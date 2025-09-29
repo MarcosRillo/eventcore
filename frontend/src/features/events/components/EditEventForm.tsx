@@ -302,7 +302,7 @@ export const EditEventForm = ({
               value={formData.category_id || ''}
               onChange={(value) => handleInputChange('category_id', value ? Number(value) : undefined)}
               placeholder={isLoadingData ? "Cargando categorías..." : "Seleccionar categoría"}
-              options={categories.map(category => ({
+              options={(categories || []).map(category => ({
                 value: category.id,
                 label: category.name
               }))}
@@ -346,7 +346,7 @@ export const EditEventForm = ({
                   handleInputChange('location_ids', selectedId ? [selectedId] : []);
                 }}
                 placeholder={isLoadingData ? "Cargando ubicaciones..." : "Seleccionar ubicación"}
-                options={locations.map(location => ({
+                options={(locations || []).map(location => ({
                   value: location.id,
                   label: `${location.name} - ${location.address}, ${location.city}`
                 }))}

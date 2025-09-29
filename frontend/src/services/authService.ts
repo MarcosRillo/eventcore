@@ -4,44 +4,34 @@
  */
 
 import { apiClient } from '@/lib/api';
-import { User } from '@/types/user.types';
-
-interface LoginCredentials extends Record<string, unknown> {
-  email: string;
-  password: string;
-}
-
-interface LoginResponse {
-  user: User;
-  token: string;
-}
+import { User, LoginCredentials, LoginResponse } from '@/types/auth.types';
 
 /**
  * Login with email and password
  */
 export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
-  return await apiClient.post<LoginResponse>('/v1/auth/login', credentials);
+  return await apiClient.post<LoginResponse>('/auth/login', credentials);
 };
 
 /**
  * Get current authenticated user
  */
 export const getCurrentUser = async (): Promise<User> => {
-  return await apiClient.get<User>('/v1/auth/me');
+  return await apiClient.get<User>('/auth/me');
 };
 
 /**
  * Logout user (if backend supports logout endpoint)
  */
 export const logoutUser = async (): Promise<void> => {
-  await apiClient.post<void>('/v1/auth/logout');
+  await apiClient.post<void>('/auth/logout');
 };
 
 /**
  * Refresh user token (if backend supports token refresh)
  */
 export const refreshToken = async (): Promise<LoginResponse> => {
-  return await apiClient.post<LoginResponse>('/v1/auth/refresh');
+  return await apiClient.post<LoginResponse>('/auth/refresh');
 };
 
 /**
@@ -49,7 +39,7 @@ export const refreshToken = async (): Promise<LoginResponse> => {
  */
 export const validateToken = async (): Promise<boolean> => {
   try {
-    await apiClient.get<User>('/v1/auth/me');
+    await apiClient.get<User>('/auth/me');
     return true;
   } catch {
     return false;

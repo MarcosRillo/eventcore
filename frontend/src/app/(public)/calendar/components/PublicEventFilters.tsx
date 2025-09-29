@@ -27,7 +27,7 @@ export default function PublicEventFilters({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await apiClient.get<{categories: Category[]}>('/v1/public/categories');
+        const response = await apiClient.get<{categories: Category[]}>('/public/categories');
         const categoriesData = response.categories;
         setCategories(categoriesData);
       } catch (error) {

@@ -9,25 +9,14 @@ import apiClient from '@/services/apiClient';
 import {
   Event,
   EventFormData,
-  EventFilters,
-  EventPagination
+  EventPagination,
+  EventTemplate,
+  EventMessage
 } from '@/types/event.types';
 import { OrganizerEventService } from './types';
+import { OrganizerEventFilters } from '@/types/filter.types';
 
-/**
- * Organizer-specific event filters
- */
-export interface OrganizerEventFilters extends EventFilters {
-  // Status filters relevant to organizers
-  draft_only?: boolean;
-  submitted_only?: boolean;
-  approved_only?: boolean;
-  requires_changes_only?: boolean;
-  
-  // Date filters for organizer's events
-  upcoming_only?: boolean;
-  past_events?: boolean;
-}
+// ExtendedOrganizerEventFilters eliminated - consolidated into OrganizerEventFilters
 
 /**
  * Organizer event statistics
@@ -77,7 +66,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
       }
     });
 
-    const response = await apiClient.get(`/v1/organizer/events?${params.toString()}`);
+    const response = await apiClient.get(`/organizer/events?${params.toString()}`);
     return response.data;
   },
 
@@ -85,7 +74,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
    * Get a single event owned by the organizer
    */
   async getMyEvent(id: number): Promise<Event> {
-    const response = await apiClient.get(`/v1/organizer/events/${id}`);
+    const response = await apiClient.get(`/organizer/events/${id}`);
     return response.data.data;
   },
 
@@ -99,7 +88,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
       end_date: data.end_date || data.start_date,
     };
 
-    const response = await apiClient.post('/v1/organizer/events', payload);
+    const response = await apiClient.post('/organizer/events', payload);
     return response.data.data;
   },
 
@@ -112,7 +101,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
       ...(data.start_date && !data.end_date && { end_date: data.start_date }),
     };
 
-    const response = await apiClient.put(`/v1/organizer/events/${id}`, payload);
+    const response = await apiClient.put(`/organizer/events/${id}`, payload);
     return response.data.data;
   },
 
@@ -120,14 +109,14 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
    * Delete organizer's own event (only if draft or rejected)
    */
   async deleteEvent(id: number): Promise<void> {
-    await apiClient.delete(`/v1/organizer/events/${id}`);
+    await apiClient.delete(`/organizer/events/${id}`);
   },
 
   /**
    * Duplicate organizer's own event
    */
   async duplicateEvent(id: number, overrides: Partial<EventFormData> = {}): Promise<Event> {
-    const response = await apiClient.post(`/v1/organizer/events/${id}/duplicate`, overrides);
+    const response = await apiClient.post(`/organizer/events/${id}/duplicate`, overrides);
     return response.data.data;
   },
 
@@ -135,7 +124,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
    * Submit event for approval
    */
   async submitForApproval(id: number, comment?: string): Promise<Event> {
-    const response = await apiClient.post(`/v1/organizer/events/${id}/submit`, { comment });
+    const response = await apiClient.post(`/organizer/events/${id}/submit`, { comment });
     return response.data.data;
   },
 
@@ -145,12 +134,8 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
   /**
    * Save event as template
    */
-  async saveAsTemplate(id: number, templateName: string): Promise<{
-    id: number;
-    name: string;
-    template_data: Partial<EventFormData>;
-  }> {
-    const response = await apiClient.post(`/v1/organizer/events/${id}/save-template`, {
+  async saveAsTemplate(id: number, templateName: string): Promise<EventTemplate> {
+    const response = await apiClient.post(`/organizer/events/${id}/save-template`, {
       name: templateName,
     });
     return response.data.data;
@@ -159,14 +144,8 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
   /**
    * Get organizer's event templates
    */
-  async getMyTemplates(): Promise<{
-    id: number;
-    name: string;
-    template_data: Record<string, unknown>;
-    created_at: string;
-    last_used?: string;
-  }[]> {
-    const response = await apiClient.get('/v1/organizer/templates');
+  async getMyTemplates(): Promise<EventTemplate[]> {
+    const response = await apiClient.get('/organizer/templates');
     return response.data.data;
   },
 
@@ -180,26 +159,21 @@ export const eventOrganizerCommunicationService = {
    * Send message to admin about an event
    */
   async sendMessageToAdmin(eventId: number, subject: string, message: string): Promise<void> {
-    await apiClient.post(`/v1/organizer/events/${eventId}/message`, {
+    await apiClient.post(`/organizer/events/${eventId}/message`, {
       subject,
       message,
     });
   },
 
   /**
-   * Get messages/communications about an event
+   * Get messages/communications about events
    */
-  async getEventMessages(eventId: number): Promise<{
-    id: number;
-    subject: string;
-    message: string;
-    from: { id: number; name: string; role: string };
-    to: { id: number; name: string; role: string };
-    event_id: number;
-    read_at?: string;
-    created_at: string;
-  }[]> {
-    const response = await apiClient.get(`/v1/organizer/events/${eventId}/messages`);
+  async getEventMessages(filters?: { event_id?: number }): Promise<EventMessage[]> {
+    const eventId = filters?.event_id;
+    const endpoint = eventId
+      ? `/organizer/events/${eventId}/messages`
+      : '/organizer/messages';
+    const response = await apiClient.get(endpoint);
     return response.data.data;
   },
 
@@ -207,14 +181,14 @@ export const eventOrganizerCommunicationService = {
    * Mark message as read
    */
   async markMessageAsRead(messageId: number): Promise<void> {
-    await apiClient.post(`/v1/organizer/messages/${messageId}/read`);
+    await apiClient.post(`/organizer/messages/${messageId}/read`);
   },
 
   /**
    * Get unread messages count
    */
   async getUnreadMessagesCount(): Promise<number> {
-    const response = await apiClient.get('/v1/organizer/messages/unread-count');
+    const response = await apiClient.get('/organizer/messages/unread-count');
     return response.data.count;
   },
 };
@@ -226,8 +200,8 @@ export const combinedEventOrganizerService: OrganizerEventService = {
   ...eventOrganizerService,
 
   // Required base interface methods (delegate to organizer-specific methods)
-  getEvents: async (filters?: Record<string, unknown>) => {
-    return eventOrganizerService.getMyEvents(filters as OrganizerEventFilters);
+  getEvents: async (filters?: OrganizerEventFilters) => {
+    return eventOrganizerService.getMyEvents(filters); // No casting needed
   },
   getEvent: async (id: number) => {
     return eventOrganizerService.getMyEvent(id);

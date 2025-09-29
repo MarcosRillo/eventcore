@@ -6,9 +6,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { LoginCredentials, LoginFormState, LoginFormActions } from '@/types/auth.types';
+import { LoginCredentials, UseLoginFormReturn } from '@/types/auth.types';
 
-export const useLoginForm = (): LoginFormState & LoginFormActions => {
+export const useLoginForm = (): UseLoginFormReturn => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error, isAuthenticated, clearError } = useAuth();
@@ -40,8 +40,8 @@ export const useLoginForm = (): LoginFormState & LoginFormActions => {
     setPassword(value);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e?.preventDefault();
     
     if (!isFormValid) return;
 
@@ -62,17 +62,30 @@ export const useLoginForm = (): LoginFormState & LoginFormActions => {
   };
 
   return {
-    // State
-    email,
-    password,
+    // FormHandler state
+    data: { email, password },
     error,
     isLoading,
-    isFormValid,
+    isValid: isFormValid,
+    isDirty: email !== '' || password !== '',
 
-    // Actions
-    setEmail: setEmailValue,
-    setPassword: setPasswordValue,
+    // FormActions methods
+    updateField: <K extends keyof LoginCredentials>(field: K, value: LoginCredentials[K]) => {
+      if (field === 'email') {
+        setEmailValue(value as string);
+      } else if (field === 'password') {
+        setPasswordValue(value as string);
+      }
+    },
+    setError: clearFormError,
+    submit: handleSubmit,
+    reset: () => {
+      setEmail('');
+      setPassword('');
+    },
+    validate: () => isFormValid,
+
+    // Additional login form specific method
     handleSubmit,
-    clearError: clearFormError,
   };
 };

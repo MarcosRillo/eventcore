@@ -1,18 +1,14 @@
 /**
  * Category Types
- * TypeScript interfaces and types for category-related data structures
+ * Type definitions for category-related data structures
  */
 
-// Re-export authentication types for backward compatibility
-export type { User, LoginCredentials, LoginResponse } from './auth.types';
+import type { PaginatedResponse } from './api-response.types';
+import type { TableProps, ModalProps, EntityFilters } from './generic-infrastructure.types';
 
-// Re-export appearance types for consistency
-export type { 
-  ThemeSettings, 
-  AppearanceFormData, 
-  AppearanceResponse,
-  DEFAULT_THEME
-} from './appearance.types';
+// Re-export only essential types for backward compatibility
+export type { User, LoginCredentials, LoginResponse } from './auth.types';
+export type { ThemeSettings, AppearanceFormData, DEFAULT_THEME } from './appearance.types';
 
 // Base category interface
 export interface Category {
@@ -27,111 +23,21 @@ export interface Category {
   updated_at: string;
 }
 
-// Data structure for creating a new category
-export interface CreateCategoryData {
-  name: string;
-  description?: string;
-  color?: string;
-  is_active?: boolean;
-}
+// Form data type
+export type CategoryFormData = Partial<Pick<Category, 'name' | 'description' | 'color' | 'is_active'>>;
 
-// Data structure for updating an existing category
-export interface UpdateCategoryData {
-  name?: string;
-  description?: string;
-  color?: string;
-  is_active?: boolean;
-}
-
-// Pagination meta information
-export interface PaginationMeta {
-  current_page: number;
-  from: number | null;
-  last_page: number;
-  per_page: number;
-  to: number | null;
-  total: number;
-  first_page_url: string;
-  last_page_url: string;
-  next_page_url: string | null;
-  prev_page_url: string | null;
-  path: string;
-}
-
-// Pagination link structure
-export interface PaginationLink {
-  url: string | null;
-  label: string;
-  page: number | null;
-  active: boolean;
-}
-
-// Complete pagination response for categories - matches Laravel structure
-export interface CategoryPagination {
-  data: Category[];
-  meta: PaginationMeta & {
-    links: PaginationLink[];
-  };
-  links: {
-    first: string | null;
-    last: string | null;
-    prev: string | null;
-    next: string | null;
-  };
-}
-
-// API response wrapper
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-}
-
-// Error response from API
-export interface ApiErrorResponse {
-  success: false;
-  message: string;
-  errors?: Record<string, string[]>;
-  error?: string;
-}
-
-// Query parameters for fetching categories
-export interface CategoryQueryParams {
-  page?: number;
-  per_page?: number;
-  search?: string;
-  active?: boolean;
-}
-
-// Filter options for category status
+// Use generic patterns
+export type CategoryFilters = EntityFilters<{ active?: boolean; status?: 'all' | 'active' | 'inactive' }>;
+export type CategoryPagination = PaginatedResponse<Category>;
+export type CategoryTableProps = TableProps<Category, {
+  onEdit: (category: Category) => void;
+  onDelete: (id: number, name: string) => void;
+}>;
+export type CreateCategoryModalProps = ModalProps<void>;
+export type EditCategoryModalProps = ModalProps<Category>;
 export type CategoryFilterStatus = 'all' | 'active' | 'inactive';
 
-// Form validation errors
-export interface CategoryFormErrors {
-  name?: string;
-  description?: string;
-  color?: string;
-  is_active?: string;
-}
-
-// Component prop types for better reusability
-export interface CategoryTableProps {
-  categories: Category[];
-  pagination: CategoryPagination | null;
-  onEdit: (category: Category) => void;
-  onDelete: (categoryId: number, categoryName: string) => void;
-  onPageChange: (page: number) => void;
-}
-
-export interface CreateCategoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-export interface EditCategoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  category: Category | null;
-}
+// Backward compatibility aliases
+export type CreateCategoryData = CategoryFormData;
+export type UpdateCategoryData = CategoryFormData;
+export type CategoryQueryParams = CategoryFilters;

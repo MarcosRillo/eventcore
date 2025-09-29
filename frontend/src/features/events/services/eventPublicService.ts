@@ -6,37 +6,14 @@
  */
 
 import apiClient from '@/services/apiClient';
-import { 
-  Event, 
-  EventFilters, 
+import {
+  Event,
   EventPagination,
 } from '@/types/event.types';
 import { PublicEventService } from './types';
+import { PublicEventFilters } from '@/types/filter.types';
 
-/**
- * Public event filters with additional public-specific options
- */
-export interface PublicEventFilters extends Omit<EventFilters, 'status'> {
-  // Date range filters
-  date_from?: string;
-  date_to?: string;
-  month?: string;
-  year?: string;
-  
-  // Public-specific filters
-  featured_only?: boolean;
-  upcoming_only?: boolean;
-  this_week?: boolean;
-  this_month?: boolean;
-  
-  // Location-based filters
-  near_location?: string;
-  within_radius?: number; // kilometers
-  
-  // Sorting options
-  sort_by?: 'date' | 'popularity' | 'featured' | 'name';
-  sort_order?: 'asc' | 'desc';
-}
+// ExtendedPublicEventFilters eliminated - consolidated into PublicEventFilters in filter.types.ts
 
 /**
  * Public event service operations
@@ -45,7 +22,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
   /**
    * Get paginated list of events (alias for public events)
    */
-  async getEvents(filters: Record<string, unknown> = {}): Promise<EventPagination> {
+  async getEvents(filters: PublicEventFilters = {}): Promise<EventPagination> {
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -54,7 +31,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/v1/public/events?${params.toString()}`);
+    const response = await apiClient.get(`/public/events?${params.toString()}`);
     return response.data;
   },
 
@@ -62,7 +39,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * Get single event (alias for public event)
    */
   async getEvent(id: number): Promise<Event> {
-    const response = await apiClient.get(`/v1/public/events/${id}`);
+    const response = await apiClient.get(`/public/events/${id}`);
     return response.data.data;
   },
 
@@ -80,7 +57,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/v1/public/events?${params.toString()}`);
+    const response = await apiClient.get(`/public/events?${params.toString()}`);
     return response.data;
   },
 
@@ -88,7 +65,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * Get a single published event by ID or slug
    */
   async getPublicEvent(identifier: number | string): Promise<Event> {
-    const response = await apiClient.get(`/v1/public/events/${identifier}`);
+    const response = await apiClient.get(`/public/events/${identifier}`);
     return response.data.data;
   },
 
@@ -105,7 +82,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/v1/public/events/search?${params.toString()}`);
+    const response = await apiClient.get(`/public/events/search?${params.toString()}`);
     return response.data;
   },
 
@@ -113,7 +90,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * Get featured events
    */
   async getFeaturedEvents(limit: number = 6): Promise<Event[]> {
-    const response = await apiClient.get(`/v1/public/events/featured?limit=${limit}`);
+    const response = await apiClient.get(`/public/events/featured?limit=${limit}`);
     return response.data.data;
   },
 
@@ -126,7 +103,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * Get upcoming events
    */
   async getUpcomingEvents(limit: number = 10): Promise<Event[]> {
-    const response = await apiClient.get(`/v1/public/events/upcoming?limit=${limit}`);
+    const response = await apiClient.get(`/public/events/upcoming?limit=${limit}`);
     return response.data.data;
   },
 
@@ -150,7 +127,7 @@ export const eventPublicExportService = {
     });
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    return `${baseUrl}/api/v1/public/events/rss?${params.toString()}`;
+    return `${baseUrl}/api/public/events/rss?${params.toString()}`;
   },
 
   /**
@@ -166,7 +143,7 @@ export const eventPublicExportService = {
     });
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    return `${baseUrl}/api/v1/public/events/ical?${params.toString()}`;
+    return `${baseUrl}/api/public/events/ical?${params.toString()}`;
   },
 
   /**
@@ -174,7 +151,7 @@ export const eventPublicExportService = {
    */
   getEventICalUrl(eventId: number): string {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    return `${baseUrl}/api/v1/public/events/${eventId}/ical`;
+    return `${baseUrl}/api/public/events/${eventId}/ical`;
   },
 
   /**
@@ -189,7 +166,7 @@ export const eventPublicExportService = {
       }
     });
 
-    const response = await apiClient.get(`/v1/public/events/ical?${params.toString()}`, {
+    const response = await apiClient.get(`/public/events/ical?${params.toString()}`, {
       responseType: 'blob',
     });
     

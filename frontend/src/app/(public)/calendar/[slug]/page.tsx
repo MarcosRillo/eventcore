@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     // Try to get the event by ID or slug
     const { slug } = await params;
     const eventId = parseInt(slug) || slug;
-    const response = await apiClient.get<{data: Event}>(`/v1/public/events/${eventId}`);
+    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data;
 
     const eventUrl = `/calendar/${slug}`;
@@ -74,7 +74,7 @@ export default async function EventPage({ params }: EventPageProps) {
     // Try to get the event by ID or slug
     const { slug } = await params;
     const eventId = parseInt(slug) || slug;
-    const response = await apiClient.get<{data: Event}>(`/v1/public/events/${eventId}`);
+    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data;
 
     return <EventDetailPage event={event} />;

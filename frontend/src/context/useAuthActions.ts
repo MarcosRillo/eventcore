@@ -7,19 +7,18 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 import apiClient, { setAuthToken, removeAuthToken, getAuthToken } from '../services/apiClient';
-import { 
-  User, 
-  LoginCredentials, 
-  LoginResponse, 
-  AuthState, 
-  AuthActions,
+import {
+  User,
+  LoginCredentials,
+  LoginResponse,
+  AuthContextType,
   UserRoleCode,
   Permission,
   ROLE_PERMISSIONS,
   RESOURCE_PERMISSIONS
 } from '../types/auth.types';
 
-export const useAuthActions = (): AuthState & AuthActions => {
+export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,17 +58,17 @@ export const useAuthActions = (): AuthState & AuthActions => {
 
             // Validate token by making a test request
             try {
-              await apiClient.get('/v1/auth/me');
+              await apiClient.get('/auth/me');
             } catch {
               // Token is invalid, clear auth state
-              // handleLogout();  // DISABLED FOR DEBUGGING
+              handleLogout();
             }
           } catch {
-            // handleLogout();  // DISABLED FOR DEBUGGING
+            handleLogout();
           }
         }
       } catch {
-        // handleLogout();  // DISABLED FOR DEBUGGING
+        handleLogout();
       } finally {
         setIsLoading(false);
       }
@@ -93,7 +92,7 @@ export const useAuthActions = (): AuthState & AuthActions => {
       setIsLoading(true);
       setError(null);
 
-      const response = await apiClient.post<{ data: LoginResponse }>('/v1/auth/login', credentials);
+      const response = await apiClient.post<{ data: LoginResponse }>('/auth/login', credentials);
       
       // Handle nested response structure: response.data.data
       if (!response.data?.data) {
@@ -110,7 +109,7 @@ export const useAuthActions = (): AuthState & AuthActions => {
       // Store auth data
       setAuthToken(authToken);
       localStorage.setItem('user', JSON.stringify(userData));
-      
+
       // Update state
       setTokenState(authToken);
       setUser(userData);
@@ -156,7 +155,7 @@ export const useAuthActions = (): AuthState & AuthActions => {
     try {
       if (!token) return;
 
-      const response = await apiClient.get<{ data: { user: User } }>('/v1/auth/me');
+      const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
 
       // Handle nested response structure
       if (!response.data?.data?.user) {
@@ -236,7 +235,8 @@ export const useAuthActions = (): AuthState & AuthActions => {
     token,
     isLoading,
     error,
-    
+    isAuthenticated: Boolean(user && token),
+
     // Actions
     login,
     logout,

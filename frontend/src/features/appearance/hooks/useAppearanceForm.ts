@@ -31,9 +31,8 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
       setIsLoading(true);
       setError(null);
       
-      const response = await getAppearanceSettings();
-      const settingsData = response.data;
-      
+      const settingsData = await getAppearanceSettings();
+
       setData(settingsData);
       setOriginalData(settingsData);
     } catch {
@@ -50,12 +49,15 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
   /**
    * Update a specific field in the form
    */
-  const updateField = useCallback((field: keyof AppearanceFormData, value: string | null) => {
+  const updateField = useCallback(<K extends keyof AppearanceFormData>(
+    field: K,
+    value: AppearanceFormData[K]
+  ) => {
     setData(prevData => ({
       ...prevData,
       [field]: value
     }));
-    
+
     // Clear any existing errors when user makes changes
     if (error) {
       setError(null);
@@ -86,9 +88,8 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
         return;
       }
 
-      const response = await updateAppearanceSettings(changedFields);
-      const updatedData = response.data;
-      
+      const updatedData = await updateAppearanceSettings(changedFields);
+
       // Update both current and original data
       setData(updatedData);
       setOriginalData(updatedData);
@@ -130,11 +131,18 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
     isSaving,
     error,
     hasUnsavedChanges,
-    
+    isValid: true, // Appearance form is always valid as all fields have defaults
+    isDirty: hasUnsavedChanges,
+    originalData,
+
     // Actions
     updateField,
     handleSubmit,
     resetForm,
     resetToDefaults,
+    submit: handleSubmit, // Add submit method for FormActions compliance
+    reset: resetForm, // Add reset method for FormActions compliance
+    setError, // Add setError method for FormActions compliance
+    validate: () => true, // Appearance form always validates successfully
   };
 };

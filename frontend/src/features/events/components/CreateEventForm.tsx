@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { EventFormData, EVENT_TYPE } from '@/types/event.types';
+import { useAuth } from '@/context/AuthContext';
 import { Category } from '@/types/category.types';
 import { Location } from '@/types/location.types';
 import { Button, Input, Modal, Textarea, Select } from '@/components/ui';
@@ -25,6 +26,7 @@ export const CreateEventForm = ({
   onClose,
   onSubmit,
 }: CreateEventFormProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
     description: '',
@@ -47,27 +49,44 @@ export const CreateEventForm = ({
 
   // Load categories and locations when modal opens
   useEffect(() => {
+    console.log('🔄 [EFFECT] isOpen changed to:', isOpen);
     if (isOpen) {
+      console.log('✅ [EFFECT] Modal opened, calling loadFormData()');
       loadFormData();
     }
   }, [isOpen]);
 
   const loadFormData = async () => {
+    console.log('🔍 [LOAD DATA] Starting to load form data...');
     setIsLoadingData(true);
     try {
+      console.log('🔍 [LOAD DATA] Fetching categories and locations...');
       const [categoriesData, locationsData] = await Promise.all([
         getActiveCategories(),
         getActiveLocations(),
       ]);
 
+      console.log('✅ [LOAD DATA] Categories received:', {
+        count: categoriesData?.length,
+        data: categoriesData
+      });
+      console.log('✅ [LOAD DATA] Locations received:', {
+        count: locationsData?.length,
+        data: locationsData
+      });
+
       setCategories(categoriesData);
       setLocations(locationsData);
-    } catch {
+
+      console.log('✅ [LOAD DATA] State updated. Current categories:', categoriesData);
+    } catch (error) {
+      console.error('❌ [LOAD DATA] Error loading data:', error);
       // Set empty arrays as fallback
       setCategories([]);
       setLocations([]);
     } finally {
       setIsLoadingData(false);
+      console.log('🏁 [LOAD DATA] Loading complete. isLoadingData now false');
     }
   };
 
@@ -142,12 +161,13 @@ export const CreateEventForm = ({
       // Required ID fields using real database values
       status_id: getStatusId('draft'), // ID 1 = 'draft'
       type_id: getTypeId(formData.type), // ID 1 = 'sede_unica', ID 2 = 'multi_sede'
-      type: formData.type, // Also include the type itself
-      organization_id: 1, // Default to Ente de Turismo (assuming ID=1)
-      entity_id: 1, // Default to Ente de Turismo for supervision
+
+      // Multi-tenant fields
+      entity_id: 1, // Always Ente de Turismo as supervisor (NOT NULL)
+      organization_id: user?.organization?.id || null, // External org or null if Ente creates directly
 
       // Required audit field
-      created_by: 1, // TODO: Get from authenticated user
+      created_by: user?.id || 1, // Use authenticated user ID or fallback to 1
 
       // Optional fields - only include if they have values
       ...(formData.category_id && { category_id: formData.category_id }),
@@ -309,7 +329,7 @@ export const CreateEventForm = ({
               value={formData.category_id || ''}
               onChange={(value) => handleInputChange('category_id', value ? Number(value) : undefined)}
               placeholder={isLoadingData ? "Cargando categorías..." : "Seleccionar categoría"}
-              options={categories.map(category => ({
+              options={(categories || []).map(category => ({
                 value: category.id,
                 label: category.name
               }))}
@@ -353,7 +373,7 @@ export const CreateEventForm = ({
                   handleInputChange('location_ids', selectedId ? [selectedId] : []);
                 }}
                 placeholder={isLoadingData ? "Cargando ubicaciones..." : "Seleccionar ubicación"}
-                options={locations.map(location => ({
+                options={(locations || []).map(location => ({
                   value: location.id,
                   label: `${location.name} - ${location.address}, ${location.city}`
                 }))}

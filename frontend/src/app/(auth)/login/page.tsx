@@ -13,22 +13,18 @@ import { Button, Input, LoadingSpinner } from '@/components/ui';
 const LoginPage = () => {
   const { isAuthenticated } = useAuth();
   const {
-    email,
-    password,
+    data,
     error,
     isLoading,
-    isFormValid,
-    setEmail,
-    setPassword,
+    isValid,
+    updateField,
     handleSubmit,
   } = useLoginForm();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    if (name === 'email') {
-      setEmail(value);
-    } else if (name === 'password') {
-      setPassword(value);
+    if (name === 'email' || name === 'password') {
+      updateField(name as keyof typeof data, value);
     }
   };
 
@@ -82,7 +78,7 @@ const LoginPage = () => {
               label="Correo electrónico"
               type="email"
               name="email"
-              value={email}
+              value={data.email}
               onChange={handleInputChange}
               placeholder="tu@ejemplo.com"
               required
@@ -100,7 +96,7 @@ const LoginPage = () => {
               label="Contraseña"
               type="password"
               name="password"
-              value={password}
+              value={data.password}
               onChange={handleInputChange}
               placeholder="Tu contraseña"
               required
@@ -116,7 +112,7 @@ const LoginPage = () => {
             {/* Submit button */}
             <Button
               type="submit"
-              disabled={!isFormValid || isLoading}
+              disabled={!isValid || isLoading}
               loading={isLoading}
               fullWidth
               size="lg"

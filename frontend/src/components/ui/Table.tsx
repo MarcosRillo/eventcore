@@ -11,8 +11,9 @@ import { Pagination, Button } from '@/components/ui';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { Permission } from '@/types/auth.types';
 import { Event } from '@/types/event.types';
-import { User } from '@/types/user.types';
+import { User } from '@/types/auth.types';
 import { Category } from '@/types/category.types';
+import { TablePaginationProps } from '@/types/pagination.types';
 
 // Supported table data types based on business domain
 type TableDataType = Event | User | Category;
@@ -40,24 +41,6 @@ export interface TableAction<T extends TableDataType = TableDataType> {
   onClick: (item: T, index: number) => void;
 }
 
-// Pagination props (compatible with existing Pagination component)
-export interface TablePaginationProps {
-  currentPage: number;
-  totalPages?: number;
-  totalItems?: number;
-  itemsFrom?: number;
-  itemsTo?: number;
-  hasNextPage?: boolean;
-  hasPrevPage?: boolean;
-  onPageChange: (page: number) => void;
-  showInfo?: boolean;
-  // Advanced pagination support
-  lastPage?: number;
-  total?: number;
-  perPage?: number;
-  onPerPageChange?: (perPage: number) => void;
-  showPerPageSelector?: boolean;
-}
 
 // Main table props
 export interface TableProps<T extends TableDataType = TableDataType> {
@@ -322,10 +305,7 @@ export const Table = <T extends TableDataType>({
       {/* Pagination */}
       {pagination && (
         <div className="border-t border-gray-200">
-          <Pagination
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            {...(pagination as any)}
-          />
+          <Pagination {...pagination} />
         </div>
       )}
     </div>

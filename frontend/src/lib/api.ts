@@ -131,9 +131,9 @@ class ApiClient {
    */
   private getAuthToken(): string | null {
     if (typeof window === 'undefined') return null;
-    
+
     try {
-      return localStorage.getItem('auth_token');
+      return localStorage.getItem('authToken');
     } catch {
       return null;
     }
@@ -232,8 +232,8 @@ class ApiClient {
     if (typeof window === 'undefined') return;
 
     // Clear authentication data
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
 
     // Redirect to login page
     // Only redirect if not already on login page
@@ -246,8 +246,8 @@ class ApiClient {
    * Make HTTP request with retry logic
    */
   private async makeRequest<T>(
-    url: string, 
-    config: RequestConfig, 
+    url: string,
+    config: RequestConfig,
     retries: number = 1
   ): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${this.baseURL}${url}`;
@@ -376,9 +376,9 @@ class ApiClient {
     if (typeof window === 'undefined') return;
 
     if (token) {
-      localStorage.setItem('auth_token', token);
+      localStorage.setItem('authToken', token);
     } else {
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
     }
   }
 

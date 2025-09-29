@@ -1,8 +1,13 @@
 /**
- * Types for Theme/Appearance Management System
- * Defines interfaces for theme settings and related operations
+ * Appearance Types
+ * Theme and appearance configuration
  */
 
+import type { FormHook } from './generic-infrastructure.types';
+
+/**
+ * Core theme settings - essential interface that cannot be reduced
+ */
 export interface ThemeSettings {
   logo_url?: string | null;
   banner_url?: string | null;
@@ -12,43 +17,25 @@ export interface ThemeSettings {
   color_text: string;
 }
 
-export interface AppearanceFormData {
-  logo_url?: string | null;
-  banner_url?: string | null;
-  color_primary: string;
-  color_secondary: string;
-  color_background: string;
-  color_text: string;
-}
+// Type aliases for backward compatibility
+export type AppearanceFormData = ThemeSettings;
+export type AppearanceResponse = ThemeSettings;
 
-export interface AppearanceResponse {
-  data: ThemeSettings;
-  message: string;
-}
+// Use generic form hook with additional methods
+export type UseAppearanceFormReturn = FormHook<ThemeSettings> & {
+  isSaving?: boolean;
+  hasUnsavedChanges?: boolean;
+  resetToDefaults?: () => void;
+  handleSubmit?: () => Promise<void>;
+  resetForm?: () => void;
+};
 
-export interface AppearanceFormState {
-  data: AppearanceFormData;
-  isLoading: boolean;
-  isSaving: boolean;
-  error: string | null;
-  hasUnsavedChanges: boolean;
-}
-
-export interface AppearanceFormActions {
-  updateField: (field: keyof AppearanceFormData, value: string | null) => void;
-  handleSubmit: () => Promise<void>;
-  resetForm: () => void;
-  resetToDefaults: () => void;
-}
-
-export interface UseAppearanceFormReturn extends AppearanceFormState, AppearanceFormActions {}
-
-// Default theme values
+// Default theme values - essential constant
 export const DEFAULT_THEME: ThemeSettings = {
   logo_url: null,
   banner_url: null,
   color_primary: '#2563eb',
-  color_secondary: '#64748b', 
+  color_secondary: '#64748b',
   color_background: '#ffffff',
   color_text: '#1e293b',
 };

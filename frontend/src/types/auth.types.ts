@@ -1,57 +1,36 @@
 /**
- * Authentication Types
- * Type definitions for authentication system with multi-tenant role support
+ * Authentication & Authorization Types
+ * Type definitions for user authentication, roles, and permissions
  */
 
-/**
- * User role types for multi-tenant system
- */
-export type UserRoleCode = 
-  | 'platform_admin'    // Full platform access
-  | 'entity_admin'      // Full tenant admin access
-  | 'entity_staff'      // Operational access within tenant
-  | 'organizer_admin';   // Limited to own events
+import type { FormHook } from './generic-infrastructure.types';
 
-/**
- * Role object structure returned by backend
- */
-export interface Role {
-  id: number;
-  role_code: UserRoleCode;
-  role_name: string;
-  description: string;
-  permissions: string[];
-  created_at: string;
-  updated_at: string;
-}
+// User role codes - matching backend constants
+export type UserRoleCode = 'admin' | 'organizer' | 'viewer' | 'entity_admin' | 'entity_staff' | 'platform_admin' | 'organizer_admin';
 
-/**
- * Organization/Entity information
- */
+// Permission type - matches backend permission system
+export type Permission =
+  | 'manage_events' | 'manage_users' | 'manage_categories' | 'manage_locations' | 'manage_organization'
+  | 'view_analytics' | 'access_admin' | 'approve_events'
+  | 'events.create' | 'events.update' | 'events.delete' | 'events.feature' | 'events.approve';
+
+// Core entity interfaces (cannot be reduced further)
 export interface Organization {
   id: number;
   name: string;
-  slug?: string;
+  type?: 'government' | 'business' | 'nonprofit' | 'other';
 }
 
-/**
- * User permissions for granular access control
- */
-export type Permission = 
-  | 'manage_users'
-  | 'manage_categories'
-  | 'manage_events'
-  | 'approve_events'
-  | 'manage_locations'
-  | 'manage_organization'
-  | 'view_analytics'
-  | 'access_admin'
-  // Event-specific permissions
-  | 'events.create'
-  | 'events.update'
-  | 'events.delete'
-  | 'events.feature'
-  | 'events.approve';
+export interface Role {
+  id: number;
+  name: string;
+  role_name?: string;
+  role_code: UserRoleCode;
+  description: string;
+  permissions: Permission[];
+  created_at?: string;
+  updated_at?: string;
+}
 
 export interface User {
   id: number;
@@ -65,24 +44,20 @@ export interface User {
   updated_at: string;
 }
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
+// Inline types for simple data structures
+export type LoginCredentials = { email: string; password: string };
+export type LoginResponse = { token: string; user: User; message?: string };
 
-export interface LoginResponse {
-  token: string;
-  user: User;
-  message?: string;
-}
-
-export interface AuthContextType {
+/**
+ * Universal Auth Context - consolidates all auth state and actions
+ */
+export interface AuthContextType extends Record<string, unknown> {
   // State
   user: User | null;
   token: string | null;
-  isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
 
   // Actions
   login: (credentials: LoginCredentials) => Promise<boolean>;
@@ -90,7 +65,7 @@ export interface AuthContextType {
   clearError: () => void;
   refreshUser: () => Promise<void>;
 
-  // Role & Permission Methods
+  // Permission methods
   hasRole: (role: UserRoleCode) => boolean;
   canAccess: (resource: string) => boolean;
   getUserPermissions: () => Permission[];
@@ -102,94 +77,29 @@ export interface AuthContextType {
   canViewAnalytics: () => boolean;
 }
 
-export interface LoginFormState {
-  email: string;
-  password: string;
-  error: string | null;
-  isLoading: boolean;
-  isFormValid: boolean;
-}
-
-export interface LoginFormActions {
-  setEmail: (email: string) => void;
-  setPassword: (password: string) => void;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
-  clearError: () => void;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface AuthActions {
-  login: (credentials: LoginCredentials) => Promise<boolean>;
-  logout: () => void;
-  clearError: () => void;
-  refreshUser: () => Promise<void>;
-
-  // Role & Permission Methods
-  hasRole: (role: UserRoleCode) => boolean;
-  canAccess: (resource: string) => boolean;
-  getUserPermissions: () => Permission[];
-  canManageEvents: () => boolean;
-  canApproveEvents: () => boolean;
-  canAccessAdmin: () => boolean;
-  canManageUsers: () => boolean;
-  canManageOrganization: () => boolean;
-  canViewAnalytics: () => boolean;
-}
-
-/**
- * Role-based permission mapping
- */
-export const ROLE_PERMISSIONS: Record<UserRoleCode, Permission[]> = {
-  platform_admin: [
-    'manage_users',
-    'manage_categories', 
-    'manage_events',
-    'approve_events',
-    'manage_locations',
-    'manage_organization',
-    'view_analytics',
-    'access_admin'
-  ],
-  entity_admin: [
-    'manage_users',
-    'manage_categories',
-    'manage_events', 
-    'approve_events',
-    'manage_locations',
-    'manage_organization',
-    'view_analytics',
-    'access_admin'
-  ],
-  entity_staff: [
-    'manage_categories',
-    'manage_events',
-    'approve_events',
-    'manage_locations', 
-    'view_analytics',
-    'access_admin'
-  ],
-  organizer_admin: [
-    'manage_events',
-    'view_analytics'
-  ]
+// Use generic form handler for login form with handleSubmit alias
+export type UseLoginFormReturn = FormHook<LoginCredentials> & {
+  handleSubmit?: (e?: React.FormEvent<HTMLFormElement>) => Promise<void>;
 };
 
-/**
- * Resource-based access control mapping
- */
+// Permission mappings (consolidated)
 export const RESOURCE_PERMISSIONS: Record<string, Permission[]> = {
   'admin': ['access_admin'],
   'users': ['manage_users'],
   'events': ['manage_events'],
-  'events/approve': ['approve_events'],
   'categories': ['manage_categories'],
   'locations': ['manage_locations'],
   'organization': ['manage_organization'],
-  'analytics': ['view_analytics']
+  'analytics': ['view_analytics'],
+};
+
+// Role permissions (essential for business logic)
+export const ROLE_PERMISSIONS: Record<UserRoleCode, Permission[]> = {
+  'admin': ['access_admin', 'manage_events', 'manage_users', 'manage_categories', 'manage_locations', 'manage_organization', 'view_analytics', 'events.create', 'events.update', 'events.delete', 'events.feature', 'events.approve'],
+  'organizer': ['manage_events', 'events.create', 'events.update', 'events.delete'],
+  'viewer': [],
+  'entity_admin': ['manage_events', 'manage_users', 'manage_organization'],
+  'entity_staff': ['manage_events'],
+  'platform_admin': ['access_admin', 'manage_events', 'manage_users', 'manage_categories', 'manage_locations', 'manage_organization', 'view_analytics'],
+  'organizer_admin': ['manage_events', 'events.approve']
 };

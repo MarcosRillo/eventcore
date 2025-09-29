@@ -57,7 +57,7 @@ export default function AppearancePage() {
               </div>
             )}
 
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+            <form onSubmit={(e) => { e.preventDefault(); handleSubmit?.(); }} className="space-y-6">
               {/* Logo URL */}
               <Input
                 label="URL del Logo"

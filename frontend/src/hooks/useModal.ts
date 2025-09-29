@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { ModalId, ModalState } from '@/types/modal.types';
 
 // Single modal hook
 export const useModal = (initialState = false) => {
@@ -23,17 +24,17 @@ export const useModal = (initialState = false) => {
 
 // Multi-modal management hook
 export const useMultiModal = () => {
-  const [modals, setModals] = useState<Record<string, boolean>>({});
+  const [modals, setModals] = useState<ModalState>({});
 
-  const openModal = useCallback((id: string) => {
+  const openModal = useCallback((id: ModalId) => {
     setModals(prev => ({ ...prev, [id]: true }));
   }, []);
 
-  const closeModal = useCallback((id: string) => {
+  const closeModal = useCallback((id: ModalId) => {
     setModals(prev => ({ ...prev, [id]: false }));
   }, []);
 
-  const toggleModal = useCallback((id: string) => {
+  const toggleModal = useCallback((id: ModalId) => {
     setModals(prev => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
@@ -41,10 +42,10 @@ export const useMultiModal = () => {
     setModals({});
   }, []);
 
-  const isOpen = useCallback((id: string) => Boolean(modals[id]), [modals]);
+  const isOpen = useCallback((id: ModalId) => Boolean(modals[id]), [modals]);
 
   const getOpenModals = useCallback(() => {
-    return Object.entries(modals).filter(([, isOpen]) => isOpen).map(([id]) => id);
+    return Object.entries(modals).filter(([, isOpen]) => isOpen).map(([id]) => id as ModalId);
   }, [modals]);
 
   return {

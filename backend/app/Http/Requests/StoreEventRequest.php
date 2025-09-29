@@ -144,6 +144,16 @@ class StoreEventRequest extends FormRequest
                     }
                 }),
             ],
+            'entity_id' => [
+                'required',
+                'integer',
+                Rule::exists('organizations', 'id'),
+            ],
+            'organization_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('organizations', 'id'),
+            ],
         ];
     }
 
