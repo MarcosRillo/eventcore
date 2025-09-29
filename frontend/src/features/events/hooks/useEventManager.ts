@@ -291,7 +291,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     try {
       // Only admin services have approval functionality
       if ('approval' in eventServiceInstance) {
-        const updatedEvent = await eventServiceInstance.approval.approveInternal(eventId, { comment });
+        const updatedEvent = await eventServiceInstance.approval.approveInternal(eventId, comment);
         updateEventInList(eventId, updatedEvent);
         setIsApprovalModalOpen(false);
         setCurrentEvent(null);
@@ -306,7 +306,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   const requestPublic = useCallback(async (eventId: number, comment?: string) => {
     try {
       if ('approval' in eventServiceInstance) {
-        const updatedEvent = await eventServiceInstance.approval.requestPublic(eventId, { comment });
+        const updatedEvent = await eventServiceInstance.approval.requestPublic(eventId, comment);
         updateEventInList(eventId, updatedEvent);
         setIsApprovalModalOpen(false);
         setCurrentEvent(null);
@@ -321,7 +321,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   const approvePublic = useCallback(async (eventId: number, comment?: string) => {
     try {
       if ('approval' in eventServiceInstance) {
-        const updatedEvent = await eventServiceInstance.approval.approvePublic(eventId, { comment });
+        const updatedEvent = await eventServiceInstance.approval.approvePublic(eventId, comment);
         updateEventInList(eventId, updatedEvent);
         setIsApprovalModalOpen(false);
         setCurrentEvent(null);

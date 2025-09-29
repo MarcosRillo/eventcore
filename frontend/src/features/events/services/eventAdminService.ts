@@ -6,14 +6,13 @@
  */
 
 import apiClient from '@/services/apiClient';
-import { 
-  Event, 
-  EventFormData, 
-  EventFilters, 
-  EventPagination, 
-  EventStatistics, 
+import {
+  Event,
+  EventFormData,
+  EventFilters,
+  EventPagination,
+  EventStatistics,
   ApprovalStatistics,
-  ApprovalActionData,
   EventStatus
 } from '@/types/event.types';
 import { AdminEventService } from './types';
@@ -34,7 +33,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
       }
     });
 
-    const response = await apiClient.get(`/v1/events?${params.toString()}`);
+    const response = await apiClient.get(`/events?${params.toString()}`);
     return response.data;
   },
 
@@ -42,7 +41,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
    * Get a single event by ID
    */
   async getEvent(id: number): Promise<Event> {
-    const response = await apiClient.get(`/v1/events/${id}`);
+    const response = await apiClient.get(`/events/${id}`);
     return response.data.data;
   },
 
@@ -56,7 +55,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
       end_date: data.end_date || data.start_date,
     };
 
-    const response = await apiClient.post('/v1/events', payload);
+    const response = await apiClient.post('/events', payload);
     return response.data.data;
   },
 
@@ -69,7 +68,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
       ...(data.start_date && !data.end_date && { end_date: data.start_date }),
     };
 
-    const response = await apiClient.put(`/v1/events/${id}`, payload);
+    const response = await apiClient.put(`/events/${id}`, payload);
     return response.data.data;
   },
 
@@ -77,21 +76,21 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
    * Delete an event
    */
   async deleteEvent(id: number): Promise<void> {
-    await apiClient.delete(`/v1/events/${id}`);
+    await apiClient.delete(`/events/${id}`);
   },
 
   /**
    * Bulk delete events
    */
   async bulkDeleteEvents(eventIds: number[]): Promise<void> {
-    await apiClient.post('/v1/events/bulk-delete', { event_ids: eventIds });
+    await apiClient.post('/events/bulk-delete', { event_ids: eventIds });
   },
 
   /**
    * Duplicate an event
    */
   async duplicateEvent(id: number, overrides: Partial<EventFormData> = {}): Promise<Event> {
-    const response = await apiClient.post(`/v1/events/${id}/duplicate`, overrides);
+    const response = await apiClient.post(`/events/${id}/duplicate`, overrides);
     return response.data.data;
   },
 
@@ -100,7 +99,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
    * Toggle featured status
    */
   async toggleFeatured(id: number): Promise<Event> {
-    const response = await apiClient.patch(`/v1/events/${id}/toggle-featured`);
+    const response = await apiClient.patch(`/events/${id}/toggle-featured`);
     return response.data.data;
   },
 
@@ -108,7 +107,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
    * Bulk update event status
    */
   async bulkUpdateStatus(eventIds: number[], status: EventStatus, comment?: string): Promise<Event[]> {
-    const response = await apiClient.post('/v1/events/bulk-update-status', {
+    const response = await apiClient.post('/events/bulk-update-status', {
       event_ids: eventIds,
       status,
       comment,
@@ -128,7 +127,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
       }
     });
 
-    const response = await apiClient.get(`/v1/events/export/${format}?${params.toString()}`, {
+    const response = await apiClient.get(`/events/export/${format}?${params.toString()}`, {
       responseType: 'blob',
     });
     
@@ -139,7 +138,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
    * Get event statistics
    */
   async getStatistics(): Promise<EventStatistics> {
-    const response = await apiClient.get('/v1/events/statistics');
+    const response = await apiClient.get('/events/statistics');
     return response.data;
   },
 
@@ -161,7 +160,7 @@ export const eventAdminApprovalService = {
       }
     });
 
-    const response = await apiClient.get(`/v1/events/approval-status/${status}?${params.toString()}`);
+    const response = await apiClient.get(`/events/approval-status/${status}?${params.toString()}`);
     return response.data;
   },
 
@@ -169,31 +168,31 @@ export const eventAdminApprovalService = {
    * Get approval workflow statistics
    */
   async getApprovalStatistics(): Promise<ApprovalStatistics> {
-    const response = await apiClient.get('/v1/events/approval/statistics');
+    const response = await apiClient.get('/events/approval/statistics');
     return response.data;
   },
 
   /**
    * Approve event for internal use
    */
-  async approveInternal(eventId: number, data: ApprovalActionData = {}): Promise<Event> {
-    const response = await apiClient.post(`/v1/events/${eventId}/approve-internal`, data);
+  async approveInternal(eventId: number, comment?: string): Promise<Event> {
+    const response = await apiClient.post(`/events/${eventId}/approve-internal`, comment ? { comment } : {});
     return response.data.data;
   },
 
   /**
    * Request public approval for an internally approved event
    */
-  async requestPublic(eventId: number, data: ApprovalActionData = {}): Promise<Event> {
-    const response = await apiClient.post(`/v1/events/${eventId}/request-public`, data);
+  async requestPublic(eventId: number, comment?: string): Promise<Event> {
+    const response = await apiClient.post(`/events/${eventId}/request-public`, comment ? { comment } : {});
     return response.data.data;
   },
 
   /**
    * Approve event for public publication
    */
-  async approvePublic(eventId: number, data: ApprovalActionData = {}): Promise<Event> {
-    const response = await apiClient.post(`/v1/events/${eventId}/approve-public`, data);
+  async approvePublic(eventId: number, comment?: string): Promise<Event> {
+    const response = await apiClient.post(`/events/${eventId}/approve-public`, comment ? { comment } : {});
     return response.data.data;
   },
 
@@ -201,7 +200,7 @@ export const eventAdminApprovalService = {
    * Request changes to an event
    */
   async requestChanges(eventId: number, comment: string): Promise<Event> {
-    const response = await apiClient.post(`/v1/events/${eventId}/request-changes`, { comment });
+    const response = await apiClient.post(`/events/${eventId}/request-changes`, { comment });
     return response.data.data;
   },
 
@@ -209,7 +208,7 @@ export const eventAdminApprovalService = {
    * Reject an event
    */
   async rejectEvent(eventId: number, comment: string): Promise<Event> {
-    const response = await apiClient.post(`/v1/events/${eventId}/reject`, { comment });
+    const response = await apiClient.post(`/events/${eventId}/reject`, { comment });
     return response.data.data;
   },
 
@@ -217,7 +216,7 @@ export const eventAdminApprovalService = {
    * Bulk approve events
    */
   async bulkApproveInternal(eventIds: number[], comment?: string): Promise<Event[]> {
-    const response = await apiClient.post('/v1/events/bulk-approve-internal', {
+    const response = await apiClient.post('/events/bulk-approve-internal', {
       event_ids: eventIds,
       comment,
     });
@@ -228,7 +227,7 @@ export const eventAdminApprovalService = {
    * Bulk approve for public
    */
   async bulkApprovePublic(eventIds: number[], comment?: string): Promise<Event[]> {
-    const response = await apiClient.post('/v1/events/bulk-approve-public', {
+    const response = await apiClient.post('/events/bulk-approve-public', {
       event_ids: eventIds,
       comment,
     });
@@ -239,7 +238,7 @@ export const eventAdminApprovalService = {
    * Bulk reject events
    */
   async bulkReject(eventIds: number[], comment: string): Promise<Event[]> {
-    const response = await apiClient.post('/v1/events/bulk-reject', {
+    const response = await apiClient.post('/events/bulk-reject', {
       event_ids: eventIds,
       comment,
     });
@@ -259,7 +258,7 @@ export const eventAdminApprovalService = {
     user: { id: number; name: string };
     created_at: string;
   }[]> {
-    const response = await apiClient.get(`/v1/events/${eventId}/approval-history`);
+    const response = await apiClient.get(`/events/${eventId}/approval-history`);
     return response.data.data;
   },
 
@@ -286,7 +285,7 @@ export const eventAdminApprovalService = {
     location_ids?: number[];
     max_days_old?: number;
   }): Promise<{ approved: number; skipped: number }> {
-    const response = await apiClient.post('/v1/events/auto-approve', criteria);
+    const response = await apiClient.post('/events/auto-approve', criteria);
     return response.data;
   },
 };

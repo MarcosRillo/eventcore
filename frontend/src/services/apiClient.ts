@@ -4,15 +4,11 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { ApiResponse, ApiErrorResponse } from '../types/category.types';
+import { ApiResponse, ApiErrorResponse } from '../types/api-response.types';
 
 // Base API URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Development logging
-if (process.env.NODE_ENV === 'development') {
-  console.log('🔧 API_BASE_URL configurada en:', API_BASE_URL);
-}
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
@@ -27,11 +23,11 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor to add authentication token and API prefix
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add /api prefix to all requests
+    // Add /api/v1 prefix to all requests
     if (config.url && !config.url.startsWith('/api')) {
-      config.url = `/api${config.url}`;
+      config.url = `/api/v1${config.url}`;
     }
-    
+
     // Add authentication token
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('authToken');
@@ -61,11 +57,12 @@ apiClient.interceptors.response.use(
         case 401:
           // Unauthorized - clear token and redirect to login
           if (typeof window !== 'undefined') {
-            console.log('🚨 401 error detected - NOT clearing tokens for debugging');
-            console.log('Error details:', error.response?.data);
-            // localStorage.removeItem('authToken');  // DISABLED FOR DEBUGGING
-            // localStorage.removeItem('user');       // DISABLED FOR DEBUGGING
-            // You might want to redirect to login page here
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            // Redirect to login page if not already there
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
           }
           break;
           

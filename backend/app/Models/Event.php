@@ -64,6 +64,7 @@ class Event extends Model
         'max_attendees',
         'category_id',
         'entity_id',
+        'organization_id',
         'approval_comments',
         'approval_history',
         'created_by',

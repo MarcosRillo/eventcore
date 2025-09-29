@@ -1,13 +1,13 @@
 /**
  * Event Types
- * 
- * Type definitions for event-related data structures.
- * These interfaces match the API Resources from the Laravel backend.
+ * Type definitions for event-related data structures
  */
 
-import { Category } from '@/types/category.types';
-import { Location } from '@/types/location.types';
-import { User } from '@/types/user.types';
+import type { Category } from '@/types/category.types';
+import type { Location } from '@/types/location.types';
+import type { User } from '@/types/auth.types';
+import type { EntityStats } from '@/types/generic-infrastructure.types';
+import type { EventOperation } from '@/types/operations.types';
 
 /**
  * Event status constants - matching backend Event model
@@ -207,32 +207,10 @@ export interface EventFilters {
 }
 
 /**
- * Paginated event response - matches Laravel pagination structure
+ * Event pagination - DEPRECATED: Use PaginatedResponse<Event> directly
  */
-export interface EventPagination {
-  data: Event[];
-  meta: {
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number | null;
-    to: number | null;
-    path: string;
-    links: Array<{
-      url: string | null;
-      label: string;
-      page: number | null;
-      active: boolean;
-    }>;
-  };
-  links: {
-    first: string | null;
-    last: string | null;
-    prev: string | null;
-    next: string | null;
-  };
-}
+import type { PaginatedResponse } from './api-response.types';
+export type EventPagination = PaginatedResponse<Event>;
 
 /**
  * Event statistics - matches backend EventService statistics
@@ -247,9 +225,9 @@ export interface EventStatistics {
 }
 
 /**
- * Approval workflow statistics - matches backend EventService approval statistics
+ * Approval statistics - Use generic stats pattern
  */
-export interface ApprovalStatistics {
+export type ApprovalStatistics = EntityStats<{
   pending_internal_approval: number;
   approved_internal: number;
   pending_public_approval: number;
@@ -258,22 +236,12 @@ export interface ApprovalStatistics {
   rejected: number;
   draft: number;
   cancelled: number;
-}
+}>;
 
-/**
- * Approval action request data
- */
-export interface ApprovalActionData {
-  comment?: string;
-}
+// Use EventOperation from operations.types.ts
+export type ApprovalActionData = Extract<EventOperation, { action: 'approve' | 'reject' }>;
 
-/**
- * API Response wrapper
- */
-export interface EventApiResponse {
-  message: string;
-  data: Event;
-}
+// EventApiResponse removed - use ApiResponse<Event> from api-response.types.ts
 
 /**
  * Event status display helpers
@@ -306,4 +274,29 @@ export const EVENT_STATUS_COLORS: Record<EventStatusCode, string> = {
   [EVENT_STATUS.REQUIRES_CHANGES]: 'bg-red-100 text-red-800',
   [EVENT_STATUS.REJECTED]: 'bg-red-100 text-red-800',
   [EVENT_STATUS.CANCELLED]: 'bg-gray-100 text-gray-800',
+};
+
+/**
+ * Event template for reusable event data
+ */
+export type EventTemplate = {
+  id: number;
+  name: string;
+  template_data: Record<string, unknown>;
+  created_at: string;
+  last_used?: string;
+};
+
+/**
+ * Event message for communication
+ */
+export type EventMessage = {
+  id: number;
+  subject: string;
+  message: string;
+  from: { id: number; name: string; role: string };
+  to: { id: number; name: string; role: string };
+  event_id: number;
+  read_at?: string;
+  created_at: string;
 };

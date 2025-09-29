@@ -6,14 +6,13 @@
  * providing role-based functionality.
  */
 
-import { 
-  Event, 
-  EventFormData, 
-  EventFilters, 
-  EventPagination, 
-  EventStatistics, 
+import {
+  Event,
+  EventFormData,
+  EventFilters,
+  EventPagination,
+  EventStatistics,
   ApprovalStatistics,
-  ApprovalActionData,
   EventStatus
 } from '@/types/event.types';
 
@@ -143,24 +142,24 @@ export const eventApprovalService = {
    * Approve event for internal use
    * @deprecated Use getEventServiceForContext('admin').approval.approveInternal() instead
    */
-  async approveInternal(eventId: number, data: ApprovalActionData = {}): Promise<Event> {
-    return combinedEventAdminService.approval.approveInternal(eventId, data);
+  async approveInternal(eventId: number, comment?: string): Promise<Event> {
+    return combinedEventAdminService.approval.approveInternal(eventId, comment);
   },
 
   /**
    * Request public approval for an internally approved event
    * @deprecated Use getEventServiceForContext('admin').approval.requestPublic() instead
    */
-  async requestPublic(eventId: number, data: ApprovalActionData = {}): Promise<Event> {
-    return combinedEventAdminService.approval.requestPublic(eventId, data);
+  async requestPublic(eventId: number, comment?: string): Promise<Event> {
+    return combinedEventAdminService.approval.requestPublic(eventId, comment);
   },
 
   /**
    * Approve event for public publication
    * @deprecated Use getEventServiceForContext('admin').approval.approvePublic() instead
    */
-  async approvePublic(eventId: number, data: ApprovalActionData = {}): Promise<Event> {
-    return combinedEventAdminService.approval.approvePublic(eventId, data);
+  async approvePublic(eventId: number, comment?: string): Promise<Event> {
+    return combinedEventAdminService.approval.approvePublic(eventId, comment);
   },
 
   /**

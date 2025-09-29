@@ -22,7 +22,7 @@ export const approvalService = {
    * This approves the event for internal calendar use
    */
   approveInternal: async (eventId: number, comment?: string): Promise<Event> => {
-    const response = await apiClient.patch<ApprovalResponse>(`/v1/events/${eventId}/approve`, {
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/approve`, {
       comment: comment || ''
     });
     return response.data.data;
@@ -33,7 +33,7 @@ export const approvalService = {
    * This submits the internally approved event for public calendar review
    */
   requestPublicApproval: async (eventId: number, comment?: string): Promise<Event> => {
-    const response = await apiClient.patch<ApprovalResponse>(`/v1/events/${eventId}/request-public`, {
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/request-public`, {
       comment: comment || ''
     });
     return response.data.data;
@@ -44,7 +44,7 @@ export const approvalService = {
    * This publishes the event to the public calendar
    */
   publishEvent: async (eventId: number): Promise<Event> => {
-    const response = await apiClient.patch<ApprovalResponse>(`/v1/events/${eventId}/publish`);
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/publish`);
     return response.data.data;
   },
 
@@ -52,7 +52,7 @@ export const approvalService = {
    * Request changes to event (any_state → requires_changes)
    */
   requestChanges: async (eventId: number, feedback: string): Promise<Event> => {
-    const response = await apiClient.patch<ApprovalResponse>(`/v1/events/${eventId}/request-changes`, {
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/request-changes`, {
       feedback
     });
     return response.data.data;
@@ -62,7 +62,7 @@ export const approvalService = {
    * Reject event (any_state → rejected)
    */
   rejectEvent: async (eventId: number, reason: string): Promise<Event> => {
-    const response = await apiClient.patch<ApprovalResponse>(`/v1/events/${eventId}/reject`, {
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/reject`, {
       reason
     });
     return response.data.data;
@@ -72,7 +72,7 @@ export const approvalService = {
    * Toggle featured status of event
    */
   toggleFeatured: async (eventId: number): Promise<Event> => {
-    const response = await apiClient.patch<ApprovalResponse>(`/v1/events/${eventId}/toggle-featured`);
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/toggle-featured`);
     return response.data.data;
   },
 

@@ -7,46 +7,15 @@
 'use client';
 
 import { Fragment } from 'react';
+import type { SimplePaginationProps, AdvancedPaginationProps } from '@/types/pagination.types';
 
-// Base pagination props (simple mode)
-interface BasePaginationProps {
-  currentPage: number;
-  onPageChange: (page: number) => void;
-  showInfo?: boolean;
-  className?: string;
-}
-
-// Simple pagination mode (backwards compatibility)
-interface SimplePaginationProps extends BasePaginationProps {
-  totalPages: number;
-  totalItems?: number;
-  itemsFrom?: number;
-  itemsTo?: number;
-  hasNextPage?: boolean;
-  hasPrevPage?: boolean;
-  // No advanced features
-  showPerPageSelector?: false;
-  perPage?: never;
-  onPerPageChange?: never;
-}
-
-// Advanced pagination mode (new features)
-interface AdvancedPaginationProps extends BasePaginationProps {
-  lastPage: number;
-  total: number;
-  perPage: number;
-  onPerPageChange: (perPage: number) => void;
-  // Advanced features enabled
-  showPerPageSelector?: true;
-  totalPages?: never;
-  totalItems?: never;
-  itemsFrom?: never;
-  itemsTo?: never;
-  hasNextPage?: never;
-  hasPrevPage?: never;
-}
-
+// Use the standardized union type from pagination.types.ts
 type PaginationProps = SimplePaginationProps | AdvancedPaginationProps;
+
+// Type guard to check if props is AdvancedPaginationProps
+function isAdvancedPagination(props: PaginationProps): props is AdvancedPaginationProps {
+  return 'lastPage' in props && 'total' in props && 'perPage' in props;
+}
 
 const Pagination: React.FC<PaginationProps> = (props) => {
   const {
@@ -56,30 +25,43 @@ const Pagination: React.FC<PaginationProps> = (props) => {
     className = '',
   } = props;
 
-  // Determine if we're in advanced or simple mode
-  const isAdvancedMode = 'lastPage' in props && 'total' in props;
+  // Extract mode-specific props with proper type narrowing
+  let totalPages: number;
+  let totalItems: number | undefined;
+  let perPage: number | undefined;
+  let onPerPageChange: ((perPage: number) => void) | undefined;
+  let showPerPageSelector: boolean;
 
-  // Extract mode-specific props
-  const totalPages = isAdvancedMode ? props.lastPage : props.totalPages;
-  const totalItems = isAdvancedMode ? props.total : props.totalItems;
-  const perPage = isAdvancedMode ? props.perPage : 10;
-  const onPerPageChange = isAdvancedMode ? props.onPerPageChange : undefined;
-  const showPerPageSelector = isAdvancedMode;
+  if (isAdvancedPagination(props)) {
+    // Advanced mode
+    totalPages = props.lastPage;
+    totalItems = props.total;
+    perPage = props.perPage;
+    onPerPageChange = props.onPerPageChange;
+    showPerPageSelector = true;
+  } else {
+    // Simple mode
+    totalPages = props.totalPages;
+    totalItems = props.totalItems;
+    perPage = undefined;
+    onPerPageChange = undefined;
+    showPerPageSelector = false;
+  }
 
   // Calculate items info
-  const itemsFrom = isAdvancedMode
-    ? (currentPage - 1) * perPage + 1
+  const itemsFrom = isAdvancedPagination(props)
+    ? (currentPage - 1) * props.perPage + 1
     : props.itemsFrom || ((currentPage - 1) * 10 + 1);
 
-  const itemsTo = isAdvancedMode
-    ? Math.min(currentPage * perPage, props.total)
+  const itemsTo = isAdvancedPagination(props)
+    ? Math.min(currentPage * props.perPage, props.total)
     : props.itemsTo || Math.min(currentPage * 10, totalItems || 0);
 
-  const hasNextPage = isAdvancedMode
+  const hasNextPage = isAdvancedPagination(props)
     ? currentPage < props.lastPage
     : props.hasNextPage ?? (currentPage < totalPages);
 
-  const hasPrevPage = isAdvancedMode
+  const hasPrevPage = isAdvancedPagination(props)
     ? currentPage > 1
     : props.hasPrevPage ?? (currentPage > 1);
 
@@ -163,7 +145,7 @@ const Pagination: React.FC<PaginationProps> = (props) => {
               </label>
               <select
                 id="pagination-per-page"
-                value={perPage}
+                value={perPage || 10}
                 onChange={(e) => onPerPageChange(Number(e.target.value))}
                 className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >

@@ -24,7 +24,7 @@ import {
 export const getLocations = async (params: LocationFilters = {}): Promise<LocationPagination> => {
   try {
     // Laravel Resource collections with pagination return the paginated data directly
-    const response: AxiosResponse<LocationPagination> = await apiClient.get('/v1/locations', {
+    const response: AxiosResponse<LocationPagination> = await apiClient.get('/locations', {
       params: {
         page: params.page || 1,
         per_page: params.per_page || 15,
@@ -46,10 +46,19 @@ export const getLocations = async (params: LocationFilters = {}): Promise<Locati
  */
 export const getActiveLocations = async (): Promise<Location[]> => {
   try {
-    const response: AxiosResponse<{ data: Location[] }> = await apiClient.get('/v1/locations/active');
+    console.log('📡 [LOCATION SERVICE] Fetching active locations...');
+    const response: AxiosResponse<{ data: Location[] }> = await apiClient.get('/locations/active');
+
+    console.log('✅ [LOCATION SERVICE] Response received:', {
+      status: response.status,
+      dataStructure: response.data,
+      locationsArray: response.data.data,
+      count: response.data.data?.length
+    });
 
     return response.data.data;
   } catch (error) {
+    console.error('❌ [LOCATION SERVICE] Error fetching locations:', error);
     throw error;
   }
 };
@@ -59,7 +68,7 @@ export const getActiveLocations = async (): Promise<Location[]> => {
  */
 export const getLocation = async (id: number): Promise<Location> => {
   try {
-    const response: AxiosResponse<{ data: Location }> = await apiClient.get(`/v1/locations/${id}`);
+    const response: AxiosResponse<{ data: Location }> = await apiClient.get(`/locations/${id}`);
 
     return response.data.data;
   } catch (error) {
@@ -72,7 +81,7 @@ export const getLocation = async (id: number): Promise<Location> => {
  */
 export const createLocation = async (locationData: Omit<Location, 'id' | 'created_at' | 'updated_at'>): Promise<Location> => {
   try {
-    const response: AxiosResponse<{ data: Location }> = await apiClient.post('/v1/locations', locationData);
+    const response: AxiosResponse<{ data: Location }> = await apiClient.post('/locations', locationData);
 
     return response.data.data;
   } catch (error) {
@@ -85,7 +94,7 @@ export const createLocation = async (locationData: Omit<Location, 'id' | 'create
  */
 export const updateLocation = async (id: number, locationData: Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>): Promise<Location> => {
   try {
-    const response: AxiosResponse<{ data: Location }> = await apiClient.put(`/v1/locations/${id}`, locationData);
+    const response: AxiosResponse<{ data: Location }> = await apiClient.put(`/locations/${id}`, locationData);
 
     return response.data.data;
   } catch (error) {
@@ -98,7 +107,7 @@ export const updateLocation = async (id: number, locationData: Partial<Omit<Loca
  */
 export const deleteLocation = async (id: number): Promise<void> => {
   try {
-    await apiClient.delete(`/v1/locations/${id}`);
+    await apiClient.delete(`/locations/${id}`);
   } catch (error) {
     throw error;
   }

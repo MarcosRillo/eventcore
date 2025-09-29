@@ -1,23 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDebounce } from "./useDebounce";
+import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
 import axios from "axios";
 
-// --- Updated interfaces to match Laravel structure ---
-export interface PaginationMeta {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number | null;
-  to: number | null;
-  path?: string;
-}
-
-export interface LaravelPaginatedResponse<T> {
-  data: T[];
-  meta: PaginationMeta;
-  links: Record<string, string | null>;
-}
+// Re-export for backward compatibility
+export type LaravelPaginatedResponse<T> = PaginatedResponse<T>;
+export type { PaginationMeta } from "@/types/api-response.types";
 
 export interface BaseFilters {
   search?: string;

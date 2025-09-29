@@ -13,27 +13,12 @@ import {
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { apiClient } from '@/lib/api';
 import { usePermissions } from '@/hooks/usePermissions';
-import { Event } from '@/types/event.types';
+import { Event, EventStatistics, EventTemplate } from '@/types/event.types';
 
 // Context types for event service examples
 type ServiceContext = 'admin' | 'public' | 'organizer';
 
-// Dashboard statistics interface for admin service
-interface AdminStats {
-  totalEvents: number;
-  publishedEvents: number;
-  pendingApproval: number;
-  draftEvents: number;
-}
 
-// Event template interface for examples
-interface EventTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  defaultDuration: number;
-}
 
 // Example 1: Basic usage with auto-detection
 export const AutoDetectedEventManager = () => {
@@ -128,7 +113,7 @@ export const DirectServiceUsage = () => {
   const loadPublicEvents = async () => {
     setLoading(true);
     try {
-      const result = await apiClient.get<{events: Event[]}>('/v1/public/events?featured_only=true&upcoming_only=true');
+      const result = await apiClient.get<{events: Event[]}>('/public/events?featured_only=true&upcoming_only=true');
       setEvents(result.events);
     } catch (error) {
       console.error('Error loading public events:', error);
@@ -140,7 +125,7 @@ export const DirectServiceUsage = () => {
   const loadOrganizerEvents = async () => {
     setLoading(true);
     try {
-      const result = await apiClient.get<{events: Event[]}>('/v1/organizer/events?draft_only=true');
+      const result = await apiClient.get<{events: Event[]}>('/organizer/events?draft_only=true');
       setEvents(result.events);
     } catch (error) {
       console.error('Error loading organizer events:', error);
@@ -198,15 +183,14 @@ export const DirectServiceUsage = () => {
 
 // Example 4: Service-specific features
 export const ServiceSpecificFeatures = () => {
-  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [stats, setStats] = useState<EventStatistics | null>(null);
   const [templates, setTemplates] = useState<EventTemplate[]>([]);
   const [exportUrl, setExportUrl] = useState<string>('');
 
   const loadAdminStats = async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const detailedStats = await apiClient.get<any>('/v1/admin/events/statistics');
-      setStats(detailedStats);
+      const response = await apiClient.get<{ data: EventStatistics }>('/admin/events/statistics');
+      setStats(response.data);
     } catch (error) {
       console.error('Error loading stats:', error);
     }
@@ -214,9 +198,8 @@ export const ServiceSpecificFeatures = () => {
 
   const loadOrganizerTemplates = async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const userTemplates = await apiClient.get<any>('/v1/organizer/templates');
-      setTemplates(userTemplates);
+      const response = await apiClient.get<{ data: EventTemplate[] }>('/organizer/templates');
+      setTemplates(response.data);
     } catch (error) {
       console.error('Error loading templates:', error);
     }

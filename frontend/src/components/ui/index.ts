@@ -19,7 +19,7 @@ export { default as SafeImage } from './SafeImage';
 export { RadioGroup } from './RadioGroup';
 
 // Table Components
-export { Table, type TableColumn, type TableAction, type TablePaginationProps, type TableProps } from './Table';
+export { Table, type TableColumn, type TableAction, type TableProps } from './Table';
 
 // Event Components
 export { EventDetailModal, type EventDetailModalProps, type EventDetailContext } from './EventDetailModal';
