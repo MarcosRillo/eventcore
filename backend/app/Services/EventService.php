@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class EventService
 {
@@ -65,44 +66,46 @@ class EventService
      */
     public function createEvent(array $data, User $user): Event
     {
-        // Get the user's primary organization for entity_id if not provided
-        if (!isset($data['entity_id'])) {
-            $organization = $user->organizations()->first();
-            if (!$organization) {
-                throw new \Exception('User must belong to an organization to create events.');
+        return DB::transaction(function () use ($data, $user) {
+            // Get the user's primary organization for entity_id if not provided
+            if (!isset($data['entity_id'])) {
+                $organization = $user->organizations()->first();
+                if (!$organization) {
+                    throw new \Exception('User must belong to an organization to create events.');
+                }
+                $data['entity_id'] = $organization->id;
             }
-            $data['entity_id'] = $organization->id;
-        }
 
-        // Auto-compute created_by from authenticated user
-        $data['created_by'] = $user->id;
+            // Auto-compute created_by from authenticated user
+            $data['created_by'] = $user->id;
 
-        // Generate slug from title
-        if (isset($data['title'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
+            // Generate slug from title
+            if (isset($data['title'])) {
+                $data['slug'] = Str::slug($data['title']);
+            }
 
-        // Ensure default status_id if not provided
-        if (!isset($data['status_id'])) {
-            $data['status_id'] = 1; // draft
-        }
+            // Ensure default status_id if not provided
+            if (!isset($data['status_id'])) {
+                $data['status_id'] = 1; // draft
+            }
 
-        // Extract location_ids for pivot table handling
-        $locationIds = $data['location_ids'] ?? [];
-        unset($data['location_ids']); // Remove from mass assignment data
+            // Extract location_ids for pivot table handling
+            $locationIds = $data['location_ids'] ?? [];
+            unset($data['location_ids']); // Remove from mass assignment data
 
-        // Create the event
-        $event = Event::create($data);
+            // Create the event
+            $event = Event::create($data);
 
-        // Handle location relationships if provided
-        if (!empty($locationIds) && is_array($locationIds)) {
-            $event->locations()->sync($locationIds);
-        }
+            // Handle location relationships if provided
+            if (!empty($locationIds) && is_array($locationIds)) {
+                $event->locations()->sync($locationIds);
+            }
 
-        // Load relationships for complete response
-        $event->load(['category', 'locations', 'status', 'type', 'creator']);
+            // Load relationships for complete response
+            $event->load(['category', 'locations', 'status', 'type', 'creator']);
 
-        return $event;
+            return $event;
+        });
     }
 
     /**
@@ -110,30 +113,32 @@ class EventService
      */
     public function updateEvent(Event $event, array $data, User $user): Event
     {
-        // Update slug if title changed
-        if (isset($data['title'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
+        return DB::transaction(function () use ($event, $data, $user) {
+            // Update slug if title changed
+            if (isset($data['title'])) {
+                $data['slug'] = Str::slug($data['title']);
+            }
 
-        // Track who updated the event
-        $data['updated_by'] = $user->id;
+            // Track who updated the event
+            $data['updated_by'] = $user->id;
 
-        // Extract location_ids for pivot table handling
-        $locationIds = $data['location_ids'] ?? null;
-        unset($data['location_ids']); // Remove from mass assignment data
+            // Extract location_ids for pivot table handling
+            $locationIds = $data['location_ids'] ?? null;
+            unset($data['location_ids']); // Remove from mass assignment data
 
-        // Update the event
-        $event->update($data);
+            // Update the event
+            $event->update($data);
 
-        // Handle location relationships if provided
-        if ($locationIds !== null && is_array($locationIds)) {
-            $event->locations()->sync($locationIds);
-        }
+            // Handle location relationships if provided
+            if ($locationIds !== null && is_array($locationIds)) {
+                $event->locations()->sync($locationIds);
+            }
 
-        // Load relationships for complete response
-        $event->load(['category', 'locations', 'status', 'type', 'creator']);
+            // Load relationships for complete response
+            $event->load(['category', 'locations', 'status', 'type', 'creator']);
 
-        return $event->fresh();
+            return $event->fresh();
+        });
     }
 
     /**
