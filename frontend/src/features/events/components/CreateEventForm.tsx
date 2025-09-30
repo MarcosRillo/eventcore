@@ -157,6 +157,7 @@ export const CreateEventForm = ({
       description: formData.description,
       start_date: formData.start_date,
       end_date: formData.end_date,
+      type: formData.type,
 
       // Required ID fields using real database values
       status_id: getStatusId('draft'), // ID 1 = 'draft'
