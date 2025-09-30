@@ -152,15 +152,41 @@ export const EditEventForm = ({
     }
     
     setErrors({});
-    
-    // Prepare clean payload for API
+
+    // Prepare clean payload for API - only send defined fields
     const cleanFormData: Partial<EventFormData> = {
-      ...formData,
-      // Only include the selected location type
-      location_text: locationType === 'free_text' ? formData.location_text : undefined,
-      location_ids: locationType === 'structured' ? formData.location_ids : undefined,
+      // Required core fields
+      title: formData.title,
+      description: formData.description,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      type: formData.type,
+
+      // Optional fields
+      ...(formData.category_id && { category_id: formData.category_id }),
+      ...(formData.max_attendees && { max_attendees: formData.max_attendees }),
+
+      // Location - only one method at a time
+      ...(locationType === 'free_text' && formData.location_text && {
+        location_text: formData.location_text
+      }),
+      ...(locationType === 'structured' && formData.location_ids && formData.location_ids.length > 0 && {
+        location_ids: formData.location_ids
+      }),
+
+      // Contact information
+      ...(formData.contact_email && { contact_email: formData.contact_email }),
+      ...(formData.contact_phone && { contact_phone: formData.contact_phone }),
+      ...(formData.website_url && { website_url: formData.website_url }),
+
+      // Media
+      ...(formData.featured_image && { featured_image: formData.featured_image }),
+
+      // CTA
+      ...(formData.cta_text && { cta_text: formData.cta_text }),
+      ...(formData.cta_link && { cta_link: formData.cta_link }),
     };
-    
+
     onSubmit(event.id, cleanFormData);
   };
 
