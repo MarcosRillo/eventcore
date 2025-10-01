@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CategoryService
 {
@@ -46,27 +48,46 @@ class CategoryService
      */
     public function createCategory(array $data, User $user): Category
     {
-        // Get the user's primary organization
-        $organization = $user->organizations()->first();
+        try {
+            return DB::transaction(function () use ($data, $user) {
+                // Get the user's primary organization
+                $organization = $user->organizations()->first();
 
-        if (!$organization) {
-            throw new \Exception('User is not associated with any organization');
+                if (!$organization) {
+                    throw new \Exception('User is not associated with any organization');
+                }
+
+                // Generate unique slug
+                $slug = $this->generateUniqueSlug($data['name'], $organization->id);
+
+                // Prepare category data with safe defaults
+                $categoryData = [
+                    'name' => $data['name'],
+                    'slug' => $slug,
+                    'entity_id' => $organization->id,
+                    'description' => $data['description'] ?? null,
+                    'color' => $data['color'] ?? null,
+                    'is_active' => $data['is_active'] ?? true,
+                ];
+
+                $category = Category::create($categoryData);
+
+                Log::info('Category created', [
+                    'category_id' => $category->id,
+                    'category_name' => $category->name,
+                    'user_id' => $user->id
+                ]);
+
+                return $category;
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to create category', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'data' => $data
+            ]);
+            throw $e;
         }
-
-        // Generate unique slug
-        $slug = $this->generateUniqueSlug($data['name'], $organization->id);
-
-        // Prepare category data with safe defaults
-        $categoryData = [
-            'name' => $data['name'],
-            'slug' => $slug,
-            'entity_id' => $organization->id,
-            'description' => $data['description'] ?? null,
-            'color' => $data['color'] ?? null,
-            'is_active' => $data['is_active'] ?? true,
-        ];
-
-        return Category::create($categoryData);
     }
 
     /**
@@ -74,18 +95,37 @@ class CategoryService
      */
     public function updateCategory(Category $category, array $data): Category
     {
-        // Update slug only if name is being updated
-        if (isset($data['name']) && $data['name'] !== $category->name) {
-            $data['slug'] = $this->generateUniqueSlug(
-                $data['name'],
-                $category->entity_id,
-                $category->id
-            );
+        try {
+            return DB::transaction(function () use ($category, $data) {
+                $originalData = $category->toArray();
+
+                // Update slug only if name is being updated
+                if (isset($data['name']) && $data['name'] !== $category->name) {
+                    $data['slug'] = $this->generateUniqueSlug(
+                        $data['name'],
+                        $category->entity_id,
+                        $category->id
+                    );
+                }
+
+                $category->update($data);
+
+                Log::info('Category updated', [
+                    'category_id' => $category->id,
+                    'category_name' => $category->name,
+                    'changes' => array_diff_assoc($data, $originalData)
+                ]);
+
+                return $category->fresh();
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to update category', [
+                'error' => $e->getMessage(),
+                'category_id' => $category->id,
+                'data' => $data
+            ]);
+            throw $e;
         }
-
-        $category->update($data);
-
-        return $category->fresh();
     }
 
     /**
@@ -93,10 +133,28 @@ class CategoryService
      */
     public function deleteCategory(Category $category): string
     {
-        $categoryName = $category->name;
-        $category->delete();
+        try {
+            return DB::transaction(function () use ($category) {
+                $categoryId = $category->id;
+                $categoryName = $category->name;
 
-        return "Category '{$categoryName}' deleted successfully";
+                $category->delete();
+
+                Log::info('Category deleted', [
+                    'category_id' => $categoryId,
+                    'category_name' => $categoryName
+                ]);
+
+                return "Category '{$categoryName}' deleted successfully";
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to delete category', [
+                'error' => $e->getMessage(),
+                'category_id' => $category->id,
+                'category_name' => $category->name
+            ]);
+            throw $e;
+        }
     }
 
     /**

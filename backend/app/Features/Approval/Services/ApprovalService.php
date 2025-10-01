@@ -4,6 +4,7 @@ namespace App\Features\Approval\Services;
 
 use App\Models\Event;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ApprovalService
@@ -13,21 +14,32 @@ class ApprovalService
      */
     public function approveInternal(Event $event, User $approver, ?string $comments = null): void
     {
-        $event->update([
-            'status_id' => 3, // approved_internal
-            'approved_by' => $approver->id,
-            'approved_at' => now(),
-            'approval_comments' => $comments
-        ]);
+        try {
+            DB::transaction(function () use ($event, $approver, $comments) {
+                $event->update([
+                    'status_id' => 3, // approved_internal
+                    'approved_by' => $approver->id,
+                    'approved_at' => now(),
+                    'approval_comments' => $comments
+                ]);
 
-        // Log simple, sin eventos de dominio
-        Log::info('Event approved internally', [
-            'event_id' => $event->id,
-            'approver_id' => $approver->id
-        ]);
+                // Log simple, sin eventos de dominio
+                Log::info('Event approved internally', [
+                    'event_id' => $event->id,
+                    'approver_id' => $approver->id
+                ]);
 
-        // Aquí podrías enviar notificación si es necesario
-        // Mail::to($event->creator)->send(new EventApprovedMail($event));
+                // Aquí podrías enviar notificación si es necesario
+                // Mail::to($event->creator)->send(new EventApprovedMail($event));
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to approve event internally', [
+                'error' => $e->getMessage(),
+                'event_id' => $event->id,
+                'approver_id' => $approver->id
+            ]);
+            throw $e;
+        }
     }
 
     /**
@@ -52,17 +64,28 @@ class ApprovalService
      */
     public function publishEvent(Event $event, User $publisher, ?string $scheduledAt = null): void
     {
-        $event->update([
-            'status_id' => 5, // published
-            'published_by' => $publisher->id,
-            'published_at' => $scheduledAt ?? now(),
-            'scheduled_publish_at' => $scheduledAt
-        ]);
+        try {
+            DB::transaction(function () use ($event, $publisher, $scheduledAt) {
+                $event->update([
+                    'status_id' => 5, // published
+                    'published_by' => $publisher->id,
+                    'published_at' => $scheduledAt ?? now(),
+                    'scheduled_publish_at' => $scheduledAt
+                ]);
 
-        Log::info('Event published', [
-            'event_id' => $event->id,
-            'publisher_id' => $publisher->id
-        ]);
+                Log::info('Event published', [
+                    'event_id' => $event->id,
+                    'publisher_id' => $publisher->id
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to publish event', [
+                'error' => $e->getMessage(),
+                'event_id' => $event->id,
+                'publisher_id' => $publisher->id
+            ]);
+            throw $e;
+        }
     }
 
     /**
@@ -70,17 +93,28 @@ class ApprovalService
      */
     public function requestChanges(Event $event, string $reason, User $reviewer): void
     {
-        $event->update([
-            'status_id' => 7, // requires_changes
-            'changes_requested_by' => $reviewer->id,
-            'changes_requested_at' => now(),
-            'approval_comments' => $reason
-        ]);
+        try {
+            DB::transaction(function () use ($event, $reason, $reviewer) {
+                $event->update([
+                    'status_id' => 7, // requires_changes
+                    'changes_requested_by' => $reviewer->id,
+                    'changes_requested_at' => now(),
+                    'approval_comments' => $reason
+                ]);
 
-        Log::info('Changes requested', [
-            'event_id' => $event->id,
-            'reviewer_id' => $reviewer->id
-        ]);
+                Log::info('Changes requested', [
+                    'event_id' => $event->id,
+                    'reviewer_id' => $reviewer->id
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to request changes', [
+                'error' => $e->getMessage(),
+                'event_id' => $event->id,
+                'reviewer_id' => $reviewer->id
+            ]);
+            throw $e;
+        }
     }
 
     /**
@@ -88,17 +122,28 @@ class ApprovalService
      */
     public function reject(Event $event, string $reason, User $rejector): void
     {
-        $event->update([
-            'status_id' => 6, // rejected
-            'rejected_by' => $rejector->id,
-            'rejected_at' => now(),
-            'rejection_reason' => $reason
-        ]);
+        try {
+            DB::transaction(function () use ($event, $reason, $rejector) {
+                $event->update([
+                    'status_id' => 6, // rejected
+                    'rejected_by' => $rejector->id,
+                    'rejected_at' => now(),
+                    'rejection_reason' => $reason
+                ]);
 
-        Log::info('Event rejected', [
-            'event_id' => $event->id,
-            'rejector_id' => $rejector->id
-        ]);
+                Log::info('Event rejected', [
+                    'event_id' => $event->id,
+                    'rejector_id' => $rejector->id
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to reject event', [
+                'error' => $e->getMessage(),
+                'event_id' => $event->id,
+                'rejector_id' => $rejector->id
+            ]);
+            throw $e;
+        }
     }
 
     /**
