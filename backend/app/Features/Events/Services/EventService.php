@@ -79,11 +79,6 @@ class EventService
             // Auto-compute created_by from authenticated user
             $data['created_by'] = $user->id;
 
-            // Generate slug from title
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
             // Ensure default status_id if not provided
             if (!isset($data['status_id'])) {
                 $data['status_id'] = 1; // draft
@@ -114,11 +109,6 @@ class EventService
     public function updateEvent(Event $event, array $data, User $user): Event
     {
         return DB::transaction(function () use ($event, $data, $user) {
-            // Update slug if title changed
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
             // Track who updated the event
             $data['updated_by'] = $user->id;
 
@@ -230,7 +220,6 @@ class EventService
     {
         $replica = $event->replicate();
         $replica->title = $event->title . ' (Copia)';
-        $replica->slug = Str::slug($replica->title);
         $replica->status_id = 1; // draft
         $replica->is_featured = false;
         $replica->approved_at = null;

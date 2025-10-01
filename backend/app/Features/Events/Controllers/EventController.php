@@ -49,7 +49,7 @@ class EventController extends Controller
      */
     public function store(StoreEventRequest $request)
     {
-        $event = $this->eventService->create(
+        $event = $this->eventService->createEvent(
             $request->validated(),
             $request->user()
         );
@@ -78,7 +78,7 @@ class EventController extends Controller
     {
         $event = Event::findOrFail($id);
 
-        $updated = $this->eventService->update(
+        $updated = $this->eventService->updateEvent(
             $event,
             $request->validated(),
             $request->user()
