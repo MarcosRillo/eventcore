@@ -125,4 +125,14 @@ class ApprovalController extends Controller
             'data' => new EventResource($event->fresh())
         ]);
     }
+
+    /**
+     * Get approval statistics.
+     */
+    public function statistics(): JsonResponse
+    {
+        $statistics = $this->approvalService->getApprovalStatistics();
+
+        return response()->json($statistics);
+    }
 }
