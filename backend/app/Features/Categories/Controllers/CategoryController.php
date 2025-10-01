@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Features\Categories\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
-use App\Services\CategoryService;
+use App\Features\Categories\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,7 +19,7 @@ class CategoryController extends Controller
 
     /**
      * Display a listing of categories for the authenticated user's entity.
-     * 
+     *
      * @OA\Get(
      *     path="/categories",
      *     summary="Get Categories",
@@ -84,7 +84,7 @@ class CategoryController extends Controller
 
     /**
      * Store a newly created category.
-     * 
+     *
      * @OA\Post(
      *     path="/categories",
      *     summary="Create Category",
@@ -149,7 +149,7 @@ class CategoryController extends Controller
 
     /**
      * Display the specified category.
-     * 
+     *
      * @OA\Get(
      *     path="/categories/{id}",
      *     summary="Get Category",
@@ -197,7 +197,7 @@ class CategoryController extends Controller
 
     /**
      * Update the specified category.
-     * 
+     *
      * @OA\Put(
      *     path="/categories/{id}",
      *     summary="Update Category",
@@ -269,7 +269,7 @@ class CategoryController extends Controller
 
     /**
      * Remove the specified category from storage.
-     * 
+     *
      * @OA\Delete(
      *     path="/categories/{id}",
      *     summary="Delete Category",
@@ -316,7 +316,7 @@ class CategoryController extends Controller
 
     /**
      * Toggle category active status.
-     * 
+     *
      * @OA\Patch(
      *     path="/categories/{id}/toggle-status",
      *     summary="Toggle Category Status",
@@ -369,7 +369,7 @@ class CategoryController extends Controller
 
     /**
      * Get only active categories (useful for dropdowns).
-     * 
+     *
      * @OA\Get(
      *     path="/categories/active",
      *     summary="Get Active Categories",

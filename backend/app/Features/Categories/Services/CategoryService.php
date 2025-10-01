@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Features\Categories\Services;
 
 use App\Models\Category;
 use App\Models\User;
@@ -115,7 +115,7 @@ class CategoryService
     private function applySearchFilter(Builder $query, string $search): void
     {
         $search = trim($search);
-        
+
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -147,18 +147,18 @@ class CategoryService
     private function getPerPageValue(array $filters): int
     {
         $perPage = $filters['per_page'] ?? 15;
-        
+
         // Ensure per_page is within reasonable bounds
         $perPage = (int) $perPage;
-        
+
         if ($perPage < 1) {
             $perPage = 15;
         }
-        
+
         if ($perPage > 100) {
             $perPage = 100;
         }
-        
+
         return $perPage;
     }
 
@@ -232,10 +232,10 @@ class CategoryService
     public function getActiveCategories(): \Illuminate\Database\Eloquent\Collection
     {
         $query = Category::query();
-        
+
         // Apply scope filter if needed
         $this->applyScopeFilter($query);
-        
+
         return $query->where('is_active', true)
                     ->orderBy('name', 'asc')
                     ->get();
