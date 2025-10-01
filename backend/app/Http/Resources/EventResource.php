@@ -100,8 +100,8 @@ class EventResource extends JsonResource
     {
         return [
             'meta' => [
-                'available_statuses' => \App\Models\Event::STATUSES,
-                'available_types' => \App\Models\Event::TYPES,
+                'available_statuses' => \App\Models\EventStatus::all(['id', 'status_name', 'status_code']),
+                'available_types' => \App\Models\EventType::all(['id', 'type_name', 'type_code']),
             ],
         ];
     }
