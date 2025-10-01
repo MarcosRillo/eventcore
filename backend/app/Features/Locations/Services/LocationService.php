@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Features\Locations\Services;
 
 use App\Models\Location;
 use App\Models\User;

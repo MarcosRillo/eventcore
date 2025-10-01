@@ -4,13 +4,13 @@ use App\Http\Controllers\Api\V1\AdminAppearanceController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\EventApprovalController;
-use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\PublicEventController;
 
 // Feature Controllers - SIMPLE
 use App\Features\Events\Controllers\EventController as FeatureEventController;
 use App\Features\Approval\Controllers\ApprovalController;
 use App\Features\Categories\Controllers\CategoryController;
+use App\Features\Locations\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
 
 /*
