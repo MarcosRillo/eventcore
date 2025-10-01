@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Features\Dashboard\Services;
 
 use App\Models\Event;
 use App\Models\EventStatus;

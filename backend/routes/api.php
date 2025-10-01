@@ -1,10 +1,16 @@
 <?php
 
-use App\Http\Controllers\Api\V1\AdminAppearanceController;
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\DashboardController;
-use App\Http\Controllers\Api\V1\EventApprovalController;
-use App\Http\Controllers\Api\V1\PublicEventController;
+// Feature Controllers - Dashboard
+use App\Features\Dashboard\Controllers\DashboardController;
+
+// Feature Controllers - Auth
+use App\Features\Auth\Controllers\AuthController;
+
+// Feature Controllers - PublicEvents
+use App\Features\PublicEvents\Controllers\PublicEventController;
+
+// Feature Controllers - Appearance
+use App\Features\Appearance\Controllers\AppearanceController;
 
 // Feature Controllers - SIMPLE
 use App\Features\Events\Controllers\EventController as FeatureEventController;
@@ -45,8 +51,8 @@ Route::prefix('v1')->group(function () {
         Route::patch('events/{id}/request-changes', [ApprovalController::class, 'requestChanges']);
         Route::patch('events/{id}/reject', [ApprovalController::class, 'reject']);
 
-        // Legacy approval statistics route (keep for dashboard compatibility)
-        Route::get('events/approval/statistics', [EventApprovalController::class, 'getApprovalStatistics']);
+        // Approval statistics route
+        Route::get('events/approval/statistics', [ApprovalController::class, 'statistics']);
 
         // Event CRUD routes using Feature Controller - SIMPLE
         Route::get('events', [FeatureEventController::class, 'index']);
@@ -75,7 +81,7 @@ Route::prefix('v1')->group(function () {
 
         // Admin
         Route::prefix('admin')->group(function () {
-            Route::apiResource('appearance', AdminAppearanceController::class);
+            Route::apiResource('appearance', AppearanceController::class);
         });
     });
 

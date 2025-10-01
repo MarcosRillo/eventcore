@@ -100,4 +100,21 @@ class ApprovalService
             'rejector_id' => $rejector->id
         ]);
     }
+
+    /**
+     * Get approval statistics.
+     */
+    public function getApprovalStatistics(): array
+    {
+        return [
+            'draft' => Event::where('status_id', 1)->count(),
+            'in_review' => Event::where('status_id', 2)->count(),
+            'approved_internal' => Event::where('status_id', 3)->count(),
+            'pending_public_approval' => Event::where('status_id', 4)->count(),
+            'published' => Event::where('status_id', 5)->count(),
+            'rejected' => Event::where('status_id', 6)->count(),
+            'requires_changes' => Event::where('status_id', 7)->count(),
+            'cancelled' => Event::where('status_id', 8)->count(),
+        ];
+    }
 }

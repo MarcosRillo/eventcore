@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Features\Dashboard\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\DashboardService;
+use App\Features\Dashboard\Services\DashboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

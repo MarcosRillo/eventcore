@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Features\Appearance\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAppearanceRequest;
@@ -8,7 +8,7 @@ use App\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class AdminAppearanceController extends Controller
+class AppearanceController extends Controller
 {
     /**
      * Get the current appearance settings for the authenticated user's organization.
