@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { usePermissions } from '../../hooks/usePermissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   HomeIcon,
   CalendarIcon,

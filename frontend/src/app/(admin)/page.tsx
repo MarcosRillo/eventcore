@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Button } from '../../components/ui';
+import { Button } from '@/components/ui';
 import Link from 'next/link';
 
 const AdminDashboard: React.FC = () => {

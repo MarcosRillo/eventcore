@@ -15,7 +15,7 @@ import {
   ColumnConfig,
   ActionConfig,
   ConfirmDialogData
-} from '../dumb/EventTable';
+} from '@/features/events/components/dumb/EventTable';
 
 interface EventTableContainerProps {
   events: Event[];

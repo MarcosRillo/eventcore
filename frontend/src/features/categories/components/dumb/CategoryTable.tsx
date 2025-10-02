@@ -11,7 +11,7 @@ import {
   CategoryColumnConfig,
   CategoryActionConfig,
   CategoryConfirmDialogData
-} from '../smart/CategoryTableContainer';
+} from '@/features/categories/components/smart/CategoryTableContainer';
 
 interface CategoryTableProps {
   categories: Category[];

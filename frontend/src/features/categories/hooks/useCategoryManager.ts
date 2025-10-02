@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { 
   getCategories, 
   deleteCategory 
-} from '../services/category.service';
+} from '@/features/categories/services/category.service';
 import {
   Category,
   CategoryFilterStatus,

@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Category } from '@/types/category.types';
 import { PaginationMeta } from '@/hooks/usePaginatedData';
-import { CategoryTable } from '../dumb/CategoryTable';
+import { CategoryTable } from '@/features/categories/components/dumb/CategoryTable';
 
 // Column configuration interface
 export interface CategoryColumnConfig {

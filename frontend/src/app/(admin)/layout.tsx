@@ -8,9 +8,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-import { Header, Sidebar } from '../../components/layout';
-import { LoadingSpinner } from '../../components/ui';
+import { useAuth } from '@/context/AuthContext';
+import { Header, Sidebar } from '@/components/layout';
+import { LoadingSpinner } from '@/components/ui';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

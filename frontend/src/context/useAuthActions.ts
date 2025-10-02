@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
-import apiClient, { setAuthToken, removeAuthToken, getAuthToken } from '../services/apiClient';
+import apiClient, { setAuthToken, removeAuthToken, getAuthToken } from '@/services/apiClient';
 import {
   User,
   LoginCredentials,
@@ -16,7 +16,7 @@ import {
   Permission,
   ROLE_PERMISSIONS,
   RESOURCE_PERMISSIONS
-} from '../types/auth.types';
+} from '@/types/auth.types';
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
