@@ -524,8 +524,8 @@ Desglose:
 
 ## 📚 Referencias
 
-- [ARCHITECTURE.md](../docs/ARCHITECTURE.md)
-- [CHANGELOG.md](../docs/CHANGELOG.md)
+- [ARCHITECTURE.md](../frontend/ARCHITECTURE.md)
+- [CHANGELOG.md](../frontend/CHANGELOG.md)
 - [Next.js 15 Documentation](https://nextjs.org/docs)
 - [React 19 Documentation](https://react.dev)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
