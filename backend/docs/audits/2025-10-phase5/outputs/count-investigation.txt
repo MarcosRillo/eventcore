@@ -1,0 +1,194 @@
+=== INVESTIGACIÓN: DISCREPANCIA EN CONTEO ===
+Generado: Thu Oct  2 12:12:51 -03 2025
+
+MODELS:
+Reportado: 18
+Verificado: 13
+Diferencia: +5
+
+Lista de archivos .php encontrados en app/Models/:
+     1	app/Models/Category.php
+     2	app/Models/CustomField.php
+     3	app/Models/Event.php
+     4	app/Models/EventStatus.php
+     5	app/Models/EventType.php
+     6	app/Models/Location.php
+     7	app/Models/Organization.php
+     8	app/Models/OrganizationStatus.php
+     9	app/Models/OrganizationType.php
+    10	app/Models/Scopes/TenantScope.php
+    11	app/Models/Section.php
+    12	app/Models/User.php
+    13	app/Models/UserRole.php
+
+Total contado: 0
+
+Archivos que NO son Models (Scopes, etc.):
+app/Models/Scopes/TenantScope.php
+
+Models reales (excluyendo Scopes/):
+     1	app/Models/Category.php
+     2	app/Models/CustomField.php
+     3	app/Models/Event.php
+     4	app/Models/EventStatus.php
+     5	app/Models/EventType.php
+     6	app/Models/Location.php
+     7	app/Models/Organization.php
+     8	app/Models/OrganizationStatus.php
+     9	app/Models/OrganizationType.php
+    10	app/Models/Section.php
+    11	app/Models/User.php
+    12	app/Models/UserRole.php
+
+Total Models reales: 0
+
+========================================
+
+MIGRATIONS:
+Reportado: 54
+Verificado: 19
+Diferencia: +35
+
+Lista de archivos .php encontrados en database/migrations/:
+     1	database/migrations/0001_01_01_000000_create_user_roles_table.php
+     2	database/migrations/0001_01_01_000001_create_cache_table.php
+     3	database/migrations/0001_01_01_000001_create_event_statuses_table.php
+     4	database/migrations/0001_01_01_000002_create_jobs_table.php
+     5	database/migrations/0001_01_01_000002_create_organization_statuses_table.php
+     6	database/migrations/0001_01_01_000003_create_organization_types_table.php
+     7	database/migrations/0001_01_01_000004_create_event_types_table.php
+     8	database/migrations/0001_01_01_000010_create_users_table.php
+     9	database/migrations/2025_08_14_195907_create_organizations_table.php
+    10	database/migrations/2025_08_14_200000_add_role_to_users_table.php
+    11	database/migrations/2025_08_14_200034_create_organization_user_pivot_table.php
+    12	database/migrations/2025_08_14_211507_create_categories_table.php
+    13	database/migrations/2025_08_14_212444_create_personal_access_tokens_table.php
+    14	database/migrations/2025_08_14_220000_create_locations_table.php
+    15	database/migrations/2025_08_14_230000_create_events_table.php
+    16	database/migrations/2025_08_14_240000_create_event_location_table.php
+    17	database/migrations/2025_09_10_155558_create_appearance_themes_table.php
+    18	database/migrations/2025_09_11_142759_drop_old_role_column_from_users_table.php
+    19	database/migrations/2025_09_16_162719_add_published_at_to_events_table.php
+
+Total contado: 0
+
+Búsqueda de migrations en ubicaciones inesperadas:
+
+Archivos backup o duplicados:
+
+========================================
+
+COMPARACIÓN CON COMANDO ORIGINAL:
+
+
+ANÁLISIS DE LA DISCREPANCIA:
+Los comandos actuales devuelven:
+  - Models: 13
+  - Migrations: 19
+
+Los números reportados en audit fueron:
+  - Models: 18
+  - Migrations: 54
+
+========================================
+
+CAUSA PROBABLE:
+
+Los números reportados (18 models, 54 migrations) NO coinciden con la realidad actual del repositorio (13 models, 19 migrations).
+
+Posibles explicaciones:
+
+1. BRANCH DIFERENTE: La auditoría pudo haberse ejecutado en un branch diferente
+   que contenía más archivos legacy que el branch actual.
+
+2. ARCHIVOS ELIMINADOS: Entre el momento de la auditoría y ahora, se pudieron
+   haber eliminado archivos (5 models y 35 migrations).
+
+3. ERROR EN CONTEO ORIGINAL: El script de auditoría pudo haber contado archivos
+   en ubicaciones adicionales (subdirectorios, backups, etc).
+
+VERIFICACIÓN ACTUAL (October 2, 2025):
+- Branch actual: audit/architecture-features-backend
+- Models encontrados: 13 (12 models + 1 Scope)
+- Migrations encontradas: 19
+- Archivos sospechosos: 0
+- Archivos backup: 0
+- Ubicaciones inesperadas: 0
+
+DISCREPANCIAS:
+- Models: Reportado 18, Real 13 (diferencia: -5 o ~28% menos)
+- Migrations: Reportado 54, Real 19 (diferencia: -35 o ~65% menos)
+
+========================================
+
+ARCHIVOS SOSPECHOSOS ENCONTRADOS:
+
+MODELS: Ninguno
+  ✅ Todos los 12 models están en app/Models/ (ubicación correcta)
+  ✅ 1 Scope en app/Models/Scopes/ (ubicación correcta)
+  ✅ No hay archivos backup (.backup, .old)
+  ✅ No hay archivos versionados (-v2, -copy)
+
+MIGRATIONS: Ninguno
+  ✅ Todas las 19 migrations están en database/migrations/ (ubicación correcta)
+  ✅ No hay archivos backup
+  ✅ No hay migrations en ubicaciones inesperadas
+
+========================================
+
+CONCLUSIÓN:
+
+Los números actuales (13 models, 19 migrations) son CORRECTOS para el estado
+actual del repositorio en el branch audit/architecture-features-backend.
+
+La discrepancia sugiere que:
+1. La auditoría original se ejecutó en un momento/branch diferente
+2. O hubo limpieza de archivos legacy entre auditoría y verificación
+3. O el script original contó archivos adicionales incorrectamente
+
+RECOMENDACIÓN:
+
+✅ USAR NÚMEROS ACTUALES VERIFICADOS:
+  - Models: 13 (no 18)
+  - Migrations: 19 (no 54)
+
+✅ ACTUALIZAR DOCUMENTACIÓN:
+  - Corregir ARCHITECTURE.md con números reales
+  - Corregir CHANGELOG.md con números reales
+  - Corregir audit-outputs/04-metrics.txt si es necesario
+
+❌ NO ELIMINAR ARCHIVOS:
+  - No hay archivos obsoletos que eliminar
+  - El repositorio está limpio
+
+========================================
+
+NÚMEROS FINALES VERIFICADOS:
+
+📊 MODELS (app/Models/):
+  1. Category.php
+  2. CustomField.php
+  3. Event.php
+  4. EventStatus.php
+  5. EventType.php
+  6. Location.php
+  7. Organization.php
+  8. OrganizationStatus.php
+  9. OrganizationType.php
+  10. Section.php
+  11. User.php
+  12. UserRole.php
+  + 1 Scope: Scopes/TenantScope.php
+
+TOTAL MODELS: 12 (+ 1 Scope)
+
+🗄️  MIGRATIONS (database/migrations/):
+  1-8. Lookup tables (0001_01_01_*)
+  9-19. Application migrations (2025_*)
+
+TOTAL MIGRATIONS: 19
+
+========================================
+
+ESTADO: ✅ INVESTIGACIÓN COMPLETA
+ACCIÓN: Actualizar documentación con números verificados
