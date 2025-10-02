@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { Event } from '@/types/event.types';
-import { EventCard } from '../dumb/EventCard';
+import { EventCard } from '@/features/events/components/dumb/EventCard';
 import { Button } from '@/components/ui';
 import { ClockIcon } from '@heroicons/react/24/outline';
-import { useEventCardLogic } from '../../hooks/useEventCardLogic';
-import { useEventUrgency } from '../../hooks/useEventUrgency';
-import { useEventActions } from '../../hooks/useEventActions';
+import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic';
+import { useEventUrgency } from '@/features/events/hooks/useEventUrgency';
+import { useEventActions } from '@/features/events/hooks/useEventActions';
 
 interface EventCardContainerProps {
   event: Event;

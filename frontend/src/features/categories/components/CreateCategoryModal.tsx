@@ -3,7 +3,7 @@
  * Uses unified FormModal component for consistent form handling
  */
 
-import { createCategory, validateCategoryData } from '../services/category.service';
+import { createCategory, validateCategoryData } from '@/features/categories/services/category.service';
 import { CreateCategoryData } from '@/types/category.types';
 import { FormModal, FormSubmitHandler, FormValidator, Input, Textarea, ColorInput, Checkbox } from '@/components/ui';
 

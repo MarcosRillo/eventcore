@@ -12,7 +12,7 @@ import {
   ApprovalActionOption,
   ApprovalFormData,
   ApprovalFormErrors
-} from '../dumb/ApprovalModal';
+} from '@/features/events/components/dumb/ApprovalModal';
 
 interface ApprovalModalContainerProps {
   isOpen: boolean;

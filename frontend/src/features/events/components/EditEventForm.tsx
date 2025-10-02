@@ -6,8 +6,8 @@ import { Category } from '@/types/category.types';
 import { Location } from '@/types/location.types';
 import { Button, Input, Modal, Textarea, Select } from '@/components/ui';
 import { ButtonGroupSelector } from '@/components/ui/ButtonGroupSelector';
-import { getActiveCategories } from '../../categories/services/category.service';
-import { getActiveLocations } from '../../locations/services/location.service';
+import { getActiveCategories } from '@/features/categories/services/category.service';
+import { getActiveLocations } from '@/features/locations/services/location.service';
 
 interface EditEventFormProps {
   isOpen: boolean;

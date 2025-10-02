@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { ApiResponse, ApiErrorResponse } from '../types/api-response.types';
+import { ApiResponse, ApiErrorResponse } from '@/types/api-response.types';
 
 // Base API URL from environment variables
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

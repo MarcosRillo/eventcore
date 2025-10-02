@@ -8,7 +8,7 @@
 
 import { createContext, useContext, ReactNode, useMemo, useRef } from 'react';
 import { useAuthActions } from './useAuthActions';
-import { AuthContextType } from '../types/auth.types';
+import { AuthContextType } from '@/types/auth.types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

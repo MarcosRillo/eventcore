@@ -10,7 +10,7 @@ import {
   AppearanceFormData, 
   DEFAULT_THEME
 } from '@/types/appearance.types';
-import { getAppearanceSettings, updateAppearanceSettings } from '../services/appearance.service';
+import { getAppearanceSettings, updateAppearanceSettings } from '@/features/appearance/services/appearance.service';
 
 export const useAppearanceForm = (): UseAppearanceFormReturn => {
   // Form state

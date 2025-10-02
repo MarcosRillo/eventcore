@@ -19,7 +19,7 @@ import {
 import { 
   getEventServiceForContext, 
   type EventServiceContext 
-} from '../services/event.service';
+} from '@/features/events/services/event.service';
 
 // Extend base filters for events
 interface EventFiltersExtended extends EventFilters {
