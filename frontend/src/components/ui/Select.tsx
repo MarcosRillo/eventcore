@@ -88,7 +88,7 @@ const Select: React.FC<SelectProps> = ({
         </label>
       )}
 
-      <Listbox value={value} onChange={onChange} disabled={disabled}>
+      <Listbox value={value ?? undefined} onChange={onChange} disabled={disabled}>
         <div className="relative">
           <Listbox.Button className={buttonClasses}>
             <span className={`block truncate ${
