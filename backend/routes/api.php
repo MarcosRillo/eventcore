@@ -32,70 +32,94 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
-    // Authentication
+    // ===== AUTHENTICATION (público) =====
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('/auth/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 
-    // Protected routes
+    // Protected routes con roles específicos
     Route::middleware('auth:sanctum')->group(function () {
-        // Events Feature Routes - SIMPLE
-        Route::get('events/statistics', [FeatureEventController::class, 'statistics']);
-        Route::patch('events/{id}/toggle-featured', [FeatureEventController::class, 'toggleFeatured']);
-        Route::post('events/{id}/duplicate', [FeatureEventController::class, 'duplicate']);
 
-        // Approval Feature Routes - SIMPLE
-        Route::patch('events/{id}/approve', [ApprovalController::class, 'approve']);
-        Route::patch('events/{id}/request-public', [ApprovalController::class, 'requestPublicApproval']);
-        Route::patch('events/{id}/publish', [ApprovalController::class, 'publish']);
-        Route::patch('events/{id}/request-changes', [ApprovalController::class, 'requestChanges']);
-        Route::patch('events/{id}/reject', [ApprovalController::class, 'reject']);
+        // ===== PLATFORM ADMIN + ENTITY ADMIN =====
+        // Full CRUD, approval, admin features
+        Route::middleware(['role:platform_admin,entity_admin'])->group(function () {
+            // Event statistics y features avanzadas
+            Route::get('events/statistics', [FeatureEventController::class, 'statistics']);
+            Route::patch('events/{id}/toggle-featured', [FeatureEventController::class, 'toggleFeatured']);
+            Route::post('events/{id}/duplicate', [FeatureEventController::class, 'duplicate']);
 
-        // Approval statistics route
-        Route::get('events/approval/statistics', [ApprovalController::class, 'statistics']);
+            // Approval routes
+            Route::patch('events/{id}/approve', [ApprovalController::class, 'approve']);
+            Route::patch('events/{id}/request-public', [ApprovalController::class, 'requestPublicApproval']);
+            Route::patch('events/{id}/publish', [ApprovalController::class, 'publish']);
+            Route::patch('events/{id}/request-changes', [ApprovalController::class, 'requestChanges']);
+            Route::patch('events/{id}/reject', [ApprovalController::class, 'reject']);
+            Route::get('events/approval/statistics', [ApprovalController::class, 'statistics']);
 
-        // Event CRUD routes using Feature Controller - SIMPLE
-        Route::get('events', [FeatureEventController::class, 'index']);
-        Route::post('events', [FeatureEventController::class, 'store']);
-        Route::get('events/{id}', [FeatureEventController::class, 'show']);
-        Route::put('events/{id}', [FeatureEventController::class, 'update']);
-        Route::patch('events/{id}', [FeatureEventController::class, 'update']);
-        Route::delete('events/{id}', [FeatureEventController::class, 'destroy']);
+            // Event CRUD (solo para eventos del Ente)
+            Route::post('events', [FeatureEventController::class, 'store']);
+            Route::put('events/{id}', [FeatureEventController::class, 'update']);
+            Route::patch('events/{id}', [FeatureEventController::class, 'update']);
+            Route::delete('events/{id}', [FeatureEventController::class, 'destroy']);
 
-        // Categories - specific routes first, then resource routes
-        Route::get('categories/active', [CategoryController::class, 'active']);
-        Route::apiResource('categories', CategoryController::class);
+            // Categories CRUD
+            Route::post('categories', [CategoryController::class, 'store']);
+            Route::put('categories/{category}', [CategoryController::class, 'update']);
+            Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
 
-        // Locations - specific routes first, then resource routes
-        Route::get('locations/active', [LocationController::class, 'active']);
-        Route::apiResource('locations', LocationController::class);
+            // Locations CRUD
+            Route::post('locations', [LocationController::class, 'store']);
+            Route::put('locations/{location}', [LocationController::class, 'update']);
+            Route::delete('locations/{location}', [LocationController::class, 'destroy']);
 
-        // Dashboard (Entity Admin/Staff only)
-        Route::prefix('dashboard')->group(function () {
-            Route::get('events/summary', [DashboardController::class, 'eventsSummary']);
-            Route::get('events', [DashboardController::class, 'events']);
+            // Admin routes
+            Route::prefix('admin')->group(function () {
+                Route::apiResource('appearance', AppearanceController::class);
+            });
         });
 
-        // Event Detail (for dashboard modal)
-        Route::get('events/{id}/detail', [DashboardController::class, 'eventDetail']);
-
-        // Admin
-        Route::prefix('admin')->group(function () {
-            Route::apiResource('appearance', AppearanceController::class);
+        // ===== EVENT ORGANIZER =====
+        // Only /organizer/* routes for own events
+        Route::middleware(['role:organizer'])->group(function () {
+            Route::prefix('organizer')->group(function () {
+                Route::get('dashboard/stats', [OrganizerController::class, 'dashboardStats']);
+                Route::get('events', [OrganizerController::class, 'index']);
+                Route::post('events', [OrganizerController::class, 'store']);
+                Route::get('events/{id}', [OrganizerController::class, 'show']);
+                Route::put('events/{id}', [OrganizerController::class, 'update']);
+                Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
+            });
         });
 
-        // Organizer routes - Eventos con scoping por organization_id
-        Route::prefix('organizer')->group(function () {
-            Route::get('events', [OrganizerController::class, 'index']);
-            Route::post('events', [OrganizerController::class, 'store']);
-            Route::get('events/{id}', [OrganizerController::class, 'show']);
-            Route::put('events/{id}', [OrganizerController::class, 'update']);
-            Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
+        // ===== PLATFORM ADMIN + ENTITY ADMIN + ENTITY STAFF =====
+        // Dashboard del Ente + read-only events
+        Route::middleware(['role:platform_admin,entity_admin,entity_staff'])->group(function () {
+            // Dashboard del Ente
+            Route::prefix('dashboard')->group(function () {
+                Route::get('events/summary', [DashboardController::class, 'eventsSummary']);
+                Route::get('events', [DashboardController::class, 'events']);
+            });
+
+            // Event detail (for dashboard modal)
+            Route::get('events/{id}/detail', [DashboardController::class, 'eventDetail']);
+
+            // Event read-only
+            Route::get('events', [FeatureEventController::class, 'index']);
+            Route::get('events/{id}', [FeatureEventController::class, 'show']);
+
+            // Categories y Locations - solo lectura
+            Route::get('categories', [CategoryController::class, 'index']);
+            Route::get('categories/{category}', [CategoryController::class, 'show']);
+            Route::get('categories/active', [CategoryController::class, 'active']);
+
+            Route::get('locations', [LocationController::class, 'index']);
+            Route::get('locations/{location}', [LocationController::class, 'show']);
+            Route::get('locations/active', [LocationController::class, 'active']);
         });
     });
 
-    // Public routes (no authentication required)
+    // ===== PUBLIC ROUTES (sin autenticación) =====
     Route::prefix('public')->group(function () {
         // Events
         Route::get('events', [PublicEventController::class, 'index']);
@@ -106,7 +130,7 @@ Route::prefix('v1')->group(function () {
         Route::get('events/date-range', [PublicEventController::class, 'dateRange']);
         Route::get('events/category/{categoryId}', [PublicEventController::class, 'byCategory']);
         Route::get('events/{id}', [PublicEventController::class, 'show']);
-        
+
         // Categories
         Route::get('categories', [PublicEventController::class, 'categories']);
     });

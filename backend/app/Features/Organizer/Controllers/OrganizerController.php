@@ -7,6 +7,7 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class OrganizerController extends Controller
 {
@@ -19,19 +20,21 @@ class OrganizerController extends Controller
     {
         $user = Auth::user();
 
-        Log::info('Organizer listing events', [
-            'user_id' => $user->id,
-            'organization_id' => $user->organization_id
-        ]);
+        if (!$user || !$user->organization_id) {
+            Log::warning('OrganizerController@index: User has no organization', [
+                'user_id' => $user?->id
+            ]);
+            return response()->json(['error' => 'No organization assigned'], 403);
+        }
 
-        // CRÍTICO: Filtrar por organization_id del usuario
-        // TenantScope se encarga automáticamente del filtrado
-        $query = Event::with(['category', 'locations', 'status']);
+        // CRÍTICO: Filtrar EXPLÍCITAMENTE por organization_id
+        $query = Event::where('organization_id', $user->organization_id)
+            ->with(['category', 'locations', 'status', 'type']);
 
         // Filtros opcionales
-        if ($request->has('status_code')) {
+        if ($request->has('status')) {
             $query->whereHas('status', function ($q) use ($request) {
-                $q->where('status_code', $request->status_code);
+                $q->where('status_code', $request->status);
             });
         }
 
@@ -47,8 +50,14 @@ class OrganizerController extends Controller
             });
         }
 
-        $events = $query->orderBy('start_date', 'desc')
-            ->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $events = $query->orderBy('start_date', 'desc')->paginate($perPage);
+
+        Log::info('OrganizerController@index: Events retrieved', [
+            'user_id' => $user->id,
+            'organization_id' => $user->organization_id,
+            'total' => $events->total()
+        ]);
 
         return response()->json($events);
     }
@@ -62,13 +71,23 @@ class OrganizerController extends Controller
     {
         $user = Auth::user();
 
+        if (!$user || !$user->organization_id) {
+            Log::warning('OrganizerController@show: User has no organization', [
+                'user_id' => $user?->id
+            ]);
+            return response()->json(['error' => 'No organization assigned'], 403);
+        }
+
+        // CRÍTICO: Verificar ownership por organization_id
         $event = Event::where('id', $id)
-            ->with(['category', 'locations', 'status', 'creator'])
+            ->where('organization_id', $user->organization_id)
+            ->with(['category', 'locations', 'status', 'type', 'creator'])
             ->firstOrFail();
 
-        Log::info('Organizer viewing event', [
+        Log::info('OrganizerController@show: Event retrieved', [
             'user_id' => $user->id,
-            'event_id' => $event->id
+            'organization_id' => $user->organization_id,
+            'event_id' => $id
         ]);
 
         return response()->json($event);
@@ -82,6 +101,13 @@ class OrganizerController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        if (!$user || !$user->organization_id) {
+            Log::warning('OrganizerController@store: User has no organization', [
+                'user_id' => $user?->id
+            ]);
+            return response()->json(['error' => 'No organization assigned'], 403);
+        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -97,30 +123,48 @@ class OrganizerController extends Controller
             'location_text' => 'nullable|string|max:500',
         ]);
 
-        // CRÍTICO: Forzar organization_id del usuario
+        // CRÍTICO: Forzar organization_id del usuario - NO confiar en input
         $validated['organization_id'] = $user->organization_id;
-        $validated['entity_id'] = 1; // Default entity (ajustar según tu lógica)
+        $validated['entity_id'] = 1; // Default entity
         $validated['status_id'] = 1; // status = 'draft'
         $validated['created_by'] = $user->id;
 
-        Log::info('Organizer creating event', [
-            'user_id' => $user->id,
-            'organization_id' => $validated['organization_id'],
-            'title' => $validated['title']
-        ]);
+        DB::beginTransaction();
+        try {
+            Log::info('OrganizerController@store: Creating event', [
+                'user_id' => $user->id,
+                'organization_id' => $validated['organization_id'],
+                'title' => $validated['title']
+            ]);
 
-        // Crear evento
-        $event = Event::create($validated);
+            // Crear evento
+            $event = Event::create($validated);
 
-        // Sync locations
-        if (isset($validated['location_ids'])) {
-            $event->locations()->sync($validated['location_ids']);
+            // Sync locations
+            if (isset($validated['location_ids'])) {
+                $event->locations()->sync($validated['location_ids']);
+            }
+
+            DB::commit();
+
+            // Reload con relationships
+            $event->load(['category', 'locations', 'status', 'type']);
+
+            Log::info('OrganizerController@store: Event created successfully', [
+                'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
+                'event_id' => $event->id
+            ]);
+
+            return response()->json($event, 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('OrganizerController@store: Failed to create event', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
         }
-
-        // Reload con relationships
-        $event->load(['category', 'locations', 'status']);
-
-        return response()->json($event, 201);
     }
 
     /**
@@ -132,16 +176,25 @@ class OrganizerController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar ownership (TenantScope maneja el filtrado)
+        if (!$user || !$user->organization_id) {
+            Log::warning('OrganizerController@update: User has no organization', [
+                'user_id' => $user?->id
+            ]);
+            return response()->json(['error' => 'No organization assigned'], 403);
+        }
+
+        // CRÍTICO: Verificar ownership por organization_id
         $event = Event::where('id', $id)
+            ->where('organization_id', $user->organization_id)
             ->with('status')
             ->firstOrFail();
 
         // Validar estado editable
         $editableStatuses = ['draft', 'requires_changes'];
         if (!in_array($event->status->status_code, $editableStatuses)) {
-            Log::warning('Organizer attempted to edit non-editable event', [
+            Log::warning('OrganizerController@update: Attempted to edit non-editable event', [
                 'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
                 'event_id' => $event->id,
                 'current_status' => $event->status->status_code
             ]);
@@ -167,20 +220,40 @@ class OrganizerController extends Controller
             'location_text' => 'nullable|string|max:500',
         ]);
 
-        Log::info('Organizer updating event', [
-            'user_id' => $user->id,
-            'event_id' => $event->id
-        ]);
+        DB::beginTransaction();
+        try {
+            Log::info('OrganizerController@update: Updating event', [
+                'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
+                'event_id' => $event->id
+            ]);
 
-        $event->update($validated);
+            $event->update($validated);
 
-        if (isset($validated['location_ids'])) {
-            $event->locations()->sync($validated['location_ids']);
+            if (isset($validated['location_ids'])) {
+                $event->locations()->sync($validated['location_ids']);
+            }
+
+            DB::commit();
+
+            $event->load(['category', 'locations', 'status', 'type']);
+
+            Log::info('OrganizerController@update: Event updated successfully', [
+                'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
+                'event_id' => $event->id
+            ]);
+
+            return response()->json($event);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('OrganizerController@update: Failed to update event', [
+                'user_id' => $user->id,
+                'event_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
         }
-
-        $event->load(['category', 'locations', 'status']);
-
-        return response()->json($event);
     }
 
     /**
@@ -192,15 +265,24 @@ class OrganizerController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar ownership (TenantScope maneja el filtrado)
+        if (!$user || !$user->organization_id) {
+            Log::warning('OrganizerController@destroy: User has no organization', [
+                'user_id' => $user?->id
+            ]);
+            return response()->json(['error' => 'No organization assigned'], 403);
+        }
+
+        // CRÍTICO: Verificar ownership por organization_id
         $event = Event::where('id', $id)
+            ->where('organization_id', $user->organization_id)
             ->with('status')
             ->firstOrFail();
 
         // Solo permitir eliminar en draft
         if ($event->status->status_code !== 'draft') {
-            Log::warning('Organizer attempted to delete non-draft event', [
+            Log::warning('OrganizerController@destroy: Attempted to delete non-draft event', [
                 'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
                 'event_id' => $event->id,
                 'current_status' => $event->status->status_code
             ]);
@@ -211,15 +293,86 @@ class OrganizerController extends Controller
             ], 403);
         }
 
-        Log::info('Organizer deleting event', [
+        DB::beginTransaction();
+        try {
+            Log::info('OrganizerController@destroy: Deleting event', [
+                'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
+                'event_id' => $event->id
+            ]);
+
+            $event->delete();
+
+            DB::commit();
+
+            Log::info('OrganizerController@destroy: Event deleted successfully', [
+                'user_id' => $user->id,
+                'organization_id' => $user->organization_id,
+                'event_id' => $id
+            ]);
+
+            return response()->json([
+                'message' => 'Event deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('OrganizerController@destroy: Failed to delete event', [
+                'user_id' => $user->id,
+                'event_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Obtiene estadísticas del dashboard del organizador
+     *
+     * GET /api/v1/organizer/dashboard/stats
+     */
+    public function dashboardStats(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->organization_id) {
+            Log::warning('OrganizerController@dashboardStats: User has no organization', [
+                'user_id' => $user?->id
+            ]);
+            return response()->json(['error' => 'No organization assigned'], 403);
+        }
+
+        // CRÍTICO: Filtrar EXPLÍCITAMENTE por organization_id
+        $stats = [
+            'total_events' => Event::where('organization_id', $user->organization_id)->count(),
+            'draft' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'draft'))
+                ->count(),
+            'pending_approval' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'pending_internal_approval'))
+                ->count(),
+            'approved_internal' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'approved_internal'))
+                ->count(),
+            'published' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'published'))
+                ->count(),
+            'requires_changes' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'requires_changes'))
+                ->count(),
+            'rejected' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'rejected'))
+                ->count(),
+            'archived' => Event::where('organization_id', $user->organization_id)
+                ->whereHas('status', fn($q) => $q->where('status_code', 'cancelled'))
+                ->count(),
+        ];
+
+        Log::info('OrganizerController@dashboardStats: Stats retrieved', [
             'user_id' => $user->id,
-            'event_id' => $event->id
+            'organization_id' => $user->organization_id,
+            'stats' => $stats
         ]);
 
-        $event->delete();
-
-        return response()->json([
-            'message' => 'Event deleted successfully'
-        ]);
+        return response()->json($stats);
     }
 }
