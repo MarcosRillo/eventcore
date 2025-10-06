@@ -90,6 +90,17 @@ services:
       frontend:
         condition: service_healthy # Espera a que Next.js esté listo
 
+  # MailHog - SMTP testing server
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: plataforma-calendario-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
+    networks:
+      - plataforma-network
+
 volumes:
   db_data:
     driver: local
