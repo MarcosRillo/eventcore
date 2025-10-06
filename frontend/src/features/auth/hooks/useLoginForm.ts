@@ -2,7 +2,6 @@
  * Login Form Hook
  * Manages login form state and submission logic
  */
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -11,15 +10,20 @@ import { LoginCredentials, UseLoginFormReturn } from '@/types/auth.types';
 export const useLoginForm = (): UseLoginFormReturn => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error, isAuthenticated, clearError } = useAuth();
+  const { login, isLoading, error, isAuthenticated, user, clearError } = useAuth(); // ✅ Agregar user
   const router = useRouter();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/');
+    if (isAuthenticated && user) {
+      // Redirigir según el rol del usuario
+      if (user.role?.role_name === 'Event Organizer') {
+        router.push('/organizer/dashboard');
+      } else {
+        router.push('/events');
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   // Clear error when credentials change
   useEffect(() => {
@@ -53,7 +57,8 @@ export const useLoginForm = (): UseLoginFormReturn => {
     const success = await login(credentials);
     
     if (success) {
-      router.push('/');
+      // ✅ La redirección se maneja en el useEffect de arriba cuando user esté disponible
+      // No necesitamos router.push aquí
     }
   };
 
@@ -68,7 +73,6 @@ export const useLoginForm = (): UseLoginFormReturn => {
     isLoading,
     isValid: isFormValid,
     isDirty: email !== '' || password !== '',
-
     // FormActions methods
     updateField: <K extends keyof LoginCredentials>(field: K, value: LoginCredentials[K]) => {
       if (field === 'email') {
@@ -84,7 +88,6 @@ export const useLoginForm = (): UseLoginFormReturn => {
       setPassword('');
     },
     validate: () => isFormValid,
-
     // Additional login form specific method
     handleSubmit,
   };
