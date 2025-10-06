@@ -20,6 +20,29 @@ jest.mock('@/context/AuthContext');
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
+// Helper to create complete AuthContext mock
+const createMockAuthContext = (overrides: Partial<AuthContextType> = {}): AuthContextType => ({
+  user: null,
+  token: null,
+  isLoading: false,
+  error: null,
+  isAuthenticated: false,
+  login: jest.fn(),
+  logout: jest.fn(),
+  clearError: jest.fn(),
+  refreshUser: jest.fn(),
+  getUserPermissions: jest.fn().mockReturnValue([]),
+  hasRole: jest.fn(),
+  canAccess: jest.fn(),
+  canManageEvents: jest.fn(),
+  canApproveEvents: jest.fn(),
+  canAccessAdmin: jest.fn(),
+  canManageUsers: jest.fn(),
+  canManageOrganization: jest.fn(),
+  canViewAnalytics: jest.fn(),
+  ...overrides,
+});
+
 describe('usePermissions Hook', () => {
 
   beforeEach(() => {
@@ -37,21 +60,15 @@ describe('usePermissions Hook', () => {
         id: 1,
         name: 'Test User',
         email: 'test@example.com',
-        role: { code: 'entity_admin' as UserRoleCode },
+        role: { id: 1, name: 'Entity Admin', role_code: 'entity_admin' as UserRoleCode, description: '', permissions: [], created_at: '', updated_at: '' },
+        created_at: '',
+        updated_at: '',
       };
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         getUserPermissions: jest.fn().mockReturnValue(['manage_events', 'approve_events', 'view_analytics'] as Permission[]),
-        hasRole: jest.fn(),
-        canAccess: jest.fn(),
-        canManageEvents: jest.fn(),
-        canApproveEvents: jest.fn(),
-        canAccessAdmin: jest.fn(),
-        canManageUsers: jest.fn(),
-        canManageOrganization: jest.fn(),
-        canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -63,7 +80,7 @@ describe('usePermissions Hook', () => {
     test('getUserPermissions should return user permissions', () => {
       const mockPermissions: Permission[] = ['manage_events', 'approve_events'];
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         getUserPermissions: jest.fn().mockReturnValue(mockPermissions),
         hasRole: jest.fn(),
         canAccess: jest.fn(),
@@ -73,7 +90,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -88,7 +105,7 @@ describe('usePermissions Hook', () => {
   describe('Role Checks', () => {
 
     test('hasRole should verify specific role', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'entity_admin'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -98,7 +115,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -107,7 +124,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('hasAnyRole should check multiple roles (OR logic)', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'entity_admin'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -117,7 +134,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -127,7 +144,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('isAdmin should return true for admin roles', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'entity_admin'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -137,7 +154,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -145,7 +162,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('isPlatformAdmin should check platform admin role', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'platform_admin'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -155,7 +172,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -164,7 +181,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('isEntityAdmin should check entity admin role', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'entity_admin'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -174,7 +191,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -183,7 +200,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('isStaff should check staff role', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'entity_staff'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -193,7 +210,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -202,7 +219,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('isOrganizer should check organizer role', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn((role: UserRoleCode) => role === 'organizer_admin'),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -212,7 +229,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -232,7 +249,7 @@ describe('usePermissions Hook', () => {
       const mockCanApproveEvents = jest.fn().mockReturnValue(true);
       const mockCanAccessAdmin = jest.fn().mockReturnValue(true);
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
         canAccess: jest.fn(),
@@ -242,7 +259,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn().mockReturnValue(false),
         canManageOrganization: jest.fn().mockReturnValue(false),
         canViewAnalytics: jest.fn().mockReturnValue(true),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -266,11 +283,13 @@ describe('usePermissions Hook', () => {
         id: 1,
         name: 'Test User',
         email: 'test@example.com',
-        role: { code: 'entity_admin' as UserRoleCode },
+        role: { id: 1, name: "Role", role_code: 'entity_admin' as UserRoleCode, description: "", permissions: [], created_at: "", updated_at: "" },
+        created_at: "",
+        updated_at: "",
         organization: mockOrganization,
       };
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -281,7 +300,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -293,10 +312,12 @@ describe('usePermissions Hook', () => {
         id: 1,
         name: 'Test User',
         email: 'test@example.com',
-        role: { code: 'platform_admin' as UserRoleCode },
+        role: { id: 1, name: "Role", role_code: 'platform_admin' as UserRoleCode, description: "", permissions: [], created_at: "", updated_at: "" },
+      created_at: "",
+      updated_at: "",
       };
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -307,7 +328,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -319,11 +340,13 @@ describe('usePermissions Hook', () => {
         id: 1,
         name: 'Test User',
         email: 'test@example.com',
-        role: { code: 'entity_admin' as UserRoleCode },
+        role: { id: 1, name: "Role", role_code: 'entity_admin' as UserRoleCode, description: "", permissions: [], created_at: "", updated_at: "" },
+        created_at: "",
+        updated_at: "",
         organization: { id: 5, name: 'Test Org' },
       };
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -334,7 +357,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -347,10 +370,12 @@ describe('usePermissions Hook', () => {
         id: 1,
         name: 'Test User',
         email: 'test@example.com',
-        role: { code: 'platform_admin' as UserRoleCode },
+        role: { id: 1, name: "Role", role_code: 'platform_admin' as UserRoleCode, description: "", permissions: [], created_at: "", updated_at: "" },
+      created_at: "",
+      updated_at: "",
       };
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -361,7 +386,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -380,10 +405,12 @@ describe('usePermissions Hook', () => {
         id: 1,
         name: 'Test User',
         email: 'test@example.com',
-        role: { code: 'entity_admin' as UserRoleCode },
+        role: { id: 1, name: "Role", role_code: 'entity_admin' as UserRoleCode, description: "", permissions: [], created_at: "", updated_at: "" },
+      created_at: "",
+      updated_at: "",
       };
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -394,7 +421,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -403,7 +430,7 @@ describe('usePermissions Hook', () => {
     });
 
     test('should handle null user', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: null,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -414,7 +441,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -430,7 +457,7 @@ describe('usePermissions Hook', () => {
   describe('Edge Cases', () => {
 
     test('should handle no user gracefully', () => {
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: null,
         hasRole: jest.fn().mockReturnValue(false),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -441,7 +468,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn().mockReturnValue(false),
         canManageOrganization: jest.fn().mockReturnValue(false),
         canViewAnalytics: jest.fn().mockReturnValue(false),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -452,18 +479,11 @@ describe('usePermissions Hook', () => {
     });
 
     test('should handle empty permissions array', () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 1, name: 'User', email: 'test@example.com', role: { code: 'entity_staff' as UserRoleCode } },
+      mockUseAuth.mockReturnValue(createMockAuthContext({
+        user: { id: 1, name: 'User', email: 'test@example.com', role: { id: 1, name: "Role", role_code: 'entity_staff' as UserRoleCode, description: "", permissions: [], created_at: "", updated_at: "" }, created_at: "", updated_at: "", organization: undefined },
         hasRole: jest.fn().mockReturnValue(true),
         getUserPermissions: jest.fn().mockReturnValue([]),
-        canAccess: jest.fn(),
-        canManageEvents: jest.fn(),
-        canApproveEvents: jest.fn(),
-        canAccessAdmin: jest.fn(),
-        canManageUsers: jest.fn(),
-        canManageOrganization: jest.fn(),
-        canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
@@ -478,7 +498,7 @@ describe('usePermissions Hook', () => {
         email: 'test@example.com',
       } as User;
 
-      mockUseAuth.mockReturnValue({
+      mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
         hasRole: jest.fn(),
         getUserPermissions: jest.fn().mockReturnValue([]),
@@ -489,7 +509,7 @@ describe('usePermissions Hook', () => {
         canManageUsers: jest.fn(),
         canManageOrganization: jest.fn(),
         canViewAnalytics: jest.fn(),
-      } as AuthContextType);
+      }));
 
       const { result } = renderHook(() => usePermissions());
 
