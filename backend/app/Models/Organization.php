@@ -25,6 +25,7 @@ class Organization extends Model
         'type_id',
         'parent_id',
         'slug',
+        'trust_level',
     ];
 
     /**
@@ -35,6 +36,7 @@ class Organization extends Model
     protected $casts = [
         'status_id' => 'integer',
         'type_id' => 'integer',
+        'trust_level' => 'integer',
     ];
 
     /**

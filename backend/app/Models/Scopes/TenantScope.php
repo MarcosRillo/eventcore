@@ -60,12 +60,35 @@ class TenantScope implements Scope
 
         // Apply filtering for organizer_admin
         if ($user->isOrganizerAdmin()) {
-            // Organizer admins can only see data from their organizer entity
             $organizationId = $this->getUserOrganizationId($user);
-            
-            if ($organizationId) {
-                Log::info('TenantScope: Adding entity_id filter for organizer', ['entity_id' => $organizationId]);
-                $builder->where('entity_id', $organizationId);
+            $modelClass = get_class($model);
+
+            // Models que pertenecen al ENTE (categorías, ubicaciones, etc)
+            $entityOwnedModels = [
+                \App\Models\Category::class,
+                \App\Models\Location::class,
+                \App\Models\EventStatus::class,
+                \App\Models\EventType::class,
+            ];
+
+            if (in_array($modelClass, $entityOwnedModels)) {
+                // Organizadores ven TODOS los recursos del ente (entity_id = 1)
+                Log::info('TenantScope: Filtering entity-owned model for organizer', [
+                    'model' => $modelClass,
+                    'entity_id' => 1
+                ]);
+                $builder->where('entity_id', 1);
+                return;
+            }
+
+            // Modelos que pertenecen a ORGANIZACIONES (eventos)
+            if ($modelClass === \App\Models\Event::class && $organizationId) {
+                Log::info('TenantScope: Filtering organization-owned model', [
+                    'model' => $modelClass,
+                    'organization_id' => $organizationId
+                ]);
+                $builder->where('organization_id', $organizationId);
+                return;
             }
         }
     }

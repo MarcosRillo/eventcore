@@ -61,6 +61,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's primary organization (first organization).
+     * Helper method for organizer_admin users.
+     */
+    public function getOrganizationIdAttribute()
+    {
+        return $this->organizations()->first()?->id;
+    }
+
+    /**
      * Get the role that this user belongs to.
      */
     public function role(): BelongsTo

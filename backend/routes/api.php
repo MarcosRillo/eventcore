@@ -17,6 +17,7 @@ use App\Features\Events\Controllers\EventController as FeatureEventController;
 use App\Features\Approval\Controllers\ApprovalController;
 use App\Features\Categories\Controllers\CategoryController;
 use App\Features\Locations\Controllers\LocationController;
+use App\Features\Organizer\Controllers\OrganizerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -82,6 +83,15 @@ Route::prefix('v1')->group(function () {
         // Admin
         Route::prefix('admin')->group(function () {
             Route::apiResource('appearance', AppearanceController::class);
+        });
+
+        // Organizer routes - Eventos con scoping por organization_id
+        Route::prefix('organizer')->group(function () {
+            Route::get('events', [OrganizerController::class, 'index']);
+            Route::post('events', [OrganizerController::class, 'store']);
+            Route::get('events/{id}', [OrganizerController::class, 'show']);
+            Route::put('events/{id}', [OrganizerController::class, 'update']);
+            Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
         });
     });
 
