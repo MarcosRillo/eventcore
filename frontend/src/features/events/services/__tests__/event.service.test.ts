@@ -19,17 +19,18 @@ const mockEvent: Event = {
   id: 1,
   title: 'Test Event',
   description: 'Test Description',
-  slug: 'test-event',
   start_date: '2025-10-10 10:00:00',
   end_date: '2025-10-10 12:00:00',
-  status_id: 1,
-  type_id: 1,
+  status: { id: 1, status_code: 'draft', status_name: 'Draft', description: 'Draft', workflow_order: 1, created_at: '', updated_at: '' },
+  type: { id: 1, type_code: 'sede_unica', type_name: 'Single Location', description: 'Single location event', created_at: '', updated_at: '' },
   category_id: 1,
-  entity_id: 1,
+  category: { id: 1, name: 'Test Category', slug: 'test-category', entity_id: 1, is_active: true, created_at: '', updated_at: '' },
+  locations: [],
   created_by: 1,
   is_featured: false,
   max_attendees: 100,
   metadata: {},
+  approval_history: [],
   created_at: '2025-10-01 10:00:00',
   updated_at: '2025-10-01 10:00:00',
 };
@@ -39,10 +40,9 @@ const mockEventFormData: EventFormData = {
   description: 'New Description',
   start_date: '2025-10-15 10:00:00',
   end_date: '2025-10-15 12:00:00',
-  status_id: 1,
-  type_id: 1,
+  status: 'draft',
+  type: 'sede_unica',
   category_id: 1,
-  entity_id: 1,
   location_ids: [1],
   is_featured: false,
   max_attendees: 50,
@@ -62,7 +62,7 @@ describe('Event Service', () => {
 
     test('getEvents should call API with filters', async () => {
       const filters: EventFilters = {
-        status_id: 1,
+        status: 'draft',
         category_id: 2,
         page: 1,
         per_page: 15
@@ -82,7 +82,7 @@ describe('Event Service', () => {
       // Verify the URL contains filter parameters
       const callArg = (apiClient.get as jest.Mock).mock.calls[0][0];
       expect(callArg).toContain('/events');
-      expect(callArg).toContain('status_id=1');
+      expect(callArg).toContain('status=draft');
       expect(callArg).toContain('category_id=2');
       expect(result).toEqual(mockResponse.data);
     });
@@ -279,7 +279,7 @@ describe('Event Service', () => {
       const result = await eventApprovalService.requestPublic(1, 'Ready for public');
 
       expect(apiClient.post).toHaveBeenCalledWith('/events/1/request-public', { comment: 'Ready for public' });
-      expect(result.status_id).toBe(3);
+      expect(typeof result.status === 'object' ? result.status.id : result.status).toBeDefined();
     });
 
     test('approvePublic should call API correctly', async () => {
@@ -291,7 +291,7 @@ describe('Event Service', () => {
       const result = await eventApprovalService.approvePublic(1);
 
       expect(apiClient.post).toHaveBeenCalledWith('/events/1/approve-public', {});
-      expect(result.status_id).toBe(4);
+      expect(typeof result.status === 'object' ? result.status.id : result.status).toBeDefined();
     });
 
     test('requestChanges should call API correctly', async () => {
@@ -303,7 +303,7 @@ describe('Event Service', () => {
       const result = await eventApprovalService.requestChanges(1, 'Update description');
 
       expect(apiClient.post).toHaveBeenCalledWith('/events/1/request-changes', { comment: 'Update description' });
-      expect(result.status_id).toBe(5);
+      expect(typeof result.status === 'object' ? result.status.id : result.status).toBeDefined();
     });
 
     test('rejectEvent should call API correctly', async () => {
@@ -315,7 +315,7 @@ describe('Event Service', () => {
       const result = await eventApprovalService.rejectEvent(1, 'Does not meet criteria');
 
       expect(apiClient.post).toHaveBeenCalledWith('/events/1/reject', { comment: 'Does not meet criteria' });
-      expect(result.status_id).toBe(6);
+      expect(typeof result.status === 'object' ? result.status.id : result.status).toBeDefined();
     });
 
     test('getApprovalStatistics should call API correctly', async () => {
@@ -344,7 +344,7 @@ describe('Event Service', () => {
       };
       (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await eventApprovalService.getEventsByStatus('pending_internal', filters);
+      const result = await eventApprovalService.getEventsByStatus('pending_internal_approval', filters);
 
       const callArg = (apiClient.get as jest.Mock).mock.calls[0][0];
       expect(callArg).toContain('/events/approval-status/pending_internal');
@@ -425,7 +425,7 @@ describe('Event Service', () => {
 
     test('should handle filters with undefined values', async () => {
       const filters: EventFilters = {
-        status_id: 1,
+        status: 'draft',
         category_id: undefined,
         search: ''
       };
@@ -435,8 +435,8 @@ describe('Event Service', () => {
       await eventService.getEvents(filters);
 
       const callArg = (apiClient.get as jest.Mock).mock.calls[0][0];
-      // Should only include status_id, not undefined or empty values
-      expect(callArg).toContain('status_id=1');
+      // Should only include status, not undefined or empty values
+      expect(callArg).toContain('status=draft');
       expect(callArg).not.toContain('category_id');
       expect(callArg).not.toContain('search');
     });
