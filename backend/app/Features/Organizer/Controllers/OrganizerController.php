@@ -12,54 +12,71 @@ use Illuminate\Support\Facades\DB;
 class OrganizerController extends Controller
 {
     /**
-     * Lista eventos SOLO de la organización del usuario
+     * Get paginated list of organization's events with filters
      *
-     * GET /api/v1/organizer/events
+     * @queryParam status string Filter by status code (optional)
+     * @queryParam search string Search by title (optional)
+     * @queryParam per_page int Items per page (default: 10)
+     * @queryParam page int Page number (default: 1)
      */
-    public function index(Request $request)
+    public function events(Request $request)
     {
-        $user = Auth::user();
+        $user = $request->user();
 
-        if (!$user || !$user->organization_id) {
-            Log::warning('OrganizerController@index: User has no organization', [
-                'user_id' => $user?->id
+        if (!$user->organization_id) {
+            Log::warning('User without organization tried to access events', [
+                'user_id' => $user->id
             ]);
-            return response()->json(['error' => 'No organization assigned'], 403);
+            return response()->json([
+                'error' => 'User not associated with organization'
+            ], 403);
         }
 
-        // CRÍTICO: Filtrar EXPLÍCITAMENTE por organization_id
-        $query = Event::where('organization_id', $user->organization_id)
-            ->with(['category', 'locations', 'status', 'type']);
+        $perPage = $request->input('per_page', 10);
+        $search = $request->input('search');
+        $statusFilter = $request->input('status');
 
-        // Filtros opcionales
-        if ($request->has('status')) {
-            $query->whereHas('status', function ($q) use ($request) {
-                $q->where('status_code', $request->status);
+        $query = Event::withoutGlobalScopes()
+            ->with(['status', 'category', 'locations'])
+            ->where('organization_id', $user->organization_id);
+
+        // Apply search filter
+        if ($search) {
+            $query->where('title', 'ILIKE', "%{$search}%");
+        }
+
+        // Apply status filter
+        if ($statusFilter) {
+            $query->whereHas('status', function ($q) use ($statusFilter) {
+                $q->where('status_code', $statusFilter);
             });
         }
 
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+        // Order by most recent first
+        $query->orderBy('created_at', 'desc');
 
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'ILIKE', "%{$search}%")
-                  ->orWhere('description', 'ILIKE', "%{$search}%");
-            });
-        }
+        $events = $query->paginate($perPage);
 
-        $perPage = $request->get('per_page', 15);
-        $events = $query->orderBy('start_date', 'desc')->paginate($perPage);
-
-        Log::info('OrganizerController@index: Events retrieved', [
+        Log::info('Organizer events list retrieved', [
             'user_id' => $user->id,
             'organization_id' => $user->organization_id,
-            'total' => $events->total()
+            'total' => $events->total(),
+            'per_page' => $perPage,
+            'search' => $search,
+            'status_filter' => $statusFilter
         ]);
 
         return response()->json($events);
+    }
+
+    /**
+     * Lista eventos SOLO de la organización del usuario
+     *
+     * GET /api/v1/organizer/events (alias for events())
+     */
+    public function index(Request $request)
+    {
+        return $this->events($request);
     }
 
     /**
