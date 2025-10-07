@@ -1,9 +1,9 @@
 /**
  * useOrganizerEvents Hook
- * Custom hook for managing organizer events data and state
+ * Custom hook for managing organizer events data and state with filters
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { organizerService } from '../services/organizerService';
 import type { OrganizerEvent, OrganizerEventFilters } from '../types/organizerTypes';
 
@@ -12,42 +12,67 @@ export const useOrganizerEvents = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
-    current_page: 1,
-    last_page: 1,
-    per_page: 10,
-    total: 0,
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    total: 0
   });
 
-  const fetchEvents = useCallback(async (params?: OrganizerEventFilters) => {
+  const [filters, setFilters] = useState<OrganizerEventFilters>({
+    page: 1,
+    per_page: 10,
+    status: undefined,
+    search: undefined
+  });
+
+  const fetchEvents = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await organizerService.getEvents(params);
 
-      setEvents(response.data);
+      const response = await organizerService.getEvents(filters);
+
+      // Laravel pagination response has data directly in response
+      setEvents(response.data || []);
       setPagination({
-        current_page: response.current_page,
-        last_page: response.last_page,
-        per_page: response.per_page,
-        total: response.total,
+        currentPage: response.current_page || 1,
+        lastPage: response.last_page || 1,
+        perPage: response.per_page || 10,
+        total: response.total || 0
       });
     } catch (err) {
-      setError('Error al cargar eventos');
       console.error('Error fetching organizer events:', err);
+      setError('Error al cargar eventos');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchEvents();
-  }, [fetchEvents]);
+  }, [filters]);
+
+  const updateFilters = (newFilters: Partial<OrganizerEventFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
+  };
+
+  const changePage = (page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  };
+
+  const changePerPage = (perPage: number) => {
+    setFilters(prev => ({ ...prev, per_page: perPage, page: 1 }));
+  };
 
   return {
     events,
     loading,
     error,
     pagination,
-    fetchEvents,
+    filters,
+    updateFilters,
+    changePage,
+    changePerPage,
+    refetch: fetchEvents
   };
 };
