@@ -84,6 +84,10 @@ export const useAuthActions = (): AuthContextType => {
     setUser(null);
     setError(null);
     localStorage.removeItem('user');
+
+    // Clear cookies
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
   // Login function
@@ -109,6 +113,10 @@ export const useAuthActions = (): AuthContextType => {
       // Store auth data
       setAuthToken(authToken);
       localStorage.setItem('user', JSON.stringify(userData));
+
+      // Store in cookies for middleware access
+      document.cookie = `token=${authToken}; path=/; max-age=86400; samesite=strict`;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=86400; samesite=strict`;
 
       // Update state
       setTokenState(authToken);
