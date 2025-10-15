@@ -4,11 +4,12 @@
  */
 
 import { apiClient } from '@/lib/api';
+import type { Event } from '@/types/event.types';
 import type {
   OrganizerDashboardStats,
-  OrganizerEvent,
   OrganizerEventsResponse,
   OrganizerEventFilters,
+  CreateEventDto,
 } from '../types/organizerTypes';
 
 export const organizerService = {
@@ -46,10 +47,32 @@ export const organizerService = {
   /**
    * Obtiene un evento específico del organizador
    */
-  getEvent: async (id: number): Promise<OrganizerEvent> => {
-    const response = await apiClient.get<OrganizerEvent>(
+  getEvent: async (id: number): Promise<Event> => {
+    const response = await apiClient.get<Event>(
       `/organizer/events/${id}`
     );
     return response;
+  },
+
+  /**
+   * Create new event
+   */
+  createEvent: async (data: CreateEventDto): Promise<Event> => {
+    const response = await apiClient.post<{ message: string; event: Event }>(
+      '/organizer/events',
+      data
+    );
+    return response.event;
+  },
+
+  /**
+   * Update existing event
+   */
+  updateEvent: async (id: number, data: CreateEventDto): Promise<Event> => {
+    const response = await apiClient.put<{ message: string; event: Event }>(
+      `/organizer/events/${id}`,
+      data
+    );
+    return response.event;
   },
 };

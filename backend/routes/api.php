@@ -110,12 +110,12 @@ Route::prefix('v1')->group(function () {
 
             // Categories y Locations - solo lectura
             Route::get('categories', [CategoryController::class, 'index']);
-            Route::get('categories/{category}', [CategoryController::class, 'show']);
             Route::get('categories/active', [CategoryController::class, 'active']);
+            Route::get('categories/{category}', [CategoryController::class, 'show']);
 
             Route::get('locations', [LocationController::class, 'index']);
-            Route::get('locations/{location}', [LocationController::class, 'show']);
             Route::get('locations/active', [LocationController::class, 'active']);
+            Route::get('locations/{location}', [LocationController::class, 'show']);
         });
     });
 
@@ -133,6 +133,10 @@ Route::prefix('v1')->group(function () {
 
         // Categories
         Route::get('categories', [PublicEventController::class, 'categories']);
+        Route::get('categories/active', [CategoryController::class, 'active']);
+
+        // Locations
+        Route::get('locations/active', [LocationController::class, 'active']);
     });
 
     // Legacy public routes (keep for backward compatibility)
