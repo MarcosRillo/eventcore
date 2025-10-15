@@ -129,33 +129,55 @@ class OrganizerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'start_date' => 'required|date|after:today',
-            'end_date' => 'required|date|after:start_date',
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'category_id' => 'required|exists:categories,id',
             'location_ids' => 'required|array|min:1',
             'location_ids.*' => 'exists:locations,id',
-            'type_id' => 'required|exists:event_types,id',
+            'type_id' => 'nullable|exists:event_types,id',
             'max_attendees' => 'nullable|integer|min:1',
             'virtual_link' => 'nullable|url',
-            'location_text' => 'nullable|string|max:500',
+            'cta_link' => 'nullable|url',
+            'cta_text' => 'nullable|string|max:255',
+            'featured_image' => 'nullable|string|max:500',
         ]);
-
-        // CRÍTICO: Forzar organization_id del usuario - NO confiar en input
-        $validated['organization_id'] = $user->organization_id;
-        $validated['entity_id'] = 1; // Default entity
-        $validated['status_id'] = 1; // status = 'draft'
-        $validated['created_by'] = $user->id;
 
         DB::beginTransaction();
         try {
+            // Get draft status
+            $draftStatus = \App\Models\EventStatus::where('status_code', 'draft')->first();
+
+            if (!$draftStatus) {
+                throw new \Exception('Draft status not found in database');
+            }
+
+            // CRÍTICO: Forzar organization_id del usuario - NO confiar en input
+            $eventData = [
+                'organization_id' => $user->organization_id,
+                'entity_id' => 1, // Default entity
+                'status_id' => $draftStatus->id,
+                'created_by' => $user->id,
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'] ?? $validated['start_date'], // Default to start_date if not provided
+                'category_id' => $validated['category_id'],
+                'type_id' => $validated['type_id'] ?? 1, // Default type if not provided
+                'max_attendees' => $validated['max_attendees'] ?? null,
+                'virtual_link' => $validated['virtual_link'] ?? null,
+                'cta_link' => $validated['cta_link'] ?? null,
+                'cta_text' => $validated['cta_text'] ?? null,
+                'featured_image' => $validated['featured_image'] ?? null,
+            ];
+
             Log::info('OrganizerController@store: Creating event', [
                 'user_id' => $user->id,
-                'organization_id' => $validated['organization_id'],
-                'title' => $validated['title']
+                'organization_id' => $eventData['organization_id'],
+                'title' => $eventData['title']
             ]);
 
             // Crear evento
-            $event = Event::create($validated);
+            $event = Event::create($eventData);
 
             // Sync locations
             if (isset($validated['location_ids'])) {
@@ -173,14 +195,21 @@ class OrganizerController extends Controller
                 'event_id' => $event->id
             ]);
 
-            return response()->json($event, 201);
+            return response()->json([
+                'message' => 'Event created successfully',
+                'event' => $event
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('OrganizerController@store: Failed to create event', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-            throw $e;
+
+            return response()->json([
+                'error' => 'Error creating event: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -224,17 +253,19 @@ class OrganizerController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'start_date' => 'sometimes|date',
-            'end_date' => 'sometimes|date|after:start_date',
-            'category_id' => 'sometimes|exists:categories,id',
-            'location_ids' => 'sometimes|array',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'category_id' => 'required|exists:categories,id',
+            'location_ids' => 'required|array|min:1',
             'location_ids.*' => 'exists:locations,id',
-            'type_id' => 'sometimes|exists:event_types,id',
+            'type_id' => 'nullable|exists:event_types,id',
             'max_attendees' => 'nullable|integer|min:1',
             'virtual_link' => 'nullable|url',
-            'location_text' => 'nullable|string|max:500',
+            'cta_link' => 'nullable|url',
+            'cta_text' => 'nullable|string|max:255',
+            'featured_image' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
@@ -245,7 +276,21 @@ class OrganizerController extends Controller
                 'event_id' => $event->id
             ]);
 
-            $event->update($validated);
+            $updateData = [
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'] ?? $validated['start_date'],
+                'category_id' => $validated['category_id'],
+                'type_id' => $validated['type_id'] ?? $event->type_id,
+                'max_attendees' => $validated['max_attendees'] ?? null,
+                'virtual_link' => $validated['virtual_link'] ?? null,
+                'cta_link' => $validated['cta_link'] ?? null,
+                'cta_text' => $validated['cta_text'] ?? null,
+                'featured_image' => $validated['featured_image'] ?? null,
+            ];
+
+            $event->update($updateData);
 
             if (isset($validated['location_ids'])) {
                 $event->locations()->sync($validated['location_ids']);
@@ -261,7 +306,10 @@ class OrganizerController extends Controller
                 'event_id' => $event->id
             ]);
 
-            return response()->json($event);
+            return response()->json([
+                'message' => 'Event updated successfully',
+                'event' => $event->fresh()->load(['category', 'locations', 'status', 'type'])
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('OrganizerController@update: Failed to update event', [

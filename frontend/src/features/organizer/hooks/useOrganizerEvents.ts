@@ -50,6 +50,7 @@ export const useOrganizerEvents = () => {
 
   useEffect(() => {
     fetchEvents();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const updateFilters = (newFilters: Partial<OrganizerEventFilters>) => {

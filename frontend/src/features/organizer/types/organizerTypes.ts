@@ -49,3 +49,18 @@ export interface OrganizerEventFilters {
   status?: string;
   search?: string;
 }
+
+export interface CreateEventDto {
+  title: string;
+  description: string;
+  start_date: string;
+  end_date?: string;
+  category_id: number;
+  location_ids: number[]; // Array of location IDs
+  type_id?: number;
+  max_attendees?: number;
+  virtual_link?: string;
+  cta_link?: string;
+  cta_text?: string;
+  featured_image?: string;
+}

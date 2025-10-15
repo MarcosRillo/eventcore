@@ -102,7 +102,7 @@ export class AuthenticationError extends Error {
 // type ResponseData = JsonResponse | TextResponse | null;
 
 // Request body types for HTTP methods
-type RequestBody = Record<string, unknown> | FormData | null;
+type RequestBody = unknown;
 
 // HTTP method types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -313,7 +313,7 @@ class ApiClient {
     return this.makeRequest<T>(url, {
       method: 'POST',
       headers: headers || {},
-      body: data ? JSON.stringify(data) : undefined,
+      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 
@@ -324,7 +324,7 @@ class ApiClient {
     return this.makeRequest<T>(url, {
       method: 'PUT',
       headers: headers || {},
-      body: data ? JSON.stringify(data) : undefined,
+      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 
@@ -335,7 +335,7 @@ class ApiClient {
     return this.makeRequest<T>(url, {
       method: 'PATCH',
       headers: headers || {},
-      body: data ? JSON.stringify(data) : undefined,
+      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
     });
   }
 

@@ -7,8 +7,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+interface User {
+  id: number;
+  role?: {
+    role_name: string;
+  };
+  organization_id?: number;
+}
+
 // Helper function to get user from cookies
-function getUserFromCookies(request: NextRequest) {
+function getUserFromCookies(request: NextRequest): User | null {
   const token = request.cookies.get('token')?.value;
   const userStr = request.cookies.get('user')?.value;
 
@@ -17,7 +25,7 @@ function getUserFromCookies(request: NextRequest) {
   }
 
   try {
-    const user = JSON.parse(decodeURIComponent(userStr));
+    const user = JSON.parse(decodeURIComponent(userStr)) as User;
     return user;
   } catch {
     return null;
@@ -25,7 +33,7 @@ function getUserFromCookies(request: NextRequest) {
 }
 
 // Helper function to get role name
-function getRoleName(user: any): string | null {
+function getRoleName(user: User): string | null {
   return user?.role?.role_name || null;
 }
 
