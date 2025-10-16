@@ -137,3 +137,8 @@ $RECYCLE.BIN/
 # Linux
 *~
 .nfs*
+# Documentation temporary files
+docs/**/.DS_Store
+docs/**/Thumbs.db
+docs/**/*.tmp
+docs/**/*.bak
