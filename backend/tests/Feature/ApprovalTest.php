@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ApprovalTest extends TestCase
@@ -34,7 +35,7 @@ class ApprovalTest extends TestCase
         return $user;
     }
 
-    /** @test */
+    #[Test]
     public function test_can_approve_event(): void
     {
         $this->authenticateUser();
@@ -54,7 +55,7 @@ class ApprovalTest extends TestCase
         $this->assertEquals(3, $event->status_id);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_reject_event(): void
     {
         $this->authenticateUser();
@@ -74,7 +75,7 @@ class ApprovalTest extends TestCase
         $this->assertEquals(6, $event->status_id);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_request_changes_on_event(): void
     {
         $this->authenticateUser();
@@ -94,7 +95,7 @@ class ApprovalTest extends TestCase
         $this->assertEquals(7, $event->status_id);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_publish_approved_event(): void
     {
         $this->authenticateUser();
@@ -114,7 +115,7 @@ class ApprovalTest extends TestCase
         $this->assertEquals(5, $event->status_id);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_request_public_visibility(): void
     {
         $this->authenticateUser();
@@ -132,7 +133,7 @@ class ApprovalTest extends TestCase
         $this->assertEquals(4, $event->status_id);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_get_approval_statistics(): void
     {
         $this->authenticateUser();
