@@ -38,8 +38,17 @@ class CategoryTest extends TestCase
     {
         $user = User::factory()->create();
 
-        // Associate user with organization (ID 1 from OrganizationSeeder)
-        $user->organizations()->attach(1);
+        // Get first organization from database (created by seeder in setUp)
+        $organization = \App\Models\Organization::first();
+
+        // If no organization exists, create it via seeder
+        if (!$organization) {
+            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationSeeder']);
+            $organization = \App\Models\Organization::first();
+        }
+
+        // Associate user with the organization
+        $user->organizations()->attach($organization->id);
 
         $this->actingAs($user);
         return $user;
@@ -58,11 +67,11 @@ class CategoryTest extends TestCase
 
         // Assert: Verify response structure (pagination from Laravel Resource Collection)
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data',      // Array of categories
-                     'links',     // Pagination links
-                     'meta'       // Pagination metadata
-                 ]);
+            ->assertJsonStructure([
+                'data',      // Array of categories
+                'links',     // Pagination links
+                'meta'       // Pagination metadata
+            ]);
 
         // Assert: At least some categories exist
         $this->assertGreaterThan(0, count($response->json('data')));
@@ -146,7 +155,7 @@ class CategoryTest extends TestCase
 
         // Assert: Only active categories returned
         $response->assertStatus(200)
-                 ->assertJsonStructure(['success', 'message', 'data']);
+            ->assertJsonStructure(['success', 'message', 'data']);
 
         // Assert: At least some active categories exist
         $this->assertGreaterThan(0, count($response->json('data')));
