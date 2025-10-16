@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\Location;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class EventTest extends TestCase
@@ -38,7 +39,7 @@ class EventTest extends TestCase
         return $user;
     }
 
-    /** @test */
+    #[Test]
     public function test_can_list_events(): void
     {
         $this->authenticateUser();
@@ -56,7 +57,7 @@ class EventTest extends TestCase
         $this->assertTrue(is_array($response->json('data')));
     }
 
-    /** @test */
+    #[Test]
     public function test_can_create_event(): void
     {
         $this->authenticateUser();
@@ -91,7 +92,7 @@ class EventTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_update_event(): void
     {
         $this->authenticateUser();
@@ -115,7 +116,7 @@ class EventTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_delete_event(): void
     {
         $this->authenticateUser();
@@ -133,7 +134,7 @@ class EventTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_get_event_statistics(): void
     {
         $this->authenticateUser();
@@ -155,7 +156,7 @@ class EventTest extends TestCase
         $this->assertIsArray($data);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_duplicate_event(): void
     {
         $this->authenticateUser();
@@ -174,7 +175,7 @@ class EventTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_toggle_featured_status(): void
     {
         $this->authenticateUser();
@@ -204,7 +205,7 @@ class EventTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_get_single_event_detail(): void
     {
         $this->authenticateUser();
