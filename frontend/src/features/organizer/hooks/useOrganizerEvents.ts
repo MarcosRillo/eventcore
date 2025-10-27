@@ -1,79 +1,87 @@
-/**
- * useOrganizerEvents Hook
- * Custom hook for managing organizer events data and state with filters
- */
-
-import { useState, useEffect } from 'react';
-import { organizerService } from '../services/organizerService';
-import type { OrganizerEvent, OrganizerEventFilters } from '../types/organizerTypes';
+import { useState, useEffect } from 'react'
+import { getEvents, deleteEvent } from '../services/organizer-event.service'
+import { OrganizerEvent, EventListParams } from '../types/event.types'
 
 export const useOrganizerEvents = () => {
-  const [events, setEvents] = useState<OrganizerEvent[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    lastPage: 1,
-    perPage: 10,
-    total: 0
-  });
+  const [events, setEvents] = useState<OrganizerEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const [filters, setFilters] = useState<OrganizerEventFilters>({
-    page: 1,
-    per_page: 10,
-    status: undefined,
-    search: undefined
-  });
+  const perPage = 10
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (page = currentPage, status = statusFilter) => {
+    setLoading(true)
+    setError(null)
+
     try {
-      setLoading(true);
-      setError(null);
+      const params: EventListParams = {
+        page,
+        per_page: perPage,
+        status
+      }
 
-      const response = await organizerService.getEvents(filters);
-
-      // Laravel pagination response has data directly in response
-      setEvents(response.data || []);
-      setPagination({
-        currentPage: response.current_page || 1,
-        lastPage: response.last_page || 1,
-        perPage: response.per_page || 10,
-        total: response.total || 0
-      });
+      const response = await getEvents(params)
+      setEvents(response.data)
+      setCurrentPage(response.pagination.current_page)
+      setTotalPages(response.pagination.last_page || 1)
+      setTotal(response.pagination.total)
     } catch (err) {
-      console.error('Error fetching organizer events:', err);
-      setError('Error al cargar eventos');
+      setError('Error loading events')
+      console.error('Error fetching events:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchEvents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+    fetchEvents()
+  }, [])
 
-  const updateFilters = (newFilters: Partial<OrganizerEventFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
-  };
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    fetchEvents(page)
+  }
 
-  const changePage = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
-  };
+  const handleStatusFilter = (status: string | null) => {
+    setStatusFilter(status)
+    setCurrentPage(1) // Reset to page 1
+    fetchEvents(1, status)
+  }
 
-  const changePerPage = (perPage: number) => {
-    setFilters(prev => ({ ...prev, per_page: perPage, page: 1 }));
-  };
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this event?')) {
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      await deleteEvent(id)
+      fetchEvents() // Refresh list
+    } catch (err) {
+      console.error('Error deleting event:', err)
+      setError('Error deleting event')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return {
     events,
     loading,
     error,
-    pagination,
-    filters,
-    updateFilters,
-    changePage,
-    changePerPage,
-    refetch: fetchEvents
-  };
-};
+    currentPage,
+    totalPages,
+    total,
+    statusFilter,
+    isDeleting,
+    handlePageChange,
+    handleStatusFilter,
+    handleDelete,
+    retry: fetchEvents
+  }
+}
