@@ -2,6 +2,7 @@
 
 // Feature Controllers - Dashboard
 use App\Features\Dashboard\Controllers\DashboardController;
+use App\Features\Dashboard\Controllers\OrganizerStatsController;
 
 // Feature Controllers - Auth
 use App\Features\Auth\Controllers\AuthController;
@@ -91,6 +92,9 @@ Route::prefix('v1')->group(function () {
                 Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
             });
         });
+
+        // ===== ORGANIZER STATS (any authenticated user) =====
+        Route::get('organizer/stats', [OrganizerStatsController::class, 'index']);
 
         // ===== PLATFORM ADMIN + ENTITY ADMIN + ENTITY STAFF =====
         // Dashboard del Ente + read-only events

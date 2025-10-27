@@ -18,12 +18,14 @@ class EventFactory extends Factory
             'description' => $this->faker->paragraph(),
             'start_date' => $this->faker->dateTimeBetween('now', '+1 month'),
             'end_date' => $this->faker->dateTimeBetween('+1 month', '+2 months'),
-            'category_id' => Category::inRandomOrder()->first()?->id ?? 1,
-            'created_by' => User::inRandomOrder()->first()?->id ?? 1,
-            'entity_id' => 1,
+
+            // Use first available or will be overridden by test
+            'category_id' => fn() => Category::first()?->id ?? 1,
+            'created_by' => fn() => User::first()?->id ?? 1,
+            'entity_id' => fn() => \App\Models\Organization::first()?->id ?? 1,
             'organization_id' => null,
-            'type_id' => 1,
-            'status_id' => 1,
+            'type_id' => fn() => \DB::table('event_types')->first()?->id ?? 1,
+            'status_id' => fn() => \DB::table('event_statuses')->first()?->id ?? 1,
             'is_featured' => false,
             'max_attendees' => $this->faker->numberBetween(50, 500),
         ];
@@ -46,14 +48,14 @@ class EventFactory extends Factory
     public function approved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => 5
+            'status_id' => 3
         ]);
     }
 
     public function published(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => 8
+            'status_id' => 5
         ]);
     }
 

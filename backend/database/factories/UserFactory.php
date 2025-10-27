@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'role_id' => 1, // Default to first role (platform_admin)
+            'role_id' => fn() => \App\Models\UserRole::first()?->id ?? 1, // Get first available role
             'remember_token' => Str::random(10),
         ];
     }
