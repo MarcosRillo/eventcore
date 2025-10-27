@@ -40,7 +40,7 @@ class OrganizerStatsController extends Controller
             $userId = $request->user()->id;
             $stats = $this->statsService->getStats($userId);
 
-            return response()->json($stats);
+            return response()->json(['data' => $stats]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error fetching stats',
