@@ -1,5 +1,5 @@
-import { useEventForm } from '../../hooks/useEventForm'
-import { OrganizerEventForm } from '../dumb/OrganizerEventForm'
+import { useEventForm } from '@/features/organizer/hooks/useEventForm'
+import { OrganizerEventForm } from '@/features/organizer/components/dumb/OrganizerEventForm'
 
 interface OrganizerEventFormContainerProps {
   eventId?: number

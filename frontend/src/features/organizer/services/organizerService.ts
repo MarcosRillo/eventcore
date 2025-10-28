@@ -10,7 +10,7 @@ import type {
   OrganizerEventsResponse,
   OrganizerEventFilters,
   CreateEventDto,
-} from '../types/organizerTypes';
+} from '@/features/organizer/types/organizerTypes';
 
 export const organizerService = {
   /**

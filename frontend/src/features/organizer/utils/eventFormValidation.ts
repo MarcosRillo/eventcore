@@ -1,4 +1,4 @@
-import { EventFormData, EventFormErrors } from '../types/event.types'
+import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
 
 export const validateEventForm = (data: EventFormData): EventFormErrors => {
   const errors: EventFormErrors = {}

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { OrganizerStatsCard } from '../OrganizerStatsCard';
-import { StatCardData } from '../../../types/organizerStats.types';
+import { OrganizerStatsCard } from '@/features/organizer/components/dumb/OrganizerStatsCard';
+import { StatCardData } from '@/features/organizer/types/organizerStats.types';
 
 describe('OrganizerStatsCard', () => {
   const mockStats: StatCardData[] = [

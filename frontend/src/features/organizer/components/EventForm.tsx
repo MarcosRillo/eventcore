@@ -13,7 +13,7 @@ import Button from '@/components/ui/Button';
 import type { Event } from '@/types/event.types';
 import type { Category } from '@/types/category.types';
 import type { Location } from '@/types/location.types';
-import type { CreateEventDto } from '../types/organizerTypes';
+import type { CreateEventDto } from '@/features/organizer/types/organizerTypes';
 
 interface EventFormProps {
   event?: Event | null;

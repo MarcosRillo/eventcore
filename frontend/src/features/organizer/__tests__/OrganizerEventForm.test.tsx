@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { OrganizerEventFormContainer } from '../components/smart/OrganizerEventFormContainer'
-import * as organizerEventService from '../services/organizer-event.service'
+import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
+import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import * as categoryService from '@/features/categories/services/category.service'
 import * as locationService from '@/features/locations/services/location.service'
 

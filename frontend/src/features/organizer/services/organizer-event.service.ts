@@ -1,5 +1,5 @@
 import apiClient from '@/services/apiClient'
-import { EventListParams, EventListResponse, CreateEventDto, UpdateEventDto, OrganizerEvent } from '../types/event.types'
+import { EventListParams, EventListResponse, CreateEventDto, UpdateEventDto, OrganizerEvent } from '@/features/organizer/types/event.types'
 
 export const getEvents = async (params: EventListParams): Promise<EventListResponse> => {
   const response = await apiClient.get<{data: EventListResponse}>('/organizer/events', { params })

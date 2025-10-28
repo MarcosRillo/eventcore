@@ -1,5 +1,5 @@
 import apiClient from '@/services/apiClient';
-import { OrganizerStats } from '../types/organizerStats.types';
+import { OrganizerStats } from '@/features/organizer/types/organizerStats.types';
 
 export const organizerStatsService = {
   /**

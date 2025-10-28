@@ -1,4 +1,4 @@
-import { OrganizerEvent } from '../../types/event.types'
+import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerEventListItem } from './OrganizerEventListItem'
 
 interface OrganizerEventListProps {

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getEvent, createEvent, updateEvent } from '../services/organizer-event.service'
+import { getEvent, createEvent, updateEvent } from '@/features/organizer/services/organizer-event.service'
 import { getCategories } from '@/features/categories/services/category.service'
 import { getLocations } from '@/features/locations/services/location.service'
-import { validateEventForm, hasErrors } from '../utils/eventFormValidation'
-import { EventFormData, EventFormErrors } from '../types/event.types'
+import { validateEventForm, hasErrors } from '@/features/organizer/utils/eventFormValidation'
+import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
 
 interface UseEventFormProps {
   eventId?: number

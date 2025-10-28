@@ -1,4 +1,4 @@
-import { organizerStatsService } from '../organizerStatsService';
+import { organizerStatsService } from '@/features/organizer/services/organizerStatsService';
 import apiClient from '@/services/apiClient';
 
 // Mock the API client

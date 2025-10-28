@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { OrganizerEventListContainer } from '../components/smart/OrganizerEventListContainer'
-import * as organizerEventService from '../services/organizer-event.service'
+import { OrganizerEventListContainer } from '@/features/organizer/components/smart/OrganizerEventListContainer'
+import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 
 jest.mock('../services/organizer-event.service')
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { organizerStatsService } from '../services/organizerStatsService';
-import { OrganizerStats } from '../types/organizerStats.types';
+import { organizerStatsService } from '@/features/organizer/services/organizerStatsService';
+import { OrganizerStats } from '@/features/organizer/types/organizerStats.types';
 
 interface UseOrganizerStatsReturn {
   stats: OrganizerStats | null;

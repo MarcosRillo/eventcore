@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useOrganizerStats } from '../useOrganizerStats';
-import { organizerStatsService } from '../../services/organizerStatsService';
+import { useOrganizerStats } from '@/features/organizer/hooks/useOrganizerStats';
+import { organizerStatsService } from '@/features/organizer/services/organizerStatsService';
 
 // Mock the service
 jest.mock('../../services/organizerStatsService');
