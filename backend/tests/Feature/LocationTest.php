@@ -13,22 +13,15 @@ class LocationTest extends TestCase
 
     /**
      * Setup the test environment.
-     *
-     * DatabaseTransactions will rollback changes after each test,
-     * but seeded data persists across all tests in this class.
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        // CRITICAL FOR POSTGRESQL + DOCKER:
-        // Only seed if data doesn't exist (runs once for all tests)
-        if (\DB::table('user_roles')->count() === 0) {
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\UserRolesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationStatusesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationTypesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationSeeder']);
-        }
+        // Seed only lookup tables
+        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
+        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
     /**
@@ -37,10 +30,8 @@ class LocationTest extends TestCase
     protected function authenticateUser(): User
     {
         $user = User::factory()->create();
-
-        // Associate user with organization (ID 1 from OrganizationSeeder)
-        $user->organizations()->attach(1);
-
+        $organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($organization->id);
         $this->actingAs($user);
         return $user;
     }

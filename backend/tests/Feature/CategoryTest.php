@@ -13,22 +13,15 @@ class CategoryTest extends TestCase
 
     /**
      * Setup the test environment.
-     *
-     * DatabaseTransactions will rollback changes after each test,
-     * but seeded data persists across all tests in this class.
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        // CRITICAL FOR POSTGRESQL + DOCKER:
-        // Only seed if data doesn't exist (runs once for all tests)
-        if (\DB::table('user_roles')->count() === 0) {
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\UserRolesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationStatusesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationTypesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationSeeder']);
-        }
+        // Seed only lookup tables
+        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
+        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
     /**
@@ -37,16 +30,7 @@ class CategoryTest extends TestCase
     protected function authenticateUser(): User
     {
         $user = User::factory()->create();
-
-        // Get first organization from database (created by seeder in setUp)
-        $organization = \App\Models\Organization::first();
-
-        // If no organization exists, create it via seeder
-        if (!$organization) {
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationSeeder']);
-            $organization = \App\Models\Organization::first();
-        }
-
+        $organization = \App\Models\Organization::factory()->create();
         // Associate user with the organization
         $user->organizations()->attach($organization->id);
 

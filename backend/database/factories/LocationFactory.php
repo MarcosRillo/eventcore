@@ -30,7 +30,7 @@ class LocationFactory extends Factory
             'phone' => $this->faker->optional()->phoneNumber(),
             'email' => $this->faker->optional()->safeEmail(),
             'is_active' => true,
-            'entity_id' => 1,
+            'entity_id' => \App\Models\Organization::factory(),
         ];
     }
 

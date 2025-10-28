@@ -19,10 +19,10 @@ class EventFactory extends Factory
             'start_date' => $this->faker->dateTimeBetween('now', '+1 month'),
             'end_date' => $this->faker->dateTimeBetween('+1 month', '+2 months'),
 
-            // Use first available or will be overridden by test
-            'category_id' => fn() => Category::first()?->id ?? 1,
-            'created_by' => fn() => User::first()?->id ?? 1,
-            'entity_id' => fn() => \App\Models\Organization::first()?->id ?? 1,
+            // Use factories for relationships
+            'category_id' => Category::factory(),
+            'created_by' => User::factory(),
+            'entity_id' => \App\Models\Organization::factory(),
             'organization_id' => null,
             'type_id' => fn() => \DB::table('event_types')->first()?->id ?? 1,
             'status_id' => fn() => \DB::table('event_statuses')->first()?->id ?? 1,

@@ -16,21 +16,19 @@ class ApprovalTest extends TestCase
     {
         parent::setUp();
 
-        if (\DB::table('user_roles')->count() === 0) {
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\UserRolesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\EventStatusesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\EventTypesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationStatusesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationTypesSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\OrganizationSeeder']);
-            $this->artisan('db:seed', ['--class' => 'Database\\Seeders\\CategorySeeder']);
-        }
+        // Seed only lookup tables
+        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
+        $this->seed(\Database\Seeders\EventTypesSeeder::class);
+        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
+        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
     private function authenticateUser(): User
     {
         $user = User::factory()->create();
-        $user->organizations()->attach(1);
+        $organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($organization->id);
         $this->actingAs($user, 'sanctum');
         return $user;
     }

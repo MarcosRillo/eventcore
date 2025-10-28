@@ -24,8 +24,8 @@ class CategoryFactory extends Factory
 
         return [
             'name' => ucfirst($name),
-            'slug' => Str::slug($name),
-            'entity_id' => 1, // Default to entity_id 1 (Ente de Turismo)
+            'slug' => Str::slug($name) . '-' . fake()->unique()->numberBetween(1, 99999),
+            'entity_id' => \App\Models\Organization::factory(),
             'color' => fake()->hexColor(),
             'description' => fake()->sentence(),
             'is_active' => true,
