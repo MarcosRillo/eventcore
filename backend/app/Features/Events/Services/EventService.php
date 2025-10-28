@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\DB;
 class EventService
 {
     /**
+     * Get event status ID by status code
+     */
+    private function getStatusId(string $statusCode): int
+    {
+        $statusId = DB::table('event_statuses')
+            ->where('status_code', $statusCode)
+            ->value('id');
+
+        if (!$statusId) {
+            throw new \RuntimeException("Event status '{$statusCode}' not found");
+        }
+
+        return $statusId;
+    }
+
+    /**
      * Get all events with optional filters and pagination.
      * This method ALWAYS returns a LengthAwarePaginator object for consistent API responses.
      */
@@ -81,7 +97,7 @@ class EventService
 
             // Ensure default status_id if not provided
             if (!isset($data['status_id'])) {
-                $data['status_id'] = 1; // draft
+                $data['status_id'] = $this->getStatusId('draft');
             }
 
             // Extract location_ids for pivot table handling
@@ -220,7 +236,7 @@ class EventService
     {
         $replica = $event->replicate();
         $replica->title = $event->title . ' (Copia)';
-        $replica->status_id = 1; // draft
+        $replica->status_id = $this->getStatusId('draft');
         $replica->is_featured = false;
         $replica->approved_at = null;
         $replica->approved_by = null;

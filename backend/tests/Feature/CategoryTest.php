@@ -43,10 +43,16 @@ class CategoryTest extends TestCase
      */
     public function test_can_list_categories(): void
     {
-        // Arrange: Authenticate
-        $this->authenticateUser();
+        // Arrange: Authenticate and create test categories
+        $user = $this->authenticateUser();
+        $organization = $user->organizations()->first();
 
-        // Act: Make request (DB already has seeded categories)
+        // Create test categories
+        Category::factory()->count(3)->create([
+            'entity_id' => $organization->id
+        ]);
+
+        // Act: Make request
         $response = $this->getJson('/api/v1/categories');
 
         // Assert: Verify response structure (pagination from Laravel Resource Collection)

@@ -10,6 +10,22 @@ use Illuminate\Support\Facades\Log;
 class ApprovalService
 {
     /**
+     * Get event status ID by status code
+     */
+    private function getStatusId(string $statusCode): int
+    {
+        $statusId = DB::table('event_statuses')
+            ->where('status_code', $statusCode)
+            ->value('id');
+
+        if (!$statusId) {
+            throw new \RuntimeException("Event status '{$statusCode}' not found");
+        }
+
+        return $statusId;
+    }
+
+    /**
      * Approve event internally - SIMPLE, sin domain events.
      */
     public function approveInternal(Event $event, User $approver, ?string $comments = null): void
@@ -17,7 +33,7 @@ class ApprovalService
         try {
             DB::transaction(function () use ($event, $approver, $comments) {
                 $event->update([
-                    'status_id' => 3, // approved_internal
+                    'status_id' => $this->getStatusId('approved_internal'),
                     'approved_by' => $approver->id,
                     'approved_at' => now(),
                     'approval_comments' => $comments
@@ -48,7 +64,7 @@ class ApprovalService
     public function requestPublicApproval(Event $event, User $requester): void
     {
         $event->update([
-            'status_id' => 4, // pending_public_approval
+            'status_id' => $this->getStatusId('pending_public_approval'),
             'public_approval_requested_at' => now(),
             'public_approval_requested_by' => $requester->id
         ]);
@@ -67,7 +83,7 @@ class ApprovalService
         try {
             DB::transaction(function () use ($event, $publisher, $scheduledAt) {
                 $event->update([
-                    'status_id' => 5, // published
+                    'status_id' => $this->getStatusId('published'),
                     'published_by' => $publisher->id,
                     'published_at' => $scheduledAt ?? now(),
                     'scheduled_publish_at' => $scheduledAt
@@ -96,7 +112,7 @@ class ApprovalService
         try {
             DB::transaction(function () use ($event, $reason, $reviewer) {
                 $event->update([
-                    'status_id' => 7, // requires_changes
+                    'status_id' => $this->getStatusId('requires_changes'),
                     'changes_requested_by' => $reviewer->id,
                     'changes_requested_at' => now(),
                     'approval_comments' => $reason
@@ -125,7 +141,7 @@ class ApprovalService
         try {
             DB::transaction(function () use ($event, $reason, $rejector) {
                 $event->update([
-                    'status_id' => 6, // rejected
+                    'status_id' => $this->getStatusId('rejected'),
                     'rejected_by' => $rejector->id,
                     'rejected_at' => now(),
                     'rejection_reason' => $reason
@@ -152,14 +168,14 @@ class ApprovalService
     public function getApprovalStatistics(): array
     {
         return [
-            'draft' => Event::where('status_id', 1)->count(),
-            'in_review' => Event::where('status_id', 2)->count(),
-            'approved_internal' => Event::where('status_id', 3)->count(),
-            'pending_public_approval' => Event::where('status_id', 4)->count(),
-            'published' => Event::where('status_id', 5)->count(),
-            'rejected' => Event::where('status_id', 6)->count(),
-            'requires_changes' => Event::where('status_id', 7)->count(),
-            'cancelled' => Event::where('status_id', 8)->count(),
+            'draft' => Event::where('status_id', $this->getStatusId('draft'))->count(),
+            'in_review' => Event::where('status_id', $this->getStatusId('pending_internal_approval'))->count(),
+            'approved_internal' => Event::where('status_id', $this->getStatusId('approved_internal'))->count(),
+            'pending_public_approval' => Event::where('status_id', $this->getStatusId('pending_public_approval'))->count(),
+            'published' => Event::where('status_id', $this->getStatusId('published'))->count(),
+            'rejected' => Event::where('status_id', $this->getStatusId('rejected'))->count(),
+            'requires_changes' => Event::where('status_id', $this->getStatusId('requires_changes'))->count(),
+            'cancelled' => Event::where('status_id', $this->getStatusId('cancelled'))->count(),
         ];
     }
 }
