@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useOrganizerStats } from '../useOrganizerStats';
 import { organizerStatsService } from '../../services/organizerStatsService';
 
@@ -97,7 +97,9 @@ describe('useOrganizerStats', () => {
     jest.clearAllMocks();
 
     // Refetch
-    await result.current.refetch();
+    await act(async () => {
+      await result.current.refetch();
+    });
 
     // Assert
     expect(organizerStatsService.getStats).toHaveBeenCalledTimes(1);

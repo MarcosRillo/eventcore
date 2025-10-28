@@ -1,10 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -35,21 +33,17 @@ export default function OrganizerEventsPage() {
     events,
     loading,
     error,
-    pagination,
-    filters,
-    updateFilters,
-    changePage,
-    changePerPage
+    currentPage,
+    totalPages,
+    total,
+    statusFilter,
+    handlePageChange,
+    handleStatusFilter,
+    handleDelete: deleteEvent
   } = useOrganizerEvents();
 
-  const [searchInput, setSearchInput] = useState('');
-
-  const handleSearch = () => {
-    updateFilters({ search: searchInput });
-  };
-
   const handleStatusChange = (status: string) => {
-    updateFilters({ status: status || undefined });
+    handleStatusFilter(status || null);
   };
 
   const handleView = (eventId: number) => {
@@ -58,17 +52,6 @@ export default function OrganizerEventsPage() {
 
   const handleEdit = (eventId: number) => {
     router.push(`/organizer/events/${eventId}/edit`);
-  };
-
-  const handleDelete = async (eventId: number) => {
-    if (!confirm('¿Estás seguro de eliminar este evento?')) return;
-
-    try {
-      // TODO: Implementar delete en organizerService
-      console.log('Delete event:', eventId);
-    } catch (err) {
-      console.error('Error deleting event:', err);
-    }
   };
 
   const handleCreate = () => {
@@ -109,26 +92,11 @@ export default function OrganizerEventsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="md:col-span-2">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Buscar por título..."
-                value={searchInput}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
-                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
-              />
-              <Button onClick={handleSearch}>
-                Buscar
-              </Button>
-            </div>
-          </div>
-
+        <div className="flex justify-end">
           {/* Status Filter */}
-          <div>
+          <div className="w-64">
             <Select
-              value={filters.status || ''}
+              value={statusFilter || ''}
               onChange={(value: string | number) => handleStatusChange(String(value))}
               options={STATUS_OPTIONS}
             />
@@ -164,23 +132,23 @@ export default function OrganizerEventsPage() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="font-medium text-gray-900">{event.title}</div>
-                    <div className="text-sm text-gray-500">{event.category?.name}</div>
+                    <div className="text-sm text-gray-500">{event.category || '-'}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <div>{new Date(event.start_date).toLocaleDateString('es-AR')}</div>
-                  {event.end_date && (
+                  <div>{new Date(event.event_date).toLocaleDateString('es-AR')}</div>
+                  {event.start_time && event.end_time && (
                     <div className="text-gray-500">
-                      a {new Date(event.end_date).toLocaleDateString('es-AR')}
+                      {event.start_time} - {event.end_time}
                     </div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {event.location?.name || '-'}
+                  {event.location || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge variant={STATUS_VARIANTS[event.status?.status_code] || 'default'}>
-                    {event.status?.name}
+                  <Badge variant={STATUS_VARIANTS[event.status] || 'default'}>
+                    {event.status}
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -200,7 +168,7 @@ export default function OrganizerEventsPage() {
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(event.id)}
+                      onClick={() => deleteEvent(event.id)}
                       className="text-red-600 hover:text-red-800"
                       title="Eliminar"
                     >
@@ -214,44 +182,27 @@ export default function OrganizerEventsPage() {
         </table>
 
         {/* Pagination */}
-        {pagination.total > 0 && (
+        {total > 0 && (
           <div className="border-t px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Mostrando {((pagination.currentPage - 1) * pagination.perPage) + 1} a{' '}
-                {Math.min(pagination.currentPage * pagination.perPage, pagination.total)} de{' '}
-                {pagination.total} eventos
+                Página {currentPage} de {totalPages} ({total} eventos)
               </div>
 
               <div className="flex items-center gap-4">
-                {/* Per page selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Por página:</span>
-                  <Select
-                    value={pagination.perPage.toString()}
-                    onChange={(value: string | number) => changePerPage(Number(value))}
-                    options={[
-                      { value: '10', label: '10' },
-                      { value: '25', label: '25' },
-                      { value: '50', label: '50' }
-                    ]}
-                    className="w-20"
-                  />
-                </div>
-
                 {/* Page navigation */}
                 <div className="flex gap-2">
                   <Button
                     variant="secondary"
-                    onClick={() => changePage(pagination.currentPage - 1)}
-                    disabled={pagination.currentPage === 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
                   >
                     Anterior
                   </Button>
                   <Button
                     variant="secondary"
-                    onClick={() => changePage(pagination.currentPage + 1)}
-                    disabled={pagination.currentPage === pagination.lastPage}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
                   >
                     Siguiente
                   </Button>
@@ -266,17 +217,14 @@ export default function OrganizerEventsPage() {
       {events.length === 0 && !loading && (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <p className="text-gray-600 mb-4">
-            No hay eventos que coincidan con los filtros seleccionados
+            {statusFilter ? 'No hay eventos que coincidan con el filtro seleccionado' : 'No tienes eventos creados aún'}
           </p>
-          {(filters.search || filters.status) && (
+          {statusFilter && (
             <Button
               variant="secondary"
-              onClick={() => {
-                setSearchInput('');
-                updateFilters({ search: undefined, status: undefined });
-              }}
+              onClick={() => handleStatusFilter(null)}
             >
-              Limpiar Filtros
+              Limpiar Filtro
             </Button>
           )}
         </div>

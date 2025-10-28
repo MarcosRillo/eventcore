@@ -30,9 +30,8 @@ export const useOrganizerEvents = () => {
       setCurrentPage(response.pagination.current_page)
       setTotalPages(response.pagination.last_page || 1)
       setTotal(response.pagination.total)
-    } catch (err) {
+    } catch {
       setError('Error loading events')
-      console.error('Error fetching events:', err)
     } finally {
       setLoading(false)
     }
@@ -40,6 +39,7 @@ export const useOrganizerEvents = () => {
 
   useEffect(() => {
     fetchEvents()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handlePageChange = (page: number) => {
@@ -62,8 +62,7 @@ export const useOrganizerEvents = () => {
     try {
       await deleteEvent(id)
       fetchEvents() // Refresh list
-    } catch (err) {
-      console.error('Error deleting event:', err)
+    } catch {
       setError('Error deleting event')
     } finally {
       setIsDeleting(false)
