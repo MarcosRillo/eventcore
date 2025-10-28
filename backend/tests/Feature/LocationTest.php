@@ -132,10 +132,23 @@ class LocationTest extends TestCase
      */
     public function test_can_get_active_locations_only(): void
     {
-        // Arrange: Authenticate
-        $this->authenticateUser();
+        // Arrange: Authenticate and create test locations
+        $user = $this->authenticateUser();
+        $organization = $user->organizations()->first();
 
-        // Act: Get active locations (DB already has seeds with active/inactive mix)
+        // Create active locations
+        Location::factory()->count(3)->create([
+            'entity_id' => $organization->id,
+            'is_active' => true
+        ]);
+
+        // Create inactive locations (should not be returned)
+        Location::factory()->count(2)->create([
+            'entity_id' => $organization->id,
+            'is_active' => false
+        ]);
+
+        // Act: Get active locations
         $response = $this->getJson('/api/v1/locations/active');
 
         // Assert: Only active locations returned

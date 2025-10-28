@@ -35,6 +35,16 @@ class EventTest extends TestCase
         return $user;
     }
 
+    /**
+     * Get event status ID by status code
+     */
+    private function getStatusId(string $statusCode): int
+    {
+        return \DB::table('event_statuses')
+            ->where('status_code', $statusCode)
+            ->value('id') ?? 1;
+    }
+
     #[Test]
     public function test_can_list_events(): void
     {
@@ -56,10 +66,11 @@ class EventTest extends TestCase
     #[Test]
     public function test_can_create_event(): void
     {
-        $this->authenticateUser();
+        $user = $this->authenticateUser();
+        $organization = $user->organizations()->first();
 
-        $category = Category::first();
-        $location = Location::first();
+        $category = Category::factory()->create(['entity_id' => $organization->id]);
+        $location = Location::factory()->create(['entity_id' => $organization->id]);
 
         $eventData = [
             'title' => 'Test Event Creation',
@@ -68,9 +79,9 @@ class EventTest extends TestCase
             'end_date' => now()->addDays(8)->format('Y-m-d H:i:s'),
             'category_id' => $category->id,
             'location_ids' => [$location->id],
-            'type_id' => 1,
-            'status_id' => 1,
-            'entity_id' => 1,
+            'type_id' => \DB::table('event_types')->first()->id,
+            'status_id' => $this->getStatusId('draft'),
+            'entity_id' => $organization->id,
             'is_featured' => false,
             'max_attendees' => 100
         ];
@@ -118,7 +129,7 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => 1 // draft, so it can be deleted
+            'status_id' => $this->getStatusId('draft')
         ]);
 
         $response = $this->deleteJson("/api/v1/events/{$event->id}");

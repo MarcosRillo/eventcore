@@ -131,10 +131,23 @@ class CategoryTest extends TestCase
      */
     public function test_can_get_active_categories_only(): void
     {
-        // Arrange: Authenticate
-        $this->authenticateUser();
+        // Arrange: Authenticate and create test categories
+        $user = $this->authenticateUser();
+        $organization = $user->organizations()->first();
 
-        // Act: Get active categories (DB already has seeds with active/inactive mix)
+        // Create active categories
+        Category::factory()->count(3)->create([
+            'entity_id' => $organization->id,
+            'is_active' => true
+        ]);
+
+        // Create inactive categories (should not be returned)
+        Category::factory()->count(2)->create([
+            'entity_id' => $organization->id,
+            'is_active' => false
+        ]);
+
+        // Act: Get active categories
         $response = $this->getJson('/api/v1/categories/active');
 
         // Assert: Only active categories returned

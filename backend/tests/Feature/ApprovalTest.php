@@ -33,13 +33,23 @@ class ApprovalTest extends TestCase
         return $user;
     }
 
+    /**
+     * Get event status ID by status code
+     */
+    private function getStatusId(string $statusCode): int
+    {
+        return \DB::table('event_statuses')
+            ->where('status_code', $statusCode)
+            ->value('id') ?? 1;
+    }
+
     #[Test]
     public function test_can_approve_event(): void
     {
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => 2 // pending_review
+            'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/approve", [
@@ -48,9 +58,9 @@ class ApprovalTest extends TestCase
 
         $response->assertStatus(200);
 
-        // Event should be approved (status_id 3)
+        // Event should be approved
         $event->refresh();
-        $this->assertEquals(3, $event->status_id);
+        $this->assertEquals($this->getStatusId('approved_internal'), $event->status_id);
     }
 
     #[Test]
@@ -59,7 +69,7 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => 2 // pending_review
+            'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/reject", [
@@ -68,9 +78,9 @@ class ApprovalTest extends TestCase
 
         $response->assertStatus(200);
 
-        // Event should be rejected (status_id 6)
+        // Event should be rejected
         $event->refresh();
-        $this->assertEquals(6, $event->status_id);
+        $this->assertEquals($this->getStatusId('rejected'), $event->status_id);
     }
 
     #[Test]
@@ -79,7 +89,7 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => 2 // pending_review
+            'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/request-changes", [
@@ -88,9 +98,9 @@ class ApprovalTest extends TestCase
 
         $response->assertStatus(200);
 
-        // Event should have changes requested (status_id 7)
+        // Event should have changes requested
         $event->refresh();
-        $this->assertEquals(7, $event->status_id);
+        $this->assertEquals($this->getStatusId('requires_changes'), $event->status_id);
     }
 
     #[Test]
@@ -99,7 +109,7 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => 3 // approved_internal
+            'status_id' => $this->getStatusId('approved_internal')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/publish", [
@@ -108,9 +118,9 @@ class ApprovalTest extends TestCase
 
         $response->assertStatus(200);
 
-        // Event should be published (status_id 5)
+        // Event should be published
         $event->refresh();
-        $this->assertEquals(5, $event->status_id);
+        $this->assertEquals($this->getStatusId('published'), $event->status_id);
     }
 
     #[Test]
@@ -119,16 +129,16 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => 1 // draft
+            'status_id' => $this->getStatusId('draft')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/request-public");
 
         $response->assertStatus(200);
 
-        // Event should be pending public approval (status_id 4)
+        // Event should be pending public approval
         $event->refresh();
-        $this->assertEquals(4, $event->status_id);
+        $this->assertEquals($this->getStatusId('pending_public_approval'), $event->status_id);
     }
 
     #[Test]
