@@ -1,8 +1,8 @@
 # claude.md - Plataforma Multi-Tenant de Eventos Turísticos
 
-**Project Status:** MVP 92% completo, Panel Organizador casi completo  
-**Current Sprint:** Sprint 1 - Completar Panel Organizador + Dashboard Integration  
-**Last Updated:** Octubre 28, 2025
+**Project Status:** MVP 90% completo
+**Tests:** 164/164 passing (36 backend + 128 frontend) ✅
+**Last Updated:** Octubre 29, 2025
 
 ---
 
@@ -18,7 +18,7 @@ Sistema de gestión de eventos turísticos multi-tenant para Argentina.
 
 ## 🏗️ ARCHITECTURE PRINCIPLES (STRICT - NO EXCEPTIONS)
 
-### Backend (Laravel 11 + PostgreSQL 15)
+### Backend (Laravel 12.24.0 + PHP 8.2.29 + PostgreSQL 15)
 
 #### 1. Features-Based Organization (MANDATORY)
 ```

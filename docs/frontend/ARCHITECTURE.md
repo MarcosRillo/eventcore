@@ -1,9 +1,10 @@
 # Frontend Architecture - Plataforma Calendario
 
 **Version:** 2.0.0
-**Stack:** Next.js 15 + React 19 + TypeScript
+**Stack:** Next.js 15.5.4 + React 19.2.0 + TypeScript 5.9.3
 **Estado:** Production Ready
-**Última actualización:** Octubre 2025
+**Última actualización:** Octubre 29, 2025
+**Tests:** 128/128 passing ✅
 
 ---
 
@@ -65,20 +66,26 @@ src/features/
 │   │   └── smart/    # EventCardContainer, ApprovalModalContainer
 │   ├── hooks/        # useEventManager, useApprovalManager
 │   └── services/     # eventService, approvalService
-└── locations/         # Gestión de ubicaciones
-    └── services/      # locationService
+├── locations/         # Gestión de ubicaciones
+│   └── services/      # locationService
+└── organizer/         # Panel del organizador
+    ├── components/
+    │   └── dumb/     # OrganizerStatsCard, OrganizerEventList, OrganizerEventForm
+    ├── hooks/        # useOrganizerStats, useEventManager
+    └── services/     # organizerStatsService
 ```
 
-### Métricas por Feature
+### Métricas Globales (Verified October 29, 2025)
 
-| Feature | Archivos | LOC | Componentes | Hooks | Services |
-|---------|----------|-----|-------------|-------|----------|
-| **events** | 29 | 5,300 | 6 | 6 | 7 |
-| **categories** | 11 | 1,153 | 2 | 2 | 2 |
-| **appearance** | 5 | 196 | 0 | 2 | 2 |
-| **locations** | 1 | 128 | 0 | 0 | 1 |
-| **auth** | 3 | 110 | 0 | 2 | 0 |
-| **TOTAL** | **49** | **6,887** | **8** | **12** | **12** |
+| Métrica | Cantidad |
+|---------|----------|
+| **Features** | 6 (appearance, auth, categories, events, locations, organizer) |
+| **Components (.tsx)** | 78 |
+| **Custom Hooks** | 23 |
+| **Services** | 14 |
+| **Test Files** | 9 |
+| **Tests** | 128/128 passing ✅ |
+| **Test Suites** | 9 suites passing ✅ |
 
 ---
 
