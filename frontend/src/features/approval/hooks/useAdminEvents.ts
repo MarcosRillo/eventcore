@@ -4,9 +4,9 @@
  * Fetches and manages events for admin dashboard with filtering.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { adminEventService } from '../services/admin-event.service'
-import { Event, EventsResponse } from '../types/approval.types'
+import { EventsResponse } from '../types/approval.types'
 
 interface UseAdminEventsReturn {
   events: EventsResponse
@@ -26,7 +26,7 @@ export const useAdminEvents = (): UseAdminEventsReturn => {
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-  const fetchEvents = async (): Promise<void> => {
+  const fetchEvents = useCallback(async (): Promise<void> => {
     setLoading(true)
     setError(null)
     try {
@@ -37,11 +37,11 @@ export const useAdminEvents = (): UseAdminEventsReturn => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter])
 
   useEffect(() => {
     fetchEvents()
-  }, [statusFilter])
+  }, [fetchEvents])
 
   const handleStatusFilter = (status: string | null): void => {
     setStatusFilter(status)

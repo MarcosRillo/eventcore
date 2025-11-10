@@ -55,17 +55,7 @@ export const useEventActions = (
   const publishEvent = async (eventId: number): Promise<void> => {
     setLoading(true)
     try {
-      await organizerEventService.updateEvent(eventId, {
-        id: eventId,
-        status: 'pending',
-        title: '',
-        description: '',
-        event_date: '',
-        start_time: '',
-        end_time: '',
-        category_id: 0,
-        location_id: 0
-      })
+      await organizerEventService.publishEvent(eventId)
       addToast({
         message: 'Event published successfully',
         type: 'success'

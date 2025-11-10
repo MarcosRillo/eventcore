@@ -25,3 +25,13 @@ export const deleteEvent = async (id: number): Promise<{ success: boolean }> => 
   const response = await apiClient.delete(`/organizer/events/${id}`)
   return response.data
 }
+
+export const publishEvent = async (id: number): Promise<{ data: OrganizerEvent }> => {
+  const response = await apiClient.post(`/organizer/events/${id}/publish`)
+  return response.data
+}
+
+export const duplicateEvent = async (id: number): Promise<{ data: OrganizerEvent }> => {
+  const response = await apiClient.post(`/organizer/events/${id}/duplicate`)
+  return response.data
+}

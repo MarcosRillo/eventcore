@@ -26,7 +26,7 @@ describe('useEventActions', () => {
   describe('publishEvent', () => {
     test('publishes event successfully and shows success toast', async () => {
       const mockPublishedEvent = { data: { id: 1, status: 'pending' } }
-      ;(organizerEventService.updateEvent as jest.Mock).mockResolvedValue(mockPublishedEvent)
+      ;(organizerEventService.publishEvent as jest.Mock).mockResolvedValue(mockPublishedEvent)
 
       const { result } = renderHook(() => useEventActions(mockRefresh))
 
@@ -34,7 +34,7 @@ describe('useEventActions', () => {
         await result.current.publishEvent(1)
       })
 
-      expect(organizerEventService.updateEvent).toHaveBeenCalledWith(1, expect.objectContaining({ status: 'pending' }))
+      expect(organizerEventService.publishEvent).toHaveBeenCalledWith(1)
       expect(mockAddToast).toHaveBeenCalledWith({
         message: 'Event published successfully',
         type: 'success'
@@ -44,7 +44,7 @@ describe('useEventActions', () => {
     })
 
     test('handles publish error and shows error toast', async () => {
-      ;(organizerEventService.updateEvent as jest.Mock).mockRejectedValue(
+      ;(organizerEventService.publishEvent as jest.Mock).mockRejectedValue(
         new Error('Network error')
       )
 
@@ -63,7 +63,7 @@ describe('useEventActions', () => {
     })
 
     test('sets loading state during publish operation', async () => {
-      ;(organizerEventService.updateEvent as jest.Mock).mockImplementation(
+      ;(organizerEventService.publishEvent as jest.Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 100))
       )
 

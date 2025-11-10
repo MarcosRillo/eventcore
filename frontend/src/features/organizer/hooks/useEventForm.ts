@@ -8,9 +8,11 @@ import { EventFormData, EventFormErrors } from '@/features/organizer/types/event
 
 interface UseEventFormProps {
   eventId?: number
+  onSuccess?: () => void
+  onCancel?: () => void
 }
 
-export const useEventForm = ({ eventId }: UseEventFormProps = {}) => {
+export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps = {}) => {
   const router = useRouter()
   const isEditMode = !!eventId
 
@@ -124,8 +126,12 @@ export const useEventForm = ({ eventId }: UseEventFormProps = {}) => {
         await createEvent(payload)
       }
 
-      // Navigate to events list on success
-      router.push('/organizer/events')
+      // Call onSuccess callback or navigate
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push('/organizer/events')
+      }
     } catch {
       setErrors({
         general: isEditMode ? 'Error updating event' : 'Error creating event'
@@ -136,7 +142,11 @@ export const useEventForm = ({ eventId }: UseEventFormProps = {}) => {
   }
 
   const handleCancel = () => {
-    router.back()
+    if (onCancel) {
+      onCancel()
+    } else {
+      router.back()
+    }
   }
 
   return {

@@ -3,9 +3,16 @@ import { OrganizerEventForm } from '@/features/organizer/components/dumb/Organiz
 
 interface OrganizerEventFormContainerProps {
   eventId?: number
+  mode?: 'create' | 'edit'
+  onSuccess?: () => void
+  onCancel?: () => void
 }
 
-export const OrganizerEventFormContainer = ({ eventId }: OrganizerEventFormContainerProps) => {
+export const OrganizerEventFormContainer = ({
+  eventId,
+  onSuccess,
+  onCancel
+}: OrganizerEventFormContainerProps) => {
   const {
     formData,
     errors,
@@ -17,7 +24,7 @@ export const OrganizerEventFormContainer = ({ eventId }: OrganizerEventFormConta
     handleChange,
     handleSubmit,
     handleCancel
-  } = useEventForm({ eventId })
+  } = useEventForm({ eventId, onSuccess, onCancel })
 
   return (
     <OrganizerEventForm
