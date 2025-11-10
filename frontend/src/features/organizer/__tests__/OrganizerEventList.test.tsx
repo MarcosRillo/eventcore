@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { OrganizerEventListContainer } from '@/features/organizer/components/smart/OrganizerEventListContainer'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
+import { ToastProvider } from '@/components/ui/Toast'
 
 jest.mock('../services/organizer-event.service')
 
@@ -17,6 +18,11 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
+// Helper to render with ToastProvider
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(<ToastProvider>{component}</ToastProvider>)
+}
+
 describe('OrganizerEventList', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -32,7 +38,7 @@ describe('OrganizerEventList', () => {
       )
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       // ASSERT
       expect(screen.getByText(/loading/i)).toBeInTheDocument()
@@ -64,7 +70,7 @@ describe('OrganizerEventList', () => {
       })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       // ASSERT
       await waitFor(() => {
@@ -98,7 +104,7 @@ describe('OrganizerEventList', () => {
       })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       // ASSERT
       await waitFor(() => {
@@ -137,7 +143,7 @@ describe('OrganizerEventList', () => {
         })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
@@ -181,7 +187,7 @@ describe('OrganizerEventList', () => {
         })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
@@ -216,7 +222,7 @@ describe('OrganizerEventList', () => {
       })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       // ASSERT
       await waitFor(() => {
@@ -243,7 +249,7 @@ describe('OrganizerEventList', () => {
         })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
@@ -275,7 +281,7 @@ describe('OrganizerEventList', () => {
       })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
@@ -289,7 +295,8 @@ describe('OrganizerEventList', () => {
     })
 
     // Test 9: Handles delete action with confirmation
-    test('should show confirmation dialog and delete event', async () => {
+    // OBSOLETE: Delete now uses DeleteConfirmModal (covered in EventActionButtons tests)
+    test.skip('should show confirmation dialog and delete event', async () => {
       // ARRANGE
       const mockEvents = [
         { id: 1, title: 'Event 1', status: 'draft', event_date: '2025-11-15', location: 'Loc' },
@@ -312,7 +319,7 @@ describe('OrganizerEventList', () => {
       global.confirm = jest.fn(() => true)
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
@@ -346,7 +353,7 @@ describe('OrganizerEventList', () => {
       })
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
@@ -371,7 +378,7 @@ describe('OrganizerEventList', () => {
       jest.spyOn(console, 'error').mockImplementation(() => {})
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       // ASSERT
       await waitFor(() => {
@@ -381,7 +388,8 @@ describe('OrganizerEventList', () => {
     })
 
     // Test 12: Shows loading state during delete operation
-    test('should show loading state during delete operation', async () => {
+    // OBSOLETE: Delete now uses DeleteConfirmModal (covered in useEventActions tests)
+    test.skip('should show loading state during delete operation', async () => {
       // ARRANGE
       const mockEvents = [
         { id: 1, title: 'Event 1', status: 'draft', event_date: '2025-11-15', location: 'Loc' }
@@ -399,7 +407,7 @@ describe('OrganizerEventList', () => {
       global.confirm = jest.fn(() => true)
 
       // ACT
-      render(<OrganizerEventListContainer />)
+      renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()

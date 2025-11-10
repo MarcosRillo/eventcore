@@ -17,7 +17,6 @@ export const OrganizerEventListContainer = () => {
     isDeleting,
     handlePageChange,
     handleStatusFilter,
-    handleDelete,
     retry
   } = useOrganizerEvents()
 
@@ -42,8 +41,8 @@ export const OrganizerEventListContainer = () => {
       onPageChange={handlePageChange}
       onStatusFilter={handleStatusFilter}
       onEdit={handleEdit}
-      onDelete={handleDelete}
       onView={handleView}
+      onSuccess={retry}
       onRetry={retry}
     />
   )

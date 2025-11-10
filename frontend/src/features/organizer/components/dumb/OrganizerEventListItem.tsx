@@ -1,18 +1,19 @@
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import { EventActionButtonsContainer } from '../smart/EventActionButtonsContainer'
 
 interface OrganizerEventListItemProps {
   event: OrganizerEvent
   onEdit: () => void
-  onDelete: () => void
   onView: () => void
+  onSuccess?: () => void
   disabled?: boolean
 }
 
 export const OrganizerEventListItem = ({
   event,
   onEdit,
-  onDelete,
   onView,
+  onSuccess,
   disabled = false
 }: OrganizerEventListItemProps) => {
   const statusColors = {
@@ -55,14 +56,10 @@ export const OrganizerEventListItem = ({
           Edit
         </button>
 
-        <button
-          onClick={onDelete}
-          disabled={disabled}
-          aria-label={`Delete ${event.title}`}
-          className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 disabled:opacity-50"
-        >
-          Delete
-        </button>
+        <EventActionButtonsContainer
+          event={event}
+          onSuccess={onSuccess}
+        />
       </div>
     </div>
   )

@@ -13,8 +13,8 @@ interface OrganizerEventListProps {
   onPageChange: (page: number) => void
   onStatusFilter: (status: string | null) => void
   onEdit: (id: number) => void
-  onDelete: (id: number) => void
   onView: (id: number) => void
+  onSuccess?: () => void
   onRetry: () => void
 }
 
@@ -30,8 +30,8 @@ export const OrganizerEventList = ({
   onPageChange,
   onStatusFilter,
   onEdit,
-  onDelete,
   onView,
+  onSuccess,
   onRetry
 }: OrganizerEventListProps) => {
   // Loading state
@@ -130,8 +130,8 @@ export const OrganizerEventList = ({
             key={event.id}
             event={event}
             onEdit={() => onEdit(event.id)}
-            onDelete={() => onDelete(event.id)}
             onView={() => onView(event.id)}
+            onSuccess={onSuccess}
             disabled={isDeleting}
           />
         ))}
