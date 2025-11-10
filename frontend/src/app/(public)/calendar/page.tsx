@@ -1,26 +1,27 @@
-import { Metadata } from 'next';
-import CalendarPageClient from './CalendarPageClient';
+import { Metadata } from 'next'
+import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
 
 export const metadata: Metadata = {
-  title: 'Calendario de Eventos - Tucumán Turismo',
-  description: 'Descubre todos los eventos turísticos y culturales de Tucumán. Calendario público con eventos, festivales, exposiciones y actividades.',
+  title: 'Eventos en Tucumán - Calendario Turístico',
+  description:
+    'Descubrí los mejores eventos turísticos y culturales de Tucumán. Música, arte, gastronomía y más.',
   keywords: 'tucuman, turismo, eventos, calendario, festivales, cultura, actividades',
   openGraph: {
-    title: 'Calendario de Eventos - Tucumán Turismo',
-    description: 'Descubre todos los eventos turísticos y culturales de Tucumán',
+    title: 'Eventos en Tucumán',
+    description: 'Calendario de eventos turísticos y culturales',
     type: 'website',
-    locale: 'es_AR',
+    locale: 'es_AR'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Calendario de Eventos - Tucumán Turismo',
-    description: 'Descubre todos los eventos turísticos y culturales de Tucumán',
+    title: 'Eventos en Tucumán',
+    description: 'Calendario de eventos turísticos y culturales'
   },
   alternates: {
     canonical: '/calendar'
   }
-};
+}
 
 export default function CalendarPage() {
-  return <CalendarPageClient />;
+  return <PublicCalendarContainer />
 }
