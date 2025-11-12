@@ -89,7 +89,10 @@ describe('EventCard', () => {
 
       const image = screen.getByRole('img', { name: /Festival de Música/i })
       expect(image).toBeInTheDocument()
-      expect(image).toHaveAttribute('src', 'https://example.com/image.jpg')
+      // Next.js Image optimizes URLs, so we check alt instead of exact src
+      expect(image).toHaveAttribute('alt', 'Festival de Música')
+      // Verify the optimized src contains reference to original URL
+      expect(image.getAttribute('src')).toContain('example.com')
     })
 
     test('displays placeholder when image_url is not provided', () => {

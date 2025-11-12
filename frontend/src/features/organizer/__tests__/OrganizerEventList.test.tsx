@@ -294,8 +294,10 @@ describe('OrganizerEventList', () => {
       expect(mockPush).toHaveBeenCalledWith('/organizer/events/1/edit')
     })
 
-    // Test 9: Handles delete action with confirmation
-    // OBSOLETE: Delete now uses DeleteConfirmModal (covered in EventActionButtons tests)
+    // Test 9: SKIPPED - Delete functionality refactored
+    // REASON: Delete now uses DeleteConfirmModal component
+    // COVERAGE: Tested in EventActionButtons.test.tsx (3 delete tests)
+    // TODO: Remove this test in v1.1 cleanup
     test.skip('should show confirmation dialog and delete event', async () => {
       // ARRANGE
       const mockEvents = [
@@ -387,8 +389,10 @@ describe('OrganizerEventList', () => {
       })
     })
 
-    // Test 12: Shows loading state during delete operation
-    // OBSOLETE: Delete now uses DeleteConfirmModal (covered in useEventActions tests)
+    // Test 12: SKIPPED - Delete loading state refactored
+    // REASON: Delete now uses DeleteConfirmModal with loading state
+    // COVERAGE: Tested in useEventActions.test.ts (deleteEvent with loading)
+    // TODO: Remove this test in v1.1 cleanup
     test.skip('should show loading state during delete operation', async () => {
       // ARRANGE
       const mockEvents = [
