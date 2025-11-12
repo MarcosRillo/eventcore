@@ -48,41 +48,47 @@ export const publicEventsService = {
       ? `/public/events?${queryString}`
       : '/public/events'
 
-    return apiClient.get(url)
+    const response = await apiClient.get(url)
+    return response.data
   },
 
   /**
    * Get event by ID
    */
   getById: async (id: number): Promise<{ data: PublicEvent }> => {
-    return apiClient.get(`/public/events/${id}`)
+    const response = await apiClient.get(`/public/events/${id}`)
+    return response.data
   },
 
   /**
    * Get upcoming events
    */
   getUpcoming: async (): Promise<EventsResponse> => {
-    return apiClient.get('/public/events/upcoming')
+    const response = await apiClient.get('/public/events/upcoming')
+    return response.data
   },
 
   /**
    * Get featured events
    */
   getFeatured: async (): Promise<EventsResponse> => {
-    return apiClient.get('/public/events/featured')
+    const response = await apiClient.get('/public/events/featured')
+    return response.data
   },
 
   /**
    * Get active categories
    */
   getCategories: async (): Promise<{ data: Category[] }> => {
-    return apiClient.get('/public/categories/active')
+    const response = await apiClient.get('/public/categories/active')
+    return response.data
   },
 
   /**
    * Get active locations
    */
   getLocations: async (): Promise<{ data: Location[] }> => {
-    return apiClient.get('/public/locations/active')
+    const response = await apiClient.get('/public/locations/active')
+    return response.data
   }
 }

@@ -18,7 +18,7 @@ describe('PublicCalendar', () => {
       start_date: '2025-11-15',
       end_date: '2025-11-17',
       category: { id: 1, name: 'Música' },
-      location: { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
+      locations: [{ id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' }],
       is_featured: true
     },
     {
@@ -28,7 +28,7 @@ describe('PublicCalendar', () => {
       start_date: '2025-11-20',
       end_date: '2025-11-20',
       category: { id: 2, name: 'Arte' },
-      location: { id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' },
+      locations: [{ id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }],
       is_featured: false
     }
   ]

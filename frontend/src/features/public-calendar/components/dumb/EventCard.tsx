@@ -33,6 +33,9 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
     })
   }
 
+  const imageUrl = event.featured_image || event.image_url
+  const location = event.locations && event.locations.length > 0 ? event.locations[0] : null
+
   return (
     <article
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer p-4"
@@ -43,9 +46,9 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
     >
       {/* Image */}
       <div className="relative h-48 bg-gray-200 mb-4">
-        {event.image_url ? (
+        {imageUrl ? (
           <Image
-            src={event.image_url}
+            src={imageUrl}
             alt={event.title}
             fill
             className="object-cover"
@@ -89,7 +92,7 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
 
         {/* Location */}
         <div className="text-sm text-gray-600">
-          📍 {event.location.name}, {event.location.city}
+          📍 {location ? `${location.name}, ${location.city}` : 'Ubicación por confirmar'}
         </div>
       </div>
     </article>

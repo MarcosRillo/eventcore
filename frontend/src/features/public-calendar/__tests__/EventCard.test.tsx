@@ -18,12 +18,14 @@ describe('EventCard', () => {
     start_time: '18:00',
     end_time: '23:00',
     category: { id: 1, name: 'Música' },
-    location: {
-      id: 1,
-      name: 'Teatro San Martín',
-      city: 'San Miguel de Tucumán',
-      address: 'San Martín 251'
-    },
+    locations: [
+      {
+        id: 1,
+        name: 'Teatro San Martín',
+        city: 'San Miguel de Tucumán',
+        address: 'San Martín 251'
+      }
+    ],
     is_featured: true,
     image_url: 'https://example.com/image.jpg'
   }

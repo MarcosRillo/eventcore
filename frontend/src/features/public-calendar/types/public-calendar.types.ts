@@ -14,14 +14,15 @@ export interface PublicEvent {
     id: number
     name: string
   }
-  location: {
+  locations: Array<{
     id: number
     name: string
     city: string
     address?: string
-  }
+  }>
   is_featured: boolean
   image_url?: string
+  featured_image?: string
 }
 
 export interface EventsResponse {

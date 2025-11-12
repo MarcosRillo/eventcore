@@ -21,7 +21,7 @@ describe('usePublicEvents', () => {
         start_date: '2025-11-15',
         end_date: '2025-11-17',
         category: { id: 1, name: 'Música' },
-        location: { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
+        locations: [{ id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' }],
         is_featured: true
       }
     ],

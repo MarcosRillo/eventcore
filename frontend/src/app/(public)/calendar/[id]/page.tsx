@@ -1,35 +1,85 @@
-/**
- * Event Detail Page
- *
- * Public event detail page (simplified for MVP).
- */
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { apiClient } from '@/lib/api';
+import { Event } from '@/types/event.types';
+import EventDetailPage from './EventDetailPage';
 
-import Link from 'next/link'
+interface EventPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
-export default async function EventDetailPage({
-  params
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
+export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
+  try {
+    // Try to get the event by ID
+    const { id } = await params;
+    const eventId = parseInt(id) || id;
+    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
+    const event = response.data;
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Detalle del Evento</h1>
-        <p className="text-gray-600">
-          Vista de detalle para evento ID: {id}
-        </p>
-        <p className="text-sm text-gray-500 mt-4">
-          (Implementación completa en próxima iteración)
-        </p>
-        <Link
-          href="/calendar"
-          className="inline-block mt-6 text-blue-600 hover:underline"
-        >
-          ← Volver al calendario
-        </Link>
-      </div>
-    </div>
-  )
+    const eventUrl = `/calendar/${id}`;
+    const eventDate = new Date(event.start_date).toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    return {
+      title: `${event.title} - Eventos Tucumán`,
+      description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
+      keywords: `tucuman, turismo, evento, ${event.title}, ${event.category?.name}`,
+      openGraph: {
+        title: event.title,
+        description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
+        type: 'article',
+        locale: 'es_AR',
+        publishedTime: event.created_at,
+        modifiedTime: event.updated_at,
+        images: event.featured_image ? [
+          {
+            url: event.featured_image,
+            width: 1200,
+            height: 630,
+            alt: event.title,
+          }
+        ] : [],
+        section: event.category?.name || 'Eventos',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: event.title,
+        description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
+        images: event.featured_image ? [event.featured_image] : [],
+      },
+      alternates: {
+        canonical: eventUrl
+      },
+      other: {
+        'event:start_time': event.start_date,
+        'event:end_time': event.end_date || event.start_date,
+        'event:location': event.location?.name || event.location_text || '',
+      }
+    };
+  } catch {
+    return {
+      title: 'Evento no encontrado - Tucumán Turismo',
+      description: 'El evento solicitado no fue encontrado o no está disponible.',
+    };
+  }
+}
+
+export default async function EventPage({ params }: EventPageProps) {
+  try {
+    // Try to get the event by ID
+    const { id } = await params;
+    const eventId = parseInt(id) || id;
+    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
+    const event = response.data;
+
+    return <EventDetailPage event={event} />;
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    notFound();
+  }
 }
