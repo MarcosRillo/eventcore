@@ -42,17 +42,17 @@ const Select: React.FC<SelectProps> = ({
   className = '',
   required = false,
 }) => {
-  const baseClasses = 'border rounded-md shadow-sm focus:outline-none focus:ring-1 transition-colors duration-150 disabled:bg-gray-50 disabled:cursor-not-allowed cursor-pointer';
-  
+  const baseClasses = 'border rounded-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer';
+
   const sizeClasses = {
     sm: 'pl-3 pr-8 py-1.5 text-sm',
-    md: 'pl-3 pr-8 py-2 text-sm',
+    md: 'pl-3 pr-8 py-2 text-base',
     lg: 'pl-4 pr-10 py-3 text-base',
   };
 
   const stateClasses = error
-    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500';
+    ? 'border-red-600 bg-red-50 focus:border-red-600 focus:ring-red-500/20'
+    : 'border-neutral-300 bg-neutral-50 focus:bg-white focus:border-primary-500 focus:ring-primary-500/20';
 
   const buttonClasses = [
     baseClasses,
@@ -82,9 +82,9 @@ const Select: React.FC<SelectProps> = ({
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-neutral-600 mb-2">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-600 ml-1">*</span>}
         </label>
       )}
 
@@ -92,14 +92,14 @@ const Select: React.FC<SelectProps> = ({
         <div className="relative">
           <Listbox.Button className={buttonClasses}>
             <span className={`block truncate ${
-              !selectedOption ? 'text-gray-500' : 'text-gray-900'
+              !selectedOption ? 'text-neutral-400' : 'text-neutral-900'
             }`}>
               {displayValue}
             </span>
-            
+
             <span className={`absolute inset-y-0 ${iconPositionClasses[size]} flex items-center pointer-events-none`}>
               <ChevronUpDownIcon
-                className={`${iconClasses[size]} text-gray-400`}
+                className={`${iconClasses[size]} text-neutral-400`}
                 aria-hidden="true"
               />
             </span>
@@ -111,15 +111,15 @@ const Select: React.FC<SelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-neutral-200 focus:outline-none sm:text-sm">
               {options.map((option, optionIdx) => (
                 <Listbox.Option
                   key={optionIdx}
                   className={({ active }) =>
                     `relative cursor-pointer select-none py-2 pl-8 pr-4 ${
                       active
-                        ? 'bg-blue-100 text-blue-900'
-                        : 'text-gray-900'
+                        ? 'bg-primary-50 text-primary-900'
+                        : 'text-neutral-900'
                     } ${
                       option.disabled
                         ? 'opacity-50 cursor-not-allowed'
@@ -133,16 +133,16 @@ const Select: React.FC<SelectProps> = ({
                     <>
                       <span
                         className={`block truncate ${
-                          selected ? 'font-medium' : 'font-normal'
+                          selected ? 'font-semibold' : 'font-normal'
                         }`}
                       >
                         {option.label}
                       </span>
-                      
+
                       {selected && (
                         <span
                           className={`absolute inset-y-0 left-0 flex items-center pl-2 ${
-                            active ? 'text-blue-600' : 'text-blue-600'
+                            active ? 'text-primary-600' : 'text-primary-600'
                           }`}
                         >
                           <CheckIcon className="h-4 w-4" aria-hidden="true" />
@@ -158,13 +158,13 @@ const Select: React.FC<SelectProps> = ({
       </Listbox>
 
       {error && (
-        <p className="mt-1 text-sm text-red-600" role="alert">
+        <p className="mt-2 text-sm text-red-600 font-medium" role="alert">
           {error}
         </p>
       )}
-      
+
       {helperText && !error && (
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-neutral-500">
           {helperText}
         </p>
       )}

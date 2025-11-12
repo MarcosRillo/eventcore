@@ -21,11 +21,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
   disabled,
   ...props
 }, ref) => {
-  const baseClasses = 'border rounded-md shadow-sm focus:outline-none focus:ring-1 transition-colors duration-150 disabled:bg-gray-50 disabled:cursor-not-allowed px-3 py-2 text-sm';
+  const baseClasses = 'border rounded-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:text-neutral-400 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400';
 
   const stateClasses = error
-    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500';
+    ? 'border-red-600 bg-red-50 focus:border-red-600 focus:ring-red-500/20'
+    : 'border-neutral-300 bg-neutral-50 focus:bg-white focus:border-primary-500 focus:ring-primary-500/20';
 
   const textareaClasses = [
     baseClasses,
@@ -37,7 +37,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-neutral-600 mb-2">
           {label}
         </label>
       )}
@@ -48,10 +48,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600 font-medium">{error}</p>
       )}
       {helperText && !error && (
-        <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+        <p className="mt-2 text-sm text-neutral-500">{helperText}</p>
       )}
     </div>
   );
