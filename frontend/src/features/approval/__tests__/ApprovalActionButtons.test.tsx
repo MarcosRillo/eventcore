@@ -174,7 +174,7 @@ describe('ApprovalActionButtons', () => {
       )
 
       const approveButton = screen.getByRole('button', { name: /approve/i })
-      expect(approveButton.className).toContain('success')
+      expect(approveButton.className).toContain('bg-secondary-500')
     })
 
     test('reject button has danger styling', () => {
@@ -186,7 +186,7 @@ describe('ApprovalActionButtons', () => {
       )
 
       const rejectButton = screen.getByRole('button', { name: /reject/i })
-      expect(rejectButton.className).toContain('danger')
+      expect(rejectButton.className).toContain('bg-red-600')
     })
 
     test('request changes button has warning styling', () => {
@@ -198,7 +198,7 @@ describe('ApprovalActionButtons', () => {
       )
 
       const requestButton = screen.getByRole('button', { name: /request changes/i })
-      expect(requestButton.className).toContain('warning')
+      expect(requestButton.className).toContain('bg-amber-500')
     })
   })
 

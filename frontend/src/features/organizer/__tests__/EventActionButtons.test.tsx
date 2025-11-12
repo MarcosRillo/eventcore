@@ -162,7 +162,7 @@ describe('EventActionButtons', () => {
       )
 
       const deleteButton = screen.getByRole('button', { name: /delete/i })
-      expect(deleteButton.className).toContain('danger')
+      expect(deleteButton.className).toContain('bg-red-600')
     })
 
     test('disables delete button when loading', () => {
