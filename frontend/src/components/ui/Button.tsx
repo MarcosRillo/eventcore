@@ -27,16 +27,16 @@ const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none shadow-sm';
+  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
 
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-hover focus:ring-primary shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
-    secondary: 'bg-secondary text-white hover:bg-secondary-hover focus:ring-secondary shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
-    outline: 'border-2 border-primary bg-white text-primary hover:bg-primary-light focus:ring-primary hover:border-primary-hover',
-    ghost: 'text-primary hover:bg-primary-light focus:ring-primary hover:text-primary-hover',
-    danger: 'bg-danger text-white hover:bg-red-700 focus:ring-danger shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
-    success: 'bg-success text-white hover:bg-green-700 focus:ring-success shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
-    warning: 'bg-warning text-white hover:bg-amber-600 focus:ring-warning shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
+    primary: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus:ring-primary-500 shadow-sm hover:shadow-md',
+    secondary: 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 active:bg-neutral-200 border border-neutral-300 focus:ring-primary-500',
+    outline: 'border-2 border-primary-500 bg-white text-primary-700 hover:bg-primary-50 focus:ring-primary-500 hover:border-primary-600',
+    ghost: 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 focus:ring-primary-500',
+    danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500 shadow-sm',
+    success: 'bg-secondary-500 text-white hover:bg-secondary-600 active:bg-secondary-700 focus:ring-secondary-500 shadow-sm',
+    warning: 'bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700 focus:ring-amber-500 shadow-sm',
   };
 
   const sizeClasses = {
