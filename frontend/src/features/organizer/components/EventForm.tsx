@@ -108,14 +108,14 @@ export const EventForm = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Error message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-sm p-4">
+          <p className="text-red-800 font-medium">{error}</p>
         </div>
       )}
 
       {/* Basic Information */}
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Información Básica</h2>
+      <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-neutral-900">Información Básica</h2>
 
         <Input
           label="Título del Evento *"
@@ -148,19 +148,19 @@ export const EventForm = ({
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
               Ubicaciones * (selecciona al menos una)
             </label>
-            <div className="border rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
+            <div className="border border-neutral-300 bg-neutral-50 rounded-sm p-3 space-y-2 max-h-40 overflow-y-auto">
               {locations.map(loc => (
-                <label key={loc.id} className="flex items-center space-x-2 cursor-pointer">
+                <label key={loc.id} className="flex items-center space-x-2 cursor-pointer hover:bg-white rounded px-2 py-1 transition-colors">
                   <input
                     type="checkbox"
                     checked={formData.location_ids?.includes(loc.id) || false}
                     onChange={() => handleLocationToggle(loc.id)}
-                    className="rounded border-gray-300"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
                   />
-                  <span className="text-sm">{loc.name}</span>
+                  <span className="text-sm text-neutral-900">{loc.name}</span>
                 </label>
               ))}
             </div>
@@ -169,8 +169,8 @@ export const EventForm = ({
       </div>
 
       {/* Date */}
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Fecha</h2>
+      <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-neutral-900">Fecha</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
@@ -192,8 +192,8 @@ export const EventForm = ({
       </div>
 
       {/* Additional Info */}
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Información Adicional</h2>
+      <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-neutral-900">Información Adicional</h2>
 
         <Input
           type="url"
