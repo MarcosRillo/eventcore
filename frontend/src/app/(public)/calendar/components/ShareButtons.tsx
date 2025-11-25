@@ -36,7 +36,6 @@ export default function ShareButtons({ event }: ShareButtonsProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Error copying to clipboard:', error);
     }
   };
 

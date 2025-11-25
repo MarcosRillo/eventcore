@@ -49,44 +49,27 @@ export const CreateEventForm = ({
 
   // Load categories and locations when modal opens
   useEffect(() => {
-    console.log('🔄 [EFFECT] isOpen changed to:', isOpen);
     if (isOpen) {
-      console.log('✅ [EFFECT] Modal opened, calling loadFormData()');
       loadFormData();
     }
   }, [isOpen]);
 
   const loadFormData = async () => {
-    console.log('🔍 [LOAD DATA] Starting to load form data...');
     setIsLoadingData(true);
     try {
-      console.log('🔍 [LOAD DATA] Fetching categories and locations...');
       const [categoriesData, locationsData] = await Promise.all([
         getActiveCategories(),
         getActiveLocations(),
       ]);
 
-      console.log('✅ [LOAD DATA] Categories received:', {
-        count: categoriesData?.length,
-        data: categoriesData
-      });
-      console.log('✅ [LOAD DATA] Locations received:', {
-        count: locationsData?.length,
-        data: locationsData
-      });
-
       setCategories(categoriesData);
       setLocations(locationsData);
-
-      console.log('✅ [LOAD DATA] State updated. Current categories:', categoriesData);
-    } catch (error) {
-      console.error('❌ [LOAD DATA] Error loading data:', error);
+    } catch {
       // Set empty arrays as fallback
       setCategories([]);
       setLocations([]);
     } finally {
       setIsLoadingData(false);
-      console.log('🏁 [LOAD DATA] Loading complete. isLoadingData now false');
     }
   };
 

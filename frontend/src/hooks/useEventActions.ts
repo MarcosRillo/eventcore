@@ -50,7 +50,6 @@ export const useEventActions = (): UseEventActionsReturn => {
         ? err.message 
         : 'Error al realizar la acción. Por favor, intente nuevamente.';
       setActionError(errorMessage);
-      console.error('Event action error:', err);
       return null;
     } finally {
       setIsPerformingAction(false);

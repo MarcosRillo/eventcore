@@ -216,7 +216,6 @@ export const EventDetailModal = ({
     try {
       await eventPublicExportService.downloadICalFile();
     } catch (error) {
-      console.error('Error downloading calendar file:', error);
     }
   };
 

@@ -31,7 +31,6 @@ export default function PublicEventFilters({
         const categoriesData = response.categories;
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching categories:', error);
       }
     };
 

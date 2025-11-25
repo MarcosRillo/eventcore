@@ -59,8 +59,6 @@ export const useApprovalManager = (): UseApprovalManagerReturn => {
    * Generic error handler for approval operations
    */
   const handleError = useCallback((error: ApiError | Error | unknown): ApprovalError => {
-    console.error('Approval operation error:', error);
-
     // Handle API errors with proper type guards
     if (error && typeof error === 'object' && 'message' in error) {
       const apiError = error as unknown as ApiError;

@@ -150,26 +150,16 @@ export const toggleCategoryStatus = async (id: number): Promise<Category> => {
  */
 export const getActiveCategories = async (): Promise<Category[]> => {
   try {
-    console.log("📡 [CATEGORY SERVICE] Fetching active categories...");
     const response: AxiosResponse<ApiResponse<Category[]>> =
       await apiClient.get("/categories/active");
-
-    console.log("✅ [CATEGORY SERVICE] Response received:", {
-      status: response.status,
-      dataStructure: response.data,
-      categoriesArray: response.data.data,
-      count: response.data.data?.length,
-    });
 
     // FIX: Handle both formats (array direct or wrapped in .data)
     const categories = Array.isArray(response.data)
       ? response.data // Backend returns array directly
       : response.data.data; // Backend returns {data: [...]}
 
-    console.log("🔧 [CATEGORY SERVICE] Normalized categories:", categories);
     return categories;
   } catch (error) {
-    console.error("❌ [CATEGORY SERVICE] Error fetching categories:", error);
     throw error;
   }
 };

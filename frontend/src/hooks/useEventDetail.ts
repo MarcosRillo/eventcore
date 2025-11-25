@@ -44,7 +44,6 @@ export const useEventDetail = (
         ? err.message 
         : 'Error al cargar los detalles del evento';
       setError(errorMessage);
-      console.error('Event detail fetch error:', err);
     } finally {
       setIsLoading(false);
     }

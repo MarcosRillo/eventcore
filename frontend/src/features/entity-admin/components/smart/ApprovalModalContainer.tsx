@@ -130,7 +130,6 @@ export const ApprovalModalContainer: React.FC<ApprovalModalContainerProps> = ({
   // Handle form submission
   const handleSubmit = async () => {
     if (!event) {
-      console.error('No hay evento para procesar');
       return;
     }
 
@@ -170,8 +169,7 @@ export const ApprovalModalContainer: React.FC<ApprovalModalContainerProps> = ({
       setFormData({ action: '', comment: '' });
       onSuccess();
       onClose();
-    } catch (error) {
-      console.error('Error processing approval action:', error);
+    } catch {
       setErrors({ action: 'Error al procesar la acción. Inténtalo de nuevo.' });
     } finally {
       setIsLoading(false);

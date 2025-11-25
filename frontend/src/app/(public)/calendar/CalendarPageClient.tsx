@@ -52,15 +52,15 @@ export default function CalendarPageClient() {
       link.click();
       
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading calendar:', error);
+    } catch {
+      // Silent fail - download error
     }
   };
 
   const handleShareCalendar = async () => {
     const url = window.location.href;
     const text = 'Calendario de Eventos de Tucumán - Descubre todos los eventos turísticos y culturales';
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -68,8 +68,8 @@ export default function CalendarPageClient() {
           text,
           url
         });
-      } catch (error) {
-        console.error('Error sharing:', error);
+      } catch {
+        // Silent fail - share cancelled or failed
       }
     } else {
       try {
@@ -79,8 +79,7 @@ export default function CalendarPageClient() {
           type: 'success',
           duration: 3000,
         });
-      } catch (error) {
-        console.error('Error copying to clipboard:', error);
+      } catch {
         addToast({
           message: 'Error al copiar el enlace',
           type: 'error',

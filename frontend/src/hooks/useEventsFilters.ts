@@ -19,14 +19,9 @@ interface UseEventsFiltersReturn {
   handlePageChange: (page: number) => void;
 }
 
-// Render counter for debugging
-let useEventsFiltersRenderCount = 0;
-
 export const useEventsFilters = (
   initialTab: DashboardTab = 'requires-action'
 ): UseEventsFiltersReturn => {
-  console.log(`🔢 useEventsFilters Render #${++useEventsFiltersRenderCount} - initialTab: ${initialTab}`);
-
   const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);

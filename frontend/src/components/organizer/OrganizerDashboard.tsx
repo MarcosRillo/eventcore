@@ -19,7 +19,6 @@ export function OrganizerDashboard() {
         const data = await organizerService.getDashboardStats();
         setStats(data);
       } catch (error) {
-        console.error('Error loading dashboard stats:', error);
       } finally {
         setLoading(false);
       }

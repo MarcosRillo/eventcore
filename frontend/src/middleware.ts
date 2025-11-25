@@ -73,7 +73,6 @@ export function middleware(request: NextRequest) {
 
     if (!isAllowed) {
       // Trying to access Entity routes - redirect to organizer dashboard
-      console.log(`[Middleware] Event Organizer blocked from: ${pathname}`);
       return NextResponse.redirect(new URL('/organizer/dashboard', request.url));
     }
   }
@@ -83,7 +82,6 @@ export function middleware(request: NextRequest) {
   if (entityRoles.includes(roleName)) {
     if (pathname.startsWith('/organizer')) {
       // Trying to access Organizer routes - redirect to events
-      console.log(`[Middleware] ${roleName} blocked from: ${pathname}`);
       return NextResponse.redirect(new URL('/events', request.url));
     }
   }
@@ -101,7 +99,6 @@ export function middleware(request: NextRequest) {
     ];
 
     if (readOnlyRestrictions.some(path => pathname.startsWith(path))) {
-      console.log(`[Middleware] Entity Staff blocked from write route: ${pathname}`);
       return NextResponse.redirect(new URL('/events', request.url));
     }
   }

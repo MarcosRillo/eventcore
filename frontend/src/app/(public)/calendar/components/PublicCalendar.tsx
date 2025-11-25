@@ -59,7 +59,6 @@ export default function PublicCalendar({
       const response = await apiClient.get<{events: Event[]}>(`/public/events/calendar/${year}/${month}`);
       setEvents(response.events);
     } catch (error) {
-      console.error('Error fetching calendar events:', error);
     } finally {
       setLoading(false);
     }

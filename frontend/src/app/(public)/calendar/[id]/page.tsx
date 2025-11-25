@@ -79,7 +79,6 @@ export default async function EventPage({ params }: EventPageProps) {
 
     return <EventDetailPage event={event} />;
   } catch (error) {
-    console.error('Error fetching event:', error);
     notFound();
   }
 }

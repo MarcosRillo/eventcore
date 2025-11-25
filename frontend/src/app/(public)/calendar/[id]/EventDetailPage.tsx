@@ -92,7 +92,6 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
       link.download = `evento-${event.id}.ics`;
       link.click();
     } catch (error) {
-      console.error('Error downloading iCal:', error);
     }
   };
 

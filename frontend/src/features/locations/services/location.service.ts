@@ -46,19 +46,9 @@ export const getLocations = async (params: LocationFilters = {}): Promise<Locati
  */
 export const getActiveLocations = async (): Promise<Location[]> => {
   try {
-    console.log('📡 [LOCATION SERVICE] Fetching active locations...');
     const response: AxiosResponse<{ data: Location[] }> = await apiClient.get('/locations/active');
-
-    console.log('✅ [LOCATION SERVICE] Response received:', {
-      status: response.status,
-      dataStructure: response.data,
-      locationsArray: response.data.data,
-      count: response.data.data?.length
-    });
-
     return response.data.data;
   } catch (error) {
-    console.error('❌ [LOCATION SERVICE] Error fetching locations:', error);
     throw error;
   }
 };
