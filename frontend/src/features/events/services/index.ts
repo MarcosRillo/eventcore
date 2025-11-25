@@ -8,10 +8,10 @@ export { getEventServiceForContext } from './event.service';
 export type { EventServiceContext } from './event.service';
 
 // Specialized services
-// eventAdminService, eventAdminApprovalService, combinedEventAdminService moved to @/features/entity-admin
+export { eventAdminService, eventAdminApprovalService, combinedEventAdminService } from './eventAdminService';
 export { eventPublicService, eventPublicExportService, combinedEventPublicService } from './eventPublicService';
 export { eventOrganizerService, combinedEventOrganizerService } from './eventOrganizerService';
-// approvalService moved to @/features/entity-admin
+export { approvalService, approvalValidation } from './approvalService';
 
 // Service types
 export type {
