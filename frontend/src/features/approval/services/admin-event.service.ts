@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/services/apiClient'
-import { EventsResponse } from '../types/approval.types'
+import { EventsResponse } from '@/features/approval/types/approval.types'
 
 interface FetchEventsParams {
   status?: string | null

@@ -1,5 +1,5 @@
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { EventActionButtonsContainer } from '../smart/EventActionButtonsContainer'
+import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
 
 interface OrganizerEventListItemProps {
   event: OrganizerEvent

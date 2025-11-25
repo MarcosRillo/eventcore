@@ -18,7 +18,7 @@ import {
 import moment from 'moment';
 import { Event } from '@/types/event.types';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
-import ShareButtons from '../components/ShareButtons';
+import ShareButtons from '@/app/(public)/calendar/components/ShareButtons';
 
 interface EventDetailPageProps {
   event: Event;

@@ -5,8 +5,8 @@
  */
 
 import { useState, useEffect } from 'react'
-import { adminStatsService } from '../services/admin-stats.service'
-import { AdminStats } from '../types/approval.types'
+import { adminStatsService } from '@/features/approval/services/admin-stats.service'
+import { AdminStats } from '@/features/approval/types/approval.types'
 
 interface UseAdminStatsReturn {
   stats: AdminStats | null

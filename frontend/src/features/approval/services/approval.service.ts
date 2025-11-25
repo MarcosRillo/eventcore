@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/services/apiClient'
-import { Event } from '../types/approval.types'
+import { Event } from '@/features/approval/types/approval.types'
 
 export const approvalService = {
   /**

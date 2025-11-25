@@ -4,8 +4,8 @@
  * Main public-facing calendar page with event listing and filters.
  */
 
-import { PublicEvent, Category, Location } from '../../types/public-calendar.types'
-import { EventCard } from './EventCard'
+import { PublicEvent, Category, Location } from '@/features/public-calendar/types/public-calendar.types'
+import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface PublicCalendarProps {

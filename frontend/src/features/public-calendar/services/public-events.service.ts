@@ -10,7 +10,7 @@ import {
   PublicEvent,
   Category,
   Location
-} from '../types/public-calendar.types'
+} from '@/features/public-calendar/types/public-calendar.types'
 
 interface FetchEventsParams {
   category_id?: number | null

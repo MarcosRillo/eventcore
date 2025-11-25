@@ -6,13 +6,13 @@
 
 'use client'
 
-import { AdminDashboard } from '../dumb/AdminDashboard'
+import { AdminDashboard } from '@/features/approval/components/dumb/AdminDashboard'
 import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
 import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
 import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
-import { ApproveConfirmModal } from '../dumb/ApproveConfirmModal'
-import { RejectConfirmModal } from '../dumb/RejectConfirmModal'
-import { RequestChangesModal } from '../dumb/RequestChangesModal'
+import { ApproveConfirmModal } from '@/features/approval/components/dumb/ApproveConfirmModal'
+import { RejectConfirmModal } from '@/features/approval/components/dumb/RejectConfirmModal'
+import { RequestChangesModal } from '@/features/approval/components/dumb/RequestChangesModal'
 import { PublishConfirmModal } from '@/shared/components/modals'
 
 export const AdminDashboardContainer = () => {

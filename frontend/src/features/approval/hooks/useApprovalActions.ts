@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react'
-import { approvalService } from '../services/approval.service'
+import { approvalService } from '@/features/approval/services/approval.service'
 import { useToast } from '@/components/ui/Toast'
 
 interface UseApprovalActionsReturn {

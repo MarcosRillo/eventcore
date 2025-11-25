@@ -6,7 +6,7 @@
  */
 
 import Image from 'next/image'
-import { PublicEvent } from '../../types/public-calendar.types'
+import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 interface EventCardProps {
   event: PublicEvent

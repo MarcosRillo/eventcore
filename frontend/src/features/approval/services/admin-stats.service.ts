@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/services/apiClient'
-import { AdminStats } from '../types/approval.types'
+import { AdminStats } from '@/features/approval/types/approval.types'
 
 export const adminStatsService = {
   /**

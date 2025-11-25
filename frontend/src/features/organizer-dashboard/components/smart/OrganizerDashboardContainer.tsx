@@ -7,7 +7,7 @@
 'use client'
 
 import { useState } from 'react'
-import { OrganizerDashboard } from '../dumb/OrganizerDashboard'
+import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 

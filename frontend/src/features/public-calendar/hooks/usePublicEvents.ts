@@ -5,13 +5,13 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { publicEventsService } from '../services/public-events.service'
+import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   PublicEvent,
   Category,
   Location,
   EventFilters
-} from '../types/public-calendar.types'
+} from '@/features/public-calendar/types/public-calendar.types'
 
 interface UsePublicEventsReturn {
   events: PublicEvent[]
