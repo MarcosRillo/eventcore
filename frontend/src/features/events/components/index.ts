@@ -7,7 +7,7 @@ export { EventFiltersBar } from './EventFiltersBar';
 // Dashboard Components (migrated from dashboard/)
 export { EventsFilterTabs } from './EventsFilterTabs';
 export { EventsList } from './EventsList';
-export { DashboardModeView } from './DashboardModeView';
+// DashboardModeView moved to @/features/entity-admin
 
 // Dumb Components (Presentational)
 export * from './dumb';

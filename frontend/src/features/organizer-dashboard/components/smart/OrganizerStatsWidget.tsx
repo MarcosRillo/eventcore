@@ -1,7 +1,7 @@
 "use client"
-import { useOrganizerStats } from '@/features/organizer/hooks/useOrganizerStats';
-import { OrganizerStatsCard } from '@/features/organizer/components/dumb/OrganizerStatsCard';
-import { StatCardData } from '@/features/organizer/types/organizerStats.types';
+import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats';
+import { OrganizerStatsCard } from '@/features/organizer-dashboard/components/dumb/OrganizerStatsCard';
+import { StatCardData } from '@/features/organizer-dashboard/types/organizerStats.types';
 
 export const OrganizerStatsWidget = () => {
   const { stats, loading, error, refetch } = useOrganizerStats();

@@ -17,7 +17,7 @@ import {
 } from '@/types/event.types';
 
 // Import specialized services
-import { combinedEventAdminService } from './eventAdminService';
+import { combinedEventAdminService } from '@/features/entity-admin/services/eventAdminService';
 import { combinedEventPublicService } from './eventPublicService';
 import { combinedEventOrganizerService } from './eventOrganizerService';
 

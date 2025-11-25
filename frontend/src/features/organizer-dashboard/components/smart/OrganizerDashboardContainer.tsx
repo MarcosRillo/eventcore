@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import { OrganizerDashboard } from '../dumb/OrganizerDashboard'
-import { useOrganizerStats } from '@/features/organizer/hooks/useOrganizerStats'
+import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 
 export const OrganizerDashboardContainer = () => {

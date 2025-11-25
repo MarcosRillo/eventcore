@@ -5,7 +5,7 @@
  * and provides access to all organizer functionality.
  */
 
-import { OrganizerDashboardContainer } from '@/features/organizer/components/smart/OrganizerDashboardContainer'
+import { OrganizerDashboardContainer } from '@/features/organizer-dashboard'
 
 export default function OrganizerDashboardPage() {
   return <OrganizerDashboardContainer />

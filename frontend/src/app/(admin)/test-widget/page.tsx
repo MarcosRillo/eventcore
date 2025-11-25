@@ -1,4 +1,4 @@
-import { OrganizerStatsWidget } from '@/features/organizer/components/smart/OrganizerStatsWidget';
+import { OrganizerStatsWidget } from '@/features/organizer-dashboard';
 
 export default function TestWidgetPage() {
   return (

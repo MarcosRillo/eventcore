@@ -4,14 +4,14 @@
  * Main dashboard UI integrating stats, filters, and event list.
  */
 
-import { OrganizerQuickFilters } from './OrganizerQuickFilters'
-import { OrganizerEventListItem } from './OrganizerEventListItem'
-import { OrganizerEventFormContainer } from '../smart/OrganizerEventFormContainer'
+import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
+import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
+import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { OrganizerStats } from '@/features/organizer/types/organizerStats.types'
+import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
 
 interface OrganizerDashboardProps {
   stats: OrganizerStats | null

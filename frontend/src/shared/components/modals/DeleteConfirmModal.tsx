@@ -1,7 +1,8 @@
 /**
- * Delete Confirmation Modal
+ * Delete Confirmation Modal - Shared Component
  *
- * Asks user to confirm deleting event (destructive action).
+ * Generic confirmation modal for delete operations.
+ * Reusable across all features (events, categories, locations, etc.)
  */
 
 import Modal from '@/components/ui/Modal'
@@ -12,7 +13,9 @@ interface DeleteConfirmModalProps {
   onClose: () => void
   onConfirm: () => void
   loading: boolean
-  eventTitle?: string
+  title?: string
+  itemName?: string
+  warningMessage?: string
 }
 
 export const DeleteConfirmModal = ({
@@ -20,20 +23,22 @@ export const DeleteConfirmModal = ({
   onClose,
   onConfirm,
   loading,
-  eventTitle
+  title = 'Delete Item',
+  itemName,
+  warningMessage = 'Warning: This action cannot be undone'
 }: DeleteConfirmModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Delete Event">
+    <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-4">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-red-800 font-semibold">
-            Warning: This action cannot be undone
+            {warningMessage}
           </p>
         </div>
 
         <p className="text-gray-700">
           Are you sure you want to delete{' '}
-          {eventTitle && <strong>&quot;{eventTitle}&quot;</strong>}?
+          {itemName && <strong>&quot;{itemName}&quot;</strong>}?
         </p>
 
         <div className="flex justify-end gap-3">

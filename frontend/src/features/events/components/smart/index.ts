@@ -4,5 +4,5 @@
  */
 
 export { EventCardContainer } from './EventCardContainer';
-export { EventTableContainer } from './EventTableContainer';
-export { ApprovalModalContainer } from './ApprovalModalContainer';
+// EventTableContainer moved to @/features/entity-admin
+// ApprovalModalContainer moved to @/features/entity-admin

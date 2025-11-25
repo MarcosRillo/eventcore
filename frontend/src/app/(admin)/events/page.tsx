@@ -5,15 +5,13 @@ import { PlusIcon, ClockIcon, CheckCircleIcon, ShareIcon, XCircleIcon, ViewColum
 import { useAuth } from '@/context/AuthContext';
 import { Event } from '@/types/event.types';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
-import { useApprovalManager } from '@/features/events/hooks/useApprovalManager';
+import { useApprovalManager } from '@/features/entity-admin/hooks';
 import {
   CreateEventForm,
   EditEventForm,
   EventFiltersBar,
-  DashboardModeView,
 } from '@/features/events/components';
-import { EventTableContainer } from '@/features/events/components/smart';
-import { ApprovalModalContainer } from '@/features/events/components/smart';
+import { DashboardModeView, EventTableContainer, ApprovalModalContainer } from '@/features/entity-admin';
 import { EventDetailModal } from '@/components/ui';
 import { Pagination, Button, ConfirmDialog, PromptDialog } from '@/components/ui';
 

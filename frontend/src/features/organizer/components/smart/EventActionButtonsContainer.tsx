@@ -8,8 +8,7 @@
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { useEventActions } from '@/features/organizer/hooks/useEventActions'
 import { EventActionButtons } from '@/features/organizer/components/dumb/EventActionButtons'
-import { PublishConfirmModal } from '@/features/organizer/components/dumb/PublishConfirmModal'
-import { DeleteConfirmModal } from '@/features/organizer/components/dumb/DeleteConfirmModal'
+import { PublishConfirmModal, DeleteConfirmModal } from '@/shared/components/modals'
 
 interface EventActionButtonsContainerProps {
   event: OrganizerEvent
@@ -80,7 +79,8 @@ export const EventActionButtonsContainer = ({
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         loading={loading}
-        eventTitle={event.title}
+        title="Delete Event"
+        itemName={event.title}
       />
     </>
   )

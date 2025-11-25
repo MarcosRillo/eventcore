@@ -5,6 +5,8 @@
  * with confirmation modals, loading states, and toast notifications.
  */
 
+'use client';
+
 import { useState } from 'react'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { useToast } from '@/components/ui/Toast'

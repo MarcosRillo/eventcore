@@ -4,7 +4,5 @@
  */
 
 export { EventCard } from './EventCard';
-export { EventTable } from './EventTable';
-export { ApprovalModal } from './ApprovalModal';
-export type { EventTableViewMode, ColumnConfig, ActionConfig, ConfirmDialogData } from './EventTable';
-export type { ApprovalActionOption, ApprovalFormData, ApprovalFormErrors } from './ApprovalModal';
+// EventTable moved to @/features/entity-admin
+// ApprovalModal moved to @/features/entity-admin

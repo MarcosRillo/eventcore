@@ -9,7 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Event } from '@/types/event.types';
-import { EventsFilterTabs, EventsList, DashboardTab } from './';
+import { EventsFilterTabs, EventsList, DashboardTab } from '@/features/events/components';
 
 interface DashboardModeViewProps {
   events: Event[];

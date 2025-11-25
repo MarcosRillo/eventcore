@@ -1,4 +1,4 @@
-import { StatCardData } from '@/features/organizer/types/organizerStats.types';
+import { StatCardData } from '@/features/organizer-dashboard/types/organizerStats.types';
 
 interface OrganizerStatsCardProps {
   stats: StatCardData[];

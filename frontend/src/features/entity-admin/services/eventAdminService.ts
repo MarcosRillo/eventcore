@@ -15,7 +15,7 @@ import {
   ApprovalStatistics,
   EventStatus
 } from '@/types/event.types';
-import { AdminEventService } from './types';
+import { AdminEventService } from '@/features/events/services/types';
 
 /**
  * Admin-level event CRUD operations

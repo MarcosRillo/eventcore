@@ -13,7 +13,7 @@ import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions
 import { ApproveConfirmModal } from '../dumb/ApproveConfirmModal'
 import { RejectConfirmModal } from '../dumb/RejectConfirmModal'
 import { RequestChangesModal } from '../dumb/RequestChangesModal'
-import { PublishConfirmModal } from '../dumb/PublishConfirmModal'
+import { PublishConfirmModal } from '@/shared/components/modals'
 
 export const AdminDashboardContainer = () => {
   // Fetch stats and events
@@ -111,7 +111,7 @@ export const AdminDashboardContainer = () => {
         onClose={closePublishModal}
         onConfirm={() => selectedEventId && publishEvent(selectedEventId)}
         loading={actionLoading}
-        eventTitle={selectedEventTitle}
+        title="Publish Event"
       />
     </>
   )

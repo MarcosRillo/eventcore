@@ -8,7 +8,7 @@
 
 import { useState, useCallback } from 'react';
 import { Event } from '@/types/event.types';
-import { approvalService, approvalValidation } from '@/features/events/services/approvalService';
+import { approvalService, approvalValidation } from '@/features/entity-admin/services/approvalService';
 import { ApiError } from '@/lib/api';
 
 interface ApprovalError {

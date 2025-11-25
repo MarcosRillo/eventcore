@@ -1,5 +1,8 @@
 /**
- * Publish Confirmation Modal
+ * Publish Confirmation Modal - Shared Component
+ *
+ * Generic confirmation modal for publish operations.
+ * Reusable across all features that need publish/approval workflows.
  */
 
 import Modal from '@/components/ui/Modal'
@@ -10,7 +13,9 @@ interface PublishConfirmModalProps {
   onClose: () => void
   onConfirm: () => void
   loading: boolean
-  eventTitle?: string
+  title?: string
+  message?: string
+  confirmLabel?: string
 }
 
 export const PublishConfirmModal = ({
@@ -18,17 +23,15 @@ export const PublishConfirmModal = ({
   onClose,
   onConfirm,
   loading,
-  eventTitle
+  title = 'Publish Item',
+  message = 'Are you sure you want to publish this item? It will be submitted for internal approval.',
+  confirmLabel = 'Publish'
 }: PublishConfirmModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Publish Event">
+    <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-4">
         <p className="text-gray-700">
-          Are you sure you want to publish{' '}
-          {eventTitle && <strong>&quot;{eventTitle}&quot;</strong>} to the public calendar?
-        </p>
-        <p className="text-sm text-gray-600">
-          The event will be visible to all users on the public calendar.
+          {message}
         </p>
 
         <div className="flex justify-end gap-3">
@@ -44,7 +47,7 @@ export const PublishConfirmModal = ({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? 'Publishing...' : 'Publish to Calendar'}
+            {loading ? `${confirmLabel}ing...` : confirmLabel}
           </Button>
         </div>
       </div>
