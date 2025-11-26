@@ -30,7 +30,7 @@ export const PublishConfirmModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-4">
-        <p className="text-gray-700">
+        <p className="text-neutral-700">
           {message}
         </p>
 

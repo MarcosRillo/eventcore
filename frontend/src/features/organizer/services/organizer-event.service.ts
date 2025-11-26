@@ -2,8 +2,8 @@ import apiClient from '@/services/apiClient'
 import { EventListParams, EventListResponse, CreateEventDto, UpdateEventDto, OrganizerEvent } from '@/features/organizer/types/event.types'
 
 export const getEvents = async (params: EventListParams): Promise<EventListResponse> => {
-  const response = await apiClient.get<{data: EventListResponse}>('/organizer/events', { params })
-  return response.data.data
+  const response = await apiClient.get<EventListResponse>('/organizer/events', { params })
+  return response.data
 }
 
 export const getEvent = async (id: number): Promise<{ data: OrganizerEvent }> => {

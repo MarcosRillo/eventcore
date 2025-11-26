@@ -32,8 +32,10 @@ describe('OrganizerDashboard', () => {
     total_events: 25,
     pending_internal: 5,
     approved_internal: 8,
+    pending_public: 3,
     published: 10,
-    requires_changes: 2
+    requires_changes: 2,
+    rejected: 2
   }
 
   const mockEvents: OrganizerEvent[] = [
@@ -41,15 +43,13 @@ describe('OrganizerDashboard', () => {
       id: 1,
       title: 'Event 1',
       status: 'draft',
-      event_date: '2025-11-01',
-      location: 'Location 1'
+      start_date: '2025-11-01T10:00:00'
     },
     {
       id: 2,
       title: 'Event 2',
       status: 'published',
-      event_date: '2025-11-15',
-      location: 'Location 2'
+      start_date: '2025-11-15T10:00:00'
     }
   ]
 

@@ -91,7 +91,7 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
       link.href = iCalUrl;
       link.download = `evento-${event.id}.ics`;
       link.click();
-    } catch (error) {
+    } catch {
     }
   };
 

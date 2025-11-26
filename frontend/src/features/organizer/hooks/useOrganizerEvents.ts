@@ -27,9 +27,9 @@ export const useOrganizerEvents = () => {
 
       const response = await getEvents(params)
       setEvents(response.data)
-      setCurrentPage(response.pagination.current_page)
-      setTotalPages(response.pagination.last_page || 1)
-      setTotal(response.pagination.total)
+      setCurrentPage(response.current_page)
+      setTotalPages(response.last_page || 1)
+      setTotal(response.total)
     } catch {
       setError('Error loading events')
     } finally {

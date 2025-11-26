@@ -13,9 +13,8 @@ describe('EventActionButtons', () => {
   const mockEvent: OrganizerEvent = {
     id: 1,
     title: 'Test Event',
-    event_date: '2025-11-01',
-    status: 'draft',
-    location: 'Test Location'
+    start_date: '2025-11-01T10:00:00',
+    status: 'draft'
   }
 
   const mockHandlers = {

@@ -66,7 +66,10 @@ describe('OrganizerEventList', () => {
 
       ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
         data: mockEvents,
-        pagination: { total: 2, per_page: 10, current_page: 1 }
+        current_page: 1,
+        last_page: 1,
+        total: 2,
+        per_page: 10
       })
 
       // ACT
@@ -100,7 +103,10 @@ describe('OrganizerEventList', () => {
 
       ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
         data: mockEvents,
-        pagination: { total: 25, per_page: 10, current_page: 1, last_page: 3 }
+        current_page: 1,
+        last_page: 3,
+        total: 25,
+        per_page: 10
       })
 
       // ACT
@@ -135,11 +141,17 @@ describe('OrganizerEventList', () => {
       ;(organizerEventService.getEvents as jest.Mock)
         .mockResolvedValueOnce({
           data: mockPage1,
-          pagination: { total: 15, per_page: 10, current_page: 1, last_page: 2 }
+          current_page: 1,
+          last_page: 2,
+          total: 15,
+          per_page: 10
         })
         .mockResolvedValueOnce({
           data: mockPage2,
-          pagination: { total: 15, per_page: 10, current_page: 2, last_page: 2 }
+          current_page: 2,
+          last_page: 2,
+          total: 15,
+          per_page: 10
         })
 
       // ACT
@@ -179,11 +191,17 @@ describe('OrganizerEventList', () => {
       ;(organizerEventService.getEvents as jest.Mock)
         .mockResolvedValueOnce({
           data: allEvents,
-          pagination: { total: 2, per_page: 10, current_page: 1 }
+          current_page: 1,
+          last_page: 1,
+          total: 2,
+          per_page: 10
         })
         .mockResolvedValueOnce({
           data: publishedEvents,
-          pagination: { total: 1, per_page: 10, current_page: 1 }
+          current_page: 1,
+          last_page: 1,
+          total: 1,
+          per_page: 10
         })
 
       // ACT
@@ -218,7 +236,10 @@ describe('OrganizerEventList', () => {
       // ARRANGE
       ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
         data: [],
-        pagination: { total: 0, per_page: 10, current_page: 1 }
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+        per_page: 10
       })
 
       // ACT
@@ -241,11 +262,17 @@ describe('OrganizerEventList', () => {
       ;(organizerEventService.getEvents as jest.Mock)
         .mockResolvedValueOnce({
           data: allEvents,
-          pagination: { total: 1, per_page: 10, current_page: 1 }
+          current_page: 1,
+          last_page: 1,
+          total: 1,
+          per_page: 10
         })
         .mockResolvedValueOnce({
           data: [],
-          pagination: { total: 0, per_page: 10, current_page: 1 }
+          current_page: 1,
+          last_page: 1,
+          total: 0,
+          per_page: 10
         })
 
       // ACT
@@ -277,7 +304,10 @@ describe('OrganizerEventList', () => {
 
       ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
         data: mockEvents,
-        pagination: { total: 1, per_page: 10, current_page: 1 }
+        current_page: 1,
+        last_page: 1,
+        total: 1,
+        per_page: 10
       })
 
       // ACT
@@ -294,55 +324,7 @@ describe('OrganizerEventList', () => {
       expect(mockPush).toHaveBeenCalledWith('/organizer/events/1/edit')
     })
 
-    // Test 9: SKIPPED - Delete functionality refactored
-    // REASON: Delete now uses DeleteConfirmModal component
-    // COVERAGE: Tested in EventActionButtons.test.tsx (3 delete tests)
-    // TODO: Remove this test in v1.1 cleanup
-    test.skip('should show confirmation dialog and delete event', async () => {
-      // ARRANGE
-      const mockEvents = [
-        { id: 1, title: 'Event 1', status: 'draft', event_date: '2025-11-15', location: 'Loc' },
-        { id: 2, title: 'Event 2', status: 'draft', event_date: '2025-11-16', location: 'Loc' }
-      ]
-
-      ;(organizerEventService.getEvents as jest.Mock)
-        .mockResolvedValueOnce({
-          data: mockEvents,
-          pagination: { total: 2, per_page: 10, current_page: 1 }
-        })
-        .mockResolvedValueOnce({
-          data: [mockEvents[1]],
-          pagination: { total: 1, per_page: 10, current_page: 1 }
-        })
-
-      ;(organizerEventService.deleteEvent as jest.Mock).mockResolvedValue({ success: true })
-
-      // Mock window.confirm
-      global.confirm = jest.fn(() => true)
-
-      // ACT
-      renderWithProviders(<OrganizerEventListContainer />)
-
-      await waitFor(() => {
-        expect(screen.getByText('Event 1')).toBeInTheDocument()
-      })
-
-      const deleteButton = screen.getByLabelText(/delete.*event 1/i)
-      fireEvent.click(deleteButton)
-
-      // ASSERT
-      expect(global.confirm).toHaveBeenCalledWith(
-        expect.stringContaining('delete')
-      )
-
-      await waitFor(() => {
-        expect(organizerEventService.deleteEvent).toHaveBeenCalledWith(1)
-        expect(screen.queryByText('Event 1')).not.toBeInTheDocument()
-        expect(screen.getByText('Event 2')).toBeInTheDocument()
-      })
-    })
-
-    // Test 10: Handles view action
+    // Test 9: Handles view action
     test('should navigate to event detail when view button clicked', async () => {
       // ARRANGE
       const mockEvents = [
@@ -351,7 +333,10 @@ describe('OrganizerEventList', () => {
 
       ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
         data: mockEvents,
-        pagination: { total: 1, per_page: 10, current_page: 1 }
+        current_page: 1,
+        last_page: 1,
+        total: 1,
+        per_page: 10
       })
 
       // ACT
@@ -386,43 +371,6 @@ describe('OrganizerEventList', () => {
       await waitFor(() => {
         expect(screen.getByText(/error loading events/i)).toBeInTheDocument()
         expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
-      })
-    })
-
-    // Test 12: SKIPPED - Delete loading state refactored
-    // REASON: Delete now uses DeleteConfirmModal with loading state
-    // COVERAGE: Tested in useEventActions.test.ts (deleteEvent with loading)
-    // TODO: Remove this test in v1.1 cleanup
-    test.skip('should show loading state during delete operation', async () => {
-      // ARRANGE
-      const mockEvents = [
-        { id: 1, title: 'Event 1', status: 'draft', event_date: '2025-11-15', location: 'Loc' }
-      ]
-
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
-        data: mockEvents,
-        pagination: { total: 1, per_page: 10, current_page: 1 }
-      })
-
-      ;(organizerEventService.deleteEvent as jest.Mock).mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 1000))
-      )
-
-      global.confirm = jest.fn(() => true)
-
-      // ACT
-      renderWithProviders(<OrganizerEventListContainer />)
-
-      await waitFor(() => {
-        expect(screen.getByText('Event 1')).toBeInTheDocument()
-      })
-
-      const deleteButton = screen.getByLabelText(/delete.*event 1/i)
-      fireEvent.click(deleteButton)
-
-      // ASSERT
-      await waitFor(() => {
-        expect(screen.getByText(/deleting/i)).toBeInTheDocument()
       })
     })
   })

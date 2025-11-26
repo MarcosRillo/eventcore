@@ -111,8 +111,11 @@ Route::prefix('v1')->group(function () {
             // Event read-only
             Route::get('events', [FeatureEventController::class, 'index']);
             Route::get('events/{id}', [FeatureEventController::class, 'show']);
+        });
 
-            // Categories y Locations - solo lectura
+        // ===== CATEGORIES & LOCATIONS READ ACCESS (All authenticated users need this) =====
+        Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer'])->group(function () {
+            // Categories y Locations - solo lectura (necesario para formularios)
             Route::get('categories', [CategoryController::class, 'index']);
             Route::get('categories/active', [CategoryController::class, 'active']);
             Route::get('categories/{category}', [CategoryController::class, 'show']);

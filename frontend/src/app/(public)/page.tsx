@@ -1,42 +1,42 @@
-'use client';
+import { Metadata } from 'next'
+import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
 
-import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { LoadingSpinner } from '@/components/ui';
+export const metadata: Metadata = {
+  title: 'Eventos Tucumán - Turismo y Cultura',
+  description:
+    'Descubrí los mejores eventos turísticos y culturales de Tucumán. Música, arte, gastronomía, festivales y mucho más. Plataforma oficial de eventos.',
+  keywords:
+    'tucuman, turismo, eventos, calendario, festivales, cultura, actividades, argentina, noroeste argentino',
+  openGraph: {
+    title: 'Eventos Tucumán - Turismo y Cultura',
+    description:
+      'Descubrí los mejores eventos turísticos y culturales de Tucumán',
+    type: 'website',
+    locale: 'es_AR',
+    siteName: 'Eventos Tucumán'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Eventos Tucumán - Turismo y Cultura',
+    description:
+      'Descubrí los mejores eventos turísticos y culturales de Tucumán'
+  },
+  alternates: {
+    canonical: '/'
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1
+    }
+  }
+}
 
 export default function HomePage() {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-  const hasRedirected = useRef(false);
-
-  useEffect(() => {
-    if (!isLoading && !hasRedirected.current) {
-      if (!user) {
-        hasRedirected.current = true;
-        router.replace('/login');
-      } else {
-        // Redirect based on user role
-        hasRedirected.current = true;
-
-        if (user.role?.role_code === 'platform_admin') {
-          router.replace('/admin/platform');
-        } else if (user.role?.role_code === 'entity_admin' || user.role?.role_code === 'entity_staff') {
-          router.replace('/events');
-        } else {
-          router.replace('/events');
-        }
-      }
-    }
-  }, [user, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="xl" text="Cargando..." />
-      </div>
-    );
-  }
-
-  return null;
+  return <LandingContainer />
 }

@@ -365,7 +365,7 @@ export const CreateEventForm = ({
                 fullWidth
                 disabled={isLoadingData}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 Selecciona una ubicación de las predefinidas en el sistema
               </p>
             </div>
@@ -380,7 +380,7 @@ export const CreateEventForm = ({
                 error={errors.location_text}
                 fullWidth
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 Describe la ubicación del evento de forma libre
               </p>
             </div>
@@ -406,9 +406,9 @@ export const CreateEventForm = ({
               id="is_featured"
               checked={formData.is_featured}
               onChange={(e) => handleInputChange('is_featured', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
             />
-            <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="is_featured" className="ml-2 block text-sm text-neutral-900">
               Marcar como evento destacado
             </label>
           </div>

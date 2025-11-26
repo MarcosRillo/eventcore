@@ -80,22 +80,37 @@ describe('useCalendarEvents', () => {
       expect(result.current.selectedCategory).toBeNull()
       expect(result.current.selectedLocation).toBeNull()
       expect(result.current.currentDate).toBeInstanceOf(Date)
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should fetch categories and locations on mount', async () => {
-      renderHook(() => useCalendarEvents())
+      const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
         expect(mockPublicEventsService.getCategories).toHaveBeenCalled()
         expect(mockPublicEventsService.getLocations).toHaveBeenCalled()
       })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should fetch events on mount', async () => {
-      renderHook(() => useCalendarEvents())
+      const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
         expect(mockPublicEventsService.getAll).toHaveBeenCalled()
+      })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
 
@@ -105,6 +120,11 @@ describe('useCalendarEvents', () => {
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
         expect(result.current.locations).toEqual(mockLocations)
+      })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
 
@@ -119,7 +139,7 @@ describe('useCalendarEvents', () => {
 
   describe('Events Fetching', () => {
     it('should fetch events with date range params', async () => {
-      renderHook(() => useCalendarEvents())
+      const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
         expect(mockPublicEventsService.getAll).toHaveBeenCalledWith(
@@ -129,6 +149,11 @@ describe('useCalendarEvents', () => {
             page: 1,
           })
         )
+      })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
 
@@ -143,6 +168,11 @@ describe('useCalendarEvents', () => {
         expect(result.current.calendarEvents[0]).toHaveProperty('end')
         expect(result.current.calendarEvents[0]).toHaveProperty('resource')
       })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should set events from API response', async () => {
@@ -152,6 +182,11 @@ describe('useCalendarEvents', () => {
         expect(result.current.calendarEvents).toHaveLength(1)
         expect(result.current.calendarEvents[0].id).toBe(mockEvent.id)
         expect(result.current.calendarEvents[0].title).toBe(mockEvent.title)
+      })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
 
@@ -206,6 +241,11 @@ describe('useCalendarEvents', () => {
       await waitFor(() => {
         expect(result.current.error).toBeNull()
       })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
   })
 
@@ -224,6 +264,11 @@ describe('useCalendarEvents', () => {
       })
 
       expect(result.current.currentDate).toEqual(newDate)
+
+      // Wait for refetch to complete after navigation
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should trigger refetch when navigating to new date', async () => {
@@ -241,6 +286,11 @@ describe('useCalendarEvents', () => {
 
       await waitFor(() => {
         expect(mockPublicEventsService.getAll.mock.calls.length).toBeGreaterThan(initialCallCount)
+      })
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
   })
@@ -302,6 +352,11 @@ describe('useCalendarEvents', () => {
       })
 
       expect(result.current.selectedCategory).toBe(1)
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should clear category filter when null', async () => {
@@ -316,11 +371,20 @@ describe('useCalendarEvents', () => {
       })
       expect(result.current.selectedCategory).toBe(1)
 
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
       act(() => {
         result.current.handleCategoryFilter(null)
       })
 
       expect(result.current.selectedCategory).toBeNull()
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should trigger refetch with category filter', async () => {
@@ -347,6 +411,11 @@ describe('useCalendarEvents', () => {
           })
         )
       })
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
   })
 
@@ -363,6 +432,11 @@ describe('useCalendarEvents', () => {
       })
 
       expect(result.current.selectedLocation).toBe(2)
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should clear location filter when null', async () => {
@@ -377,11 +451,20 @@ describe('useCalendarEvents', () => {
       })
       expect(result.current.selectedLocation).toBe(2)
 
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
       act(() => {
         result.current.handleLocationFilter(null)
       })
 
       expect(result.current.selectedLocation).toBeNull()
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should trigger refetch with location filter', async () => {
@@ -408,6 +491,11 @@ describe('useCalendarEvents', () => {
           })
         )
       })
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
   })
 
@@ -431,6 +519,11 @@ describe('useCalendarEvents', () => {
             location_id: 2,
           })
         )
+      })
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
   })
@@ -487,6 +580,11 @@ describe('useCalendarEvents', () => {
       await waitFor(() => {
         expect(result.current.calendarEvents[0].start).toBeInstanceOf(Date)
       })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should correctly transform end date to Date object', async () => {
@@ -495,6 +593,11 @@ describe('useCalendarEvents', () => {
       await waitFor(() => {
         expect(result.current.calendarEvents[0].end).toBeInstanceOf(Date)
       })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should include original event data in resource field', async () => {
@@ -502,6 +605,11 @@ describe('useCalendarEvents', () => {
 
       await waitFor(() => {
         expect(result.current.calendarEvents[0].resource).toEqual(mockEvent)
+      })
+
+      // Wait for all async effects to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
       })
     })
   })

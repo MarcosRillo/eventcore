@@ -40,24 +40,34 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Rendering', () => {
-    it('should render search input', () => {
+    it('should render search input', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       expect(screen.getByPlaceholderText('Buscar eventos...')).toBeInTheDocument()
     })
 
-    it('should render filter toggle button on mobile', () => {
+    it('should render filter toggle button on mobile', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       expect(screen.getByText('Filtros')).toBeInTheDocument()
     })
@@ -105,7 +115,7 @@ describe('PublicEventFilters', () => {
       })
     })
 
-    it('should render all months', () => {
+    it('should render all months', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
@@ -113,11 +123,16 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       expect(screen.getByText('Enero')).toBeInTheDocument()
       expect(screen.getByText('Diciembre')).toBeInTheDocument()
     })
 
-    it('should render year options', () => {
+    it('should render year options', async () => {
       const currentYear = new Date().getFullYear()
 
       render(
@@ -127,6 +142,11 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       expect(screen.getByText(String(currentYear - 1))).toBeInTheDocument()
       expect(screen.getByText(String(currentYear))).toBeInTheDocument()
       expect(screen.getByText(String(currentYear + 1))).toBeInTheDocument()
@@ -134,13 +154,18 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Search Functionality', () => {
-    it('should call onFiltersChange when search input changes', () => {
+    it('should call onFiltersChange when search input changes', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...')
       fireEvent.change(searchInput, { target: { value: 'Festival' } })
@@ -151,7 +176,7 @@ describe('PublicEventFilters', () => {
       })
     })
 
-    it('should display current search value', () => {
+    it('should display current search value', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, search: 'Concierto' }}
@@ -159,17 +184,27 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       const searchInput = screen.getByPlaceholderText('Buscar eventos...') as HTMLInputElement
       expect(searchInput.value).toBe('Concierto')
     })
 
-    it('should handle empty search', () => {
+    it('should handle empty search', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, search: 'test' }}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...')
       fireEvent.change(searchInput, { target: { value: '' } })
@@ -240,13 +275,18 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Month Filter', () => {
-    it('should call onFiltersChange when month is selected', () => {
+    it('should call onFiltersChange when month is selected', async () => {
       const { container } = render(
         <PublicEventFilters
           filters={defaultFilters}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const selects = container.querySelectorAll('select')
       const monthSelect = selects[1] // Second select is month
@@ -258,7 +298,7 @@ describe('PublicEventFilters', () => {
       })
     })
 
-    it('should display selected month', () => {
+    it('should display selected month', async () => {
       const { container } = render(
         <PublicEventFilters
           filters={{ ...defaultFilters, month: '03' }}
@@ -266,18 +306,28 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       const selects = container.querySelectorAll('select')
       const monthSelect = selects[1] as HTMLSelectElement
       expect(monthSelect.value).toBe('03')
     })
 
-    it('should handle clearing month filter', () => {
+    it('should handle clearing month filter', async () => {
       const { container } = render(
         <PublicEventFilters
           filters={{ ...defaultFilters, month: '12' }}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const selects = container.querySelectorAll('select')
       const monthSelect = selects[1]
@@ -291,7 +341,7 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Year Filter', () => {
-    it('should call onFiltersChange when year is selected', () => {
+    it('should call onFiltersChange when year is selected', async () => {
       const currentYear = new Date().getFullYear()
 
       const { container } = render(
@@ -300,6 +350,11 @@ describe('PublicEventFilters', () => {
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const selects = container.querySelectorAll('select')
       const yearSelect = selects[2] // Third select is year
@@ -311,7 +366,7 @@ describe('PublicEventFilters', () => {
       })
     })
 
-    it('should display selected year', () => {
+    it('should display selected year', async () => {
       const currentYear = new Date().getFullYear()
 
       const { container } = render(
@@ -321,6 +376,11 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       const selects = container.querySelectorAll('select')
       const yearSelect = selects[2] as HTMLSelectElement
       expect(yearSelect.value).toBe(String(currentYear))
@@ -328,7 +388,7 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Clear Filters', () => {
-    it('should show clear button when filters are active', () => {
+    it('should show clear button when filters are active', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, search: 'test' }}
@@ -336,10 +396,15 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       expect(screen.getByText('Limpiar filtros')).toBeInTheDocument()
     })
 
-    it('should not show clear button when no filters are active', () => {
+    it('should not show clear button when no filters are active', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
@@ -347,10 +412,15 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       expect(screen.queryByText('Limpiar filtros')).not.toBeInTheDocument()
     })
 
-    it('should clear all filters when clear button is clicked', () => {
+    it('should clear all filters when clear button is clicked', async () => {
       render(
         <PublicEventFilters
           filters={{
@@ -362,6 +432,11 @@ describe('PublicEventFilters', () => {
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const clearButton = screen.getByText('Limpiar filtros')
       fireEvent.click(clearButton)
@@ -376,13 +451,18 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Active Filters Summary', () => {
-    it('should display search filter chip', () => {
+    it('should display search filter chip', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, search: 'Festival' }}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       expect(screen.getByText(/Búsqueda:/)).toBeInTheDocument()
       expect(screen.getByText(/"Festival"/)).toBeInTheDocument()
@@ -402,7 +482,7 @@ describe('PublicEventFilters', () => {
       })
     })
 
-    it('should display month filter chip', () => {
+    it('should display month filter chip', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, month: '06' }}
@@ -410,17 +490,27 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       expect(screen.getByText(/Mes:/)).toBeInTheDocument()
       expect(screen.getByText('Junio')).toBeInTheDocument()
     })
 
-    it('should display year filter chip', () => {
+    it('should display year filter chip', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, year: '2025' }}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       expect(screen.getByText(/Año:/)).toBeInTheDocument()
       expect(screen.getByText('2025')).toBeInTheDocument()
@@ -449,13 +539,18 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Mobile Filters Toggle', () => {
-    it('should toggle filters visibility on mobile', () => {
+    it('should toggle filters visibility on mobile', async () => {
       const { container } = render(
         <PublicEventFilters
           filters={defaultFilters}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const toggleButton = screen.getByText('Filtros')
       const filtersContainer = container.querySelector('.lg\\:block')
@@ -507,7 +602,7 @@ describe('PublicEventFilters', () => {
       })
     })
 
-    it('should handle very long search text', () => {
+    it('should handle very long search text', async () => {
       const longText = 'A'.repeat(200)
 
       render(
@@ -517,17 +612,27 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       const searchInput = screen.getByPlaceholderText('Buscar eventos...') as HTMLInputElement
       expect(searchInput.value).toBe(longText)
     })
 
-    it('should handle special characters in search', () => {
+    it('should handle special characters in search', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...')
       fireEvent.change(searchInput, { target: { value: '<script>alert("xss")</script>' } })
@@ -540,7 +645,7 @@ describe('PublicEventFilters', () => {
   })
 
   describe('Accessibility', () => {
-    it('should have proper labels for all inputs', () => {
+    it('should have proper labels for all inputs', async () => {
       render(
         <PublicEventFilters
           filters={defaultFilters}
@@ -548,18 +653,28 @@ describe('PublicEventFilters', () => {
         />
       )
 
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
+
       expect(screen.getByText('Categoría')).toBeInTheDocument()
       expect(screen.getByText('Mes')).toBeInTheDocument()
       expect(screen.getByText('Año')).toBeInTheDocument()
     })
 
-    it('should have accessible button titles', () => {
+    it('should have accessible button titles', async () => {
       render(
         <PublicEventFilters
           filters={{ ...defaultFilters, search: 'test' }}
           onFiltersChange={mockOnFiltersChange}
         />
       )
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(apiClient.get).toHaveBeenCalled()
+      })
 
       const clearButton = screen.getByText('Limpiar filtros')
       expect(clearButton).toBeInTheDocument()

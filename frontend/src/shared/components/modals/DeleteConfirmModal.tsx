@@ -30,13 +30,13 @@ export const DeleteConfirmModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-4">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-sm p-4">
           <p className="text-red-800 font-semibold">
             {warningMessage}
           </p>
         </div>
 
-        <p className="text-gray-700">
+        <p className="text-neutral-700">
           Are you sure you want to delete{' '}
           {itemName && <strong>&quot;{itemName}&quot;</strong>}?
         </p>

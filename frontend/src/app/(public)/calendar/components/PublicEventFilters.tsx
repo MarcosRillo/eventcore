@@ -30,7 +30,7 @@ export default function PublicEventFilters({
         const response = await apiClient.get<{categories: Category[]}>('/public/categories');
         const categoriesData = response.categories;
         setCategories(categoriesData);
-      } catch (error) {
+      } catch {
       }
     };
 

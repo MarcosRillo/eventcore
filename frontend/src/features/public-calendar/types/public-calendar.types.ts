@@ -52,3 +52,17 @@ export interface EventFilters {
   end_date?: string | null
   search?: string | null
 }
+
+/**
+ * Calendar Event for react-big-calendar
+ * Transforms PublicEvent to format expected by calendar library
+ */
+export interface CalendarEvent {
+  id: number
+  title: string
+  start: Date
+  end: Date
+  resource: PublicEvent
+}
+
+export type CalendarView = 'month' | 'week' | 'day' | 'agenda'

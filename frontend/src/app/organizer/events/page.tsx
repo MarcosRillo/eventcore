@@ -132,11 +132,15 @@ export default function OrganizerEventsPage() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="font-medium text-gray-900">{event.title}</div>
-                    <div className="text-sm text-gray-500">{event.category || '-'}</div>
+                    <div className="text-sm text-gray-500">
+                      {typeof event.category === 'object' ? event.category?.name : event.category || '-'}
+                    </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <div>{new Date(event.event_date).toLocaleDateString('es-AR')}</div>
+                  <div>
+                    {new Date(event.start_date || event.event_date || '').toLocaleDateString('es-AR')}
+                  </div>
                   {event.start_time && event.end_time && (
                     <div className="text-gray-500">
                       {event.start_time} - {event.end_time}
@@ -144,12 +148,18 @@ export default function OrganizerEventsPage() {
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {event.location || '-'}
+                  {event.locations?.[0]?.name || event.location || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge variant={STATUS_VARIANTS[event.status] || 'default'}>
-                    {event.status}
-                  </Badge>
+                  {(() => {
+                    const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status
+                    const statusDisplay = typeof event.status === 'object' ? event.status.status_name : event.status
+                    return (
+                      <Badge variant={STATUS_VARIANTS[statusCode] || 'default'}>
+                        {statusDisplay}
+                      </Badge>
+                    )
+                  })()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <div className="flex gap-2">

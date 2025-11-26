@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
+import { CalendarPageContainer } from './CalendarPageContainer'
 
 export const metadata: Metadata = {
   title: 'Eventos en Tucumán - Calendario Turístico',
@@ -23,5 +23,5 @@ export const metadata: Metadata = {
 }
 
 export default function CalendarPage() {
-  return <PublicCalendarContainer />
+  return <CalendarPageContainer />
 }

@@ -215,7 +215,7 @@ export const EventDetailModal = ({
   const handleDownloadICS = async () => {
     try {
       await eventPublicExportService.downloadICalFile();
-    } catch (error) {
+    } catch {
     }
   };
 

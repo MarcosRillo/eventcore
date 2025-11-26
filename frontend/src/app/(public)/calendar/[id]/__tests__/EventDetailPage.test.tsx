@@ -40,8 +40,8 @@ describe('EventDetailPage', () => {
     description: '<p>Gran festival con artistas nacionales e internacionales</p>',
     start_date: '2025-11-15T18:00:00.000Z',
     end_date: '2025-11-17T23:00:00.000Z',
-    status_id: 5,
-    type_id: 1,
+    type: 'sede_unica',
+    status: 'published',
     category_id: 1,
     category: {
       id: 1,
@@ -49,6 +49,7 @@ describe('EventDetailPage', () => {
       slug: 'musica',
       color: '#FF6B35',
       is_active: true,
+      entity_id: 1,
       created_at: '2025-01-01',
       updated_at: '2025-01-01'
     },
@@ -59,7 +60,12 @@ describe('EventDetailPage', () => {
         city: 'San Miguel de Tucumán',
         address: 'Av. Aconquija s/n',
         state: 'Tucumán',
-        country: 'Argentina'
+        country: 'Argentina',
+        features: [],
+        is_active: true,
+        entity_id: 1,
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01'
       }
     ],
     is_featured: true,
@@ -69,6 +75,7 @@ describe('EventDetailPage', () => {
     website_url: 'https://festival.com',
     cta_text: 'Comprar Entradas',
     cta_link: 'https://festival.com/tickets',
+    approval_history: [],
     created_at: '2025-01-01',
     updated_at: '2025-01-01'
   }
@@ -340,8 +347,8 @@ describe('EventDetailPage', () => {
         description: 'Simple description',
         start_date: '2025-11-15',
         end_date: '2025-11-15',
-        status_id: 5,
-        type_id: 1,
+        type: 'sede_unica',
+        status: 'published',
         category_id: 1,
         category: {
           id: 1,
@@ -349,11 +356,13 @@ describe('EventDetailPage', () => {
           slug: 'general',
           color: '#000000',
           is_active: true,
+          entity_id: 1,
           created_at: '2025-01-01',
           updated_at: '2025-01-01'
         },
         locations: [],
         is_featured: false,
+        approval_history: [],
         created_at: '2025-01-01',
         updated_at: '2025-01-01'
       }

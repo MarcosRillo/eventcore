@@ -22,7 +22,7 @@ describe('useAppearanceForm', () => {
   })
 
   describe('Initialization', () => {
-    it('should initialize with default theme while loading', () => {
+    it('should initialize with default theme while loading', async () => {
       const { result } = renderHook(() => useAppearanceForm())
 
       expect(result.current.data).toEqual(DEFAULT_THEME)
@@ -32,6 +32,11 @@ describe('useAppearanceForm', () => {
       expect(result.current.hasUnsavedChanges).toBe(false)
       expect(result.current.isValid).toBe(true)
       expect(result.current.isDirty).toBe(false)
+
+      // Wait for async effects to complete
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
     })
 
     it('should load appearance settings on mount', async () => {

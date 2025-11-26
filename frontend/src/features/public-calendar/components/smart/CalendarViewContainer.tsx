@@ -1,0 +1,57 @@
+/**
+ * Calendar View Container
+ * Smart component that connects useCalendarEvents hook with CalendarView component
+ */
+
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
+import { CalendarView } from '@/features/public-calendar/components/dumb/CalendarView'
+import { CalendarEvent } from '@/features/public-calendar/types/public-calendar.types'
+
+export const CalendarViewContainer = () => {
+  const router = useRouter()
+  const {
+    calendarEvents,
+    loading,
+    error,
+    currentDate,
+    currentView,
+    handleNavigate,
+    handleViewChange,
+  } = useCalendarEvents()
+
+  // Handle event click - navigate to event detail page
+  const handleSelectEvent = (event: CalendarEvent): void => {
+    router.push(`/calendar/${event.id}`)
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="text-center py-12">
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <CalendarView
+      events={calendarEvents}
+      onSelectEvent={handleSelectEvent}
+      onNavigate={handleNavigate}
+      onView={handleViewChange}
+      currentDate={currentDate}
+      currentView={currentView}
+      loading={loading}
+    />
+  )
+}

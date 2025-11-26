@@ -11,13 +11,47 @@ class EventFactory extends Factory
 {
     protected $model = Event::class;
 
+    /**
+     * Event title templates for realistic event names
+     */
+    private array $eventTitles = [
+        'Festival de %s',
+        'Encuentro de %s',
+        'Muestra de %s',
+        'Feria de %s',
+        'Jornada de %s',
+        'Exposición de %s',
+        'Taller de %s',
+        'Conferencia de %s',
+        'Gala de %s',
+        'Ciclo de %s',
+    ];
+
+    private array $eventTopics = [
+        'Música Folclórica', 'Arte Contemporáneo', 'Gastronomía Regional',
+        'Artesanías', 'Teatro Independiente', 'Fotografía', 'Literatura',
+        'Danza', 'Cine', 'Vinos Argentinos', 'Emprendimientos', 'Turismo Aventura',
+        'Historia Local', 'Cultura Andina', 'Jazz', 'Tango', 'Rock Nacional',
+    ];
+
     public function definition(): array
     {
+        $startDate = $this->faker->dateTimeBetween('now', '+3 months');
+
+        // End date must be after start date
+        $daysToAdd = $this->faker->numberBetween(1, 7);
+        $endDate = (clone $startDate)->modify("+{$daysToAdd} days");
+
+        // Generate realistic event title
+        $template = $this->faker->randomElement($this->eventTitles);
+        $topic = $this->faker->randomElement($this->eventTopics);
+        $title = sprintf($template, $topic);
+
         return [
-            'title' => $this->faker->sentence(3),
-            'description' => $this->faker->paragraph(),
-            'start_date' => $this->faker->dateTimeBetween('now', '+1 month'),
-            'end_date' => $this->faker->dateTimeBetween('+1 month', '+2 months'),
+            'title' => $title,
+            'description' => $this->generateRealisticDescription($topic),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
 
             // Use factories for relationships
             'category_id' => Category::factory(),
@@ -28,7 +62,25 @@ class EventFactory extends Factory
             'status_id' => fn() => \DB::table('event_statuses')->first()?->id ?? 1,
             'is_featured' => false,
             'max_attendees' => $this->faker->numberBetween(50, 500),
+            'cta_text' => $this->faker->randomElement(['Ver Más', 'Inscribirse', 'Comprar Entradas', 'Reservar']),
+            'cta_link' => null, // Optional
         ];
+    }
+
+    /**
+     * Generate realistic event description
+     */
+    private function generateRealisticDescription(string $topic): string
+    {
+        $descriptions = [
+            "Evento imperdible que celebra {$topic} con actividades para toda la familia.",
+            "Una experiencia única dedicada a {$topic}, con invitados especiales y talleres interactivos.",
+            "Descubrí el mundo de {$topic} en este encuentro que reúne a los mejores exponentes de Tucumán.",
+            "Jornada especial sobre {$topic} con entrada libre y gratuita para toda la comunidad.",
+            "Celebramos {$topic} con un evento que combina tradición e innovación.",
+        ];
+
+        return $this->faker->randomElement($descriptions);
     }
 
     public function draft(): static

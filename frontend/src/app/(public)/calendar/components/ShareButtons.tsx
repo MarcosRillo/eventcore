@@ -35,7 +35,7 @@ export default function ShareButtons({ event }: ShareButtonsProps) {
       await navigator.clipboard.writeText(eventUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
     }
   };
 

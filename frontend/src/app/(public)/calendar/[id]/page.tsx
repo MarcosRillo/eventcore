@@ -78,7 +78,7 @@ export default async function EventPage({ params }: EventPageProps) {
     const event = response.data;
 
     return <EventDetailPage event={event} />;
-  } catch (error) {
+  } catch {
     notFound();
   }
 }

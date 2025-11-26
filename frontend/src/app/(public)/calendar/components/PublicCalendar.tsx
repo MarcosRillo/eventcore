@@ -55,10 +55,10 @@ export default function PublicCalendar({
     try {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
-      
+
       const response = await apiClient.get<{events: Event[]}>(`/public/events/calendar/${year}/${month}`);
       setEvents(response.events);
-    } catch (error) {
+    } catch {
     } finally {
       setLoading(false);
     }

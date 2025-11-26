@@ -71,6 +71,35 @@ class Event extends Model
         'approved_by',
         'approved_at',
         'published_at',
+
+        // Extended fields (added Nov 25, 2025)
+        'edition_number',
+        'event_type',
+        'event_subtype',
+        'origin',
+        'theme',
+        'frequency',
+        'rotation_type',
+        'coffee_break',
+        'lunch_catering',
+        'dinner_catering',
+        'pre_event_package',
+        'post_event_package',
+        'venue',
+        'city',
+        'rooms_used',
+        'maps_url',
+        'previous_venue',
+        'next_venue',
+        'asynchronous_dates',
+        'local_attendance',
+        'national_attendance',
+        'international_attendance',
+        'virtual_transmission',
+        'producer',
+        'event_website',
+        'logo_url',
+        'responsive_image_url',
     ];
 
     /**
@@ -89,6 +118,18 @@ class Event extends Model
         'published_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+
+        // Extended fields casts (added Nov 25, 2025)
+        'asynchronous_dates' => 'array',
+        'coffee_break' => 'boolean',
+        'lunch_catering' => 'boolean',
+        'dinner_catering' => 'boolean',
+        'pre_event_package' => 'boolean',
+        'post_event_package' => 'boolean',
+        'virtual_transmission' => 'boolean',
+        'local_attendance' => 'integer',
+        'national_attendance' => 'integer',
+        'international_attendance' => 'integer',
     ];
 
     /**

@@ -25,13 +25,17 @@ class DatabaseSeeder extends Seeder
             OrganizationTypesSeeder::class,
             EventStatusesSeeder::class,
             EventTypesSeeder::class,
-            
+
             // 2. Main tables with foreign key dependencies
             OrganizationSeeder::class,  // Uses org statuses and types
             UserSeeder::class,          // Uses user roles and organizations
             CategorySeeder::class,      // Uses organizations
             LocationSeeder::class,      // Uses organizations
             EventSeeder::class,         // Uses all previous tables
+
+            // 3. Optional: Additional test data for UI testing
+            // Uncomment to seed 26 additional events for landing page testing
+            // LandingTestSeeder::class,  // 6 featured + 20 published events
         ]);
 
         $this->command->newLine();
@@ -53,8 +57,13 @@ class DatabaseSeeder extends Seeder
         $this->command->info('• 7 Users with different roles and permissions');
         $this->command->info('• 5 Categories (3 Tourism + 2 Culture)');
         $this->command->info('• 5 Locations (3 Tourism + 2 Culture)');
-        $this->command->info('• 5 Events with varied statuses for testing workflows');
+        $this->command->info('• 8 Events with varied statuses for testing workflows');
         $this->command->info('• Complete entity-tenant isolation for multi-tenant testing');
+        $this->command->newLine();
+
+        $this->command->info('💡 TIP: For landing page UI testing with more events:');
+        $this->command->info('   php artisan db:seed --class=LandingTestSeeder');
+        $this->command->info('   (Adds 6 featured + 20 published events)');
         $this->command->newLine();
     }
 }

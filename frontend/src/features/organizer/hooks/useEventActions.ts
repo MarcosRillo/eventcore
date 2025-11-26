@@ -87,15 +87,30 @@ export const useEventActions = (
         status: 'draft' as const
       }
 
+      // Extract date and time from original event's start_date and end_date
+      // Original event has start_date/end_date as ISO timestamps
+      const dateSource = cleanData.start_date || cleanData.event_date
+      if (!dateSource) {
+        throw new Error('No date available for duplication')
+      }
+
+      const startDate = new Date(dateSource)
+      const eventDate = startDate.toISOString().split('T')[0] // YYYY-MM-DD
+      const startTime = cleanData.start_time || '09:00'
+      const endTime = cleanData.end_time || '17:00'
+
+      // Combine date + time into ISO 8601 format
+      const startDateTime = `${eventDate}T${startTime}:00`
+      const endDateTime = `${eventDate}T${endTime}:00`
+
       await organizerEventService.createEvent({
         title: cleanData.title,
         description: cleanData.description || '',
-        event_date: cleanData.event_date,
-        start_time: cleanData.start_time || '',
-        end_time: cleanData.end_time || '',
+        start_date: startDateTime,
+        end_date: endDateTime,
         category_id: cleanData.category_id || 0,
-        location_id: cleanData.location_id || 0,
-        image_url: cleanData.image_url
+        location_ids: [cleanData.location_id || 0],  // Backend expects array
+        featured_image: cleanData.image_url
       })
 
       addToast({

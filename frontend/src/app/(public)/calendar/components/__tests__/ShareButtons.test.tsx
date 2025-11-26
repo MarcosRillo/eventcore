@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { Event } from '@/types/event.types'
 
 // Mock lucide-react icons
@@ -177,37 +177,73 @@ describe('ShareButtons', () => {
 
   describe('Copy Link', () => {
     it('should copy link to clipboard when button clicked', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalledWith(getExpectedUrl(123))
       })
+
+      // Clean up timer
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
     it('should show "Copiado" text after copying', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         expect(screen.getByText('Copiado')).toBeInTheDocument()
       })
+
+      // Clean up timer
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
     it('should change button styling when copied', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         const copiedButton = screen.getByTitle('Enlace copiado')
         expect(copiedButton).toHaveClass('bg-green-100', 'text-green-800')
       })
+
+      // Clean up timer
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
     it('should reset to "Copiar" after 2 seconds', async () => {
@@ -216,14 +252,19 @@ describe('ShareButtons', () => {
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         expect(screen.getByText('Copiado')).toBeInTheDocument()
       })
 
       // Fast-forward 2 seconds
-      jest.advanceTimersByTime(2000)
+      act(() => {
+        jest.advanceTimersByTime(2000)
+      })
 
       await waitFor(() => {
         expect(screen.getByText('Copiar')).toBeInTheDocument()
@@ -234,12 +275,16 @@ describe('ShareButtons', () => {
     })
 
     it('should handle clipboard error gracefully', async () => {
+      jest.useFakeTimers()
       mockWriteText.mockRejectedValue(new Error('Clipboard error'))
 
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       // Should not crash or show error
       await waitFor(() => {
@@ -248,41 +293,85 @@ describe('ShareButtons', () => {
 
       // Should still show "Copiar" (not "Copiado")
       expect(screen.getByText('Copiar')).toBeInTheDocument()
+
+      jest.useRealTimers()
     })
   })
 
   describe('Event URL Generation', () => {
-    it('should generate correct event URL', () => {
+    it('should generate correct event URL', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
 
-      expect(mockWriteText).toHaveBeenCalledWith(
-        expect.stringContaining('/calendar/evento/123')
-      )
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
+
+      await waitFor(() => {
+        expect(mockWriteText).toHaveBeenCalledWith(
+          expect.stringContaining('/calendar/evento/123')
+        )
+      })
+
+      // Clean up timer
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
-    it('should use window.location.origin', () => {
+    it('should use window.location.origin', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
 
-      expect(mockWriteText).toHaveBeenCalledWith(
-        expect.stringContaining(window.location.origin)
-      )
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
+
+      await waitFor(() => {
+        expect(mockWriteText).toHaveBeenCalledWith(
+          expect.stringContaining(window.location.origin)
+        )
+      })
+
+      // Clean up timer
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
-    it('should handle different event IDs', () => {
+    it('should handle different event IDs', async () => {
+      jest.useFakeTimers()
+
       const differentEvent = { ...mockEvent, id: 456 }
 
       render(<ShareButtons event={differentEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
 
-      expect(mockWriteText).toHaveBeenCalledWith(getExpectedUrl(456))
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
+
+      await waitFor(() => {
+        expect(mockWriteText).toHaveBeenCalledWith(getExpectedUrl(456))
+      })
+
+      // Clean up timer
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
   })
 
@@ -324,16 +413,28 @@ describe('ShareButtons', () => {
     })
 
     it('should handle multiple rapid clicks on copy button', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
-      fireEvent.click(copyButton)
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+        fireEvent.click(copyButton)
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalledTimes(3)
       })
+
+      // Clean up timers
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
   })
 
@@ -348,14 +449,26 @@ describe('ShareButtons', () => {
     })
 
     it('should update copy button title when copied', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         expect(screen.getByTitle('Enlace copiado')).toBeInTheDocument()
       })
+
+      // Clean up timers
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
     it('should have proper button elements', () => {
@@ -384,16 +497,28 @@ describe('ShareButtons', () => {
     })
 
     it('should have success styling when copied', async () => {
+      jest.useFakeTimers()
+
       render(<ShareButtons event={mockEvent} />)
 
       const copyButton = screen.getByText('Copiar')
-      fireEvent.click(copyButton)
+
+      await act(async () => {
+        fireEvent.click(copyButton)
+      })
 
       await waitFor(() => {
         const copiedButton = screen.getByTitle('Enlace copiado')
         expect(copiedButton).toHaveClass('bg-green-100', 'text-green-800')
         expect(copiedButton).not.toHaveClass('bg-gray-200')
       })
+
+      // Clean up timers
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      jest.useRealTimers()
     })
 
     it('should have hover styles', () => {

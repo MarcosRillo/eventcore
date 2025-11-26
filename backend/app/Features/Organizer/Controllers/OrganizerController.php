@@ -127,6 +127,7 @@ class OrganizerController extends Controller
         }
 
         $validated = $request->validate([
+            // Campos básicos requeridos
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'start_date' => 'required|date|after_or_equal:today',
@@ -134,12 +135,58 @@ class OrganizerController extends Controller
             'category_id' => 'required|exists:categories,id',
             'location_ids' => 'required|array|min:1',
             'location_ids.*' => 'exists:locations,id',
+
+            // Información Básica (nuevos campos)
+            'edition_number' => 'nullable|string|max:100',
+            'event_type' => 'nullable|string|max:100',
+            'event_subtype' => 'nullable|string|max:100',
+            'origin' => 'nullable|string|max:100',
+            'theme' => 'nullable|string|max:100',
+            'frequency' => 'nullable|string|max:100',
+            'rotation_type' => 'nullable|string|max:100',
+
+            // Servicios y Catering
+            'coffee_break' => 'nullable|boolean',
+            'lunch_catering' => 'nullable|boolean',
+            'dinner_catering' => 'nullable|boolean',
+            'pre_event_package' => 'nullable|boolean',
+            'post_event_package' => 'nullable|boolean',
+
+            // Ubicación
+            'venue' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'rooms_used' => 'nullable|string|max:255',
+            'maps_url' => 'nullable|string',
+            'previous_venue' => 'nullable|string|max:255',
+            'next_venue' => 'nullable|string|max:255',
+
+            // Fechas Asincrónicas
+            'asynchronous_dates' => 'nullable|array',
+            'asynchronous_dates.*.date' => 'required_with:asynchronous_dates|date',
+            'asynchronous_dates.*.start_time' => 'required_with:asynchronous_dates|date_format:H:i',
+            'asynchronous_dates.*.end_time' => 'required_with:asynchronous_dates|date_format:H:i',
+
+            // Asistencia
+            'local_attendance' => 'nullable|integer|min:0',
+            'national_attendance' => 'nullable|integer|min:0',
+            'international_attendance' => 'nullable|integer|min:0',
+            'virtual_transmission' => 'nullable|boolean',
+
+            // Información Adicional
+            'producer' => 'nullable|string|max:255',
+            'event_website' => 'nullable|url|max:500',
+
+            // Imágenes
+            'logo_url' => 'nullable|string|max:500',
+            'featured_image' => 'nullable|string|max:500',
+            'responsive_image_url' => 'nullable|string|max:500',
+
+            // Campos legacy (mantener compatibilidad)
             'type_id' => 'nullable|exists:event_types,id',
             'max_attendees' => 'nullable|integer|min:1',
             'virtual_link' => 'nullable|url',
             'cta_link' => 'nullable|url',
             'cta_text' => 'nullable|string|max:255',
-            'featured_image' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
@@ -153,21 +200,67 @@ class OrganizerController extends Controller
 
             // CRÍTICO: Forzar organization_id del usuario - NO confiar en input
             $eventData = [
+                // Campos obligatorios del sistema
                 'organization_id' => $user->organization_id,
-                'entity_id' => 1, // Default entity
+                'entity_id' => $user->organization_id, // Same as organization for organizers
                 'status_id' => $draftStatus->id,
                 'created_by' => $user->id,
+
+                // Campos básicos requeridos
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'start_date' => $validated['start_date'],
-                'end_date' => $validated['end_date'] ?? $validated['start_date'], // Default to start_date if not provided
+                'end_date' => $validated['end_date'] ?? $validated['start_date'],
                 'category_id' => $validated['category_id'],
-                'type_id' => $validated['type_id'] ?? 1, // Default type if not provided
+
+                // Información Básica (nuevos campos)
+                'edition_number' => $validated['edition_number'] ?? null,
+                'event_type' => $validated['event_type'] ?? null,
+                'event_subtype' => $validated['event_subtype'] ?? null,
+                'origin' => $validated['origin'] ?? null,
+                'theme' => $validated['theme'] ?? null,
+                'frequency' => $validated['frequency'] ?? null,
+                'rotation_type' => $validated['rotation_type'] ?? null,
+
+                // Servicios y Catering
+                'coffee_break' => $validated['coffee_break'] ?? false,
+                'lunch_catering' => $validated['lunch_catering'] ?? false,
+                'dinner_catering' => $validated['dinner_catering'] ?? false,
+                'pre_event_package' => $validated['pre_event_package'] ?? false,
+                'post_event_package' => $validated['post_event_package'] ?? false,
+
+                // Ubicación
+                'venue' => $validated['venue'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'rooms_used' => $validated['rooms_used'] ?? null,
+                'maps_url' => $validated['maps_url'] ?? null,
+                'previous_venue' => $validated['previous_venue'] ?? null,
+                'next_venue' => $validated['next_venue'] ?? null,
+
+                // Fechas Asincrónicas (array - Model cast handles JSON encoding)
+                'asynchronous_dates' => $validated['asynchronous_dates'] ?? null,
+
+                // Asistencia
+                'local_attendance' => $validated['local_attendance'] ?? null,
+                'national_attendance' => $validated['national_attendance'] ?? null,
+                'international_attendance' => $validated['international_attendance'] ?? null,
+                'virtual_transmission' => $validated['virtual_transmission'] ?? false,
+
+                // Información Adicional
+                'producer' => $validated['producer'] ?? null,
+                'event_website' => $validated['event_website'] ?? null,
+
+                // Imágenes
+                'logo_url' => $validated['logo_url'] ?? null,
+                'featured_image' => $validated['featured_image'] ?? null,
+                'responsive_image_url' => $validated['responsive_image_url'] ?? null,
+
+                // Campos legacy (mantener compatibilidad)
+                'type_id' => $validated['type_id'] ?? null,
                 'max_attendees' => $validated['max_attendees'] ?? null,
                 'virtual_link' => $validated['virtual_link'] ?? null,
                 'cta_link' => $validated['cta_link'] ?? null,
                 'cta_text' => $validated['cta_text'] ?? null,
-                'featured_image' => $validated['featured_image'] ?? null,
             ];
 
             Log::info('OrganizerController@store: Creating event', [
@@ -182,12 +275,16 @@ class OrganizerController extends Controller
             // Sync locations
             if (isset($validated['location_ids'])) {
                 $event->locations()->sync($validated['location_ids']);
+                // Refresh model to ensure pivot data is in sync
+                $event = $event->fresh(['category', 'locations', 'status', 'type']);
             }
 
             DB::commit();
 
-            // Reload con relationships
-            $event->load(['category', 'locations', 'status', 'type']);
+            // Reload con relationships if not already loaded
+            if (!$event->relationLoaded('locations')) {
+                $event->load(['category', 'locations', 'status', 'type']);
+            }
 
             Log::info('OrganizerController@store: Event created successfully', [
                 'user_id' => $user->id,
@@ -253,6 +350,7 @@ class OrganizerController extends Controller
         }
 
         $validated = $request->validate([
+            // Campos básicos requeridos
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'start_date' => 'required|date',
@@ -260,12 +358,58 @@ class OrganizerController extends Controller
             'category_id' => 'required|exists:categories,id',
             'location_ids' => 'required|array|min:1',
             'location_ids.*' => 'exists:locations,id',
+
+            // Información Básica (nuevos campos)
+            'edition_number' => 'nullable|string|max:100',
+            'event_type' => 'nullable|string|max:100',
+            'event_subtype' => 'nullable|string|max:100',
+            'origin' => 'nullable|string|max:100',
+            'theme' => 'nullable|string|max:100',
+            'frequency' => 'nullable|string|max:100',
+            'rotation_type' => 'nullable|string|max:100',
+
+            // Servicios y Catering
+            'coffee_break' => 'nullable|boolean',
+            'lunch_catering' => 'nullable|boolean',
+            'dinner_catering' => 'nullable|boolean',
+            'pre_event_package' => 'nullable|boolean',
+            'post_event_package' => 'nullable|boolean',
+
+            // Ubicación
+            'venue' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'rooms_used' => 'nullable|string|max:255',
+            'maps_url' => 'nullable|string',
+            'previous_venue' => 'nullable|string|max:255',
+            'next_venue' => 'nullable|string|max:255',
+
+            // Fechas Asincrónicas
+            'asynchronous_dates' => 'nullable|array',
+            'asynchronous_dates.*.date' => 'required_with:asynchronous_dates|date',
+            'asynchronous_dates.*.start_time' => 'required_with:asynchronous_dates|date_format:H:i',
+            'asynchronous_dates.*.end_time' => 'required_with:asynchronous_dates|date_format:H:i',
+
+            // Asistencia
+            'local_attendance' => 'nullable|integer|min:0',
+            'national_attendance' => 'nullable|integer|min:0',
+            'international_attendance' => 'nullable|integer|min:0',
+            'virtual_transmission' => 'nullable|boolean',
+
+            // Información Adicional
+            'producer' => 'nullable|string|max:255',
+            'event_website' => 'nullable|url|max:500',
+
+            // Imágenes
+            'logo_url' => 'nullable|string|max:500',
+            'featured_image' => 'nullable|string|max:500',
+            'responsive_image_url' => 'nullable|string|max:500',
+
+            // Campos legacy (mantener compatibilidad)
             'type_id' => 'nullable|exists:event_types,id',
             'max_attendees' => 'nullable|integer|min:1',
             'virtual_link' => 'nullable|url',
             'cta_link' => 'nullable|url',
             'cta_text' => 'nullable|string|max:255',
-            'featured_image' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
@@ -277,28 +421,77 @@ class OrganizerController extends Controller
             ]);
 
             $updateData = [
+                // Campos básicos
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'start_date' => $validated['start_date'],
                 'end_date' => $validated['end_date'] ?? $validated['start_date'],
                 'category_id' => $validated['category_id'],
+
+                // Información Básica (nuevos campos)
+                'edition_number' => $validated['edition_number'] ?? null,
+                'event_type' => $validated['event_type'] ?? null,
+                'event_subtype' => $validated['event_subtype'] ?? null,
+                'origin' => $validated['origin'] ?? null,
+                'theme' => $validated['theme'] ?? null,
+                'frequency' => $validated['frequency'] ?? null,
+                'rotation_type' => $validated['rotation_type'] ?? null,
+
+                // Servicios y Catering
+                'coffee_break' => $validated['coffee_break'] ?? false,
+                'lunch_catering' => $validated['lunch_catering'] ?? false,
+                'dinner_catering' => $validated['dinner_catering'] ?? false,
+                'pre_event_package' => $validated['pre_event_package'] ?? false,
+                'post_event_package' => $validated['post_event_package'] ?? false,
+
+                // Ubicación
+                'venue' => $validated['venue'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'rooms_used' => $validated['rooms_used'] ?? null,
+                'maps_url' => $validated['maps_url'] ?? null,
+                'previous_venue' => $validated['previous_venue'] ?? null,
+                'next_venue' => $validated['next_venue'] ?? null,
+
+                // Fechas Asincrónicas (array - Model cast handles JSON encoding)
+                'asynchronous_dates' => $validated['asynchronous_dates'] ?? null,
+
+                // Asistencia
+                'local_attendance' => $validated['local_attendance'] ?? null,
+                'national_attendance' => $validated['national_attendance'] ?? null,
+                'international_attendance' => $validated['international_attendance'] ?? null,
+                'virtual_transmission' => $validated['virtual_transmission'] ?? false,
+
+                // Información Adicional
+                'producer' => $validated['producer'] ?? null,
+                'event_website' => $validated['event_website'] ?? null,
+
+                // Imágenes
+                'logo_url' => $validated['logo_url'] ?? null,
+                'featured_image' => $validated['featured_image'] ?? null,
+                'responsive_image_url' => $validated['responsive_image_url'] ?? null,
+
+                // Campos legacy
                 'type_id' => $validated['type_id'] ?? $event->type_id,
                 'max_attendees' => $validated['max_attendees'] ?? null,
                 'virtual_link' => $validated['virtual_link'] ?? null,
                 'cta_link' => $validated['cta_link'] ?? null,
                 'cta_text' => $validated['cta_text'] ?? null,
-                'featured_image' => $validated['featured_image'] ?? null,
             ];
 
             $event->update($updateData);
 
             if (isset($validated['location_ids'])) {
                 $event->locations()->sync($validated['location_ids']);
+                // Refresh model to ensure pivot data is in sync
+                $event = $event->fresh(['category', 'locations', 'status', 'type']);
             }
 
             DB::commit();
 
-            $event->load(['category', 'locations', 'status', 'type']);
+            // Reload con relationships if not already loaded
+            if (!$event->relationLoaded('locations')) {
+                $event->load(['category', 'locations', 'status', 'type']);
+            }
 
             Log::info('OrganizerController@update: Event updated successfully', [
                 'user_id' => $user->id,

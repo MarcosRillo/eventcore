@@ -2,6 +2,8 @@
  * Next.js Middleware - Route Protection
  * Protects routes based on user role from authentication
  * Runs before rendering any page
+ *
+ * Optimized for Next.js 15 Edge Runtime
  */
 
 import { NextResponse } from 'next/server';
@@ -13,6 +15,32 @@ interface User {
     role_name: string;
   };
   organization_id?: number;
+}
+
+// Public routes configuration (optimized for Edge Runtime)
+// Set provides O(1) lookup vs Array O(n)
+const PUBLIC_ROUTES = new Set([
+  '/',       // Landing page
+  '/login',  // Authentication
+]);
+
+// Public route prefixes (allow sub-routes)
+const PUBLIC_PREFIXES = [
+  '/calendar', // Public calendar and event details
+];
+
+/**
+ * Check if a route is public (no authentication required)
+ * Optimized for Next.js 15 Edge Runtime performance
+ */
+function isPublicRoute(pathname: string): boolean {
+  // Exact match for static routes (O(1))
+  if (PUBLIC_ROUTES.has(pathname)) {
+    return true;
+  }
+
+  // Prefix match for dynamic routes
+  return PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
 }
 
 // Helper function to get user from cookies
@@ -40,9 +68,8 @@ function getRoleName(user: User): string | null {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  const publicRoutes = ['/login', '/calendar'];
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  // Allow public routes (no authentication required)
+  if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
