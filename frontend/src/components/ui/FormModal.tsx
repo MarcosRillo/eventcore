@@ -9,7 +9,7 @@
 import { useState, useEffect, FormEvent, ReactNode } from 'react';
 import { Modal, Button } from '@/components/ui';
 import { CreateCategoryData, UpdateCategoryData } from '@/types/category.types';
-import { EventFormData } from '@/lib/api';
+import { EventFormData } from '@/types/event.types';
 
 // Form data types supported by FormModal - specific domain types only
 interface ApprovalFormData {

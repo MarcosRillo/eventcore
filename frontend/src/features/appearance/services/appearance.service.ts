@@ -4,7 +4,7 @@
  * Contains NO business logic - only HTTP operations
  */
 
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 import { AppearanceResponse, AppearanceFormData } from '@/types/appearance.types';
 
 const APPEARANCE_ENDPOINTS = {
@@ -15,7 +15,8 @@ const APPEARANCE_ENDPOINTS = {
  * Fetches current appearance settings from the server
  */
 export const getAppearanceSettings = async (): Promise<AppearanceResponse> => {
-  return await apiClient.get<AppearanceResponse>(APPEARANCE_ENDPOINTS.base);
+  const response = await apiClient.get<AppearanceResponse>(APPEARANCE_ENDPOINTS.base);
+  return response.data;
 };
 
 /**
@@ -24,8 +25,9 @@ export const getAppearanceSettings = async (): Promise<AppearanceResponse> => {
 export const updateAppearanceSettings = async (
   data: Partial<AppearanceFormData>
 ): Promise<AppearanceResponse> => {
-  return await apiClient.put<AppearanceResponse>(
+  const response = await apiClient.put<AppearanceResponse>(
     APPEARANCE_ENDPOINTS.base,
     data
   );
+  return response.data;
 };

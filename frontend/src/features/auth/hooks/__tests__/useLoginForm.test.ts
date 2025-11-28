@@ -360,7 +360,7 @@ describe('useLoginForm', () => {
       const { result } = renderHook(() => useLoginForm())
 
       act(() => {
-        result.current.setError()
+        result.current.setError(null)
       })
 
       expect(mockClearError).toHaveBeenCalled()

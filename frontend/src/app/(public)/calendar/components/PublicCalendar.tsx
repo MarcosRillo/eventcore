@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment/locale/es';
 import '../calendar.css';
 import { Event } from '@/types/event.types';
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 
 moment.locale('es');
 const localizer = momentLocalizer(moment);
@@ -57,7 +57,7 @@ export default function PublicCalendar({
       const month = date.getMonth() + 1;
 
       const response = await apiClient.get<{events: Event[]}>(`/public/events/calendar/${year}/${month}`);
-      setEvents(response.events);
+      setEvents(response.data.events);
     } catch {
     } finally {
       setLoading(false);

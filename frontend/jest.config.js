@@ -22,6 +22,10 @@ const customJestConfig = {
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)'
   ],
+  // Worker and timeout configuration to prevent hanging
+  maxWorkers: process.env.CI ? 2 : '50%', // Use fewer workers in CI, 50% of cores locally
+  testTimeout: 10000, // 10 second timeout per test
+  workerIdleMemoryLimit: '512MB', // Restart workers if they exceed this memory
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

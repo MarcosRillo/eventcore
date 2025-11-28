@@ -31,14 +31,17 @@ describe('ShareButtons', () => {
     id: 123,
     title: 'Concierto de Jazz',
     description: 'Un increíble concierto de jazz con artistas internacionales. Disfruta de una noche mágica con la mejor música en vivo.',
-    start_date: '2025-12-15',
-    end_date: '2025-12-15',
-    start_time: '20:00',
-    end_time: '23:00',
+    type: 'sede_unica',
+    start_date: '2025-12-15T20:00:00',
+    end_date: '2025-12-15T23:00:00',
     status: 'published',
-    event_type: 'music',
     category_id: 1,
-    organizer_id: 1,
+    category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+    locations: [],
+    location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+    organizer: { id: 1, name: 'Test Org', organization: 'Test Org' },
+    is_featured: false,
+    approval_history: [],
     created_at: '2025-11-01',
     updated_at: '2025-11-01',
   }
@@ -377,7 +380,8 @@ describe('ShareButtons', () => {
 
   describe('Edge Cases', () => {
     it('should handle event with no description', () => {
-      const eventNoDescription = { ...mockEvent, description: undefined }
+      // Type assertion needed for edge case testing
+      const eventNoDescription = { ...mockEvent, description: undefined } as unknown as Event
 
       render(<ShareButtons event={eventNoDescription} />)
 

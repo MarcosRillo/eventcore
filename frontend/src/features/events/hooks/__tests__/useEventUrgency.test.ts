@@ -1,19 +1,23 @@
 import { renderHook } from '@testing-library/react'
 import { useEventUrgency } from '../useEventUrgency'
-import { Event } from '@/types/event.types'
+import { Event, EventStatus } from '@/types/event.types'
 
 // Helper to create mock events
 const createEvent = (start_date: string, end_date: string): Event => ({
   id: 1,
   title: 'Test Event',
   description: 'Test',
+  type: 'sede_unica',
   start_date,
   end_date,
-  status: 'published',
+  status: 'published' as EventStatus,
   category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
+  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  locations: [],
+  location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  organizer: { id: 1, name: 'Test Org', organization: 'Test Org' },
   is_featured: false,
+  approval_history: [],
   created_at: '2025-11-01',
   updated_at: '2025-11-01',
 })

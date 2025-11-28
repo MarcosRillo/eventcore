@@ -1,18 +1,50 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { EventTableContainer } from '../EventTableContainer'
 import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
 
+interface ColumnConfig {
+  key: string
+  label: string
+  visible: boolean
+  className?: string
+}
+
+interface ActionConfig {
+  key: string
+  label: string
+  icon?: string
+  className?: string
+  onClick: (event: Event) => void
+  condition?: (event: Event) => boolean
+}
+
+interface ConfirmDialogData {
+  isOpen: boolean
+  title: string
+  message: string
+  onConfirm: () => void
+}
+
+interface MockEventTableProps {
+  events: Event[]
+  isLoading: boolean
+  columns: ColumnConfig[]
+  actions: ActionConfig[]
+  confirmDialog: ConfirmDialogData
+  onCloseConfirmDialog: () => void
+}
+
 // Mock child component
 jest.mock('@/features/entity-admin/components/dumb/EventTable', () => ({
-  EventTable: jest.fn(({ events, isLoading, columns, actions, confirmDialog, onCloseConfirmDialog }) => (
+  EventTable: jest.fn(({ events, isLoading, columns, actions, confirmDialog, onCloseConfirmDialog }: MockEventTableProps) => (
     <div data-testid="event-table-mock">
       <div data-testid="loading">{isLoading.toString()}</div>
       <div data-testid="events-count">{events.length}</div>
-      <div data-testid="columns-count">{columns.filter((c: any) => c.visible).length}</div>
+      <div data-testid="columns-count">{columns.filter((c: ColumnConfig) => c.visible).length}</div>
       <div data-testid="actions-count">{actions.length}</div>
 
       {/* Simulate action buttons */}
-      {actions.map((action: any) => (
+      {actions.map((action: ActionConfig) => (
         <button
           key={action.key}
           data-testid={`action-${action.key}`}
@@ -48,9 +80,12 @@ const createMockEvent = (overrides?: Partial<Event>): Event => ({
   status: EVENT_STATUS.DRAFT,
   type: EVENT_TYPE.SINGLE_LOCATION,
   category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
+  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  locations: [],
+  location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  organizer: { id: 1, name: 'Test Org', organization: 'Test Org' },
   is_featured: false,
+  approval_history: [],
   created_at: '2025-11-01T00:00:00Z',
   updated_at: '2025-11-01T00:00:00Z',
   ...overrides,

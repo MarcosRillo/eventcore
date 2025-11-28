@@ -67,18 +67,18 @@ describe('usePermissions Hook', () => {
 
       mockUseAuth.mockReturnValue(createMockAuthContext({
         user: mockUser,
-        getUserPermissions: jest.fn().mockReturnValue(['manage_events', 'approve_events', 'view_analytics'] as Permission[]),
+        getUserPermissions: jest.fn().mockReturnValue(['manage_entity_events', 'approve_events', 'view_analytics'] as Permission[]),
       }));
 
       const { result } = renderHook(() => usePermissions());
 
-      expect(result.current.can('manage_events' as Permission)).toBe(true);
+      expect(result.current.can('manage_entity_events' as Permission)).toBe(true);
       expect(result.current.can('approve_events' as Permission)).toBe(true);
       expect(result.current.can('manage_users' as Permission)).toBe(false);
     });
 
     test('getUserPermissions should return user permissions', () => {
-      const mockPermissions: Permission[] = ['manage_events', 'approve_events'];
+      const mockPermissions: Permission[] = ['manage_entity_events', 'approve_events'];
 
       mockUseAuth.mockReturnValue(createMockAuthContext({
         getUserPermissions: jest.fn().mockReturnValue(mockPermissions),

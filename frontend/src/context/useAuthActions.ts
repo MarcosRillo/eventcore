@@ -6,7 +6,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
-import apiClient, { setAuthToken, removeAuthToken, getAuthToken } from '@/services/apiClient';
+import apiClient from '@/services/apiClient';
+import {
+  getAccessToken,
+  storeTokens,
+  clearTokens,
+} from '@/services/tokenUtils';
 import {
   User,
   LoginCredentials,
@@ -15,7 +20,8 @@ import {
   UserRoleCode,
   Permission,
   ROLE_PERMISSIONS,
-  RESOURCE_PERMISSIONS
+  RESOURCE_PERMISSIONS,
+  TOKEN_KEYS
 } from '@/types/auth.types';
 
 export const useAuthActions = (): AuthContextType => {
@@ -47,8 +53,8 @@ export const useAuthActions = (): AuthContextType => {
 
     const initializeAuth = async () => {
       try {
-        const storedToken = getAuthToken();
-        const storedUser = localStorage.getItem('user');
+        const storedToken = getAccessToken();
+        const storedUser = localStorage.getItem(TOKEN_KEYS.USER);
 
         if (storedToken && storedUser && storedUser !== 'undefined') {
           try {
@@ -57,10 +63,11 @@ export const useAuthActions = (): AuthContextType => {
             setUser(parsedUser);
 
             // Validate token by making a test request
+            // If 401, apiClient interceptor will auto-refresh
             try {
               await apiClient.get('/auth/me');
             } catch {
-              // Token is invalid, clear auth state
+              // Token is invalid and refresh failed, clear auth state
               handleLogout();
             }
           } catch {
@@ -79,11 +86,10 @@ export const useAuthActions = (): AuthContextType => {
 
   // Internal logout helper
   const handleLogout = () => {
-    removeAuthToken();
+    clearTokens();
     setTokenState(null);
     setUser(null);
     setError(null);
-    localStorage.removeItem('user');
 
     // Clear cookies
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -97,37 +103,37 @@ export const useAuthActions = (): AuthContextType => {
       setError(null);
 
       const response = await apiClient.post<{ data: LoginResponse }>('/auth/login', credentials);
-      
+
       // Handle nested response structure: response.data.data
       if (!response.data?.data) {
         throw new Error('Invalid response structure from login API');
       }
 
-      const { token: authToken, user: userData } = response.data.data;
+      const { access_token, refresh_token, expires_at, user: userData } = response.data.data;
 
       // Validate that we have the required data
-      if (!authToken || !userData) {
+      if (!access_token || !refresh_token || !userData) {
         throw new Error('Missing token or user data in login response');
       }
 
-      // Store auth data
-      setAuthToken(authToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Store all tokens in localStorage
+      storeTokens(access_token, refresh_token, expires_at);
+      localStorage.setItem(TOKEN_KEYS.USER, JSON.stringify(userData));
 
-      // Store in cookies for middleware access
-      document.cookie = `token=${authToken}; path=/; max-age=86400; samesite=strict`;
+      // Store in cookies for middleware access (access token for API, user for role checks)
+      document.cookie = `token=${access_token}; path=/; max-age=86400; samesite=strict`;
       document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=86400; samesite=strict`;
 
       // Update state
-      setTokenState(authToken);
+      setTokenState(access_token);
       setUser(userData);
 
       return true;
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string; errors?: Record<string, string[]> }>;
-      
+
       let errorMessage = 'Error al iniciar sesión. Inténtalo de nuevo.';
-      
+
       if (axiosError.response?.status === 401) {
         errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
       } else if (axiosError.response?.status === 422) {
@@ -139,7 +145,7 @@ export const useAuthActions = (): AuthContextType => {
       } else if (axiosError.response?.data?.message) {
         errorMessage = axiosError.response.data.message;
       }
-      
+
       setError(errorMessage);
       return false;
     } finally {
@@ -207,34 +213,68 @@ export const useAuthActions = (): AuthContextType => {
     );
   };
 
+  /**
+   * Check if user can manage events (create, edit, delete)
+   * Includes: manage_entity_events, manage_own_events, create_events
+   */
   const canManageEvents = (): boolean => {
     const userPermissions = getUserPermissions();
-    return userPermissions.includes('manage_events');
+    return userPermissions.some(p =>
+      ['manage_entity_events', 'manage_own_events', 'create_events'].includes(p)
+    );
   };
 
+  /**
+   * Check if user can approve/reject events
+   * Only entity_admin has this permission
+   */
   const canApproveEvents = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.includes('approve_events');
   };
 
+  /**
+   * Check if user can access admin panel
+   * platform_admin and entity_admin can access
+   */
   const canAccessAdmin = (): boolean => {
     const userPermissions = getUserPermissions();
-    return userPermissions.includes('access_admin');
+    return userPermissions.some(p =>
+      ['manage_platform', 'manage_entity_events', 'approve_events'].includes(p)
+    );
   };
 
+  /**
+   * Check if user can manage users
+   * platform_admin: manage_users (all users)
+   * entity_admin: manage_entity_users (users in their entity)
+   */
   const canManageUsers = (): boolean => {
     const userPermissions = getUserPermissions();
-    return userPermissions.includes('manage_users');
+    return userPermissions.some(p =>
+      ['manage_users', 'manage_entity_users'].includes(p)
+    );
   };
 
+  /**
+   * Check if user can manage organizations
+   * Only platform_admin has this permission
+   */
   const canManageOrganization = (): boolean => {
     const userPermissions = getUserPermissions();
-    return userPermissions.includes('manage_organization');
+    return userPermissions.includes('manage_organizations');
   };
 
+  /**
+   * Check if user can view analytics
+   * entity_admin: view_analytics (entity-wide)
+   * organizer_admin: view_own_analytics (own events only)
+   */
   const canViewAnalytics = (): boolean => {
     const userPermissions = getUserPermissions();
-    return userPermissions.includes('view_analytics');
+    return userPermissions.some(p =>
+      ['view_analytics', 'view_own_analytics'].includes(p)
+    );
   };
 
   return {

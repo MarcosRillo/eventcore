@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api'
+import apiClient from '@/services/apiClient'
 import {
   getCategories,
   getCategory,
@@ -22,9 +22,49 @@ import { ApiResponse } from '@/types/api-response.types'
 import { AxiosError, AxiosResponse } from 'axios'
 
 // Mock apiClient
-jest.mock('@/lib/api')
+jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
+
+// Helper to create mock axios response
+const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: { headers: {} } as AxiosResponse['config'],
+})
+
+// Helper to create a valid Category mock
+const createMockCategory = (overrides: Partial<Category> & { id: number; name: string }): Category => ({
+  slug: overrides.name.toLowerCase().replace(/\s+/g, '-'),
+  entity_id: 1,
+  is_active: true,
+  color: '#000000',
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
+// Helper to create valid PaginationMeta
+const createMockMeta = (overrides: Partial<{
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}> = {}) => ({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+  from: null,
+  to: null,
+  path: 'http://api.example.com/categories',
+  links: [],
+  ...overrides,
+})
 
 describe('category.service', () => {
   beforeEach(() => {
@@ -35,17 +75,10 @@ describe('category.service', () => {
     it('should fetch categories with default params', async () => {
       const mockResponse: CategoryPagination = {
         data: [
-          { id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' },
-          { id: 2, name: 'Sports', slug: 'sports', is_active: true, color: '#00FF00' },
+          createMockCategory({ id: 1, name: 'Music', color: '#FF0000' }),
+          createMockCategory({ id: 2, name: 'Sports', color: '#00FF00' }),
         ],
-        meta: {
-          current_page: 1,
-          from: 1,
-          last_page: 1,
-          per_page: 10,
-          to: 2,
-          total: 2,
-        },
+        meta: createMockMeta({ current_page: 1, from: 1, last_page: 1, per_page: 10, to: 2, total: 2 }),
         links: {
           first: 'http://api.example.com/categories?page=1',
           last: 'http://api.example.com/categories?page=1',
@@ -54,7 +87,7 @@ describe('category.service', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await getCategories()
 
@@ -65,15 +98,8 @@ describe('category.service', () => {
 
     it('should fetch categories with search param', async () => {
       const mockResponse: CategoryPagination = {
-        data: [{ id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' }],
-        meta: {
-          current_page: 1,
-          from: 1,
-          last_page: 1,
-          per_page: 10,
-          to: 1,
-          total: 1,
-        },
+        data: [createMockCategory({ id: 1, name: 'Music', color: '#FF0000' })],
+        meta: createMockMeta({ current_page: 1, from: 1, last_page: 1, per_page: 10, to: 1, total: 1 }),
         links: {
           first: 'http://api.example.com/categories?page=1',
           last: 'http://api.example.com/categories?page=1',
@@ -82,7 +108,7 @@ describe('category.service', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       await getCategories({ search: 'Music' })
 
@@ -92,14 +118,7 @@ describe('category.service', () => {
     it('should fetch categories with pagination params', async () => {
       const mockResponse: CategoryPagination = {
         data: [],
-        meta: {
-          current_page: 2,
-          from: 11,
-          last_page: 3,
-          per_page: 20,
-          to: 30,
-          total: 50,
-        },
+        meta: createMockMeta({ current_page: 2, from: 11, last_page: 3, per_page: 20, to: 30, total: 50 }),
         links: {
           first: 'http://api.example.com/categories?page=1',
           last: 'http://api.example.com/categories?page=3',
@@ -108,7 +127,7 @@ describe('category.service', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       await getCategories({ page: 2, per_page: 20 })
 
@@ -117,15 +136,8 @@ describe('category.service', () => {
 
     it('should fetch active categories only', async () => {
       const mockResponse: CategoryPagination = {
-        data: [{ id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' }],
-        meta: {
-          current_page: 1,
-          from: 1,
-          last_page: 1,
-          per_page: 10,
-          to: 1,
-          total: 1,
-        },
+        data: [createMockCategory({ id: 1, name: 'Music', color: '#FF0000' })],
+        meta: createMockMeta({ current_page: 1, from: 1, last_page: 1, per_page: 10, to: 1, total: 1 }),
         links: {
           first: 'http://api.example.com/categories?page=1',
           last: 'http://api.example.com/categories?page=1',
@@ -134,7 +146,7 @@ describe('category.service', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       await getCategories({ active: true })
 
@@ -144,16 +156,14 @@ describe('category.service', () => {
 
   describe('getCategory', () => {
     it('should fetch a single category by ID', async () => {
-      const mockCategory: Category = {
+      const mockCategory = createMockCategory({
         id: 1,
         name: 'Music',
-        slug: 'music',
-        is_active: true,
         color: '#FF0000',
         description: 'Music events',
-      }
+      })
 
-      mockApiClient.get.mockResolvedValueOnce(mockCategory)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockCategory })
 
       const result = await getCategory(1)
 
@@ -173,24 +183,16 @@ describe('category.service', () => {
         is_active: true,
       }
 
-      const mockResponse: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category created successfully',
-          data: {
-            id: 3,
-            name: 'Technology',
-            slug: 'technology',
-            description: 'Tech events',
-            color: '#0000FF',
-            is_active: true,
-          },
-        },
-        status: 201,
-        statusText: 'Created',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category created successfully',
+        data: createMockCategory({
+          id: 3,
+          name: 'Technology',
+          description: 'Tech events',
+          color: '#0000FF',
+        }),
+      })
 
       mockApiClient.post.mockResolvedValueOnce(mockResponse)
 
@@ -212,23 +214,14 @@ describe('category.service', () => {
         name: 'Sports',
       }
 
-      const mockResponse: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category created successfully',
-          data: {
-            id: 4,
-            name: 'Sports',
-            slug: 'sports',
-            is_active: true,
-            color: '#000000',
-          },
-        },
-        status: 201,
-        statusText: 'Created',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category created successfully',
+        data: createMockCategory({
+          id: 4,
+          name: 'Sports',
+        }),
+      })
 
       mockApiClient.post.mockResolvedValueOnce(mockResponse)
 
@@ -263,24 +256,17 @@ describe('category.service', () => {
         is_active: false,
       }
 
-      const mockResponse: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category updated successfully',
-          data: {
-            id: 1,
-            name: 'Updated Music',
-            slug: 'updated-music',
-            description: 'Updated description',
-            color: '#FF00FF',
-            is_active: false,
-          },
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category updated successfully',
+        data: createMockCategory({
+          id: 1,
+          name: 'Updated Music',
+          description: 'Updated description',
+          color: '#FF00FF',
+          is_active: false,
+        }),
+      })
 
       mockApiClient.put.mockResolvedValueOnce(mockResponse)
 
@@ -296,23 +282,15 @@ describe('category.service', () => {
         name: 'Partially Updated',
       }
 
-      const mockResponse: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category updated successfully',
-          data: {
-            id: 1,
-            name: 'Partially Updated',
-            slug: 'partially-updated',
-            is_active: true,
-            color: '#FF0000',
-          },
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category updated successfully',
+        data: createMockCategory({
+          id: 1,
+          name: 'Partially Updated',
+          color: '#FF0000',
+        }),
+      })
 
       mockApiClient.put.mockResolvedValueOnce(mockResponse)
 
@@ -333,18 +311,14 @@ describe('category.service', () => {
 
     it('should handle 404 error with custom message', async () => {
       const error: AxiosError = {
-        response: {
-          status: 404,
-          data: { message: 'Category not found' },
-          statusText: 'Not Found',
-          headers: {},
-          config: {} as any,
-        },
+        response: createMockResponse({ message: 'Category not found' }),
         isAxiosError: true,
         toJSON: () => ({}),
         name: 'AxiosError',
         message: 'Request failed with status code 404',
       }
+      error.response!.status = 404
+      error.response!.statusText = 'Not Found'
 
       mockApiClient.delete.mockRejectedValueOnce(error)
 
@@ -355,18 +329,14 @@ describe('category.service', () => {
 
     it('should handle 403 error with custom message', async () => {
       const error: AxiosError = {
-        response: {
-          status: 403,
-          data: { message: 'Forbidden' },
-          statusText: 'Forbidden',
-          headers: {},
-          config: {} as any,
-        },
+        response: createMockResponse({ message: 'Forbidden' }),
         isAxiosError: true,
         toJSON: () => ({}),
         name: 'AxiosError',
         message: 'Request failed with status code 403',
       }
+      error.response!.status = 403
+      error.response!.statusText = 'Forbidden'
 
       mockApiClient.delete.mockRejectedValueOnce(error)
 
@@ -377,18 +347,14 @@ describe('category.service', () => {
 
     it('should handle other errors with API message', async () => {
       const error: AxiosError = {
-        response: {
-          status: 500,
-          data: { message: 'Internal server error' },
-          statusText: 'Internal Server Error',
-          headers: {},
-          config: {} as any,
-        },
+        response: createMockResponse({ message: 'Internal server error' }),
         isAxiosError: true,
         toJSON: () => ({}),
         name: 'AxiosError',
         message: 'Request failed with status code 500',
       }
+      error.response!.status = 500
+      error.response!.statusText = 'Internal Server Error'
 
       mockApiClient.delete.mockRejectedValueOnce(error)
 
@@ -398,23 +364,16 @@ describe('category.service', () => {
 
   describe('toggleCategoryStatus', () => {
     it('should toggle category status', async () => {
-      const mockResponse: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category status toggled',
-          data: {
-            id: 1,
-            name: 'Music',
-            slug: 'music',
-            is_active: false,
-            color: '#FF0000',
-          },
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category status toggled',
+        data: createMockCategory({
+          id: 1,
+          name: 'Music',
+          color: '#FF0000',
+          is_active: false,
+        }),
+      })
 
       mockApiClient.patch.mockResolvedValueOnce(mockResponse)
 
@@ -428,8 +387,8 @@ describe('category.service', () => {
   describe('getActiveCategories', () => {
     it('should fetch active categories when backend returns array with data wrapper', async () => {
       const mockCategories: Category[] = [
-        { id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' },
-        { id: 2, name: 'Sports', slug: 'sports', is_active: true, color: '#00FF00' },
+        createMockCategory({ id: 1, name: 'Music', color: '#FF0000' }),
+        createMockCategory({ id: 2, name: 'Sports', color: '#00FF00' }),
       ]
 
       // apiClient returns what backend sends
@@ -445,22 +404,16 @@ describe('category.service', () => {
     })
 
     it('should fetch active categories (wrapped in data)', async () => {
-      const mockResponse: AxiosResponse<ApiResponse<Category[]>> = {
-        data: {
-          success: true,
-          message: 'Active categories retrieved',
-          data: [
-            { id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' },
-            { id: 2, name: 'Sports', slug: 'sports', is_active: true, color: '#00FF00' },
-          ],
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
+      const mockResponseData: ApiResponse<Category[]> = {
+        
+        message: 'Active categories retrieved',
+        data: [
+          createMockCategory({ id: 1, name: 'Music', color: '#FF0000' }),
+          createMockCategory({ id: 2, name: 'Sports', color: '#00FF00' }),
+        ],
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse.data)
+      mockApiClient.get.mockResolvedValueOnce(mockResponseData)
 
       const result = await getActiveCategories()
 
@@ -472,15 +425,8 @@ describe('category.service', () => {
   describe('searchCategories', () => {
     it('should search categories with default pagination', async () => {
       const mockResponse: CategoryPagination = {
-        data: [{ id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' }],
-        meta: {
-          current_page: 1,
-          from: 1,
-          last_page: 1,
-          per_page: 15,
-          to: 1,
-          total: 1,
-        },
+        data: [createMockCategory({ id: 1, name: 'Music', color: '#FF0000' })],
+        meta: createMockMeta({ current_page: 1, from: 1, last_page: 1, per_page: 15, to: 1, total: 1 }),
         links: {
           first: 'http://api.example.com/categories?page=1',
           last: 'http://api.example.com/categories?page=1',
@@ -489,7 +435,7 @@ describe('category.service', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await searchCategories('Music')
 
@@ -504,14 +450,7 @@ describe('category.service', () => {
     it('should search categories with custom page', async () => {
       const mockResponse: CategoryPagination = {
         data: [],
-        meta: {
-          current_page: 2,
-          from: 16,
-          last_page: 2,
-          per_page: 15,
-          to: 30,
-          total: 30,
-        },
+        meta: createMockMeta({ current_page: 2, from: 16, last_page: 2, per_page: 15, to: 30, total: 30 }),
         links: {
           first: 'http://api.example.com/categories?page=1',
           last: 'http://api.example.com/categories?page=2',
@@ -520,7 +459,7 @@ describe('category.service', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       await searchCategories('Tech', 2)
 
@@ -539,29 +478,17 @@ describe('category.service', () => {
         { id: 2, data: { name: 'Updated 2' } },
       ]
 
-      const mockResponse1: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category updated',
-          data: { id: 1, name: 'Updated 1', slug: 'updated-1', is_active: true, color: '#000000' },
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse1 = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category updated',
+        data: createMockCategory({ id: 1, name: 'Updated 1' }),
+      })
 
-      const mockResponse2: AxiosResponse<ApiResponse<Category>> = {
-        data: {
-          success: true,
-          message: 'Category updated',
-          data: { id: 2, name: 'Updated 2', slug: 'updated-2', is_active: true, color: '#000000' },
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
+      const mockResponse2 = createMockResponse<ApiResponse<Category>>({
+        
+        message: 'Category updated',
+        data: createMockCategory({ id: 2, name: 'Updated 2' }),
+      })
 
       mockApiClient.put
         .mockResolvedValueOnce(mockResponse1)
@@ -582,11 +509,11 @@ describe('category.service', () => {
       ]
 
       mockApiClient.put
-        .mockResolvedValueOnce({
-          data: {
-            data: { id: 1, name: 'Updated 1', slug: 'updated-1', is_active: true, color: '#000000' },
-          },
-        } as any)
+        .mockResolvedValueOnce(
+          createMockResponse({
+            data: createMockCategory({ id: 1, name: 'Updated 1' }),
+          })
+        )
         .mockRejectedValueOnce(new Error('Update failed for category 2'))
 
       await expect(batchUpdateCategories(updates)).rejects.toThrow('Update failed for category 2')
@@ -716,7 +643,7 @@ describe('category.service', () => {
         },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(mockPublicCategories)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockPublicCategories })
 
       const result = await getPublicCategories()
 

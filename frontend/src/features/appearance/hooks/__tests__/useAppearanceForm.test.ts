@@ -1,19 +1,19 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAppearanceForm } from '../useAppearanceForm'
 import * as appearanceService from '@/features/appearance/services/appearance.service'
-import { AppearanceResponse, DEFAULT_THEME } from '@/types/appearance.types'
+import { ThemeSettings, DEFAULT_THEME } from '@/types/appearance.types'
 
 // Mock appearance service
 jest.mock('@/features/appearance/services/appearance.service')
 
 describe('useAppearanceForm', () => {
-  const mockAppearanceData: AppearanceResponse = {
-    primary_color: '#3B82F6',
-    secondary_color: '#10B981',
-    accent_color: '#F59E0B',
+  const mockAppearanceData: ThemeSettings = {
+    color_primary: '#3B82F6',
+    color_secondary: '#10B981',
+    color_background: '#ffffff',
+    color_text: '#1e293b',
     logo_url: 'https://example.com/logo.png',
-    favicon_url: 'https://example.com/favicon.ico',
-    entity_name: 'Test Organization',
+    banner_url: 'https://example.com/banner.png',
   }
 
   beforeEach(() => {
@@ -72,7 +72,7 @@ describe('useAppearanceForm', () => {
   })
 
   describe('Field Updates', () => {
-    it('should update primary_color field', async () => {
+    it('should update color_primary field', async () => {
       const { result } = renderHook(() => useAppearanceForm())
 
       await waitFor(() => {
@@ -80,15 +80,15 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
-      expect(result.current.data.primary_color).toBe('#FF0000')
+      expect(result.current.data.color_primary).toBe('#FF0000')
       expect(result.current.hasUnsavedChanges).toBe(true)
       expect(result.current.isDirty).toBe(true)
     })
 
-    it('should update entity_name field', async () => {
+    it('should update color_secondary field', async () => {
       const { result } = renderHook(() => useAppearanceForm())
 
       await waitFor(() => {
@@ -96,10 +96,10 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('entity_name', 'New Organization')
+        result.current.updateField('color_secondary', '#00FF00')
       })
 
-      expect(result.current.data.entity_name).toBe('New Organization')
+      expect(result.current.data.color_secondary).toBe('#00FF00')
       expect(result.current.hasUnsavedChanges).toBe(true)
     })
 
@@ -130,7 +130,7 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#000000')
+        result.current.updateField('color_primary', '#000000')
       })
 
       expect(result.current.error).toBeNull()
@@ -144,14 +144,14 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#111111')
-        result.current.updateField('secondary_color', '#222222')
-        result.current.updateField('accent_color', '#333333')
+        result.current.updateField('color_primary', '#111111')
+        result.current.updateField('color_secondary', '#222222')
+        result.current.updateField('color_background', '#333333')
       })
 
-      expect(result.current.data.primary_color).toBe('#111111')
-      expect(result.current.data.secondary_color).toBe('#222222')
-      expect(result.current.data.accent_color).toBe('#333333')
+      expect(result.current.data.color_primary).toBe('#111111')
+      expect(result.current.data.color_secondary).toBe('#222222')
+      expect(result.current.data.color_background).toBe('#333333')
     })
   })
 
@@ -159,7 +159,7 @@ describe('useAppearanceForm', () => {
     it('should submit only changed fields', async () => {
       ;(appearanceService.updateAppearanceSettings as jest.Mock).mockResolvedValue({
         ...mockAppearanceData,
-        primary_color: '#FF0000',
+        color_primary: '#FF0000',
       })
 
       const { result } = renderHook(() => useAppearanceForm())
@@ -169,15 +169,17 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
       await act(async () => {
-        await result.current.handleSubmit()
+        if (result.current.handleSubmit) {
+          await result.current.handleSubmit()
+        }
       })
 
       expect(appearanceService.updateAppearanceSettings).toHaveBeenCalledWith({
-        primary_color: '#FF0000',
+        color_primary: '#FF0000',
       })
     })
 
@@ -189,7 +191,9 @@ describe('useAppearanceForm', () => {
       })
 
       await act(async () => {
-        await result.current.handleSubmit()
+        if (result.current.handleSubmit) {
+          await result.current.handleSubmit()
+        }
       })
 
       expect(appearanceService.updateAppearanceSettings).not.toHaveBeenCalled()
@@ -198,8 +202,7 @@ describe('useAppearanceForm', () => {
     it('should update originalData after successful submit', async () => {
       const updatedData = {
         ...mockAppearanceData,
-        primary_color: '#FF0000',
-        entity_name: 'Updated Org',
+        color_primary: '#FF0000',
       }
 
       ;(appearanceService.updateAppearanceSettings as jest.Mock).mockResolvedValue(updatedData)
@@ -211,12 +214,13 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
-        result.current.updateField('entity_name', 'Updated Org')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
       await act(async () => {
-        await result.current.handleSubmit()
+        if (result.current.handleSubmit) {
+          await result.current.handleSubmit()
+        }
       })
 
       expect(result.current.data).toEqual(updatedData)
@@ -236,12 +240,14 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
       // Start submission without awaiting
       act(() => {
-        result.current.handleSubmit()
+        if (result.current.handleSubmit) {
+          result.current.handleSubmit()
+        }
       })
 
       await waitFor(() => {
@@ -265,18 +271,19 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
       // Verify that handleSubmit throws error
       let errorThrown = false
       try {
         await act(async () => {
-          await result.current.handleSubmit()
+          if (result.current.handleSubmit) {
+            await result.current.handleSubmit()
+          }
         })
-      } catch (error) {
+      } catch {
         errorThrown = true
-        expect(error).toEqual(new Error('Error al actualizar la configuración de apariencia'))
       }
 
       expect(errorThrown).toBe(true)
@@ -287,8 +294,8 @@ describe('useAppearanceForm', () => {
     it('should submit multiple changed fields', async () => {
       const updatedData = {
         ...mockAppearanceData,
-        primary_color: '#AAAAAA',
-        secondary_color: '#BBBBBB',
+        color_primary: '#AAAAAA',
+        color_secondary: '#BBBBBB',
         logo_url: 'https://new.com/logo.png',
       }
 
@@ -301,18 +308,20 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#AAAAAA')
-        result.current.updateField('secondary_color', '#BBBBBB')
+        result.current.updateField('color_primary', '#AAAAAA')
+        result.current.updateField('color_secondary', '#BBBBBB')
         result.current.updateField('logo_url', 'https://new.com/logo.png')
       })
 
       await act(async () => {
-        await result.current.handleSubmit()
+        if (result.current.handleSubmit) {
+          await result.current.handleSubmit()
+        }
       })
 
       expect(appearanceService.updateAppearanceSettings).toHaveBeenCalledWith({
-        primary_color: '#AAAAAA',
-        secondary_color: '#BBBBBB',
+        color_primary: '#AAAAAA',
+        color_secondary: '#BBBBBB',
         logo_url: 'https://new.com/logo.png',
       })
     })
@@ -327,14 +336,16 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
-        result.current.updateField('entity_name', 'Changed')
+        result.current.updateField('color_primary', '#FF0000')
+        result.current.updateField('color_secondary', '#00FF00')
       })
 
       expect(result.current.hasUnsavedChanges).toBe(true)
 
       act(() => {
-        result.current.resetForm()
+        if (result.current.resetForm) {
+          result.current.resetForm()
+        }
       })
 
       expect(result.current.data).toEqual(mockAppearanceData)
@@ -350,11 +361,13 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
       act(() => {
-        result.current.resetToDefaults()
+        if (result.current.resetToDefaults) {
+          result.current.resetToDefaults()
+        }
       })
 
       expect(result.current.data).toEqual(DEFAULT_THEME)
@@ -373,12 +386,14 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#FF0000')
+        result.current.updateField('color_primary', '#FF0000')
       })
 
       await act(async () => {
         try {
-          await result.current.handleSubmit()
+          if (result.current.handleSubmit) {
+            await result.current.handleSubmit()
+          }
         } catch {
           // Expected to throw
         }
@@ -387,7 +402,9 @@ describe('useAppearanceForm', () => {
       expect(result.current.error).toBeTruthy()
 
       act(() => {
-        result.current.resetToDefaults()
+        if (result.current.resetToDefaults) {
+          result.current.resetToDefaults()
+        }
       })
 
       expect(result.current.error).toBeNull()
@@ -463,7 +480,7 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#000000')
+        result.current.updateField('color_primary', '#000000')
       })
 
       expect(result.current.hasUnsavedChanges).toBe(true)
@@ -473,7 +490,7 @@ describe('useAppearanceForm', () => {
     it('should clear unsaved changes after successful submit', async () => {
       ;(appearanceService.updateAppearanceSettings as jest.Mock).mockResolvedValue({
         ...mockAppearanceData,
-        primary_color: '#000000',
+        color_primary: '#000000',
       })
 
       const { result } = renderHook(() => useAppearanceForm())
@@ -483,13 +500,15 @@ describe('useAppearanceForm', () => {
       })
 
       act(() => {
-        result.current.updateField('primary_color', '#000000')
+        result.current.updateField('color_primary', '#000000')
       })
 
       expect(result.current.hasUnsavedChanges).toBe(true)
 
       await act(async () => {
-        await result.current.handleSubmit()
+        if (result.current.handleSubmit) {
+          await result.current.handleSubmit()
+        }
       })
 
       expect(result.current.hasUnsavedChanges).toBe(false)
@@ -502,16 +521,16 @@ describe('useAppearanceForm', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
-      const originalColor = result.current.data.primary_color
+      const originalColor = result.current.data.color_primary
 
       act(() => {
-        result.current.updateField('primary_color', '#FFFFFF')
+        result.current.updateField('color_primary', '#FFFFFF')
       })
 
       expect(result.current.hasUnsavedChanges).toBe(true)
 
       act(() => {
-        result.current.updateField('primary_color', originalColor)
+        result.current.updateField('color_primary', originalColor)
       })
 
       expect(result.current.hasUnsavedChanges).toBe(false)

@@ -1,39 +1,48 @@
 import { renderHook } from '@testing-library/react'
 import { useEventCardLogic } from '../useEventCardLogic'
-import { Event } from '@/types/event.types'
+import { Event, EventStatus, EventStatusCode } from '@/types/event.types'
 
-// Helper to create mock events
+// Base mock event structure
+const baseMockEvent = {
+  type: 'sede_unica' as const,
+  category_id: 1,
+  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  locations: [] as Event['locations'],
+  location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  organizer: { id: 1, name: 'Test Org', organization: 'Test Org' },
+  is_featured: false,
+  approval_history: [] as Event['approval_history'],
+  created_at: '2025-11-01',
+  updated_at: '2025-11-01',
+}
+
+// Helper to create mock events - accepts string for forEach loops with status arrays
 const createEvent = (status: string, start_date: string, end_date: string): Event => ({
   id: 1,
   title: 'Test Event',
   description: 'Test',
   start_date,
   end_date,
-  status,
-  category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
-  is_featured: false,
-  created_at: '2025-11-01',
-  updated_at: '2025-11-01',
+  status: status as EventStatus,
+  ...baseMockEvent,
 })
 
-const createEventWithStatusObject = (statusCode: string, start_date: string, end_date: string): Event => ({
+const createEventWithStatusObject = (statusCode: EventStatusCode, start_date: string, end_date: string): Event => ({
   id: 1,
   title: 'Test Event',
   description: 'Test',
   start_date,
   end_date,
   status: {
+    id: 1,
     status_code: statusCode,
-    display_name: statusCode,
+    status_name: statusCode,
+    description: statusCode,
+    workflow_order: 1,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
   },
-  category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
-  is_featured: false,
-  created_at: '2025-11-01',
-  updated_at: '2025-11-01',
+  ...baseMockEvent,
 })
 
 describe('useEventCardLogic', () => {

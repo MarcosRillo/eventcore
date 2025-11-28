@@ -12,35 +12,27 @@ use Illuminate\Support\Facades\Log;
 
 class CategoryService
 {
+    private const DEFAULT_PER_PAGE = 15;
+    private const MAX_PER_PAGE = 100;
+
     /**
      * Get all categories with optional filters and pagination.
-     * This method ALWAYS returns a LengthAwarePaginator object for consistent API responses.
      */
     public function getAllCategories(array $filters = []): LengthAwarePaginator
     {
         $query = Category::query();
 
-        // Apply entity filter - scope to current user's organization
-        $this->applyScopeFilter($query);
-
-        // Apply search filter
         if (!empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
-        // Apply active status filter
         if (isset($filters['active'])) {
             $this->applyActiveFilter($query, $filters['active']);
         }
 
-        // Apply default ordering
         $this->applyDefaultOrdering($query);
 
-        // Apply pagination - ALWAYS paginate to ensure consistent API response structure
-        $perPage = $this->getPerPageValue($filters);
-
-        // CRITICAL: This method MUST always return paginated results
-        return $query->paginate($perPage);
+        return $query->paginate($this->getPerPageValue($filters));
     }
 
     /**
@@ -158,16 +150,6 @@ class CategoryService
     }
 
     /**
-     * Apply scope filter to limit categories to user's organization.
-     */
-    private function applyScopeFilter(Builder $query): void
-    {
-        // Note: In a real application, you might want to scope by user's organization
-        // For now, we'll leave this as a placeholder for future implementation
-        // $query->where('entity_id', auth()->user()->organization_id);
-    }
-
-    /**
      * Apply search filter to the query.
      */
     private function applySearchFilter(Builder $query, string $search): void
@@ -204,20 +186,8 @@ class CategoryService
      */
     private function getPerPageValue(array $filters): int
     {
-        $perPage = $filters['per_page'] ?? 15;
-
-        // Ensure per_page is within reasonable bounds
-        $perPage = (int) $perPage;
-
-        if ($perPage < 1) {
-            $perPage = 15;
-        }
-
-        if ($perPage > 100) {
-            $perPage = 100;
-        }
-
-        return $perPage;
+        $perPage = (int) ($filters['per_page'] ?? self::DEFAULT_PER_PAGE);
+        return max(1, min($perPage, self::MAX_PER_PAGE));
     }
 
     /**
@@ -258,17 +228,13 @@ class CategoryService
      */
     public function getCategoryStats(): array
     {
-        $query = Category::query();
-        $this->applyScopeFilter($query);
-
-        $total = $query->count();
-        $active = $query->where('is_active', true)->count();
-        $inactive = $total - $active;
+        $total = Category::count();
+        $active = Category::where('is_active', true)->count();
 
         return [
             'total' => $total,
             'active' => $active,
-            'inactive' => $inactive,
+            'inactive' => $total - $active,
         ];
     }
 
@@ -277,11 +243,13 @@ class CategoryService
      */
     public function toggleCategoryStatus(Category $category): Category
     {
-        $category->update([
-            'is_active' => !$category->is_active
-        ]);
+        return DB::transaction(function () use ($category) {
+            $category->update([
+                'is_active' => !$category->is_active
+            ]);
 
-        return $category->fresh();
+            return $category->fresh();
+        });
     }
 
     /**
@@ -289,13 +257,8 @@ class CategoryService
      */
     public function getActiveCategories(): \Illuminate\Database\Eloquent\Collection
     {
-        $query = Category::query();
-
-        // Apply scope filter if needed
-        $this->applyScopeFilter($query);
-
-        return $query->where('is_active', true)
-                    ->orderBy('name', 'asc')
-                    ->get();
+        return Category::where('is_active', true)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 }

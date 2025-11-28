@@ -1,6 +1,35 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { ApprovalModalContainer } from '../ApprovalModalContainer'
-import { Event, EVENT_STATUS } from '@/types/event.types'
+import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types'
+
+interface ApprovalActionOption {
+  value: string
+  label: string
+}
+
+interface ApprovalFormData {
+  action: string
+  comment: string
+}
+
+interface ApprovalFormErrors {
+  action?: string
+  comment?: string
+}
+
+interface MockApprovalModalProps {
+  isOpen: boolean
+  event: Event | null
+  formData: ApprovalFormData
+  errors: ApprovalFormErrors
+  isLoading: boolean
+  availableActions: ApprovalActionOption[]
+  submitButtonText: string
+  onClose: () => void
+  onFieldChange: (field: string, value: string) => void
+  onSubmit: () => void
+  requiresComment: (action: string) => boolean
+}
 
 // Mock child component
 jest.mock('@/features/entity-admin/components/dumb/ApprovalModal', () => ({
@@ -16,7 +45,7 @@ jest.mock('@/features/entity-admin/components/dumb/ApprovalModal', () => ({
     onFieldChange,
     onSubmit,
     requiresComment
-  }) => {
+  }: MockApprovalModalProps) => {
     if (!isOpen) return null
 
     return (
@@ -34,7 +63,7 @@ jest.mock('@/features/entity-admin/components/dumb/ApprovalModal', () => ({
           onChange={(e) => onFieldChange('action', e.target.value)}
         >
           <option value="">Select action</option>
-          {availableActions.map((action: any) => (
+          {availableActions.map((action: ApprovalActionOption) => (
             <option key={action.value} value={action.value}>
               {action.label}
             </option>
@@ -67,17 +96,21 @@ jest.mock('@/features/entity-admin/components/dumb/ApprovalModal', () => ({
   }),
 }))
 
-const createMockEvent = (status: string): Event => ({
+const createMockEvent = (status: EventStatus): Event => ({
   id: 1,
   title: 'Test Event',
   description: 'Test Description',
+  type: 'sede_unica',
   start_date: '2025-12-15T10:00:00Z',
   end_date: '2025-12-15T18:00:00Z',
   status,
   category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
+  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  locations: [],
+  location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  organizer: { id: 1, name: 'Test Organizer', organization: 'Test Org' },
   is_featured: false,
+  approval_history: [],
   created_at: '2025-11-01T00:00:00Z',
   updated_at: '2025-11-01T00:00:00Z',
 })
@@ -545,8 +578,13 @@ describe('ApprovalModalContainer', () => {
       const event = {
         ...createMockEvent(EVENT_STATUS.DRAFT),
         status: {
+          id: 1,
           status_code: EVENT_STATUS.DRAFT,
           status_name: 'Borrador',
+          description: 'Draft status',
+          workflow_order: 1,
+          created_at: '2025-01-01T00:00:00Z',
+          updated_at: '2025-01-01T00:00:00Z',
         },
       }
 

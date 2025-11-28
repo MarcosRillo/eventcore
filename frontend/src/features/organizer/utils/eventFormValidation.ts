@@ -21,11 +21,11 @@ export const validateEventForm = (data: EventFormData): EventFormErrors => {
   if (!data.event_date) {
     errors.event_date = 'Event date is required'
   } else {
-    const eventDate = new Date(data.event_date)
+    // Compare date strings directly to avoid timezone issues
     const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const todayString = today.toISOString().split('T')[0]
 
-    if (eventDate < today) {
+    if (data.event_date <= todayString) {
       errors.event_date = 'Date must be in the future'
     }
   }

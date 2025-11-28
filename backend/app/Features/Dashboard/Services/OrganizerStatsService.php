@@ -2,6 +2,7 @@
 
 namespace App\Features\Dashboard\Services;
 
+use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,20 @@ use Illuminate\Support\Facades\Log;
  */
 class OrganizerStatsService
 {
+    use StatusResolvable;
+
+    /**
+     * Map database status codes to API response keys.
+     */
+    private const STATUS_KEY_MAP = [
+        'pending_internal_approval' => 'pending_internal',
+        'approved_internal' => 'approved_internal',
+        'pending_public_approval' => 'pending_public',
+        'published' => 'published',
+        'requires_changes' => 'requires_changes',
+        'rejected' => 'rejected',
+    ];
+
     /**
      * Get statistics for organizer's events.
      *
@@ -23,8 +38,9 @@ class OrganizerStatsService
     public function getStats(int $userId): array
     {
         try {
-            // Get status IDs dynamically from database
-            $statusIds = $this->getStatusIds();
+            // Get all status IDs from cached trait method
+            $allStatusIds = $this->getAllStatusIds();
+            $statusIds = $this->mapStatusKeys($allStatusIds);
 
             // Single efficient query with groupBy
             $statusCounts = Event::where('created_by', $userId)
@@ -59,35 +75,19 @@ class OrganizerStatsService
     }
 
     /**
-     * Get status IDs dynamically from database by status code.
-     * Maps long status codes to short keys for cleaner API responses.
+     * Map database status codes to short API keys.
      *
-     * @return array Map of short_key => status_id
+     * @param array<string, int> $allStatusIds Map of status_code => id from trait
+     * @return array<string, int> Map of short_key => id
      */
-    private function getStatusIds(): array
+    private function mapStatusKeys(array $allStatusIds): array
     {
-        return DB::table('event_statuses')
-            ->whereIn('status_code', [
-                'pending_internal_approval',
-                'approved_internal',
-                'pending_public_approval',
-                'published',
-                'requires_changes',
-                'rejected'
-            ])
-            ->pluck('id', 'status_code')
-            ->mapWithKeys(function ($id, $code) {
-                // Map database codes to API response keys
-                $keyMap = [
-                    'pending_internal_approval' => 'pending_internal',
-                    'approved_internal' => 'approved_internal',
-                    'pending_public_approval' => 'pending_public',
-                    'published' => 'published',
-                    'requires_changes' => 'requires_changes',
-                    'rejected' => 'rejected',
-                ];
-                return [$keyMap[$code] => $id];
-            })
-            ->toArray();
+        $mapped = [];
+        foreach (self::STATUS_KEY_MAP as $dbCode => $apiKey) {
+            if (isset($allStatusIds[$dbCode])) {
+                $mapped[$apiKey] = $allStatusIds[$dbCode];
+            }
+        }
+        return $mapped;
     }
 }

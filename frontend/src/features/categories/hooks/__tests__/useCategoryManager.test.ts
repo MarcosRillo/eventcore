@@ -1,8 +1,9 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useCategoryManager } from '../useCategoryManager'
 import { useAuth } from '@/context/AuthContext'
 import { usePaginatedData } from '@/hooks/usePaginatedData'
 import * as categoryService from '@/features/categories/services/category.service'
+import { Category } from '@/types/category.types'
 
 // Mock dependencies
 jest.mock('@/context/AuthContext')
@@ -17,11 +18,22 @@ const mockAddItem = jest.fn()
 const mockUpdateItem = jest.fn()
 const mockRemoveItem = jest.fn()
 
+// Helper to create a valid Category mock
+const createMockCategory = (overrides: Partial<Category> & { id: number; name: string }): Category => ({
+  slug: overrides.name.toLowerCase().replace(/\s+/g, '-'),
+  entity_id: 1,
+  is_active: true,
+  color: '#000000',
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
 describe('useCategoryManager', () => {
   const mockCategories = [
-    { id: 1, name: 'Music', slug: 'music', is_active: true, color: '#FF0000' },
-    { id: 2, name: 'Sports', slug: 'sports', is_active: false, color: '#00FF00' },
-    { id: 3, name: 'Tech', slug: 'tech', is_active: true, color: '#0000FF' },
+    createMockCategory({ id: 1, name: 'Music', color: '#FF0000' }),
+    createMockCategory({ id: 2, name: 'Sports', is_active: false, color: '#00FF00' }),
+    createMockCategory({ id: 3, name: 'Tech', color: '#0000FF' }),
   ]
 
   const mockPagination = {
@@ -286,7 +298,7 @@ describe('useCategoryManager', () => {
     it('should expose addCategory for optimistic addition', () => {
       const { result } = renderHook(() => useCategoryManager())
 
-      const newCategory = { id: 4, name: 'Art', slug: 'art', is_active: true, color: '#FFFF00' }
+      const newCategory = createMockCategory({ id: 4, name: 'Art', color: '#FFFF00' })
 
       act(() => {
         result.current.addCategory(newCategory)

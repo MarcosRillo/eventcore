@@ -192,11 +192,13 @@ class LocationService
      */
     public function toggleLocationStatus(Location $location): Location
     {
-        $location->update([
-            'is_active' => !$location->is_active
-        ]);
+        return DB::transaction(function () use ($location) {
+            $location->update([
+                'is_active' => !$location->is_active
+            ]);
 
-        return $location->fresh();
+            return $location->fresh();
+        });
     }
 
     /**

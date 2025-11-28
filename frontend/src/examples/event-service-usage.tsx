@@ -11,7 +11,7 @@ import {
   getEventServiceForContext
 } from '@/features/events/services/event.service';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Event, EventStatistics, EventTemplate } from '@/types/event.types';
 
@@ -114,7 +114,7 @@ export const DirectServiceUsage = () => {
     setLoading(true);
     try {
       const result = await apiClient.get<{events: Event[]}>('/public/events?featured_only=true&upcoming_only=true');
-      setEvents(result.events);
+      setEvents(result.data.events);
     } catch (error) {
       console.error('Error loading public events:', error);
     } finally {
@@ -126,7 +126,7 @@ export const DirectServiceUsage = () => {
     setLoading(true);
     try {
       const result = await apiClient.get<{events: Event[]}>('/organizer/events?draft_only=true');
-      setEvents(result.events);
+      setEvents(result.data.events);
     } catch (error) {
       console.error('Error loading organizer events:', error);
     } finally {
@@ -190,7 +190,7 @@ export const ServiceSpecificFeatures = () => {
   const loadAdminStats = async () => {
     try {
       const response = await apiClient.get<{ data: EventStatistics }>('/admin/events/statistics');
-      setStats(response.data);
+      setStats(response.data.data);
     } catch (error) {
       console.error('Error loading stats:', error);
     }
@@ -199,7 +199,7 @@ export const ServiceSpecificFeatures = () => {
   const loadOrganizerTemplates = async () => {
     try {
       const response = await apiClient.get<{ data: EventTemplate[] }>('/organizer/templates');
-      setTemplates(response.data);
+      setTemplates(response.data.data);
     } catch (error) {
       console.error('Error loading templates:', error);
     }

@@ -3,5 +3,5 @@
  * Barrel exports for utility libraries
  */
 
-export { apiClient, ApiClient } from './api';
-export type { ApiResponse, ApiError } from './api';
+export * from './utils';
+export * from './type-guards';

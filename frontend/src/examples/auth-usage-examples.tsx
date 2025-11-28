@@ -101,7 +101,8 @@ export const PermissionsHookExample = () => {
       <div>
         <h3>Feature Access:</h3>
         <ul className="list-disc list-inside">
-          <li>Manage Events: {can('manage_events') ? '✅' : '❌'}</li>
+          <li>Manage Entity Events: {can('manage_entity_events') ? '✅' : '❌'}</li>
+          <li>Manage Own Events: {can('manage_own_events') ? '✅' : '❌'}</li>
           <li>Approve Events: {can('approve_events') ? '✅' : '❌'}</li>
           <li>Manage Users: {can('manage_users') ? '✅' : '❌'}</li>
           <li>View Analytics: {can('view_analytics') ? '✅' : '❌'}</li>
@@ -118,8 +119,8 @@ export const PermissionGateExample = () => {
       <h2>Permission Gates</h2>
       
       {/* Single permission check */}
-      <PermissionGate 
-        permission="manage_events"
+      <PermissionGate
+        permission="manage_entity_events"
         fallback={<p className="text-red-500">No access to event management</p>}
       >
         <div className="bg-green-100 p-4 rounded">
@@ -127,10 +128,10 @@ export const PermissionGateExample = () => {
           <p>You can manage events!</p>
         </div>
       </PermissionGate>
-      
+
       {/* Multiple permissions (require all) */}
-      <PermissionGate 
-        permissions={['manage_events', 'approve_events']}
+      <PermissionGate
+        permissions={['manage_entity_events', 'approve_events']}
         requireAll={true}
         fallback={<p className="text-orange-500">Need both manage and approve permissions</p>}
       >

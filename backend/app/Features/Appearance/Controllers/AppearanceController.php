@@ -3,7 +3,7 @@
 namespace App\Features\Appearance\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateAppearanceRequest;
+use App\Features\Appearance\Requests\UpdateAppearanceRequest;
 use App\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

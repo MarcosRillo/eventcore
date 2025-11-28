@@ -15,6 +15,48 @@ jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
 
+// Helper to create mock axios response
+const createMockResponse = <T>(data: T, status = 200, statusText = 'OK'): AxiosResponse<T> => ({
+  data,
+  status,
+  statusText,
+  headers: {},
+  config: { headers: {} } as AxiosResponse['config'],
+})
+
+// Helper to create a valid Location mock
+const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
+  address: 'Default Address 123',
+  city: 'Default City',
+  country: 'Argentina',
+  features: [],
+  is_active: true,
+  entity_id: 1,
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
+// Helper to create valid PaginationMeta
+const createMockMeta = (overrides: Partial<{
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}> = {}) => ({
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0,
+  from: null,
+  to: null,
+  path: 'http://api.example.com/locations',
+  links: [],
+  ...overrides,
+})
+
 describe('location.service', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -24,17 +66,10 @@ describe('location.service', () => {
     it('should fetch paginated locations with default params', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          { id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA', province: 'Buenos Aires', country: 'Argentina', capacity: 500 },
-          { id: 2, name: 'Centro Cultural Kirchner', address: 'Sarmiento 151', city: 'CABA', province: 'Buenos Aires', country: 'Argentina', capacity: 1000 },
+          createMockLocation({ id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA', state: 'Buenos Aires', max_capacity: 500 }),
+          createMockLocation({ id: 2, name: 'Centro Cultural Kirchner', address: 'Sarmiento 151', city: 'CABA', state: 'Buenos Aires', max_capacity: 1000 }),
         ],
-        meta: {
-          current_page: 1,
-          last_page: 1,
-          total: 2,
-          per_page: 15,
-          from: 1,
-          to: 2,
-        },
+        meta: createMockMeta({ current_page: 1, last_page: 1, total: 2, per_page: 15, from: 1, to: 2 }),
         links: {
           first: 'http://api.example.com/locations?page=1',
           last: 'http://api.example.com/locations?page=1',
@@ -43,15 +78,7 @@ describe('location.service', () => {
         },
       }
 
-      const axiosResponse: AxiosResponse<LocationPagination> = {
-        data: mockResponse,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       const result = await getLocations()
 
@@ -70,14 +97,7 @@ describe('location.service', () => {
     it('should fetch locations with custom pagination params', async () => {
       const mockResponse: LocationPagination = {
         data: [],
-        meta: {
-          current_page: 2,
-          last_page: 5,
-          total: 100,
-          per_page: 20,
-          from: 21,
-          to: 40,
-        },
+        meta: createMockMeta({ current_page: 2, last_page: 5, total: 100, per_page: 20, from: 21, to: 40 }),
         links: {
           first: 'http://api.example.com/locations?page=1',
           last: 'http://api.example.com/locations?page=5',
@@ -86,15 +106,7 @@ describe('location.service', () => {
         },
       }
 
-      const axiosResponse: AxiosResponse<LocationPagination> = {
-        data: mockResponse,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       await getLocations({ page: 2, per_page: 20 })
 
@@ -111,16 +123,9 @@ describe('location.service', () => {
     it('should fetch locations with search filter', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          { id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA', province: 'Buenos Aires', country: 'Argentina', capacity: 500 },
+          createMockLocation({ id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA', state: 'Buenos Aires', max_capacity: 500 }),
         ],
-        meta: {
-          current_page: 1,
-          last_page: 1,
-          total: 1,
-          per_page: 15,
-          from: 1,
-          to: 1,
-        },
+        meta: createMockMeta({ current_page: 1, last_page: 1, total: 1, per_page: 15, from: 1, to: 1 }),
         links: {
           first: 'http://api.example.com/locations?page=1',
           last: 'http://api.example.com/locations?page=1',
@@ -129,15 +134,7 @@ describe('location.service', () => {
         },
       }
 
-      const axiosResponse: AxiosResponse<LocationPagination> = {
-        data: mockResponse,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       await getLocations({ search: 'Teatro' })
 
@@ -154,16 +151,9 @@ describe('location.service', () => {
     it('should fetch only active locations when is_active filter is true', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          { id: 1, name: 'Active Location', address: 'Address 1', city: 'City', province: 'Province', country: 'Argentina', capacity: 100 },
+          createMockLocation({ id: 1, name: 'Active Location', address: 'Address 1', city: 'City', state: 'Province', max_capacity: 100 }),
         ],
-        meta: {
-          current_page: 1,
-          last_page: 1,
-          total: 1,
-          per_page: 15,
-          from: 1,
-          to: 1,
-        },
+        meta: createMockMeta({ current_page: 1, last_page: 1, total: 1, per_page: 15, from: 1, to: 1 }),
         links: {
           first: 'http://api.example.com/locations?page=1',
           last: 'http://api.example.com/locations?page=1',
@@ -172,15 +162,7 @@ describe('location.service', () => {
         },
       }
 
-      const axiosResponse: AxiosResponse<LocationPagination> = {
-        data: mockResponse,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       await getLocations({ is_active: true })
 
@@ -204,19 +186,11 @@ describe('location.service', () => {
   describe('getActiveLocations', () => {
     it('should fetch all active locations without pagination', async () => {
       const mockLocations: Location[] = [
-        { id: 1, name: 'Location 1', address: 'Address 1', city: 'City 1', province: 'Province', country: 'Argentina', capacity: 100 },
-        { id: 2, name: 'Location 2', address: 'Address 2', city: 'City 2', province: 'Province', country: 'Argentina', capacity: 200 },
+        createMockLocation({ id: 1, name: 'Location 1', address: 'Address 1', city: 'City 1', state: 'Province', max_capacity: 100 }),
+        createMockLocation({ id: 2, name: 'Location 2', address: 'Address 2', city: 'City 2', state: 'Province', max_capacity: 200 }),
       ]
 
-      const axiosResponse: AxiosResponse<{ data: Location[] }> = {
-        data: { data: mockLocations },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
 
       const result = await getActiveLocations()
 
@@ -234,26 +208,17 @@ describe('location.service', () => {
 
   describe('getLocation', () => {
     it('should fetch a single location by ID', async () => {
-      const mockLocation: Location = {
+      const mockLocation = createMockLocation({
         id: 1,
         name: 'Teatro San Martín',
         address: 'Av. Corrientes 1530',
         city: 'CABA',
-        province: 'Buenos Aires',
-        country: 'Argentina',
-        capacity: 500,
+        state: 'Buenos Aires',
+        max_capacity: 500,
         description: 'Historic theater',
-      }
+      })
 
-      const axiosResponse: AxiosResponse<{ data: Location }> = {
-        data: { data: mockLocation },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocation }))
 
       const result = await getLocation(1)
 
@@ -276,25 +241,24 @@ describe('location.service', () => {
         name: 'New Theater',
         address: 'New Address 123',
         city: 'Mendoza',
-        province: 'Mendoza',
+        state: 'Mendoza',
         country: 'Argentina',
-        capacity: 300,
+        max_capacity: 300,
+        features: [] as string[],
+        is_active: true,
+        entity_id: 1,
       }
 
-      const createdLocation: Location = {
+      const createdLocation = createMockLocation({
         id: 3,
-        ...newLocationData,
-      }
+        name: 'New Theater',
+        address: 'New Address 123',
+        city: 'Mendoza',
+        state: 'Mendoza',
+        max_capacity: 300,
+      })
 
-      const axiosResponse: AxiosResponse<{ data: Location }> = {
-        data: { data: createdLocation },
-        status: 201,
-        statusText: 'Created',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.post.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: createdLocation }, 201, 'Created'))
 
       const result = await createLocation(newLocationData)
 
@@ -309,28 +273,30 @@ describe('location.service', () => {
         name: 'Minimal Location',
         address: 'Address',
         city: 'City',
-        province: 'Province',
+        state: 'Province',
         country: 'Argentina',
-        capacity: 50,
+        max_capacity: 50,
         description: 'Optional description',
         latitude: -34.6037,
         longitude: -58.3816,
+        features: [] as string[],
+        is_active: true,
+        entity_id: 1,
       }
 
-      const createdLocation: Location = {
+      const createdLocation = createMockLocation({
         id: 4,
-        ...newLocationData,
-      }
+        name: 'Minimal Location',
+        address: 'Address',
+        city: 'City',
+        state: 'Province',
+        max_capacity: 50,
+        description: 'Optional description',
+        latitude: -34.6037,
+        longitude: -58.3816,
+      })
 
-      const axiosResponse: AxiosResponse<{ data: Location }> = {
-        data: { data: createdLocation },
-        status: 201,
-        statusText: 'Created',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.post.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: createdLocation }, 201, 'Created'))
 
       const result = await createLocation(newLocationData)
 
@@ -344,9 +310,12 @@ describe('location.service', () => {
         name: 'Invalid Location',
         address: '',
         city: '',
-        province: '',
+        state: '',
         country: '',
-        capacity: 0,
+        max_capacity: 0,
+        features: [] as string[],
+        is_active: true,
+        entity_id: 1,
       }
 
       mockApiClient.post.mockRejectedValueOnce(new Error('Validation failed'))
@@ -361,65 +330,47 @@ describe('location.service', () => {
         name: 'Updated Theater',
         address: 'Updated Address 456',
         city: 'Updated City',
-        capacity: 600,
+        max_capacity: 600,
       }
 
-      const updatedLocation: Location = {
+      const updatedLocation = createMockLocation({
         id: 1,
         name: 'Updated Theater',
         address: 'Updated Address 456',
         city: 'Updated City',
-        province: 'Buenos Aires',
-        country: 'Argentina',
-        capacity: 600,
-      }
+        state: 'Buenos Aires',
+        max_capacity: 600,
+      })
 
-      const axiosResponse: AxiosResponse<{ data: Location }> = {
-        data: { data: updatedLocation },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.put.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: updatedLocation }))
 
       const result = await updateLocation(1, updateData)
 
       expect(mockApiClient.put).toHaveBeenCalledWith('/locations/1', updateData)
       expect(result).toEqual(updatedLocation)
       expect(result.name).toBe('Updated Theater')
-      expect(result.capacity).toBe(600)
+      expect(result.max_capacity).toBe(600)
     })
 
     it('should update location with partial fields', async () => {
       const updateData = {
-        capacity: 450,
+        max_capacity: 450,
       }
 
-      const updatedLocation: Location = {
+      const updatedLocation = createMockLocation({
         id: 1,
         name: 'Teatro San Martín',
         address: 'Av. Corrientes 1530',
         city: 'CABA',
-        province: 'Buenos Aires',
-        country: 'Argentina',
-        capacity: 450,
-      }
+        state: 'Buenos Aires',
+        max_capacity: 450,
+      })
 
-      const axiosResponse: AxiosResponse<{ data: Location }> = {
-        data: { data: updatedLocation },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.put.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: updatedLocation }))
 
       const result = await updateLocation(1, updateData)
 
-      expect(result.capacity).toBe(450)
+      expect(result.max_capacity).toBe(450)
     })
 
     it('should handle errors when updating location', async () => {
@@ -431,15 +382,7 @@ describe('location.service', () => {
 
   describe('deleteLocation', () => {
     it('should delete a location successfully', async () => {
-      const axiosResponse: AxiosResponse<void> = {
-        data: undefined,
-        status: 204,
-        statusText: 'No Content',
-        headers: {},
-        config: {} as any,
-      }
-
-      mockApiClient.delete.mockResolvedValueOnce(axiosResponse)
+      mockApiClient.delete.mockResolvedValueOnce(createMockResponse(undefined, 204, 'No Content'))
 
       await expect(deleteLocation(1)).resolves.not.toThrow()
 

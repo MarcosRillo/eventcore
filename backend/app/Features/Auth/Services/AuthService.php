@@ -2,14 +2,20 @@
 
 namespace App\Features\Auth\Services;
 
+use App\Models\RefreshToken;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthService
 {
     /**
      * Authenticate a user with email and password.
+     * Returns access token, refresh token, and expiration time.
      */
     public function login(array $credentials): array
     {
@@ -20,25 +26,96 @@ class AuthService
         /** @var User $user */
         $user = User::where('email', $credentials['email'])->firstOrFail();
 
-        // Revoke all existing tokens for security
-        $user->tokens()->delete();
+        return DB::transaction(function () use ($user) {
+            // Revoke all existing access tokens for security
+            $user->tokens()->delete();
 
-        // Create new token
-        $token = $user->createToken('auth_token')->plainTextToken;
+            // Create access token with expiration
+            $accessTokenExpiration = config('tokens.access_token_expiration', 15);
+            $expiresAt = Carbon::now()->addMinutes($accessTokenExpiration);
 
-        return [
-            'user' => $user,
-            'token' => $token,
-        ];
+            $accessToken = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
+
+            // Create refresh token with new family
+            $refreshTokenPlain = $this->createRefreshToken($user);
+
+            return [
+                'user' => $user,
+                'access_token' => $accessToken,
+                'refresh_token' => $refreshTokenPlain,
+                'expires_at' => $expiresAt->toISOString(),
+            ];
+        });
+    }
+
+    /**
+     * Refresh tokens using a valid refresh token.
+     * Implements token rotation: old refresh token is revoked, new one issued.
+     */
+    public function refresh(string $refreshTokenPlain): array
+    {
+        // Find the refresh token by checking hash (outside transaction for security checks)
+        $refreshToken = $this->findValidRefreshToken($refreshTokenPlain);
+
+        if (!$refreshToken) {
+            throw new AuthenticationException('Invalid or expired refresh token');
+        }
+
+        // Check if token is being reused (already revoked)
+        // This MUST happen outside the main transaction so the revocation is not rolled back
+        if ($refreshToken->isRevoked()) {
+            // Token reuse detected - potential attack
+            // Revoke entire family for security (this persists even if we throw)
+            $this->revokeTokenFamily($refreshToken->family_id);
+            throw new AuthenticationException('Invalid or expired refresh token');
+        }
+
+        // Check expiration
+        if ($refreshToken->isExpired()) {
+            throw new AuthenticationException('Invalid or expired refresh token');
+        }
+
+        // Perform the actual token rotation in a transaction
+        return DB::transaction(function () use ($refreshToken) {
+            $user = $refreshToken->user;
+
+            // Revoke the used refresh token
+            $refreshToken->revoke();
+
+            // Revoke all existing access tokens
+            $user->tokens()->delete();
+
+            // Create new access token
+            $accessTokenExpiration = config('tokens.access_token_expiration', 15);
+            $expiresAt = Carbon::now()->addMinutes($accessTokenExpiration);
+            $accessToken = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
+
+            // Create new refresh token in same family
+            $newRefreshTokenPlain = $this->createRefreshToken($user, $refreshToken->family_id);
+
+            return [
+                'access_token' => $accessToken,
+                'refresh_token' => $newRefreshTokenPlain,
+                'expires_at' => $expiresAt->toISOString(),
+            ];
+        });
     }
 
     /**
      * Logout the authenticated user.
+     * Revokes all access and refresh tokens.
      */
     public function logout(User $user): void
     {
-        // Revoke all tokens for the user
-        $user->tokens()->delete();
+        DB::transaction(function () use ($user) {
+            // Revoke all access tokens
+            $user->tokens()->delete();
+
+            // Revoke all refresh tokens
+            RefreshToken::where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->update(['revoked_at' => now()]);
+        });
     }
 
     /**
@@ -46,7 +123,69 @@ class AuthService
      */
     public function logoutCurrentDevice(User $user, string $tokenId): void
     {
-        // Revoke only the current token
+        // Revoke only the current access token
         $user->tokens()->where('id', $tokenId)->delete();
+    }
+
+    /**
+     * Create a new refresh token for a user.
+     *
+     * @param User $user The user to create token for
+     * @param string|null $familyId Optional family ID (null creates new family)
+     * @return string The plaintext refresh token
+     */
+    private function createRefreshToken(User $user, ?string $familyId = null): string
+    {
+        $tokenPlain = Str::random(64);
+        $tokenHash = Hash::make($tokenPlain);
+
+        $refreshTokenExpiration = config('tokens.refresh_token_expiration', 10080);
+
+        RefreshToken::create([
+            'user_id' => $user->id,
+            'token' => $tokenHash,
+            'family_id' => $familyId ?? Str::uuid()->toString(),
+            'expires_at' => Carbon::now()->addMinutes($refreshTokenExpiration),
+        ]);
+
+        return $tokenPlain;
+    }
+
+    /**
+     * Find a valid refresh token by its plaintext value.
+     * Uses Hash::check for timing-safe comparison.
+     */
+    private function findValidRefreshToken(string $tokenPlain): ?RefreshToken
+    {
+        // Get all non-expired tokens for checking
+        $tokens = RefreshToken::where('expires_at', '>', now())->get();
+
+        foreach ($tokens as $token) {
+            if (Hash::check($tokenPlain, $token->token)) {
+                return $token;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Revoke all tokens in a family (security measure for token reuse).
+     */
+    private function revokeTokenFamily(string $familyId): void
+    {
+        RefreshToken::where('family_id', $familyId)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
+    }
+
+    /**
+     * Revoke all refresh tokens for a user (used during password reset).
+     */
+    public function revokeAllRefreshTokens(User $user): void
+    {
+        RefreshToken::where('user_id', $user->id)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
     }
 }

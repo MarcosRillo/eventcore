@@ -1,10 +1,25 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DeleteConfirmModal } from '../DeleteConfirmModal'
+
+interface MockModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+}
+
+interface MockButtonProps {
+  children: React.ReactNode
+  onClick?: () => void
+  variant?: string
+  disabled?: boolean
+}
 
 // Mock UI components
 jest.mock('@/components/ui/Modal', () => ({
   __esModule: true,
-  default: ({ isOpen, onClose, title, children }: any) =>
+  default: ({ isOpen, onClose, title, children }: MockModalProps) =>
     isOpen ? (
       <div data-testid="modal">
         <div data-testid="modal-title">{title}</div>
@@ -18,7 +33,7 @@ jest.mock('@/components/ui/Modal', () => ({
 
 jest.mock('@/components/ui/Button', () => ({
   __esModule: true,
-  default: ({ children, onClick, variant, disabled }: any) => (
+  default: ({ children, onClick, variant, disabled }: MockButtonProps) => (
     <button
       data-testid={`button-${variant}`}
       onClick={onClick}

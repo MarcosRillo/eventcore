@@ -1,10 +1,50 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ApprovalModal, ApprovalFormData, ApprovalActionOption } from '../ApprovalModal'
-import { Event, EVENT_STATUS } from '@/types/event.types'
+import { Event, EventStatus, EventStatusObject, EVENT_STATUS } from '@/types/event.types'
+
+interface MockModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+  footer: React.ReactNode
+}
+
+interface MockTextareaProps {
+  label: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  placeholder?: string
+  disabled?: boolean
+  error?: string
+  name: string
+}
+
+interface MockRadioOption {
+  value: string
+  label: string
+}
+
+interface MockRadioGroupProps {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: MockRadioOption[]
+  error?: string
+}
+
+interface MockButtonProps {
+  children: React.ReactNode
+  onClick?: () => void
+  loading?: boolean
+  disabled?: boolean
+  variant?: string
+}
 
 // Mock UI components
 jest.mock('@/components/ui', () => ({
-  Modal: ({ isOpen, onClose, title, children, footer }: any) =>
+  Modal: ({ isOpen, onClose, title, children, footer }: MockModalProps) =>
     isOpen ? (
       <div data-testid="modal">
         <div data-testid="modal-title">{title}</div>
@@ -15,7 +55,7 @@ jest.mock('@/components/ui', () => ({
         </button>
       </div>
     ) : null,
-  Textarea: ({ label, value, onChange, placeholder, disabled, error, name }: any) => (
+  Textarea: ({ label, value, onChange, placeholder, disabled, error, name }: MockTextareaProps) => (
     <div>
       <label>{label}</label>
       <textarea
@@ -28,11 +68,11 @@ jest.mock('@/components/ui', () => ({
       {error && <div data-testid="textarea-error">{error}</div>}
     </div>
   ),
-  RadioGroup: ({ label, value, onChange, options, error }: any) => (
+  RadioGroup: ({ label, value, onChange, options, error }: MockRadioGroupProps) => (
     <div>
       <label>{label}</label>
       <div data-testid="radio-group">
-        {options.map((option: any) => (
+        {options.map((option: MockRadioOption) => (
           <label key={option.value}>
             <input
               type="radio"
@@ -47,7 +87,7 @@ jest.mock('@/components/ui', () => ({
       {error && <div data-testid="radio-error">{error}</div>}
     </div>
   ),
-  Button: ({ children, onClick, loading, disabled, variant }: any) => (
+  Button: ({ children, onClick, loading, disabled, variant }: MockButtonProps) => (
     <button
       data-testid={`button-${variant || 'primary'}`}
       onClick={onClick}
@@ -58,17 +98,21 @@ jest.mock('@/components/ui', () => ({
   ),
 }))
 
-const createMockEvent = (status: string): Event => ({
+const createMockEvent = (status: EventStatus): Event => ({
   id: 1,
   title: 'Test Event',
   description: 'Test Description',
+  type: 'sede_unica',
   start_date: '2025-12-15T10:00:00Z',
   end_date: '2025-12-15T18:00:00Z',
   status,
   category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
+  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  locations: [],
+  location: { id: 1, name: 'Teatro', address: 'Av. Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  organizer: { id: 1, name: 'Test Organizer', organization: 'Test Org' },
   is_featured: false,
+  approval_history: [],
   created_at: '2025-11-01T00:00:00Z',
   updated_at: '2025-11-01T00:00:00Z',
 })
@@ -197,7 +241,7 @@ describe('ApprovalModal', () => {
         status: {
           status_code: EVENT_STATUS.DRAFT,
           status_name: 'Borrador',
-        } as any,
+        } as EventStatusObject,
       }
 
       render(

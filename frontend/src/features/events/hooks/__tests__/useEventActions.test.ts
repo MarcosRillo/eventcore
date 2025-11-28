@@ -1,18 +1,22 @@
 import { renderHook } from '@testing-library/react'
 import { useEventActions } from '../useEventActions'
-import { Event } from '@/types/event.types'
+import { Event, EventStatus } from '@/types/event.types'
 
 const mockEvent: Event = {
   id: 1,
   title: 'Test Event',
   description: 'Test',
+  type: 'sede_unica',
   start_date: '2025-12-15T10:00:00Z',
   end_date: '2025-12-15T18:00:00Z',
-  status: 'draft',
+  status: 'draft' as EventStatus,
   category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
+  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  locations: [],
+  location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  organizer: { id: 1, name: 'Test Org', organization: 'Test Org' },
   is_featured: false,
+  approval_history: [],
   created_at: '2025-11-01',
   updated_at: '2025-11-01',
 }

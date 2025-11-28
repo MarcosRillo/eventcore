@@ -1,27 +1,53 @@
 import apiClient from '@/services/apiClient'
 import { approvalService, approvalValidation } from '../approvalService'
-import { Event } from '@/types/event.types'
+import { Event, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import { AxiosResponse } from 'axios'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
 
+// Helper to create mock axios response
+const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: { headers: {} } as AxiosResponse['config'],
+})
+
+// Helper to create valid Event mock
+const createMockEvent = (overrides: Partial<Event> & { id: number; title: string }): Event => ({
+  description: 'Test event description',
+  start_date: '2025-12-01T10:00:00.000Z',
+  end_date: '2025-12-01T18:00:00.000Z',
+  type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
+  status: EVENT_STATUS.PENDING_INTERNAL_APPROVAL as EventStatusCode,
+  category_id: 1,
+  category: {
+    id: 1,
+    name: 'Test Category',
+    slug: 'test-category',
+    entity_id: 1,
+    is_active: true,
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_at: '2025-01-01T00:00:00.000Z',
+  },
+  locations: [],
+  is_featured: false,
+  approval_history: [],
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
 describe('approvalService', () => {
-  const mockEvent: Event = {
+  const mockEvent = createMockEvent({
     id: 1,
     title: 'Test Event',
     description: 'Test Description',
-    start_date: '2025-12-01',
-    end_date: '2025-12-01',
-    status: 'pending_internal_approval',
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
-    is_featured: false,
-    created_at: '2025-11-01',
-    updated_at: '2025-11-01',
-  }
+  })
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -29,9 +55,9 @@ describe('approvalService', () => {
 
   describe('approveInternal', () => {
     it('should approve event internally without comment', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Approved', data: { ...mockEvent, status: 'approved_internal' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Approved', data: { ...mockEvent, status: 'approved_internal' } })
+      )
 
       const result = await approvalService.approveInternal(1)
 
@@ -40,9 +66,9 @@ describe('approvalService', () => {
     })
 
     it('should approve event internally with comment', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Approved', data: { ...mockEvent, status: 'approved_internal' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Approved', data: { ...mockEvent, status: 'approved_internal' } })
+      )
 
       const result = await approvalService.approveInternal(1, 'Looks good')
 
@@ -59,9 +85,9 @@ describe('approvalService', () => {
 
   describe('requestPublicApproval', () => {
     it('should request public approval without comment', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Requested', data: { ...mockEvent, status: 'pending_public_approval' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Requested', data: { ...mockEvent, status: 'pending_public_approval' } })
+      )
 
       const result = await approvalService.requestPublicApproval(1)
 
@@ -70,9 +96,9 @@ describe('approvalService', () => {
     })
 
     it('should request public approval with comment', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Requested', data: { ...mockEvent, status: 'pending_public_approval' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Requested', data: { ...mockEvent, status: 'pending_public_approval' } })
+      )
 
       const result = await approvalService.requestPublicApproval(1, 'Ready for public')
 
@@ -89,9 +115,9 @@ describe('approvalService', () => {
 
   describe('publishEvent', () => {
     it('should publish event successfully', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Published', data: { ...mockEvent, status: 'published' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Published', data: { ...mockEvent, status: 'published' } })
+      )
 
       const result = await approvalService.publishEvent(1)
 
@@ -108,9 +134,9 @@ describe('approvalService', () => {
 
   describe('requestChanges', () => {
     it('should request changes with feedback', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Changes requested', data: { ...mockEvent, status: 'requires_changes' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Changes requested', data: { ...mockEvent, status: 'requires_changes' } })
+      )
 
       const result = await approvalService.requestChanges(1, 'Please fix the date')
 
@@ -127,9 +153,9 @@ describe('approvalService', () => {
 
   describe('rejectEvent', () => {
     it('should reject event with reason', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Rejected', data: { ...mockEvent, status: 'rejected' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Rejected', data: { ...mockEvent, status: 'rejected' } })
+      )
 
       const result = await approvalService.rejectEvent(1, 'Does not meet criteria')
 
@@ -146,9 +172,9 @@ describe('approvalService', () => {
 
   describe('toggleFeatured', () => {
     it('should toggle featured status to true', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Toggled', data: { ...mockEvent, is_featured: true } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Toggled', data: { ...mockEvent, is_featured: true } })
+      )
 
       const result = await approvalService.toggleFeatured(1)
 
@@ -157,9 +183,9 @@ describe('approvalService', () => {
     })
 
     it('should toggle featured status to false', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Toggled', data: { ...mockEvent, is_featured: false } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Toggled', data: { ...mockEvent, is_featured: false } })
+      )
 
       const result = await approvalService.toggleFeatured(1)
 
@@ -175,9 +201,9 @@ describe('approvalService', () => {
 
   describe('approveEvent (legacy)', () => {
     it('should call approveInternal', async () => {
-      mockApiClient.patch.mockResolvedValueOnce({
-        data: { message: 'Approved', data: { ...mockEvent, status: 'approved_internal' } },
-      } as any)
+      mockApiClient.patch.mockResolvedValueOnce(
+        createMockResponse({ message: 'Approved', data: { ...mockEvent, status: 'approved_internal' } })
+      )
 
       const result = await approvalService.approveEvent(1, 'Legacy approve')
 
@@ -188,34 +214,18 @@ describe('approvalService', () => {
 })
 
 describe('approvalValidation', () => {
-  const createEvent = (status: string): Event => ({
+  const createEvent = (status: EventStatusCode): Event => createMockEvent({
     id: 1,
     title: 'Test Event',
     description: 'Test',
-    start_date: '2025-12-01',
-    end_date: '2025-12-01',
     status,
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
-    is_featured: false,
-    created_at: '2025-11-01',
-    updated_at: '2025-11-01',
   })
 
-  const createEventWithStatusObject = (statusCode: string): Event => ({
+  const createEventWithStatusObject = (statusCode: EventStatusCode): Event => createMockEvent({
     id: 1,
     title: 'Test Event',
     description: 'Test',
-    start_date: '2025-12-01',
-    end_date: '2025-12-01',
-    status: { status_code: statusCode, display_name: statusCode },
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
-    is_featured: false,
-    created_at: '2025-11-01',
-    updated_at: '2025-11-01',
+    status: statusCode,
   })
 
   describe('canApproveInternal', () => {
@@ -362,7 +372,8 @@ describe('approvalValidation', () => {
     })
 
     it('should return "Estado desconocido" for unknown status', () => {
-      expect(approvalValidation.getWorkflowStage(createEvent('unknown_status'))).toBe('Estado desconocido')
+      // Use type assertion to test edge case with unknown status
+      expect(approvalValidation.getWorkflowStage(createEvent('unknown_status' as EventStatusCode))).toBe('Estado desconocido')
     })
 
     it('should handle status as object', () => {

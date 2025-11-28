@@ -5,8 +5,8 @@ namespace App\Features\Events\Controllers;
 use App\Http\Controllers\Controller;
 use App\Features\Events\Services\EventService;
 use App\Models\Event;
-use App\Http\Requests\StoreEventRequest;
-use App\Http\Requests\UpdateEventRequest;
+use App\Features\Events\Requests\StoreEventRequest;
+use App\Features\Events\Requests\UpdateEventRequest;
 use App\Http\Resources\EventResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -95,10 +95,10 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        $event = Event::findOrFail($id);
+        $event = Event::with('status')->findOrFail($id);
 
-        // Validación simple sin abstracciones
-        if ($event->status_id === 5) { // published
+        // Check if event is published using relationship
+        if ($event->status && $event->status->status_code === 'published') {
             return response()->json([
                 'message' => 'No se puede eliminar un evento publicado'
             ], 422);
@@ -149,9 +149,9 @@ class EventController extends Controller
     {
         $stats = [
             'total' => Event::count(),
-            'published' => Event::where('status_id', 5)->count(),
-            'pending' => Event::whereIn('status_id', [2, 4])->count(),
-            'draft' => Event::where('status_id', 1)->count(),
+            'published' => Event::whereHas('status', fn($q) => $q->where('status_code', 'published'))->count(),
+            'pending' => Event::whereHas('status', fn($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval']))->count(),
+            'draft' => Event::whereHas('status', fn($q) => $q->where('status_code', 'draft'))->count(),
         ];
 
         return response()->json(['data' => $stats]);

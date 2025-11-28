@@ -10,7 +10,7 @@
  */
 
 import { AxiosResponse, AxiosError } from "axios";
-import { apiClient } from "@/lib/api";
+import apiClient from "@/services/apiClient";
 import {
   Category,
   CategoryPagination,
@@ -38,7 +38,7 @@ export const getCategories = async (
   const response = await apiClient.get<CategoryPagination>(
     `/categories?${searchParams.toString()}`
   );
-  return response;
+  return response.data;
 };
 
 /**
@@ -46,7 +46,8 @@ export const getCategories = async (
  * Returns ApiResponse<Category> wrapper structure
  */
 export const getCategory = async (id: number): Promise<Category> => {
-  return await apiClient.get<Category>(`/categories/${id}`);
+  const response = await apiClient.get<Category>(`/categories/${id}`);
+  return response.data;
 };
 
 /**
@@ -247,7 +248,7 @@ export const getPublicCategories = async (): Promise<
       event_count: number;
     }[]
   >("/public/categories");
-  return response;
+  return response.data;
 };
 
 /**

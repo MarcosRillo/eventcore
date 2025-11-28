@@ -1,11 +1,21 @@
 import apiClient from '@/services/apiClient'
 import { publicEventsService } from '../public-events.service'
 import { EventsResponse, PublicEvent, Category, Location } from '@/features/public-calendar/types/public-calendar.types'
+import { AxiosResponse } from 'axios'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
+
+// Helper to create mock axios response
+const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: { headers: {} } as AxiosResponse['config'],
+})
 
 describe('publicEventsService', () => {
   const mockPublicEvent: PublicEvent = {
@@ -14,19 +24,22 @@ describe('publicEventsService', () => {
     description: 'Public Description',
     start_date: '2025-12-01',
     end_date: '2025-12-01',
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
     is_featured: true,
-    category_name: 'Music',
-    location_name: 'Teatro San Martín',
+    category: {
+      id: 1,
+      name: 'Music',
+    },
+    locations: [{
+      id: 1,
+      name: 'Teatro San Martín',
+      city: 'Buenos Aires',
+    }],
   }
 
   const mockEventsResponse: EventsResponse = {
     data: [mockPublicEvent],
     meta: {
       current_page: 1,
-      last_page: 1,
       per_page: 15,
       total: 1,
     },
@@ -38,7 +51,7 @@ describe('publicEventsService', () => {
 
   describe('getAll', () => {
     it('should fetch all public events without params', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       const result = await publicEventsService.getAll()
 
@@ -48,7 +61,7 @@ describe('publicEventsService', () => {
     })
 
     it('should fetch events with category_id filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ category_id: 1 })
 
@@ -56,7 +69,7 @@ describe('publicEventsService', () => {
     })
 
     it('should fetch events with location_id filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ location_id: 2 })
 
@@ -64,7 +77,7 @@ describe('publicEventsService', () => {
     })
 
     it('should fetch events with start_date filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ start_date: '2025-12-01' })
 
@@ -72,7 +85,7 @@ describe('publicEventsService', () => {
     })
 
     it('should fetch events with end_date filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ end_date: '2025-12-31' })
 
@@ -80,7 +93,7 @@ describe('publicEventsService', () => {
     })
 
     it('should fetch events with page filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ page: 2 })
 
@@ -88,7 +101,7 @@ describe('publicEventsService', () => {
     })
 
     it('should fetch events with multiple filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
         category_id: 1,
@@ -107,7 +120,7 @@ describe('publicEventsService', () => {
     })
 
     it('should skip null filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
         category_id: null,
@@ -120,7 +133,7 @@ describe('publicEventsService', () => {
     })
 
     it('should skip undefined filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockEventsResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
         category_id: undefined,
@@ -135,13 +148,12 @@ describe('publicEventsService', () => {
         data: [],
         meta: {
           current_page: 1,
-          last_page: 1,
           per_page: 15,
           total: 0,
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: emptyResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
 
       const result = await publicEventsService.getAll()
 
@@ -158,7 +170,7 @@ describe('publicEventsService', () => {
 
   describe('getById', () => {
     it('should fetch event by ID successfully', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockPublicEvent } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockPublicEvent }))
 
       const result = await publicEventsService.getById(1)
 
@@ -169,7 +181,7 @@ describe('publicEventsService', () => {
 
     it('should fetch different event IDs', async () => {
       const mockEvent2 = { ...mockPublicEvent, id: 123 }
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockEvent2 } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent2 }))
 
       const result = await publicEventsService.getById(123)
 
@@ -196,13 +208,12 @@ describe('publicEventsService', () => {
         data: [mockPublicEvent, { ...mockPublicEvent, id: 2 }],
         meta: {
           current_page: 1,
-          last_page: 1,
           per_page: 10,
           total: 2,
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: upcomingEvents } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(upcomingEvents))
 
       const result = await publicEventsService.getUpcoming()
 
@@ -216,13 +227,12 @@ describe('publicEventsService', () => {
         data: [],
         meta: {
           current_page: 1,
-          last_page: 1,
           per_page: 10,
           total: 0,
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: emptyResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
 
       const result = await publicEventsService.getUpcoming()
 
@@ -246,13 +256,12 @@ describe('publicEventsService', () => {
         ],
         meta: {
           current_page: 1,
-          last_page: 1,
           per_page: 6,
           total: 3,
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: featuredEvents } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(featuredEvents))
 
       const result = await publicEventsService.getFeatured()
 
@@ -266,13 +275,12 @@ describe('publicEventsService', () => {
         data: [],
         meta: {
           current_page: 1,
-          last_page: 1,
           per_page: 6,
           total: 0,
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: emptyResponse } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
 
       const result = await publicEventsService.getFeatured()
 
@@ -289,12 +297,12 @@ describe('publicEventsService', () => {
   describe('getCategories', () => {
     it('should fetch active categories successfully', async () => {
       const mockCategories: Category[] = [
-        { id: 1, name: 'Music', slug: 'music', color: '#FF0000' },
-        { id: 2, name: 'Sports', slug: 'sports', color: '#00FF00' },
-        { id: 3, name: 'Arts', slug: 'arts', color: '#0000FF' },
+        { id: 1, name: 'Music' },
+        { id: 2, name: 'Sports' },
+        { id: 3, name: 'Arts' },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockCategories } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockCategories }))
 
       const result = await publicEventsService.getCategories()
 
@@ -305,7 +313,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle empty categories list', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: [] } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await publicEventsService.getCategories()
 
@@ -320,29 +328,27 @@ describe('publicEventsService', () => {
 
     it('should fetch categories with all required fields', async () => {
       const mockCategories: Category[] = [
-        { id: 1, name: 'Music', slug: 'music', color: '#FF0000' },
+        { id: 1, name: 'Music' },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockCategories } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockCategories }))
 
       const result = await publicEventsService.getCategories()
 
       expect(result.data[0]).toHaveProperty('id')
       expect(result.data[0]).toHaveProperty('name')
-      expect(result.data[0]).toHaveProperty('slug')
-      expect(result.data[0]).toHaveProperty('color')
     })
   })
 
   describe('getLocations', () => {
     it('should fetch active locations successfully', async () => {
       const mockLocations: Location[] = [
-        { id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA' },
-        { id: 2, name: 'Centro Cultural Kirchner', address: 'Sarmiento 151', city: 'CABA' },
-        { id: 3, name: 'Luna Park', address: 'Av. Madero 420', city: 'CABA' },
+        { id: 1, name: 'Teatro San Martín', city: 'CABA' },
+        { id: 2, name: 'Centro Cultural Kirchner', city: 'CABA' },
+        { id: 3, name: 'Luna Park', city: 'CABA' },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockLocations } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
 
       const result = await publicEventsService.getLocations()
 
@@ -353,7 +359,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle empty locations list', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: [] } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await publicEventsService.getLocations()
 
@@ -368,16 +374,15 @@ describe('publicEventsService', () => {
 
     it('should fetch locations with all required fields', async () => {
       const mockLocations: Location[] = [
-        { id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA' },
+        { id: 1, name: 'Teatro San Martín', city: 'CABA' },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockLocations } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
 
       const result = await publicEventsService.getLocations()
 
       expect(result.data[0]).toHaveProperty('id')
       expect(result.data[0]).toHaveProperty('name')
-      expect(result.data[0]).toHaveProperty('address')
       expect(result.data[0]).toHaveProperty('city')
     })
   })

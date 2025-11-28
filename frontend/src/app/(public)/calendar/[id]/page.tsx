@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 import { Event } from '@/types/event.types';
 import EventDetailPage from './EventDetailPage';
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     const { id } = await params;
     const eventId = parseInt(id) || id;
     const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
-    const event = response.data;
+    const event = response.data.data;
 
     const eventUrl = `/calendar/${id}`;
     const eventDate = new Date(event.start_date).toLocaleDateString('es-AR', {
@@ -75,7 +75,7 @@ export default async function EventPage({ params }: EventPageProps) {
     const { id } = await params;
     const eventId = parseInt(id) || id;
     const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
-    const event = response.data;
+    const event = response.data.data;
 
     return <EventDetailPage event={event} />;
   } catch {

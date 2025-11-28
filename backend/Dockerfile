@@ -1,7 +1,7 @@
 FROM php:8.2-fpm
 
 # Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -24,10 +24,24 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install zip \
     && docker-php-ext-install exif \
     && docker-php-ext-install pcntl \
-    && docker-php-ext-install bcmath
+    && docker-php-ext-install bcmath \
+    # Instalar PCOV para code coverage (más rápido que Xdebug)
+    && pecl install pcov \
+    && docker-php-ext-enable pcov \
+    # Limpiar caché
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Limpiar caché
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Configuración de PCOV para coverage
+# - pcov.enabled=1 siempre activo (solo genera overhead con --coverage)
+# - PCOV no afecta rendimiento si no se usa --coverage
+# - Excluye vendor y directorios no relevantes
+RUN { \
+    echo '[pcov]'; \
+    echo 'pcov.enabled=1'; \
+    echo 'pcov.directory=/var/www/app'; \
+    echo 'pcov.exclude="~vendor|tests|database|bootstrap|storage~"'; \
+    } > /usr/local/etc/php/conf.d/pcov.ini
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

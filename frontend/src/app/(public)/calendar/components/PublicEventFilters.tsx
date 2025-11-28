@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, Calendar as CalendarIcon } from 'lucide-react';
 import { Category } from '@/types/category.types';
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 
 export interface PublicEventFiltersState {
   search: string;
@@ -28,7 +28,7 @@ export default function PublicEventFilters({
     const fetchCategories = async () => {
       try {
         const response = await apiClient.get<{categories: Category[]}>('/public/categories');
-        const categoriesData = response.categories;
+        const categoriesData = response.data.categories;
         setCategories(categoriesData);
       } catch {
       }

@@ -1,10 +1,34 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { RejectConfirmModal } from '../RejectConfirmModal'
+
+interface MockModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+}
+
+interface MockButtonProps {
+  children: React.ReactNode
+  onClick?: () => void
+  variant?: string
+  disabled?: boolean
+}
+
+interface MockTextareaProps {
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  placeholder?: string
+  disabled?: boolean
+  rows?: number
+  'aria-label'?: string
+}
 
 // Mock UI components
 jest.mock('@/components/ui/Modal', () => ({
   __esModule: true,
-  default: ({ isOpen, onClose, title, children }: any) =>
+  default: ({ isOpen, onClose, title, children }: MockModalProps) =>
     isOpen ? (
       <div data-testid="modal">
         <div data-testid="modal-title">{title}</div>
@@ -18,7 +42,7 @@ jest.mock('@/components/ui/Modal', () => ({
 
 jest.mock('@/components/ui/Button', () => ({
   __esModule: true,
-  default: ({ children, onClick, variant, disabled }: any) => (
+  default: ({ children, onClick, variant, disabled }: MockButtonProps) => (
     <button
       data-testid={`button-${variant}`}
       onClick={onClick}
@@ -31,7 +55,7 @@ jest.mock('@/components/ui/Button', () => ({
 
 jest.mock('@/components/ui/Textarea', () => ({
   __esModule: true,
-  default: ({ value, onChange, placeholder, disabled, rows, ...props }: any) => (
+  default: ({ value, onChange, placeholder, disabled, rows, ...props }: MockTextareaProps) => (
     <textarea
       data-testid="textarea-reason"
       value={value}

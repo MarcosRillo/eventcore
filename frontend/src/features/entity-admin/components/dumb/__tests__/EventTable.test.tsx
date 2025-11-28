@@ -1,11 +1,30 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { EventTable, ColumnConfig, ActionConfig, ConfirmDialogData } from '../EventTable'
-import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
+import { Event, EVENT_STATUS, EVENT_TYPE, EventStatusObject, EventTypeObject } from '@/types/event.types'
+
+interface MockConfirmDialogProps {
+  isOpen: boolean
+  title: string
+  message: string
+  onConfirm: () => void
+  onCancel: () => void
+}
+
+interface MockButtonProps {
+  children: React.ReactNode
+  onClick?: () => void
+  [key: string]: unknown
+}
+
+interface MockPermissionGateProps {
+  children: React.ReactNode
+}
 
 // Mock UI components
 jest.mock('@/components/ui', () => ({
   LoadingSpinner: () => <div data-testid="loading-spinner">Loading...</div>,
-  ConfirmDialog: ({ isOpen, title, message, onConfirm, onCancel }: any) =>
+  ConfirmDialog: ({ isOpen, title, message, onConfirm, onCancel }: MockConfirmDialogProps) =>
     isOpen ? (
       <div data-testid="confirm-dialog">
         <div data-testid="confirm-title">{title}</div>
@@ -18,7 +37,7 @@ jest.mock('@/components/ui', () => ({
         </button>
       </div>
     ) : null,
-  Button: ({ children, onClick, ...props }: any) => (
+  Button: ({ children, onClick, ...props }: MockButtonProps) => (
     <button onClick={onClick} {...props}>
       {children}
     </button>
@@ -27,7 +46,7 @@ jest.mock('@/components/ui', () => ({
 
 // Mock PermissionGate to always allow
 jest.mock('@/components/auth/PermissionGate', () => ({
-  PermissionGate: ({ children }: any) => <>{children}</>,
+  PermissionGate: ({ children }: MockPermissionGateProps) => <>{children}</>,
 }))
 
 const createMockEvent = (overrides?: Partial<Event>): Event => ({
@@ -39,27 +58,36 @@ const createMockEvent = (overrides?: Partial<Event>): Event => ({
   status: EVENT_STATUS.DRAFT,
   type: EVENT_TYPE.SINGLE_LOCATION,
   category_id: 1,
-  location_id: 1,
-  organizer_id: 1,
   is_featured: false,
   created_at: '2025-11-01T00:00:00Z',
   updated_at: '2025-11-01T00:00:00Z',
+  approval_history: [],
+  locations: [],
   category: {
     id: 1,
     name: 'Music',
     slug: 'music',
     color: '#FF5733',
+    entity_id: 1,
+    is_active: true,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
   },
   location: {
     id: 1,
     name: 'Teatro San Martín',
     address: 'Av. Corrientes 1530',
     city: 'CABA',
+    country: 'Argentina',
+    features: [],
+    is_active: true,
+    entity_id: 1,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
   },
   organizer: {
     id: 1,
     name: 'John Doe',
-    email: 'john@example.com',
     organization: 'Test Org',
   },
   ...overrides,
@@ -100,7 +128,7 @@ describe('EventTable', () => {
     [EVENT_TYPE.MULTI_LOCATION]: 'Multi-Sede',
   }
 
-  const mockFormatDate = jest.fn((dateString: string) => '15/12/2025 10:00')
+  const mockFormatDate = jest.fn(() => '15/12/2025 10:00')
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -394,13 +422,21 @@ describe('EventTable', () => {
       const columns: ColumnConfig[] = [
         { key: 'location', label: 'Ubicación', visible: true },
       ]
+      const createLocation = (id: number) => ({
+        id,
+        name: `Location ${id}`,
+        address: `Address ${id}`,
+        city: `City ${id}`,
+        country: 'Argentina',
+        features: [],
+        is_active: true,
+        entity_id: 1,
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+      })
       const events = [
         createMockEvent({
-          locations: [
-            { id: 1, name: 'Location 1', address: 'Address 1', city: 'City 1' },
-            { id: 2, name: 'Location 2', address: 'Address 2', city: 'City 2' },
-            { id: 3, name: 'Location 3', address: 'Address 3', city: 'City 3' },
-          ],
+          locations: [createLocation(1), createLocation(2), createLocation(3)],
         }),
       ]
 
@@ -456,7 +492,7 @@ describe('EventTable', () => {
           status: {
             status_code: EVENT_STATUS.PUBLISHED,
             status_name: 'Publicado',
-          } as any,
+          } as EventStatusObject,
         }),
       ]
 
@@ -511,7 +547,7 @@ describe('EventTable', () => {
           type: {
             type_code: EVENT_TYPE.MULTI_LOCATION,
             type_name: 'Multi-Sede',
-          } as any,
+          } as EventTypeObject,
         }),
       ]
 

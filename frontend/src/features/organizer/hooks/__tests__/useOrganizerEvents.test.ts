@@ -35,7 +35,7 @@ describe('useOrganizerEvents', () => {
   })
 
   describe('Initialization', () => {
-    it('should initialize with default values', () => {
+    it('should initialize with default values', async () => {
       const { result } = renderHook(() => useOrganizerEvents())
 
       expect(result.current.events).toEqual([])
@@ -46,6 +46,11 @@ describe('useOrganizerEvents', () => {
       expect(result.current.total).toBe(0)
       expect(result.current.statusFilter).toBe(null)
       expect(result.current.isDeleting).toBe(false)
+
+      // Wait for async updates to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
 
     it('should fetch events on mount', async () => {

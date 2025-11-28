@@ -33,32 +33,28 @@ describe('useCalendarEvents', () => {
     description: 'Test Description',
     start_date: '2025-12-15T10:00:00Z',
     end_date: '2025-12-15T18:00:00Z',
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
     is_featured: true,
-    category_name: 'Music',
-    location_name: 'Teatro',
+    category: { id: 1, name: 'Music' },
+    locations: [{ id: 1, name: 'Teatro', city: 'City 1' }],
   }
 
   const mockEventsResponse: EventsResponse = {
     data: [mockEvent],
     meta: {
       current_page: 1,
-      last_page: 1,
       per_page: 15,
       total: 1,
     },
   }
 
   const mockCategories: Category[] = [
-    { id: 1, name: 'Music', slug: 'music', color: '#FF0000' },
-    { id: 2, name: 'Sports', slug: 'sports', color: '#00FF00' },
+    { id: 1, name: 'Music' },
+    { id: 2, name: 'Sports' },
   ]
 
   const mockLocations: Location[] = [
-    { id: 1, name: 'Teatro', address: 'Address 1', city: 'City 1' },
-    { id: 2, name: 'Estadio', address: 'Address 2', city: 'City 2' },
+    { id: 1, name: 'Teatro', city: 'City 1' },
+    { id: 2, name: 'Estadio', city: 'City 2' },
   ]
 
   beforeEach(() => {
@@ -195,7 +191,6 @@ describe('useCalendarEvents', () => {
         data: [],
         meta: {
           current_page: 1,
-          last_page: 1,
           per_page: 15,
           total: 0,
         },

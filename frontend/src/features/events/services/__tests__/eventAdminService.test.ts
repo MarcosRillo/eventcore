@@ -1,38 +1,73 @@
 import apiClient from '@/services/apiClient'
 import { eventAdminService, eventAdminApprovalService, combinedEventAdminService } from '../eventAdminService'
-import { Event, EventFormData, EventPagination, EventFilters, EventStatistics, ApprovalStatistics, EventStatus } from '@/types/event.types'
+import { Event, EventFormData, EventPagination, EventFilters, EventStatistics, ApprovalStatistics, EventStatus, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import { AxiosResponse } from 'axios'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
 
-describe('eventAdminService', () => {
-  const mockEvent: Event = {
+// Helper to create mock axios response
+const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: { headers: {} } as AxiosResponse['config'],
+})
+
+// Helper to create valid Event mock
+const createMockEvent = (overrides: Partial<Event> & { id: number; title: string }): Event => ({
+  description: 'Test event description',
+  start_date: '2025-12-01T10:00:00.000Z',
+  end_date: '2025-12-01T18:00:00.000Z',
+  type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
+  status: EVENT_STATUS.DRAFT as EventStatusCode,
+  category_id: 1,
+  category: {
     id: 1,
-    title: 'Admin Event',
-    description: 'Admin Description',
-    start_date: '2025-12-01',
-    end_date: '2025-12-01',
-    status: 'draft',
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
-    is_featured: false,
-    created_at: '2025-11-01',
-    updated_at: '2025-11-01',
-  }
+    name: 'Test Category',
+    slug: 'test-category',
+    entity_id: 1,
+    is_active: true,
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_at: '2025-01-01T00:00:00.000Z',
+  },
+  locations: [],
+  is_featured: false,
+  approval_history: [],
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
+// Helper to create valid PaginationMeta
+const createMockMeta = (overrides: Partial<{
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}> = {}) => ({
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0,
+  from: null,
+  to: null,
+  path: 'http://api.example.com/events',
+  links: [],
+  ...overrides,
+})
+
+describe('eventAdminService', () => {
+  const mockEvent = createMockEvent({ id: 1, title: 'Admin Event', description: 'Admin Description' })
 
   const mockPagination: EventPagination = {
     data: [mockEvent],
-    meta: {
-      current_page: 1,
-      last_page: 1,
-      per_page: 15,
-      total: 1,
-      from: 1,
-      to: 1,
-    },
+    meta: createMockMeta({ total: 1, from: 1, to: 1 }),
     links: {
       first: 'http://api/events?page=1',
       last: 'http://api/events?page=1',
@@ -47,7 +82,7 @@ describe('eventAdminService', () => {
 
   describe('getEvents', () => {
     it('should get events without filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventAdminService.getEvents()
 
@@ -57,7 +92,7 @@ describe('eventAdminService', () => {
     })
 
     it('should get events with filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: EventFilters = {
         category_id: 1,
@@ -74,11 +109,11 @@ describe('eventAdminService', () => {
     })
 
     it('should skip null, undefined, and empty string filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: EventFilters = {
         category_id: undefined,
-        status: null as any,
+        status: undefined,
         search: '',
         page: 1,
       }
@@ -101,7 +136,7 @@ describe('eventAdminService', () => {
 
   describe('getEvent', () => {
     it('should get single event by ID', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       const result = await eventAdminService.getEvent(1)
 
@@ -124,12 +159,13 @@ describe('eventAdminService', () => {
         description: 'New Description',
         start_date: '2025-12-01',
         end_date: '2025-12-02',
+        type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
         category_id: 1,
-        location_id: 1,
+        location_ids: [1],
       }
 
-      const createdEvent = { ...mockEvent, ...formData, id: 2, status: 'draft' }
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: createdEvent } } as any)
+      const createdEvent = createMockEvent({ id: 2, title: 'New Event', description: 'New Description' })
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: createdEvent }))
 
       const result = await eventAdminService.createEvent(formData)
 
@@ -144,12 +180,14 @@ describe('eventAdminService', () => {
     it('should set end_date to start_date if not provided', async () => {
       const formData: EventFormData = {
         title: 'Single Day Event',
+        description: 'Single day event description',
         start_date: '2025-12-01',
+        type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
         category_id: 1,
-        location_id: 1,
+        location_ids: [1],
       }
 
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       await eventAdminService.createEvent(formData)
 
@@ -163,9 +201,11 @@ describe('eventAdminService', () => {
     it('should handle validation errors', async () => {
       const formData: EventFormData = {
         title: '',
+        description: '',
         start_date: '',
+        type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
         category_id: 0,
-        location_id: 0,
+        location_ids: [],
       }
 
       mockApiClient.post.mockRejectedValueOnce(new Error('Validation failed'))
@@ -181,7 +221,7 @@ describe('eventAdminService', () => {
       }
 
       const updatedEvent = { ...mockEvent, title: 'Updated Title' }
-      mockApiClient.put.mockResolvedValueOnce({ data: { data: updatedEvent } } as any)
+      mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: updatedEvent }))
 
       const result = await eventAdminService.updateEvent(1, updateData)
 
@@ -194,7 +234,7 @@ describe('eventAdminService', () => {
         start_date: '2025-12-15',
       }
 
-      mockApiClient.put.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       await eventAdminService.updateEvent(1, updateData)
 
@@ -210,7 +250,7 @@ describe('eventAdminService', () => {
         end_date: '2025-12-20',
       }
 
-      mockApiClient.put.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       await eventAdminService.updateEvent(1, updateData)
 
@@ -226,7 +266,7 @@ describe('eventAdminService', () => {
 
   describe('deleteEvent', () => {
     it('should delete event successfully', async () => {
-      mockApiClient.delete.mockResolvedValueOnce({ data: undefined } as any)
+      mockApiClient.delete.mockResolvedValueOnce(createMockResponse(undefined))
 
       await expect(eventAdminService.deleteEvent(1)).resolves.not.toThrow()
 
@@ -242,9 +282,9 @@ describe('eventAdminService', () => {
 
   describe('bulkDeleteEvents', () => {
     it('should bulk delete multiple events', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: undefined } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse(undefined))
 
-      await expect(eventAdminService.bulkDeleteEvents([1, 2, 3])).resolves.not.toThrow()
+      await expect(eventAdminService.bulkDeleteEvents?.([1, 2, 3])).resolves.not.toThrow()
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/events/bulk-delete', { event_ids: [1, 2, 3] })
     })
@@ -252,14 +292,14 @@ describe('eventAdminService', () => {
     it('should handle bulk delete errors', async () => {
       mockApiClient.post.mockRejectedValueOnce(new Error('Some events cannot be deleted'))
 
-      await expect(eventAdminService.bulkDeleteEvents([1, 2])).rejects.toThrow('Some events cannot be deleted')
+      await expect(eventAdminService.bulkDeleteEvents?.([1, 2])).rejects.toThrow('Some events cannot be deleted')
     })
   })
 
   describe('duplicateEvent', () => {
     it('should duplicate event without overrides', async () => {
       const duplicatedEvent = { ...mockEvent, id: 2, title: 'Copy of Admin Event' }
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: duplicatedEvent } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: duplicatedEvent }))
 
       const result = await eventAdminService.duplicateEvent(1)
 
@@ -274,7 +314,7 @@ describe('eventAdminService', () => {
       }
 
       const duplicatedEvent = { ...mockEvent, id: 2, ...overrides }
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: duplicatedEvent } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: duplicatedEvent }))
 
       const result = await eventAdminService.duplicateEvent(1, overrides)
 
@@ -293,7 +333,7 @@ describe('eventAdminService', () => {
   describe('toggleFeatured', () => {
     it('should toggle featured status', async () => {
       const featuredEvent = { ...mockEvent, is_featured: true }
-      mockApiClient.patch.mockResolvedValueOnce({ data: { data: featuredEvent } } as any)
+      mockApiClient.patch.mockResolvedValueOnce(createMockResponse({ data: featuredEvent }))
 
       const result = await eventAdminService.toggleFeatured(1)
 
@@ -311,12 +351,12 @@ describe('eventAdminService', () => {
   describe('bulkUpdateStatus', () => {
     it('should bulk update event status without comment', async () => {
       const updatedEvents = [
-        { ...mockEvent, id: 1, status: 'approved_internal' as EventStatus },
-        { ...mockEvent, id: 2, status: 'approved_internal' as EventStatus },
+        createMockEvent({ id: 1, title: 'Event 1', status: EVENT_STATUS.APPROVED_INTERNAL as EventStatusCode }),
+        createMockEvent({ id: 2, title: 'Event 2', status: EVENT_STATUS.APPROVED_INTERNAL as EventStatusCode }),
       ]
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: updatedEvents } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: updatedEvents }))
 
-      const result = await eventAdminService.bulkUpdateStatus([1, 2], 'approved_internal')
+      const result = await eventAdminService.bulkUpdateStatus?.([1, 2], 'approved_internal')
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/events/bulk-update-status', {
         event_ids: [1, 2],
@@ -324,14 +364,14 @@ describe('eventAdminService', () => {
         comment: undefined,
       })
       expect(result).toHaveLength(2)
-      expect(result[0].status).toBe('approved_internal')
+      expect(result?.[0].status).toBe('approved_internal')
     })
 
     it('should bulk update event status with comment', async () => {
-      const updatedEvents = [{ ...mockEvent, status: 'rejected' as EventStatus }]
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: updatedEvents } } as any)
+      const updatedEvents = [createMockEvent({ id: 1, title: 'Event 1', status: EVENT_STATUS.REJECTED as EventStatusCode })]
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: updatedEvents }))
 
-      await eventAdminService.bulkUpdateStatus([1], 'rejected', 'Does not meet criteria')
+      await eventAdminService.bulkUpdateStatus?.([1], 'rejected', 'Does not meet criteria')
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/events/bulk-update-status', {
         event_ids: [1],
@@ -344,9 +384,9 @@ describe('eventAdminService', () => {
   describe('exportEvents', () => {
     it('should export events as CSV without filters', async () => {
       const mockBlob = new Blob(['csv data'], { type: 'text/csv' })
-      mockApiClient.get.mockResolvedValueOnce({ data: mockBlob } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
-      const result = await eventAdminService.exportEvents()
+      const result = await eventAdminService.exportEvents?.()
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/events/export/csv?', {
         responseType: 'blob',
@@ -356,14 +396,14 @@ describe('eventAdminService', () => {
 
     it('should export events with filters and format', async () => {
       const mockBlob = new Blob(['xlsx data'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-      mockApiClient.get.mockResolvedValueOnce({ data: mockBlob } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
-      const filters: EventFilters = {
+      const filters = {
         category_id: 1,
-        status: 'published',
+        status: 'published' as const,
       }
 
-      await eventAdminService.exportEvents(filters, 'xlsx')
+      await eventAdminService.exportEvents?.(filters, 'xlsx')
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('/events/export/xlsx?')
@@ -377,9 +417,9 @@ describe('eventAdminService', () => {
 
     it('should export events as PDF', async () => {
       const mockBlob = new Blob(['pdf data'], { type: 'application/pdf' })
-      mockApiClient.get.mockResolvedValueOnce({ data: mockBlob } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
-      await eventAdminService.exportEvents({}, 'pdf')
+      await eventAdminService.exportEvents?.({}, 'pdf')
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/events/export/pdf?', {
         responseType: 'blob',
@@ -392,13 +432,13 @@ describe('eventAdminService', () => {
       const mockStats: EventStatistics = {
         total: 100,
         draft: 20,
-        pending_internal_approval: 15,
-        approved_internal: 30,
-        pending_public_approval: 10,
         published: 25,
+        cancelled: 5,
+        upcoming: 30,
+        featured: 10,
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockStats } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockStats))
 
       const result = await eventAdminService.getStatistics()
 
@@ -416,20 +456,12 @@ describe('eventAdminService', () => {
 })
 
 describe('eventAdminApprovalService', () => {
-  const mockEvent: Event = {
+  const mockEvent = createMockEvent({
     id: 1,
     title: 'Test Event',
     description: 'Test',
-    start_date: '2025-12-01',
-    end_date: '2025-12-01',
-    status: 'pending_internal_approval',
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
-    is_featured: false,
-    created_at: '2025-11-01',
-    updated_at: '2025-11-01',
-  }
+    status: EVENT_STATUS.PENDING_INTERNAL_APPROVAL as EventStatusCode,
+  })
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -439,11 +471,11 @@ describe('eventAdminApprovalService', () => {
     it('should get events by status without filters', async () => {
       const mockPagination: EventPagination = {
         data: [mockEvent],
-        meta: { current_page: 1, last_page: 1, per_page: 15, total: 1, from: 1, to: 1 },
+        meta: createMockMeta({ total: 1, from: 1, to: 1 }),
         links: { first: null, last: null, prev: null, next: null },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventAdminApprovalService.getEventsByStatus('pending_internal_approval')
 
@@ -454,11 +486,11 @@ describe('eventAdminApprovalService', () => {
     it('should get events by status with filters', async () => {
       const mockPagination: EventPagination = {
         data: [],
-        meta: { current_page: 1, last_page: 1, per_page: 15, total: 0, from: 0, to: 0 },
+        meta: createMockMeta({ total: 0, from: null, to: null }),
         links: { first: null, last: null, prev: null, next: null },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: EventFilters = { category_id: 1 }
 
@@ -473,25 +505,30 @@ describe('eventAdminApprovalService', () => {
   describe('getApprovalStatistics', () => {
     it('should get approval statistics', async () => {
       const mockStats: ApprovalStatistics = {
-        pending_internal: 5,
-        pending_public: 3,
-        approved_this_week: 10,
-        rejected_this_week: 2,
+        total: 20,
+        pending_internal_approval: 5,
+        approved_internal: 3,
+        pending_public_approval: 2,
+        published: 4,
+        requires_changes: 1,
+        rejected: 2,
+        draft: 2,
+        cancelled: 1,
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockStats } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockStats))
 
       const result = await eventAdminApprovalService.getApprovalStatistics()
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/events/approval/statistics')
-      expect(result.pending_internal).toBe(5)
-      expect(result.pending_public).toBe(3)
+      expect(result.pending_internal_approval).toBe(5)
+      expect(result.pending_public_approval).toBe(2)
     })
   })
 
   describe('approveInternal', () => {
     it('should approve event internally without comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: { ...mockEvent, status: 'approved_internal' } } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'approved_internal' } }))
 
       const result = await eventAdminApprovalService.approveInternal(1)
 
@@ -500,7 +537,7 @@ describe('eventAdminApprovalService', () => {
     })
 
     it('should approve event internally with comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: { ...mockEvent, status: 'approved_internal' } } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'approved_internal' } }))
 
       await eventAdminApprovalService.approveInternal(1, 'Looks good')
 
@@ -510,7 +547,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('requestPublic', () => {
     it('should request public approval', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: { ...mockEvent, status: 'pending_public_approval' } } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'pending_public_approval' } }))
 
       const result = await eventAdminApprovalService.requestPublic(1, 'Ready for public')
 
@@ -521,7 +558,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('approvePublic', () => {
     it('should approve event for public', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: { ...mockEvent, status: 'published' } } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'published' } }))
 
       const result = await eventAdminApprovalService.approvePublic(1)
 
@@ -532,7 +569,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('requestChanges', () => {
     it('should request changes with comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: { ...mockEvent, status: 'requires_changes' } } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'requires_changes' } }))
 
       const result = await eventAdminApprovalService.requestChanges(1, 'Please fix the date')
 
@@ -543,7 +580,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('rejectEvent', () => {
     it('should reject event with comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: { ...mockEvent, status: 'rejected' } } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'rejected' } }))
 
       const result = await eventAdminApprovalService.rejectEvent(1, 'Does not meet criteria')
 
@@ -558,7 +595,7 @@ describe('eventAdminApprovalService', () => {
         { ...mockEvent, id: 1, status: 'approved_internal' as EventStatus },
         { ...mockEvent, id: 2, status: 'approved_internal' as EventStatus },
       ]
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockEvents } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvents }))
 
       const result = await eventAdminApprovalService.bulkApproveInternal([1, 2], 'Batch approved')
 
@@ -573,7 +610,7 @@ describe('eventAdminApprovalService', () => {
   describe('bulkApprovePublic', () => {
     it('should bulk approve events for public', async () => {
       const mockEvents = [{ ...mockEvent, status: 'published' as EventStatus }]
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockEvents } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvents }))
 
       await eventAdminApprovalService.bulkApprovePublic([1])
 
@@ -587,7 +624,7 @@ describe('eventAdminApprovalService', () => {
   describe('bulkReject', () => {
     it('should bulk reject events', async () => {
       const mockEvents = [{ ...mockEvent, status: 'rejected' as EventStatus }]
-      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockEvents } } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvents }))
 
       await eventAdminApprovalService.bulkReject([1, 2], 'Rejected for review')
 
@@ -613,7 +650,7 @@ describe('eventAdminApprovalService', () => {
         },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockHistory } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockHistory }))
 
       const result = await eventAdminApprovalService.getApprovalHistory(1)
 
@@ -627,11 +664,11 @@ describe('eventAdminApprovalService', () => {
     it('should get pending internal approvals', async () => {
       const mockPagination: EventPagination = {
         data: [mockEvent],
-        meta: { current_page: 1, last_page: 1, per_page: 15, total: 1, from: 1, to: 1 },
+        meta: createMockMeta({ total: 1, from: 1, to: 1 }),
         links: { first: null, last: null, prev: null, next: null },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventAdminApprovalService.getPendingApprovals()
 
@@ -644,11 +681,11 @@ describe('eventAdminApprovalService', () => {
     it('should get pending public approvals', async () => {
       const mockPagination: EventPagination = {
         data: [],
-        meta: { current_page: 1, last_page: 1, per_page: 15, total: 0, from: 0, to: 0 },
+        meta: createMockMeta({ total: 0, from: null, to: null }),
         links: { first: null, last: null, prev: null, next: null },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       await eventAdminApprovalService.getPendingPublicApprovals()
 
@@ -659,7 +696,7 @@ describe('eventAdminApprovalService', () => {
   describe('autoApprove', () => {
     it('should auto-approve events based on criteria', async () => {
       const mockResult = { approved: 5, skipped: 2 }
-      mockApiClient.post.mockResolvedValueOnce({ data: mockResult } as any)
+      mockApiClient.post.mockResolvedValueOnce(createMockResponse(mockResult))
 
       const criteria = {
         category_ids: [1, 2],

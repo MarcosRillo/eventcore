@@ -169,7 +169,7 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
             icon: '✏️',
             className: 'text-indigo-600 hover:text-indigo-800',
             onClick: onEditEvent,
-            permission: 'events.update',
+            permission: 'manage_entity_events',
           });
         }
 
@@ -184,7 +184,7 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
               return status === EVENT_STATUS.PENDING_INTERNAL_APPROVAL || status === EVENT_STATUS.PENDING_PUBLIC_APPROVAL;
             },
             onClick: onApprovalAction,
-            permission: 'events.approve',
+            permission: 'approve_events',
           });
         }
 
@@ -195,7 +195,7 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
             icon: '⭐',
             className: 'text-yellow-600 hover:text-yellow-800',
             onClick: onToggleFeatured,
-            permission: 'events.feature',
+            permission: 'manage_entity_events',
           });
         }
 
@@ -206,7 +206,7 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
             icon: '📋',
             className: 'text-purple-600 hover:text-purple-800',
             onClick: onDuplicateEvent,
-            permission: 'events.create',
+            permission: 'create_events',
           });
         }
 
@@ -217,7 +217,7 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
             icon: '🗑️',
             className: 'text-red-600 hover:text-red-800',
             onClick: (event) => handleDeleteEvent(event),
-            permission: 'events.delete',
+            permission: 'manage_entity_events',
           });
         }
         break;

@@ -1,39 +1,80 @@
 import apiClient from '@/services/apiClient'
 import { eventPublicService, eventPublicExportService, combinedEventPublicService } from '../eventPublicService'
-import { Event, EventPagination } from '@/types/event.types'
+import { Event, EventPagination, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
+import { Location } from '@/types/location.types'
 import { PublicEventFilters } from '@/types/filter.types'
+import { AxiosResponse } from 'axios'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
 
+// Helper to create mock axios response
+const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: { headers: {} } as AxiosResponse['config'],
+})
+
+// Helper to create a valid Event mock
+const createMockEvent = (overrides: Partial<Event> & { id: number; title: string }): Event => ({
+  description: 'Test event description',
+  start_date: '2025-12-01T10:00:00.000Z',
+  end_date: '2025-12-01T18:00:00.000Z',
+  type: EVENT_TYPE.SINGLE_LOCATION,
+  status: EVENT_STATUS.PUBLISHED,
+  category_id: 1,
+  category: {
+    id: 1,
+    name: 'Test Category',
+    slug: 'test-category',
+    entity_id: 1,
+    is_active: true,
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_at: '2025-01-01T00:00:00.000Z',
+  },
+  locations: [],
+  is_featured: false,
+  approval_history: [],
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
+// Helper to create valid PaginationMeta
+const createMockMeta = (overrides: Partial<{
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}> = {}) => ({
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0,
+  from: null as number | null,
+  to: null as number | null,
+  path: 'http://api/public/events',
+  links: [],
+  ...overrides,
+})
+
 describe('eventPublicService', () => {
-  const mockEvent: Event = {
+  const mockEvent = createMockEvent({
     id: 1,
     title: 'Public Event',
     description: 'Public Description',
-    start_date: '2025-12-01',
-    end_date: '2025-12-01',
-    status: 'published',
-    category_id: 1,
-    location_id: 1,
-    organizer_id: 1,
     is_featured: true,
-    created_at: '2025-11-01',
-    updated_at: '2025-11-01',
-  }
+  })
 
   const mockPagination: EventPagination = {
     data: [mockEvent],
-    meta: {
-      current_page: 1,
-      last_page: 1,
-      per_page: 15,
-      total: 1,
-      from: 1,
-      to: 1,
-    },
+    meta: createMockMeta({ current_page: 1, last_page: 1, per_page: 15, total: 1, from: 1, to: 1 }),
     links: {
       first: 'http://api/public/events?page=1',
       last: 'http://api/public/events?page=1',
@@ -48,7 +89,7 @@ describe('eventPublicService', () => {
 
   describe('getEvents', () => {
     it('should get events without filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventPublicService.getEvents()
 
@@ -58,7 +99,7 @@ describe('eventPublicService', () => {
     })
 
     it('should get events with filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -77,11 +118,9 @@ describe('eventPublicService', () => {
     })
 
     it('should skip null and undefined filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
-        category_id: undefined,
-        start_date: null as any,
         featured: true,
       }
 
@@ -102,7 +141,7 @@ describe('eventPublicService', () => {
 
   describe('getEvent', () => {
     it('should get single event by ID', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       const result = await eventPublicService.getEvent(1)
 
@@ -120,16 +159,16 @@ describe('eventPublicService', () => {
 
   describe('getPublicEvents', () => {
     it('should get public events without filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
-      const result = await eventPublicService.getPublicEvents()
+      const result = await eventPublicService.getPublicEvents?.()
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?')
       expect(result).toEqual(mockPagination)
     })
 
     it('should get public events with multiple filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -141,7 +180,7 @@ describe('eventPublicService', () => {
         per_page: 20,
       }
 
-      await eventPublicService.getPublicEvents(filters)
+      await eventPublicService.getPublicEvents?.(filters)
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('category_id=1')
@@ -156,14 +195,7 @@ describe('eventPublicService', () => {
     it('should handle empty results', async () => {
       const emptyPagination: EventPagination = {
         data: [],
-        meta: {
-          current_page: 1,
-          last_page: 1,
-          per_page: 15,
-          total: 0,
-          from: 0,
-          to: 0,
-        },
+        meta: createMockMeta({ current_page: 1, last_page: 1, per_page: 15, total: 0, from: null, to: null }),
         links: {
           first: null,
           last: null,
@@ -172,29 +204,29 @@ describe('eventPublicService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: emptyPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyPagination))
 
-      const result = await eventPublicService.getPublicEvents()
+      const result = await eventPublicService.getPublicEvents?.()
 
-      expect(result.data).toHaveLength(0)
-      expect(result.meta.total).toBe(0)
+      expect(result?.data).toHaveLength(0)
+      expect(result?.meta.total).toBe(0)
     })
   })
 
   describe('getPublicEvent', () => {
     it('should get public event by ID', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
-      const result = await eventPublicService.getPublicEvent(1)
+      const result = await eventPublicService.getPublicEvent?.(1)
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/1')
       expect(result).toEqual(mockEvent)
     })
 
     it('should get public event by slug', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockEvent } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
-      const result = await eventPublicService.getPublicEvent('public-event-slug')
+      const result = await eventPublicService.getPublicEvent?.('public-event-slug')
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/public-event-slug')
       expect(result).toEqual(mockEvent)
@@ -203,15 +235,15 @@ describe('eventPublicService', () => {
     it('should handle not found errors', async () => {
       mockApiClient.get.mockRejectedValueOnce(new Error('Event not found'))
 
-      await expect(eventPublicService.getPublicEvent('invalid-slug')).rejects.toThrow('Event not found')
+      await expect(eventPublicService.getPublicEvent?.('invalid-slug')).rejects.toThrow('Event not found')
     })
   })
 
   describe('searchEvents', () => {
     it('should search events with query', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
-      const result = await eventPublicService.searchEvents('music')
+      const result = await eventPublicService.searchEvents?.('music')
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/public/events/search?')
@@ -223,14 +255,14 @@ describe('eventPublicService', () => {
     })
 
     it('should search events with query and filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         category_id: 1,
         featured: true,
       }
 
-      await eventPublicService.searchEvents('concert', filters)
+      await eventPublicService.searchEvents?.('concert', filters)
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('q=concert')
@@ -241,14 +273,7 @@ describe('eventPublicService', () => {
     it('should handle empty search results', async () => {
       const emptyPagination: EventPagination = {
         data: [],
-        meta: {
-          current_page: 1,
-          last_page: 1,
-          per_page: 15,
-          total: 0,
-          from: 0,
-          to: 0,
-        },
+        meta: createMockMeta({ current_page: 1, last_page: 1, per_page: 15, total: 0, from: null, to: null }),
         links: {
           first: null,
           last: null,
@@ -257,21 +282,22 @@ describe('eventPublicService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce({ data: emptyPagination } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyPagination))
 
-      const result = await eventPublicService.searchEvents('nonexistent')
+      const result = await eventPublicService.searchEvents?.('nonexistent')
 
-      expect(result.data).toHaveLength(0)
-      expect(result.meta.total).toBe(0)
+      expect(result?.data).toHaveLength(0)
+      expect(result?.meta.total).toBe(0)
     })
   })
 
   describe('getFeaturedEvents', () => {
     it('should get featured events with default limit', async () => {
-      const mockFeaturedEvents = [mockEvent, { ...mockEvent, id: 2 }]
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockFeaturedEvents } } as any)
+      const mockEvent2 = createMockEvent({ id: 2, title: 'Public Event 2' })
+      const mockFeaturedEvents = [mockEvent, mockEvent2]
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockFeaturedEvents }))
 
-      const result = await eventPublicService.getFeaturedEvents()
+      const result = await eventPublicService.getFeaturedEvents?.()
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/featured?limit=6')
       expect(result).toEqual(mockFeaturedEvents)
@@ -280,18 +306,18 @@ describe('eventPublicService', () => {
 
     it('should get featured events with custom limit', async () => {
       const mockFeaturedEvents = [mockEvent]
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockFeaturedEvents } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockFeaturedEvents }))
 
-      const result = await eventPublicService.getFeaturedEvents(3)
+      const result = await eventPublicService.getFeaturedEvents?.(3)
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/featured?limit=3')
       expect(result).toHaveLength(1)
     })
 
     it('should handle empty featured events', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: [] } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
-      const result = await eventPublicService.getFeaturedEvents()
+      const result = await eventPublicService.getFeaturedEvents?.()
 
       expect(result).toHaveLength(0)
     })
@@ -299,10 +325,11 @@ describe('eventPublicService', () => {
 
   describe('getUpcomingEvents', () => {
     it('should get upcoming events with default limit', async () => {
-      const mockUpcomingEvents = [mockEvent, { ...mockEvent, id: 2 }]
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockUpcomingEvents } } as any)
+      const mockEvent2 = createMockEvent({ id: 2, title: 'Public Event 2' })
+      const mockUpcomingEvents = [mockEvent, mockEvent2]
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockUpcomingEvents }))
 
-      const result = await eventPublicService.getUpcomingEvents()
+      const result = await eventPublicService.getUpcomingEvents?.()
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/upcoming?limit=10')
       expect(result).toEqual(mockUpcomingEvents)
@@ -311,18 +338,18 @@ describe('eventPublicService', () => {
 
     it('should get upcoming events with custom limit', async () => {
       const mockUpcomingEvents = [mockEvent]
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockUpcomingEvents } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockUpcomingEvents }))
 
-      const result = await eventPublicService.getUpcomingEvents(5)
+      const result = await eventPublicService.getUpcomingEvents?.(5)
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/upcoming?limit=5')
       expect(result).toHaveLength(1)
     })
 
     it('should handle empty upcoming events', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: { data: [] } } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
-      const result = await eventPublicService.getUpcomingEvents()
+      const result = await eventPublicService.getUpcomingEvents?.()
 
       expect(result).toHaveLength(0)
     })
@@ -428,7 +455,7 @@ describe('eventPublicExportService', () => {
   describe('downloadICalFile', () => {
     it('should download iCal file without filters', async () => {
       const mockBlob = new Blob(['mock ical data'], { type: 'text/calendar' })
-      mockApiClient.get.mockResolvedValueOnce({ data: mockBlob } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
       const result = await eventPublicExportService.downloadICalFile()
 
@@ -440,7 +467,7 @@ describe('eventPublicExportService', () => {
 
     it('should download iCal file with filters', async () => {
       const mockBlob = new Blob(['mock ical data'], { type: 'text/calendar' })
-      mockApiClient.get.mockResolvedValueOnce({ data: mockBlob } as any)
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -466,24 +493,30 @@ describe('eventPublicExportService', () => {
   })
 
   describe('getGoogleCalendarUrl', () => {
+    // Helper for export tests - creates Location mock
+    const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
+      address: 'Default Address',
+      city: 'Default City',
+      country: 'Argentina',
+      features: [],
+      is_active: true,
+      entity_id: 1,
+      created_at: '2025-01-01T00:00:00.000Z',
+      updated_at: '2025-01-01T00:00:00.000Z',
+      ...overrides,
+    })
+
     it('should generate Google Calendar URL for event', () => {
-      const mockEvent: Event = {
+      const eventWithLocation = createMockEvent({
         id: 1,
         title: 'Test Event',
         description: 'Test Description',
         start_date: '2025-12-01T10:00:00Z',
         end_date: '2025-12-01T12:00:00Z',
-        status: 'published',
-        category_id: 1,
-        location_id: 1,
-        organizer_id: 1,
-        is_featured: false,
-        created_at: '2025-11-01',
-        updated_at: '2025-11-01',
-        location: { id: 1, name: 'Test Venue', address: '123 Main St', city: 'Test City', province: 'Test', country: 'Argentina' },
-      }
+        location: createMockLocation({ id: 1, name: 'Test Venue', address: '123 Main St', city: 'Test City' }),
+      })
 
-      const url = eventPublicExportService.getGoogleCalendarUrl(mockEvent)
+      const url = eventPublicExportService.getGoogleCalendarUrl(eventWithLocation)
 
       expect(url).toContain('https://calendar.google.com/calendar/render?')
       expect(url).toContain('action=TEMPLATE')
@@ -494,43 +527,30 @@ describe('eventPublicExportService', () => {
     })
 
     it('should handle event without location object', () => {
-      const mockEvent: Event = {
+      const onlineEvent = createMockEvent({
         id: 1,
         title: 'Online Event',
         description: 'Virtual event',
         start_date: '2025-12-01T10:00:00Z',
         end_date: '2025-12-01T12:00:00Z',
-        status: 'published',
-        category_id: 1,
-        location_id: null,
-        organizer_id: 1,
-        is_featured: false,
-        created_at: '2025-11-01',
-        updated_at: '2025-11-01',
         location_text: 'Zoom Meeting',
-      }
+      })
 
-      const url = eventPublicExportService.getGoogleCalendarUrl(mockEvent)
+      const url = eventPublicExportService.getGoogleCalendarUrl(onlineEvent)
 
       expect(url).toContain('location=Zoom+Meeting')
     })
 
     it('should handle event without description', () => {
-      const mockEvent: Event = {
+      const noDescEvent = createMockEvent({
         id: 1,
         title: 'No Description Event',
+        description: '',
         start_date: '2025-12-01T10:00:00Z',
         end_date: '2025-12-01T12:00:00Z',
-        status: 'published',
-        category_id: 1,
-        location_id: 1,
-        organizer_id: 1,
-        is_featured: false,
-        created_at: '2025-11-01',
-        updated_at: '2025-11-01',
-      }
+      })
 
-      const url = eventPublicExportService.getGoogleCalendarUrl(mockEvent)
+      const url = eventPublicExportService.getGoogleCalendarUrl(noDescEvent)
 
       expect(url).toContain('details=')
       expect(url).not.toContain('details=undefined')
@@ -538,24 +558,30 @@ describe('eventPublicExportService', () => {
   })
 
   describe('getOutlookCalendarUrl', () => {
+    // Helper for export tests - creates Location mock
+    const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
+      address: 'Default Address',
+      city: 'Default City',
+      country: 'Argentina',
+      features: [],
+      is_active: true,
+      entity_id: 1,
+      created_at: '2025-01-01T00:00:00.000Z',
+      updated_at: '2025-01-01T00:00:00.000Z',
+      ...overrides,
+    })
+
     it('should generate Outlook Calendar URL for event', () => {
-      const mockEvent: Event = {
+      const eventWithLocation = createMockEvent({
         id: 1,
         title: 'Test Event',
         description: 'Test Description',
         start_date: '2025-12-01T10:00:00Z',
         end_date: '2025-12-01T12:00:00Z',
-        status: 'published',
-        category_id: 1,
-        location_id: 1,
-        organizer_id: 1,
-        is_featured: false,
-        created_at: '2025-11-01',
-        updated_at: '2025-11-01',
-        location: { id: 1, name: 'Test Venue', address: '456 Oak Ave', city: 'Test City', province: 'Test', country: 'Argentina' },
-      }
+        location: createMockLocation({ id: 1, name: 'Test Venue', address: '456 Oak Ave', city: 'Test City' }),
+      })
 
-      const url = eventPublicExportService.getOutlookCalendarUrl(mockEvent)
+      const url = eventPublicExportService.getOutlookCalendarUrl(eventWithLocation)
 
       expect(url).toContain('https://outlook.live.com/calendar/0/deeplink/compose?')
       expect(url).toContain('subject=Test+Event')
@@ -566,43 +592,30 @@ describe('eventPublicExportService', () => {
     })
 
     it('should handle event without location object', () => {
-      const mockEvent: Event = {
+      const onlineEvent = createMockEvent({
         id: 1,
         title: 'Online Event',
         description: 'Virtual event',
         start_date: '2025-12-01T10:00:00Z',
         end_date: '2025-12-01T12:00:00Z',
-        status: 'published',
-        category_id: 1,
-        location_id: null,
-        organizer_id: 1,
-        is_featured: false,
-        created_at: '2025-11-01',
-        updated_at: '2025-11-01',
         location_text: 'Microsoft Teams',
-      }
+      })
 
-      const url = eventPublicExportService.getOutlookCalendarUrl(mockEvent)
+      const url = eventPublicExportService.getOutlookCalendarUrl(onlineEvent)
 
       expect(url).toContain('location=Microsoft+Teams')
     })
 
     it('should handle event without description', () => {
-      const mockEvent: Event = {
+      const noDescEvent = createMockEvent({
         id: 1,
         title: 'No Description Event',
+        description: '',
         start_date: '2025-12-01T10:00:00Z',
         end_date: '2025-12-01T12:00:00Z',
-        status: 'published',
-        category_id: 1,
-        location_id: 1,
-        organizer_id: 1,
-        is_featured: false,
-        created_at: '2025-11-01',
-        updated_at: '2025-11-01',
-      }
+      })
 
-      const url = eventPublicExportService.getOutlookCalendarUrl(mockEvent)
+      const url = eventPublicExportService.getOutlookCalendarUrl(noDescEvent)
 
       expect(url).toContain('body=')
       expect(url).not.toContain('body=undefined')

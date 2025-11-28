@@ -59,11 +59,8 @@ class CheckRole
             ], 403);
         }
 
-        Log::info('CheckRole: Access granted', [
-            'user_id' => $user->id,
-            'user_role' => $userRole,
-            'route' => $request->path()
-        ]);
+        // Note: Successful access is NOT logged to avoid excessive log volume.
+        // Only failures are logged for security auditing purposes.
 
         return $next($request);
     }

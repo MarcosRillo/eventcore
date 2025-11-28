@@ -1,9 +1,9 @@
-import { apiClient } from '@/lib/api'
+import apiClient from '@/services/apiClient'
 import { getAppearanceSettings, updateAppearanceSettings } from '../appearance.service'
-import { AppearanceResponse, AppearanceFormData } from '@/types/appearance.types'
+import { ThemeSettings } from '@/types/appearance.types'
 
 // Mock apiClient
-jest.mock('@/lib/api')
+jest.mock('@/services/apiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
 
@@ -14,43 +14,41 @@ describe('appearance.service', () => {
 
   describe('getAppearanceSettings', () => {
     it('should fetch appearance settings successfully', async () => {
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#3B82F6',
-        secondary_color: '#10B981',
-        accent_color: '#F59E0B',
+      const mockResponse: ThemeSettings = {
+        color_primary: '#3B82F6',
+        color_secondary: '#10B981',
+        color_background: '#ffffff',
+        color_text: '#1e293b',
         logo_url: 'https://example.com/logo.png',
-        favicon_url: 'https://example.com/favicon.ico',
-        entity_name: 'Test Organization',
+        banner_url: 'https://example.com/banner.png',
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await getAppearanceSettings()
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/admin/appearance')
       expect(result).toEqual(mockResponse)
-      expect(result.primary_color).toBe('#3B82F6')
-      expect(result.entity_name).toBe('Test Organization')
+      expect(result.color_primary).toBe('#3B82F6')
+      expect(result.color_secondary).toBe('#10B981')
     })
 
     it('should fetch appearance settings with null optional fields', async () => {
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#3B82F6',
-        secondary_color: null,
-        accent_color: null,
+      const mockResponse: ThemeSettings = {
+        color_primary: '#3B82F6',
+        color_secondary: '#64748b',
+        color_background: '#ffffff',
+        color_text: '#1e293b',
         logo_url: null,
-        favicon_url: null,
-        entity_name: 'Minimal Org',
+        banner_url: null,
       }
 
-      mockApiClient.get.mockResolvedValueOnce(mockResponse)
+      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await getAppearanceSettings()
 
-      expect(result.secondary_color).toBeNull()
-      expect(result.accent_color).toBeNull()
       expect(result.logo_url).toBeNull()
-      expect(result.favicon_url).toBeNull()
+      expect(result.banner_url).toBeNull()
     })
 
     it('should handle errors when fetching appearance settings', async () => {
@@ -68,103 +66,81 @@ describe('appearance.service', () => {
 
   describe('updateAppearanceSettings', () => {
     it('should update appearance settings with all fields', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        primary_color: '#FF0000',
-        secondary_color: '#00FF00',
-        accent_color: '#0000FF',
+      const updateData: Partial<ThemeSettings> = {
+        color_primary: '#FF0000',
+        color_secondary: '#00FF00',
+        color_background: '#f5f5f5',
+        color_text: '#333333',
         logo_url: 'https://example.com/new-logo.png',
-        favicon_url: 'https://example.com/new-favicon.ico',
-        entity_name: 'Updated Organization',
+        banner_url: 'https://example.com/new-banner.png',
       }
 
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#FF0000',
-        secondary_color: '#00FF00',
-        accent_color: '#0000FF',
+      const mockResponse: ThemeSettings = {
+        color_primary: '#FF0000',
+        color_secondary: '#00FF00',
+        color_background: '#f5f5f5',
+        color_text: '#333333',
         logo_url: 'https://example.com/new-logo.png',
-        favicon_url: 'https://example.com/new-favicon.ico',
-        entity_name: 'Updated Organization',
+        banner_url: 'https://example.com/new-banner.png',
       }
 
-      mockApiClient.put.mockResolvedValueOnce(mockResponse)
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await updateAppearanceSettings(updateData)
 
       expect(mockApiClient.put).toHaveBeenCalledWith('/admin/appearance', updateData)
       expect(result).toEqual(mockResponse)
-      expect(result.primary_color).toBe('#FF0000')
-      expect(result.entity_name).toBe('Updated Organization')
+      expect(result.color_primary).toBe('#FF0000')
     })
 
     it('should update appearance settings with partial fields', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        primary_color: '#123456',
+      const updateData: Partial<ThemeSettings> = {
+        color_primary: '#123456',
       }
 
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#123456',
-        secondary_color: '#10B981',
-        accent_color: '#F59E0B',
+      const mockResponse: ThemeSettings = {
+        color_primary: '#123456',
+        color_secondary: '#10B981',
+        color_background: '#ffffff',
+        color_text: '#1e293b',
         logo_url: 'https://example.com/logo.png',
-        favicon_url: 'https://example.com/favicon.ico',
-        entity_name: 'Test Organization',
+        banner_url: null,
       }
 
-      mockApiClient.put.mockResolvedValueOnce(mockResponse)
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await updateAppearanceSettings(updateData)
 
       expect(mockApiClient.put).toHaveBeenCalledWith('/admin/appearance', updateData)
-      expect(result.primary_color).toBe('#123456')
+      expect(result.color_primary).toBe('#123456')
     })
 
-    it('should update only entity_name', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        entity_name: 'New Entity Name',
-      }
-
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#3B82F6',
-        secondary_color: '#10B981',
-        accent_color: '#F59E0B',
-        logo_url: null,
-        favicon_url: null,
-        entity_name: 'New Entity Name',
-      }
-
-      mockApiClient.put.mockResolvedValueOnce(mockResponse)
-
-      const result = await updateAppearanceSettings(updateData)
-
-      expect(result.entity_name).toBe('New Entity Name')
-    })
-
-    it('should update logo and favicon URLs', async () => {
-      const updateData: Partial<AppearanceFormData> = {
+    it('should update logo and banner URLs', async () => {
+      const updateData: Partial<ThemeSettings> = {
         logo_url: 'https://cdn.example.com/logo-v2.png',
-        favicon_url: 'https://cdn.example.com/favicon-v2.ico',
+        banner_url: 'https://cdn.example.com/banner-v2.png',
       }
 
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#3B82F6',
-        secondary_color: '#10B981',
-        accent_color: '#F59E0B',
+      const mockResponse: ThemeSettings = {
+        color_primary: '#3B82F6',
+        color_secondary: '#10B981',
+        color_background: '#ffffff',
+        color_text: '#1e293b',
         logo_url: 'https://cdn.example.com/logo-v2.png',
-        favicon_url: 'https://cdn.example.com/favicon-v2.ico',
-        entity_name: 'Test Organization',
+        banner_url: 'https://cdn.example.com/banner-v2.png',
       }
 
-      mockApiClient.put.mockResolvedValueOnce(mockResponse)
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await updateAppearanceSettings(updateData)
 
       expect(result.logo_url).toBe('https://cdn.example.com/logo-v2.png')
-      expect(result.favicon_url).toBe('https://cdn.example.com/favicon-v2.ico')
+      expect(result.banner_url).toBe('https://cdn.example.com/banner-v2.png')
     })
 
     it('should handle validation errors', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        primary_color: 'invalid-color',
+      const updateData: Partial<ThemeSettings> = {
+        color_primary: 'invalid-color',
       }
 
       mockApiClient.put.mockRejectedValueOnce(new Error('Validation failed'))
@@ -173,8 +149,8 @@ describe('appearance.service', () => {
     })
 
     it('should handle unauthorized errors', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        primary_color: '#FF0000',
+      const updateData: Partial<ThemeSettings> = {
+        color_primary: '#FF0000',
       }
 
       mockApiClient.put.mockRejectedValueOnce(new Error('Forbidden'))
@@ -183,8 +159,8 @@ describe('appearance.service', () => {
     })
 
     it('should handle server errors', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        entity_name: 'Test',
+      const updateData: Partial<ThemeSettings> = {
+        color_secondary: '#Test123',
       }
 
       mockApiClient.put.mockRejectedValueOnce(new Error('Internal server error'))
@@ -193,18 +169,18 @@ describe('appearance.service', () => {
     })
 
     it('should send empty object when no fields provided', async () => {
-      const updateData: Partial<AppearanceFormData> = {}
+      const updateData: Partial<ThemeSettings> = {}
 
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#3B82F6',
-        secondary_color: '#10B981',
-        accent_color: '#F59E0B',
+      const mockResponse: ThemeSettings = {
+        color_primary: '#3B82F6',
+        color_secondary: '#10B981',
+        color_background: '#ffffff',
+        color_text: '#1e293b',
         logo_url: null,
-        favicon_url: null,
-        entity_name: 'Test Organization',
+        banner_url: null,
       }
 
-      mockApiClient.put.mockResolvedValueOnce(mockResponse)
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await updateAppearanceSettings(updateData)
 
@@ -213,26 +189,26 @@ describe('appearance.service', () => {
     })
 
     it('should handle null values in update', async () => {
-      const updateData: Partial<AppearanceFormData> = {
-        secondary_color: null,
-        accent_color: null,
+      const updateData: Partial<ThemeSettings> = {
+        logo_url: null,
+        banner_url: null,
       }
 
-      const mockResponse: AppearanceResponse = {
-        primary_color: '#3B82F6',
-        secondary_color: null,
-        accent_color: null,
-        logo_url: 'https://example.com/logo.png',
-        favicon_url: null,
-        entity_name: 'Test Organization',
+      const mockResponse: ThemeSettings = {
+        color_primary: '#3B82F6',
+        color_secondary: '#64748b',
+        color_background: '#ffffff',
+        color_text: '#1e293b',
+        logo_url: null,
+        banner_url: null,
       }
 
-      mockApiClient.put.mockResolvedValueOnce(mockResponse)
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse })
 
       const result = await updateAppearanceSettings(updateData)
 
-      expect(result.secondary_color).toBeNull()
-      expect(result.accent_color).toBeNull()
+      expect(result.logo_url).toBeNull()
+      expect(result.banner_url).toBeNull()
     })
   })
 })

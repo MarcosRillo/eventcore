@@ -3,7 +3,7 @@
  * API calls for event approval, rejection, and change requests
  */
 
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 
 // Types for approval actions
 export type ApprovalAction = 'approve' | 'reject' | 'request_changes';
@@ -128,7 +128,8 @@ class EventApprovalService {
    */
   async getEventDetail(eventId: number): Promise<EventDetailResponse> {
     try {
-      return await apiClient.get<EventDetailResponse>(`/events/${eventId}/detail`);
+      const response = await apiClient.get<EventDetailResponse>(`/events/${eventId}/detail`);
+      return response.data;
     } catch (error) {
       // Temporary fallback: If endpoint doesn't exist, throw meaningful error
       if (error instanceof Error && error.message.includes('404')) {
@@ -143,9 +144,10 @@ class EventApprovalService {
    */
   async approveEvent(eventId: number, comments?: string): Promise<ApprovalResponse> {
     try {
-      return await apiClient.post<ApprovalResponse>(`/events/${eventId}/approve`, {
+      const response = await apiClient.post<ApprovalResponse>(`/events/${eventId}/approve`, {
         comments,
       });
+      return response.data;
     } catch (error) {
       if (error instanceof Error && error.message.includes('404')) {
         throw new Error('La funcionalidad de aprobación de eventos está en desarrollo. Por favor, contacte al administrador.');
@@ -159,10 +161,11 @@ class EventApprovalService {
    */
   async rejectEvent(eventId: number, reason: string, comments?: string): Promise<ApprovalResponse> {
     try {
-      return await apiClient.post<ApprovalResponse>(`/events/${eventId}/reject`, {
+      const response = await apiClient.post<ApprovalResponse>(`/events/${eventId}/reject`, {
         reason,
         comments,
       });
+      return response.data;
     } catch (error) {
       if (error instanceof Error && error.message.includes('404')) {
         throw new Error('La funcionalidad de rechazo de eventos está en desarrollo. Por favor, contacte al administrador.');
@@ -176,10 +179,11 @@ class EventApprovalService {
    */
   async requestChanges(eventId: number, reason: string, comments?: string): Promise<ApprovalResponse> {
     try {
-      return await apiClient.post<ApprovalResponse>(`/events/${eventId}/request-changes`, {
+      const response = await apiClient.post<ApprovalResponse>(`/events/${eventId}/request-changes`, {
         reason,
         comments,
       });
+      return response.data;
     } catch (error) {
       if (error instanceof Error && error.message.includes('404')) {
         throw new Error('La funcionalidad de solicitud de cambios está en desarrollo. Por favor, contacte al administrador.');

@@ -1,13 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import PublicEventFilters, { PublicEventFiltersState } from '../PublicEventFilters'
-import { apiClient } from '@/lib/api'
+import apiClient from '@/services/apiClient'
 
 // Mock apiClient
-jest.mock('@/lib/api', () => ({
-  apiClient: {
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: {
     get: jest.fn(),
   },
 }))
+
+// Get the mocked function
+const mockGet = apiClient.get as jest.Mock
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -34,8 +38,8 @@ describe('PublicEventFilters', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(apiClient.get as jest.Mock).mockResolvedValue({
-      categories: mockCategories,
+    mockGet.mockResolvedValue({
+      data: { categories: mockCategories },
     })
   })
 
@@ -50,7 +54,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByPlaceholderText('Buscar eventos...')).toBeInTheDocument()
@@ -66,7 +70,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText('Filtros')).toBeInTheDocument()
@@ -81,7 +85,7 @@ describe('PublicEventFilters', () => {
       )
 
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalledWith('/public/categories')
+        expect(mockGet).toHaveBeenCalledWith('/public/categories')
       })
     })
 
@@ -125,7 +129,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText('Enero')).toBeInTheDocument()
@@ -144,7 +148,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText(String(currentYear - 1))).toBeInTheDocument()
@@ -164,7 +168,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...')
@@ -186,7 +190,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...') as HTMLInputElement
@@ -203,7 +207,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...')
@@ -285,7 +289,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const selects = container.querySelectorAll('select')
@@ -308,7 +312,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const selects = container.querySelectorAll('select')
@@ -326,7 +330,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const selects = container.querySelectorAll('select')
@@ -353,7 +357,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const selects = container.querySelectorAll('select')
@@ -378,7 +382,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const selects = container.querySelectorAll('select')
@@ -398,7 +402,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText('Limpiar filtros')).toBeInTheDocument()
@@ -414,7 +418,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.queryByText('Limpiar filtros')).not.toBeInTheDocument()
@@ -435,7 +439,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const clearButton = screen.getByText('Limpiar filtros')
@@ -461,7 +465,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText(/Búsqueda:/)).toBeInTheDocument()
@@ -492,7 +496,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText(/Mes:/)).toBeInTheDocument()
@@ -509,7 +513,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText(/Año:/)).toBeInTheDocument()
@@ -549,7 +553,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const toggleButton = screen.getByText('Filtros')
@@ -570,7 +574,7 @@ describe('PublicEventFilters', () => {
 
   describe('Edge Cases', () => {
     it('should handle API error gracefully', async () => {
-      ;(apiClient.get as jest.Mock).mockRejectedValue(new Error('Network error'))
+      mockGet.mockRejectedValue(new Error('Network error'))
 
       render(
         <PublicEventFilters
@@ -580,7 +584,7 @@ describe('PublicEventFilters', () => {
       )
 
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       // Should still render with empty categories
@@ -588,7 +592,7 @@ describe('PublicEventFilters', () => {
     })
 
     it('should handle empty categories response', async () => {
-      ;(apiClient.get as jest.Mock).mockResolvedValue({ categories: [] })
+      mockGet.mockResolvedValue({ data: { categories: [] } })
 
       render(
         <PublicEventFilters
@@ -614,7 +618,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...') as HTMLInputElement
@@ -631,7 +635,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const searchInput = screen.getByPlaceholderText('Buscar eventos...')
@@ -655,7 +659,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       expect(screen.getByText('Categoría')).toBeInTheDocument()
@@ -673,7 +677,7 @@ describe('PublicEventFilters', () => {
 
       // Wait for async effects to complete
       await waitFor(() => {
-        expect(apiClient.get).toHaveBeenCalled()
+        expect(mockGet).toHaveBeenCalled()
       })
 
       const clearButton = screen.getByText('Limpiar filtros')

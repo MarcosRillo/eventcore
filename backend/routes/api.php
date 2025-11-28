@@ -6,6 +6,9 @@ use App\Features\Dashboard\Controllers\OrganizerStatsController;
 
 // Feature Controllers - Auth
 use App\Features\Auth\Controllers\AuthController;
+use App\Features\Auth\Controllers\InvitationController;
+use App\Features\Auth\Controllers\RegistrationRequestController;
+use App\Features\Auth\Controllers\PasswordResetController;
 
 // Feature Controllers - PublicEvents
 use App\Features\PublicEvents\Controllers\PublicEventController;
@@ -34,10 +37,38 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     // ===== AUTHENTICATION (público) =====
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/register', [AuthController::class, 'register']);
+    // Login: 5 attempts per minute per IP (brute force protection)
+    Route::post('/auth/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1');
+    // Refresh: 10 attempts per minute (higher than login since it's automated)
+    Route::post('/auth/refresh', [AuthController::class, 'refresh'])
+        ->middleware('throttle:10,1');
     Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('/auth/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
+
+    // ===== INVITATIONS (public endpoints) =====
+    // Validate: 30 per minute (may be called multiple times during form load)
+    Route::get('/auth/invitations/validate/{token}', [InvitationController::class, 'validateToken'])
+        ->middleware('throttle:30,1');
+    // Accept: 10 per minute (form submission)
+    Route::post('/auth/invitations/accept', [InvitationController::class, 'accept'])
+        ->middleware('throttle:10,1');
+
+    // ===== REGISTRATION REQUESTS (public endpoint) =====
+    // Register request: 3 per minute (prevent spam)
+    Route::post('/auth/register-request', [RegistrationRequestController::class, 'store'])
+        ->middleware('throttle:3,1');
+
+    // ===== PASSWORD RESET (public endpoints) =====
+    // Forgot password: 5 per minute (email enumeration protection)
+    Route::post('/auth/forgot-password', [PasswordResetController::class, 'forgotPassword'])
+        ->middleware('throttle:5,1');
+    // Reset password: 5 per minute (brute force protection)
+    Route::post('/auth/reset-password', [PasswordResetController::class, 'resetPassword'])
+        ->middleware('throttle:5,1');
+    // Validate token: 30 per minute (may be called during form load)
+    Route::post('/auth/validate-reset-token', [PasswordResetController::class, 'validateToken'])
+        ->middleware('throttle:30,1');
 
     // Protected routes con roles específicos
     Route::middleware('auth:sanctum')->group(function () {
@@ -45,6 +76,17 @@ Route::prefix('v1')->group(function () {
         // ===== PLATFORM ADMIN + ENTITY ADMIN =====
         // Full CRUD, approval, admin features
         Route::middleware(['role:platform_admin,entity_admin'])->group(function () {
+            // Invitations management
+            Route::get('invitations', [InvitationController::class, 'index']);
+            Route::post('invitations', [InvitationController::class, 'store']);
+            Route::delete('invitations/{id}', [InvitationController::class, 'destroy']);
+
+            // Registration requests management
+            Route::get('registration-requests', [RegistrationRequestController::class, 'index']);
+            Route::get('registration-requests/{id}', [RegistrationRequestController::class, 'show']);
+            Route::post('registration-requests/{id}/approve', [RegistrationRequestController::class, 'approve']);
+            Route::post('registration-requests/{id}/reject', [RegistrationRequestController::class, 'reject']);
+
             // Event statistics y features avanzadas
             Route::get('events/statistics', [FeatureEventController::class, 'statistics']);
             Route::patch('events/{id}/toggle-featured', [FeatureEventController::class, 'toggleFeatured']);

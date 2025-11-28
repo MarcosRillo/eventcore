@@ -11,7 +11,8 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
-import apiClient, { setAuthToken, removeAuthToken, getAuthToken } from '@/services/apiClient';
+import apiClient from '@/services/apiClient';
+import { getAccessToken, storeTokens, clearTokens } from '@/services/tokenUtils';
 import { ReactNode } from 'react';
 
 // Mock next/navigation
@@ -29,9 +30,13 @@ jest.mock('@/services/apiClient', () => ({
     post: jest.fn(),
     get: jest.fn(),
   },
-  setAuthToken: jest.fn(),
-  removeAuthToken: jest.fn(),
-  getAuthToken: jest.fn(),
+}));
+
+// Mock token utilities
+jest.mock('@/services/tokenUtils', () => ({
+  getAccessToken: jest.fn(),
+  storeTokens: jest.fn(),
+  clearTokens: jest.fn(),
 }));
 
 // Mock localStorage
@@ -81,12 +86,16 @@ describe('AuthContext', () => {
         email: 'test@example.com',
         role: { code: 'entity_admin' } as { code: 'entity_admin' },
       };
-      const mockToken = 'mock-token-123';
+      const mockAccessToken = 'mock-access-token-123';
+      const mockRefreshToken = 'mock-refresh-token-456';
+      const mockExpiresAt = '2025-12-31T23:59:59.000Z';
       const mockResponse = {
         data: {
           data: {
             user: mockUser,
-            token: mockToken,
+            access_token: mockAccessToken,
+            refresh_token: mockRefreshToken,
+            expires_at: mockExpiresAt,
           },
         },
       };
@@ -108,11 +117,11 @@ describe('AuthContext', () => {
         email: 'test@example.com',
         password: 'password',
       });
-      expect(setAuthToken).toHaveBeenCalledWith(mockToken);
+      expect(storeTokens).toHaveBeenCalledWith(mockAccessToken, mockRefreshToken, mockExpiresAt);
       expect(localStorageMock.getItem('user')).toBe(JSON.stringify(mockUser));
       expect(result.current.user).toEqual(mockUser);
       expect(result.current.isAuthenticated).toBe(true);
-      expect(result.current.token).toBe(mockToken);
+      expect(result.current.token).toBe(mockAccessToken);
     });
 
     test('should handle login error with 401 status', async () => {
@@ -205,12 +214,16 @@ describe('AuthContext', () => {
         email: 'test@example.com',
         role: { code: 'entity_admin' } as { code: 'entity_admin' },
       };
-      const mockToken = 'mock-token-123';
+      const mockAccessToken = 'mock-access-token-123';
+      const mockRefreshToken = 'mock-refresh-token-456';
+      const mockExpiresAt = '2025-12-31T23:59:59.000Z';
       const mockResponse = {
         data: {
           data: {
             user: mockUser,
-            token: mockToken,
+            access_token: mockAccessToken,
+            refresh_token: mockRefreshToken,
+            expires_at: mockExpiresAt,
           },
         },
       };
@@ -238,8 +251,8 @@ describe('AuthContext', () => {
       expect(result.current.user).toBeNull();
       expect(result.current.token).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
-      expect(removeAuthToken).toHaveBeenCalled();
-      expect(localStorageMock.getItem('user')).toBeNull();
+      expect(clearTokens).toHaveBeenCalled();
+      // Note: localStorage clearing is handled by clearTokens (tested in tokenUtils.test.ts)
       expect(mockPush).toHaveBeenCalledWith('/login');
     });
 
@@ -286,7 +299,7 @@ describe('AuthContext', () => {
 
       // Pre-populate localStorage
       localStorageMock.setItem('user', JSON.stringify(mockUser));
-      (getAuthToken as jest.Mock).mockReturnValue(mockToken);
+      (getAccessToken as jest.Mock).mockReturnValue(mockToken);
       (apiClient.get as jest.Mock).mockResolvedValue({ data: mockUser });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -311,7 +324,7 @@ describe('AuthContext', () => {
       const mockToken = 'invalid-token';
 
       localStorageMock.setItem('user', JSON.stringify(mockUser));
-      (getAuthToken as jest.Mock).mockReturnValue(mockToken);
+      (getAccessToken as jest.Mock).mockReturnValue(mockToken);
       (apiClient.get as jest.Mock).mockRejectedValue(new Error('Token expired'));
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -322,15 +335,15 @@ describe('AuthContext', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
-      expect(removeAuthToken).toHaveBeenCalled();
-      expect(localStorageMock.getItem('user')).toBeNull();
+      expect(clearTokens).toHaveBeenCalled();
+      // Note: localStorage clearing is handled by clearTokens (tested in tokenUtils.test.ts)
     });
 
     test('should handle corrupted user data in localStorage', async () => {
       const mockToken = 'valid-token';
 
       localStorageMock.setItem('user', 'invalid-json-{{{');
-      (getAuthToken as jest.Mock).mockReturnValue(mockToken);
+      (getAccessToken as jest.Mock).mockReturnValue(mockToken);
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -340,11 +353,11 @@ describe('AuthContext', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
-      expect(removeAuthToken).toHaveBeenCalled();
+      expect(clearTokens).toHaveBeenCalled();
     });
 
     test('should not restore session when no token exists', async () => {
-      (getAuthToken as jest.Mock).mockReturnValue(null);
+      (getAccessToken as jest.Mock).mockReturnValue(null);
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -454,12 +467,16 @@ describe('AuthContext', () => {
         email: 'test@example.com',
         role: { code: 'entity_admin' } as { code: 'entity_admin' },
       };
-      const mockToken = 'mock-token-123';
+      const mockAccessToken = 'mock-access-token-123';
+      const mockRefreshToken = 'mock-refresh-token-456';
+      const mockExpiresAt = '2025-12-31T23:59:59.000Z';
       const mockResponse = {
         data: {
           data: {
             user: mockUser,
-            token: mockToken,
+            access_token: mockAccessToken,
+            refresh_token: mockRefreshToken,
+            expires_at: mockExpiresAt,
           },
         },
       };
@@ -478,7 +495,9 @@ describe('AuthContext', () => {
         data: {
           data: {
             user: { id: 1, email: 'test@example.com', role: { code: 'entity_admin' } },
-            token: 'token',
+            access_token: 'access-token',
+            refresh_token: 'refresh-token',
+            expires_at: '2025-12-31T23:59:59.000Z',
           },
         },
       };

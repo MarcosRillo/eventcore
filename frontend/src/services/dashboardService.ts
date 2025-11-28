@@ -3,7 +3,7 @@
  * API service for entity admin/staff dashboard functionality
  */
 
-import { apiClient } from '@/lib/api';
+import apiClient from '@/services/apiClient';
 
 // Event metadata specific to dashboard functionality
 interface EventMetadata {
@@ -146,11 +146,11 @@ class DashboardService {
       message: string;
     }>('/dashboard/events/summary');
 
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to fetch dashboard summary');
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to fetch dashboard summary');
     }
 
-    return response.data;
+    return response.data.data;
   }
 
   /**
@@ -169,14 +169,14 @@ class DashboardService {
       pagination: DashboardEventsResponse['pagination'];
       message: string;
     }>(`/dashboard/events?${searchParams.toString()}`);
-    
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to fetch events');
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to fetch events');
     }
 
     return {
-      data: response.data,
-      pagination: response.pagination,
+      data: response.data.data,
+      pagination: response.data.pagination,
     };
   }
 
@@ -189,12 +189,12 @@ class DashboardService {
       data: EventDetail;
       message: string;
     }>(`/events/${eventId}/detail`);
-    
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to fetch event detail');
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to fetch event detail');
     }
 
-    return response.data;
+    return response.data.data;
   }
 }
 

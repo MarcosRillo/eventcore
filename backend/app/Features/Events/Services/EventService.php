@@ -2,6 +2,7 @@
 
 namespace App\Features\Events\Services;
 
+use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -11,21 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class EventService
 {
-    /**
-     * Get event status ID by status code
-     */
-    private function getStatusId(string $statusCode): int
-    {
-        $statusId = DB::table('event_statuses')
-            ->where('status_code', $statusCode)
-            ->value('id');
-
-        if (!$statusId) {
-            throw new \RuntimeException("Event status '{$statusCode}' not found");
-        }
-
-        return $statusId;
-    }
+    use StatusResolvable;
 
     /**
      * Get all events with optional filters and pagination.
@@ -231,24 +218,33 @@ class EventService
 
     /**
      * Duplicate event.
+     * Creates a copy of the event with draft status and copies location relationships.
+     *
+     * @param Event $event The event to duplicate
+     * @return Event The duplicated event
      */
     public function duplicate(Event $event): Event
     {
-        $replica = $event->replicate();
-        $replica->title = $event->title . ' (Copia)';
-        $replica->status_id = $this->getStatusId('draft');
-        $replica->is_featured = false;
-        $replica->approved_at = null;
-        $replica->approved_by = null;
-        $replica->published_at = null;
-        $replica->save();
+        return DB::transaction(function () use ($event) {
+            $replica = $event->replicate();
+            $replica->title = $event->title . ' (Copia)';
+            $replica->status_id = $this->getStatusId('draft');
+            $replica->is_featured = false;
+            $replica->approved_at = null;
+            $replica->approved_by = null;
+            $replica->published_at = null;
+            $replica->save();
 
-        // Copy relationships if necessary
-        if ($event->locations) {
-            $replica->locations()->sync($event->locations->pluck('id'));
-        }
+            // Copy location relationships
+            if ($event->locations && $event->locations->isNotEmpty()) {
+                $replica->locations()->sync($event->locations->pluck('id'));
+            }
 
-        return $replica;
+            // Load relationships for complete response
+            $replica->load(['category', 'locations', 'status', 'type']);
+
+            return $replica;
+        });
     }
 
     /**

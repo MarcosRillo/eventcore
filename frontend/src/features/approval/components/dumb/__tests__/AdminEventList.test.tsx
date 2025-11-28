@@ -1,10 +1,19 @@
 import { render, screen } from '@testing-library/react'
 import { AdminEventList } from '../AdminEventList'
-import { Event } from '@/features/approval/types/approval.types'
+import { Event, EventStatus } from '@/features/approval/types/approval.types'
+
+interface MockApprovalActionButtonsProps {
+  event: Event
+  onApprove: (id: number) => void
+  onReject: (id: number) => void
+  onRequestChanges: (id: number) => void
+  onPublish: (id: number) => void
+  loading?: boolean
+}
 
 // Mock ApprovalActionButtons component
 jest.mock('@/features/approval/components/dumb/ApprovalActionButtons', () => ({
-  ApprovalActionButtons: ({ event, onApprove, onReject, onRequestChanges, onPublish, loading }: any) => (
+  ApprovalActionButtons: ({ event, onApprove, onReject, onRequestChanges, onPublish, loading }: MockApprovalActionButtonsProps) => (
     <div data-testid="approval-action-buttons">
       <span data-testid="event-id">{event.id}</span>
       <button onClick={() => onApprove(event.id)}>Approve</button>
@@ -27,10 +36,14 @@ describe('AdminEventList', () => {
   const createMockEvent = (overrides?: Partial<Event>): Event => ({
     id: 1,
     title: 'Test Event',
-    organizer: 'Test Organizer',
-    category_id: 1,
+    description: 'Test Description',
     start_date: '2025-12-01',
+    end_date: '2025-12-01',
     status: 'pending_internal',
+    category_id: 1,
+    location_id: 1,
+    organizer: 'Test Organizer',
+    created_at: '2025-01-01T00:00:00Z',
     ...overrides,
   })
 
@@ -337,7 +350,7 @@ describe('AdminEventList', () => {
     })
 
     it('should display unknown status with default styling', () => {
-      const event = createMockEvent({ status: 'unknown_status' as any })
+      const event = createMockEvent({ status: 'unknown_status' as EventStatus })
 
       render(
         <AdminEventList

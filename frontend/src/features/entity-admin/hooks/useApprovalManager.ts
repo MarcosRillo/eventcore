@@ -9,7 +9,7 @@
 import { useState, useCallback } from 'react';
 import { Event } from '@/types/event.types';
 import { approvalService, approvalValidation } from '@/features/events/services/approvalService';
-import { ApiError } from '@/lib/api';
+import { ApiError } from '@/types/api-response.types';
 
 interface ApprovalError {
   message: string;
@@ -65,7 +65,7 @@ export const useApprovalManager = (): UseApprovalManagerReturn => {
       if (apiError.message) {
         return {
           message: apiError.message,
-          details: apiError.errors ? JSON.stringify(apiError.errors) : undefined
+          details: apiError.details ? JSON.stringify(apiError.details) : undefined
         };
       }
     }
