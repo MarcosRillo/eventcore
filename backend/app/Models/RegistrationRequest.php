@@ -28,6 +28,8 @@ class RegistrationRequest extends Model
         'reviewed_by',
         'reviewed_at',
         'rejection_reason',
+        'user_id',
+        'organization_id',
     ];
 
     protected $casts = [
@@ -48,6 +50,22 @@ class RegistrationRequest extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * Get the user created from this request (after approval).
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the organization created from this request (after approval).
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'organization_id');
     }
 
     /**

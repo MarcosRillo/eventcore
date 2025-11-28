@@ -23,6 +23,7 @@ const PUBLIC_ROUTES = new Set([
   '/',                  // Landing page
   '/login',             // Authentication
   '/solicitar-cuenta',  // Registration request form
+  '/accept-invitation', // Accept invitation (public)
 ]);
 
 // Public route prefixes (allow sub-routes)

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { RegistrationFormData, RegistrationFormErrors } from '../../types/registration.types'
 import { Loader2, CheckCircle, AlertCircle, User, Building2, FileText } from 'lucide-react'
 
@@ -153,12 +154,12 @@ export const RegistrationForm = ({
             El equipo del Ente de Turismo revisará tu solicitud y te notificará
             cuando sea aprobada.
           </p>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     )

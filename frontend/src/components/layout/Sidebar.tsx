@@ -9,7 +9,9 @@ import {
   TagIcon,
   TicketIcon,
   EnvelopeIcon,
+  ClipboardDocumentListIcon,
   BuildingOffice2Icon,
+  BuildingStorefrontIcon,
   Cog6ToothIcon,
   ChevronDoubleLeftIcon,
   PaintBrushIcon,
@@ -75,9 +77,19 @@ const Sidebar: React.FC<SidebarProps> = ({
           ...(canAccessEntityDashboard && { badge: '5' }), // Mock badge for dashboard functionality
         },
         {
+          name: 'Organizaciones',
+          href: '/organizations',
+          icon: <BuildingStorefrontIcon className="w-5 h-5" />,
+        },
+        {
           name: 'Invitaciones',
           href: '/invitations',
           icon: <EnvelopeIcon className="w-5 h-5" />,
+        },
+        {
+          name: 'Solicitudes',
+          href: '/registration-requests',
+          icon: <ClipboardDocumentListIcon className="w-5 h-5" />,
         },
       ],
     },

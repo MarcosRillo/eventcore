@@ -70,6 +70,48 @@ export interface InvitationActionResponse {
 }
 
 /**
+ * Response from validating an invitation token (public endpoint)
+ */
+export interface ValidateInvitationResponse {
+  success: boolean
+  data: {
+    email: string
+    role: string
+    invited_by: string
+    expires_at: string
+  }
+}
+
+/**
+ * Data required to accept an invitation
+ */
+export interface AcceptInvitationData {
+  token: string
+  name: string
+  dni: string
+  password: string
+  password_confirmation: string
+}
+
+/**
+ * Response from accepting an invitation
+ */
+export interface AcceptInvitationResponse {
+  success: boolean
+  message: string
+  data: {
+    user: {
+      id: number
+      name: string
+      email: string
+    }
+    access_token: string
+    refresh_token: string
+    expires_at: string
+  }
+}
+
+/**
  * Checks if an invitation is expired based on expires_at
  */
 export const isInvitationExpired = (invitation: Invitation): boolean => {

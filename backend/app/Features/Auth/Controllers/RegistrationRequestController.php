@@ -57,22 +57,7 @@ class RegistrationRequestController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $requests->map(fn($req) => [
-                'id' => $req->id,
-                'dni' => $req->dni,
-                'full_name' => $req->full_name,
-                'email' => $req->email,
-                'whatsapp' => $req->whatsapp,
-                'organization_name' => $req->organization_name,
-                'organization_sector' => $req->organization_sector,
-                'website' => $req->website,
-                'motivation' => $req->motivation,
-                'status' => $req->status,
-                'reviewed_by' => $req->reviewer?->name,
-                'reviewed_at' => $req->reviewed_at?->toIso8601String(),
-                'rejection_reason' => $req->rejection_reason,
-                'created_at' => $req->created_at->toIso8601String(),
-            ]),
+            'data' => $requests->map(fn($req) => $this->formatRequestResponse($req)),
         ]);
     }
 
@@ -84,30 +69,18 @@ class RegistrationRequestController extends Controller
         try {
             $req = $this->service->getRequest($id);
 
+            $data = $this->formatRequestResponse($req);
+            $data['first_name'] = $req->first_name;
+            $data['last_name'] = $req->last_name;
+            $data['profile_photo'] = $req->profile_photo;
+            $data['organization_cuit'] = $req->organization_cuit;
+            $data['organization_logo'] = $req->organization_logo;
+
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'id' => $req->id,
-                    'dni' => $req->dni,
-                    'first_name' => $req->first_name,
-                    'last_name' => $req->last_name,
-                    'full_name' => $req->full_name,
-                    'email' => $req->email,
-                    'whatsapp' => $req->whatsapp,
-                    'profile_photo' => $req->profile_photo,
-                    'organization_name' => $req->organization_name,
-                    'organization_sector' => $req->organization_sector,
-                    'organization_logo' => $req->organization_logo,
-                    'website' => $req->website,
-                    'motivation' => $req->motivation,
-                    'status' => $req->status,
-                    'reviewed_by' => $req->reviewer?->name,
-                    'reviewed_at' => $req->reviewed_at?->toIso8601String(),
-                    'rejection_reason' => $req->rejection_reason,
-                    'created_at' => $req->created_at->toIso8601String(),
-                ],
+                'data' => $data,
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([
                 'success' => false,
                 'message' => 'Solicitud no encontrada.',
@@ -183,5 +156,113 @@ class RegistrationRequestController extends Controller
                 'message' => 'Solicitud no encontrada.',
             ], 404);
         }
+    }
+
+    /**
+     * Suspend an approved registration request (admin endpoint).
+     */
+    public function suspend(Request $request, int $id): JsonResponse
+    {
+        try {
+            $registrationRequest = $this->service->suspendApprovedRequest($id, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario y organización suspendidos exitosamente.',
+                'data' => $this->formatRequestResponse($registrationRequest),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al suspender.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada.',
+            ], 404);
+        }
+    }
+
+    /**
+     * Unsuspend (reactivate) an approved registration request (admin endpoint).
+     */
+    public function unsuspend(Request $request, int $id): JsonResponse
+    {
+        try {
+            $registrationRequest = $this->service->unsuspendApprovedRequest($id, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario y organización reactivados exitosamente.',
+                'data' => $this->formatRequestResponse($registrationRequest),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al reactivar.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada.',
+            ], 404);
+        }
+    }
+
+    /**
+     * Delete an approved registration request's user and organization (admin endpoint).
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        try {
+            $this->service->deleteApprovedRequest($id, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario y organización eliminados exitosamente.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada.',
+            ], 404);
+        }
+    }
+
+    /**
+     * Format a registration request for API response.
+     */
+    private function formatRequestResponse($req): array
+    {
+        return [
+            'id' => $req->id,
+            'dni' => $req->dni,
+            'full_name' => $req->full_name,
+            'email' => $req->email,
+            'whatsapp' => $req->whatsapp,
+            'organization_name' => $req->organization_name,
+            'organization_sector' => $req->organization_sector,
+            'website' => $req->website,
+            'motivation' => $req->motivation,
+            'status' => $req->status,
+            'reviewed_by' => $req->reviewer?->name,
+            'reviewed_at' => $req->reviewed_at?->toIso8601String(),
+            'rejection_reason' => $req->rejection_reason,
+            'created_at' => $req->created_at->toIso8601String(),
+            'user_id' => $req->user_id,
+            'organization_id' => $req->organization_id,
+            'user_status' => $req->user?->status,
+            'organization_status' => $req->organization?->status?->status_code ?? null,
+            'is_deleted' => $req->user?->trashed() ?? false,
+        ];
     }
 }

@@ -23,6 +23,7 @@ use App\Features\Approval\Controllers\ApprovalController;
 use App\Features\Categories\Controllers\CategoryController;
 use App\Features\Locations\Controllers\LocationController;
 use App\Features\Organizer\Controllers\OrganizerController;
+use App\Features\Organizations\Controllers\OrganizationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -91,6 +92,9 @@ Route::prefix('v1')->group(function () {
             Route::get('registration-requests/{id}', [RegistrationRequestController::class, 'show']);
             Route::post('registration-requests/{id}/approve', [RegistrationRequestController::class, 'approve']);
             Route::post('registration-requests/{id}/reject', [RegistrationRequestController::class, 'reject']);
+            Route::post('registration-requests/{id}/suspend', [RegistrationRequestController::class, 'suspend']);
+            Route::post('registration-requests/{id}/unsuspend', [RegistrationRequestController::class, 'unsuspend']);
+            Route::delete('registration-requests/{id}', [RegistrationRequestController::class, 'destroy']);
 
             // Event statistics y features avanzadas
             Route::get('events/statistics', [FeatureEventController::class, 'statistics']);
@@ -125,11 +129,14 @@ Route::prefix('v1')->group(function () {
             Route::prefix('admin')->group(function () {
                 Route::apiResource('appearance', AppearanceController::class);
             });
+
+            // Organizations management (write operations)
+            Route::patch('organizations/{id}/status', [OrganizationController::class, 'toggleStatus']);
         });
 
         // ===== EVENT ORGANIZER =====
         // Only /organizer/* routes for own events
-        Route::middleware(['role:organizer'])->group(function () {
+        Route::middleware(['role:organizer_admin'])->group(function () {
             Route::prefix('organizer')->group(function () {
                 Route::get('dashboard/stats', [OrganizerController::class, 'dashboardStats']);
                 Route::get('events', [OrganizerController::class, 'index']);
@@ -158,10 +165,14 @@ Route::prefix('v1')->group(function () {
             // Event read-only
             Route::get('events', [FeatureEventController::class, 'index']);
             Route::get('events/{id}', [FeatureEventController::class, 'show']);
+
+            // Organizations read-only
+            Route::get('organizations', [OrganizationController::class, 'index']);
+            Route::get('organizations/{id}', [OrganizationController::class, 'show']);
         });
 
         // ===== CATEGORIES & LOCATIONS READ ACCESS (All authenticated users need this) =====
-        Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer'])->group(function () {
+        Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer_admin'])->group(function () {
             // Categories y Locations - solo lectura (necesario para formularios)
             Route::get('categories', [CategoryController::class, 'index']);
             Route::get('categories/active', [CategoryController::class, 'active']);

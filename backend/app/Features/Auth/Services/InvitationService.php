@@ -209,7 +209,7 @@ class InvitationService
 
             // Send notification with new token
             $plainToken = $selector . $validator;
-            $invitation->notify(new InvitationNotification($plainToken, $requestedBy));
+            $invitation->notify(new InvitationNotification($plainToken));
 
             Log::info('Invitation resent', [
                 'invitation_id' => $invitation->id,

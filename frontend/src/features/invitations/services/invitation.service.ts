@@ -11,6 +11,9 @@ import {
   SendInvitationData,
   AssignableRole,
   RolesListResponse,
+  ValidateInvitationResponse,
+  AcceptInvitationData,
+  AcceptInvitationResponse,
 } from '../types/invitation.types'
 
 /**
@@ -60,6 +63,31 @@ export const getAssignableRoles = async (): Promise<AssignableRole[]> => {
 }
 
 /**
+ * Validate an invitation token (public endpoint)
+ */
+export const validateInvitationToken = async (
+  token: string
+): Promise<ValidateInvitationResponse['data']> => {
+  const response = await apiClient.get<ValidateInvitationResponse>(
+    `/auth/invitations/validate/${token}`
+  )
+  return response.data.data
+}
+
+/**
+ * Accept an invitation and create account (public endpoint)
+ */
+export const acceptInvitation = async (
+  data: AcceptInvitationData
+): Promise<AcceptInvitationResponse['data']> => {
+  const response = await apiClient.post<AcceptInvitationResponse>(
+    '/auth/invitations/accept',
+    data
+  )
+  return response.data.data
+}
+
+/**
  * Export default object with all service functions
  */
 const invitationService = {
@@ -68,6 +96,8 @@ const invitationService = {
   resendInvitation,
   cancelInvitation,
   getAssignableRoles,
+  validateInvitationToken,
+  acceptInvitation,
 }
 
 export default invitationService

@@ -97,11 +97,13 @@ class RegistrationRequestService
             // Associate user with organization
             $user->organizations()->attach($organization->id);
 
-            // Update request status
+            // Update request status with references to created entities
             $request->update([
                 'status' => 'approved',
                 'reviewed_by' => $reviewer->id,
                 'reviewed_at' => now(),
+                'user_id' => $user->id,
+                'organization_id' => $organization->id,
             ]);
 
             Log::info('Registration request approved', [
@@ -164,10 +166,15 @@ class RegistrationRequestService
 
     /**
      * Get all registration requests with optional status filter.
+     * Uses withTrashed to include soft-deleted users and organizations.
      */
     public function getRequests(?string $status = null): Collection
     {
-        $query = RegistrationRequest::with('reviewer')
+        $query = RegistrationRequest::with([
+                'reviewer',
+                'user' => fn($q) => $q->withTrashed(),
+                'organization' => fn($q) => $q->withTrashed()->with('status'),
+            ])
             ->orderBy('created_at', 'desc');
 
         if ($status) {
@@ -179,10 +186,155 @@ class RegistrationRequestService
 
     /**
      * Get a single registration request by ID.
+     * Uses withTrashed to include soft-deleted users and organizations.
      */
     public function getRequest(int $id): RegistrationRequest
     {
-        return RegistrationRequest::with('reviewer')->findOrFail($id);
+        return RegistrationRequest::with([
+            'reviewer',
+            'user' => fn($q) => $q->withTrashed(),
+            'organization' => fn($q) => $q->withTrashed()->with('status'),
+        ])->findOrFail($id);
+    }
+
+    /**
+     * Suspend an approved registration request's user and organization.
+     */
+    public function suspendApprovedRequest(int $id, User $admin): RegistrationRequest
+    {
+        $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
+
+        if (!$request->isApproved()) {
+            throw ValidationException::withMessages([
+                'request' => ['Solo se pueden suspender solicitudes aprobadas.'],
+            ]);
+        }
+
+        if (!$request->user || !$request->organization) {
+            throw ValidationException::withMessages([
+                'request' => ['Esta solicitud no tiene usuario u organización asociados.'],
+            ]);
+        }
+
+        if ($request->user->isSuspended()) {
+            throw ValidationException::withMessages([
+                'request' => ['Esta solicitud ya está suspendida.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($request, $admin) {
+            $suspendedStatusId = DB::table('organization_statuses')
+                ->where('status_code', 'suspended')
+                ->value('id');
+
+            $request->user->update(['status' => 'suspended']);
+            $request->organization->update(['status_id' => $suspendedStatusId]);
+
+            Log::info('Registration request suspended', [
+                'request_id' => $request->id,
+                'user_id' => $request->user_id,
+                'organization_id' => $request->organization_id,
+                'admin_id' => $admin->id,
+            ]);
+
+            return $request->load(['user', 'organization', 'reviewer']);
+        });
+    }
+
+    /**
+     * Unsuspend (reactivate) an approved registration request's user and organization.
+     */
+    public function unsuspendApprovedRequest(int $id, User $admin): RegistrationRequest
+    {
+        $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
+
+        if (!$request->isApproved()) {
+            throw ValidationException::withMessages([
+                'request' => ['Solo se pueden reactivar solicitudes aprobadas.'],
+            ]);
+        }
+
+        if (!$request->user || !$request->organization) {
+            throw ValidationException::withMessages([
+                'request' => ['Esta solicitud no tiene usuario u organización asociados.'],
+            ]);
+        }
+
+        if ($request->user->isActive()) {
+            throw ValidationException::withMessages([
+                'request' => ['Esta solicitud ya está activa.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($request, $admin) {
+            $activeStatusId = DB::table('organization_statuses')
+                ->where('status_code', 'active')
+                ->value('id');
+
+            $request->user->update(['status' => 'active']);
+            $request->organization->update(['status_id' => $activeStatusId]);
+
+            Log::info('Registration request unsuspended', [
+                'request_id' => $request->id,
+                'user_id' => $request->user_id,
+                'organization_id' => $request->organization_id,
+                'admin_id' => $admin->id,
+            ]);
+
+            return $request->load(['user', 'organization', 'reviewer']);
+        });
+    }
+
+    /**
+     * Delete an approved registration request's user and organization.
+     * Only allowed if the request is currently suspended.
+     */
+    public function deleteApprovedRequest(int $id, User $admin): void
+    {
+        $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
+
+        if (!$request->isApproved()) {
+            throw ValidationException::withMessages([
+                'request' => ['Solo se pueden eliminar solicitudes aprobadas.'],
+            ]);
+        }
+
+        if (!$request->user || !$request->organization) {
+            throw ValidationException::withMessages([
+                'request' => ['Esta solicitud no tiene usuario u organización asociados.'],
+            ]);
+        }
+
+        if (!$request->user->isSuspended()) {
+            throw ValidationException::withMessages([
+                'request' => ['Solo se pueden eliminar solicitudes suspendidas. Primero debe suspender la solicitud.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($request, $admin) {
+            $userId = $request->user_id;
+            $organizationId = $request->organization_id;
+            $userEmail = $request->user->email;
+            $organizationName = $request->organization->name;
+
+            // Soft delete organization (setea deleted_at)
+            $request->organization->delete();
+
+            // Soft delete user (setea deleted_at)
+            $request->user->delete();
+
+            // MANTENER referencias user_id y organization_id para trazabilidad
+            // Esto permite restaurar y ver histórico
+
+            Log::info('Registration request user and organization soft deleted', [
+                'request_id' => $request->id,
+                'deleted_user_id' => $userId,
+                'deleted_user_email' => $userEmail,
+                'deleted_organization_id' => $organizationId,
+                'deleted_organization_name' => $organizationName,
+                'admin_id' => $admin->id,
+            ]);
+        });
     }
 
     /**
