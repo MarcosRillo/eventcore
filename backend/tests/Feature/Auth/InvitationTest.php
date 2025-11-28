@@ -111,6 +111,28 @@ class InvitationTest extends TestCase
     }
 
     #[Test]
+    public function test_entity_admin_can_send_invitation_to_organizer(): void
+    {
+        Notification::fake();
+
+        $entityAdmin = $this->createUserWithRole('entity_admin');
+        $this->actingAs($entityAdmin, 'sanctum');
+
+        $response = $this->postJson('/api/v1/invitations', [
+            'email' => 'neworganizer@example.com',
+            'role_id' => $this->getRoleId('organizer_admin'),
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonPath('success', true);
+
+        $this->assertDatabaseHas('invitations', [
+            'email' => 'neworganizer@example.com',
+            'role_id' => $this->getRoleId('organizer_admin'),
+        ]);
+    }
+
+    #[Test]
     public function test_entity_admin_cannot_invite_platform_admin(): void
     {
         $entityAdmin = $this->createUserWithRole('entity_admin');

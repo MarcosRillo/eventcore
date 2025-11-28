@@ -20,8 +20,9 @@ interface User {
 // Public routes configuration (optimized for Edge Runtime)
 // Set provides O(1) lookup vs Array O(n)
 const PUBLIC_ROUTES = new Set([
-  '/',       // Landing page
-  '/login',  // Authentication
+  '/',                  // Landing page
+  '/login',             // Authentication
+  '/solicitar-cuenta',  // Registration request form
 ]);
 
 // Public route prefixes (allow sub-routes)

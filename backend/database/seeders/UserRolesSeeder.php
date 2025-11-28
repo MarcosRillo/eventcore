@@ -16,7 +16,7 @@ class UserRolesSeeder extends Seeder
         $roles = [
             [
                 'role_code' => 'platform_admin',
-                'role_name' => 'Platform Administrator',
+                'role_name' => 'Administrador de Plataforma',
                 'description' => 'Full access to platform configuration and all organizations',
                 'permissions' => json_encode([
                     'manage_platform',
@@ -29,7 +29,7 @@ class UserRolesSeeder extends Seeder
             ],
             [
                 'role_code' => 'entity_admin',
-                'role_name' => 'Entity Administrator',
+                'role_name' => 'Administrador del Ente',
                 'description' => 'Administrator of a primary entity (government, municipality)',
                 'permissions' => json_encode([
                     'manage_entity_events',
@@ -42,7 +42,7 @@ class UserRolesSeeder extends Seeder
             ],
             [
                 'role_code' => 'entity_staff',
-                'role_name' => 'Entity Staff',
+                'role_name' => 'Personal del Ente',
                 'description' => 'Staff member of a primary entity with limited permissions',
                 'permissions' => json_encode([
                     'create_events',
@@ -54,7 +54,7 @@ class UserRolesSeeder extends Seeder
             ],
             [
                 'role_code' => 'organizer_admin',
-                'role_name' => 'Event Organizer',
+                'role_name' => 'Organizador de Eventos',
                 'description' => 'External organizer who can create and manage their own events',
                 'permissions' => json_encode([
                     'create_events',

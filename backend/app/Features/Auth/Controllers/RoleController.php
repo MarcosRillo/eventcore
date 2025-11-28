@@ -12,7 +12,7 @@ class RoleController extends Controller
     /**
      * Get roles that the current user can assign to invitations.
      * Platform admin can assign any role.
-     * Entity admin can only assign entity_staff.
+     * Entity admin can assign entity_staff and organizer_admin.
      */
     public function assignable(Request $request): JsonResponse
     {
@@ -23,7 +23,7 @@ class RoleController extends Controller
         if ($user->isPlatformAdmin()) {
             $roles = $query->orderBy('role_name')->get();
         } else {
-            $roles = $query->where('role_code', 'entity_staff')
+            $roles = $query->whereIn('role_code', ['entity_staff', 'organizer_admin'])
                           ->orderBy('role_name')
                           ->get();
         }

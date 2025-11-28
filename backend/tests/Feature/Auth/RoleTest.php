@@ -51,7 +51,7 @@ class RoleTest extends TestCase
     }
 
     #[Test]
-    public function test_entity_admin_only_sees_entity_staff_role(): void
+    public function test_entity_admin_sees_assignable_roles(): void
     {
         $entityAdmin = $this->createUserWithRole('entity_admin');
         $this->actingAs($entityAdmin, 'sanctum');
@@ -64,9 +64,10 @@ class RoleTest extends TestCase
         $roles = $response->json('data');
         $roleCodes = array_column($roles, 'role_code');
 
-        // Entity admin should only see entity_staff
-        $this->assertCount(1, $roles);
+        // Entity admin should see entity_staff and organizer_admin
+        $this->assertCount(2, $roles);
         $this->assertContains('entity_staff', $roleCodes);
+        $this->assertContains('organizer_admin', $roleCodes);
         $this->assertNotContains('platform_admin', $roleCodes);
         $this->assertNotContains('entity_admin', $roleCodes);
     }

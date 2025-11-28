@@ -20,7 +20,7 @@ class InvitationService
      */
     private const INVITATION_PERMISSIONS = [
         'platform_admin' => ['entity_admin'],
-        'entity_admin' => ['entity_staff'],
+        'entity_admin' => ['entity_staff', 'organizer_admin'],
     ];
 
     /**
