@@ -5,11 +5,13 @@ namespace App\Features\Auth\Services;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Models\UserRole;
+use App\Features\Auth\Notifications\InvitationNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class InvitationService
 {
@@ -171,6 +173,52 @@ class InvitationService
         }
 
         return $invitation->delete();
+    }
+
+    /**
+     * Resend an invitation with a new token.
+     *
+     * This generates a completely new token, invalidating the previous one,
+     * and extends the expiration by 24 hours.
+     */
+    public function resendInvitation(int $invitationId, User $requestedBy): Invitation
+    {
+        $invitation = Invitation::findOrFail($invitationId);
+
+        // Only the inviter or a platform admin can resend
+        if ($invitation->invited_by !== $requestedBy->id && !$requestedBy->isPlatformAdmin()) {
+            throw new AccessDeniedHttpException('You do not have permission to resend this invitation.');
+        }
+
+        if ($invitation->isAccepted()) {
+            throw ValidationException::withMessages([
+                'invitation' => ['Cannot resend an already accepted invitation.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($invitation, $requestedBy) {
+            // Generate new token (invalidates the old one)
+            $selector = $this->generateSelector();
+            $validator = $this->generateValidator();
+
+            $invitation->update([
+                'selector' => $selector,
+                'token' => Hash::make($validator),
+                'expires_at' => now()->addHours(24),
+            ]);
+
+            // Send notification with new token
+            $plainToken = $selector . $validator;
+            $invitation->notify(new InvitationNotification($plainToken, $requestedBy));
+
+            Log::info('Invitation resent', [
+                'invitation_id' => $invitation->id,
+                'email' => $invitation->email,
+                'resent_by' => $requestedBy->id,
+            ]);
+
+            return $invitation->fresh()->load(['role', 'inviter']);
+        });
     }
 
     /**

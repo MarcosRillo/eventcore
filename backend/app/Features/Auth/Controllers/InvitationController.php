@@ -96,6 +96,43 @@ class InvitationController extends Controller
     }
 
     /**
+     * Resend an invitation with a new token.
+     */
+    public function resend(Request $request, int $id): JsonResponse
+    {
+        try {
+            $invitation = $this->invitationService->resendInvitation($id, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitación reenviada exitosamente.',
+                'data' => [
+                    'id' => $invitation->id,
+                    'email' => $invitation->email,
+                    'role' => $invitation->role->role_name,
+                    'expires_at' => $invitation->expires_at->toIso8601String(),
+                ],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al reenviar invitación.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invitación no encontrada.',
+            ], 404);
+        }
+    }
+
+    /**
      * Validate an invitation token (public endpoint).
      */
     public function validateToken(string $token): JsonResponse

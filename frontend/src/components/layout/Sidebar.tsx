@@ -8,7 +8,7 @@ import {
   CalendarIcon,
   TagIcon,
   TicketIcon,
-  UsersIcon,
+  EnvelopeIcon,
   BuildingOffice2Icon,
   Cog6ToothIcon,
   ChevronDoubleLeftIcon,
@@ -75,9 +75,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           ...(canAccessEntityDashboard && { badge: '5' }), // Mock badge for dashboard functionality
         },
         {
-          name: 'Usuarios',
-          href: '/users',
-          icon: <UsersIcon className="w-5 h-5" />,
+          name: 'Invitaciones',
+          href: '/invitations',
+          icon: <EnvelopeIcon className="w-5 h-5" />,
         },
       ],
     },

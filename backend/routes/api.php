@@ -79,6 +79,7 @@ Route::prefix('v1')->group(function () {
             // Invitations management
             Route::get('invitations', [InvitationController::class, 'index']);
             Route::post('invitations', [InvitationController::class, 'store']);
+            Route::post('invitations/{id}/resend', [InvitationController::class, 'resend']);
             Route::delete('invitations/{id}', [InvitationController::class, 'destroy']);
 
             // Registration requests management

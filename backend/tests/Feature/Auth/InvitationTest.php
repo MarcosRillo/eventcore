@@ -469,4 +469,164 @@ class InvitationTest extends TestCase
         $response->assertStatus(201);
         $response->assertJsonPath('success', true);
     }
+
+    // ==================== RESEND INVITATION TESTS ====================
+
+    #[Test]
+    public function test_can_resend_pending_invitation(): void
+    {
+        Notification::fake();
+
+        $platformAdmin = $this->createUserWithRole('platform_admin');
+        $this->actingAs($platformAdmin, 'sanctum');
+
+        [$invitation, $plainToken] = $this->createInvitationWithToken([
+            'email' => 'resend@example.com',
+            'role_id' => $this->getRoleId('entity_admin'),
+            'invited_by' => $platformAdmin->id,
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        $response = $this->postJson("/api/v1/invitations/{$invitation->id}/resend");
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('success', true);
+        $response->assertJsonStructure(['data' => ['id', 'email', 'expires_at']]);
+
+        // Verify notification was sent
+        Notification::assertSentTo(
+            $invitation->fresh(),
+            InvitationNotification::class
+        );
+    }
+
+    #[Test]
+    public function test_resend_generates_new_token(): void
+    {
+        Notification::fake();
+
+        $platformAdmin = $this->createUserWithRole('platform_admin');
+        $this->actingAs($platformAdmin, 'sanctum');
+
+        [$invitation, $oldPlainToken] = $this->createInvitationWithToken([
+            'email' => 'newtoken@example.com',
+            'role_id' => $this->getRoleId('entity_admin'),
+            'invited_by' => $platformAdmin->id,
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        $oldSelector = $invitation->selector;
+        $oldTokenHash = $invitation->token;
+
+        $response = $this->postJson("/api/v1/invitations/{$invitation->id}/resend");
+
+        $response->assertStatus(200);
+
+        $invitation->refresh();
+
+        // Selector should be different (new token)
+        $this->assertNotEquals($oldSelector, $invitation->selector);
+        // Token hash should be different
+        $this->assertNotEquals($oldTokenHash, $invitation->token);
+    }
+
+    #[Test]
+    public function test_resend_extends_expiration(): void
+    {
+        Notification::fake();
+
+        $platformAdmin = $this->createUserWithRole('platform_admin');
+        $this->actingAs($platformAdmin, 'sanctum');
+
+        // Create invitation that expires in 1 hour
+        [$invitation, $plainToken] = $this->createInvitationWithToken([
+            'email' => 'extend@example.com',
+            'role_id' => $this->getRoleId('entity_admin'),
+            'invited_by' => $platformAdmin->id,
+            'expires_at' => now()->addHour(),
+        ]);
+
+        $oldExpiresAt = $invitation->expires_at;
+
+        $response = $this->postJson("/api/v1/invitations/{$invitation->id}/resend");
+
+        $response->assertStatus(200);
+
+        $invitation->refresh();
+
+        // New expiration should be ~24 hours from now (more than the old 1 hour)
+        $this->assertTrue($invitation->expires_at->gt($oldExpiresAt));
+        $this->assertTrue($invitation->expires_at->gt(now()->addHours(23)));
+    }
+
+    #[Test]
+    public function test_cannot_resend_accepted_invitation(): void
+    {
+        $platformAdmin = $this->createUserWithRole('platform_admin');
+        $this->actingAs($platformAdmin, 'sanctum');
+
+        [$invitation, $plainToken] = $this->createInvitationWithToken([
+            'email' => 'accepted@example.com',
+            'role_id' => $this->getRoleId('entity_admin'),
+            'invited_by' => $platformAdmin->id,
+            'expires_at' => now()->addHours(24),
+            'accepted_at' => now(), // Already accepted
+        ]);
+
+        $response = $this->postJson("/api/v1/invitations/{$invitation->id}/resend");
+
+        $response->assertStatus(422);
+        $response->assertJsonPath('success', false);
+    }
+
+    #[Test]
+    public function test_cannot_resend_others_invitation(): void
+    {
+        Notification::fake();
+
+        $platformAdmin = $this->createUserWithRole('platform_admin');
+        $entityAdmin = $this->createUserWithRole('entity_admin');
+
+        // Invitation created by platform_admin
+        [$invitation, $plainToken] = $this->createInvitationWithToken([
+            'email' => 'others@example.com',
+            'role_id' => $this->getRoleId('entity_staff'),
+            'invited_by' => $platformAdmin->id,
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        // Entity admin (not the inviter) tries to resend
+        $this->actingAs($entityAdmin, 'sanctum');
+
+        $response = $this->postJson("/api/v1/invitations/{$invitation->id}/resend");
+
+        $response->assertStatus(403);
+        $response->assertJsonPath('success', false);
+    }
+
+    #[Test]
+    public function test_resend_invalidates_old_token(): void
+    {
+        Notification::fake();
+
+        $platformAdmin = $this->createUserWithRole('platform_admin');
+        $this->actingAs($platformAdmin, 'sanctum');
+
+        [$invitation, $oldPlainToken] = $this->createInvitationWithToken([
+            'email' => 'invalidate@example.com',
+            'role_id' => $this->getRoleId('entity_admin'),
+            'invited_by' => $platformAdmin->id,
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        // Resend invitation (generates new token)
+        $response = $this->postJson("/api/v1/invitations/{$invitation->id}/resend");
+        $response->assertStatus(200);
+
+        // Try to validate with old token - should fail
+        $validateResponse = $this->getJson("/api/v1/auth/invitations/validate/{$oldPlainToken}");
+
+        $validateResponse->assertStatus(404);
+        $validateResponse->assertJsonPath('success', false);
+    }
 }
