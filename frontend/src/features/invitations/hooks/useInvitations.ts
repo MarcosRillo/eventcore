@@ -1,16 +1,21 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Invitation } from '../types/invitation.types'
+import { Invitation, AssignableRole, SendInvitationData } from '../types/invitation.types'
 import invitationService from '../services/invitation.service'
 
 interface UseInvitationsReturn {
   invitations: Invitation[]
+  roles: AssignableRole[]
   loading: boolean
+  loadingRoles: boolean
+  creating: boolean
   error: string | null
   resendingId: number | null
   cancellingId: number | null
   fetchInvitations: () => Promise<void>
+  fetchRoles: () => Promise<void>
+  handleCreate: (data: SendInvitationData) => Promise<boolean>
   handleResend: (id: number) => Promise<boolean>
   handleCancel: (id: number) => Promise<boolean>
   clearError: () => void
@@ -18,7 +23,10 @@ interface UseInvitationsReturn {
 
 export const useInvitations = (): UseInvitationsReturn => {
   const [invitations, setInvitations] = useState<Invitation[]>([])
+  const [roles, setRoles] = useState<AssignableRole[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingRoles, setLoadingRoles] = useState(false)
+  const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [resendingId, setResendingId] = useState<number | null>(null)
   const [cancellingId, setCancellingId] = useState<number | null>(null)
@@ -33,6 +41,33 @@ export const useInvitations = (): UseInvitationsReturn => {
       setError('Error al cargar las invitaciones')
     } finally {
       setLoading(false)
+    }
+  }, [])
+
+  const fetchRoles = useCallback(async () => {
+    setLoadingRoles(true)
+    try {
+      const data = await invitationService.getAssignableRoles()
+      setRoles(data)
+    } catch {
+      setError('Error al cargar los roles')
+    } finally {
+      setLoadingRoles(false)
+    }
+  }, [])
+
+  const handleCreate = useCallback(async (data: SendInvitationData): Promise<boolean> => {
+    setCreating(true)
+    setError(null)
+    try {
+      const newInvitation = await invitationService.sendInvitation(data)
+      setInvitations((prev) => [newInvitation, ...prev])
+      return true
+    } catch {
+      setError('Error al crear la invitación')
+      return false
+    } finally {
+      setCreating(false)
     }
   }, [])
 
@@ -74,15 +109,21 @@ export const useInvitations = (): UseInvitationsReturn => {
 
   useEffect(() => {
     fetchInvitations()
-  }, [fetchInvitations])
+    fetchRoles()
+  }, [fetchInvitations, fetchRoles])
 
   return {
     invitations,
+    roles,
     loading,
+    loadingRoles,
+    creating,
     error,
     resendingId,
     cancellingId,
     fetchInvitations,
+    fetchRoles,
+    handleCreate,
     handleResend,
     handleCancel,
     clearError,

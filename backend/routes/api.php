@@ -9,6 +9,7 @@ use App\Features\Auth\Controllers\AuthController;
 use App\Features\Auth\Controllers\InvitationController;
 use App\Features\Auth\Controllers\RegistrationRequestController;
 use App\Features\Auth\Controllers\PasswordResetController;
+use App\Features\Auth\Controllers\RoleController;
 
 // Feature Controllers - PublicEvents
 use App\Features\PublicEvents\Controllers\PublicEventController;
@@ -76,6 +77,9 @@ Route::prefix('v1')->group(function () {
         // ===== PLATFORM ADMIN + ENTITY ADMIN =====
         // Full CRUD, approval, admin features
         Route::middleware(['role:platform_admin,entity_admin'])->group(function () {
+            // Roles management
+            Route::get('roles/assignable', [RoleController::class, 'assignable']);
+
             // Invitations management
             Route::get('invitations', [InvitationController::class, 'index']);
             Route::post('invitations', [InvitationController::class, 'store']);

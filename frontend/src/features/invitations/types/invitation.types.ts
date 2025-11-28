@@ -8,6 +8,20 @@ export interface InvitationRole {
   role_code: string
 }
 
+/**
+ * Role available for assignment in invitations
+ */
+export interface AssignableRole {
+  id: number
+  role_code: string
+  role_name: string
+}
+
+export interface RolesListResponse {
+  success: boolean
+  data: AssignableRole[]
+}
+
 export interface InvitationInviter {
   id: number
   name: string

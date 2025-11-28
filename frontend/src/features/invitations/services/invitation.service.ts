@@ -9,6 +9,8 @@ import {
   InvitationsListResponse,
   InvitationActionResponse,
   SendInvitationData,
+  AssignableRole,
+  RolesListResponse,
 } from '../types/invitation.types'
 
 /**
@@ -50,6 +52,14 @@ export const cancelInvitation = async (id: number): Promise<void> => {
 }
 
 /**
+ * Get roles that the current user can assign to invitations
+ */
+export const getAssignableRoles = async (): Promise<AssignableRole[]> => {
+  const response = await apiClient.get<RolesListResponse>('/roles/assignable')
+  return response.data.data
+}
+
+/**
  * Export default object with all service functions
  */
 const invitationService = {
@@ -57,6 +67,7 @@ const invitationService = {
   sendInvitation,
   resendInvitation,
   cancelInvitation,
+  getAssignableRoles,
 }
 
 export default invitationService

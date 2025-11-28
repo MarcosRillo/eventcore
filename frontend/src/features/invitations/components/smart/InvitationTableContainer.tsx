@@ -1,18 +1,24 @@
 'use client'
 
-import { useEffect } from 'react'
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
+import { Loader2, AlertCircle, RefreshCw, UserPlus } from 'lucide-react'
 import { useInvitations } from '../../hooks/useInvitations'
 import InvitationTable from '../dumb/InvitationTable'
+import CreateInvitationModal from '../dumb/CreateInvitationModal'
 
 export const InvitationTableContainer = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+
   const {
     invitations,
+    roles,
     loading,
+    creating,
     error,
     resendingId,
     cancellingId,
     fetchInvitations,
+    handleCreate,
     handleResend,
     handleCancel,
     clearError,
@@ -61,7 +67,7 @@ export const InvitationTableContainer = () => {
         </div>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end space-x-2">
         <button
           onClick={fetchInvitations}
           disabled={loading}
@@ -70,6 +76,14 @@ export const InvitationTableContainer = () => {
         >
           <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
+        </button>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          data-testid="create-invitation-button"
+        >
+          <UserPlus className="h-4 w-4 mr-1" />
+          Nueva invitación
         </button>
       </div>
 
@@ -82,6 +96,14 @@ export const InvitationTableContainer = () => {
           cancellingId={cancellingId}
         />
       </div>
+
+      <CreateInvitationModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreate}
+        roles={roles}
+        isLoading={creating}
+      />
     </div>
   )
 }
