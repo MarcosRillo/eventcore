@@ -13,9 +13,10 @@ jest.mock('next/link', () => {
 describe('HeroSection', () => {
   it('renders title and subtitle', () => {
     render(<HeroSection onExploreClick={jest.fn()} />)
-    
-    expect(screen.getByText(/Descubrí Tucumán/i)).toBeInTheDocument()
-    expect(screen.getByText(/Los mejores eventos turísticos y culturales de la provincia/i)).toBeInTheDocument()
+
+    expect(screen.getByText(/Descubrí los eventos de/i)).toBeInTheDocument()
+    expect(screen.getByText(/Tucumán/i)).toBeInTheDocument()
+    expect(screen.getByText(/Explorá los mejores eventos turísticos y culturales/i)).toBeInTheDocument()
   })
 
   it('renders call to action button', () => {
