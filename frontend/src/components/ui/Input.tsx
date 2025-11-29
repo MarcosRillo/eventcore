@@ -52,9 +52,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
     lg: 'h-12 px-4 text-base',
   }
 
-  // Error state
+  // Error state - using semantic error tokens
   const errorClasses = error
-    ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10 bg-red-50/50'
+    ? 'border-error-300 focus:border-error-500 focus:ring-error-500/10 bg-error-50/50'
     : ''
 
   // Icon padding adjustments
@@ -92,18 +92,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
           htmlFor={inputId}
           className={`
             block text-sm font-medium mb-1.5 transition-colors
-            ${error ? 'text-red-600' : 'text-neutral-700'}
+            ${error ? 'text-error-600' : 'text-neutral-700'}
           `}
         >
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <span className="text-error-500 ml-0.5">*</span>}
         </label>
       )}
 
       <div className="relative">
         {leftIcon && (
           <div className={`absolute left-3 ${iconPosition[size]} pointer-events-none`}>
-            <span className={`${iconSize[size]} ${error ? 'text-red-400' : 'text-neutral-400'}`}>
+            <span className={`${iconSize[size]} ${error ? 'text-error-500' : 'text-neutral-400'}`}>
               {leftIcon}
             </span>
           </div>
@@ -122,7 +122,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
 
         {rightIcon && (
           <div className={`absolute right-3 ${iconPosition[size]} pointer-events-none`}>
-            <span className={`${iconSize[size]} ${error ? 'text-red-400' : 'text-neutral-400'}`}>
+            <span className={`${iconSize[size]} ${error ? 'text-error-500' : 'text-neutral-400'}`}>
               {rightIcon}
             </span>
           </div>
@@ -132,7 +132,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
       {error && (
         <p
           id={`${inputId}-error`}
-          className="mt-1.5 text-sm text-red-600 flex items-center gap-1"
+          className="mt-1.5 text-sm text-error-600 flex items-center gap-1"
           role="alert"
         >
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">

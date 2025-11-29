@@ -73,30 +73,30 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'focus:ring-neutral-500/40',
     ].join(' '),
 
-    // Danger - red for destructive actions
+    // Danger - using error semantic token
     danger: [
-      'bg-red-500 text-white',
-      'hover:bg-red-600',
-      'active:bg-red-700',
-      'focus:ring-red-500/40',
+      'bg-error-500 text-white',
+      'hover:bg-error-600',
+      'active:bg-error-700',
+      'focus:ring-error-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
 
-    // Success - green for positive actions
+    // Success - using success semantic token
     success: [
-      'bg-secondary-500 text-white',
-      'hover:bg-secondary-600',
-      'active:bg-secondary-700',
-      'focus:ring-secondary-500/40',
+      'bg-success-500 text-white',
+      'hover:bg-success-600',
+      'active:bg-success-700',
+      'focus:ring-success-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
 
-    // Warning - amber for caution
+    // Warning - using warning semantic token
     warning: [
-      'bg-amber-500 text-white',
-      'hover:bg-amber-600',
-      'active:bg-amber-700',
-      'focus:ring-amber-500/40',
+      'bg-warning-500 text-white',
+      'hover:bg-warning-600',
+      'active:bg-warning-700',
+      'focus:ring-warning-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
   }

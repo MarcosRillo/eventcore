@@ -28,7 +28,7 @@ interface SelectProps {
   required?: boolean
 }
 
-const Select: React.FC<SelectProps> = ({
+const Select = ({
   label,
   value,
   onChange,
@@ -41,7 +41,7 @@ const Select: React.FC<SelectProps> = ({
   fullWidth = false,
   className = '',
   required = false,
-}) => {
+}: SelectProps) => {
   // Size variants
   const sizeClasses: Record<string, string> = {
     sm: 'h-8 pl-3 pr-8 text-sm',
@@ -58,7 +58,7 @@ const Select: React.FC<SelectProps> = ({
     'disabled:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
     sizeClasses[size],
     error
-      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+      ? 'border-error-300 focus:border-error-500 focus:ring-error-500/10'
       : 'border-neutral-200 hover:border-neutral-300',
     className,
   ].filter(Boolean).join(' ')
@@ -77,9 +77,9 @@ const Select: React.FC<SelectProps> = ({
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className={`block text-sm font-medium mb-1.5 ${error ? 'text-red-600' : 'text-neutral-700'}`}>
+        <label className={`block text-sm font-medium mb-1.5 ${error ? 'text-error-600' : 'text-neutral-700'}`}>
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <span className="text-error-500 ml-0.5">*</span>}
         </label>
       )}
 
@@ -132,7 +132,7 @@ const Select: React.FC<SelectProps> = ({
       </Listbox>
 
       {error && (
-        <p className="mt-1.5 text-sm text-red-600" role="alert">
+        <p className="mt-1.5 text-sm text-error-600" role="alert">
           {error}
         </p>
       )}

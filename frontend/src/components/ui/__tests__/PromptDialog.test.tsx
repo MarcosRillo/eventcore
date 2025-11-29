@@ -288,21 +288,21 @@ describe('PromptDialog', () => {
       render(<PromptDialog {...defaultProps} variant="danger" />)
 
       const confirmButton = screen.getByRole('button', { name: /confirmar/i })
-      expect(confirmButton).toHaveClass('bg-red-500')
+      expect(confirmButton).toHaveClass('bg-error-500')
     })
 
     it('uses warning variant when specified', () => {
       render(<PromptDialog {...defaultProps} variant="warning" />)
 
       const confirmButton = screen.getByRole('button', { name: /confirmar/i })
-      expect(confirmButton).toHaveClass('bg-amber-500')
+      expect(confirmButton).toHaveClass('bg-warning-500')
     })
 
     it('uses success variant when specified', () => {
       render(<PromptDialog {...defaultProps} variant="success" />)
 
       const confirmButton = screen.getByRole('button', { name: /confirmar/i })
-      expect(confirmButton).toHaveClass('bg-secondary-500')
+      expect(confirmButton).toHaveClass('bg-success-500')
     })
   })
 

@@ -3,10 +3,10 @@
  * Clean container with subtle shadows and borders
  */
 
-import React from 'react'
+import type { ReactNode, KeyboardEvent } from 'react'
 
 interface CardProps {
-  children: React.ReactNode
+  children: ReactNode
   className?: string
   variant?: 'default' | 'bordered' | 'elevated' | 'flat'
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
@@ -15,7 +15,7 @@ interface CardProps {
   as?: 'div' | 'article' | 'section'
 }
 
-const Card: React.FC<CardProps> = ({
+const Card = ({
   children,
   className = '',
   variant = 'default',
@@ -23,7 +23,7 @@ const Card: React.FC<CardProps> = ({
   onClick,
   hover = false,
   as: Component = 'div',
-}) => {
+}: CardProps) => {
   // Base styles
   const baseClasses = 'rounded-lg transition-all duration-150 ease-in-out'
 
@@ -81,51 +81,44 @@ const Card: React.FC<CardProps> = ({
 }
 
 // Card Header subcomponent
-export const CardHeader: React.FC<{
-  children: React.ReactNode
+interface CardSubcomponentProps {
+  children: ReactNode
   className?: string
-}> = ({ children, className = '' }) => (
+}
+
+export const CardHeader = ({ children, className = '' }: CardSubcomponentProps) => (
   <div className={`mb-4 ${className}`}>
     {children}
   </div>
 )
 
 // Card Title subcomponent
-export const CardTitle: React.FC<{
-  children: React.ReactNode
-  className?: string
+interface CardTitleProps extends CardSubcomponentProps {
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-}> = ({ children, className = '', as: Component = 'h3' }) => (
+}
+
+export const CardTitle = ({ children, className = '', as: Component = 'h3' }: CardTitleProps) => (
   <Component className={`text-lg font-semibold text-neutral-900 ${className}`}>
     {children}
   </Component>
 )
 
 // Card Description subcomponent
-export const CardDescription: React.FC<{
-  children: React.ReactNode
-  className?: string
-}> = ({ children, className = '' }) => (
+export const CardDescription = ({ children, className = '' }: CardSubcomponentProps) => (
   <p className={`text-sm text-neutral-500 mt-1 ${className}`}>
     {children}
   </p>
 )
 
 // Card Content subcomponent
-export const CardContent: React.FC<{
-  children: React.ReactNode
-  className?: string
-}> = ({ children, className = '' }) => (
+export const CardContent = ({ children, className = '' }: CardSubcomponentProps) => (
   <div className={className}>
     {children}
   </div>
 )
 
 // Card Footer subcomponent
-export const CardFooter: React.FC<{
-  children: React.ReactNode
-  className?: string
-}> = ({ children, className = '' }) => (
+export const CardFooter = ({ children, className = '' }: CardSubcomponentProps) => (
   <div className={`mt-4 pt-4 border-t border-neutral-100 ${className}`}>
     {children}
   </div>

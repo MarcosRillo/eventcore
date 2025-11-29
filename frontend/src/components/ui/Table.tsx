@@ -187,6 +187,7 @@ export const Table = <T extends TableDataType>({
                       checked={data.length > 0 && selectedItems.length === data.length}
                       onChange={toggleSelectAll}
                       className="w-4 h-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500/20"
+                      aria-label="Seleccionar todos los elementos"
                     />
                   ) : column.label}
                 </th>
@@ -224,6 +225,7 @@ export const Table = <T extends TableDataType>({
                             toggleSelection(item)
                           }}
                           className="w-4 h-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500/20"
+                          aria-label="Seleccionar fila"
                         />
                       ) : column.key === '__actions' ? (
                         <div className="flex items-center justify-end gap-1">

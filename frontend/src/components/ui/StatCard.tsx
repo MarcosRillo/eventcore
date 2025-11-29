@@ -89,6 +89,7 @@ const StatCard = ({
       onClick={onClick}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
+      aria-label={isClickable ? `Ver detalles de ${label}` : undefined}
       onKeyDown={isClickable ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()

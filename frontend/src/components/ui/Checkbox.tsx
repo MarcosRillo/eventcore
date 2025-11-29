@@ -52,14 +52,14 @@ const Checkbox = ({
             focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-0
             disabled:opacity-50 disabled:cursor-not-allowed
             ${!disabled ? 'cursor-pointer' : ''}
-            ${error ? 'border-red-300' : ''}
+            ${error ? 'border-error-300' : ''}
           `}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${checkboxId}-error` : description ? `${checkboxId}-description` : undefined}
         />
       </div>
 
-      {(label || description) && (
+      {(label || description || error) && (
         <div className="ml-3">
           {label && (
             <label
@@ -77,13 +77,12 @@ const Checkbox = ({
               {description}
             </p>
           )}
+          {error && (
+            <p id={`${checkboxId}-error`} className="text-sm text-error-600 mt-0.5" role="alert">
+              {error}
+            </p>
+          )}
         </div>
-      )}
-
-      {error && (
-        <p id={`${checkboxId}-error`} className="ml-3 text-sm text-red-600" role="alert">
-          {error}
-        </p>
       )}
     </div>
   )

@@ -59,7 +59,10 @@ export const CategoriesSection = ({
                 "
                 aria-label={`Ver eventos de ${category.name}`}
               >
-                <div className="text-4xl md:text-5xl mb-4 group-hover:scale-110 transition-transform duration-200">
+                <div
+                  className="text-4xl md:text-5xl mb-4 group-hover:scale-110 transition-transform duration-200"
+                  aria-hidden="true"
+                >
                   {getCategoryIcon(category.name)}
                 </div>
                 <h3 className="text-base md:text-lg font-semibold text-neutral-900">

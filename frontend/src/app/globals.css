@@ -70,22 +70,46 @@
 
   /* ==========================================
      SEMANTIC COLORS (Estados de Sistema)
+     Escalas numéricas para uso con Tailwind
      ========================================== */
+  /* Success (Green) */
   --color-success: #10b981;
   --color-success-light: #dcfce7;
   --color-success-dark: #065f46;
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
 
+  /* Warning (Amber) */
   --color-warning: #f59e0b;
   --color-warning-light: #fef3c7;
   --color-warning-dark: #92400e;
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
 
+  /* Error (Red) */
   --color-error: #ef4444;
   --color-error-light: #fee2e2;
   --color-error-dark: #991b1b;
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-300: #fca5a5;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
 
+  /* Info (Blue - alias to primary) */
   --color-info: #3b82f6;
   --color-info-light: #dbeafe;
   --color-info-dark: #1d4ed8;
+  --color-info-50: #eff6ff;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
 
   /* ==========================================
      BACKGROUNDS & SURFACES (Minimalista)
@@ -312,19 +336,41 @@
   --color-neutral-800: var(--color-neutral-800);
   --color-neutral-900: var(--color-neutral-900);
 
-  /* Semantic Colors */
+  /* Semantic Colors - Full Scales */
   --color-success: var(--color-success);
   --color-success-light: var(--color-success-light);
   --color-success-dark: var(--color-success-dark);
+  --color-success-50: var(--color-success-50);
+  --color-success-100: var(--color-success-100);
+  --color-success-500: var(--color-success-500);
+  --color-success-600: var(--color-success-600);
+  --color-success-700: var(--color-success-700);
+
   --color-warning: var(--color-warning);
   --color-warning-light: var(--color-warning-light);
   --color-warning-dark: var(--color-warning-dark);
+  --color-warning-50: var(--color-warning-50);
+  --color-warning-100: var(--color-warning-100);
+  --color-warning-500: var(--color-warning-500);
+  --color-warning-600: var(--color-warning-600);
+  --color-warning-700: var(--color-warning-700);
+
   --color-error: var(--color-error);
   --color-error-light: var(--color-error-light);
   --color-error-dark: var(--color-error-dark);
+  --color-error-50: var(--color-error-50);
+  --color-error-100: var(--color-error-100);
+  --color-error-300: var(--color-error-300);
+  --color-error-500: var(--color-error-500);
+  --color-error-600: var(--color-error-600);
+  --color-error-700: var(--color-error-700);
+
   --color-info: var(--color-info);
   --color-info-light: var(--color-info-light);
   --color-info-dark: var(--color-info-dark);
+  --color-info-50: var(--color-info-50);
+  --color-info-500: var(--color-info-500);
+  --color-info-600: var(--color-info-600);
 
   /* Backgrounds & Surfaces */
   --color-background: var(--color-background);

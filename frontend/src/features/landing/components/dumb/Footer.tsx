@@ -22,7 +22,7 @@ export const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <nav aria-label="Enlaces rápidos">
             <h3 className="text-lg font-semibold mb-4">Enlaces</h3>
             <ul className="space-y-3">
               <li>
@@ -42,7 +42,7 @@ export const Footer = () => {
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Contact Section */}
           <div>

@@ -43,9 +43,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
     'disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed',
   ].join(' ')
 
-  // Error state
+  // Error state - using semantic error tokens
   const errorClasses = error
-    ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10 bg-red-50/50'
+    ? 'border-error-300 focus:border-error-500 focus:ring-error-500/10 bg-error-50/50'
     : ''
 
   const textareaClasses = [
@@ -59,10 +59,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
       {label && (
         <label
           htmlFor={textareaId}
-          className={`block text-sm font-medium mb-1.5 ${error ? 'text-red-600' : 'text-neutral-700'}`}
+          className={`block text-sm font-medium mb-1.5 ${error ? 'text-error-600' : 'text-neutral-700'}`}
         >
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <span className="text-error-500 ml-0.5">*</span>}
         </label>
       )}
 
@@ -81,7 +81,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
       {error && (
         <p
           id={`${textareaId}-error`}
-          className="mt-1.5 text-sm text-red-600 flex items-center gap-1"
+          className="mt-1.5 text-sm text-error-600 flex items-center gap-1"
           role="alert"
         >
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
