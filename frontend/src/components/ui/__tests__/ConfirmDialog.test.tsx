@@ -54,28 +54,28 @@ describe('ConfirmDialog', () => {
     it('renders danger variant with red icon', () => {
       render(<ConfirmDialog {...defaultProps} variant="danger" />)
 
-      const iconContainer = document.querySelector('.bg-red-100')
+      const iconContainer = document.querySelector('.bg-red-50')
       expect(iconContainer).toBeInTheDocument()
     })
 
     it('renders warning variant with amber icon', () => {
       render(<ConfirmDialog {...defaultProps} variant="warning" />)
 
-      const iconContainer = document.querySelector('.bg-amber-100')
+      const iconContainer = document.querySelector('.bg-amber-50')
       expect(iconContainer).toBeInTheDocument()
     })
 
     it('renders success variant with green icon', () => {
       render(<ConfirmDialog {...defaultProps} variant="success" />)
 
-      const iconContainer = document.querySelector('.bg-green-100')
+      const iconContainer = document.querySelector('.bg-green-50')
       expect(iconContainer).toBeInTheDocument()
     })
 
-    it('renders info variant (default) with blue icon', () => {
+    it('renders info variant (default) with primary icon', () => {
       render(<ConfirmDialog {...defaultProps} variant="info" />)
 
-      const iconContainer = document.querySelector('.bg-blue-100')
+      const iconContainer = document.querySelector('.bg-primary-50')
       expect(iconContainer).toBeInTheDocument()
     })
   })
