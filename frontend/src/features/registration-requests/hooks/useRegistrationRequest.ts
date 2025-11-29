@@ -96,7 +96,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
     if (!formData.email.trim()) {
       errors.email = 'El email es requerido'
     } else if (!isValidEmail(formData.email)) {
-      errors.email = 'El email no es v醠ido'
+      errors.email = 'El email no es v谩lido'
     }
 
     // WhatsApp validation
@@ -108,7 +108,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
 
     // Organization name validation
     if (!formData.organization_name.trim()) {
-      errors.organization_name = 'El nombre de la organizaci髇 es requerido'
+      errors.organization_name = 'El nombre de la organizaci贸n es requerido'
     }
 
     // Organization CUIT validation
@@ -125,11 +125,11 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
 
     // Motivation validation
     if (!formData.motivation.trim()) {
-      errors.motivation = 'La motivaci髇 es requerida'
+      errors.motivation = 'La motivaci贸n es requerida'
     } else if (formData.motivation.length < 50) {
-      errors.motivation = 'La motivaci髇 debe tener al menos 50 caracteres'
+      errors.motivation = 'La motivaci贸n debe tener al menos 50 caracteres'
     } else if (formData.motivation.length > 1000) {
-      errors.motivation = 'La motivaci髇 no puede exceder 1000 caracteres'
+      errors.motivation = 'La motivaci贸n no puede exceder 1000 caracteres'
     }
 
     // Profile photo validation
@@ -155,7 +155,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
       try {
         new URL(formData.website)
       } catch {
-        errors.website = 'La URL del sitio web no es v醠ida'
+        errors.website = 'La URL del sitio web no es v谩lida'
       }
     }
 

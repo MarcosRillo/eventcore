@@ -94,10 +94,10 @@ describe('useRegistrationRequest', () => {
       expect(result.current.formErrors.last_name).toBe('El apellido es requerido')
       expect(result.current.formErrors.email).toBe('El email es requerido')
       expect(result.current.formErrors.whatsapp).toBe('El WhatsApp es requerido')
-      expect(result.current.formErrors.organization_name).toBe('El nombre de la organizaciÛn es requerido')
+      expect(result.current.formErrors.organization_name).toBe('El nombre de la organizaci√≥n es requerido')
       expect(result.current.formErrors.organization_cuit).toBe('El CUIT es requerido')
       expect(result.current.formErrors.organization_sector).toBe('El sector es requerido')
-      expect(result.current.formErrors.motivation).toBe('La motivaciÛn es requerida')
+      expect(result.current.formErrors.motivation).toBe('La motivaci√≥n es requerida')
     })
 
     it('should validate email format', async () => {
@@ -111,7 +111,7 @@ describe('useRegistrationRequest', () => {
         await result.current.submitForm()
       })
 
-      expect(result.current.formErrors.email).toBe('El email no es v·lido')
+      expect(result.current.formErrors.email).toBe('El email no es v√°lido')
     })
 
     it('should validate valid email', async () => {
@@ -167,7 +167,7 @@ describe('useRegistrationRequest', () => {
         await result.current.submitForm()
       })
 
-      expect(result.current.formErrors.motivation).toBe('La motivaciÛn debe tener al menos 50 caracteres')
+      expect(result.current.formErrors.motivation).toBe('La motivaci√≥n debe tener al menos 50 caracteres')
     })
 
     it('should validate motivation length (max 1000)', async () => {
@@ -181,7 +181,7 @@ describe('useRegistrationRequest', () => {
         await result.current.submitForm()
       })
 
-      expect(result.current.formErrors.motivation).toBe('La motivaciÛn no puede exceder 1000 caracteres')
+      expect(result.current.formErrors.motivation).toBe('La motivaci√≥n no puede exceder 1000 caracteres')
     })
 
     it('should validate file size (max 2MB)', async () => {
@@ -228,7 +228,7 @@ describe('useRegistrationRequest', () => {
         await result.current.submitForm()
       })
 
-      expect(result.current.formErrors.website).toBe('La URL del sitio web no es v·lida')
+      expect(result.current.formErrors.website).toBe('La URL del sitio web no es v√°lida')
     })
 
     it('should accept valid website URL', async () => {
@@ -250,13 +250,13 @@ describe('useRegistrationRequest', () => {
     const validFormData = {
       dni: '12345678',
       first_name: 'Juan',
-      last_name: 'PÈrez',
+      last_name: 'P√©rez',
       email: 'juan@example.com',
       whatsapp: '+5491234567890',
       organization_name: 'Turismo SRL',
       organization_cuit: '20-12345678-9',
       organization_sector: 'hotel',
-      motivation: 'Quiero publicar eventos turÌsticos en la plataforma para promocionar mi negocio.',
+      motivation: 'Quiero publicar eventos tur√≠sticos en la plataforma para promocionar mi negocio.',
     }
 
     it('should not submit if validation fails', async () => {
@@ -330,8 +330,8 @@ describe('useRegistrationRequest', () => {
         response: {
           data: {
             errors: {
-              email: ['Este email ya est· registrado'],
-              organization_cuit: ['Este CUIT ya est· registrado'],
+              email: ['Este email ya est√° registrado'],
+              organization_cuit: ['Este CUIT ya est√° registrado'],
             },
           },
         },
@@ -350,8 +350,8 @@ describe('useRegistrationRequest', () => {
         await result.current.submitForm()
       })
 
-      expect(result.current.formErrors.email).toBe('Este email ya est· registrado')
-      expect(result.current.formErrors.organization_cuit).toBe('Este CUIT ya est· registrado')
+      expect(result.current.formErrors.email).toBe('Este email ya est√° registrado')
+      expect(result.current.formErrors.organization_cuit).toBe('Este CUIT ya est√° registrado')
       expect(result.current.success).toBe(false)
     })
 
