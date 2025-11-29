@@ -1,31 +1,31 @@
 /**
- * Select Component
- * Custom select component using Headless UI for accessibility and professional UX
+ * Select Component - Minimalist Design System
+ * Clean dropdown using Headless UI for accessibility
  */
 
-import { Fragment } from 'react';
-import { Listbox, Transition } from '@headlessui/react';
-import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { Fragment } from 'react'
+import { Listbox, Transition } from '@headlessui/react'
+import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 
 export interface SelectOption {
-  value: string | number;
-  label: string;
-  disabled?: boolean;
+  value: string | number
+  label: string
+  disabled?: boolean
 }
 
 interface SelectProps {
-  label?: string;
-  value: string | number | null;
-  onChange: (value: string | number) => void;
-  options: SelectOption[];
-  placeholder?: string;
-  error?: string;
-  helperText?: string;
-  disabled?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
-  className?: string;
-  required?: boolean;
+  label?: string
+  value: string | number | null
+  onChange: (value: string | number) => void
+  options: SelectOption[]
+  placeholder?: string
+  error?: string
+  helperText?: string
+  disabled?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  fullWidth?: boolean
+  className?: string
+  required?: boolean
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -42,66 +42,55 @@ const Select: React.FC<SelectProps> = ({
   className = '',
   required = false,
 }) => {
-  const baseClasses = 'border rounded-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer';
+  // Size variants
+  const sizeClasses: Record<string, string> = {
+    sm: 'h-8 pl-3 pr-8 text-sm',
+    md: 'h-10 pl-3 pr-10 text-sm',
+    lg: 'h-12 pl-4 pr-10 text-base',
+  }
 
-  const sizeClasses = {
-    sm: 'pl-3 pr-8 py-1.5 text-sm',
-    md: 'pl-3 pr-8 py-2 text-base',
-    lg: 'pl-4 pr-10 py-3 text-base',
-  };
-
-  const stateClasses = error
-    ? 'border-red-600 bg-red-50 focus:border-red-600 focus:ring-red-500/20'
-    : 'border-neutral-300 bg-neutral-50 focus:bg-white focus:border-primary-500 focus:ring-primary-500/20';
-
+  // Base button classes
   const buttonClasses = [
-    baseClasses,
+    'relative w-full text-left',
+    'bg-white border rounded-md',
+    'transition-all duration-150 ease-in-out',
+    'focus:outline-none focus:ring-2 focus:ring-primary-500/10 focus:border-primary-500',
+    'disabled:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
     sizeClasses[size],
-    stateClasses,
-    'relative w-full text-left bg-white',
-    fullWidth ? 'w-full' : '',
+    error
+      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+      : 'border-neutral-200 hover:border-neutral-300',
     className,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join(' ')
 
-  const iconClasses = {
+  // Icon sizes
+  const iconSize: Record<string, string> = {
     sm: 'w-4 h-4',
-    md: 'w-5 h-5',
+    md: 'w-4 h-4',
     lg: 'w-5 h-5',
-  };
+  }
 
-  const iconPositionClasses = {
-    sm: 'top-1.5 right-2',
-    md: 'top-2 right-2',
-    lg: 'top-3 right-3',
-  };
-
-  // Find the selected option to display its label
-  const selectedOption = options.find(option => option.value === value);
-  const displayValue = selectedOption?.label || placeholder;
+  // Find selected option
+  const selectedOption = options.find(option => option.value === value)
+  const displayValue = selectedOption?.label || placeholder
 
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className="block text-sm font-medium text-neutral-600 mb-2">
+        <label className={`block text-sm font-medium mb-1.5 ${error ? 'text-red-600' : 'text-neutral-700'}`}>
           {label}
-          {required && <span className="text-red-600 ml-1">*</span>}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
         </label>
       )}
 
       <Listbox value={value ?? undefined} onChange={onChange} disabled={disabled}>
         <div className="relative">
           <Listbox.Button className={buttonClasses}>
-            <span className={`block truncate ${
-              !selectedOption ? 'text-neutral-400' : 'text-neutral-900'
-            }`}>
+            <span className={`block truncate ${!selectedOption ? 'text-neutral-400' : 'text-neutral-900'}`}>
               {displayValue}
             </span>
-
-            <span className={`absolute inset-y-0 ${iconPositionClasses[size]} flex items-center pointer-events-none`}>
-              <ChevronUpDownIcon
-                className={`${iconClasses[size]} text-neutral-400`}
-                aria-hidden="true"
-              />
+            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+              <ChevronUpDownIcon className={`${iconSize[size]} text-neutral-400`} aria-hidden="true" />
             </span>
           </Listbox.Button>
 
@@ -111,40 +100,25 @@ const Select: React.FC<SelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-neutral-200 focus:outline-none sm:text-sm">
-              {options.map((option, optionIdx) => (
+            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 shadow-lg border border-neutral-100 focus:outline-none">
+              {options.map((option) => (
                 <Listbox.Option
-                  key={optionIdx}
+                  key={option.value}
                   className={({ active }) =>
-                    `relative cursor-pointer select-none py-2 pl-8 pr-4 ${
-                      active
-                        ? 'bg-primary-50 text-primary-900'
-                        : 'text-neutral-900'
-                    } ${
-                      option.disabled
-                        ? 'opacity-50 cursor-not-allowed'
-                        : ''
-                    }`
+                    `relative cursor-pointer select-none py-2 pl-9 pr-4 text-sm ${
+                      active ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-700'
+                    } ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}`
                   }
                   value={option.value}
                   disabled={option.disabled}
                 >
-                  {({ selected, active }) => (
+                  {({ selected }) => (
                     <>
-                      <span
-                        className={`block truncate ${
-                          selected ? 'font-semibold' : 'font-normal'
-                        }`}
-                      >
+                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
                         {option.label}
                       </span>
-
                       {selected && (
-                        <span
-                          className={`absolute inset-y-0 left-0 flex items-center pl-2 ${
-                            active ? 'text-primary-600' : 'text-primary-600'
-                          }`}
-                        >
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-600">
                           <CheckIcon className="h-4 w-4" aria-hidden="true" />
                         </span>
                       )}
@@ -158,18 +132,18 @@ const Select: React.FC<SelectProps> = ({
       </Listbox>
 
       {error && (
-        <p className="mt-2 text-sm text-red-600 font-medium" role="alert">
+        <p className="mt-1.5 text-sm text-red-600" role="alert">
           {error}
         </p>
       )}
 
       {helperText && !error && (
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-1.5 text-sm text-neutral-500">
           {helperText}
         </p>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Select;
+export default Select

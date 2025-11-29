@@ -1,17 +1,18 @@
 /**
- * Card Component - Base layout for card-style containers
- * Provides consistent styling and variants for different card types
+ * Card Component - Minimalist Design System
+ * Clean container with subtle shadows and borders
  */
 
-import React from 'react';
+import React from 'react'
 
 interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-  variant?: 'default' | 'bordered' | 'elevated' | 'flat';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  onClick?: () => void;
-  hover?: boolean;
+  children: React.ReactNode
+  className?: string
+  variant?: 'default' | 'bordered' | 'elevated' | 'flat'
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
+  onClick?: () => void
+  hover?: boolean
+  as?: 'div' | 'article' | 'section'
 }
 
 const Card: React.FC<CardProps> = ({
@@ -20,44 +21,114 @@ const Card: React.FC<CardProps> = ({
   variant = 'default',
   padding = 'md',
   onClick,
-  hover = false
+  hover = false,
+  as: Component = 'div',
 }) => {
-  const baseClasses = 'rounded-lg transition-all duration-200';
+  // Base styles
+  const baseClasses = 'rounded-lg transition-all duration-150 ease-in-out'
 
-  const variantClasses = {
-    default: 'bg-white border border-gray-200',
-    bordered: 'bg-white border-2 border-gray-300',
-    elevated: 'bg-white shadow-lg border border-gray-100',
-    flat: 'bg-gray-50'
-  };
+  // Variant styles - minimal and clean
+  const variantClasses: Record<string, string> = {
+    default: 'bg-white border border-neutral-200',
+    bordered: 'bg-white border border-neutral-300',
+    elevated: 'bg-white shadow-sm border border-neutral-100',
+    flat: 'bg-neutral-50',
+  }
 
-  const paddingClasses = {
+  // Padding scale
+  const paddingClasses: Record<string, string> = {
     none: '',
     sm: 'p-3',
     md: 'p-4',
-    lg: 'p-6'
-  };
+    lg: 'p-6',
+    xl: 'p-8',
+  }
 
-  const hoverClasses = hover || onClick ? 'hover:shadow-md hover:border-gray-300' : '';
-  const clickableClasses = onClick ? 'cursor-pointer' : '';
+  // Interactive states
+  const interactiveClasses = (hover || onClick)
+    ? 'hover:shadow-md hover:border-neutral-300 active:shadow-sm'
+    : ''
+
+  const clickableClasses = onClick
+    ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500/20'
+    : ''
 
   const finalClasses = [
     baseClasses,
     variantClasses[variant],
     paddingClasses[padding],
-    hoverClasses,
+    interactiveClasses,
     clickableClasses,
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ].filter(Boolean).join(' ')
 
   return (
-    <div
+    <Component
       className={finalClasses}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      } : undefined}
     >
       {children}
-    </div>
-  );
-};
+    </Component>
+  )
+}
 
-export default Card;
+// Card Header subcomponent
+export const CardHeader: React.FC<{
+  children: React.ReactNode
+  className?: string
+}> = ({ children, className = '' }) => (
+  <div className={`mb-4 ${className}`}>
+    {children}
+  </div>
+)
+
+// Card Title subcomponent
+export const CardTitle: React.FC<{
+  children: React.ReactNode
+  className?: string
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+}> = ({ children, className = '', as: Component = 'h3' }) => (
+  <Component className={`text-lg font-semibold text-neutral-900 ${className}`}>
+    {children}
+  </Component>
+)
+
+// Card Description subcomponent
+export const CardDescription: React.FC<{
+  children: React.ReactNode
+  className?: string
+}> = ({ children, className = '' }) => (
+  <p className={`text-sm text-neutral-500 mt-1 ${className}`}>
+    {children}
+  </p>
+)
+
+// Card Content subcomponent
+export const CardContent: React.FC<{
+  children: React.ReactNode
+  className?: string
+}> = ({ children, className = '' }) => (
+  <div className={className}>
+    {children}
+  </div>
+)
+
+// Card Footer subcomponent
+export const CardFooter: React.FC<{
+  children: React.ReactNode
+  className?: string
+}> = ({ children, className = '' }) => (
+  <div className={`mt-4 pt-4 border-t border-neutral-100 ${className}`}>
+    {children}
+  </div>
+)
+
+export default Card

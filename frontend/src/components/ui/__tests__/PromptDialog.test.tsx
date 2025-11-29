@@ -288,7 +288,7 @@ describe('PromptDialog', () => {
       render(<PromptDialog {...defaultProps} variant="danger" />)
 
       const confirmButton = screen.getByRole('button', { name: /confirmar/i })
-      expect(confirmButton).toHaveClass('bg-red-600')
+      expect(confirmButton).toHaveClass('bg-red-500')
     })
 
     it('uses warning variant when specified', () => {

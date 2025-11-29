@@ -1,19 +1,18 @@
 /**
- * Input Component - Tucumán Turismo Theme
- * Generic reusable input component with institutional design system
+ * Input Component - Minimalist Design System
+ * Clean and subtle input field with elegant focus states
  */
 
-import { InputHTMLAttributes, ReactNode, forwardRef } from 'react';
+import { InputHTMLAttributes, ReactNode, forwardRef } from 'react'
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  label?: string;
-  error?: string;
-  helperText?: string;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
-  variant?: 'default' | 'filled' | 'outlined';
+  label?: string
+  error?: string
+  helperText?: string
+  leftIcon?: ReactNode
+  rightIcon?: ReactNode
+  size?: 'sm' | 'md' | 'lg'
+  fullWidth?: boolean
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({
@@ -24,71 +23,87 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   rightIcon,
   size = 'md',
   fullWidth = false,
-  variant = 'default',
   className = '',
   disabled,
   required,
+  id,
   ...props
 }, ref) => {
-  const baseClasses = 'transition-all duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 text-neutral-900';
+  // Generate unique ID for accessibility
+  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
 
-  const variantClasses = {
-    default: 'border border-neutral-300 bg-neutral-50 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 placeholder:text-neutral-400',
-    filled: 'border-0 bg-neutral-100 focus:bg-white focus:ring-2 focus:ring-primary-500/20 placeholder:text-neutral-400',
-    outlined: 'border-2 border-neutral-300 bg-transparent focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 placeholder:text-neutral-400',
-  };
+  // Base input styles
+  const baseClasses = [
+    'w-full',
+    'bg-white',
+    'border border-neutral-200',
+    'text-neutral-900',
+    'placeholder:text-neutral-400',
+    'rounded-md',
+    'transition-all duration-150 ease-in-out',
+    'focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10',
+    'disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed',
+  ].join(' ')
 
-  const sizeClasses = {
-    sm: 'px-3 py-2 text-sm rounded-sm min-h-[36px]',
-    md: 'px-3 py-2 text-base rounded-sm min-h-[42px]',
-    lg: 'px-4 py-3 text-base rounded-md min-h-[48px]',
-  };
+  // Size variants
+  const sizeClasses: Record<string, string> = {
+    sm: 'h-8 px-3 text-sm',
+    md: 'h-10 px-3 text-sm',
+    lg: 'h-12 px-4 text-base',
+  }
 
-  const stateClasses = error
-    ? 'border-red-600 focus:border-red-600 focus:ring-red-500/20 bg-red-50'
-    : variantClasses[variant];
+  // Error state
+  const errorClasses = error
+    ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10 bg-red-50/50'
+    : ''
+
+  // Icon padding adjustments
+  const iconPadding = {
+    left: leftIcon ? (size === 'lg' ? 'pl-11' : 'pl-10') : '',
+    right: rightIcon ? (size === 'lg' ? 'pr-11' : 'pr-10') : '',
+  }
 
   const inputClasses = [
     baseClasses,
     sizeClasses[size],
-    stateClasses,
-    leftIcon ? (size === 'lg' ? 'pl-12' : 'pl-10') : '',
-    rightIcon ? (size === 'lg' ? 'pr-12' : 'pr-10') : '',
-    fullWidth ? 'w-full' : '',
-    disabled ? 'bg-neutral-100 text-neutral-400' : '',
+    errorClasses,
+    iconPadding.left,
+    iconPadding.right,
     className,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join(' ')
 
-  const iconClasses = {
+  // Icon styles
+  const iconSize: Record<string, string> = {
     sm: 'w-4 h-4',
-    md: 'w-5 h-5',
+    md: 'w-4 h-4',
     lg: 'w-5 h-5',
-  };
+  }
 
-  const iconPositionClasses = {
-    sm: 'top-2.5',
+  const iconPosition: Record<string, string> = {
+    sm: 'top-2',
     md: 'top-3',
     lg: 'top-3.5',
-  };
-
-  const labelClasses = [
-    'block text-sm font-medium mb-2 transition-colors',
-    error ? 'text-red-600' : 'text-neutral-600',
-    required ? 'after:content-["*"] after:ml-1 after:text-red-600' : '',
-  ].filter(Boolean).join(' ');
+  }
 
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className={labelClasses}>
+        <label
+          htmlFor={inputId}
+          className={`
+            block text-sm font-medium mb-1.5 transition-colors
+            ${error ? 'text-red-600' : 'text-neutral-700'}
+          `}
+        >
           {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
         </label>
       )}
-      
+
       <div className="relative">
         {leftIcon && (
-          <div className={`absolute left-3 ${iconPositionClasses[size]} z-10 pointer-events-none`}>
-            <span className={`${iconClasses[size]} ${error ? 'text-red-600' : 'text-neutral-500'} transition-colors`}>
+          <div className={`absolute left-3 ${iconPosition[size]} pointer-events-none`}>
+            <span className={`${iconSize[size]} ${error ? 'text-red-400' : 'text-neutral-400'}`}>
               {leftIcon}
             </span>
           </div>
@@ -96,15 +111,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
 
         <input
           ref={ref}
+          id={inputId}
           className={inputClasses}
           disabled={disabled}
           required={required}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
           {...props}
         />
 
         {rightIcon && (
-          <div className={`absolute right-3 ${iconPositionClasses[size]} z-10 pointer-events-none`}>
-            <span className={`${iconClasses[size]} ${error ? 'text-red-600' : 'text-neutral-500'} transition-colors`}>
+          <div className={`absolute right-3 ${iconPosition[size]} pointer-events-none`}>
+            <span className={`${iconSize[size]} ${error ? 'text-red-400' : 'text-neutral-400'}`}>
               {rightIcon}
             </span>
           </div>
@@ -112,21 +130,31 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
       </div>
 
       {error && (
-        <div className="mt-2 flex items-start space-x-1">
-          <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        <p
+          id={`${inputId}-error`}
+          className="mt-1.5 text-sm text-red-600 flex items-center gap-1"
+          role="alert"
+        >
+          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
           </svg>
-          <p className="text-sm text-red-600 font-medium">{error}</p>
-        </div>
+          {error}
+        </p>
       )}
 
       {helperText && !error && (
-        <p className="mt-2 text-sm text-neutral-500 leading-relaxed">{helperText}</p>
+        <p id={`${inputId}-helper`} className="mt-1.5 text-sm text-neutral-500">
+          {helperText}
+        </p>
       )}
     </div>
-  );
-});
+  )
+})
 
-Input.displayName = 'Input';
+Input.displayName = 'Input'
 
-export default Input;
+export default Input
