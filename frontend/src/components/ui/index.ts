@@ -15,7 +15,10 @@ export { default as LoadingSpinner, LoadingDots, LoadingOverlay } from './Loadin
 export { default as Skeleton, SkeletonText, SkeletonAvatar, SkeletonButton, SkeletonCard, SkeletonTable } from './Skeleton';
 export { default as EmptyState, EmptyStateIcons } from './EmptyState';
 export { default as ErrorState, NetworkError, NotFoundError, PermissionError } from './ErrorState';
+
+// Data Components
 export { default as Pagination } from './Pagination';
+export { default as StatCard, StatIcons } from './StatCard';
 export { default as Checkbox } from './Checkbox';
 export { default as ColorInput } from './ColorInput';
 export { ColorPicker } from './ColorPicker';

@@ -1,117 +1,80 @@
 /**
- * Table Component - Base reutilizable
- * Unified table component that supports both simple and complex table patterns
- * Provides loading states, empty states, pagination, and flexible column configuration
+ * Table Component - Minimalist Design System
+ * Clean, accessible table with loading states and pagination
  */
 
-'use client';
+'use client'
 
-import { ReactNode } from 'react';
-import { Pagination, Button } from '@/components/ui';
-import { PermissionGate } from '@/components/auth/PermissionGate';
-import { Permission } from '@/types/auth.types';
-import { Event } from '@/types/event.types';
-import { User } from '@/types/auth.types';
-import { Category } from '@/types/category.types';
-import { TablePaginationProps } from '@/types/pagination.types';
+import type { ReactNode } from 'react'
+import { Pagination, Button, Skeleton, EmptyState, EmptyStateIcons } from '@/components/ui'
+import { PermissionGate } from '@/components/auth/PermissionGate'
+import type { Permission } from '@/types/auth.types'
+import type { Event } from '@/types/event.types'
+import type { User } from '@/types/auth.types'
+import type { Category } from '@/types/category.types'
+import type { TablePaginationProps } from '@/types/pagination.types'
 
-// Supported table data types based on business domain
-type TableDataType = Event | User | Category;
+type TableDataType = Event | User | Category
 
-// Base column configuration
 export interface TableColumn<T extends TableDataType = TableDataType> {
-  key: string;
-  label: string;
-  className?: string;
-  render?: (item: T, index: number) => ReactNode;
-  sortable?: boolean;
-  visible?: boolean;
+  key: string
+  label: string
+  className?: string
+  render?: (item: T, index: number) => ReactNode
+  sortable?: boolean
+  visible?: boolean
 }
 
-// Base action configuration
 export interface TableAction<T extends TableDataType = TableDataType> {
-  key: string;
-  label: string;
-  icon?: ReactNode;
-  className?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'xs' | 'sm' | 'md' | 'lg';
-  condition?: (item: T, index: number) => boolean;
-  permission?: Permission;
-  onClick: (item: T, index: number) => void;
+  key: string
+  label: string
+  icon?: ReactNode
+  className?: string
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+  condition?: (item: T, index: number) => boolean
+  permission?: Permission
+  onClick: (item: T, index: number) => void
 }
 
-
-// Main table props
 export interface TableProps<T extends TableDataType = TableDataType> {
-  columns: TableColumn<T>[];
-  data: T[];
-  loading?: boolean;
-  pagination?: TablePaginationProps;
-  actions?: TableAction<T>[];
-  onRowClick?: (item: T, index: number) => void;
-  emptyStateMessage?: string;
-  emptyStateIcon?: ReactNode;
-  className?: string;
-  tableClassName?: string;
-  headerClassName?: string;
-  bodyClassName?: string;
-  rowClassName?: string | ((item: T, index: number) => string);
-  // Advanced features
-  selectable?: boolean;
-  selectedItems?: T[];
-  onSelectionChange?: (items: T[]) => void;
-  getItemId?: (item: T) => string | number;
+  columns: TableColumn<T>[]
+  data: T[]
+  loading?: boolean
+  pagination?: TablePaginationProps
+  actions?: TableAction<T>[]
+  onRowClick?: (item: T, index: number) => void
+  emptyStateMessage?: string
+  emptyStateDescription?: string
+  emptyStateIcon?: ReactNode
+  emptyStateAction?: ReactNode
+  className?: string
+  tableClassName?: string
+  headerClassName?: string
+  bodyClassName?: string
+  rowClassName?: string | ((item: T, index: number) => string)
+  selectable?: boolean
+  selectedItems?: T[]
+  onSelectionChange?: (items: T[]) => void
+  getItemId?: (item: T) => string | number
 }
 
-// Default empty state icon
-const DefaultEmptyIcon = () => (
-  <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 8l2 2 4-4" />
-  </svg>
-);
-
-// Loading skeleton component
-const TableSkeleton = ({ columns }: { columns: TableColumn<TableDataType>[] }) => (
-  <div className="animate-pulse">
-    <div className="bg-gray-50 px-6 py-3">
-      <div className="flex space-x-4">
-        {columns.filter(col => col.visible !== false).map((col, index) => (
-          <div key={col.key} className={`h-4 bg-gray-200 rounded ${index === 0 ? 'w-1/4' : 'w-1/6'}`} />
+const TableSkeleton = ({ columns }: { columns: number }) => (
+  <div className="divide-y divide-neutral-100">
+    {Array.from({ length: 5 }).map((_, rowIndex) => (
+      <div key={rowIndex} className="px-6 py-4 flex gap-4">
+        {Array.from({ length: columns }).map((_, colIndex) => (
+          <Skeleton
+            key={colIndex}
+            variant="text"
+            width={colIndex === 0 ? '25%' : '15%'}
+            height={14}
+          />
         ))}
       </div>
-    </div>
-    <div className="divide-y divide-gray-200">
-      {Array.from({ length: 5 }).map((_, rowIndex) => (
-        <div key={rowIndex} className="px-6 py-4">
-          <div className="flex space-x-4">
-            {columns.filter(col => col.visible !== false).map((col, colIndex) => (
-              <div key={col.key} className={`h-4 bg-gray-100 rounded ${colIndex === 0 ? 'w-1/4' : 'w-1/6'}`} />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    ))}
   </div>
-);
-
-// Empty state component
-const EmptyState = ({
-  message = "No hay datos disponibles",
-  icon
-}: {
-  message: string;
-  icon?: ReactNode;
-}) => (
-  <div className="text-center py-12">
-    <div className="flex flex-col items-center">
-      {icon || <DefaultEmptyIcon />}
-      <h3 className="mt-4 text-lg font-medium text-gray-900">
-        {message}
-      </h3>
-    </div>
-  </div>
-);
+)
 
 export const Table = <T extends TableDataType>({
   columns,
@@ -120,139 +83,150 @@ export const Table = <T extends TableDataType>({
   pagination,
   actions = [],
   onRowClick,
-  emptyStateMessage = "No hay datos disponibles",
+  emptyStateMessage = 'No hay datos disponibles',
+  emptyStateDescription,
   emptyStateIcon,
-  className = "",
-  tableClassName = "",
-  headerClassName = "",
-  bodyClassName = "",
-  rowClassName = "",
+  emptyStateAction,
+  className = '',
+  tableClassName = '',
+  headerClassName = '',
+  bodyClassName = '',
+  rowClassName = '',
   selectable = false,
   selectedItems = [],
   onSelectionChange,
   getItemId,
 }: TableProps<T>) => {
-  // Get visible columns
-  const visibleColumns = columns.filter(col => col.visible !== false);
+  const visibleColumns = columns.filter(col => col.visible !== false)
 
-  // Add selection column if selectable
   const finalColumns = selectable
-    ? [{ key: '__selection', label: '', className: 'w-8' }, ...visibleColumns]
-    : visibleColumns;
+    ? [{ key: '__selection', label: '', className: 'w-10' }, ...visibleColumns]
+    : visibleColumns
 
-  // Add actions column if actions exist
   if (actions.length > 0) {
     finalColumns.push({
       key: '__actions',
       label: 'Acciones',
-      className: 'text-right w-32'
-    });
+      className: 'text-right w-28',
+    })
   }
 
-  // Handle selection
   const isSelected = (item: T): boolean => {
-    if (!selectable || !getItemId) return false;
-    const itemId = getItemId(item);
-    return selectedItems.some(selected => getItemId(selected) === itemId);
-  };
+    if (!selectable || !getItemId) return false
+    const itemId = getItemId(item)
+    return selectedItems.some(selected => getItemId(selected) === itemId)
+  }
 
   const toggleSelection = (item: T) => {
-    if (!selectable || !getItemId || !onSelectionChange) return;
+    if (!selectable || !getItemId || !onSelectionChange) return
 
-    const itemId = getItemId(item);
-    const currentlySelected = isSelected(item);
+    const itemId = getItemId(item)
+    const currentlySelected = isSelected(item)
 
     if (currentlySelected) {
-      onSelectionChange(selectedItems.filter(selected => getItemId(selected) !== itemId));
+      onSelectionChange(selectedItems.filter(selected => getItemId(selected) !== itemId))
     } else {
-      onSelectionChange([...selectedItems, item]);
+      onSelectionChange([...selectedItems, item])
     }
-  };
-
-  const toggleSelectAll = () => {
-    if (!selectable || !getItemId || !onSelectionChange) return;
-
-    if (selectedItems.length === data.length) {
-      onSelectionChange([]);
-    } else {
-      onSelectionChange([...data]);
-    }
-  };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className={`bg-white rounded-lg shadow overflow-hidden ${className}`}>
-        <TableSkeleton columns={finalColumns as TableColumn<TableDataType>[]} />
-      </div>
-    );
   }
 
-  // Empty state
+  const toggleSelectAll = () => {
+    if (!selectable || !getItemId || !onSelectionChange) return
+
+    if (selectedItems.length === data.length) {
+      onSelectionChange([])
+    } else {
+      onSelectionChange([...data])
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className={`bg-white rounded-lg border border-neutral-200 overflow-hidden ${className}`}>
+        <div className="px-6 py-3 bg-neutral-50 border-b border-neutral-200">
+          <div className="flex gap-4">
+            {finalColumns.map((col, i) => (
+              <Skeleton key={col.key} variant="text" width={i === 0 ? '20%' : '12%'} height={12} />
+            ))}
+          </div>
+        </div>
+        <TableSkeleton columns={finalColumns.length} />
+      </div>
+    )
+  }
+
   if (data.length === 0) {
     return (
-      <div className={`bg-white rounded-lg shadow ${className}`}>
-        <EmptyState message={emptyStateMessage} icon={emptyStateIcon} />
+      <div className={`bg-white rounded-lg border border-neutral-200 ${className}`}>
+        <EmptyState
+          icon={emptyStateIcon || EmptyStateIcons.inbox}
+          title={emptyStateMessage}
+          description={emptyStateDescription}
+          action={emptyStateAction}
+          size="md"
+        />
       </div>
-    );
+    )
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow overflow-hidden ${className}`}>
+    <div className={`bg-white rounded-lg border border-neutral-200 overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
-        <table className={`min-w-full divide-y divide-gray-200 ${tableClassName}`}>
-          <thead className={`bg-gray-50 ${headerClassName}`}>
+        <table className={`min-w-full divide-y divide-neutral-200 ${tableClassName}`}>
+          <thead className={`bg-neutral-50 ${headerClassName}`}>
             <tr>
               {finalColumns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${column.className || ''}`}
+                  scope="col"
+                  className={`px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider ${column.className || ''}`}
                 >
                   {column.key === '__selection' && selectable ? (
                     <input
                       type="checkbox"
                       checked={data.length > 0 && selectedItems.length === data.length}
                       onChange={toggleSelectAll}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500/20"
                     />
                   ) : column.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className={`bg-white divide-y divide-gray-200 ${bodyClassName}`}>
+          <tbody className={`bg-white divide-y divide-neutral-100 ${bodyClassName}`}>
             {data.map((item, index) => {
               const computedRowClassName = typeof rowClassName === 'function'
                 ? rowClassName(item, index)
-                : rowClassName;
-
-              const defaultRowClassName = onRowClick
-                ? 'hover:bg-gray-50 cursor-pointer'
-                : 'hover:bg-gray-50';
+                : rowClassName
 
               return (
                 <tr
                   key={getItemId ? getItemId(item) : index}
-                  className={`${defaultRowClassName} ${computedRowClassName}`}
+                  className={`
+                    transition-colors duration-150
+                    ${onRowClick ? 'cursor-pointer hover:bg-neutral-50' : 'hover:bg-neutral-50/50'}
+                    ${isSelected(item) ? 'bg-primary-50/50' : ''}
+                    ${computedRowClassName}
+                  `}
                   onClick={() => onRowClick?.(item, index)}
                 >
                   {finalColumns.map((column) => (
                     <td
                       key={`${column.key}-${index}`}
-                      className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
+                      className={`px-6 py-4 whitespace-nowrap text-sm ${column.className || ''}`}
                     >
                       {column.key === '__selection' && selectable ? (
                         <input
                           type="checkbox"
                           checked={isSelected(item)}
                           onChange={(e) => {
-                            e.stopPropagation();
-                            toggleSelection(item);
+                            e.stopPropagation()
+                            toggleSelection(item)
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="w-4 h-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500/20"
                         />
                       ) : column.key === '__actions' ? (
-                        <div className="flex items-center justify-end space-x-1">
+                        <div className="flex items-center justify-end gap-1">
                           {actions
                             .filter(action => !action.condition || action.condition(item, index))
                             .map((action) => {
@@ -260,56 +234,53 @@ export const Table = <T extends TableDataType>({
                                 <Button
                                   key={action.key}
                                   variant={action.variant || 'ghost'}
-                                  size={(action.size === 'xs' ? 'sm' : action.size) || 'sm'}
+                                  size={action.size || 'sm'}
                                   onClick={(e) => {
-                                    e.stopPropagation();
-                                    action.onClick(item, index);
+                                    e.stopPropagation()
+                                    action.onClick(item, index)
                                   }}
                                   className={action.className}
                                   title={action.label}
                                   leftIcon={action.icon}
                                 >
-                                  {action.size === 'xs' || action.size === 'sm' ? null : action.label}
+                                  {action.size === 'sm' ? null : action.label}
                                 </Button>
-                              );
+                              )
 
-                              // Wrap in PermissionGate if permission is specified
                               if (action.permission) {
                                 return (
                                   <PermissionGate key={action.key} permission={action.permission}>
                                     {ActionButton}
                                   </PermissionGate>
-                                );
+                                )
                               }
 
-                              return ActionButton;
+                              return ActionButton
                             })}
                         </div>
                       ) : column.render ? (
                         column.render(item, index)
                       ) : (
-                        // Fallback - try to access the property by key
-                        <span className="text-sm text-gray-900">
+                        <span className="text-neutral-900">
                           {String(item[column.key as keyof T] || '—')}
                         </span>
                       )}
                     </td>
                   ))}
                 </tr>
-              );
+              )
             })}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
       {pagination && (
-        <div className="border-t border-gray-200">
+        <div className="border-t border-neutral-200">
           <Pagination {...pagination} />
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Table;
+export default Table
