@@ -34,41 +34,34 @@ jest.mock('@/features/approval/components/dumb/AdminDashboard', () => ({
   )
 }))
 
-jest.mock('@/features/approval/components/dumb/ApproveConfirmModal', () => ({
-  ApproveConfirmModal: ({ isOpen, onClose, onConfirm }: {
+jest.mock('@/components/ui', () => ({
+  ConfirmDialog: ({ isOpen, onCancel, onConfirm, title }: {
     isOpen: boolean
-    onClose: () => void
+    onCancel: () => void
     onConfirm: () => void
+    title: string
   }) => isOpen ? (
     <div data-testid="approve-modal">
+      <span>{title}</span>
       <button onClick={onConfirm}>Confirm Approve</button>
-      <button onClick={onClose}>Cancel Approve</button>
+      <button onClick={onCancel}>Cancel Approve</button>
     </div>
-  ) : null
-}))
-
-jest.mock('@/features/approval/components/dumb/RejectConfirmModal', () => ({
-  RejectConfirmModal: ({ isOpen, onClose, onConfirm }: {
+  ) : null,
+  PromptDialog: ({ isOpen, onCancel, onConfirm, title, variant }: {
     isOpen: boolean
-    onClose: () => void
-    onConfirm: (reason: string) => void
+    onCancel: () => void
+    onConfirm: (value: string) => void
+    title: string
+    variant?: string
   }) => isOpen ? (
-    <div data-testid="reject-modal">
-      <button onClick={() => onConfirm('Test reason')}>Confirm Reject</button>
-      <button onClick={onClose}>Cancel Reject</button>
-    </div>
-  ) : null
-}))
-
-jest.mock('@/features/approval/components/dumb/RequestChangesModal', () => ({
-  RequestChangesModal: ({ isOpen, onClose, onConfirm }: {
-    isOpen: boolean
-    onClose: () => void
-    onConfirm: (comments: string) => void
-  }) => isOpen ? (
-    <div data-testid="request-changes-modal">
-      <button onClick={() => onConfirm('Please fix this')}>Confirm Request Changes</button>
-      <button onClick={onClose}>Cancel Request Changes</button>
+    <div data-testid={variant === 'danger' ? 'reject-modal' : 'request-changes-modal'}>
+      <span>{title}</span>
+      <button onClick={() => onConfirm(variant === 'danger' ? 'Test reason' : 'Please fix this')}>
+        {variant === 'danger' ? 'Confirm Reject' : 'Confirm Request Changes'}
+      </button>
+      <button onClick={onCancel}>
+        {variant === 'danger' ? 'Cancel Reject' : 'Cancel Request Changes'}
+      </button>
     </div>
   ) : null
 }))

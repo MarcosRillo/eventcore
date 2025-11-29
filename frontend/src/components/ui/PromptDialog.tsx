@@ -27,6 +27,8 @@ interface PromptDialogProps {
   loading?: boolean;
   confirmText?: string;
   cancelText?: string;
+  /** Button variant for the confirm button */
+  variant?: 'primary' | 'danger' | 'warning' | 'success';
 }
 
 const PromptDialog: React.FC<PromptDialogProps> = ({
@@ -44,6 +46,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
   loading = false,
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
+  variant = 'primary',
 }) => {
   const [value, setValue] = useState(defaultValue);
   const [error, setError] = useState('');
@@ -123,7 +126,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
         {cancelText}
       </Button>
       <Button
-        variant="primary"
+        variant={variant}
         onClick={handleConfirm}
         loading={loading}
         disabled={!isValueValid()}

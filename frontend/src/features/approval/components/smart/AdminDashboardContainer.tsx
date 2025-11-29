@@ -10,9 +10,7 @@ import { AdminDashboard } from '@/features/approval/components/dumb/AdminDashboa
 import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
 import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
 import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
-import { ApproveConfirmModal } from '@/features/approval/components/dumb/ApproveConfirmModal'
-import { RejectConfirmModal } from '@/features/approval/components/dumb/RejectConfirmModal'
-import { RequestChangesModal } from '@/features/approval/components/dumb/RequestChangesModal'
+import { ConfirmDialog, PromptDialog } from '@/components/ui'
 import { PublishConfirmModal } from '@/shared/components/modals'
 
 export const AdminDashboardContainer = () => {
@@ -79,30 +77,46 @@ export const AdminDashboardContainer = () => {
       )}
 
       {/* Approve Modal */}
-      <ApproveConfirmModal
+      <ConfirmDialog
         isOpen={approveModalOpen}
-        onClose={closeApproveModal}
+        title="Approve Event"
+        message={`Are you sure you want to approve "${selectedEventTitle || ''}"? The event will be marked as approved and can be published.`}
+        confirmText="Approve"
+        variant="success"
         onConfirm={() => selectedEventId && approveEvent(selectedEventId)}
+        onCancel={closeApproveModal}
         loading={actionLoading}
-        eventTitle={selectedEventTitle}
       />
 
       {/* Reject Modal */}
-      <RejectConfirmModal
+      <PromptDialog
         isOpen={rejectModalOpen}
-        onClose={closeRejectModal}
+        title="Reject Event"
+        message={`Please provide a reason for rejecting "${selectedEventTitle || ''}":`}
+        label="Rejection Reason"
+        placeholder="Enter reason for rejection..."
+        multiline
+        required
+        confirmText="Reject Event"
+        variant="danger"
         onConfirm={(reason) => selectedEventId && rejectEvent(selectedEventId, reason)}
+        onCancel={closeRejectModal}
         loading={actionLoading}
-        eventTitle={selectedEventTitle}
       />
 
       {/* Request Changes Modal */}
-      <RequestChangesModal
+      <PromptDialog
         isOpen={requestChangesModalOpen}
-        onClose={closeRequestChangesModal}
+        title="Request Changes"
+        message={`Request changes to "${selectedEventTitle || ''}":`}
+        placeholder="Describe what changes are needed..."
+        multiline
+        required
+        confirmText="Request Changes"
+        variant="warning"
         onConfirm={(comments) => selectedEventId && requestChanges(selectedEventId, comments)}
+        onCancel={closeRequestChangesModal}
         loading={actionLoading}
-        eventTitle={selectedEventTitle}
       />
 
       {/* Publish Modal */}
