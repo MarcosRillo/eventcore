@@ -4,7 +4,18 @@
  */
 
 import axios from 'axios';
-import { User, LoginCredentials, LoginResponse, RefreshTokenResponse } from '@/types/auth.types';
+import {
+  User,
+  LoginCredentials,
+  LoginResponse,
+  RefreshTokenResponse,
+  ForgotPasswordData,
+  ResetPasswordData,
+  ValidateResetTokenData,
+  PasswordResetResponse,
+  ValidateTokenResponse,
+  ResetPasswordResponse,
+} from '@/types/auth.types';
 import { getRefreshToken } from '@/services/tokenUtils';
 
 // Base API URL - used for refresh endpoint (which doesn't need auth)
@@ -81,12 +92,47 @@ export const validateToken = async (): Promise<boolean> => {
   }
 };
 
+// ============================================
+// Password Reset Functions
+// ============================================
+
+/**
+ * Request password reset link
+ * Always returns success to prevent email enumeration
+ */
+export const forgotPassword = async (data: ForgotPasswordData): Promise<PasswordResetResponse> => {
+  const { default: apiClient } = await import('@/services/apiClient');
+  const response = await apiClient.post<PasswordResetResponse>('/auth/forgot-password', data);
+  return response.data;
+};
+
+/**
+ * Validate reset token before showing reset form
+ */
+export const validateResetToken = async (data: ValidateResetTokenData): Promise<ValidateTokenResponse> => {
+  const { default: apiClient } = await import('@/services/apiClient');
+  const response = await apiClient.post<ValidateTokenResponse>('/auth/validate-reset-token', data);
+  return response.data;
+};
+
+/**
+ * Reset password with token
+ */
+export const resetPassword = async (data: ResetPasswordData): Promise<ResetPasswordResponse> => {
+  const { default: apiClient } = await import('@/services/apiClient');
+  const response = await apiClient.post<ResetPasswordResponse>('/auth/reset-password', data);
+  return response.data;
+};
+
 const authService = {
   loginUser,
   getCurrentUser,
   logoutUser,
   refreshTokens,
   validateToken,
+  forgotPassword,
+  validateResetToken,
+  resetPassword,
 };
 
 export default authService;

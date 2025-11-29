@@ -6,6 +6,7 @@
 
 'use client';
 
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/features/auth';
 import { Button, Input, LoadingSpinner } from '@/components/ui';
@@ -108,6 +109,16 @@ const LoginPage = () => {
                 </svg>
               }
             />
+
+            {/* Forgot password link */}
+            <div className="flex justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-500"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
 
             {/* Submit button */}
             <Button

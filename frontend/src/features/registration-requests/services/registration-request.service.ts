@@ -15,7 +15,63 @@ import {
   RejectResultResponse,
   SuspendResultResponse,
   DeleteResultResponse,
+  CreateRegistrationRequestData,
+  CreateRequestResponse,
+  DisplayStatusFilter,
 } from '../types/registration-request.types'
+
+// ============================================
+// Public Endpoints (No Auth Required)
+// ============================================
+
+/**
+ * Submit a new registration request (public form)
+ * Uses FormData to handle file uploads
+ */
+export const createRegistrationRequest = async (
+  data: CreateRegistrationRequestData
+): Promise<CreateRequestResponse['data']> => {
+  const formData = new FormData()
+
+  // Append all required text fields
+  formData.append('dni', data.dni)
+  formData.append('first_name', data.first_name)
+  formData.append('last_name', data.last_name)
+  formData.append('email', data.email)
+  formData.append('whatsapp', data.whatsapp)
+  formData.append('organization_name', data.organization_name)
+  formData.append('organization_cuit', data.organization_cuit)
+  formData.append('organization_sector', data.organization_sector)
+  formData.append('motivation', data.motivation)
+
+  // Append optional fields
+  if (data.website) {
+    formData.append('website', data.website)
+  }
+
+  // Append files if provided
+  if (data.profile_photo) {
+    formData.append('profile_photo', data.profile_photo)
+  }
+  if (data.organization_logo) {
+    formData.append('organization_logo', data.organization_logo)
+  }
+
+  const response = await apiClient.post<CreateRequestResponse>(
+    '/auth/register-request',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  )
+  return response.data.data
+}
+
+// ============================================
+// Admin Endpoints (Auth Required)
+// ============================================
 
 /**
  * Get all registration requests with optional status filter
@@ -109,6 +165,9 @@ export const deleteRegistrationRequest = async (
 }
 
 const registrationRequestService = {
+  // Public
+  create: createRegistrationRequest,
+  // Admin
   getAll: getRegistrationRequests,
   getById: getRegistrationRequestById,
   approve: approveRegistrationRequest,

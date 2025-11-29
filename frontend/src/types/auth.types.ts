@@ -204,3 +204,61 @@ export const ROLE_PERMISSIONS: Record<UserRoleCode, Permission[]> = {
     'view_own_analytics',
   ],
 };
+
+// ============================================
+// Password Reset Types
+// ============================================
+
+/**
+ * Forgot password request data
+ */
+export interface ForgotPasswordData {
+  email: string;
+}
+
+/**
+ * Reset password request data
+ */
+export interface ResetPasswordData {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+}
+
+/**
+ * Validate reset token request data
+ */
+export interface ValidateResetTokenData {
+  email: string;
+  token: string;
+}
+
+/**
+ * Generic API response for password reset endpoints
+ */
+export interface PasswordResetResponse {
+  success: boolean;
+  message: string;
+}
+
+/**
+ * Validate token response
+ */
+export interface ValidateTokenResponse {
+  success: boolean;
+  data: {
+    valid: boolean;
+  };
+}
+
+/**
+ * Reset password success response
+ */
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user_id: number;
+  };
+}

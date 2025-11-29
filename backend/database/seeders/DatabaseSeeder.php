@@ -50,15 +50,22 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Entity Admin (Cultura): carlos.mendoza@cultura.gov.ar / password123');
         $this->command->info('All other users also have password: password123');
         $this->command->newLine();
-        
+
         $this->command->info('📈 DATASET SUMMARY:');
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         $this->command->info('• 2 Primary Entities + 4 Event Organizers');
-        $this->command->info('• 7 Users with different roles and permissions');
+        $this->command->info('• 13 Users: 1 platform_admin, 2 entity_admin, 4 organizer_admin, 6 entity_staff');
         $this->command->info('• 5 Categories (3 Tourism + 2 Culture)');
         $this->command->info('• 5 Locations (3 Tourism + 2 Culture)');
         $this->command->info('• 8 Events with varied statuses for testing workflows');
+        $this->command->info('• 1 Suspended user (fernando.ruiz@enteturismo.gov.ar) for testing');
         $this->command->info('• Complete entity-tenant isolation for multi-tenant testing');
+        $this->command->newLine();
+
+        $this->command->info('👥 PANEL /users TEST:');
+        $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        $this->command->info('Login as ana.garcia@enteturismo.gov.ar to see 4 entity_staff');
+        $this->command->info('Login as carlos.mendoza@cultura.gov.ar to see 2 entity_staff');
         $this->command->newLine();
 
         $this->command->info('💡 TIP: For landing page UI testing with more events:');

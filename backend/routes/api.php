@@ -11,6 +11,9 @@ use App\Features\Auth\Controllers\RegistrationRequestController;
 use App\Features\Auth\Controllers\PasswordResetController;
 use App\Features\Auth\Controllers\RoleController;
 
+// Feature Controllers - Users
+use App\Features\Users\Controllers\UserController;
+
 // Feature Controllers - PublicEvents
 use App\Features\PublicEvents\Controllers\PublicEventController;
 
@@ -73,11 +76,20 @@ Route::prefix('v1')->group(function () {
         ->middleware('throttle:30,1');
 
     // Protected routes con roles específicos
-    Route::middleware('auth:sanctum')->group(function () {
+    // 'active' middleware blocks suspended users from accessing any protected route
+    Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
         // ===== PLATFORM ADMIN + ENTITY ADMIN =====
         // Full CRUD, approval, admin features
         Route::middleware(['role:platform_admin,entity_admin'])->group(function () {
+            // Users management (entity_staff)
+            Route::get('users', [UserController::class, 'index']);
+            Route::get('users/{id}', [UserController::class, 'show']);
+            Route::put('users/{id}', [UserController::class, 'update']);
+            Route::delete('users/{id}', [UserController::class, 'destroy']);
+            Route::patch('users/{id}/suspend', [UserController::class, 'suspend']);
+            Route::patch('users/{id}/unsuspend', [UserController::class, 'unsuspend']);
+
             // Roles management
             Route::get('roles/assignable', [RoleController::class, 'assignable']);
 

@@ -26,6 +26,11 @@ class AuthService
         /** @var User $user */
         $user = User::where('email', $credentials['email'])->firstOrFail();
 
+        // Check if user account is suspended
+        if ($user->isSuspended()) {
+            throw new AuthenticationException('Tu cuenta ha sido suspendida. Contacta al administrador.');
+        }
+
         return DB::transaction(function () use ($user) {
             // Revoke all existing access tokens for security
             $user->tokens()->delete();

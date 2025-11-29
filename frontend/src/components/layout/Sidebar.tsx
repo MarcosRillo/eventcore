@@ -15,6 +15,7 @@ import {
   Cog6ToothIcon,
   ChevronDoubleLeftIcon,
   PaintBrushIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarItem {
@@ -43,6 +44,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Check if user can access entity dashboard
   const canAccessEntityDashboard = hasRole('entity_admin') || hasRole('entity_staff');
+
+  // Check if user can manage team users (entity_staff)
+  const canManageUsers = hasRole('entity_admin') || hasRole('platform_admin');
 
   const principalItems = [
     {
@@ -81,6 +85,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           href: '/organizations',
           icon: <BuildingStorefrontIcon className="w-5 h-5" />,
         },
+        ...(canManageUsers ? [{
+          name: 'Usuarios',
+          href: '/users',
+          icon: <UserGroupIcon className="w-5 h-5" />,
+        }] : []),
         {
           name: 'Invitaciones',
           href: '/invitations',

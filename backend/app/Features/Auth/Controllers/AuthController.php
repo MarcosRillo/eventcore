@@ -7,6 +7,7 @@ use App\Features\Auth\Requests\LoginRequest;
 use App\Features\Auth\Requests\RefreshTokenRequest;
 use App\Http\Resources\UserResource;
 use App\Features\Auth\Services\AuthService;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -40,6 +41,16 @@ class AuthController extends Controller
                 ],
                 'message' => 'Login successful',
             ]);
+        } catch (AuthenticationException $e) {
+            // Return specific message for suspended users
+            $message = str_contains($e->getMessage(), 'suspendida')
+                ? $e->getMessage()
+                : 'Invalid credentials';
+
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 401);
         } catch (\Exception) {
             return response()->json([
                 'success' => false,

@@ -10,7 +10,14 @@
 export * from './hooks';
 
 // Services (shared services, imported for convenience)
-export { loginUser, getCurrentUser, logoutUser } from '@/services/authService';
+export {
+  loginUser,
+  getCurrentUser,
+  logoutUser,
+  forgotPassword,
+  validateResetToken,
+  resetPassword,
+} from '@/services/authService';
 
 // Types (when created)
 // export * from './types';

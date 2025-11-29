@@ -95,30 +95,75 @@ class UserSeeder extends Seeder
         ]);
         $organizerTeatro->organizations()->attach($teatroSanMartin->id);
 
-        // Create some Entity Staff members
-        $entityStaffTurismo = User::create([
+        // Create Entity Staff members for Ente de Turismo
+        $staffTurismo1 = User::create([
             'name' => 'Patricia López',
             'email' => 'patricia.lopez@enteturismo.gov.ar',
             'role_id' => $entityStaffRole->id,
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'status' => 'active',
         ]);
-        $entityStaffTurismo->organizations()->attach($enteDeturismo->id);
+        $staffTurismo1->organizations()->attach($enteDeturismo->id);
 
-        $entityStaffCultura = User::create([
+        $staffTurismo2 = User::create([
+            'name' => 'Miguel Sánchez',
+            'email' => 'miguel.sanchez@enteturismo.gov.ar',
+            'role_id' => $entityStaffRole->id,
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'status' => 'active',
+        ]);
+        $staffTurismo2->organizations()->attach($enteDeturismo->id);
+
+        $staffTurismo3 = User::create([
+            'name' => 'Lucía Romero',
+            'email' => 'lucia.romero@enteturismo.gov.ar',
+            'role_id' => $entityStaffRole->id,
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'status' => 'active',
+        ]);
+        $staffTurismo3->organizations()->attach($enteDeturismo->id);
+
+        // One suspended staff for testing
+        $staffTurismoSuspended = User::create([
+            'name' => 'Fernando Ruiz (Suspendido)',
+            'email' => 'fernando.ruiz@enteturismo.gov.ar',
+            'role_id' => $entityStaffRole->id,
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'status' => 'suspended',
+        ]);
+        $staffTurismoSuspended->organizations()->attach($enteDeturismo->id);
+
+        // Create Entity Staff members for Secretaría de Cultura
+        $staffCultura1 = User::create([
             'name' => 'Diego Martinez',
             'email' => 'diego.martinez@cultura.gov.ar',
             'role_id' => $entityStaffRole->id,
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'status' => 'active',
         ]);
-        $entityStaffCultura->organizations()->attach($secretariaCultura->id);
+        $staffCultura1->organizations()->attach($secretariaCultura->id);
+
+        $staffCultura2 = User::create([
+            'name' => 'Sofía Herrera',
+            'email' => 'sofia.herrera@cultura.gov.ar',
+            'role_id' => $entityStaffRole->id,
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'status' => 'active',
+        ]);
+        $staffCultura2->organizations()->attach($secretariaCultura->id);
 
         $this->command->info('Users created successfully!');
-        $this->command->info('- 1 Platform Admin created');
-        $this->command->info('- 2 Entity Admins created');
-        $this->command->info('- 4 Organizer Admins created');
-        $this->command->info('- 2 Entity Staff created');
-        $this->command->info('- All users have password: password123');
+        $this->command->info('- 1 Platform Admin');
+        $this->command->info('- 2 Entity Admins');
+        $this->command->info('- 4 Organizer Admins');
+        $this->command->info('- 6 Entity Staff (4 Turismo + 2 Cultura)');
+        $this->command->info('- 1 Suspended user for testing');
+        $this->command->info('- All passwords: password123');
     }
 }
