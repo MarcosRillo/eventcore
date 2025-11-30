@@ -110,7 +110,7 @@ describe('EventCard', () => {
     test('calls onClick when card is clicked', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
-      const card = screen.getByRole('article')
+      const card = screen.getByRole('button', { name: /Ver evento: Festival de Música/i })
       fireEvent.click(card)
 
       expect(mockHandlers.onClick).toHaveBeenCalledWith(mockEvent.id)
@@ -119,7 +119,7 @@ describe('EventCard', () => {
     test('card is keyboard accessible', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
-      const card = screen.getByRole('article')
+      const card = screen.getByRole('button', { name: /Ver evento/i })
 
       expect(card).toHaveAttribute('tabIndex', '0')
     })
@@ -127,7 +127,7 @@ describe('EventCard', () => {
     test('calls onClick on Enter key press', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
-      const card = screen.getByRole('article')
+      const card = screen.getByRole('button', { name: /Ver evento/i })
       fireEvent.keyDown(card, { key: 'Enter', code: 'Enter' })
 
       expect(mockHandlers.onClick).toHaveBeenCalledWith(mockEvent.id)
@@ -138,18 +138,19 @@ describe('EventCard', () => {
     test('applies hover effect classes', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
-      const card = screen.getByRole('article')
+      const card = screen.getByRole('button', { name: /Ver evento/i })
 
       expect(card.className).toContain('hover')
     })
 
-    test('applies responsive classes', () => {
+    test('applies transition and border classes', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
-      const card = screen.getByRole('article')
+      const card = screen.getByRole('button', { name: /Ver evento/i })
 
-      // Should have responsive padding/sizing
-      expect(card.className).toMatch(/p-/)
+      // Should have transition and border styling
+      expect(card.className).toContain('transition')
+      expect(card.className).toContain('border')
     })
   })
 })

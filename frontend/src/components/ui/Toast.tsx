@@ -45,22 +45,22 @@ const Toast = ({ message, type, duration = 5000, onClose }: ToastProps) => {
 
   const config = {
     success: {
-      bg: 'bg-green-50',
-      border: 'border-green-200',
-      icon: 'text-green-500',
-      text: 'text-green-800',
+      bg: 'bg-success-50',
+      border: 'border-success-200',
+      icon: 'text-success-500',
+      text: 'text-success-800',
     },
     error: {
-      bg: 'bg-red-50',
-      border: 'border-red-200',
-      icon: 'text-red-500',
-      text: 'text-red-800',
+      bg: 'bg-error-50',
+      border: 'border-error-200',
+      icon: 'text-error-500',
+      text: 'text-error-800',
     },
     warning: {
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      icon: 'text-amber-500',
-      text: 'text-amber-800',
+      bg: 'bg-warning-50',
+      border: 'border-warning-200',
+      icon: 'text-warning-500',
+      text: 'text-warning-800',
     },
     info: {
       bg: 'bg-primary-50',

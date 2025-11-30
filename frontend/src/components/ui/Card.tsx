@@ -3,7 +3,7 @@
  * Clean container with subtle shadows and borders
  */
 
-import type { ReactNode, KeyboardEvent } from 'react'
+import type { ReactNode } from 'react'
 
 interface CardProps {
   children: ReactNode

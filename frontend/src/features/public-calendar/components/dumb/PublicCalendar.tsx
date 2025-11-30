@@ -1,9 +1,11 @@
 /**
- * Public Calendar Component
+ * Public Calendar Component - Minimalist Design System
  *
  * Main public-facing calendar page with event listing and filters.
+ * Uses semantic color tokens and consistent spacing.
  */
 
+import type { ChangeEvent } from 'react'
 import { PublicEvent, Category, Location } from '@/features/public-calendar/types/public-calendar.types'
 import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
@@ -29,25 +31,34 @@ export const PublicCalendar = ({
   onLocationFilter,
   onEventClick
 }: PublicCalendarProps) => {
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     const value = e.target.value
     onCategoryFilter(value ? parseInt(value) : null)
   }
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+  const handleLocationChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     const value = e.target.value
     onLocationFilter(value ? parseInt(value) : null)
   }
 
+  const selectClasses = `
+    w-full h-10 px-3 py-2
+    bg-white border border-neutral-200 rounded-md
+    text-sm text-neutral-900
+    transition-all duration-150
+    focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10
+    hover:border-neutral-300
+  `
+
   return (
-    <main className="min-h-screen bg-gray-50" role="main">
+    <main className="min-h-screen bg-neutral-50" role="main">
       {/* Header */}
-      <div className="bg-white shadow-sm">
+      <div className="bg-white border-b border-neutral-200">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-neutral-900">
             Eventos en Tucumán
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-neutral-600 mt-2">
             Descubrí los mejores eventos turísticos y culturales
           </p>
         </div>
@@ -55,19 +66,19 @@ export const PublicCalendar = ({
 
       {/* Filters */}
       <div className="container mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-white rounded-lg border border-neutral-200 p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Category Filter */}
             <div>
               <label
                 htmlFor="category-filter"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-neutral-700 mb-1.5"
               >
                 Categoría
               </label>
               <select
                 id="category-filter"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className={selectClasses}
                 onChange={handleCategoryChange}
                 aria-label="Categoría"
               >
@@ -84,13 +95,13 @@ export const PublicCalendar = ({
             <div>
               <label
                 htmlFor="location-filter"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-neutral-700 mb-1.5"
               >
                 Ubicación
               </label>
               <select
                 id="location-filter"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className={selectClasses}
                 onChange={handleLocationChange}
                 aria-label="Ubicación"
               >
@@ -115,14 +126,14 @@ export const PublicCalendar = ({
         {/* Error State */}
         {error && !loading && (
           <div className="text-center py-12">
-            <p className="text-red-600">{error}</p>
+            <p className="text-error-600">{error}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && !error && events.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600">No hay eventos disponibles en este momento.</p>
+            <p className="text-neutral-600">No hay eventos disponibles en este momento.</p>
           </div>
         )}
 

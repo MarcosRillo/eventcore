@@ -1,60 +1,68 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Search, Filter, Calendar as CalendarIcon } from 'lucide-react';
-import { Category } from '@/types/category.types';
-import apiClient from '@/services/apiClient';
+/**
+ * Public Event Filters - Minimalist Design System
+ *
+ * Filter controls for public calendar with search, category, month, and year filters.
+ * Uses semantic design tokens and Badge component for active filters.
+ */
+
+import { useState, useEffect } from 'react'
+import { Category } from '@/types/category.types'
+import { Badge, Button } from '@/components/ui'
+import apiClient from '@/services/apiClient'
 
 export interface PublicEventFiltersState {
-  search: string;
-  category_id: number | undefined;
-  month: string;
-  year: string;
+  search: string
+  category_id: number | undefined
+  month: string
+  year: string
 }
 
 interface PublicEventFiltersProps {
-  filters: PublicEventFiltersState;
-  onFiltersChange: (filters: PublicEventFiltersState) => void;
+  filters: PublicEventFiltersState
+  onFiltersChange: (filters: PublicEventFiltersState) => void
 }
 
 export default function PublicEventFilters({
   filters,
   onFiltersChange
 }: PublicEventFiltersProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([])
+  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await apiClient.get<{categories: Category[]}>('/public/categories');
-        const categoriesData = response.data.categories;
-        setCategories(categoriesData);
+        const response = await apiClient.get<{categories: Category[]}>('/public/categories')
+        const categoriesData = response.data.categories
+        setCategories(categoriesData)
       } catch {
+        // Silent fail - categories will be empty
       }
-    };
+    }
 
-    fetchCategories();
-  }, []);
+    fetchCategories()
+  }, [])
 
   const handleSearchChange = (value: string) => {
-    onFiltersChange({ ...filters, search: value });
-  };
+    onFiltersChange({ ...filters, search: value })
+  }
 
   const handleCategoryChange = (categoryId: string) => {
     onFiltersChange({
       ...filters,
       category_id: categoryId === '' ? undefined : Number(categoryId)
-    });
-  };
+    })
+  }
 
   const handleMonthChange = (month: string) => {
-    onFiltersChange({ ...filters, month });
-  };
+    onFiltersChange({ ...filters, month })
+  }
 
   const handleYearChange = (year: string) => {
-    onFiltersChange({ ...filters, year });
-  };
+    onFiltersChange({ ...filters, year })
+  }
 
   const clearFilters = () => {
     onFiltersChange({
@@ -62,11 +70,11 @@ export default function PublicEventFilters({
       category_id: undefined,
       month: '',
       year: ''
-    });
-  };
+    })
+  }
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 3 }, (_, i) => currentYear + i - 1);
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 3 }, (_, i) => currentYear + i - 1)
   const months = [
     { value: '01', label: 'Enero' },
     { value: '02', label: 'Febrero' },
@@ -80,31 +88,66 @@ export default function PublicEventFilters({
     { value: '10', label: 'Octubre' },
     { value: '11', label: 'Noviembre' },
     { value: '12', label: 'Diciembre' }
-  ];
+  ]
 
-  const hasActiveFilters = filters.search || filters.category_id || filters.month || filters.year;
+  const hasActiveFilters = filters.search || filters.category_id || filters.month || filters.year
+
+  // Common select styles using design tokens
+  const selectClasses = `
+    w-full h-10 px-3 py-2
+    bg-white border border-neutral-200 rounded-md
+    text-sm text-neutral-900
+    transition-all duration-150
+    focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10
+    hover:border-neutral-300
+  `
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div className="bg-white rounded-lg border border-neutral-200 p-6 mb-6">
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <svg
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
           <input
             type="text"
             placeholder="Buscar eventos..."
             value={filters.search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="
+              w-full h-10 pl-10 pr-4
+              bg-white border border-neutral-200 rounded-md
+              text-sm text-neutral-900 placeholder:text-neutral-400
+              transition-all duration-150
+              focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10
+              hover:border-neutral-300
+            "
           />
         </div>
 
         {/* Toggle Filters Button (Mobile) */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="lg:hidden flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="
+            lg:hidden flex items-center justify-center gap-2
+            h-10 px-4
+            border border-neutral-200 rounded-md
+            text-sm text-neutral-700
+            hover:bg-neutral-50 hover:border-neutral-300
+            transition-all duration-150
+          "
         >
-          <Filter className="w-5 h-5 mr-2" />
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+          </svg>
           Filtros
         </button>
       </div>
@@ -113,13 +156,13 @@ export default function PublicEventFilters({
       <div className={`${showFilters ? 'block' : 'hidden'} lg:block mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4`}>
         {/* Category Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
             Categoría
           </label>
           <select
             value={filters.category_id || ''}
             onChange={(e) => handleCategoryChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className={selectClasses}
           >
             <option value="">Todas las categorías</option>
             {categories.map((category) => (
@@ -132,14 +175,13 @@ export default function PublicEventFilters({
 
         {/* Month Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <CalendarIcon className="w-4 h-4 inline mr-1" />
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
             Mes
           </label>
           <select
             value={filters.month}
             onChange={(e) => handleMonthChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className={selectClasses}
           >
             <option value="">Todos los meses</option>
             {months.map((month) => (
@@ -152,13 +194,13 @@ export default function PublicEventFilters({
 
         {/* Year Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
             Año
           </label>
           <select
             value={filters.year}
             onChange={(e) => handleYearChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className={selectClasses}
           >
             <option value="">Todos los años</option>
             {years.map((year) => (
@@ -172,12 +214,14 @@ export default function PublicEventFilters({
         {/* Clear Filters */}
         <div className="flex items-end">
           {hasActiveFilters && (
-            <button
+            <Button
+              variant="outline"
+              size="md"
+              fullWidth
               onClick={clearFilters}
-              className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Limpiar filtros
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -186,27 +230,27 @@ export default function PublicEventFilters({
       {hasActiveFilters && (
         <div className="mt-4 flex flex-wrap gap-2">
           {filters.search && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <Badge variant="default" size="sm">
               Búsqueda: &quot;{filters.search}&quot;
-            </span>
+            </Badge>
           )}
           {filters.category_id && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <Badge variant="info" size="sm">
               Categoría: {categories.find(c => c.id === filters.category_id)?.name}
-            </span>
+            </Badge>
           )}
           {filters.month && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+            <Badge variant="info" size="sm">
               Mes: {months.find(m => m.value === filters.month)?.label}
-            </span>
+            </Badge>
           )}
           {filters.year && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+            <Badge variant="info" size="sm">
               Año: {filters.year}
-            </span>
+            </Badge>
           )}
         </div>
       )}
     </div>
-  );
+  )
 }

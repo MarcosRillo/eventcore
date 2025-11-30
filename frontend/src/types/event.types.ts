@@ -263,17 +263,17 @@ export const EVENT_TYPE_LABELS: Record<EventTypeCode, string> = {
 };
 
 /**
- * Status color mapping for UI
+ * Status color mapping for UI - Uses semantic design tokens
  */
 export const EVENT_STATUS_COLORS: Record<EventStatusCode, string> = {
-  [EVENT_STATUS.DRAFT]: 'bg-gray-100 text-gray-800',
-  [EVENT_STATUS.PENDING_INTERNAL_APPROVAL]: 'bg-yellow-100 text-yellow-800',
-  [EVENT_STATUS.APPROVED_INTERNAL]: 'bg-blue-100 text-blue-800',
-  [EVENT_STATUS.PENDING_PUBLIC_APPROVAL]: 'bg-orange-100 text-orange-800',
-  [EVENT_STATUS.PUBLISHED]: 'bg-green-100 text-green-800',
-  [EVENT_STATUS.REQUIRES_CHANGES]: 'bg-red-100 text-red-800',
-  [EVENT_STATUS.REJECTED]: 'bg-red-100 text-red-800',
-  [EVENT_STATUS.CANCELLED]: 'bg-gray-100 text-gray-800',
+  [EVENT_STATUS.DRAFT]: 'bg-neutral-100 text-neutral-800',
+  [EVENT_STATUS.PENDING_INTERNAL_APPROVAL]: 'bg-warning-100 text-warning-800',
+  [EVENT_STATUS.APPROVED_INTERNAL]: 'bg-primary-100 text-primary-800',
+  [EVENT_STATUS.PENDING_PUBLIC_APPROVAL]: 'bg-warning-50 text-warning-700',
+  [EVENT_STATUS.PUBLISHED]: 'bg-success-100 text-success-800',
+  [EVENT_STATUS.REQUIRES_CHANGES]: 'bg-error-100 text-error-800',
+  [EVENT_STATUS.REJECTED]: 'bg-error-100 text-error-800',
+  [EVENT_STATUS.CANCELLED]: 'bg-neutral-100 text-neutral-800',
 };
 
 /**

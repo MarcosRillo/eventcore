@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Accept Invitation Page
+ * Accept Invitation Page - Minimalist Design System
  * Public page for accepting an invitation and creating an account
  */
 
@@ -47,15 +47,16 @@ function AcceptInvitationContent() {
   // No token provided
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
               <svg
-                className="mx-auto h-12 w-12 text-red-400"
+                className="mx-auto h-12 w-12 text-error-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -64,17 +65,17 @@ function AcceptInvitationContent() {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 Token no proporcionado
               </h2>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-neutral-500">
                 El enlace de invitación no es válido. Por favor, verifica que hayas
                 copiado el enlace completo del email.
               </p>
               <div className="mt-6">
                 <Link
                   href="/login"
-                  className="text-blue-600 hover:text-blue-500 font-medium"
+                  className="text-primary-600 hover:text-primary-500 font-medium"
                 >
                   Ir al inicio de sesión
                 </Link>
@@ -89,7 +90,7 @@ function AcceptInvitationContent() {
   // Validating token
   if (validating) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="xl" text="Validando invitación..." />
       </div>
     )
@@ -98,15 +99,16 @@ function AcceptInvitationContent() {
   // Token invalid or expired
   if (tokenError || !tokenValid) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
               <svg
-                className="mx-auto h-12 w-12 text-red-400"
+                className="mx-auto h-12 w-12 text-error-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -115,21 +117,21 @@ function AcceptInvitationContent() {
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 Invitación inválida
               </h2>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-neutral-500">
                 {tokenError ||
                   'El enlace de invitación no es válido o ha expirado.'}
               </p>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-neutral-500">
                 Por favor, contacta al administrador para recibir una nueva
                 invitación.
               </p>
               <div className="mt-6">
                 <Link
                   href="/login"
-                  className="text-blue-600 hover:text-blue-500 font-medium"
+                  className="text-primary-600 hover:text-primary-500 font-medium"
                 >
                   Ir al inicio de sesión
                 </Link>
@@ -144,15 +146,16 @@ function AcceptInvitationContent() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
               <svg
-                className="mx-auto h-12 w-12 text-green-400"
+                className="mx-auto h-12 w-12 text-success-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -161,10 +164,10 @@ function AcceptInvitationContent() {
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 ¡Cuenta creada exitosamente!
               </h2>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-neutral-500">
                 Tu cuenta ha sido creada. Serás redirigido al inicio de sesión...
               </p>
               <div className="mt-4">
@@ -179,16 +182,17 @@ function AcceptInvitationContent() {
 
   // Show form
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo and title */}
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
             <svg
               className="w-7 h-7 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -199,10 +203,10 @@ function AcceptInvitationContent() {
             </svg>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-bold text-neutral-900">
           Acepta tu invitación
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-neutral-600">
           Completa tus datos para crear tu cuenta
         </p>
       </div>
@@ -222,11 +226,11 @@ function AcceptInvitationContent() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-neutral-500">
               ¿Ya tienes una cuenta?{' '}
               <Link
                 href="/login"
-                className="text-blue-600 hover:text-blue-500 font-medium"
+                className="text-primary-600 hover:text-primary-500 font-medium"
               >
                 Inicia sesión
               </Link>
@@ -242,7 +246,7 @@ export default function AcceptInvitationPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <LoadingSpinner size="xl" text="Cargando..." />
         </div>
       }

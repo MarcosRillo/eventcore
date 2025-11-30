@@ -84,7 +84,8 @@ export default function PublicCalendar({
 
   const eventStyleGetter = (event: CalendarEvent) => {
     const eventData = event.resource;
-    const backgroundColor = eventData.category?.color || '#228B22';
+    // Fallback to primary color if category has no color
+    const backgroundColor = eventData.category?.color || '#2563eb'; // primary-600
     
     return {
       style: {
@@ -107,7 +108,7 @@ export default function PublicCalendar({
       return {
         className: 'today-highlight',
         style: {
-          backgroundColor: '#f0f9ff'
+          backgroundColor: '#eff6ff' // primary-50
         }
       };
     }
@@ -135,7 +136,7 @@ export default function PublicCalendar({
     <div className="h-[600px] w-full">
       {loading && (
         <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         </div>
       )}
       

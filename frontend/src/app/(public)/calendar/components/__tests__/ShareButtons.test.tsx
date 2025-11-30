@@ -1,14 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { Event } from '@/types/event.types'
 
-// Mock lucide-react icons
-jest.mock('lucide-react', () => ({
-  MessageCircle: () => <div data-testid="whatsapp-icon" />,
-  Facebook: () => <div data-testid="facebook-icon" />,
-  Twitter: () => <div data-testid="twitter-icon" />,
-  Link2: () => <div data-testid="link-icon" />,
-}))
-
 import ShareButtons from '../ShareButtons'
 
 // Helper to get expected URL (works with Jest's default localhost)
@@ -61,35 +53,43 @@ describe('ShareButtons', () => {
       expect(screen.getByText('Copiar')).toBeInTheDocument()
     })
 
-    it('should render with correct button titles', () => {
+    it('should render with correct aria-labels', () => {
       render(<ShareButtons event={mockEvent} />)
 
-      expect(screen.getByTitle('Compartir en WhatsApp')).toBeInTheDocument()
-      expect(screen.getByTitle('Compartir en Facebook')).toBeInTheDocument()
-      expect(screen.getByTitle('Compartir en Twitter')).toBeInTheDocument()
-      expect(screen.getByTitle('Copiar enlace')).toBeInTheDocument()
+      expect(screen.getByLabelText('Compartir en WhatsApp')).toBeInTheDocument()
+      expect(screen.getByLabelText('Compartir en Facebook')).toBeInTheDocument()
+      expect(screen.getByLabelText('Compartir en Twitter')).toBeInTheDocument()
+      expect(screen.getByLabelText('Copiar enlace')).toBeInTheDocument()
     })
 
-    it('should render all icons', () => {
+    it('should render SVG icons with aria-hidden', () => {
       render(<ShareButtons event={mockEvent} />)
 
-      expect(screen.getByTestId('whatsapp-icon')).toBeInTheDocument()
-      expect(screen.getByTestId('facebook-icon')).toBeInTheDocument()
-      expect(screen.getByTestId('twitter-icon')).toBeInTheDocument()
-      expect(screen.getByTestId('link-icon')).toBeInTheDocument()
+      const buttons = screen.getAllByRole('button')
+      buttons.forEach(button => {
+        const svg = button.querySelector('svg')
+        expect(svg).toBeInTheDocument()
+        expect(svg).toHaveAttribute('aria-hidden', 'true')
+      })
     })
 
     it('should have correct styling classes', () => {
       render(<ShareButtons event={mockEvent} />)
 
-      const whatsappButton = screen.getByTitle('Compartir en WhatsApp')
-      expect(whatsappButton).toHaveClass('bg-green-600', 'text-white')
+      const whatsappButton = screen.getByLabelText('Compartir en WhatsApp')
+      expect(whatsappButton).toHaveClass('bg-success-600', 'text-white')
 
-      const facebookButton = screen.getByTitle('Compartir en Facebook')
-      expect(facebookButton).toHaveClass('bg-blue-600', 'text-white')
+      const facebookButton = screen.getByLabelText('Compartir en Facebook')
+      expect(facebookButton).toHaveClass('bg-primary-600', 'text-white')
 
-      const twitterButton = screen.getByTitle('Compartir en Twitter')
-      expect(twitterButton).toHaveClass('bg-sky-500', 'text-white')
+      const twitterButton = screen.getByLabelText('Compartir en Twitter')
+      expect(twitterButton).toHaveClass('bg-neutral-800', 'text-white')
+    })
+
+    it('should have role group container with aria-label', () => {
+      render(<ShareButtons event={mockEvent} />)
+
+      expect(screen.getByRole('group', { name: 'Compartir evento' })).toBeInTheDocument()
     })
   })
 
@@ -237,8 +237,8 @@ describe('ShareButtons', () => {
       })
 
       await waitFor(() => {
-        const copiedButton = screen.getByTitle('Enlace copiado')
-        expect(copiedButton).toHaveClass('bg-green-100', 'text-green-800')
+        const copiedButton = screen.getByLabelText('Enlace copiado')
+        expect(copiedButton).toHaveClass('bg-success-50', 'text-success-700')
       })
 
       // Clean up timer
@@ -443,16 +443,16 @@ describe('ShareButtons', () => {
   })
 
   describe('Accessibility', () => {
-    it('should have title attributes on all buttons', () => {
+    it('should have aria-label attributes on all buttons', () => {
       render(<ShareButtons event={mockEvent} />)
 
-      expect(screen.getByTitle('Compartir en WhatsApp')).toBeInTheDocument()
-      expect(screen.getByTitle('Compartir en Facebook')).toBeInTheDocument()
-      expect(screen.getByTitle('Compartir en Twitter')).toBeInTheDocument()
-      expect(screen.getByTitle('Copiar enlace')).toBeInTheDocument()
+      expect(screen.getByLabelText('Compartir en WhatsApp')).toBeInTheDocument()
+      expect(screen.getByLabelText('Compartir en Facebook')).toBeInTheDocument()
+      expect(screen.getByLabelText('Compartir en Twitter')).toBeInTheDocument()
+      expect(screen.getByLabelText('Copiar enlace')).toBeInTheDocument()
     })
 
-    it('should update copy button title when copied', async () => {
+    it('should update copy button aria-label when copied', async () => {
       jest.useFakeTimers()
 
       render(<ShareButtons event={mockEvent} />)
@@ -464,7 +464,7 @@ describe('ShareButtons', () => {
       })
 
       await waitFor(() => {
-        expect(screen.getByTitle('Enlace copiado')).toBeInTheDocument()
+        expect(screen.getByLabelText('Enlace copiado')).toBeInTheDocument()
       })
 
       // Clean up timers
@@ -496,8 +496,8 @@ describe('ShareButtons', () => {
     it('should have default styling for copy button', () => {
       render(<ShareButtons event={mockEvent} />)
 
-      const copyButton = screen.getByTitle('Copiar enlace')
-      expect(copyButton).toHaveClass('bg-gray-200', 'text-gray-700')
+      const copyButton = screen.getByLabelText('Copiar enlace')
+      expect(copyButton).toHaveClass('bg-neutral-100', 'text-neutral-700')
     })
 
     it('should have success styling when copied', async () => {
@@ -512,9 +512,9 @@ describe('ShareButtons', () => {
       })
 
       await waitFor(() => {
-        const copiedButton = screen.getByTitle('Enlace copiado')
-        expect(copiedButton).toHaveClass('bg-green-100', 'text-green-800')
-        expect(copiedButton).not.toHaveClass('bg-gray-200')
+        const copiedButton = screen.getByLabelText('Enlace copiado')
+        expect(copiedButton).toHaveClass('bg-success-50', 'text-success-700')
+        expect(copiedButton).not.toHaveClass('bg-neutral-100')
       })
 
       // Clean up timers
@@ -528,14 +528,14 @@ describe('ShareButtons', () => {
     it('should have hover styles', () => {
       render(<ShareButtons event={mockEvent} />)
 
-      const whatsappButton = screen.getByTitle('Compartir en WhatsApp')
-      expect(whatsappButton).toHaveClass('hover:bg-green-700')
+      const whatsappButton = screen.getByLabelText('Compartir en WhatsApp')
+      expect(whatsappButton).toHaveClass('hover:bg-success-700')
 
-      const facebookButton = screen.getByTitle('Compartir en Facebook')
-      expect(facebookButton).toHaveClass('hover:bg-blue-700')
+      const facebookButton = screen.getByLabelText('Compartir en Facebook')
+      expect(facebookButton).toHaveClass('hover:bg-primary-700')
 
-      const twitterButton = screen.getByTitle('Compartir en Twitter')
-      expect(twitterButton).toHaveClass('hover:bg-sky-600')
+      const twitterButton = screen.getByLabelText('Compartir en Twitter')
+      expect(twitterButton).toHaveClass('hover:bg-neutral-900')
     })
   })
 })

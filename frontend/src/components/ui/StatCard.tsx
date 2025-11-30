@@ -60,16 +60,16 @@ const StatCard = ({
       accent: 'text-primary-500',
     },
     success: {
-      icon: 'bg-green-50 text-green-600',
-      accent: 'text-green-600',
+      icon: 'bg-success-50 text-success-600',
+      accent: 'text-success-600',
     },
     warning: {
-      icon: 'bg-amber-50 text-amber-600',
-      accent: 'text-amber-600',
+      icon: 'bg-warning-50 text-warning-600',
+      accent: 'text-warning-600',
     },
     danger: {
-      icon: 'bg-red-50 text-red-600',
-      accent: 'text-red-600',
+      icon: 'bg-error-50 text-error-600',
+      accent: 'text-error-600',
     },
   }
 
@@ -109,15 +109,15 @@ const StatCard = ({
           {trend && (
             <div className="flex items-center gap-1 mt-2">
               {trend.value > 0 ? (
-                <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
               ) : trend.value < 0 ? (
-                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-error-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
               ) : null}
-              <span className={`text-xs font-medium ${trend.value > 0 ? 'text-green-600' : trend.value < 0 ? 'text-red-600' : 'text-neutral-500'}`}>
+              <span className={`text-xs font-medium ${trend.value > 0 ? 'text-success-600' : trend.value < 0 ? 'text-error-600' : 'text-neutral-500'}`}>
                 {trend.value > 0 ? '+' : ''}{trend.value}%
               </span>
               {trend.label && (

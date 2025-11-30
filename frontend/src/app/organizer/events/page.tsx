@@ -18,7 +18,7 @@ const STATUS_OPTIONS = [
   { value: 'rejected', label: 'Rechazado' }
 ];
 
-const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info' | 'purple'> = {
+const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
   draft: 'default',
   pending_internal_approval: 'warning',
   approved_internal: 'info',

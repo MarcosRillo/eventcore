@@ -121,7 +121,7 @@ describe('ResetPasswordPage', () => {
       render(<ResetPasswordPage />);
 
       const metReq = screen.getByText('Mínimo 8 caracteres');
-      expect(metReq).toHaveClass('text-green-600');
+      expect(metReq).toHaveClass('text-success-600');
     });
   });
 
