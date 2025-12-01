@@ -13,6 +13,7 @@ import {
   PlusCircleIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/organizer/dashboard', icon: HomeIcon },
@@ -23,6 +24,7 @@ const navigation = [
 
 export function OrganizerSidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <div className="w-64 bg-gradient-to-b from-green-600 to-green-800 text-white">
@@ -56,7 +58,7 @@ export function OrganizerSidebar() {
       <div className="absolute bottom-0 w-64 p-4 border-t border-green-700">
         <button
           className="w-full text-left px-3 py-2 text-green-100 hover:bg-green-700/50 rounded-lg transition-colors"
-          onClick={() => {/* TODO: Logout */}}
+          onClick={logout}
         >
           Cerrar Sesión
         </button>

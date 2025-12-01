@@ -1,13 +1,15 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
 import { Button } from '@/components/ui'
 import UserTableContainer from '@/features/users/components/smart/UserTableContainer'
 
 export default function UsersPage() {
+  const router = useRouter()
+
   const handleInvite = () => {
-    // TODO: Open invite modal or navigate to invitations page
-    window.location.href = '/invitations'
+    router.push('/invitations')
   }
 
   return (
