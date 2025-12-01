@@ -13,6 +13,13 @@ class EventStatusesSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedStatuses();
+        });
+    }
+
+    private function seedStatuses(): void
+    {
         $statuses = [
             [
                 'status_code' => 'draft',
@@ -91,3 +98,4 @@ class EventStatusesSeeder extends Seeder
         DB::table('event_statuses')->insert($statuses);
     }
 }
+

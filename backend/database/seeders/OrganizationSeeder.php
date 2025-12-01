@@ -7,6 +7,7 @@ use App\Models\OrganizationStatus;
 use App\Models\OrganizationType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OrganizationSeeder extends Seeder
 {
@@ -15,10 +16,18 @@ class OrganizationSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedOrganizations();
+        });
+    }
+
+    private function seedOrganizations(): void
+    {
         // Get status and type IDs
         $activeStatus = OrganizationStatus::where('status_code', 'active')->first();
         $primaryEntityType = OrganizationType::where('type_code', 'primary_entity')->first();
         $eventOrganizerType = OrganizationType::where('type_code', 'event_organizer')->first();
+
         // Create Primary Entities (Entidades Principales)
         $enteDeturismo = Organization::create([
             'name' => 'Ente de Turismo de Tucumán',

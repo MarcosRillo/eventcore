@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserRole;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -15,6 +16,13 @@ class UserSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
+    {
+        DB::transaction(function () {
+            $this->seedUsers();
+        });
+    }
+
+    private function seedUsers(): void
     {
         // Get role IDs
         $platformAdminRole = UserRole::where('role_code', 'platform_admin')->first();

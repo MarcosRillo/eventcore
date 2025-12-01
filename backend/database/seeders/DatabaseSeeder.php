@@ -25,13 +25,14 @@ class DatabaseSeeder extends Seeder
             OrganizationTypesSeeder::class,
             EventStatusesSeeder::class,
             EventTypesSeeder::class,
+            EventLookupSeeder::class,   // 3NF lookup tables (origins, themes, frequencies, etc.)
 
             // 2. Main tables with foreign key dependencies
             OrganizationSeeder::class,  // Uses org statuses and types
             UserSeeder::class,          // Uses user roles and organizations
             CategorySeeder::class,      // Uses organizations
             LocationSeeder::class,      // Uses organizations
-            EventSeeder::class,         // Uses all previous tables
+            EventSeeder::class,         // Uses all previous tables including 3NF lookups
 
             // 3. Optional: Additional test data for UI testing
             // Uncomment to seed 26 additional events for landing page testing

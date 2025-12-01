@@ -13,6 +13,13 @@ class UserRolesSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedRoles();
+        });
+    }
+
+    private function seedRoles(): void
+    {
         $roles = [
             [
                 'role_code' => 'platform_admin',

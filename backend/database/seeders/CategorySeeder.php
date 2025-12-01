@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Organization;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
@@ -13,6 +14,13 @@ class CategorySeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
+    {
+        DB::transaction(function () {
+            $this->seedCategories();
+        });
+    }
+
+    private function seedCategories(): void
     {
         // Get organizations
         $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();

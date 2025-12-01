@@ -3,29 +3,63 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
+use App\Models\EventFrequency;
+use App\Models\EventOrigin;
+use App\Models\EventRotationType;
 use App\Models\EventStatus;
+use App\Models\EventTheme;
 use App\Models\EventType;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Location;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class EventSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Creates sample events with proper 3NF relationships.
      */
     public function run(): void
     {
-        // Get event statuses and types
+        DB::transaction(function () {
+            $this->seedEvents();
+        });
+    }
+
+    /**
+     * Seed all events with their relationships.
+     */
+    private function seedEvents(): void
+    {
+        // Get event statuses
         $publishedStatus = EventStatus::where('status_code', 'published')->first();
         $approvedInternalStatus = EventStatus::where('status_code', 'approved_internal')->first();
         $pendingInternalStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
+
+        // Get event types
         $multiSedeType = EventType::where('type_code', 'multi_sede')->first();
         $sedeUnicaType = EventType::where('type_code', 'sede_unica')->first();
+
+        // Get 3NF lookup values
+        $originLocal = EventOrigin::where('code', 'local')->first();
+        $originNational = EventOrigin::where('code', 'national')->first();
+        $originInternational = EventOrigin::where('code', 'international')->first();
+
+        $themeCultural = EventTheme::where('code', 'cultural')->first();
+        $themeGastronomico = EventTheme::where('code', 'gastronomico')->first();
+        $themeDeportivo = EventTheme::where('code', 'deportivo')->first();
+        $themeNegocios = EventTheme::where('code', 'negocios')->first();
+
+        $frequencyUnico = EventFrequency::where('code', 'unico')->first();
+        $frequencyAnual = EventFrequency::where('code', 'anual')->first();
+
+        $rotationFijo = EventRotationType::where('code', 'fijo')->first();
+        $rotationRotativo = EventRotationType::where('code', 'rotativo')->first();
+
         // Get organizations and their admins
         $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
         $secretariaCultura = Organization::where('slug', 'secretaria-cultura')->first();
@@ -50,23 +84,27 @@ class EventSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(32)->setHour(23)->setMinute(0),
             'status_id' => $publishedStatus->id,
             'type_id' => $multiSedeType->id,
-            'cta_link' => 'https://festivalgatronomico.tuc.gov.ar/entradas',
-            'cta_text' => 'Comprar Entradas',
             'featured_image' => 'https://example.com/images/festival-gastronomico.jpg',
             'is_featured' => true,
-            'max_attendees' => 5000,
             'category_id' => $categoriasTurismo->where('slug', 'turismo-gastronomico')->first()?->id,
-            'organization_id' => $enteDeturismo->id, // Add organization_id for Ente
+            'organization_id' => $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
+            // 3NF fields
+            'origin_id' => $originLocal->id,
+            'theme_id' => $themeGastronomico->id,
+            'frequency_id' => $frequencyAnual->id,
+            'rotation_type_id' => $rotationFijo->id,
         ]);
 
         // Associate locations with the first tourism event
         if ($ubicacionesTurismo->count() > 0) {
-            $eventoTurismo1->locations()->attach([
-                $ubicacionesTurismo->first()->id => ['location_specific_notes' => 'Zona gastronómica principal'],
-                $ubicacionesTurismo->skip(1)->first()->id => ['location_specific_notes' => 'Escenario musical']
-            ]);
+            $locationIds = [];
+            $locationIds[$ubicacionesTurismo->first()->id] = ['location_specific_notes' => 'Zona gastronómica principal'];
+            if ($ubicacionesTurismo->count() > 1) {
+                $locationIds[$ubicacionesTurismo->skip(1)->first()->id] = ['location_specific_notes' => 'Escenario musical'];
+            }
+            $eventoTurismo1->locations()->attach($locationIds);
         }
 
         $eventoTurismo2 = Event::create([
@@ -76,15 +114,17 @@ class EventSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(15)->setHour(17)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
             'type_id' => $sedeUnicaType->id,
-            'cta_link' => 'https://aventuratucuman.com/inscripcion',
-            'cta_text' => 'Inscribirse',
             'featured_image' => 'https://example.com/images/cerro-san-javier.jpg',
             'is_featured' => false,
-            'max_attendees' => 50,
             'category_id' => $categoriasTurismo->where('slug', 'turismo-aventura')->first()?->id,
-            'organization_id' => $enteDeturismo->id, // Add organization_id for Ente
+            'organization_id' => $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
+            // 3NF fields
+            'origin_id' => $originLocal->id,
+            'theme_id' => $themeDeportivo->id,
+            'frequency_id' => $frequencyUnico->id,
+            'rotation_type_id' => $rotationFijo->id,
         ]);
 
         // Associate location with the second tourism event
@@ -103,11 +143,15 @@ class EventSeeder extends Seeder
             'type_id' => $sedeUnicaType->id,
             'featured_image' => 'https://example.com/images/ruta-dulce.jpg',
             'is_featured' => false,
-            'max_attendees' => 30,
             'category_id' => $categoriasTurismo->where('slug', 'turismo-rural')->first()?->id,
-            'organization_id' => $enteDeturismo->id, // Add organization_id for Ente
+            'organization_id' => $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
+            // 3NF fields
+            'origin_id' => $originLocal->id,
+            'theme_id' => $themeGastronomico->id,
+            'frequency_id' => $frequencyUnico->id,
+            'rotation_type_id' => $rotationFijo->id,
         ]);
 
         // Associate location with the third tourism event
@@ -117,7 +161,7 @@ class EventSeeder extends Seeder
             ]);
         }
 
-        // Events for Secretaría de Cultura - also add organization_id
+        // Events for Secretaría de Cultura
         $eventoCultura1 = Event::create([
             'title' => 'Gala de Danza Folclórica Argentina',
             'description' => 'Espectacular gala que presenta los mejores exponentes de la danza folclórica argentina, con la participación de grupos locales y nacionales. Una celebración de nuestras tradiciones culturales.',
@@ -125,15 +169,17 @@ class EventSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(20)->setHour(22)->setMinute(30),
             'status_id' => $publishedStatus->id,
             'type_id' => $sedeUnicaType->id,
-            'cta_link' => 'https://cultura.tuc.gov.ar/gala-folklorica',
-            'cta_text' => 'Reservar Lugar',
             'featured_image' => 'https://example.com/images/gala-folklorica.jpg',
             'is_featured' => true,
-            'max_attendees' => 200,
             'category_id' => $categoriasCultura->where('slug', 'artes-escenicas')->first()?->id,
-            'organization_id' => $secretariaCultura->id, // Add organization_id for Cultura
+            'organization_id' => $secretariaCultura->id,
             'entity_id' => $secretariaCultura->id,
             'created_by' => $entityAdminCultura->id,
+            // 3NF fields
+            'origin_id' => $originNational->id,
+            'theme_id' => $themeCultural->id,
+            'frequency_id' => $frequencyAnual->id,
+            'rotation_type_id' => $rotationFijo->id,
         ]);
 
         // Associate location with the first culture event
@@ -152,11 +198,15 @@ class EventSeeder extends Seeder
             'type_id' => $sedeUnicaType->id,
             'featured_image' => 'https://example.com/images/exposicion-patrimonio.jpg',
             'is_featured' => false,
-            'max_attendees' => null, // Sin límite específico para exposición
             'category_id' => $categoriasCultura->where('slug', 'patrimonio-cultural')->first()?->id,
-            'organization_id' => $secretariaCultura->id, // Add organization_id for Cultura
+            'organization_id' => $secretariaCultura->id,
             'entity_id' => $secretariaCultura->id,
             'created_by' => $entityAdminCultura->id,
+            // 3NF fields
+            'origin_id' => $originLocal->id,
+            'theme_id' => $themeCultural->id,
+            'frequency_id' => $frequencyUnico->id,
+            'rotation_type_id' => $rotationFijo->id,
         ]);
 
         // Associate location with the second culture event
@@ -172,75 +222,78 @@ class EventSeeder extends Seeder
         $centroVirla = Organization::where('name', 'LIKE', '%Virla%')->first();
 
         // Event from Sheraton Hotel (requires approval from Ente de Turismo)
-        $eventoSheraton = Event::create([
-            'title' => 'Cena de Gala San Valentín 2025',
-            'description' => 'Elegante cena de gala para celebrar San Valentín en el hotel más exclusivo de Tucumán. Incluye menú gourmet de cinco tiempos, música en vivo y vista panorámica de la ciudad.',
-            'start_date' => Carbon::now()->addDays(25)->setHour(20)->setMinute(0),
-            'end_date' => Carbon::now()->addDays(25)->setHour(23)->setMinute(30),
-            'status_id' => $pendingInternalStatus->id, // Requires approval from entity_admin
-            'type_id' => $sedeUnicaType->id,
-            'cta_link' => 'https://sheraton.com/tucuman/san-valentin',
-            'cta_text' => 'Reservar Mesa',
-            'featured_image' => 'https://example.com/images/cena-san-valentin.jpg',
-            'is_featured' => false,
-            'max_attendees' => 80,
-            'organization_id' => $sheratonHotel->id, // External organization
-            'entity_id' => $enteDeturismo->id, // Supervised by Ente de Turismo
-            'created_by' => null, // Created by organization, not entity admin
-            'category_id' => $categoriasTurismo->where('slug', 'turismo-gastronomico')->first()?->id,
-        ]);
+        if ($sheratonHotel) {
+            Event::create([
+                'title' => 'Cena de Gala San Valentín 2025',
+                'description' => 'Elegante cena de gala para celebrar San Valentín en el hotel más exclusivo de Tucumán. Incluye menú gourmet de cinco tiempos, música en vivo y vista panorámica de la ciudad.',
+                'start_date' => Carbon::now()->addDays(25)->setHour(20)->setMinute(0),
+                'end_date' => Carbon::now()->addDays(25)->setHour(23)->setMinute(30),
+                'status_id' => $pendingInternalStatus->id,
+                'type_id' => $sedeUnicaType->id,
+                'featured_image' => 'https://example.com/images/cena-san-valentin.jpg',
+                'is_featured' => false,
+                'organization_id' => $sheratonHotel->id,
+                'entity_id' => $enteDeturismo->id,
+                'created_by' => null,
+                'category_id' => $categoriasTurismo->where('slug', 'turismo-gastronomico')->first()?->id,
+                // 3NF fields
+                'origin_id' => $originLocal->id,
+                'theme_id' => $themeGastronomico->id,
+                'frequency_id' => $frequencyAnual->id,
+                'rotation_type_id' => $rotationFijo->id,
+            ]);
+        }
 
         // Event from La Rural (approved internally, ready for public approval)
-        $eventoRural = Event::create([
-            'title' => 'Feria Agropecuaria del Norte 2025',
-            'description' => 'Gran feria que reúne a productores agropecuarios del norte argentino. Exposición de ganado, maquinaria agrícola, productos regionales y conferencias técnicas del sector.',
-            'start_date' => Carbon::now()->addDays(50)->setHour(8)->setMinute(0),
-            'end_date' => Carbon::now()->addDays(53)->setHour(18)->setMinute(0),
-            'status_id' => $approvedInternalStatus->id, // Approved internally, pending publication
-            'type_id' => $multiSedeType->id,
-            'cta_link' => 'https://larural.org.ar/feria-norte',
-            'cta_text' => 'Ver Cronograma',
-            'featured_image' => 'https://example.com/images/feria-agropecuaria.jpg',
-            'is_featured' => true,
-            'max_attendees' => 2000,
-            'organization_id' => $laRural->id, // External organization
-            'entity_id' => $enteDeturismo->id, // Supervised by Ente de Turismo
-            'created_by' => null, // Created by organization
-            'category_id' => $categoriasTurismo->where('slug', 'turismo-rural')->first()?->id,
-        ]);
+        if ($laRural) {
+            Event::create([
+                'title' => 'Feria Agropecuaria del Norte 2025',
+                'description' => 'Gran feria que reúne a productores agropecuarios del norte argentino. Exposición de ganado, maquinaria agrícola, productos regionales y conferencias técnicas del sector.',
+                'start_date' => Carbon::now()->addDays(50)->setHour(8)->setMinute(0),
+                'end_date' => Carbon::now()->addDays(53)->setHour(18)->setMinute(0),
+                'status_id' => $approvedInternalStatus->id,
+                'type_id' => $multiSedeType->id,
+                'featured_image' => 'https://example.com/images/feria-agropecuaria.jpg',
+                'is_featured' => true,
+                'organization_id' => $laRural->id,
+                'entity_id' => $enteDeturismo->id,
+                'created_by' => null,
+                'category_id' => $categoriasTurismo->where('slug', 'turismo-rural')->first()?->id,
+                // 3NF fields
+                'origin_id' => $originNational->id,
+                'theme_id' => $themeNegocios->id,
+                'frequency_id' => $frequencyAnual->id,
+                'rotation_type_id' => $rotationRotativo->id,
+            ]);
+        }
 
         // Event from Centro Cultural Virla (published external event)
-        $eventoVirla = Event::create([
-            'title' => 'Muestra de Arte Contemporáneo Tucumano',
-            'description' => 'Exhibición de obras de artistas contemporáneos tucumanos emergentes. Incluye pintura, escultura, fotografía y nuevos medios digitales.',
-            'start_date' => Carbon::now()->addDays(12)->setHour(18)->setMinute(0),
-            'end_date' => Carbon::now()->addDays(35)->setHour(21)->setMinute(0),
-            'status_id' => $publishedStatus->id, // Already approved and published
-            'type_id' => $sedeUnicaType->id,
-            'cta_link' => 'https://centrovirla.org/arte-contemporaneo',
-            'cta_text' => 'Más Información',
-            'featured_image' => 'https://example.com/images/arte-contemporaneo.jpg',
-            'is_featured' => false,
-            'max_attendees' => null,
-            'organization_id' => $centroVirla->id, // External organization
-            'entity_id' => $secretariaCultura->id, // Supervised by Secretaría de Cultura
-            'created_by' => null, // Created by organization
-            'category_id' => $categoriasCultura->where('slug', 'patrimonio-cultural')->first()?->id,
-        ]);
+        if ($centroVirla) {
+            Event::create([
+                'title' => 'Muestra de Arte Contemporáneo Tucumano',
+                'description' => 'Exhibición de obras de artistas contemporáneos tucumanos emergentes. Incluye pintura, escultura, fotografía y nuevos medios digitales.',
+                'start_date' => Carbon::now()->addDays(12)->setHour(18)->setMinute(0),
+                'end_date' => Carbon::now()->addDays(35)->setHour(21)->setMinute(0),
+                'status_id' => $publishedStatus->id,
+                'type_id' => $sedeUnicaType->id,
+                'featured_image' => 'https://example.com/images/arte-contemporaneo.jpg',
+                'is_featured' => false,
+                'organization_id' => $centroVirla->id,
+                'entity_id' => $secretariaCultura->id,
+                'created_by' => null,
+                'category_id' => $categoriasCultura->where('slug', 'patrimonio-cultural')->first()?->id,
+                // 3NF fields
+                'origin_id' => $originLocal->id,
+                'theme_id' => $themeCultural->id,
+                'frequency_id' => $frequencyUnico->id,
+                'rotation_type_id' => $rotationFijo->id,
+            ]);
+        }
 
         $this->command->info('Events created successfully!');
-        $this->command->info('- 3 events created for Ente de Turismo (Internal):');
-        $this->command->info('  * Festival Gastronómico (Published)');
-        $this->command->info('  * Expedición Aventura (Approved Internal)');
-        $this->command->info('  * Ruta del Dulce (Pending Internal Approval)');
-        $this->command->info('- 2 events created for Secretaría de Cultura (Internal):');
-        $this->command->info('  * Gala de Danza Folclórica (Published)');
-        $this->command->info('  * Exposición Patrimonio (Approved Internal)');
-        $this->command->info('- 3 events created by External Organizations:');
-        $this->command->info('  * Cena San Valentín - Sheraton (Pending Internal Approval)');
-        $this->command->info('  * Feria Agropecuaria - La Rural (Approved Internal)');
-        $this->command->info('  * Arte Contemporáneo - Centro Virla (Published)');
-        $this->command->info('- Events differentiated by ownership for approval workflow testing');
-        $this->command->info('- All events have proper category and location associations');
+        $this->command->info('- 3 events created for Ente de Turismo (Internal)');
+        $this->command->info('- 2 events created for Secretaría de Cultura (Internal)');
+        $this->command->info('- 3 events created by External Organizations');
+        $this->command->info('- All events have 3NF lookup relationships (origin, theme, frequency, rotation_type)');
     }
 }

@@ -9,8 +9,9 @@ use App\Models\Organization;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Landing Test Seeder
@@ -25,6 +26,13 @@ class LandingTestSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
+    {
+        DB::transaction(function () {
+            $this->seedLandingTestData();
+        });
+    }
+
+    private function seedLandingTestData(): void
     {
         $this->command->info('🎨 Seeding data for Landing Page UI testing...');
 

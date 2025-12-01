@@ -13,6 +13,13 @@ class EventTypesSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedTypes();
+        });
+    }
+
+    private function seedTypes(): void
+    {
         $types = [
             [
                 'type_code' => 'sede_unica',

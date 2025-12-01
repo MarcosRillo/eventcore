@@ -13,6 +13,13 @@ class OrganizationTypesSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedTypes();
+        });
+    }
+
+    private function seedTypes(): void
+    {
         $types = [
             [
                 'type_code' => 'primary_entity',

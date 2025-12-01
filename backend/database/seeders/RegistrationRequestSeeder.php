@@ -18,6 +18,13 @@ class RegistrationRequestSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedRegistrationRequests();
+        });
+    }
+
+    private function seedRegistrationRequests(): void
+    {
         // Ensure required lookup data exists
         $this->ensureLookupDataExists();
 

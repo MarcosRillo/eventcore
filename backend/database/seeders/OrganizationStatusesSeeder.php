@@ -13,6 +13,13 @@ class OrganizationStatusesSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::transaction(function () {
+            $this->seedStatuses();
+        });
+    }
+
+    private function seedStatuses(): void
+    {
         $statuses = [
             [
                 'status_code' => 'active',
