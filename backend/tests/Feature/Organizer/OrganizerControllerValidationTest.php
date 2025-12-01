@@ -4,6 +4,7 @@ namespace Tests\Feature\Organizer;
 
 use App\Models\Category;
 use App\Models\Event;
+use App\Models\EventOrigin;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -14,14 +15,9 @@ use Tests\TestCase;
 /**
  * Comprehensive validation tests for OrganizerController
  *
- * Validates all 34 extended fields plus base fields for:
- * - Required/optional constraints
- * - Data types
- * - String lengths
- * - URL formats
- * - Date formats
- * - Numeric ranges
- * - Array structures
+ * Updated for 3NF normalized schema (Nov 30, 2025).
+ * Tests validation for normalized fields (FK references)
+ * instead of denormalized string fields.
  */
 class OrganizerControllerValidationTest extends TestCase
 {
@@ -37,6 +33,7 @@ class OrganizerControllerValidationTest extends TestCase
         $this->seed(\Database\Seeders\EventTypesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(\Database\Seeders\EventLookupSeeder::class);
     }
 
     /**
@@ -62,23 +59,11 @@ class OrganizerControllerValidationTest extends TestCase
     }
 
     /**
-     * Get a valid type_id, creating one if necessary
+     * Get a valid type_id
      */
     private function getValidTypeId(): int
     {
-        $typeId = \DB::table('event_types')->value('id');
-
-        if (!$typeId) {
-            $typeId = \DB::table('event_types')->insertGetId([
-                'type_name' => 'Test Event Type',
-                'type_code' => 'test_type',
-                'description' => 'Test type for unit tests',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        return $typeId;
+        return \DB::table('event_types')->value('id') ?? 1;
     }
 
     /**
@@ -193,58 +178,6 @@ class OrganizerControllerValidationTest extends TestCase
         $response->assertJsonValidationErrors(['edition_number']);
     }
 
-    #[Test]
-    public function test_validation_fails_when_event_type_exceeds_max_length(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['event_type'] = str_repeat('a', 101); // Max is 100
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['event_type']);
-    }
-
-    #[Test]
-    public function test_validation_fails_when_venue_exceeds_max_length(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['venue'] = str_repeat('a', 256); // Max is 255
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['venue']);
-    }
-
-    #[Test]
-    public function test_validation_fails_when_city_exceeds_max_length(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['city'] = str_repeat('a', 101); // Max is 100
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['city']);
-    }
-
-    #[Test]
-    public function test_validation_fails_when_producer_exceeds_max_length(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['producer'] = str_repeat('a', 256); // Max is 255
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['producer']);
-    }
-
     // ==================== URL FORMAT VALIDATIONS ====================
 
     #[Test]
@@ -271,32 +204,6 @@ class OrganizerControllerValidationTest extends TestCase
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
         $response->assertStatus(201);
-    }
-
-    #[Test]
-    public function test_validation_fails_for_invalid_virtual_link_url(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['virtual_link'] = 'invalid-url';
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['virtual_link']);
-    }
-
-    #[Test]
-    public function test_validation_fails_for_invalid_cta_link_url(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['cta_link'] = 'not-a-url';
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['cta_link']);
     }
 
     // ==================== DATE VALIDATIONS ====================
@@ -384,32 +291,6 @@ class OrganizerControllerValidationTest extends TestCase
         $response->assertJsonValidationErrors(['international_attendance']);
     }
 
-    #[Test]
-    public function test_validation_fails_for_negative_max_attendees(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['max_attendees'] = -50;
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['max_attendees']);
-    }
-
-    #[Test]
-    public function test_validation_fails_for_zero_max_attendees(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['max_attendees'] = 0; // Min is 1
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['max_attendees']);
-    }
-
     // ==================== BOOLEAN VALIDATIONS ====================
 
     #[Test]
@@ -417,10 +298,7 @@ class OrganizerControllerValidationTest extends TestCase
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        $payload['coffee_break'] = true;
-        $payload['lunch_catering'] = false;
-        $payload['dinner_catering'] = true;
-        $payload['virtual_transmission'] = false;
+        $payload['virtual_transmission'] = true;
         $payload['type_id'] = $this->getValidTypeId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
@@ -428,10 +306,7 @@ class OrganizerControllerValidationTest extends TestCase
         $response->assertStatus(201);
 
         $event = Event::find($response->json('event.id'));
-        $this->assertTrue($event->coffee_break);
-        $this->assertFalse($event->lunch_catering);
-        $this->assertTrue($event->dinner_catering);
-        $this->assertFalse($event->virtual_transmission);
+        $this->assertTrue($event->virtual_transmission);
     }
 
     // ==================== ARRAY VALIDATIONS ====================
@@ -475,76 +350,89 @@ class OrganizerControllerValidationTest extends TestCase
         $response->assertJsonValidationErrors(['category_id']);
     }
 
-    // ==================== ASYNCHRONOUS DATES VALIDATIONS ====================
+    // ==================== FK VALIDATIONS (3NF NORMALIZED) ====================
 
     #[Test]
-    public function test_validation_fails_when_asynchronous_dates_missing_date_field(): void
+    public function test_validation_fails_for_invalid_origin_id(): void
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        $payload['asynchronous_dates'] = [
-            ['start_time' => '09:00', 'end_time' => '17:00'] // Missing 'date'
+        $payload['origin_id'] = 99999; // Non-existent origin
+
+        $response = $this->postJson('/api/v1/organizer/events', $payload);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['origin_id']);
+    }
+
+    #[Test]
+    public function test_validation_passes_for_valid_origin_id(): void
+    {
+        $user = $this->createAuthenticatedUser();
+        $payload = $this->getMinimalPayload($user);
+        $payload['origin_id'] = EventOrigin::where('code', 'national')->first()->id;
+        $payload['type_id'] = $this->getValidTypeId();
+
+        $response = $this->postJson('/api/v1/organizer/events', $payload);
+
+        $response->assertStatus(201);
+    }
+
+    #[Test]
+    public function test_validation_fails_for_invalid_producer_id(): void
+    {
+        $user = $this->createAuthenticatedUser();
+        $payload = $this->getMinimalPayload($user);
+        $payload['producer_id'] = 99999; // Non-existent organization
+
+        $response = $this->postJson('/api/v1/organizer/events', $payload);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['producer_id']);
+    }
+
+    #[Test]
+    public function test_validation_passes_for_valid_producer_id(): void
+    {
+        $user = $this->createAuthenticatedUser();
+        $payload = $this->getMinimalPayload($user);
+        $producer = Organization::factory()->create();
+        $payload['producer_id'] = $producer->id;
+        $payload['type_id'] = $this->getValidTypeId();
+
+        $response = $this->postJson('/api/v1/organizer/events', $payload);
+
+        $response->assertStatus(201);
+
+        $event = Event::find($response->json('event.id'));
+        $this->assertEquals($producer->id, $event->producer_id);
+    }
+
+    // ==================== ASYNC DATES VALIDATIONS (NORMALIZED) ====================
+
+    #[Test]
+    public function test_validation_fails_when_async_dates_missing_date_field(): void
+    {
+        $user = $this->createAuthenticatedUser();
+        $payload = $this->getMinimalPayload($user);
+        $payload['async_dates'] = [
+            ['notes' => 'Some notes'] // Missing 'date'
         ];
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['asynchronous_dates.0.date']);
+        $response->assertJsonValidationErrors(['async_dates.0.date']);
     }
 
     #[Test]
-    public function test_validation_fails_when_asynchronous_dates_missing_start_time(): void
+    public function test_validation_passes_for_valid_async_dates(): void
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        $payload['asynchronous_dates'] = [
-            ['date' => '2025-12-01', 'end_time' => '17:00'] // Missing 'start_time'
-        ];
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['asynchronous_dates.0.start_time']);
-    }
-
-    #[Test]
-    public function test_validation_fails_when_asynchronous_dates_missing_end_time(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['asynchronous_dates'] = [
-            ['date' => '2025-12-01', 'start_time' => '09:00'] // Missing 'end_time'
-        ];
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['asynchronous_dates.0.end_time']);
-    }
-
-    #[Test]
-    public function test_validation_fails_for_invalid_time_format_in_asynchronous_dates(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['asynchronous_dates'] = [
-            ['date' => '2025-12-01', 'start_time' => '9am', 'end_time' => '5pm'] // Invalid format
-        ];
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['asynchronous_dates.0.start_time', 'asynchronous_dates.0.end_time']);
-    }
-
-    #[Test]
-    public function test_validation_passes_for_valid_asynchronous_dates(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['asynchronous_dates'] = [
-            ['date' => '2025-12-01', 'start_time' => '09:00', 'end_time' => '13:00'],
-            ['date' => '2025-12-03', 'start_time' => '14:00', 'end_time' => '18:00']
+        $payload['async_dates'] = [
+            ['date' => '2025-12-01', 'notes' => 'Day 1 notes'],
+            ['date' => '2025-12-03', 'notes' => 'Day 2 notes']
         ];
         $payload['type_id'] = $this->getValidTypeId();
 
@@ -553,7 +441,7 @@ class OrganizerControllerValidationTest extends TestCase
         $response->assertStatus(201);
 
         $event = Event::find($response->json('event.id'));
-        $this->assertCount(2, $event->asynchronous_dates);
+        $this->assertCount(2, $event->asyncDates);
     }
 
     // ==================== OPTIONAL FIELDS TESTS ====================
@@ -564,25 +452,21 @@ class OrganizerControllerValidationTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
 
-        // Explicitly set all optional fields to null
+        // Explicitly set all optional FK fields to null
         $payload['edition_number'] = null;
-        $payload['event_type'] = null;
-        $payload['event_subtype'] = null;
-        $payload['origin'] = null;
-        $payload['theme'] = null;
-        $payload['frequency'] = null;
-        $payload['rotation_type'] = null;
-        $payload['venue'] = null;
-        $payload['city'] = null;
-        $payload['rooms_used'] = null;
+        $payload['subtype_id'] = null;
+        $payload['origin_id'] = null;
+        $payload['theme_id'] = null;
+        $payload['frequency_id'] = null;
+        $payload['rotation_type_id'] = null;
+        $payload['producer_id'] = null;
         $payload['maps_url'] = null;
         $payload['previous_venue'] = null;
         $payload['next_venue'] = null;
-        $payload['asynchronous_dates'] = null;
+        $payload['async_dates'] = null;
         $payload['local_attendance'] = null;
         $payload['national_attendance'] = null;
         $payload['international_attendance'] = null;
-        $payload['producer'] = null;
         $payload['event_website'] = null;
         $payload['logo_url'] = null;
         $payload['responsive_image_url'] = null;
@@ -594,8 +478,8 @@ class OrganizerControllerValidationTest extends TestCase
 
         $event = Event::find($response->json('event.id'));
         $this->assertNull($event->edition_number);
-        $this->assertNull($event->venue);
-        $this->assertNull($event->producer);
+        $this->assertNull($event->origin_id);
+        $this->assertNull($event->producer_id);
     }
 
     #[Test]
@@ -613,8 +497,7 @@ class OrganizerControllerValidationTest extends TestCase
 
         $event = Event::find($response->json('event.id'));
         $this->assertNull($event->edition_number);
-        $this->assertNull($event->venue);
-        $this->assertFalse($event->coffee_break);
+        $this->assertNull($event->origin_id);
         $this->assertFalse($event->virtual_transmission);
     }
 }

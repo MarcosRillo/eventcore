@@ -12,7 +12,7 @@ use App\Models\EventType;
  * Store Event Request
  *
  * Validation rules for creating new events.
- * Handles complex validation including location consistency and date validation.
+ * Updated for 3NF normalized schema (Nov 30, 2025).
  */
 class StoreEventRequest extends FormRequest
 {
@@ -32,6 +32,7 @@ class StoreEventRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Core required fields
             'title' => [
                 'required',
                 'string',
@@ -63,70 +64,30 @@ class StoreEventRequest extends FormRequest
                 'integer',
                 Rule::exists('event_types', 'id'),
             ],
-            'virtual_link' => [
-                'nullable',
-                'url',
-                'max:500',
-            ],
-            'cta_link' => [
-                'nullable',
-                'url',
-                'max:500',
-            ],
-            'cta_text' => [
-                'nullable',
-                'string',
-                'max:100',
-                'required_with:cta_link',
-            ],
-            'metadata' => [
-                'nullable',
-                'array',
-            ],
-            'featured_image' => [
-                'nullable',
-                'string',
-                'max:500',
-            ],
-            'is_featured' => [
-                'nullable',
-                'boolean',
-            ],
-            'max_attendees' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:100000',
-            ],
             'category_id' => [
                 'nullable',
                 'integer',
                 Rule::exists('categories', 'id')->where(function ($query) {
                     $user = $this->user();
                     if ($user) {
-                        // Get the user's organization ID using the same logic as TenantScope
                         $organization = $user->organizations()->first();
                         if ($organization) {
                             $query->where('entity_id', $organization->id);
                         } else {
-                            // If user has no organizations, make validation fail
                             $query->where('id', null);
                         }
                     } else {
-                        // If no user, make validation fail
                         $query->where('id', null);
                     }
                 }),
             ],
-            'location_text' => [
-                'nullable',
-                'string',
-                'max:1000',
-            ],
+
+            // Locations (required at least one)
             'location_ids' => [
-                'nullable',
+                'required',
                 'array',
-                'max:10', // Maximum 10 locations per event
+                'min:1',
+                'max:10',
             ],
             'location_ids.*' => [
                 'integer',
@@ -144,6 +105,50 @@ class StoreEventRequest extends FormRequest
                     }
                 }),
             ],
+
+            // Basic information
+            'edition_number' => 'nullable|string|max:100',
+
+            // Normalized FKs (Nov 30, 2025)
+            'subtype_id' => 'nullable|exists:event_subtypes,id',
+            'origin_id' => 'nullable|exists:event_origins,id',
+            'theme_id' => 'nullable|exists:event_themes,id',
+            'frequency_id' => 'nullable|exists:event_frequencies,id',
+            'rotation_type_id' => 'nullable|exists:event_rotation_types,id',
+            'producer_id' => 'nullable|exists:organizations,id',
+
+            // Services and Rooms (many-to-many)
+            'service_ids' => 'nullable|array',
+            'service_ids.*' => 'exists:event_services,id',
+            'room_ids' => 'nullable|array',
+            'room_ids.*' => 'exists:event_rooms,id',
+
+            // Location info
+            'maps_url' => 'nullable|string',
+            'previous_venue' => 'nullable|string|max:255',
+            'next_venue' => 'nullable|string|max:255',
+
+            // Async dates (normalized table)
+            'async_dates' => 'nullable|array',
+            'async_dates.*.date' => 'required_with:async_dates|date',
+            'async_dates.*.notes' => 'nullable|string|max:500',
+
+            // Attendance
+            'local_attendance' => 'nullable|integer|min:0',
+            'national_attendance' => 'nullable|integer|min:0',
+            'international_attendance' => 'nullable|integer|min:0',
+            'virtual_transmission' => 'nullable|boolean',
+
+            // Additional info
+            'event_website' => 'nullable|url|max:500',
+
+            // Images
+            'featured_image' => 'nullable|string|max:500',
+            'logo_url' => 'nullable|string|max:500',
+            'responsive_image_url' => 'nullable|string|max:500',
+            'is_featured' => 'nullable|boolean',
+
+            // Entity/Organization
             'entity_id' => [
                 'required',
                 'integer',
@@ -177,15 +182,10 @@ class StoreEventRequest extends FormRequest
             'status_id.exists' => 'El estado seleccionado no es válido.',
             'type_id.required' => 'El tipo de evento es obligatorio.',
             'type_id.exists' => 'El tipo de evento seleccionado no es válido.',
-            'virtual_link.url' => 'El enlace virtual debe ser una URL válida.',
-            'cta_link.url' => 'El enlace de call-to-action debe ser una URL válida.',
-            'cta_text.required_with' => 'El texto del call-to-action es obligatorio cuando se proporciona un enlace.',
-            'max_attendees.min' => 'El número máximo de asistentes debe ser al menos 1.',
-            'max_attendees.max' => 'El número máximo de asistentes no puede exceder 100,000.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
-            'location_text.string' => 'La ubicación debe ser texto.',
-            'location_text.max' => 'La ubicación no puede exceder 1000 caracteres.',
+            'location_ids.required' => 'Debe seleccionar al menos una ubicación.',
             'location_ids.array' => 'Las ubicaciones deben ser un array.',
+            'location_ids.min' => 'Debe seleccionar al menos una ubicación.',
             'location_ids.max' => 'No puede seleccionar más de 10 ubicaciones.',
             'location_ids.*.integer' => 'Los IDs de ubicación deben ser números enteros.',
             'location_ids.*.exists' => 'Una o más ubicaciones seleccionadas no existen.',
@@ -198,62 +198,8 @@ class StoreEventRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            $this->validateLocationConsistency($validator);
             $this->validateDateRange($validator);
         });
-    }
-
-    /**
-     * Validate that event type is consistent with location data.
-     */
-    protected function validateLocationConsistency($validator): void
-    {
-        $typeId = $this->input('type_id');
-        $eventType = EventType::find($typeId);
-        $typeCode = $eventType?->type_code;
-        $locationText = $this->input('location_text');
-        $locationIds = $this->input('location_ids');
-
-        // At least one location method must be provided
-        if (empty($locationText) && empty($locationIds)) {
-            $validator->errors()->add(
-                'location_text',
-                'Debe proporcionar al menos una ubicación (texto libre o ubicaciones estructuradas).'
-            );
-            $validator->errors()->add(
-                'location_ids',
-                'Debe proporcionar al menos una ubicación (texto libre o ubicaciones estructuradas).'
-            );
-            return;
-        }
-
-        // Cannot use both methods simultaneously
-        if (!empty($locationText) && !empty($locationIds)) {
-            $validator->errors()->add(
-                'location_text',
-                'No puede usar ubicación de texto libre y ubicaciones estructuradas al mismo tiempo.'
-            );
-            $validator->errors()->add(
-                'location_ids',
-                'No puede usar ubicación de texto libre y ubicaciones estructuradas al mismo tiempo.'
-            );
-            return;
-        }
-
-        // Validate consistency with event type
-        if ($typeCode === 'sede_unica' && !empty($locationIds) && count($locationIds) > 1) {
-            $validator->errors()->add(
-                'location_ids',
-                'Los eventos de sede única solo pueden tener una ubicación estructurada.'
-            );
-        }
-
-        if ($typeCode === 'multi_sede' && !empty($locationIds) && count($locationIds) === 1) {
-            $validator->errors()->add(
-                'type_id',
-                'Los eventos multi-sede requieren múltiples ubicaciones o usar texto libre.'
-            );
-        }
     }
 
     /**

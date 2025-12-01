@@ -6,9 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Form Request for updating organizer events.
+ * Updated for 3NF normalized schema (Nov 30, 2025).
  * Validates all required and optional fields for event updates.
- * Note: Unlike StoreOrganizerEventRequest, start_date doesn't require after_or_equal:today
- * since we're updating existing events that may have already passed validation.
  */
 class UpdateOrganizerEventRequest extends FormRequest
 {
@@ -39,33 +38,33 @@ class UpdateOrganizerEventRequest extends FormRequest
 
             // Basic information
             'edition_number' => 'nullable|string|max:100',
-            'event_type' => 'nullable|string|max:100',
-            'event_subtype' => 'nullable|string|max:100',
-            'origin' => 'nullable|string|max:100',
-            'theme' => 'nullable|string|max:100',
-            'frequency' => 'nullable|string|max:100',
-            'rotation_type' => 'nullable|string|max:100',
+            'type_id' => 'nullable|exists:event_types,id',
 
-            // Catering services
-            'coffee_break' => 'nullable|boolean',
-            'lunch_catering' => 'nullable|boolean',
-            'dinner_catering' => 'nullable|boolean',
-            'pre_event_package' => 'nullable|boolean',
-            'post_event_package' => 'nullable|boolean',
+            // Normalized FKs (Nov 30, 2025)
+            'subtype_id' => 'nullable|exists:event_subtypes,id',
+            'origin_id' => 'nullable|exists:event_origins,id',
+            'theme_id' => 'nullable|exists:event_themes,id',
+            'frequency_id' => 'nullable|exists:event_frequencies,id',
+            'rotation_type_id' => 'nullable|exists:event_rotation_types,id',
+            'producer_id' => 'nullable|exists:organizations,id',
 
-            // Location
-            'venue' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'rooms_used' => 'nullable|string|max:255',
+            // Services (array of service IDs)
+            'service_ids' => 'nullable|array',
+            'service_ids.*' => 'exists:event_services,id',
+
+            // Rooms (array of room IDs)
+            'room_ids' => 'nullable|array',
+            'room_ids.*' => 'exists:event_rooms,id',
+
+            // Location info
             'maps_url' => 'nullable|string',
             'previous_venue' => 'nullable|string|max:255',
             'next_venue' => 'nullable|string|max:255',
 
-            // Asynchronous dates
-            'asynchronous_dates' => 'nullable|array',
-            'asynchronous_dates.*.date' => 'required_with:asynchronous_dates|date',
-            'asynchronous_dates.*.start_time' => 'required_with:asynchronous_dates|date_format:H:i',
-            'asynchronous_dates.*.end_time' => 'required_with:asynchronous_dates|date_format:H:i',
+            // Asynchronous dates (normalized to separate table)
+            'async_dates' => 'nullable|array',
+            'async_dates.*.date' => 'required_with:async_dates|date',
+            'async_dates.*.notes' => 'nullable|string|max:500',
 
             // Attendance
             'local_attendance' => 'nullable|integer|min:0',
@@ -74,21 +73,12 @@ class UpdateOrganizerEventRequest extends FormRequest
             'virtual_transmission' => 'nullable|boolean',
 
             // Additional information
-            'producer' => 'nullable|string|max:255',
             'event_website' => 'nullable|url|max:500',
 
             // Images
             'logo_url' => 'nullable|string|max:500',
             'featured_image' => 'nullable|string|max:500',
             'responsive_image_url' => 'nullable|string|max:500',
-
-            // Legacy fields
-            'type_id' => 'nullable|exists:event_types,id',
-            'max_attendees' => 'nullable|integer|min:1',
-            'virtual_link' => 'nullable|url',
-            'cta_link' => 'nullable|url',
-            'cta_text' => 'nullable|string|max:255',
         ];
     }
-
 }

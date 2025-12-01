@@ -5,6 +5,7 @@ namespace Tests\Feature\Organizer;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\EventOrigin;
 use App\Models\Location;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -12,14 +13,10 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests for OrganizerController@update() method with all 34 extended fields
+ * Tests for OrganizerController@update() method
  *
- * This test suite verifies that the update() method:
- * - Updates events with all 34 fields
- * - Enforces security (organization ownership, editable status)
- * - Validates all required and optional fields
- * - Syncs locations correctly
- * - Handles asynchronous_dates JSON properly
+ * Updated for 3NF normalized schema (Nov 30, 2025).
+ * Tests update with normalized FK fields instead of denormalized strings.
  */
 class OrganizerControllerUpdateTest extends TestCase
 {
@@ -35,10 +32,10 @@ class OrganizerControllerUpdateTest extends TestCase
         $this->seed(\Database\Seeders\EventTypesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(\Database\Seeders\EventLookupSeeder::class);
 
-        // Create tourism entity (id=1) that owns shared resources (locations, categories)
-        // Required for TenantScope which filters locations to entity_id = 1
-        \DB::table('organizations')->insert([
+        // Create tourism entity (id=1) that owns shared resources
+        \DB::table('organizations')->insertOrIgnore([
             'id' => 1,
             'name' => 'Ente de Turismo de Tucumán',
             'slug' => 'ente-turismo-tucuman',
@@ -52,8 +49,8 @@ class OrganizerControllerUpdateTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        // Reset sequence to avoid id collision with factory-created organizations
-        \DB::statement('ALTER SEQUENCE organizations_id_seq RESTART WITH 2');
+        // Reset sequence to avoid id collision
+        \DB::statement('ALTER SEQUENCE organizations_id_seq RESTART WITH 100');
     }
 
     /**
@@ -65,7 +62,6 @@ class OrganizerControllerUpdateTest extends TestCase
         $organization = Organization::factory()->create();
         $user->organizations()->attach($organization->id);
 
-        // Assign 'organizer_admin' role
         $organizerRole = \DB::table('user_roles')->where('role_code', 'organizer_admin')->first();
         if ($organizerRole) {
             $user->role_id = $organizerRole->id;
@@ -106,28 +102,16 @@ class OrganizerControllerUpdateTest extends TestCase
      */
     private function getValidTypeId(): int
     {
-        $typeId = \DB::table('event_types')->value('id');
-
-        if (!$typeId) {
-            $typeId = \DB::table('event_types')->insertGetId([
-                'type_name' => 'Test Event Type',
-                'type_code' => 'test_type',
-                'description' => 'Test type',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        return $typeId;
+        return \DB::table('event_types')->value('id') ?? 1;
     }
 
     #[Test]
-    public function test_updates_event_with_all_34_extended_fields_successfully(): void
+    public function test_updates_event_with_all_normalized_fields_successfully(): void
     {
         // Arrange: Create event with minimal data
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create();
-        $location = Location::factory()->create();
+        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
+        $location = Location::factory()->create(['entity_id' => 1]);
 
         $event = Event::factory()->create([
             'organization_id' => $user->organization_id,
@@ -144,8 +128,10 @@ class OrganizerControllerUpdateTest extends TestCase
         $newCategory = Category::factory()->create(['entity_id' => $user->organization_id]);
         $newLocation1 = Location::factory()->create(['entity_id' => 1]);
         $newLocation2 = Location::factory()->create(['entity_id' => 1]);
+        $producer = Organization::factory()->create(['name' => 'Producer Org']);
+        $originId = EventOrigin::where('code', 'national')->first()->id;
 
-        // Update payload with all 34 fields
+        // Update payload with normalized fields
         $updatePayload = [
             'title' => 'Updated: Congreso Internacional de Turismo 2025',
             'description' => 'Updated: Evento anual renovado',
@@ -155,47 +141,32 @@ class OrganizerControllerUpdateTest extends TestCase
             'location_ids' => [$newLocation1->id, $newLocation2->id],
             'type_id' => $this->getValidTypeId(),
 
-            // Basic Information (7 fields)
+            // Normalized FK fields
             'edition_number' => '16va Edición',
-            'event_type' => 'Congreso Actualizado',
-            'event_subtype' => 'Regional',
-            'origin' => 'Internacional',
-            'theme' => 'Turismo Digital',
-            'frequency' => 'Bienal',
-            'rotation_type' => 'Fijo',
+            'origin_id' => $originId,
+            'producer_id' => $producer->id,
 
-            // Catering Services (5 fields)
-            'coffee_break' => false,
-            'lunch_catering' => true,
-            'dinner_catering' => true,
-            'pre_event_package' => false,
-            'post_event_package' => true,
-
-            // Location (6 fields)
-            'venue' => 'Centro Cultural Actualizado',
-            'city' => 'Buenos Aires',
-            'rooms_used' => 'Auditorio Principal',
+            // Location info (kept in events)
             'maps_url' => 'https://maps.google.com/?q=-34.6037,-58.3816',
             'previous_venue' => 'Palacio de Congresos',
             'next_venue' => 'Expo Centro',
 
-            // Asynchronous Dates (1 field)
-            'asynchronous_dates' => [
-                ['date' => '2025-12-10', 'start_time' => '10:00', 'end_time' => '14:00'],
-                ['date' => '2025-12-12', 'start_time' => '15:00', 'end_time' => '19:00']
+            // Async dates (normalized to table)
+            'async_dates' => [
+                ['date' => '2025-12-10', 'notes' => 'Morning session'],
+                ['date' => '2025-12-12', 'notes' => 'Afternoon session']
             ],
 
-            // Attendance (4 fields)
+            // Attendance
             'local_attendance' => 800,
             'national_attendance' => 300,
             'international_attendance' => 150,
             'virtual_transmission' => true,
 
-            // Additional Information (2 fields)
-            'producer' => 'Ministerio de Turismo',
+            // Additional info
             'event_website' => 'https://turismo-actualizado.gob.ar',
 
-            // Images (3 fields)
+            // Images
             'logo_url' => 'https://example.com/new-logo.png',
             'featured_image' => 'https://example.com/new-featured.jpg',
             'responsive_image_url' => 'https://example.com/new-responsive.jpg',
@@ -204,7 +175,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert: Response (Assertions 1-3)
+        // Assert: Response
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'message',
@@ -212,60 +183,28 @@ class OrganizerControllerUpdateTest extends TestCase
         ]);
         $response->assertJsonPath('event.title', 'Updated: Congreso Internacional de Turismo 2025');
 
-        // Assert: Verify all 34 fields updated in database (Assertions 4-37)
+        // Assert: Verify normalized fields in database
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
             'title' => 'Updated: Congreso Internacional de Turismo 2025',
             'description' => 'Updated: Evento anual renovado',
             'category_id' => $newCategory->id,
-
-            // Basic Information (7 fields)
             'edition_number' => '16va Edición',
-            'event_type' => 'Congreso Actualizado',
-            'event_subtype' => 'Regional',
-            'origin' => 'Internacional',
-            'theme' => 'Turismo Digital',
-            'frequency' => 'Bienal',
-            'rotation_type' => 'Fijo',
-
-            // Catering (5 fields)
-            'coffee_break' => false,
-            'lunch_catering' => true,
-            'dinner_catering' => true,
-            'pre_event_package' => false,
-            'post_event_package' => true,
-
-            // Location (6 fields)
-            'venue' => 'Centro Cultural Actualizado',
-            'city' => 'Buenos Aires',
-            'rooms_used' => 'Auditorio Principal',
+            'origin_id' => $originId,
+            'producer_id' => $producer->id,
             'maps_url' => 'https://maps.google.com/?q=-34.6037,-58.3816',
-            'previous_venue' => 'Palacio de Congresos',
-            'next_venue' => 'Expo Centro',
-
-            // Attendance (4 fields)
             'local_attendance' => 800,
             'national_attendance' => 300,
             'international_attendance' => 150,
             'virtual_transmission' => true,
-
-            // Additional Info (2 fields)
-            'producer' => 'Ministerio de Turismo',
-            'event_website' => 'https://turismo-actualizado.gob.ar',
-
-            // Images (3 fields)
-            'logo_url' => 'https://example.com/new-logo.png',
-            'featured_image' => 'https://example.com/new-featured.jpg',
-            'responsive_image_url' => 'https://example.com/new-responsive.jpg',
         ]);
 
-        // Assert: Verify asynchronous_dates JSON (Assertions 38-40)
-        $updatedEvent = Event::with('locations')->find($event->id);
-        $this->assertIsArray($updatedEvent->asynchronous_dates);
-        $this->assertCount(2, $updatedEvent->asynchronous_dates);
-        $this->assertEquals('2025-12-10', $updatedEvent->asynchronous_dates[0]['date']);
+        // Assert: Verify async dates in normalized table
+        $updatedEvent = Event::with(['locations', 'asyncDates'])->find($event->id);
+        $this->assertCount(2, $updatedEvent->asyncDates);
+        $this->assertEquals('Morning session', $updatedEvent->asyncDates->first()->notes);
 
-        // Assert: Verify locations synced (Assertions 41-43)
+        // Assert: Verify locations synced
         $this->assertEquals(2, $updatedEvent->locations()->count());
         $this->assertTrue($updatedEvent->locations->contains($newLocation1->id));
         $this->assertTrue($updatedEvent->locations->contains($newLocation2->id));
@@ -276,6 +215,7 @@ class OrganizerControllerUpdateTest extends TestCase
     {
         // Arrange
         $user = $this->createAuthenticatedUser();
+        $producer = Organization::factory()->create();
         $event = Event::factory()->create([
             'organization_id' => $user->organization_id,
             'entity_id' => $user->organization_id,
@@ -284,7 +224,7 @@ class OrganizerControllerUpdateTest extends TestCase
             'type_id' => $this->getValidTypeId(),
             'title' => 'Original',
             'edition_number' => 'Old Edition',
-            'venue' => 'Old Venue',
+            'producer_id' => $producer->id,
         ]);
 
         $category = Category::factory()->create(['entity_id' => $user->organization_id]);
@@ -301,7 +241,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-8)
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('event.title', 'Updated Title');
 
@@ -311,11 +251,11 @@ class OrganizerControllerUpdateTest extends TestCase
             'description' => 'Updated Description',
         ]);
 
-        // Verify optional fields were NOT changed (set to null by update)
+        // Verify optional fields were reset
         $updatedEvent = Event::with('locations')->find($event->id);
         $this->assertNull($updatedEvent->edition_number);
-        $this->assertNull($updatedEvent->venue);
-        $this->assertFalse($updatedEvent->coffee_break);
+        $this->assertNull($updatedEvent->producer_id);
+        $this->assertFalse($updatedEvent->virtual_transmission);
         $this->assertEquals(1, $updatedEvent->locations()->count());
     }
 
@@ -358,10 +298,9 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-3)
-        $response->assertStatus(404); // firstOrFail throws 404
+        // Assert
+        $response->assertStatus(404);
 
-        // Verify event was NOT updated
         $this->assertDatabaseMissing('events', [
             'id' => $event->id,
             'title' => 'Malicious Update'
@@ -396,15 +335,14 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-4)
+        // Assert
         $response->assertStatus(403);
         $response->assertJsonFragment(['error' => 'Cannot edit event in current status']);
         $response->assertJsonStructure(['error', 'current_status', 'editable_statuses']);
 
-        // Verify event was NOT updated
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'title' => 'Published Event' // Original title
+            'title' => 'Published Event'
         ]);
     }
 
@@ -422,8 +360,8 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Draft Event',
         ]);
 
-        $category = Category::factory()->create();
-        $location = Location::factory()->create();
+        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
+        $location = Location::factory()->create(['entity_id' => 1]);
 
         $updatePayload = [
             'title' => 'Updated Draft',
@@ -436,7 +374,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-3)
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
@@ -458,8 +396,8 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Requires Changes Event',
         ]);
 
-        $category = Category::factory()->create();
-        $location = Location::factory()->create();
+        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
+        $location = Location::factory()->create(['entity_id' => 1]);
 
         $updatePayload = [
             'title' => 'Fixed Event',
@@ -472,7 +410,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-3)
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
@@ -497,7 +435,6 @@ class OrganizerControllerUpdateTest extends TestCase
         $location = Location::factory()->create();
 
         $updatePayload = [
-            // Missing 'title'
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
             'category_id' => $category->id,
@@ -507,7 +444,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-2)
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['title']);
     }
@@ -528,7 +465,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'type_id' => $this->getValidTypeId(),
         ]);
 
-        // Initial: 2 locations
         $event->locations()->sync([$location1->id, $location2->id]);
 
         // Update: Change to 3 different locations
@@ -549,7 +485,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-7)
+        // Assert
         $response->assertStatus(200);
 
         $updatedEvent = Event::with('locations')->find($event->id);
@@ -564,7 +500,7 @@ class OrganizerControllerUpdateTest extends TestCase
     }
 
     #[Test]
-    public function test_updates_asynchronous_dates_correctly(): void
+    public function test_updates_async_dates_correctly(): void
     {
         // Arrange
         $user = $this->createAuthenticatedUser();
@@ -574,13 +510,16 @@ class OrganizerControllerUpdateTest extends TestCase
             'created_by' => $user->id,
             'status_id' => $this->getDraftStatusId(),
             'type_id' => $this->getValidTypeId(),
-            'asynchronous_dates' => [
-                ['date' => '2025-11-01', 'start_time' => '09:00', 'end_time' => '12:00']
-            ]
         ]);
 
-        $category = Category::factory()->create();
-        $location = Location::factory()->create();
+        // Create initial async date
+        $event->asyncDates()->create([
+            'date_value' => '2025-11-01',
+            'notes' => 'Initial session'
+        ]);
+
+        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
+        $location = Location::factory()->create(['entity_id' => 1]);
 
         $updatePayload = [
             'title' => 'Updated',
@@ -588,23 +527,69 @@ class OrganizerControllerUpdateTest extends TestCase
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
             'category_id' => $category->id,
             'location_ids' => [$location->id],
-            'asynchronous_dates' => [
-                ['date' => '2025-12-05', 'start_time' => '10:00', 'end_time' => '14:00'],
-                ['date' => '2025-12-07', 'start_time' => '15:00', 'end_time' => '19:00'],
-                ['date' => '2025-12-09', 'start_time' => '08:00', 'end_time' => '12:00']
+            'async_dates' => [
+                ['date' => '2025-12-05', 'notes' => 'Morning session'],
+                ['date' => '2025-12-07', 'notes' => 'Afternoon session'],
+                ['date' => '2025-12-09', 'notes' => 'Closing session']
             ]
         ];
 
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert (Assertions 1-5)
+        // Assert
         $response->assertStatus(200);
 
-        $updatedEvent = Event::find($event->id);
-        $this->assertIsArray($updatedEvent->asynchronous_dates);
-        $this->assertCount(3, $updatedEvent->asynchronous_dates);
-        $this->assertEquals('2025-12-05', $updatedEvent->asynchronous_dates[0]['date']);
-        $this->assertEquals('10:00', $updatedEvent->asynchronous_dates[0]['start_time']);
+        $updatedEvent = Event::with('asyncDates')->find($event->id);
+        $this->assertCount(3, $updatedEvent->asyncDates);
+        $this->assertEquals('2025-12-05', $updatedEvent->asyncDates->first()->date->format('Y-m-d'));
+        $this->assertEquals('Morning session', $updatedEvent->asyncDates->first()->notes);
+    }
+
+    #[Test]
+    public function test_updates_normalized_fk_fields(): void
+    {
+        // Arrange
+        $user = $this->createAuthenticatedUser();
+        $initialProducer = Organization::factory()->create();
+        $event = Event::factory()->create([
+            'organization_id' => $user->organization_id,
+            'entity_id' => $user->organization_id,
+            'created_by' => $user->id,
+            'status_id' => $this->getDraftStatusId(),
+            'type_id' => $this->getValidTypeId(),
+            'producer_id' => $initialProducer->id,
+        ]);
+
+        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
+        $location = Location::factory()->create(['entity_id' => 1]);
+        $newProducer = Organization::factory()->create(['name' => 'New Producer']);
+        $originId = EventOrigin::where('code', 'international')->first()->id;
+
+        $updatePayload = [
+            'title' => 'Updated Event',
+            'description' => 'Updated',
+            'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'category_id' => $category->id,
+            'location_ids' => [$location->id],
+            'producer_id' => $newProducer->id,
+            'origin_id' => $originId,
+        ];
+
+        // Act
+        $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
+
+        // Assert
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'producer_id' => $newProducer->id,
+            'origin_id' => $originId,
+        ]);
+
+        $updatedEvent = Event::with(['producer', 'origin'])->find($event->id);
+        $this->assertEquals('New Producer', $updatedEvent->producer->name);
+        $this->assertEquals('international', $updatedEvent->origin->code);
     }
 }

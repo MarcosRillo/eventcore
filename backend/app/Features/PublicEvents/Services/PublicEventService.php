@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
  * Handles public-facing event queries for the tourist calendar.
  * Delegates category and calendar operations to specialized services.
  *
+ * Updated for 3NF normalized schema (Nov 30, 2025).
+ *
  * @package App\Features\PublicEvents\Services
  */
 class PublicEventService
@@ -45,7 +47,7 @@ class PublicEventService
         $perPage = $this->normalizePerPage($perPage);
 
         $query = Event::published()
-            ->with(['category', 'locations'])
+            ->with(['category', 'locations', 'origin', 'theme', 'frequency'])
             ->orderBy('start_date', 'asc');
 
         $this->applyFilters($query, $filters);
@@ -63,7 +65,7 @@ class PublicEventService
     public function getPublishedEventById(int $id): Event
     {
         $event = Event::published()
-            ->with(['category', 'locations', 'creator'])
+            ->with(['category', 'locations', 'creator', 'origin', 'theme', 'frequency', 'rotationType', 'services'])
             ->find($id);
 
         if (!$event) {
@@ -150,6 +152,7 @@ class PublicEventService
 
     /**
      * Search published events by query string.
+     * Searches in title, description, and related locations.
      *
      * @param string $query Search query
      * @param int|null $categoryId Optional category filter
@@ -159,15 +162,19 @@ class PublicEventService
     public function searchEvents(string $query, ?int $categoryId = null, int $limit = 15): array
     {
         $limit = min($limit, self::MAX_PER_PAGE);
-        $query = trim($query);
+        $searchTerm = trim($query);
 
         $builder = Event::published()
             ->with(['category', 'locations'])
-            ->where(function ($q) use ($query) {
-                $q->where('title', 'ilike', "%{$query}%")
-                    ->orWhere('description', 'ilike', "%{$query}%")
-                    ->orWhere('venue', 'ilike', "%{$query}%")
-                    ->orWhere('city', 'ilike', "%{$query}%");
+            ->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'ilike', "%{$searchTerm}%")
+                    ->orWhere('description', 'ilike', "%{$searchTerm}%")
+                    // Search in related locations (city, name, address)
+                    ->orWhereHas('locations', function ($locationQuery) use ($searchTerm) {
+                        $locationQuery->where('name', 'ilike', "%{$searchTerm}%")
+                            ->orWhere('city', 'ilike', "%{$searchTerm}%")
+                            ->orWhere('address', 'ilike', "%{$searchTerm}%");
+                    });
             });
 
         if ($categoryId !== null) {
@@ -181,13 +188,13 @@ class PublicEventService
                 WHEN description ILIKE ? THEN 2
                 ELSE 3
             END
-        ", ["%{$query}%", "%{$query}%"])
+        ", ["%{$searchTerm}%", "%{$searchTerm}%"])
             ->take($limit)
             ->get();
 
         return [
             'events' => $events,
-            'search_query' => $query,
+            'search_query' => $searchTerm,
             'total_results' => $events->count(),
         ];
     }
@@ -248,9 +255,21 @@ class PublicEventService
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'ilike', "%{$search}%")
                     ->orWhere('description', 'ilike', "%{$search}%")
-                    ->orWhere('venue', 'ilike', "%{$search}%")
-                    ->orWhere('city', 'ilike', "%{$search}%");
+                    ->orWhereHas('locations', function ($locationQuery) use ($search) {
+                        $locationQuery->where('name', 'ilike', "%{$search}%")
+                            ->orWhere('city', 'ilike', "%{$search}%");
+                    });
             });
+        }
+
+        // Filter by origin
+        if (!empty($filters['origin_id'])) {
+            $query->where('origin_id', $filters['origin_id']);
+        }
+
+        // Filter by theme
+        if (!empty($filters['theme_id'])) {
+            $query->where('theme_id', $filters['theme_id']);
         }
     }
 

@@ -6,42 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Scopes\TenantScope;
 use Carbon\Carbon;
 
 /**
  * Event Model
- * 
+ *
  * Represents events that can be scheduled at one or multiple locations.
  * Each event belongs to an organization (multi-tenant) and optionally to a category.
- * 
- * @property int $id
- * @property string $title
- * @property string|null $description
- * @property \Carbon\Carbon $start_date
- * @property \Carbon\Carbon $end_date
- * @property string $status
- * @property string $type
- * @property string|null $virtual_link
- * @property string|null $cta_link
- * @property string|null $cta_text
- * @property array|null $metadata
- * @property string|null $featured_image
- * @property bool $is_featured
- * @property int|null $max_attendees
- * @property int|null $category_id
- * @property int $entity_id
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * 
- * @property-read Organization $entity
- * @property-read Category|null $category
- * @property-read \Illuminate\Database\Eloquent\Collection|Location[] $locations
+ *
+ * Normalized to 3NF (Nov 30, 2025):
+ * - String fields replaced with FK relationships
+ * - Boolean services moved to pivot table
+ * - JSON async dates moved to separate table
  */
 class Event extends Model
 {
     use HasFactory;
-
 
     /**
      * The attributes that are mass assignable.
@@ -49,22 +31,18 @@ class Event extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        // Core fields
         'title',
         'description',
         'start_date',
         'end_date',
         'status_id',
         'type_id',
-        'virtual_link',
-        'cta_link',
-        'cta_text',
-        'metadata',
-        'featured_image',
-        'is_featured',
-        'max_attendees',
         'category_id',
         'entity_id',
         'organization_id',
+
+        // Approval workflow
         'approval_comments',
         'approval_history',
         'created_by',
@@ -72,34 +50,32 @@ class Event extends Model
         'approved_at',
         'published_at',
 
-        // Extended fields (added Nov 25, 2025)
+        // Display
+        'featured_image',
+        'is_featured',
+        'logo_url',
+        'responsive_image_url',
+
+        // Event info
         'edition_number',
-        'event_type',
-        'event_subtype',
-        'origin',
-        'theme',
-        'frequency',
-        'rotation_type',
-        'coffee_break',
-        'lunch_catering',
-        'dinner_catering',
-        'pre_event_package',
-        'post_event_package',
-        'venue',
-        'city',
-        'rooms_used',
         'maps_url',
         'previous_venue',
         'next_venue',
-        'asynchronous_dates',
+        'event_website',
+        'virtual_transmission',
+
+        // Attendance (integers)
         'local_attendance',
         'national_attendance',
         'international_attendance',
-        'virtual_transmission',
-        'producer',
-        'event_website',
-        'logo_url',
-        'responsive_image_url',
+
+        // Foreign keys (normalized - Nov 30, 2025)
+        'subtype_id',
+        'origin_id',
+        'theme_id',
+        'frequency_id',
+        'rotation_type_id',
+        'producer_id',
     ];
 
     /**
@@ -110,26 +86,22 @@ class Event extends Model
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'metadata' => 'array',
         'approval_history' => 'array',
         'is_featured' => 'boolean',
-        'max_attendees' => 'integer',
         'approved_at' => 'datetime',
         'published_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-
-        // Extended fields casts (added Nov 25, 2025)
-        'asynchronous_dates' => 'array',
-        'coffee_break' => 'boolean',
-        'lunch_catering' => 'boolean',
-        'dinner_catering' => 'boolean',
-        'pre_event_package' => 'boolean',
-        'post_event_package' => 'boolean',
         'virtual_transmission' => 'boolean',
         'local_attendance' => 'integer',
         'national_attendance' => 'integer',
         'international_attendance' => 'integer',
+        'subtype_id' => 'integer',
+        'origin_id' => 'integer',
+        'theme_id' => 'integer',
+        'frequency_id' => 'integer',
+        'rotation_type_id' => 'integer',
+        'producer_id' => 'integer',
     ];
 
     /**
@@ -139,6 +111,10 @@ class Event extends Model
     {
         static::addGlobalScope(new TenantScope);
     }
+
+    // =====================================================
+    // RELATIONSHIPS - Core
+    // =====================================================
 
     /**
      * Get the organization that owns this event (entity relationship).
@@ -165,17 +141,19 @@ class Event extends Model
     }
 
     /**
-     * Get the locations associated with this event.
+     * Get the status that this event belongs to.
      */
-    public function locations(): BelongsToMany
+    public function status(): BelongsTo
     {
-        return $this->belongsToMany(Location::class, 'event_location')
-                    ->withPivot([
-                        'location_specific_notes',
-                        'max_attendees_for_location',
-                        'location_metadata'
-                    ])
-                    ->withTimestamps();
+        return $this->belongsTo(EventStatus::class, 'status_id');
+    }
+
+    /**
+     * Get the type that this event belongs to.
+     */
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(EventType::class, 'type_id');
     }
 
     /**
@@ -195,20 +173,101 @@ class Event extends Model
     }
 
     /**
-     * Get the status that this event belongs to.
+     * Get the locations associated with this event.
      */
-    public function status(): BelongsTo
+    public function locations(): BelongsToMany
     {
-        return $this->belongsTo(EventStatus::class, 'status_id');
+        return $this->belongsToMany(Location::class, 'event_location')
+                    ->withPivot([
+                        'location_specific_notes',
+                        'max_attendees_for_location',
+                        'location_metadata'
+                    ])
+                    ->withTimestamps();
+    }
+
+    // =====================================================
+    // RELATIONSHIPS - Normalized (Nov 30, 2025)
+    // =====================================================
+
+    /**
+     * Get the subtype of this event.
+     */
+    public function subtype(): BelongsTo
+    {
+        return $this->belongsTo(EventSubtype::class, 'subtype_id');
     }
 
     /**
-     * Get the type that this event belongs to.
+     * Get the origin of this event.
      */
-    public function type(): BelongsTo
+    public function origin(): BelongsTo
     {
-        return $this->belongsTo(EventType::class, 'type_id');
+        return $this->belongsTo(EventOrigin::class, 'origin_id');
     }
+
+    /**
+     * Get the theme of this event.
+     */
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(EventTheme::class, 'theme_id');
+    }
+
+    /**
+     * Get the frequency of this event.
+     */
+    public function frequency(): BelongsTo
+    {
+        return $this->belongsTo(EventFrequency::class, 'frequency_id');
+    }
+
+    /**
+     * Get the rotation type of this event.
+     */
+    public function rotationType(): BelongsTo
+    {
+        return $this->belongsTo(EventRotationType::class, 'rotation_type_id');
+    }
+
+    /**
+     * Get the producer (organization) of this event.
+     */
+    public function producer(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'producer_id');
+    }
+
+    /**
+     * Get the services for this event.
+     */
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(EventService::class, 'event_service', 'event_id', 'service_id')
+                    ->withPivot(['is_included', 'notes'])
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the rooms for this event.
+     */
+    public function rooms(): BelongsToMany
+    {
+        return $this->belongsToMany(EventRoom::class, 'event_room', 'event_id', 'room_id')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the asynchronous dates for this event.
+     */
+    public function asyncDates(): HasMany
+    {
+        return $this->hasMany(EventAsyncDate::class);
+    }
+
+    // =====================================================
+    // SCOPES
+    // =====================================================
 
     /**
      * Scope a query to only include published events.
@@ -217,7 +276,6 @@ class Event extends Model
     {
         return $query->whereHas('status', fn($q) => $q->where('status_code', 'published'));
     }
-
 
     /**
      * Scope a query to only include featured events.
@@ -270,6 +328,26 @@ class Event extends Model
     }
 
     /**
+     * Scope a query to filter events by origin.
+     */
+    public function scopeByOrigin($query, $originCode)
+    {
+        return $query->whereHas('origin', fn($q) => $q->where('code', $originCode));
+    }
+
+    /**
+     * Scope a query to filter events by theme.
+     */
+    public function scopeByTheme($query, $themeCode)
+    {
+        return $query->whereHas('theme', fn($q) => $q->where('code', $themeCode));
+    }
+
+    // =====================================================
+    // ACCESSORS
+    // =====================================================
+
+    /**
      * Get the duration of the event in minutes.
      */
     public function getDurationInMinutesAttribute(): int
@@ -284,6 +362,10 @@ class Event extends Model
     {
         return round($this->getDurationInMinutesAttribute() / 60, 2);
     }
+
+    // =====================================================
+    // HELPER METHODS
+    // =====================================================
 
     /**
      * Check if the event is currently happening.
@@ -311,11 +393,11 @@ class Event extends Model
     }
 
     /**
-     * Check if the event is virtual (has virtual link).
+     * Check if the event has virtual transmission.
      */
     public function isVirtual(): bool
     {
-        return !empty($this->virtual_link);
+        return $this->virtual_transmission === true;
     }
 
     /**
@@ -327,11 +409,14 @@ class Event extends Model
     }
 
     /**
-     * Check if the event has a call-to-action.
+     * Check if the event has a specific service.
      */
-    public function hasCTA(): bool
+    public function hasService(string $serviceCode): bool
     {
-        return !empty($this->cta_link) && !empty($this->cta_text);
+        return $this->services()
+            ->where('code', $serviceCode)
+            ->wherePivot('is_included', true)
+            ->exists();
     }
 
     /**
@@ -348,21 +433,30 @@ class Event extends Model
         ]);
     }
 
-
     /**
      * Add an entry to the approval history.
      */
     public function addApprovalHistoryEntry(string $action, int $userId, ?string $comment = null): void
     {
         $history = $this->approval_history ?? [];
-        
+
         $history[] = [
             'action' => $action,
             'user_id' => $userId,
             'comment' => $comment,
             'timestamp' => now()->toISOString(),
         ];
-        
+
         $this->approval_history = $history;
+    }
+
+    /**
+     * Get total attendance (sum of all attendance types).
+     */
+    public function getTotalAttendanceAttribute(): int
+    {
+        return ($this->local_attendance ?? 0)
+             + ($this->national_attendance ?? 0)
+             + ($this->international_attendance ?? 0);
     }
 }

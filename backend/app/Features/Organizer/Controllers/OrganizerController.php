@@ -2,20 +2,24 @@
 
 namespace App\Features\Organizer\Controllers;
 
+use App\Features\Events\Services\EventValidationService;
 use App\Features\Organizer\Requests\StoreOrganizerEventRequest;
 use App\Features\Organizer\Requests\UpdateOrganizerEventRequest;
 use App\Features\Organizer\Services\OrganizerService;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\EventStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class OrganizerController extends Controller
 {
     public function __construct(
-        private OrganizerService $organizerService
+        private OrganizerService $organizerService,
+        private EventValidationService $validationService
     ) {}
 
     /**
@@ -188,5 +192,56 @@ class OrganizerController extends Controller
         $stats = $this->organizerService->getDashboardStats($user->organization_id);
 
         return response()->json($stats);
+    }
+
+    /**
+     * Submit event for internal review
+     *
+     * Validates all internal required fields and transitions
+     * from draft/requires_changes to pending_internal_approval
+     */
+    public function submit(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+
+        // Query by organization to enforce ownership (returns 404 if not found)
+        $event = Event::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->with(['status', 'locations'])
+            ->firstOrFail();
+
+        // Validate submittable status
+        $submittableStatuses = ['draft', 'requires_changes'];
+        if (!in_array($event->status->status_code, $submittableStatuses)) {
+            return response()->json([
+                'error' => 'Only draft events can be submitted'
+            ], 403);
+        }
+
+        // Validate internal required fields
+        $validationResult = $this->validationService->validateForInternalApproval($event);
+
+        if (!$validationResult->isValid()) {
+            return response()->json([
+                'error' => 'Event is missing required fields',
+                'errors' => $validationResult->getErrors()
+            ], 422);
+        }
+
+        // Update status to pending_internal_approval
+        $pendingStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
+
+        return DB::transaction(function () use ($event, $pendingStatus) {
+            $event->status_id = $pendingStatus->id;
+            $event->save();
+            $event->refresh();
+            $event->load('status');
+
+            return response()->json([
+                'message' => 'Event submitted for review',
+                'status' => 'pending_internal_approval',
+                'event' => $event
+            ]);
+        });
     }
 }

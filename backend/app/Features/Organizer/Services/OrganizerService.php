@@ -49,13 +49,18 @@ class OrganizerService
                 $event->locations()->sync($data['location_ids']);
             }
 
+            // Sync async dates (3NF normalized table)
+            if (isset($data['async_dates']) && is_array($data['async_dates'])) {
+                $this->syncAsyncDates($event, $data['async_dates']);
+            }
+
             Log::info('Organizer event created', [
                 'event_id' => $event->id,
                 'user_id' => $user->id,
                 'organization_id' => $user->organization_id,
             ]);
 
-            return $event->load(['category', 'locations', 'status', 'type']);
+            return $event->load(['category', 'locations', 'status', 'type', 'asyncDates']);
         });
     }
 
@@ -74,13 +79,18 @@ class OrganizerService
                 $event->locations()->sync($data['location_ids']);
             }
 
+            // Sync async dates (3NF normalized table)
+            if (isset($data['async_dates']) && is_array($data['async_dates'])) {
+                $this->syncAsyncDates($event, $data['async_dates']);
+            }
+
             Log::info('Organizer event updated', [
                 'event_id' => $event->id,
                 'user_id' => $user->id,
                 'organization_id' => $user->organization_id,
             ]);
 
-            return $event->fresh(['category', 'locations', 'status', 'type']);
+            return $event->fresh(['category', 'locations', 'status', 'type', 'asyncDates']);
         });
     }
 
@@ -139,6 +149,26 @@ class OrganizerService
             ->where('organization_id', $user->organization_id)
             ->with(['category', 'locations', 'status', 'type', 'creator'])
             ->firstOrFail();
+    }
+
+    /**
+     * Sync async dates for an event.
+     *
+     * @param Event $event The event to sync dates for
+     * @param array $asyncDates Array of async date data
+     */
+    private function syncAsyncDates(Event $event, array $asyncDates): void
+    {
+        // Delete existing async dates
+        $event->asyncDates()->delete();
+
+        // Create new async dates
+        foreach ($asyncDates as $dateData) {
+            $event->asyncDates()->create([
+                'date_value' => $dateData['date'],
+                'notes' => $dateData['notes'] ?? null,
+            ]);
+        }
     }
 
     /**

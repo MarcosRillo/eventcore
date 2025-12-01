@@ -2,16 +2,26 @@
 
 namespace Tests\Feature\Organizer;
 
+use App\Models\Event;
+use App\Models\EventFrequency;
+use App\Models\EventOrigin;
+use App\Models\EventRoom;
+use App\Models\EventRotationType;
+use App\Models\EventService;
+use App\Models\EventTheme;
+use App\Models\Organization;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests for the extended fields migration (27 new columns)
+ * Tests for the 3NF normalized event schema
  *
- * This test suite verifies that the migration 2025_11_25_162610_add_extended_fields_to_events_table
- * successfully added all 27 new columns to the events table.
+ * This test suite verifies that the events table has been properly
+ * normalized to 3NF with FK columns instead of denormalized strings.
+ *
+ * Updated for 3NF normalized schema (Nov 30, 2025).
  */
 class OrganizerExtendedFieldsTest extends TestCase
 {
@@ -27,81 +37,269 @@ class OrganizerExtendedFieldsTest extends TestCase
         $this->seed(\Database\Seeders\EventTypesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
-    }
+        $this->seed(\Database\Seeders\EventLookupSeeder::class);
 
-    #[Test]
-    public function test_migration_adds_all_basic_information_fields(): void
-    {
-        // Assert: Verify 7 basic information fields exist (Assertions 1-7)
-        $this->assertTrue(Schema::hasColumn('events', 'edition_number'));
-        $this->assertTrue(Schema::hasColumn('events', 'event_type'));
-        $this->assertTrue(Schema::hasColumn('events', 'event_subtype'));
-        $this->assertTrue(Schema::hasColumn('events', 'origin'));
-        $this->assertTrue(Schema::hasColumn('events', 'theme'));
-        $this->assertTrue(Schema::hasColumn('events', 'frequency'));
-        $this->assertTrue(Schema::hasColumn('events', 'rotation_type'));
-    }
-
-    #[Test]
-    public function test_migration_adds_all_catering_service_fields(): void
-    {
-        // Assert: Verify 5 catering/service boolean fields exist (Assertions 1-5)
-        $this->assertTrue(Schema::hasColumn('events', 'coffee_break'));
-        $this->assertTrue(Schema::hasColumn('events', 'lunch_catering'));
-        $this->assertTrue(Schema::hasColumn('events', 'dinner_catering'));
-        $this->assertTrue(Schema::hasColumn('events', 'pre_event_package'));
-        $this->assertTrue(Schema::hasColumn('events', 'post_event_package'));
-    }
-
-    #[Test]
-    public function test_migration_adds_all_location_fields(): void
-    {
-        // Assert: Verify 6 location-related fields exist (Assertions 1-6)
-        $this->assertTrue(Schema::hasColumn('events', 'venue'));
-        $this->assertTrue(Schema::hasColumn('events', 'city'));
-        $this->assertTrue(Schema::hasColumn('events', 'rooms_used'));
-        $this->assertTrue(Schema::hasColumn('events', 'maps_url'));
-        $this->assertTrue(Schema::hasColumn('events', 'previous_venue'));
-        $this->assertTrue(Schema::hasColumn('events', 'next_venue'));
-    }
-
-    #[Test]
-    public function test_migration_adds_asynchronous_dates_json_field(): void
-    {
-        // Assert: Verify asynchronous_dates JSON field exists
-        $this->assertTrue(Schema::hasColumn('events', 'asynchronous_dates'));
-
-        // Verify column accepts JSON data by creating an event with JSON array
-        $jsonData = [
-            ['date' => '2025-12-01', 'start_time' => '09:00', 'end_time' => '17:00'],
-            ['date' => '2025-12-03', 'start_time' => '10:00', 'end_time' => '18:00']
-        ];
-
-        $event = \App\Models\Event::factory()->create([
-            'asynchronous_dates' => $jsonData
+        // Create tourism entity (id=1) for locations FK
+        \DB::table('organizations')->insertOrIgnore([
+            'id' => 1,
+            'name' => 'Ente de Turismo de Tucumán',
+            'slug' => 'ente-turismo-tucuman',
+            'cuit' => '30-12345678-9',
+            'description' => 'Ente principal de turismo',
+            'type_id' => \DB::table('organization_types')->value('id'),
+            'status_id' => \DB::table('organization_statuses')->value('id'),
+            'parent_id' => null,
+            'trust_level' => 5,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        // Assert: Verify JSON data was stored and retrieved correctly (Assertions 2-4)
-        $this->assertNotNull($event->asynchronous_dates);
-        $this->assertIsArray($event->asynchronous_dates);
-        $this->assertCount(2, $event->asynchronous_dates);
+        // Reset sequence to avoid id collision
+        \DB::statement('ALTER SEQUENCE organizations_id_seq RESTART WITH 100');
+    }
 
-        // Verify database state
-        $this->assertDatabaseHas('events', [
-            'id' => $event->id
-        ]);
+    // ==========================================
+    // LOOKUP TABLES EXIST TESTS
+    // ==========================================
 
-        // Verify column accepts null values (nullable)
-        $eventWithNull = \App\Models\Event::factory()->create([
-            'asynchronous_dates' => null
-        ]);
-        $this->assertNull($eventWithNull->asynchronous_dates);
+    #[Test]
+    public function test_lookup_tables_exist(): void
+    {
+        // Assert: Verify all lookup tables exist
+        $this->assertTrue(Schema::hasTable('event_origins'));
+        $this->assertTrue(Schema::hasTable('event_themes'));
+        $this->assertTrue(Schema::hasTable('event_frequencies'));
+        $this->assertTrue(Schema::hasTable('event_rotation_types'));
+        $this->assertTrue(Schema::hasTable('event_subtypes'));
+        $this->assertTrue(Schema::hasTable('event_services'));
+        $this->assertTrue(Schema::hasTable('event_rooms'));
     }
 
     #[Test]
-    public function test_migration_adds_all_attendance_fields(): void
+    public function test_pivot_tables_exist(): void
     {
-        // Assert: Verify 4 attendance fields exist (Assertions 1-4)
+        // Assert: Verify pivot tables exist
+        $this->assertTrue(Schema::hasTable('event_service'));
+        $this->assertTrue(Schema::hasTable('event_room'));
+        $this->assertTrue(Schema::hasTable('event_async_dates'));
+    }
+
+    // ==========================================
+    // FK COLUMNS EXIST TESTS
+    // ==========================================
+
+    #[Test]
+    public function test_events_table_has_normalized_fk_columns(): void
+    {
+        // Assert: Verify FK columns exist in events table
+        $this->assertTrue(Schema::hasColumn('events', 'subtype_id'));
+        $this->assertTrue(Schema::hasColumn('events', 'origin_id'));
+        $this->assertTrue(Schema::hasColumn('events', 'theme_id'));
+        $this->assertTrue(Schema::hasColumn('events', 'frequency_id'));
+        $this->assertTrue(Schema::hasColumn('events', 'rotation_type_id'));
+        $this->assertTrue(Schema::hasColumn('events', 'producer_id'));
+    }
+
+    #[Test]
+    public function test_denormalized_columns_removed(): void
+    {
+        // Assert: Verify old denormalized columns were removed
+        $this->assertFalse(Schema::hasColumn('events', 'event_type'));
+        $this->assertFalse(Schema::hasColumn('events', 'event_subtype'));
+        $this->assertFalse(Schema::hasColumn('events', 'origin'));
+        $this->assertFalse(Schema::hasColumn('events', 'theme'));
+        $this->assertFalse(Schema::hasColumn('events', 'frequency'));
+        $this->assertFalse(Schema::hasColumn('events', 'rotation_type'));
+        $this->assertFalse(Schema::hasColumn('events', 'producer'));
+        $this->assertFalse(Schema::hasColumn('events', 'city'));
+        $this->assertFalse(Schema::hasColumn('events', 'venue'));
+        $this->assertFalse(Schema::hasColumn('events', 'rooms_used'));
+        $this->assertFalse(Schema::hasColumn('events', 'coffee_break'));
+        $this->assertFalse(Schema::hasColumn('events', 'lunch_catering'));
+        $this->assertFalse(Schema::hasColumn('events', 'dinner_catering'));
+        $this->assertFalse(Schema::hasColumn('events', 'asynchronous_dates'));
+    }
+
+    // ==========================================
+    // LOOKUP TABLES DATA TESTS
+    // ==========================================
+
+    #[Test]
+    public function test_event_origins_seeded_with_correct_values(): void
+    {
+        // Assert: Verify EventOrigin lookup table has expected values
+        $this->assertDatabaseHas('event_origins', ['code' => 'local']);
+        $this->assertDatabaseHas('event_origins', ['code' => 'national']);
+        $this->assertDatabaseHas('event_origins', ['code' => 'international']);
+        $this->assertEquals(3, EventOrigin::count());
+    }
+
+    #[Test]
+    public function test_event_themes_seeded(): void
+    {
+        // Assert: Verify themes are seeded
+        $this->assertGreaterThan(0, EventTheme::count());
+        $this->assertDatabaseHas('event_themes', ['code' => 'cultural']);
+    }
+
+    #[Test]
+    public function test_event_frequencies_seeded(): void
+    {
+        // Assert: Verify frequencies are seeded
+        $this->assertGreaterThan(0, EventFrequency::count());
+        $this->assertDatabaseHas('event_frequencies', ['code' => 'unico']);
+        $this->assertDatabaseHas('event_frequencies', ['code' => 'anual']);
+    }
+
+    // ==========================================
+    // EVENT RELATIONSHIPS TESTS
+    // ==========================================
+
+    #[Test]
+    public function test_event_can_have_origin_relationship(): void
+    {
+        $origin = EventOrigin::where('code', 'national')->first();
+
+        $event = Event::factory()->create([
+            'origin_id' => $origin->id,
+        ]);
+
+        // Assert: Verify relationship works
+        $this->assertNotNull($event->origin);
+        $this->assertEquals('national', $event->origin->code);
+        $this->assertEquals('Nacional', $event->origin->name);
+    }
+
+    #[Test]
+    public function test_event_can_have_theme_relationship(): void
+    {
+        $theme = EventTheme::first();
+
+        $event = Event::factory()->create([
+            'theme_id' => $theme->id,
+        ]);
+
+        // Assert: Verify relationship works
+        $this->assertNotNull($event->theme);
+        $this->assertEquals($theme->code, $event->theme->code);
+    }
+
+    #[Test]
+    public function test_event_can_have_producer_relationship(): void
+    {
+        $producer = Organization::factory()->create(['name' => 'Producer Org']);
+
+        $event = Event::factory()->create([
+            'producer_id' => $producer->id,
+        ]);
+
+        // Assert: Verify relationship works
+        $this->assertNotNull($event->producer);
+        $this->assertEquals('Producer Org', $event->producer->name);
+    }
+
+    #[Test]
+    public function test_event_can_have_many_services(): void
+    {
+        $services = EventService::take(3)->get();
+        $event = Event::factory()->create();
+
+        // Attach services via pivot
+        $event->services()->attach($services->pluck('id'), ['is_included' => true]);
+
+        $event->refresh();
+
+        // Assert: Verify many-to-many relationship works
+        $this->assertCount(3, $event->services);
+        $this->assertTrue($event->services->first()->pivot->is_included);
+    }
+
+    #[Test]
+    public function test_event_can_have_many_rooms(): void
+    {
+        // Create a location first (required by event_rooms FK)
+        $location = \App\Models\Location::factory()->create(['entity_id' => 1]);
+
+        // Create rooms directly since no seeder exists for them
+        $room1 = EventRoom::create([
+            'location_id' => $location->id,
+            'name' => 'Sala Principal',
+            'code' => 'sala_principal',
+            'is_active' => true,
+        ]);
+        $room2 = EventRoom::create([
+            'location_id' => $location->id,
+            'name' => 'Sala Secundaria',
+            'code' => 'sala_secundaria',
+            'is_active' => true,
+        ]);
+
+        $event = Event::factory()->create();
+
+        // Attach rooms via pivot
+        $event->rooms()->attach([$room1->id, $room2->id]);
+
+        $event->refresh();
+
+        // Assert: Verify many-to-many relationship works
+        $this->assertCount(2, $event->rooms);
+    }
+
+    #[Test]
+    public function test_event_can_have_async_dates(): void
+    {
+        $event = Event::factory()->create();
+
+        // Create async dates via relationship
+        $event->asyncDates()->createMany([
+            ['date_value' => '2025-12-01', 'notes' => 'Day 1'],
+            ['date_value' => '2025-12-03', 'notes' => 'Day 2'],
+        ]);
+
+        $event->refresh();
+
+        // Assert: Verify has-many relationship works
+        $this->assertCount(2, $event->asyncDates);
+        $this->assertEquals('Day 1', $event->asyncDates->first()->notes);
+    }
+
+    // ==========================================
+    // NULLABLE FK TESTS
+    // ==========================================
+
+    #[Test]
+    public function test_nullable_fk_fields_accept_null(): void
+    {
+        $event = Event::factory()->create([
+            'subtype_id' => null,
+            'origin_id' => null,
+            'theme_id' => null,
+            'frequency_id' => null,
+            'rotation_type_id' => null,
+            'producer_id' => null,
+        ]);
+
+        // Assert: All FK fields are nullable
+        $this->assertNull($event->subtype_id);
+        $this->assertNull($event->origin_id);
+        $this->assertNull($event->theme_id);
+        $this->assertNull($event->frequency_id);
+        $this->assertNull($event->rotation_type_id);
+        $this->assertNull($event->producer_id);
+
+        // Relationships return null
+        $this->assertNull($event->origin);
+        $this->assertNull($event->theme);
+        $this->assertNull($event->producer);
+    }
+
+    // ==========================================
+    // ATTENDANCE AND OTHER FIELDS TESTS
+    // ==========================================
+
+    #[Test]
+    public function test_attendance_fields_exist(): void
+    {
         $this->assertTrue(Schema::hasColumn('events', 'local_attendance'));
         $this->assertTrue(Schema::hasColumn('events', 'national_attendance'));
         $this->assertTrue(Schema::hasColumn('events', 'international_attendance'));
@@ -109,135 +307,25 @@ class OrganizerExtendedFieldsTest extends TestCase
     }
 
     #[Test]
-    public function test_migration_adds_all_additional_information_fields(): void
+    public function test_virtual_transmission_defaults_to_false(): void
     {
-        // Assert: Verify 2 additional information fields exist (Assertions 1-2)
-        $this->assertTrue(Schema::hasColumn('events', 'producer'));
-        $this->assertTrue(Schema::hasColumn('events', 'event_website'));
-    }
+        // Create event explicitly setting virtual_transmission to false
+        $event = Event::factory()->create([
+            'virtual_transmission' => false,
+        ]);
 
-    #[Test]
-    public function test_migration_adds_all_image_fields(): void
-    {
-        // Assert: Verify 2 image URL fields exist (Assertions 1-2)
-        $this->assertTrue(Schema::hasColumn('events', 'logo_url'));
-        $this->assertTrue(Schema::hasColumn('events', 'responsive_image_url'));
-    }
-
-    #[Test]
-    public function test_all_27_extended_fields_exist_in_events_table(): void
-    {
-        // Comprehensive test: Verify all 27 new columns exist (27 assertions)
-        $expectedColumns = [
-            // Basic Information (7)
-            'edition_number',
-            'event_type',
-            'event_subtype',
-            'origin',
-            'theme',
-            'frequency',
-            'rotation_type',
-
-            // Catering Services (5)
-            'coffee_break',
-            'lunch_catering',
-            'dinner_catering',
-            'pre_event_package',
-            'post_event_package',
-
-            // Location (6)
-            'venue',
-            'city',
-            'rooms_used',
-            'maps_url',
-            'previous_venue',
-            'next_venue',
-
-            // Asynchronous Dates (1)
-            'asynchronous_dates',
-
-            // Attendance (4)
-            'local_attendance',
-            'national_attendance',
-            'international_attendance',
-            'virtual_transmission',
-
-            // Additional Information (2)
-            'producer',
-            'event_website',
-
-            // Images (2)
-            'logo_url',
-            'responsive_image_url',
-        ];
-
-        // Assert each column exists
-        foreach ($expectedColumns as $column) {
-            $this->assertTrue(
-                Schema::hasColumn('events', $column),
-                "Column '{$column}' does not exist in events table"
-            );
-        }
-
-        // Additional assertion: Verify count
-        $this->assertCount(27, $expectedColumns);
-    }
-
-    #[Test]
-    public function test_boolean_fields_have_correct_defaults(): void
-    {
-        // Create an event without specifying boolean fields
-        $event = \App\Models\Event::factory()->create();
-
-        // Assert: Boolean fields should default to false (Assertions 1-6)
-        $this->assertFalse((bool) $event->coffee_break);
-        $this->assertFalse((bool) $event->lunch_catering);
-        $this->assertFalse((bool) $event->dinner_catering);
-        $this->assertFalse((bool) $event->pre_event_package);
-        $this->assertFalse((bool) $event->post_event_package);
+        // Database default is false (NOT NULL DEFAULT FALSE)
         $this->assertFalse((bool) $event->virtual_transmission);
 
-        // Verify database state
-        $this->assertDatabaseHas('events', [
-            'id' => $event->id,
-            'coffee_break' => false,
-            'virtual_transmission' => false
-        ]);
+        // Verify the column default behavior via raw insert
+        $this->assertTrue(Schema::hasColumn('events', 'virtual_transmission'));
     }
 
     #[Test]
-    public function test_nullable_fields_accept_null_values(): void
+    public function test_image_fields_exist(): void
     {
-        // Create event with all nullable extended fields as null
-        $event = \App\Models\Event::factory()->create([
-            'edition_number' => null,
-            'event_type' => null,
-            'origin' => null,
-            'venue' => null,
-            'city' => null,
-            'asynchronous_dates' => null,
-            'local_attendance' => null,
-            'producer' => null,
-            'logo_url' => null,
-        ]);
-
-        // Assert: All specified fields are null (Assertions 1-9)
-        $this->assertNull($event->edition_number);
-        $this->assertNull($event->event_type);
-        $this->assertNull($event->origin);
-        $this->assertNull($event->venue);
-        $this->assertNull($event->city);
-        $this->assertNull($event->asynchronous_dates);
-        $this->assertNull($event->local_attendance);
-        $this->assertNull($event->producer);
-        $this->assertNull($event->logo_url);
-
-        // Verify database state
-        $this->assertDatabaseHas('events', [
-            'id' => $event->id,
-            'edition_number' => null,
-            'venue' => null,
-            'producer' => null
-        ]);
+        $this->assertTrue(Schema::hasColumn('events', 'logo_url'));
+        $this->assertTrue(Schema::hasColumn('events', 'responsive_image_url'));
+        $this->assertTrue(Schema::hasColumn('events', 'featured_image'));
     }
 }

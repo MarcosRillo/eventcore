@@ -4,6 +4,10 @@ namespace Database\Factories;
 
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\EventFrequency;
+use App\Models\EventOrigin;
+use App\Models\EventRotationType;
+use App\Models\EventTheme;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -48,22 +52,46 @@ class EventFactory extends Factory
         $title = sprintf($template, $topic);
 
         return [
+            // Core fields
             'title' => $title,
             'description' => $this->generateRealisticDescription($topic),
             'start_date' => $startDate,
             'end_date' => $endDate,
 
-            // Use factories for relationships
+            // Relationships
             'category_id' => Category::factory(),
             'created_by' => User::factory(),
             'entity_id' => \App\Models\Organization::factory(),
             'organization_id' => null,
             'type_id' => fn() => \DB::table('event_types')->first()?->id ?? 1,
             'status_id' => fn() => \DB::table('event_statuses')->first()?->id ?? 1,
+
+            // Display
             'is_featured' => false,
-            'max_attendees' => $this->faker->numberBetween(50, 500),
-            'cta_text' => $this->faker->randomElement(['Ver Más', 'Inscribirse', 'Comprar Entradas', 'Reservar']),
-            'cta_link' => null, // Optional
+            'featured_image' => null,
+            'logo_url' => null,
+            'responsive_image_url' => null,
+
+            // Event info
+            'edition_number' => $this->faker->optional(0.7)->numberBetween(1, 50),
+            'maps_url' => null,
+            'previous_venue' => null,
+            'next_venue' => null,
+            'event_website' => $this->faker->optional(0.3)->url(),
+            'virtual_transmission' => $this->faker->boolean(20),
+
+            // Attendance
+            'local_attendance' => $this->faker->optional(0.8)->numberBetween(50, 500),
+            'national_attendance' => $this->faker->optional(0.5)->numberBetween(10, 100),
+            'international_attendance' => $this->faker->optional(0.2)->numberBetween(5, 50),
+
+            // Foreign keys (normalized)
+            'subtype_id' => null,
+            'origin_id' => fn() => EventOrigin::inRandomOrder()->first()?->id,
+            'theme_id' => fn() => EventTheme::inRandomOrder()->first()?->id,
+            'frequency_id' => fn() => EventFrequency::inRandomOrder()->first()?->id,
+            'rotation_type_id' => fn() => EventRotationType::inRandomOrder()->first()?->id,
+            'producer_id' => null,
         ];
     }
 
@@ -83,38 +111,129 @@ class EventFactory extends Factory
         return $this->faker->randomElement($descriptions);
     }
 
+    // =====================================================
+    // STATUS STATES
+    // =====================================================
+
     public function draft(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => 1
+            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'draft')->first()?->id ?? 1,
         ]);
     }
 
-    public function pendingReview(): static
+    public function pendingInternalApproval(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => 2
+            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'pending_internal_approval')->first()?->id ?? 2,
         ]);
     }
 
-    public function approved(): static
+    public function approvedInternal(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => 3
+            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'approved_internal')->first()?->id ?? 3,
+        ]);
+    }
+
+    public function pendingPublicApproval(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'pending_public_approval')->first()?->id ?? 4,
         ]);
     }
 
     public function published(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => 5
+            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'published')->first()?->id ?? 5,
+            'published_at' => now(),
         ]);
     }
+
+    public function rejected(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'rejected')->first()?->id ?? 6,
+        ]);
+    }
+
+    // =====================================================
+    // FEATURE STATES
+    // =====================================================
 
     public function featured(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_featured' => true
+            'is_featured' => true,
+        ]);
+    }
+
+    public function withVirtualTransmission(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'virtual_transmission' => true,
+        ]);
+    }
+
+    // =====================================================
+    // ORIGIN STATES
+    // =====================================================
+
+    public function local(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'origin_id' => fn() => EventOrigin::where('code', 'local')->first()?->id,
+        ]);
+    }
+
+    public function national(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'origin_id' => fn() => EventOrigin::where('code', 'national')->first()?->id,
+        ]);
+    }
+
+    public function international(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'origin_id' => fn() => EventOrigin::where('code', 'international')->first()?->id,
+        ]);
+    }
+
+    // =====================================================
+    // FREQUENCY STATES
+    // =====================================================
+
+    public function unique(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'frequency_id' => fn() => EventFrequency::where('code', 'unico')->first()?->id,
+        ]);
+    }
+
+    public function annual(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'frequency_id' => fn() => EventFrequency::where('code', 'anual')->first()?->id,
+        ]);
+    }
+
+    // =====================================================
+    // THEME STATES
+    // =====================================================
+
+    public function cultural(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'theme_id' => fn() => EventTheme::where('code', 'cultural')->first()?->id,
+        ]);
+    }
+
+    public function business(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'theme_id' => fn() => EventTheme::where('code', 'negocios')->first()?->id,
         ]);
     }
 }

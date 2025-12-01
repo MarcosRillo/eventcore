@@ -7,10 +7,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Event Resource
- * 
+ *
  * Transforms Event model data for API responses.
- * Follows Laravel Resource pattern for consistent API output.
- * 
+ * Updated for 3NF normalized schema (Nov 30, 2025).
+ *
  * @property-read \App\Models\Event $resource
  */
 class EventResource extends JsonResource
@@ -28,17 +28,27 @@ class EventResource extends JsonResource
             'description' => $this->description,
             'start_date' => $this->start_date->toISOString(),
             'end_date' => $this->end_date->toISOString(),
-            'status' => $this->status,
-            'type' => $this->type,
-            'location_text' => $this->location_text,
-            'virtual_link' => $this->virtual_link,
-            'cta_link' => $this->cta_link,
-            'cta_text' => $this->cta_text,
-            'metadata' => $this->metadata,
+
+            // Display
             'featured_image' => $this->featured_image,
             'is_featured' => $this->is_featured,
-            'max_attendees' => $this->max_attendees,
-            
+            'logo_url' => $this->logo_url,
+            'responsive_image_url' => $this->responsive_image_url,
+
+            // Event info
+            'edition_number' => $this->edition_number,
+            'maps_url' => $this->maps_url,
+            'previous_venue' => $this->previous_venue,
+            'next_venue' => $this->next_venue,
+            'event_website' => $this->event_website,
+            'virtual_transmission' => $this->virtual_transmission,
+
+            // Attendance
+            'local_attendance' => $this->local_attendance,
+            'national_attendance' => $this->national_attendance,
+            'international_attendance' => $this->international_attendance,
+            'total_attendance' => $this->total_attendance,
+
             // Computed properties
             'duration_minutes' => $this->duration_in_minutes,
             'duration_hours' => $this->duration_in_hours,
@@ -47,44 +57,119 @@ class EventResource extends JsonResource
             'is_upcoming' => $this->isUpcoming(),
             'is_virtual' => $this->isVirtual(),
             'has_multiple_locations' => $this->hasMultipleLocations(),
-            'has_cta' => $this->hasCTA(),
-            
-            // Relationships
-            'category' => $this->whenLoaded('category', function () {
-                return new CategoryResource($this->category);
-            }),
-            
-            'locations' => $this->whenLoaded('locations', function () {
-                return $this->locations->map(function ($location) {
-                    return [
-                        'id' => $location->id,
-                        'name' => $location->name,
-                        'address' => $location->address,
-                        'city' => $location->city,
-                        'state' => $location->state,
-                        'country' => $location->country,
-                    ];
-                });
-            }),
-            
-            'entity' => $this->whenLoaded('entity', function () {
-                return [
-                    'id' => $this->entity->id,
-                    'name' => $this->entity->name,
-                ];
-            }),
 
-            'organization' => $this->whenLoaded('organization', function () {
-                return [
-                    'id' => $this->organization->id,
-                    'name' => $this->organization->name,
-                    'type' => $this->organization->type,
-                ];
-            }),
+            // Core relationships
+            'status' => $this->whenLoaded('status', fn() => [
+                'id' => $this->status->id,
+                'code' => $this->status->status_code,
+                'name' => $this->status->status_name,
+            ]),
 
-            // Direct field access for organization_id
+            'type' => $this->whenLoaded('type', fn() => [
+                'id' => $this->type->id,
+                'code' => $this->type->type_code,
+                'name' => $this->type->type_name,
+            ]),
+
+            'category' => $this->whenLoaded('category', fn() => new CategoryResource($this->category)),
+
+            'locations' => $this->whenLoaded('locations', fn() => $this->locations->map(fn($location) => [
+                'id' => $location->id,
+                'name' => $location->name,
+                'address' => $location->address,
+                'city' => $location->city,
+                'state' => $location->state,
+                'country' => $location->country,
+            ])),
+
+            'entity' => $this->whenLoaded('entity', fn() => [
+                'id' => $this->entity->id,
+                'name' => $this->entity->name,
+            ]),
+
+            'organization' => $this->whenLoaded('organization', fn() => [
+                'id' => $this->organization->id,
+                'name' => $this->organization->name,
+            ]),
+
+            // Normalized relationships (Nov 30, 2025)
+            'subtype' => $this->whenLoaded('subtype', fn() => [
+                'id' => $this->subtype->id,
+                'code' => $this->subtype->code,
+                'name' => $this->subtype->name,
+            ]),
+
+            'origin' => $this->whenLoaded('origin', fn() => [
+                'id' => $this->origin->id,
+                'code' => $this->origin->code,
+                'name' => $this->origin->name,
+            ]),
+
+            'theme' => $this->whenLoaded('theme', fn() => [
+                'id' => $this->theme->id,
+                'code' => $this->theme->code,
+                'name' => $this->theme->name,
+            ]),
+
+            'frequency' => $this->whenLoaded('frequency', fn() => [
+                'id' => $this->frequency->id,
+                'code' => $this->frequency->code,
+                'name' => $this->frequency->name,
+            ]),
+
+            'rotation_type' => $this->whenLoaded('rotationType', fn() => [
+                'id' => $this->rotationType->id,
+                'code' => $this->rotationType->code,
+                'name' => $this->rotationType->name,
+            ]),
+
+            'producer' => $this->whenLoaded('producer', fn() => [
+                'id' => $this->producer->id,
+                'name' => $this->producer->name,
+            ]),
+
+            'services' => $this->whenLoaded('services', fn() => $this->services->map(fn($service) => [
+                'id' => $service->id,
+                'code' => $service->code,
+                'name' => $service->name,
+                'is_included' => $service->pivot->is_included,
+                'notes' => $service->pivot->notes,
+            ])),
+
+            'rooms' => $this->whenLoaded('rooms', fn() => $this->rooms->map(fn($room) => [
+                'id' => $room->id,
+                'code' => $room->code,
+                'name' => $room->name,
+                'capacity' => $room->capacity,
+            ])),
+
+            'async_dates' => $this->whenLoaded('asyncDates', fn() => $this->asyncDates->map(fn($date) => [
+                'id' => $date->id,
+                'date' => $date->date_value->toDateString(),
+                'notes' => $date->notes,
+            ])),
+
+            // Foreign key IDs (for forms)
+            'status_id' => $this->status_id,
+            'type_id' => $this->type_id,
+            'category_id' => $this->category_id,
+            'entity_id' => $this->entity_id,
             'organization_id' => $this->organization_id,
-            
+            'subtype_id' => $this->subtype_id,
+            'origin_id' => $this->origin_id,
+            'theme_id' => $this->theme_id,
+            'frequency_id' => $this->frequency_id,
+            'rotation_type_id' => $this->rotation_type_id,
+            'producer_id' => $this->producer_id,
+
+            // Approval workflow
+            'approval_comments' => $this->approval_comments,
+            'approval_history' => $this->approval_history,
+            'created_by' => $this->created_by,
+            'approved_by' => $this->approved_by,
+            'approved_at' => $this->approved_at?->toISOString(),
+            'published_at' => $this->published_at?->toISOString(),
+
             // Timestamps
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),

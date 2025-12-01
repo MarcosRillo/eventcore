@@ -156,6 +156,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('events/{id}', [OrganizerController::class, 'show']);
                 Route::put('events/{id}', [OrganizerController::class, 'update']);
                 Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
+                Route::post('events/{id}/submit', [OrganizerController::class, 'submit']);
             });
         });
 
