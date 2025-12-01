@@ -1,3 +1,8 @@
+/**
+ * Tests for useEventForm hook
+ * Updated for 3NF schema (Nov 30, 2025)
+ */
+
 import type { FormEvent } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useEventForm } from '../useEventForm'
@@ -19,8 +24,6 @@ jest.mock('next/navigation', () => ({
 
 /**
  * Creates a mock FormEvent for testing form submissions
- * Provides minimum required properties for FormEvent interface
- * @returns Complete mock FormEvent with all required properties
  */
 const createMockFormEvent = (): FormEvent => {
   const mockEvent = {
@@ -74,11 +77,11 @@ describe('useEventForm', () => {
 
       expect(result.current.formData.title).toBe('')
       expect(result.current.formData.description).toBe('')
+      expect(result.current.formData.location_ids).toEqual([])
       expect(result.current.isEditMode).toBe(false)
       expect(result.current.loading).toBe(false)
       expect(result.current.initialLoading).toBe(false)
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -90,7 +93,8 @@ describe('useEventForm', () => {
           id: 1,
           title: 'Test Event',
           description: 'Test Description',
-          start_date: '2030-12-01T10:00:00',
+          start_date: '2030-12-01T10:00',
+          locations: [{ id: 1, name: 'Location 1' }],
         },
       })
 
@@ -99,7 +103,6 @@ describe('useEventForm', () => {
       expect(result.current.isEditMode).toBe(true)
       expect(result.current.initialLoading).toBe(true)
 
-      // Wait for async loading to complete
       await waitFor(() => {
         expect(result.current.initialLoading).toBe(false)
       })
@@ -134,7 +137,6 @@ describe('useEventForm', () => {
 
       expect(result.current.formData.title).toBe('New Event Title')
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -144,12 +146,11 @@ describe('useEventForm', () => {
       const { result } = renderHook(() => useEventForm())
 
       act(() => {
-        result.current.handleChange('coffee_break', true)
+        result.current.handleChange('virtual_transmission', true)
       })
 
-      expect(result.current.formData.coffee_break).toBe(true)
+      expect(result.current.formData.virtual_transmission).toBe(true)
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -164,7 +165,20 @@ describe('useEventForm', () => {
 
       expect(result.current.formData.category_id).toBe(5)
 
-      // Wait for categories and locations to load
+      await waitFor(() => {
+        expect(result.current.categories.length).toBeGreaterThan(0)
+      })
+    })
+
+    it('should update array fields correctly', async () => {
+      const { result } = renderHook(() => useEventForm())
+
+      act(() => {
+        result.current.handleChange('location_ids', [1, 2])
+      })
+
+      expect(result.current.formData.location_ids).toEqual([1, 2])
+
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -173,25 +187,20 @@ describe('useEventForm', () => {
     it('should clear field error when field value changes', async () => {
       const { result } = renderHook(() => useEventForm())
 
-      // Set initial error
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
       })
 
-      // Errors should exist
       await waitFor(() => {
         expect(Object.keys(result.current.errors).length).toBeGreaterThan(0)
       })
 
-      // Change field value
       act(() => {
         result.current.handleChange('title', 'Valid Title')
       })
 
-      // Error for that field should be cleared
       expect(result.current.errors.title).toBeUndefined()
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -209,7 +218,6 @@ describe('useEventForm', () => {
       expect(Object.keys(result.current.errors).length).toBeGreaterThan(0)
       expect(organizerEventService.createEvent).not.toHaveBeenCalled()
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -222,9 +230,8 @@ describe('useEventForm', () => {
         await result.current.handleSubmit(createMockFormEvent())
       })
 
-      expect(result.current.errors.title).toBe('Title is required')
+      expect(result.current.errors.title).toBe('El título es requerido')
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -237,24 +244,22 @@ describe('useEventForm', () => {
         await result.current.handleSubmit(createMockFormEvent())
       })
 
-      expect(result.current.errors.description).toBe('Description is required')
+      expect(result.current.errors.description).toBe('La descripción es requerida')
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
     })
 
-    it('should show error for missing event_date', async () => {
+    it('should show error for missing start_date', async () => {
       const { result } = renderHook(() => useEventForm())
 
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
       })
 
-      expect(result.current.errors.event_date).toBe('Event date is required')
+      expect(result.current.errors.start_date).toBe('La fecha de inicio es requerida')
 
-      // Wait for categories and locations to load
       await waitFor(() => {
         expect(result.current.categories.length).toBeGreaterThan(0)
       })
@@ -267,20 +272,16 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      // Wait for initial effects to complete
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
 
-      // Fill form with valid data
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
-        result.current.handleChange('event_date', '2030-12-01')
-        result.current.handleChange('start_time', '10:00')
-        result.current.handleChange('end_time', '18:00')
+        result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('category_id', 1)
-        result.current.handleChange('location_id', 1)
+        result.current.handleChange('location_ids', [1])
       })
 
       await act(async () => {
@@ -299,36 +300,28 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      // Wait for initial effects
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
 
-      // Verify loading is false initially
       expect(result.current.loading).toBe(false)
 
-      // Fill valid data
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
-        result.current.handleChange('event_date', '2030-12-01')
-        result.current.handleChange('start_time', '10:00')
-        result.current.handleChange('end_time', '18:00')
+        result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('category_id', 1)
-        result.current.handleChange('location_id', 1)
+        result.current.handleChange('location_ids', [1])
       })
 
-      // Start submission without awaiting
       act(() => {
         result.current.handleSubmit(createMockFormEvent())
       })
 
-      // Wait for loading to be true
       await waitFor(() => {
         expect(result.current.loading).toBe(true)
       })
 
-      // Wait for submission to complete and loading to be false
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       }, { timeout: 500 })
@@ -339,20 +332,16 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      // Wait for initial effects
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
 
-      // Fill valid data
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
-        result.current.handleChange('event_date', '2030-12-01')
-        result.current.handleChange('start_time', '10:00')
-        result.current.handleChange('end_time', '18:00')
+        result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('category_id', 1)
-        result.current.handleChange('location_id', 1)
+        result.current.handleChange('location_ids', [1])
       })
 
       await act(async () => {
@@ -368,20 +357,16 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm({ onSuccess }))
 
-      // Wait for initial effects
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
 
-      // Fill valid data
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
-        result.current.handleChange('event_date', '2030-12-01')
-        result.current.handleChange('start_time', '10:00')
-        result.current.handleChange('end_time', '18:00')
+        result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('category_id', 1)
-        result.current.handleChange('location_id', 1)
+        result.current.handleChange('location_ids', [1])
       })
 
       await act(async () => {
@@ -397,20 +382,16 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      // Wait for initial effects
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
 
-      // Fill valid data
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
-        result.current.handleChange('event_date', '2030-12-01')
-        result.current.handleChange('start_time', '10:00')
-        result.current.handleChange('end_time', '18:00')
+        result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('category_id', 1)
-        result.current.handleChange('location_id', 1)
+        result.current.handleChange('location_ids', [1])
       })
 
       await act(async () => {
@@ -428,31 +409,27 @@ describe('useEventForm', () => {
           id: 1,
           title: 'Original Title',
           description: 'Original Description',
-          start_date: '2030-12-01T10:00:00',
-          end_date: '2030-12-01T18:00:00',
+          start_date: '2030-12-01T10:00',
+          end_date: '2030-12-01T18:00',
           category_id: 1,
-          location_id: 1,
+          locations: [{ id: 1, name: 'Location 1' }],
         },
       })
       ;(organizerEventService.updateEvent as jest.Mock).mockResolvedValue({ data: { id: 1 } })
 
       const { result } = renderHook(() => useEventForm({ eventId: 1 }))
 
-      // Wait for event to load and categories/locations to be ready
       await waitFor(() => {
         expect(result.current.formData.title).toBe('Original Title')
         expect(result.current.categories).toEqual(mockCategories)
       })
 
-      // Ensure all required fields are set for validation to pass
       act(() => {
         result.current.handleChange('title', 'Updated Title')
         result.current.handleChange('description', 'Updated Description')
-        result.current.handleChange('event_date', '2030-12-01')
-        result.current.handleChange('start_time', '10:00')
-        result.current.handleChange('end_time', '18:00')
+        result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('category_id', 1)
-        result.current.handleChange('location_id', 1)
+        result.current.handleChange('location_ids', [1])
       })
 
       await act(async () => {
@@ -470,7 +447,6 @@ describe('useEventForm', () => {
     it('should call router.back when onCancel is not provided', async () => {
       const { result } = renderHook(() => useEventForm())
 
-      // Wait for initial effects
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
@@ -486,7 +462,6 @@ describe('useEventForm', () => {
       const onCancel = jest.fn()
       const { result } = renderHook(() => useEventForm({ onCancel }))
 
-      // Wait for initial effects
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
       })
@@ -506,11 +481,11 @@ describe('useEventForm', () => {
         id: 1,
         title: 'Test Event',
         description: 'Test Description',
-        start_date: '2030-12-01T10:00:00',
-        end_date: '2030-12-01T18:00:00',
+        start_date: '2030-12-01T10:00',
+        end_date: '2030-12-01T18:00',
         category_id: 1,
-        location_id: 2,
-        image_url: 'https://example.com/image.jpg',
+        locations: [{ id: 2, name: 'Location 2' }],
+        featured_image: 'https://example.com/image.jpg',
       }
 
       ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
@@ -523,7 +498,8 @@ describe('useEventForm', () => {
         expect(result.current.formData.title).toBe('Test Event')
         expect(result.current.formData.description).toBe('Test Description')
         expect(result.current.formData.category_id).toBe(1)
-        expect(result.current.formData.location_id).toBe(2)
+        expect(result.current.formData.location_ids).toEqual([2])
+        expect(result.current.formData.featured_image).toBe('https://example.com/image.jpg')
       })
     })
 
@@ -539,15 +515,17 @@ describe('useEventForm', () => {
 
     it('should set initialLoading to false after loading', async () => {
       ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: { id: 1, title: 'Test' },
+        data: {
+          id: 1,
+          title: 'Test',
+          locations: [],
+        },
       })
 
       const { result } = renderHook(() => useEventForm({ eventId: 1 }))
 
-      // Initially loading
       expect(result.current.initialLoading).toBe(true)
 
-      // After load completes
       await waitFor(() => {
         expect(result.current.initialLoading).toBe(false)
       })

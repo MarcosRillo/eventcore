@@ -5,7 +5,7 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
-  publishEvent,
+  submitForReview,
   duplicateEvent,
 } from '../organizer-event.service'
 import type { CreateEventDto, UpdateEventDto } from '@/features/organizer/types/event.types'
@@ -116,8 +116,8 @@ describe('organizer-event.service', () => {
         category_id: 1,
         location_ids: [1, 2],
         edition_number: '10ma Edición',
-        coffee_break: true,
-        venue: 'Centro Cultural',
+        virtual_transmission: true,
+        maps_url: 'https://maps.google.com/test',
       }
 
       const mockResponse = { data: { id: 1, ...newEvent } }
@@ -166,7 +166,7 @@ describe('organizer-event.service', () => {
         category_id: 2,
         location_ids: [3],
         edition_number: '11va Edición',
-        coffee_break: false,
+        virtual_transmission: false,
       }
 
       const mockResponse = { data: updateData }
@@ -235,46 +235,52 @@ describe('organizer-event.service', () => {
     })
   })
 
-  describe('publishEvent', () => {
-    it('should publish event by id', async () => {
+  describe('submitForReview', () => {
+    it('should submit event for review by id', async () => {
       const mockResponse = {
-        data: {
+        message: 'Event submitted for review',
+        status: 'pending_internal_approval',
+        event: {
           id: 1,
           title: 'Event',
-          status: 'published',
+          status: 'pending_internal_approval',
         },
       }
 
       mockedApiClient.post.mockResolvedValue({ data: mockResponse })
 
-      const result = await publishEvent(1)
+      const result = await submitForReview(1)
 
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/organizer/events/1/publish')
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/organizer/events/1/submit')
       expect(result).toEqual(mockResponse)
     })
 
-    it('should publish event with large id', async () => {
-      const mockResponse = { data: { id: 999999, status: 'published' } }
+    it('should submit event with large id', async () => {
+      const mockResponse = {
+        message: 'Event submitted for review',
+        status: 'pending_internal_approval',
+        event: { id: 999999, status: 'pending_internal_approval' }
+      }
       mockedApiClient.post.mockResolvedValue({ data: mockResponse })
 
-      const result = await publishEvent(999999)
+      const result = await submitForReview(999999)
 
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/organizer/events/999999/publish')
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/organizer/events/999999/submit')
       expect(result).toEqual(mockResponse)
     })
 
-    it('should handle publish error', async () => {
-      const error = new Error('Cannot publish event')
+    it('should handle submit validation error', async () => {
+      const error = new Error('Missing required fields')
       mockedApiClient.post.mockRejectedValue(error)
 
-      await expect(publishEvent(1)).rejects.toThrow('Cannot publish event')
+      await expect(submitForReview(1)).rejects.toThrow('Missing required fields')
     })
 
-    it('should handle publish forbidden error', async () => {
-      const error = new Error('Event already published')
+    it('should handle submit forbidden error', async () => {
+      const error = new Error('Only draft events can be submitted')
       mockedApiClient.post.mockRejectedValue(error)
 
-      await expect(publishEvent(1)).rejects.toThrow('Event already published')
+      await expect(submitForReview(1)).rejects.toThrow('Only draft events can be submitted')
     })
   })
 

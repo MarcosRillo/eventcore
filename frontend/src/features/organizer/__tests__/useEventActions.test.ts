@@ -1,7 +1,7 @@
 /**
  * Tests for useEventActions hook
  *
- * Tests business logic for event actions: publish, duplicate, delete.
+ * Tests business logic for event actions: submit for review, duplicate, delete.
  * Includes API calls, error handling, and state management.
  */
 
@@ -23,54 +23,58 @@ describe('useEventActions', () => {
     ;(useToast as jest.Mock).mockReturnValue({ addToast: mockAddToast })
   })
 
-  describe('publishEvent', () => {
-    test('publishes event successfully and shows success toast', async () => {
-      const mockPublishedEvent = { data: { id: 1, status: 'pending' } }
-      ;(organizerEventService.publishEvent as jest.Mock).mockResolvedValue(mockPublishedEvent)
+  describe('submitForReview', () => {
+    test('submits event for review successfully and shows success toast', async () => {
+      const mockSubmittedEvent = {
+        message: 'Event submitted for review',
+        status: 'pending_internal_approval',
+        event: { id: 1, status: 'pending_internal_approval' }
+      }
+      ;(organizerEventService.submitForReview as jest.Mock).mockResolvedValue(mockSubmittedEvent)
 
       const { result } = renderHook(() => useEventActions(mockRefresh))
 
       await act(async () => {
-        await result.current.publishEvent(1)
+        await result.current.submitForReview(1)
       })
 
-      expect(organizerEventService.publishEvent).toHaveBeenCalledWith(1)
+      expect(organizerEventService.submitForReview).toHaveBeenCalledWith(1)
       expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Event published successfully',
+        message: 'Evento enviado a revisión exitosamente',
         type: 'success'
       })
       expect(mockRefresh).toHaveBeenCalled()
       expect(result.current.loading).toBe(false)
     })
 
-    test('handles publish error and shows error toast', async () => {
-      ;(organizerEventService.publishEvent as jest.Mock).mockRejectedValue(
+    test('handles submit error and shows error toast', async () => {
+      ;(organizerEventService.submitForReview as jest.Mock).mockRejectedValue(
         new Error('Network error')
       )
 
       const { result } = renderHook(() => useEventActions(mockRefresh))
 
       await act(async () => {
-        await result.current.publishEvent(1)
+        await result.current.submitForReview(1)
       })
 
       expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Failed to publish event',
+        message: 'Error al enviar evento a revisión',
         type: 'error'
       })
       expect(mockRefresh).not.toHaveBeenCalled()
       expect(result.current.loading).toBe(false)
     })
 
-    test('sets loading state during publish operation', async () => {
-      ;(organizerEventService.publishEvent as jest.Mock).mockImplementation(
+    test('sets loading state during submit operation', async () => {
+      ;(organizerEventService.submitForReview as jest.Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 100))
       )
 
       const { result } = renderHook(() => useEventActions(mockRefresh))
 
       act(() => {
-        result.current.publishEvent(1)
+        result.current.submitForReview(1)
       })
 
       expect(result.current.loading).toBe(true)
@@ -87,18 +91,20 @@ describe('useEventActions', () => {
         data: {
           id: 1,
           title: 'Original Event',
+          description: 'Test description',
           status: 'published' as const,
-          event_date: '2025-11-01',
-          location: 'Test Location'
+          start_date: '2025-11-01T10:00',
+          locations: [{ id: 1, name: 'Test Location' }],
+          category: { id: 1, name: 'Test Category' }
         }
       }
       const mockDuplicatedEvent = {
         data: {
           id: 2,
-          title: 'Original Event (Copy)',
+          title: 'Original Event (Copia)',
           status: 'draft' as const,
-          event_date: '2025-11-01',
-          location: 'Test Location'
+          start_date: '2025-11-01T10:00',
+          locations: [{ id: 1, name: 'Test Location' }]
         }
       }
 
@@ -114,11 +120,12 @@ describe('useEventActions', () => {
       expect(organizerEventService.getEvent).toHaveBeenCalledWith(1)
       expect(organizerEventService.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Original Event (Copy)'
+          title: 'Original Event (Copia)',
+          location_ids: [1]
         })
       )
       expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Event duplicated successfully',
+        message: 'Evento duplicado exitosamente',
         type: 'success'
       })
       expect(mockRefresh).toHaveBeenCalled()
@@ -129,8 +136,10 @@ describe('useEventActions', () => {
         data: {
           id: 1,
           title: 'Original Event',
-          event_date: '2025-11-01',
-          location: 'Test Location',
+          description: 'Test description',
+          start_date: '2025-11-01T10:00',
+          locations: [{ id: 1, name: 'Test Location' }],
+          category: { id: 1, name: 'Test Category' },
           status: 'draft' as const,
           created_at: '2025-10-29T00:00:00Z',
           updated_at: '2025-10-29T00:00:00Z'
@@ -146,13 +155,12 @@ describe('useEventActions', () => {
         await result.current.duplicateEvent(1)
       })
 
-      expect(organizerEventService.createEvent).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          id: expect.anything(),
-          created_at: expect.anything(),
-          updated_at: expect.anything()
-        })
-      )
+      // Verify createEvent was called with proper structure (no id, created_at, updated_at)
+      const createEventCall = (organizerEventService.createEvent as jest.Mock).mock.calls[0][0]
+      expect(createEventCall.id).toBeUndefined()
+      expect(createEventCall.created_at).toBeUndefined()
+      expect(createEventCall.updated_at).toBeUndefined()
+      expect(createEventCall.title).toBe('Original Event (Copia)')
     })
 
     test('handles duplicate error and shows error toast', async () => {
@@ -167,7 +175,7 @@ describe('useEventActions', () => {
       })
 
       expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Failed to duplicate event',
+        message: 'Error al duplicar evento',
         type: 'error'
       })
       expect(mockRefresh).not.toHaveBeenCalled()
@@ -232,21 +240,21 @@ describe('useEventActions', () => {
   })
 
   describe('Confirmation Modals', () => {
-    test('opens and closes publish confirmation modal', () => {
+    test('opens and closes submit confirmation modal', () => {
       const { result } = renderHook(() => useEventActions(mockRefresh))
 
       act(() => {
-        result.current.openPublishModal(1)
+        result.current.openSubmitModal(1)
       })
 
-      expect(result.current.publishModalOpen).toBe(true)
+      expect(result.current.submitModalOpen).toBe(true)
       expect(result.current.selectedEventId).toBe(1)
 
       act(() => {
-        result.current.closePublishModal()
+        result.current.closeSubmitModal()
       })
 
-      expect(result.current.publishModalOpen).toBe(false)
+      expect(result.current.submitModalOpen).toBe(false)
       expect(result.current.selectedEventId).toBeNull()
     })
 
