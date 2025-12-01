@@ -32,11 +32,11 @@ export const OrganizerEventListItem = ({
   const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status
   const statusDisplay = typeof event.status === 'object' ? event.status.status_name : event.status
 
-  // Get event date (prioritize start_date over legacy event_date)
-  const eventDate = event.start_date || event.event_date
+  // Get event date
+  const eventDate = event.start_date
 
-  // Get location name from locations array or legacy location field
-  const locationName = event.locations?.[0]?.name || event.location || 'N/A'
+  // Get location name from locations array
+  const locationName = event.locations?.[0]?.name || 'N/A'
 
   return (
     <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">

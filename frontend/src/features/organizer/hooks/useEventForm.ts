@@ -19,57 +19,49 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
   const isEditMode = !!eventId
 
   const [formData, setFormData] = useState<EventFormData>({
-    // Información Básica
+    // Basic information
     title: '',
-    edition_number: '',
     description: '',
-    event_type: '',
-    event_subtype: '',
-    origin: '',
-    theme: '',
-    frequency: '',
-    rotation_type: '',
+    edition_number: '',
 
-    // Servicios y Catering
-    coffee_break: false,
-    lunch_catering: false,
-    dinner_catering: false,
-    pre_event_package: false,
-    post_event_package: false,
+    // FK references (IDs)
+    type_id: null,
+    subtype_id: null,
+    origin_id: null,
+    theme_id: null,
+    frequency_id: null,
+    rotation_type_id: null,
+    producer_id: null,
+    category_id: null,
 
-    // Ubicación
-    venue: '',
-    city: '',
-    rooms_used: '',
+    // Services and Rooms (arrays of IDs)
+    service_ids: [],
+    room_ids: [],
+
+    // Location info
+    location_ids: [],
     maps_url: '',
     previous_venue: '',
     next_venue: '',
 
-    // Fechas y Horarios
-    event_date: '',
+    // Dates
+    start_date: '',
     end_date: '',
-    start_time: '',
-    end_time: '',
-    asynchronous_dates: [],
+    async_dates: [],
 
-    // Asistencia
+    // Attendance
     local_attendance: '',
     national_attendance: '',
     international_attendance: '',
     virtual_transmission: false,
 
-    // Información Adicional
-    producer: '',
+    // Additional info
     event_website: '',
 
-    // Imágenes
+    // Images
     logo_url: '',
-    image_url: '',
-    responsive_image_url: '',
-
-    // Campos legacy
-    category_id: null,
-    location_id: null
+    featured_image: '',
+    responsive_image_url: ''
   })
 
   const [errors, setErrors] = useState<EventFormErrors>({})
@@ -126,57 +118,52 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
         const event = response.data
 
         setFormData({
-          // Información Básica
+          // Basic information
           title: event.title,
-          edition_number: '',
           description: event.description || '',
-          event_type: '',
-          event_subtype: '',
-          origin: '',
-          theme: '',
-          frequency: '',
-          rotation_type: '',
+          edition_number: event.edition_number || '',
 
-          // Servicios y Catering
-          coffee_break: false,
-          lunch_catering: false,
-          dinner_catering: false,
-          pre_event_package: false,
-          post_event_package: false,
+          // FK references (IDs)
+          type_id: event.type_id || null,
+          subtype_id: event.subtype_id || null,
+          origin_id: event.origin_id || null,
+          theme_id: event.theme_id || null,
+          frequency_id: event.frequency_id || null,
+          rotation_type_id: event.rotation_type_id || null,
+          producer_id: event.producer_id || null,
+          category_id: event.category?.id || event.category_id || null,
 
-          // Ubicación
-          venue: '',
-          city: '',
-          rooms_used: '',
-          maps_url: '',
-          previous_venue: '',
-          next_venue: '',
+          // Services and Rooms (arrays of IDs)
+          service_ids: event.services?.map((s: { id: number }) => s.id) || [],
+          room_ids: event.rooms?.map((r: { id: number }) => r.id) || [],
 
-          // Fechas y Horarios
-          event_date: event.start_date || event.event_date || '',
+          // Location info
+          location_ids: event.locations?.map((l: { id: number }) => l.id) || [],
+          maps_url: event.maps_url || '',
+          previous_venue: event.previous_venue || '',
+          next_venue: event.next_venue || '',
+
+          // Dates
+          start_date: event.start_date || '',
           end_date: event.end_date || '',
-          start_time: event.start_time || '',
-          end_time: event.end_time || '',
-          asynchronous_dates: [],
+          async_dates: event.async_dates?.map((d: { date_value?: string; date?: string; notes?: string }) => ({
+            date: d.date_value || d.date || '',
+            notes: d.notes
+          })) || [],
 
-          // Asistencia
-          local_attendance: '',
-          national_attendance: '',
-          international_attendance: '',
-          virtual_transmission: false,
+          // Attendance
+          local_attendance: event.local_attendance?.toString() || '',
+          national_attendance: event.national_attendance?.toString() || '',
+          international_attendance: event.international_attendance?.toString() || '',
+          virtual_transmission: event.virtual_transmission || false,
 
-          // Información Adicional
-          producer: '',
-          event_website: '',
+          // Additional info
+          event_website: event.event_website || '',
 
-          // Imágenes
-          logo_url: '',
-          image_url: event.image_url || '',
-          responsive_image_url: '',
-
-          // Campos legacy
-          category_id: event.category_id || null,
-          location_id: event.location_id || null
+          // Images
+          logo_url: event.logo_url || '',
+          featured_image: event.featured_image || '',
+          responsive_image_url: event.responsive_image_url || ''
         })
       } catch {
         setErrors({ general: 'Error loading event data' })
@@ -188,7 +175,7 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     loadEvent()
   }, [eventId])
 
-  const handleChange = (field: keyof EventFormData, value: string | number | boolean | null | AsynchronousDate[]) => {
+  const handleChange = (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
 
     // Clear field error on change (if it exists)
@@ -216,69 +203,57 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     setErrors({})
 
     try {
-      // Combine date + time into ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
-      // Laravel expects timestamps in this format for the database
-      const startDateTime = `${formData.event_date}T${formData.start_time}:00`
-      const endDateTime = `${formData.end_date || formData.event_date}T${formData.end_time}:00`
-
-      // Prepare asynchronous dates if they exist
-      const asyncDates = formData.asynchronous_dates.length > 0
-        ? formData.asynchronous_dates.map(d => ({
+      // Prepare async dates if they exist
+      const asyncDates = formData.async_dates.length > 0
+        ? formData.async_dates.map(d => ({
             date: d.date,
-            start_time: d.start_time,
-            end_time: d.end_time
+            notes: d.notes
           }))
         : undefined
 
       const payload = {
-        // Campos básicos requeridos
+        // Required fields
         title: formData.title,
         description: formData.description,
-        start_date: startDateTime,
-        end_date: endDateTime,
+        start_date: formData.start_date,
+        end_date: formData.end_date || undefined,
         category_id: formData.category_id!,
-        location_ids: [formData.location_id!],
+        location_ids: formData.location_ids,
 
-        // Información Básica
+        // FK references (IDs)
+        type_id: formData.type_id || undefined,
         edition_number: formData.edition_number || undefined,
-        event_type: formData.event_type || undefined,
-        event_subtype: formData.event_subtype || undefined,
-        origin: formData.origin || undefined,
-        theme: formData.theme || undefined,
-        frequency: formData.frequency || undefined,
-        rotation_type: formData.rotation_type || undefined,
+        subtype_id: formData.subtype_id || undefined,
+        origin_id: formData.origin_id || undefined,
+        theme_id: formData.theme_id || undefined,
+        frequency_id: formData.frequency_id || undefined,
+        rotation_type_id: formData.rotation_type_id || undefined,
+        producer_id: formData.producer_id || undefined,
 
-        // Servicios y Catering
-        coffee_break: formData.coffee_break,
-        lunch_catering: formData.lunch_catering,
-        dinner_catering: formData.dinner_catering,
-        pre_event_package: formData.pre_event_package,
-        post_event_package: formData.post_event_package,
+        // Services and Rooms
+        service_ids: formData.service_ids.length > 0 ? formData.service_ids : undefined,
+        room_ids: formData.room_ids.length > 0 ? formData.room_ids : undefined,
 
-        // Ubicación
-        venue: formData.venue || undefined,
-        city: formData.city || undefined,
-        rooms_used: formData.rooms_used || undefined,
+        // Location info
         maps_url: formData.maps_url || undefined,
         previous_venue: formData.previous_venue || undefined,
         next_venue: formData.next_venue || undefined,
 
-        // Fechas Asincrónicas
-        asynchronous_dates: asyncDates,
+        // Async dates
+        async_dates: asyncDates,
 
-        // Asistencia
+        // Attendance
         local_attendance: formData.local_attendance ? parseInt(formData.local_attendance) : undefined,
         national_attendance: formData.national_attendance ? parseInt(formData.national_attendance) : undefined,
         international_attendance: formData.international_attendance ? parseInt(formData.international_attendance) : undefined,
         virtual_transmission: formData.virtual_transmission,
 
-        // Información Adicional
-        producer: formData.producer || undefined,
+        // Additional info
         event_website: formData.event_website || undefined,
 
-        // Imágenes
+        // Images
         logo_url: formData.logo_url || undefined,
-        featured_image: formData.image_url || undefined,
+        featured_image: formData.featured_image || undefined,
         responsive_image_url: formData.responsive_image_url || undefined,
       }
 

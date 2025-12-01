@@ -3,7 +3,7 @@
  * Clean checkbox with label and description support
  */
 
-import type { ChangeEvent } from 'react'
+import { useId, type ChangeEvent } from 'react'
 
 interface CheckboxProps {
   id?: string
@@ -32,7 +32,9 @@ const Checkbox = ({
     onChange(e.target.checked)
   }
 
-  const checkboxId = id || `checkbox-${Math.random().toString(36).substr(2, 9)}`
+  // Generate stable unique ID for accessibility (useId ensures SSR/CSR match)
+  const generatedId = useId()
+  const checkboxId = id || `checkbox-${generatedId}`
 
   return (
     <div className={`flex items-start ${className}`}>

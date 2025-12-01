@@ -141,7 +141,7 @@ describe('OrganizerEventListItem', () => {
 
   describe('date handling', () => {
     test('should use start_date when available', () => {
-      const event = { ...baseEvent, start_date: '2025-12-25', event_date: '2025-01-01' }
+      const event = { ...baseEvent, start_date: '2025-12-25' }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
       // Should show December 25 - check for date content
@@ -149,18 +149,9 @@ describe('OrganizerEventListItem', () => {
       expect(dateText).toContain('2025')
     })
 
-    test('should fallback to event_date when start_date is not available', () => {
-      // Type assertion needed for edge case testing - component handles missing start_date gracefully
-      const event = { ...baseEvent, start_date: undefined, event_date: '2025-07-04' } as unknown as OrganizerEvent
-      render(<OrganizerEventListItem {...defaultProps} event={event} />)
-
-      const dateText = screen.getByText(/Date:/).textContent
-      expect(dateText).toContain('2025')
-    })
-
     test('should show N/A when no date is available', () => {
       // Type assertion needed for edge case testing - component handles missing dates gracefully
-      const event = { ...baseEvent, start_date: undefined, event_date: undefined } as unknown as OrganizerEvent
+      const event = { ...baseEvent, start_date: '' } as OrganizerEvent
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
       expect(screen.getByText('Date: N/A')).toBeInTheDocument()
@@ -174,16 +165,16 @@ describe('OrganizerEventListItem', () => {
       expect(screen.getByText('Location: Location 1')).toBeInTheDocument()
     })
 
-    test('should fallback to location field when locations array is empty', () => {
-      const event = { ...baseEvent, locations: [], location: 'Legacy Location' }
+    test('should show N/A when locations array is empty', () => {
+      const event = { ...baseEvent, locations: [] }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.getByText('Location: Legacy Location')).toBeInTheDocument()
+      expect(screen.getByText('Location: N/A')).toBeInTheDocument()
     })
 
     test('should show N/A when no location is available', () => {
       // Type assertion needed for edge case testing - component handles missing locations gracefully
-      const event = { ...baseEvent, locations: undefined, location: undefined } as unknown as OrganizerEvent
+      const event = { ...baseEvent, locations: undefined } as unknown as OrganizerEvent
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
       expect(screen.getByText('Location: N/A')).toBeInTheDocument()

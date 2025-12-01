@@ -3,7 +3,7 @@
  * Clean and subtle input field with elegant focus states
  */
 
-import { InputHTMLAttributes, ReactNode, forwardRef } from 'react'
+import { InputHTMLAttributes, ReactNode, forwardRef, useId } from 'react'
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string
@@ -29,8 +29,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   id,
   ...props
 }, ref) => {
-  // Generate unique ID for accessibility
-  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
+  // Generate stable unique ID for accessibility (useId ensures SSR/CSR match)
+  const generatedId = useId()
+  const inputId = id || `input-${generatedId}`
 
   // Base input styles
   const baseClasses = [

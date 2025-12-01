@@ -8,7 +8,7 @@
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { useEventActions } from '@/features/organizer/hooks/useEventActions'
 import { EventActionButtons } from '@/features/organizer/components/dumb/EventActionButtons'
-import { PublishConfirmModal, DeleteConfirmModal } from '@/shared/components/modals'
+import { DeleteConfirmModal, PublishConfirmModal } from '@/shared/components/modals'
 
 interface EventActionButtonsContainerProps {
   event: OrganizerEvent
@@ -21,20 +21,21 @@ export const EventActionButtonsContainer = ({
 }: EventActionButtonsContainerProps) => {
   const {
     loading,
-    publishModalOpen,
+    submitModalOpen,
     deleteModalOpen,
     selectedEventId,
-    openPublishModal,
-    closePublishModal,
+    validationErrors,
+    openSubmitModal,
+    closeSubmitModal,
     openDeleteModal,
     closeDeleteModal,
-    publishEvent,
+    submitForReview,
     duplicateEvent,
     deleteEvent
   } = useEventActions(onSuccess)
 
-  const handlePublish = (): void => {
-    openPublishModal(event.id)
+  const handleSubmit = (): void => {
+    openSubmitModal(event.id)
   }
 
   const handleDuplicate = async (): Promise<void> => {
@@ -45,9 +46,9 @@ export const EventActionButtonsContainer = ({
     openDeleteModal(event.id)
   }
 
-  const confirmPublish = async (): Promise<void> => {
+  const confirmSubmit = async (): Promise<void> => {
     if (selectedEventId) {
-      await publishEvent(selectedEventId)
+      await submitForReview(selectedEventId)
     }
   }
 
@@ -61,16 +62,23 @@ export const EventActionButtonsContainer = ({
     <>
       <EventActionButtons
         event={event}
-        onPublish={handlePublish}
+        onSubmit={handleSubmit}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
         loading={loading}
       />
 
       <PublishConfirmModal
-        isOpen={publishModalOpen}
-        onClose={closePublishModal}
-        onConfirm={confirmPublish}
+        isOpen={submitModalOpen}
+        onClose={closeSubmitModal}
+        onConfirm={confirmSubmit}
+        title="Enviar a revisión"
+        message={
+          validationErrors
+            ? `Faltan los siguientes campos: ${Object.keys(validationErrors).join(', ')}`
+            : `¿Está seguro que desea enviar "${event.title}" a revisión? Una vez enviado, no podrá editarlo hasta recibir una respuesta.`
+        }
+        confirmLabel="Enviar"
         loading={loading}
       />
 
@@ -79,7 +87,7 @@ export const EventActionButtonsContainer = ({
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         loading={loading}
-        title="Delete Event"
+        title="Eliminar evento"
         itemName={event.title}
       />
     </>

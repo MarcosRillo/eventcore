@@ -3,7 +3,7 @@
  * Clean textarea with elegant focus states
  */
 
-import { TextareaHTMLAttributes, forwardRef } from 'react'
+import { TextareaHTMLAttributes, forwardRef, useId } from 'react'
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
@@ -24,8 +24,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
   rows = 4,
   ...props
 }, ref) => {
-  // Generate unique ID for accessibility
-  const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`
+  // Generate stable unique ID for accessibility (useId ensures SSR/CSR match)
+  const generatedId = useId()
+  const textareaId = id || `textarea-${generatedId}`
 
   // Base classes
   const baseClasses = [

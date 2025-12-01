@@ -5,39 +5,31 @@ describe('eventFormValidation', () => {
   const getValidFormData = (): EventFormData => ({
     title: 'Valid Event Title',
     description: 'Valid description',
-    event_date: '2030-12-31',
-    start_time: '10:00',
-    end_time: '18:00',
-    category_id: 1,
-    location_id: 1,
     edition_number: '',
-    event_type: '',
-    event_subtype: '',
-    origin: '',
-    theme: '',
-    frequency: '',
-    rotation_type: '',
-    coffee_break: false,
-    lunch_catering: false,
-    dinner_catering: false,
-    pre_event_package: false,
-    post_event_package: false,
-    venue: '',
-    city: '',
-    rooms_used: '',
+    type_id: null,
+    subtype_id: null,
+    origin_id: null,
+    theme_id: null,
+    frequency_id: null,
+    rotation_type_id: null,
+    producer_id: null,
+    category_id: 1,
+    service_ids: [],
+    room_ids: [],
+    location_ids: [1],
     maps_url: '',
     previous_venue: '',
     next_venue: '',
-    end_date: '',
-    asynchronous_dates: [],
+    start_date: '2030-12-31T10:00',
+    end_date: '2030-12-31T18:00',
+    async_dates: [],
     local_attendance: '',
     national_attendance: '',
     international_attendance: '',
     virtual_transmission: false,
-    producer: '',
     event_website: '',
     logo_url: '',
-    image_url: '',
+    featured_image: '',
     responsive_image_url: '',
   })
 
@@ -49,7 +41,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.title).toBe('Title is required')
+        expect(errors.title).toBe('El título es requerido')
       })
 
       it('should return error when title is only whitespace', () => {
@@ -58,7 +50,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.title).toBe('Title is required')
+        expect(errors.title).toBe('El título es requerido')
       })
 
       it('should return error when title exceeds 200 characters', () => {
@@ -67,7 +59,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.title).toBe('Title must be less than 200 characters')
+        expect(errors.title).toBe('El título debe tener menos de 200 caracteres')
       })
 
       it('should not return error when title is valid', () => {
@@ -96,7 +88,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.description).toBe('Description is required')
+        expect(errors.description).toBe('La descripción es requerida')
       })
 
       it('should return error when description is only whitespace', () => {
@@ -105,7 +97,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.description).toBe('Description is required')
+        expect(errors.description).toBe('La descripción es requerida')
       })
 
       it('should return error when description exceeds 2000 characters', () => {
@@ -114,7 +106,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.description).toBe('Description must be less than 2000 characters')
+        expect(errors.description).toBe('La descripción debe tener menos de 2000 caracteres')
       })
 
       it('should not return error when description is valid', () => {
@@ -136,103 +128,64 @@ describe('eventFormValidation', () => {
       })
     })
 
-    describe('event_date validation', () => {
-      it('should return error when event_date is empty', () => {
+    describe('start_date validation', () => {
+      it('should return error when start_date is empty', () => {
         const formData = getValidFormData()
-        formData.event_date = ''
+        formData.start_date = ''
 
         const errors = validateEventForm(formData)
 
-        expect(errors.event_date).toBe('Event date is required')
+        expect(errors.start_date).toBe('La fecha de inicio es requerida')
       })
 
       it('should return error when date is in the past', () => {
         const formData = getValidFormData()
-        formData.event_date = '2020-01-01' // Past date
+        formData.start_date = '2020-01-01T10:00'
 
         const errors = validateEventForm(formData)
 
-        expect(errors.event_date).toBe('Date must be in the future')
-      })
-
-      it('should return error when date is today (considered past)', () => {
-        const formData = getValidFormData()
-        const today = new Date()
-        formData.event_date = today.toISOString().split('T')[0]
-
-        const errors = validateEventForm(formData)
-
-        // The validation requires future dates, today is considered past
-        expect(errors.event_date).toBe('Date must be in the future')
+        expect(errors.start_date).toBe('La fecha de inicio debe ser en el futuro')
       })
 
       it('should not return error when date is in the future', () => {
         const formData = getValidFormData()
-        formData.event_date = '2030-12-31'
+        formData.start_date = '2030-12-31T10:00'
 
         const errors = validateEventForm(formData)
 
-        expect(errors.event_date).toBeUndefined()
+        expect(errors.start_date).toBeUndefined()
       })
     })
 
-    describe('time validation', () => {
-      it('should return error when start_time is empty', () => {
+    describe('end_date validation', () => {
+      it('should return error when end_date is before start_date', () => {
         const formData = getValidFormData()
-        formData.start_time = ''
+        formData.start_date = '2030-12-31T10:00'
+        formData.end_date = '2030-12-30T10:00'
 
         const errors = validateEventForm(formData)
 
-        expect(errors.start_time).toBe('Start time is required')
+        expect(errors.end_date).toBe('La fecha de fin debe ser posterior a la fecha de inicio')
       })
 
-      it('should return error when end_time is empty', () => {
+      it('should not return error when end_date is after start_date', () => {
         const formData = getValidFormData()
-        formData.end_time = ''
+        formData.start_date = '2030-12-30T10:00'
+        formData.end_date = '2030-12-31T10:00'
 
         const errors = validateEventForm(formData)
 
-        expect(errors.end_time).toBe('End time is required')
+        expect(errors.end_date).toBeUndefined()
       })
 
-      it('should return error when end_time equals start_time', () => {
+      it('should not return error when end_date is not provided', () => {
         const formData = getValidFormData()
-        formData.start_time = '10:00'
-        formData.end_time = '10:00'
+        formData.start_date = '2030-12-31T10:00'
+        formData.end_date = ''
 
         const errors = validateEventForm(formData)
 
-        expect(errors.end_time).toBe('End time must be after start time')
-      })
-
-      it('should return error when end_time is before start_time', () => {
-        const formData = getValidFormData()
-        formData.start_time = '18:00'
-        formData.end_time = '16:00'
-
-        const errors = validateEventForm(formData)
-
-        expect(errors.end_time).toBe('End time must be after start time')
-      })
-
-      it('should not return error when end_time is after start_time', () => {
-        const formData = getValidFormData()
-        formData.start_time = '10:00'
-        formData.end_time = '18:00'
-
-        const errors = validateEventForm(formData)
-
-        expect(errors.end_time).toBeUndefined()
-      })
-
-      it('should not return error when times are different and valid', () => {
-        const formData = getValidFormData()
-        formData.start_time = '09:00'
-        formData.end_time = '09:01'
-
-        const errors = validateEventForm(formData)
-
-        expect(errors.end_time).toBeUndefined()
+        expect(errors.end_date).toBeUndefined()
       })
     })
 
@@ -243,7 +196,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData)
 
-        expect(errors.category_id).toBe('Category is required')
+        expect(errors.category_id).toBe('La categoría es requerida')
       })
 
       it('should return error when category_id is undefined', () => {
@@ -254,7 +207,7 @@ describe('eventFormValidation', () => {
 
         const errors = validateEventForm(formData as EventFormData)
 
-        expect(errors.category_id).toBe('Category is required')
+        expect(errors.category_id).toBe('La categoría es requerida')
       })
 
       it('should not return error when category_id is valid', () => {
@@ -267,34 +220,43 @@ describe('eventFormValidation', () => {
       })
     })
 
-    describe('location_id validation', () => {
-      it('should return error when location_id is null', () => {
+    describe('location_ids validation', () => {
+      it('should return error when location_ids is empty array', () => {
         const formData = getValidFormData()
-        formData.location_id = null
+        formData.location_ids = []
 
         const errors = validateEventForm(formData)
 
-        expect(errors.location_id).toBe('Location is required')
+        expect(errors.location_ids).toBe('Al menos una ubicación es requerida')
       })
 
-      it('should return error when location_id is undefined', () => {
+      it('should return error when location_ids is undefined', () => {
         const formData: Partial<EventFormData> = {
           ...getValidFormData(),
-          location_id: undefined
+          location_ids: undefined
         }
 
         const errors = validateEventForm(formData as EventFormData)
 
-        expect(errors.location_id).toBe('Location is required')
+        expect(errors.location_ids).toBe('Al menos una ubicación es requerida')
       })
 
-      it('should not return error when location_id is valid', () => {
+      it('should not return error when location_ids has at least one location', () => {
         const formData = getValidFormData()
-        formData.location_id = 1
+        formData.location_ids = [1]
 
         const errors = validateEventForm(formData)
 
-        expect(errors.location_id).toBeUndefined()
+        expect(errors.location_ids).toBeUndefined()
+      })
+
+      it('should not return error when location_ids has multiple locations', () => {
+        const formData = getValidFormData()
+        formData.location_ids = [1, 2, 3]
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.location_ids).toBeUndefined()
       })
     })
 
@@ -311,29 +273,25 @@ describe('eventFormValidation', () => {
         const formData = getValidFormData()
         formData.title = ''
         formData.description = ''
-        formData.event_date = ''
-        formData.start_time = ''
-        formData.end_time = ''
+        formData.start_date = ''
         formData.category_id = null
-        formData.location_id = null
+        formData.location_ids = []
 
         const errors = validateEventForm(formData)
 
-        expect(errors.title).toBe('Title is required')
-        expect(errors.description).toBe('Description is required')
-        expect(errors.event_date).toBe('Event date is required')
-        expect(errors.start_time).toBe('Start time is required')
-        expect(errors.end_time).toBe('End time is required')
-        expect(errors.category_id).toBe('Category is required')
-        expect(errors.location_id).toBe('Location is required')
-        expect(Object.keys(errors).length).toBe(7)
+        expect(errors.title).toBe('El título es requerido')
+        expect(errors.description).toBe('La descripción es requerida')
+        expect(errors.start_date).toBe('La fecha de inicio es requerida')
+        expect(errors.category_id).toBe('La categoría es requerida')
+        expect(errors.location_ids).toBe('Al menos una ubicación es requerida')
+        expect(Object.keys(errors).length).toBe(5)
       })
     })
   })
 
   describe('hasErrors', () => {
     it('should return true when errors object has errors', () => {
-      const errors = { title: 'Title is required' }
+      const errors = { title: 'El título es requerido' }
 
       const result = hasErrors(errors)
 
@@ -350,9 +308,9 @@ describe('eventFormValidation', () => {
 
     it('should return true when errors object has multiple errors', () => {
       const errors = {
-        title: 'Title is required',
-        description: 'Description is required',
-        event_date: 'Event date is required'
+        title: 'El título es requerido',
+        description: 'La descripción es requerida',
+        start_date: 'La fecha de inicio es requerida'
       }
 
       const result = hasErrors(errors)

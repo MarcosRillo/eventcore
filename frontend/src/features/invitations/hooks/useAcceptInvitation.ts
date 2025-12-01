@@ -5,7 +5,7 @@
  * Manages the state and logic for accepting an invitation
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { validateInvitationToken, acceptInvitation } from '../services/invitation.service'
 import type { AcceptInvitationData } from '../types/invitation.types'

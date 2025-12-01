@@ -2,7 +2,7 @@
  * Accept Invitation Page Tests
  * Tests for token validation, form rendering, success state, and error handling
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import AcceptInvitationPage from '../page';
 import { useAcceptInvitation } from '@/features/invitations/hooks/useAcceptInvitation';
 

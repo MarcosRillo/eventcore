@@ -139,16 +139,16 @@ export default function OrganizerEventsPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <div>
-                    {new Date(event.start_date || event.event_date || '').toLocaleDateString('es-AR')}
+                    {new Date(event.start_date).toLocaleDateString('es-AR')}
                   </div>
-                  {event.start_time && event.end_time && (
+                  {event.end_date && (
                     <div className="text-gray-500">
-                      {event.start_time} - {event.end_time}
+                      hasta {new Date(event.end_date).toLocaleDateString('es-AR')}
                     </div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {event.locations?.[0]?.name || event.location || '-'}
+                  {event.locations?.[0]?.name || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {(() => {

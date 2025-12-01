@@ -85,38 +85,6 @@ export function formatFileSize(bytes: number): string {
 }
 
 /**
- * Generate a random color
- */
-export function generateRandomColor(): string {
-  const colors = [
-    '#3B82F6', // Blue
-    '#EF4444', // Red
-    '#10B981', // Green
-    '#F59E0B', // Yellow
-    '#8B5CF6', // Purple
-    '#06B6D4', // Cyan
-    '#EC4899', // Pink
-    '#84CC16', // Lime
-    '#F97316', // Orange
-    '#6B7280', // Gray
-  ];
-  
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-/**
- * Check if a color is dark or light
- */
-export function isColorDark(hexColor: string): boolean {
-  const color = hexColor.replace('#', '');
-  const r = parseInt(color.substr(0, 2), 16);
-  const g = parseInt(color.substr(2, 2), 16);
-  const b = parseInt(color.substr(4, 2), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness < 128;
-}
-
-/**
  * Validate email format
  */
 export function isValidEmail(email: string): boolean {

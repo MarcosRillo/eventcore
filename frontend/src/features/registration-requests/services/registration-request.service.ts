@@ -17,7 +17,6 @@ import {
   DeleteResultResponse,
   CreateRegistrationRequestData,
   CreateRequestResponse,
-  DisplayStatusFilter,
 } from '../types/registration-request.types'
 
 // ============================================

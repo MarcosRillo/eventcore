@@ -1,26 +1,29 @@
 /**
  * Custom hook for event action operations
  *
- * Provides methods to publish, duplicate, and delete events
+ * Provides methods to submit for review, duplicate, and delete events
  * with confirmation modals, loading states, and toast notifications.
  */
 
 'use client';
 
 import { useState } from 'react'
+import { AxiosError } from 'axios'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
+import { SubmitEventError } from '@/features/organizer/types/event.types'
 import { useToast } from '@/components/ui/Toast'
 
 interface UseEventActionsReturn {
   loading: boolean
-  publishModalOpen: boolean
+  submitModalOpen: boolean
   deleteModalOpen: boolean
   selectedEventId: number | null
-  openPublishModal: (eventId: number) => void
-  closePublishModal: () => void
+  validationErrors: Record<string, string> | null
+  openSubmitModal: (eventId: number) => void
+  closeSubmitModal: () => void
   openDeleteModal: (eventId: number) => void
   closeDeleteModal: () => void
-  publishEvent: (eventId: number) => Promise<void>
+  submitForReview: (eventId: number) => Promise<void>
   duplicateEvent: (eventId: number) => Promise<void>
   deleteEvent: (eventId: number) => Promise<void>
 }
@@ -29,19 +32,22 @@ export const useEventActions = (
   onSuccess?: () => void
 ): UseEventActionsReturn => {
   const [loading, setLoading] = useState(false)
-  const [publishModalOpen, setPublishModalOpen] = useState(false)
+  const [submitModalOpen, setSubmitModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string> | null>(null)
   const { addToast } = useToast()
 
-  const openPublishModal = (eventId: number): void => {
+  const openSubmitModal = (eventId: number): void => {
     setSelectedEventId(eventId)
-    setPublishModalOpen(true)
+    setValidationErrors(null)
+    setSubmitModalOpen(true)
   }
 
-  const closePublishModal = (): void => {
-    setPublishModalOpen(false)
+  const closeSubmitModal = (): void => {
+    setSubmitModalOpen(false)
     setSelectedEventId(null)
+    setValidationErrors(null)
   }
 
   const openDeleteModal = (eventId: number): void => {
@@ -54,21 +60,38 @@ export const useEventActions = (
     setSelectedEventId(null)
   }
 
-  const publishEvent = async (eventId: number): Promise<void> => {
+  const submitForReview = async (eventId: number): Promise<void> => {
     setLoading(true)
+    setValidationErrors(null)
     try {
-      await organizerEventService.publishEvent(eventId)
+      await organizerEventService.submitForReview(eventId)
       addToast({
-        message: 'Event published successfully',
+        message: 'Evento enviado a revisión exitosamente',
         type: 'success'
       })
-      closePublishModal()
+      closeSubmitModal()
       onSuccess?.()
-    } catch {
-      addToast({
-        message: 'Failed to publish event',
-        type: 'error'
-      })
+    } catch (error) {
+      const axiosError = error as AxiosError<SubmitEventError>
+      if (axiosError.response?.status === 422) {
+        // Validation errors - show which fields are missing
+        const errors = axiosError.response.data?.errors
+        setValidationErrors(errors || null)
+        addToast({
+          message: 'Faltan campos requeridos para enviar a revisión',
+          type: 'error'
+        })
+      } else if (axiosError.response?.status === 403) {
+        addToast({
+          message: 'Solo eventos en borrador pueden ser enviados a revisión',
+          type: 'error'
+        })
+      } else {
+        addToast({
+          message: 'Error al enviar evento a revisión',
+          type: 'error'
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -80,47 +103,47 @@ export const useEventActions = (
       const response = await organizerEventService.getEvent(eventId)
       const originalEvent = response.data
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, created_at, updated_at, ...cleanData } = {
-        ...originalEvent,
-        title: `${originalEvent.title} (Copy)`,
-        status: 'draft' as const
-      }
-
-      // Extract date and time from original event's start_date and end_date
-      // Original event has start_date/end_date as ISO timestamps
-      const dateSource = cleanData.start_date || cleanData.event_date
-      if (!dateSource) {
+      if (!originalEvent.start_date) {
         throw new Error('No date available for duplication')
       }
 
-      const startDate = new Date(dateSource)
-      const eventDate = startDate.toISOString().split('T')[0] // YYYY-MM-DD
-      const startTime = cleanData.start_time || '09:00'
-      const endTime = cleanData.end_time || '17:00'
+      // Extract location IDs from locations array
+      const locationIds = originalEvent.locations?.map((l: { id: number }) => l.id) || []
+      const categoryId = originalEvent.category?.id || originalEvent.category_id
 
-      // Combine date + time into ISO 8601 format
-      const startDateTime = `${eventDate}T${startTime}:00`
-      const endDateTime = `${eventDate}T${endTime}:00`
+      if (locationIds.length === 0) {
+        throw new Error('No location available for duplication')
+      }
 
       await organizerEventService.createEvent({
-        title: cleanData.title,
-        description: cleanData.description || '',
-        start_date: startDateTime,
-        end_date: endDateTime,
-        category_id: cleanData.category_id || 0,
-        location_ids: [cleanData.location_id || 0],  // Backend expects array
-        featured_image: cleanData.image_url
+        title: `${originalEvent.title} (Copia)`,
+        description: originalEvent.description || '',
+        start_date: originalEvent.start_date,
+        end_date: originalEvent.end_date,
+        category_id: categoryId || 0,
+        location_ids: locationIds,
+        // Copy optional FK fields
+        type_id: originalEvent.type_id,
+        edition_number: originalEvent.edition_number,
+        subtype_id: originalEvent.subtype_id,
+        origin_id: originalEvent.origin_id,
+        theme_id: originalEvent.theme_id,
+        frequency_id: originalEvent.frequency_id,
+        rotation_type_id: originalEvent.rotation_type_id,
+        // Copy images
+        logo_url: originalEvent.logo_url,
+        featured_image: originalEvent.featured_image,
+        responsive_image_url: originalEvent.responsive_image_url
       })
 
       addToast({
-        message: 'Event duplicated successfully',
+        message: 'Evento duplicado exitosamente',
         type: 'success'
       })
       onSuccess?.()
     } catch {
       addToast({
-        message: 'Failed to duplicate event',
+        message: 'Error al duplicar evento',
         type: 'error'
       })
     } finally {
@@ -150,14 +173,15 @@ export const useEventActions = (
 
   return {
     loading,
-    publishModalOpen,
+    submitModalOpen,
     deleteModalOpen,
     selectedEventId,
-    openPublishModal,
-    closePublishModal,
+    validationErrors,
+    openSubmitModal,
+    closeSubmitModal,
     openDeleteModal,
     closeDeleteModal,
-    publishEvent,
+    submitForReview,
     duplicateEvent,
     deleteEvent
   }

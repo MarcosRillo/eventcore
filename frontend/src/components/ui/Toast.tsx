@@ -174,7 +174,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<(ToastConfig & { id: string })[]>([])
 
   const addToast = useCallback((config: ToastConfig) => {
-    const id = Math.random().toString(36).substr(2, 9)
+    const id = crypto.randomUUID()
     setToasts(prev => [...prev, { ...config, id }])
   }, [])
 

@@ -45,8 +45,7 @@ export const useOrganizations = (): UseOrganizationsReturn => {
       setLoading(true)
       setError(null)
       try {
-        const filtersToUse = newFilters || filters
-        const result = await organizationService.getOrganizations(filtersToUse)
+        const result = await organizationService.getOrganizations(newFilters)
         setOrganizations(result.data)
         setPagination(result.pagination)
       } catch {
@@ -55,7 +54,7 @@ export const useOrganizations = (): UseOrganizationsReturn => {
         setLoading(false)
       }
     },
-    [filters]
+    []
   )
 
   const handleToggleStatus = useCallback(
@@ -111,7 +110,7 @@ export const useOrganizations = (): UseOrganizationsReturn => {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchOrganizations(filters)
-  }, [filters.status, filters.page, filters.search])
+  }, [fetchOrganizations, filters])
 
   return {
     organizations,

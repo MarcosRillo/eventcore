@@ -1,5 +1,5 @@
 import apiClient from '@/services/apiClient'
-import { EventListParams, EventListResponse, CreateEventDto, UpdateEventDto, OrganizerEvent } from '@/features/organizer/types/event.types'
+import { EventListParams, EventListResponse, CreateEventDto, UpdateEventDto, OrganizerEvent, SubmitEventResponse } from '@/features/organizer/types/event.types'
 
 export const getEvents = async (params: EventListParams): Promise<EventListResponse> => {
   const response = await apiClient.get<EventListResponse>('/organizer/events', { params })
@@ -26,8 +26,12 @@ export const deleteEvent = async (id: number): Promise<{ success: boolean }> => 
   return response.data
 }
 
-export const publishEvent = async (id: number): Promise<{ data: OrganizerEvent }> => {
-  const response = await apiClient.post(`/organizer/events/${id}/publish`)
+/**
+ * Submit event for internal review
+ * Changes status from draft/requires_changes to pending_internal_approval
+ */
+export const submitForReview = async (id: number): Promise<SubmitEventResponse> => {
+  const response = await apiClient.post(`/organizer/events/${id}/submit`)
   return response.data
 }
 

@@ -5,55 +5,50 @@ export const validateEventForm = (data: EventFormData): EventFormErrors => {
 
   // Title validation
   if (!data.title.trim()) {
-    errors.title = 'Title is required'
+    errors.title = 'El título es requerido'
   } else if (data.title.length > 200) {
-    errors.title = 'Title must be less than 200 characters'
+    errors.title = 'El título debe tener menos de 200 caracteres'
   }
 
   // Description validation
   if (!data.description.trim()) {
-    errors.description = 'Description is required'
+    errors.description = 'La descripción es requerida'
   } else if (data.description.length > 2000) {
-    errors.description = 'Description must be less than 2000 characters'
+    errors.description = 'La descripción debe tener menos de 2000 caracteres'
   }
 
-  // Date validation
-  if (!data.event_date) {
-    errors.event_date = 'Event date is required'
+  // Start date validation
+  if (!data.start_date) {
+    errors.start_date = 'La fecha de inicio es requerida'
   } else {
-    // Compare date strings directly to avoid timezone issues
+    // Extract date portion for comparison
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
+    const startDateString = data.start_date.split('T')[0]
 
-    if (data.event_date <= todayString) {
-      errors.event_date = 'Date must be in the future'
+    if (startDateString < todayString) {
+      errors.start_date = 'La fecha de inicio debe ser en el futuro'
     }
   }
 
-  // Time validation
-  if (!data.start_time) {
-    errors.start_time = 'Start time is required'
-  }
+  // End date validation (if provided)
+  if (data.end_date && data.start_date) {
+    const startDateString = data.start_date.split('T')[0]
+    const endDateString = data.end_date.split('T')[0]
 
-  if (!data.end_time) {
-    errors.end_time = 'End time is required'
-  }
-
-  // End time must be after start time
-  if (data.start_time && data.end_time) {
-    if (data.end_time <= data.start_time) {
-      errors.end_time = 'End time must be after start time'
+    if (endDateString < startDateString) {
+      errors.end_date = 'La fecha de fin debe ser posterior a la fecha de inicio'
     }
   }
 
   // Category validation
   if (!data.category_id) {
-    errors.category_id = 'Category is required'
+    errors.category_id = 'La categoría es requerida'
   }
 
-  // Location validation
-  if (!data.location_id) {
-    errors.location_id = 'Location is required'
+  // Location validation (at least one location required)
+  if (!data.location_ids || data.location_ids.length === 0) {
+    errors.location_ids = 'Al menos una ubicación es requerida'
   }
 
   return errors

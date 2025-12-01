@@ -11,67 +11,10 @@ interface OrganizerEventFormProps {
   categories: { id: number; name: string }[]
   locations: { id: number; name: string }[]
   isEditMode: boolean
-  handleChange: (field: keyof EventFormData, value: string | number | boolean | null | AsynchronousDate[]) => void
+  handleChange: (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => void
   handleSubmit: (e: React.FormEvent) => void
   handleCancel: () => void
 }
-
-// Opciones para los selectores (pueden venir del backend luego)
-const EVENT_TYPES = [
-  { value: '', label: 'Seleccionar tipo de evento' },
-  { value: 'congreso', label: 'Congreso' },
-  { value: 'seminario', label: 'Seminario' },
-  { value: 'workshop', label: 'Workshop' },
-  { value: 'conferencia', label: 'Conferencia' },
-  { value: 'feria', label: 'Feria' },
-  { value: 'exposicion', label: 'Exposición' },
-  { value: 'festival', label: 'Festival' },
-]
-
-const EVENT_SUBTYPES = [
-  { value: '', label: 'Seleccionar subtipo' },
-  { value: 'nacional', label: 'Nacional' },
-  { value: 'internacional', label: 'Internacional' },
-  { value: 'regional', label: 'Regional' },
-  { value: 'local', label: 'Local' },
-]
-
-const ORIGINS = [
-  { value: '', label: 'Seleccionar origen' },
-  { value: 'publico', label: 'Público' },
-  { value: 'privado', label: 'Privado' },
-  { value: 'mixto', label: 'Mixto' },
-]
-
-const THEMES = [
-  { value: '', label: 'Seleccionar tema' },
-  { value: 'tecnologia', label: 'Tecnología' },
-  { value: 'ciencia', label: 'Ciencia' },
-  { value: 'negocios', label: 'Negocios' },
-  { value: 'salud', label: 'Salud' },
-  { value: 'educacion', label: 'Educación' },
-  { value: 'cultura', label: 'Cultura' },
-  { value: 'turismo', label: 'Turismo' },
-  { value: 'gastronomia', label: 'Gastronomía' },
-]
-
-const FREQUENCIES = [
-  { value: '', label: 'Seleccionar frecuencia' },
-  { value: 'unico', label: 'Único' },
-  { value: 'anual', label: 'Anual' },
-  { value: 'semestral', label: 'Semestral' },
-  { value: 'trimestral', label: 'Trimestral' },
-  { value: 'mensual', label: 'Mensual' },
-  { value: 'semanal', label: 'Semanal' },
-]
-
-const ROTATION_TYPES = [
-  { value: '', label: 'Seleccionar tipo de rotación' },
-  { value: 'fija', label: 'Sede Fija' },
-  { value: 'rotativa_regional', label: 'Rotativa Regional' },
-  { value: 'rotativa_nacional', label: 'Rotativa Nacional' },
-  { value: 'rotativa_internacional', label: 'Rotativa Internacional' },
-]
 
 export const OrganizerEventForm = ({
   formData,
@@ -86,29 +29,35 @@ export const OrganizerEventForm = ({
   handleCancel
 }: OrganizerEventFormProps) => {
   // Estado local para manejar fechas asincrónicas
-  const [newAsyncDate, setNewAsyncDate] = useState({ date: '', start_time: '', end_time: '' })
+  const [newAsyncDate, setNewAsyncDate] = useState({ date: '', notes: '' })
 
   const addAsynchronousDate = () => {
-    if (!newAsyncDate.date || !newAsyncDate.start_time || !newAsyncDate.end_time) {
+    if (!newAsyncDate.date) {
       return
     }
 
     const newDate: AsynchronousDate = {
-      id: crypto.randomUUID(),
       date: newAsyncDate.date,
-      start_time: newAsyncDate.start_time,
-      end_time: newAsyncDate.end_time,
+      notes: newAsyncDate.notes || undefined,
     }
 
-    handleChange('asynchronous_dates', [...formData.asynchronous_dates, newDate])
-    setNewAsyncDate({ date: '', start_time: '', end_time: '' })
+    handleChange('async_dates', [...formData.async_dates, newDate])
+    setNewAsyncDate({ date: '', notes: '' })
   }
 
-  const removeAsynchronousDate = (id: string) => {
+  const removeAsynchronousDate = (index: number) => {
     handleChange(
-      'asynchronous_dates',
-      formData.asynchronous_dates.filter(d => d.id !== id)
+      'async_dates',
+      formData.async_dates.filter((_, i) => i !== index)
     )
+  }
+
+  const handleLocationChange = (locationId: number, checked: boolean) => {
+    if (checked) {
+      handleChange('location_ids', [...formData.location_ids, locationId])
+    } else {
+      handleChange('location_ids', formData.location_ids.filter(id => id !== locationId))
+    }
   }
 
   if (initialLoading) {
@@ -172,117 +121,6 @@ export const OrganizerEventForm = ({
             )}
           </div>
 
-          {/* Tipo de Evento */}
-          <div>
-            <label htmlFor="event_type" className="block text-sm font-medium text-neutral-600">
-              Tipo de Evento *
-            </label>
-            <select
-              id="event_type"
-              value={formData.event_type}
-              onChange={(e) => handleChange('event_type', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {EVENT_TYPES.map(type => (
-                <option key={type.value} value={type.value}>{type.label}</option>
-              ))}
-            </select>
-            {errors.event_type && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.event_type}</p>
-            )}
-          </div>
-
-          {/* Subtipo de Evento */}
-          <div>
-            <label htmlFor="event_subtype" className="block text-sm font-medium text-neutral-600">
-              Subtipo de Evento
-            </label>
-            <select
-              id="event_subtype"
-              value={formData.event_subtype}
-              onChange={(e) => handleChange('event_subtype', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {EVENT_SUBTYPES.map(subtype => (
-                <option key={subtype.value} value={subtype.value}>{subtype.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Origen */}
-          <div>
-            <label htmlFor="origin" className="block text-sm font-medium text-neutral-600">
-              Origen
-            </label>
-            <select
-              id="origin"
-              value={formData.origin}
-              onChange={(e) => handleChange('origin', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {ORIGINS.map(origin => (
-                <option key={origin.value} value={origin.value}>{origin.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tema */}
-          <div>
-            <label htmlFor="theme" className="block text-sm font-medium text-neutral-600">
-              Tema
-            </label>
-            <select
-              id="theme"
-              value={formData.theme}
-              onChange={(e) => handleChange('theme', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {THEMES.map(theme => (
-                <option key={theme.value} value={theme.value}>{theme.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Frecuencia */}
-          <div>
-            <label htmlFor="frequency" className="block text-sm font-medium text-neutral-600">
-              Frecuencia
-            </label>
-            <select
-              id="frequency"
-              value={formData.frequency}
-              onChange={(e) => handleChange('frequency', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {FREQUENCIES.map(freq => (
-                <option key={freq.value} value={freq.value}>{freq.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tipo de Rotación */}
-          <div>
-            <label htmlFor="rotation_type" className="block text-sm font-medium text-neutral-600">
-              Tipo de Rotación
-            </label>
-            <select
-              id="rotation_type"
-              value={formData.rotation_type}
-              onChange={(e) => handleChange('rotation_type', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {ROTATION_TYPES.map(rotation => (
-                <option key={rotation.value} value={rotation.value}>{rotation.label}</option>
-              ))}
-            </select>
-          </div>
-
           {/* Categoría */}
           <div>
             <label htmlFor="category_id" className="block text-sm font-medium text-neutral-600">
@@ -302,28 +140,6 @@ export const OrganizerEventForm = ({
             </select>
             {errors.category_id && (
               <p className="mt-1 text-sm text-red-600 font-medium">{errors.category_id}</p>
-            )}
-          </div>
-
-          {/* Ubicación */}
-          <div>
-            <label htmlFor="location_id" className="block text-sm font-medium text-neutral-600">
-              Ubicación *
-            </label>
-            <select
-              id="location_id"
-              value={formData.location_id || ''}
-              onChange={(e) => handleChange('location_id', e.target.value ? parseInt(e.target.value) : null)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              <option value="">Seleccionar ubicación</option>
-              {Array.isArray(locations) && locations.map(location => (
-                <option key={location.id} value={location.id}>{location.name}</option>
-              ))}
-            </select>
-            {errors.location_id && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.location_id}</p>
             )}
           </div>
 
@@ -348,149 +164,38 @@ export const OrganizerEventForm = ({
         </div>
       </div>
 
-      {/* SECCIÓN 2: SERVICIOS Y CATERING */}
+      {/* SECCIÓN 2: UBICACIÓN */}
       <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900 border-b border-neutral-200 pb-2">
-          2. Servicios y Catering
+          2. Ubicación
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Coffee Break */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="coffee_break"
-              checked={formData.coffee_break}
-              onChange={(e) => handleChange('coffee_break', e.target.checked)}
-              disabled={loading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-            />
-            <label htmlFor="coffee_break" className="ml-2 block text-sm text-neutral-900">
-              Mesas de Coffee Break
-            </label>
-          </div>
-
-          {/* Catering Almuerzo */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="lunch_catering"
-              checked={formData.lunch_catering}
-              onChange={(e) => handleChange('lunch_catering', e.target.checked)}
-              disabled={loading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-            />
-            <label htmlFor="lunch_catering" className="ml-2 block text-sm text-neutral-900">
-              Catering de Almuerzo
-            </label>
-          </div>
-
-          {/* Catering Cena */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="dinner_catering"
-              checked={formData.dinner_catering}
-              onChange={(e) => handleChange('dinner_catering', e.target.checked)}
-              disabled={loading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-            />
-            <label htmlFor="dinner_catering" className="ml-2 block text-sm text-neutral-900">
-              Catering de Cena
-            </label>
-          </div>
-
-          {/* Paquete Pre-evento */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="pre_event_package"
-              checked={formData.pre_event_package}
-              onChange={(e) => handleChange('pre_event_package', e.target.checked)}
-              disabled={loading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-            />
-            <label htmlFor="pre_event_package" className="ml-2 block text-sm text-neutral-900">
-              Paquete Pre-evento
-            </label>
-          </div>
-
-          {/* Paquete Post-evento */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="post_event_package"
-              checked={formData.post_event_package}
-              onChange={(e) => handleChange('post_event_package', e.target.checked)}
-              disabled={loading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-            />
-            <label htmlFor="post_event_package" className="ml-2 block text-sm text-neutral-900">
-              Paquete Post-evento
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* SECCIÓN 3: UBICACIÓN */}
-      <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-neutral-900 border-b border-neutral-200 pb-2">
-          3. Ubicación
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Sede */}
-          <div>
-            <label htmlFor="venue" className="block text-sm font-medium text-neutral-600">
-              Sede *
-            </label>
-            <input
-              type="text"
-              id="venue"
-              value={formData.venue}
-              onChange={(e) => handleChange('venue', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="Ej: Centro de Convenciones"
-            />
-            {errors.venue && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.venue}</p>
-            )}
-          </div>
-
-          {/* Ciudad */}
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-neutral-600">
-              Ciudad *
-            </label>
-            <input
-              type="text"
-              id="city"
-              value={formData.city}
-              onChange={(e) => handleChange('city', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="Ej: San Miguel de Tucumán"
-            />
-            {errors.city && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.city}</p>
-            )}
-          </div>
-
-          {/* Salones Utilizados */}
+          {/* Ubicaciones (selección múltiple) */}
           <div className="md:col-span-2">
-            <label htmlFor="rooms_used" className="block text-sm font-medium text-neutral-600">
-              Salón/Salones Utilizados
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
+              Ubicaciones *
             </label>
-            <input
-              type="text"
-              id="rooms_used"
-              value={formData.rooms_used}
-              onChange={(e) => handleChange('rooms_used', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="Ej: Salón Principal, Sala A, Sala B"
-            />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {Array.isArray(locations) && locations.map(location => (
+                <div key={location.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`location_${location.id}`}
+                    checked={formData.location_ids.includes(location.id)}
+                    onChange={(e) => handleLocationChange(location.id, e.target.checked)}
+                    disabled={loading}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+                  />
+                  <label htmlFor={`location_${location.id}`} className="ml-2 block text-sm text-neutral-900">
+                    {location.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {errors.location_ids && (
+              <p className="mt-1 text-sm text-red-600 font-medium">{errors.location_ids}</p>
+            )}
           </div>
 
           {/* Maps URL */}
@@ -543,38 +248,38 @@ export const OrganizerEventForm = ({
         </div>
       </div>
 
-      {/* SECCIÓN 4: FECHAS Y HORARIOS */}
+      {/* SECCIÓN 3: FECHAS */}
       <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900 border-b border-neutral-200 pb-2">
-          4. Fechas y Horarios
+          3. Fechas
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Fecha Desde */}
+          {/* Fecha Inicio */}
           <div>
-            <label htmlFor="event_date" className="block text-sm font-medium text-neutral-600">
-              Fecha Desde *
+            <label htmlFor="start_date" className="block text-sm font-medium text-neutral-600">
+              Fecha Inicio *
             </label>
             <input
-              type="date"
-              id="event_date"
-              value={formData.event_date}
-              onChange={(e) => handleChange('event_date', e.target.value)}
+              type="datetime-local"
+              id="start_date"
+              value={formData.start_date}
+              onChange={(e) => handleChange('start_date', e.target.value)}
               disabled={loading}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
             />
-            {errors.event_date && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.event_date}</p>
+            {errors.start_date && (
+              <p className="mt-1 text-sm text-red-600 font-medium">{errors.start_date}</p>
             )}
           </div>
 
-          {/* Fecha Hasta */}
+          {/* Fecha Fin */}
           <div>
             <label htmlFor="end_date" className="block text-sm font-medium text-neutral-600">
-              Fecha Hasta
+              Fecha Fin
             </label>
             <input
-              type="date"
+              type="datetime-local"
               id="end_date"
               value={formData.end_date}
               onChange={(e) => handleChange('end_date', e.target.value)}
@@ -585,69 +290,37 @@ export const OrganizerEventForm = ({
               <p className="mt-1 text-sm text-red-600 font-medium">{errors.end_date}</p>
             )}
           </div>
-
-          {/* Hora Desde */}
-          <div>
-            <label htmlFor="start_time" className="block text-sm font-medium text-neutral-600">
-              Hora Desde *
-            </label>
-            <input
-              type="time"
-              id="start_time"
-              value={formData.start_time}
-              onChange={(e) => handleChange('start_time', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-            />
-            {errors.start_time && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.start_time}</p>
-            )}
-          </div>
-
-          {/* Hora Hasta */}
-          <div>
-            <label htmlFor="end_time" className="block text-sm font-medium text-neutral-600">
-              Hora Hasta *
-            </label>
-            <input
-              type="time"
-              id="end_time"
-              value={formData.end_time}
-              onChange={(e) => handleChange('end_time', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-            />
-            {errors.end_time && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.end_time}</p>
-            )}
-          </div>
         </div>
 
         {/* Fechas Asincrónicas */}
         <div className="pt-4 border-t border-neutral-200">
           <h3 className="text-sm font-semibold text-neutral-900 mb-3">
-            Fechas Asincrónicas (Opcional)
+            Fechas Adicionales (Opcional)
           </h3>
           <p className="text-xs text-neutral-500 mb-3">
-            Agrega fechas adicionales para eventos que ocurren en días no consecutivos (ej: lunes, miércoles y viernes)
+            Agrega fechas adicionales para eventos que ocurren en días no consecutivos
           </p>
 
           {/* Lista de fechas asincrónicas */}
-          {formData.asynchronous_dates.length > 0 && (
+          {formData.async_dates.length > 0 && (
             <div className="space-y-2 mb-4">
-              {formData.asynchronous_dates.map(asyncDate => (
+              {formData.async_dates.map((asyncDate, index) => (
                 <div
-                  key={asyncDate.id}
+                  key={index}
                   className="flex items-center gap-3 bg-neutral-50 border border-neutral-200 rounded-sm p-3"
                 >
                   <div className="flex-1 text-sm text-neutral-900">
                     <span className="font-medium">{asyncDate.date}</span>
-                    {' • '}
-                    <span>{asyncDate.start_time} - {asyncDate.end_time}</span>
+                    {asyncDate.notes && (
+                      <>
+                        {' • '}
+                        <span className="text-neutral-500">{asyncDate.notes}</span>
+                      </>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeAsynchronousDate(asyncDate.id!)}
+                    onClick={() => removeAsynchronousDate(index)}
                     disabled={loading}
                     className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors disabled:opacity-50"
                   >
@@ -659,7 +332,7 @@ export const OrganizerEventForm = ({
           )}
 
           {/* Formulario para agregar nueva fecha asincrónica */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <input
                 type="date"
@@ -672,28 +345,18 @@ export const OrganizerEventForm = ({
             </div>
             <div>
               <input
-                type="time"
-                value={newAsyncDate.start_time}
-                onChange={(e) => setNewAsyncDate(prev => ({ ...prev, start_time: e.target.value }))}
+                type="text"
+                value={newAsyncDate.notes}
+                onChange={(e) => setNewAsyncDate(prev => ({ ...prev, notes: e.target.value }))}
                 disabled={loading}
-                placeholder="Hora inicio"
-                className="block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              />
-            </div>
-            <div>
-              <input
-                type="time"
-                value={newAsyncDate.end_time}
-                onChange={(e) => setNewAsyncDate(prev => ({ ...prev, end_time: e.target.value }))}
-                disabled={loading}
-                placeholder="Hora fin"
+                placeholder="Notas (opcional)"
                 className="block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
               />
             </div>
             <button
               type="button"
               onClick={addAsynchronousDate}
-              disabled={loading || !newAsyncDate.date || !newAsyncDate.start_time || !newAsyncDate.end_time}
+              disabled={loading || !newAsyncDate.date}
               className="bg-secondary-500 text-white px-4 py-2 rounded-sm font-medium shadow-sm hover:bg-secondary-600 active:bg-secondary-700 focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Agregar
@@ -702,10 +365,10 @@ export const OrganizerEventForm = ({
         </div>
       </div>
 
-      {/* SECCIÓN 5: ASISTENCIA */}
+      {/* SECCIÓN 4: ASISTENCIA */}
       <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900 border-b border-neutral-200 pb-2">
-          5. Asistencia
+          4. Asistencia
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -777,29 +440,13 @@ export const OrganizerEventForm = ({
         </div>
       </div>
 
-      {/* SECCIÓN 6: INFORMACIÓN ADICIONAL */}
+      {/* SECCIÓN 5: INFORMACIÓN ADICIONAL */}
       <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900 border-b border-neutral-200 pb-2">
-          6. Información Adicional
+          5. Información Adicional
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Productor */}
-          <div>
-            <label htmlFor="producer" className="block text-sm font-medium text-neutral-600">
-              Productor
-            </label>
-            <input
-              type="text"
-              id="producer"
-              value={formData.producer}
-              onChange={(e) => handleChange('producer', e.target.value)}
-              disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="Ej: Empresa Productora XYZ"
-            />
-          </div>
-
+        <div className="grid grid-cols-1 gap-4">
           {/* Web del Evento */}
           <div>
             <label htmlFor="event_website" className="block text-sm font-medium text-neutral-600">
@@ -818,10 +465,10 @@ export const OrganizerEventForm = ({
         </div>
       </div>
 
-      {/* SECCIÓN 7: IMÁGENES */}
+      {/* SECCIÓN 6: IMÁGENES */}
       <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900 border-b border-neutral-200 pb-2">
-          7. Imágenes
+          6. Imágenes
         </h2>
         <p className="text-sm text-neutral-500">
           Por ahora ingresa URLs de imágenes. Próximamente podrás subir archivos directamente.
@@ -844,16 +491,16 @@ export const OrganizerEventForm = ({
             />
           </div>
 
-          {/* Imagen */}
+          {/* Imagen Principal */}
           <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-neutral-600">
+            <label htmlFor="featured_image" className="block text-sm font-medium text-neutral-600">
               Imagen Principal
             </label>
             <input
               type="url"
-              id="image_url"
-              value={formData.image_url}
-              onChange={(e) => handleChange('image_url', e.target.value)}
+              id="featured_image"
+              value={formData.featured_image}
+              onChange={(e) => handleChange('featured_image', e.target.value)}
               disabled={loading}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
               placeholder="https://ejemplo.com/imagen.jpg"

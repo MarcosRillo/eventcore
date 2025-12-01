@@ -1,7 +1,7 @@
 /**
  * EventActionButtons Component (Presentational)
  *
- * Displays action buttons for event: Publish, Duplicate, Delete.
+ * Displays action buttons for event: Submit for Review, Duplicate, Delete.
  * Buttons visibility depends on event status.
  */
 
@@ -10,32 +10,44 @@ import Button from '@/components/ui/Button'
 
 interface EventActionButtonsProps {
   event: OrganizerEvent
-  onPublish: (eventId: number) => void
+  onSubmit: (eventId: number) => void
   onDuplicate: (eventId: number) => void
   onDelete: (eventId: number) => void
   loading?: boolean
 }
 
+/**
+ * Get status code from event status (handles both string and object formats)
+ */
+const getStatusCode = (status: OrganizerEvent['status']): string => {
+  if (typeof status === 'string') {
+    return status
+  }
+  return status.status_code
+}
+
 export const EventActionButtons = ({
   event,
-  onPublish,
+  onSubmit,
   onDuplicate,
   onDelete,
   loading = false
 }: EventActionButtonsProps) => {
-  const canPublish = event.status === 'draft'
+  const statusCode = getStatusCode(event.status)
+  const canSubmit = statusCode === 'draft' || statusCode === 'requires_changes'
+  const canDelete = statusCode === 'draft'
 
   return (
     <div className="flex gap-2">
-      {canPublish && (
+      {canSubmit && (
         <Button
           variant="primary"
           size="sm"
-          onClick={() => onPublish(event.id)}
+          onClick={() => onSubmit(event.id)}
           disabled={loading}
-          aria-label={`Publish event ${event.title}`}
+          aria-label={`Submit event ${event.title} for review`}
         >
-          Publish
+          Enviar a revisión
         </Button>
       )}
 
@@ -46,18 +58,20 @@ export const EventActionButtons = ({
         disabled={loading}
         aria-label={`Duplicate event ${event.title}`}
       >
-        Duplicate
+        Duplicar
       </Button>
 
-      <Button
-        variant="danger"
-        size="sm"
-        onClick={() => onDelete(event.id)}
-        disabled={loading}
-        aria-label={`Delete event ${event.title}`}
-      >
-        Delete
-      </Button>
+      {canDelete && (
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={() => onDelete(event.id)}
+          disabled={loading}
+          aria-label={`Delete event ${event.title}`}
+        >
+          Eliminar
+        </Button>
+      )}
     </div>
   )
 }

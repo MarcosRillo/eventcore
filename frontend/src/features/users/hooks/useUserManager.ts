@@ -50,8 +50,7 @@ export const useUserManager = (): UseUserManagerReturn => {
       setLoading(true)
       setError(null)
       try {
-        const filtersToUse = newFilters || filters
-        const result = await userService.getUsers(filtersToUse)
+        const result = await userService.getUsers(newFilters)
         setUsers(result.data)
         setPagination(result.meta)
       } catch {
@@ -60,7 +59,7 @@ export const useUserManager = (): UseUserManagerReturn => {
         setLoading(false)
       }
     },
-    [filters]
+    []
   )
 
   const handleSuspend = useCallback(async (id: number): Promise<boolean> => {
@@ -181,7 +180,7 @@ export const useUserManager = (): UseUserManagerReturn => {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchUsers(filters)
-  }, [filters.status, filters.page, filters.search])
+  }, [fetchUsers, filters])
 
   return {
     users,
