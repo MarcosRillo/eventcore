@@ -20,35 +20,26 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
     loading,
     error,
     activeFilter,
-    createModalOpen,
     onFilterChange,
-    onOpenCreateModal,
-    onCloseCreateModal,
-    onCreateSuccess
+    onSuccess
   }: {
     stats: unknown
     events: unknown
     loading: boolean
     error: string | null
     activeFilter: string | null
-    createModalOpen: boolean
     onFilterChange: (status: string | null) => void
-    onOpenCreateModal: () => void
-    onCloseCreateModal: () => void
-    onCreateSuccess: () => void
+    onSuccess: () => void
   }) => (
     <div data-testid="organizer-dashboard">
       <span data-testid="loading-state">{loading ? 'loading' : 'loaded'}</span>
       <span data-testid="error-state">{error || 'no-error'}</span>
       <span data-testid="active-filter">{activeFilter || 'all'}</span>
-      <span data-testid="modal-state">{createModalOpen ? 'open' : 'closed'}</span>
       <span data-testid="stats-present">{stats ? 'yes' : 'no'}</span>
       <span data-testid="events-count">{Array.isArray((events as { data: unknown[] })?.data) ? (events as { data: unknown[] }).data.length : 0}</span>
       <button onClick={() => onFilterChange('draft')}>Filter Draft</button>
       <button onClick={() => onFilterChange(null)}>Show All</button>
-      <button onClick={onOpenCreateModal}>Open Create Modal</button>
-      <button onClick={onCloseCreateModal}>Close Create Modal</button>
-      <button onClick={onCreateSuccess}>Create Success</button>
+      <button onClick={onSuccess}>Refresh Data</button>
     </div>
   )
 }))
@@ -179,39 +170,11 @@ describe('OrganizerDashboardContainer', () => {
     })
   })
 
-  describe('create modal management', () => {
-    test('should initialize with modal closed', () => {
-      render(<OrganizerDashboardContainer />)
-
-      expect(screen.getByTestId('modal-state')).toHaveTextContent('closed')
-    })
-
-    test('should open create modal when onOpenCreateModal is called', () => {
-      render(<OrganizerDashboardContainer />)
-
-      fireEvent.click(screen.getByText('Open Create Modal'))
-
-      expect(screen.getByTestId('modal-state')).toHaveTextContent('open')
-    })
-
-    test('should close create modal when onCloseCreateModal is called', () => {
-      render(<OrganizerDashboardContainer />)
-
-      // Open first
-      fireEvent.click(screen.getByText('Open Create Modal'))
-      expect(screen.getByTestId('modal-state')).toHaveTextContent('open')
-
-      // Then close
-      fireEvent.click(screen.getByText('Close Create Modal'))
-      expect(screen.getByTestId('modal-state')).toHaveTextContent('closed')
-    })
-  })
-
   describe('refresh handling', () => {
-    test('should call refetchStats and retry when onCreateSuccess is called', () => {
+    test('should call refetchStats and retry when onSuccess is called', () => {
       render(<OrganizerDashboardContainer />)
 
-      fireEvent.click(screen.getByText('Create Success'))
+      fireEvent.click(screen.getByText('Refresh Data'))
 
       expect(mockRefetchStats).toHaveBeenCalledTimes(1)
       expect(mockRetry).toHaveBeenCalledTimes(1)

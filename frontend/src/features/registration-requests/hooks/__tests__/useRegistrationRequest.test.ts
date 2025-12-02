@@ -296,7 +296,7 @@ describe('useRegistrationRequest', () => {
     })
 
     it('should set submitting state during submission', async () => {
-      let resolvePromise: (value: unknown) => void
+      let resolvePromise!: (value: { id: number; email: string; status: 'pending' | 'approved' | 'rejected' }) => void
       mockCreateRegistrationRequest.mockReturnValueOnce(
         new Promise((resolve) => {
           resolvePromise = resolve

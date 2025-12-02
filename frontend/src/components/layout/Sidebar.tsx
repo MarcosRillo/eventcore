@@ -16,6 +16,7 @@ import {
   ChevronDoubleLeftIcon,
   PaintBrushIcon,
   UserGroupIcon,
+  MapPinIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarItem {
@@ -84,6 +85,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           name: 'Organizaciones',
           href: '/organizations',
           icon: <BuildingStorefrontIcon className="w-5 h-5" />,
+        },
+        {
+          name: 'Ubicaciones',
+          href: '/locations',
+          icon: <MapPinIcon className="w-5 h-5" />,
         },
         ...(canManageUsers ? [{
           name: 'Usuarios',

@@ -10,7 +10,7 @@ use App\Models\EventRotationType;
 use App\Models\EventService;
 use App\Models\EventTheme;
 use App\Models\Organization;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -25,7 +25,7 @@ use Tests\TestCase;
  */
 class OrganizerExtendedFieldsTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

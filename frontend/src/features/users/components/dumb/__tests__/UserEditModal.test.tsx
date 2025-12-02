@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import UserEditModal from '../UserEditModal'
 import type { User } from '../../../types/user.types'
 
@@ -23,8 +23,13 @@ describe('UserEditModal', () => {
     user: mockUser,
     isOpen: true,
     loading: false,
+    name: 'Patricia López',
+    email: 'patricia.lopez@enteturismo.gov.ar',
+    errors: {},
+    onNameChange: jest.fn(),
+    onEmailChange: jest.fn(),
+    onSubmit: jest.fn(),
     onClose: jest.fn(),
-    onSave: jest.fn().mockResolvedValue(true),
   }
 
   beforeEach(() => {
@@ -62,22 +67,22 @@ describe('UserEditModal', () => {
   })
 
   describe('form interactions', () => {
-    it('should update name when typing', () => {
+    it('should call onNameChange when typing in name field', () => {
       render(<UserEditModal {...defaultProps} />)
 
       const nameInput = screen.getByDisplayValue('Patricia López')
       fireEvent.change(nameInput, { target: { value: 'Patricia López Updated' } })
 
-      expect(screen.getByDisplayValue('Patricia López Updated')).toBeInTheDocument()
+      expect(defaultProps.onNameChange).toHaveBeenCalledWith('Patricia López Updated')
     })
 
-    it('should update email when typing', () => {
+    it('should call onEmailChange when typing in email field', () => {
       render(<UserEditModal {...defaultProps} />)
 
       const emailInput = screen.getByDisplayValue('patricia.lopez@enteturismo.gov.ar')
       fireEvent.change(emailInput, { target: { value: 'new.email@test.com' } })
 
-      expect(screen.getByDisplayValue('new.email@test.com')).toBeInTheDocument()
+      expect(defaultProps.onEmailChange).toHaveBeenCalledWith('new.email@test.com')
     })
 
     it('should call onClose when clicking Cancelar', () => {
@@ -87,122 +92,83 @@ describe('UserEditModal', () => {
 
       expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
     })
-  })
 
-  describe('validation', () => {
-    it('should show error when name is empty', async () => {
+    it('should call onSubmit when form is submitted', () => {
       render(<UserEditModal {...defaultProps} />)
-
-      const nameInput = screen.getByDisplayValue('Patricia López')
-      fireEvent.change(nameInput, { target: { value: '' } })
 
       fireEvent.click(screen.getByText('Guardar'))
 
-      await waitFor(() => {
-        expect(screen.getByText('El nombre es obligatorio')).toBeInTheDocument()
-      })
-      expect(defaultProps.onSave).not.toHaveBeenCalled()
-    })
-
-    it('should show error when email is empty', async () => {
-      render(<UserEditModal {...defaultProps} />)
-
-      const emailInput = screen.getByDisplayValue('patricia.lopez@enteturismo.gov.ar')
-      fireEvent.change(emailInput, { target: { value: '' } })
-
-      fireEvent.click(screen.getByText('Guardar'))
-
-      await waitFor(() => {
-        expect(screen.getByText('El email es obligatorio')).toBeInTheDocument()
-      })
-      expect(defaultProps.onSave).not.toHaveBeenCalled()
-    })
-
-    it('should show error when email is invalid', async () => {
-      render(<UserEditModal {...defaultProps} />)
-
-      const emailInput = screen.getByDisplayValue('patricia.lopez@enteturismo.gov.ar')
-      fireEvent.change(emailInput, { target: { value: 'invalidemail' } })
-
-      // Submit the form directly to bypass HTML5 validation
-      const form = emailInput.closest('form')
-      expect(form).toBeInTheDocument()
-      fireEvent.submit(form!)
-
-      await waitFor(() => {
-        expect(screen.getByText('El email debe ser válido')).toBeInTheDocument()
-      })
-      expect(defaultProps.onSave).not.toHaveBeenCalled()
-    })
-
-    it('should show error when name exceeds 255 characters', async () => {
-      render(<UserEditModal {...defaultProps} />)
-
-      const nameInput = screen.getByDisplayValue('Patricia López')
-      fireEvent.change(nameInput, { target: { value: 'a'.repeat(256) } })
-
-      fireEvent.click(screen.getByText('Guardar'))
-
-      await waitFor(() => {
-        expect(screen.getByText('El nombre no puede exceder 255 caracteres')).toBeInTheDocument()
-      })
-      expect(defaultProps.onSave).not.toHaveBeenCalled()
+      expect(defaultProps.onSubmit).toHaveBeenCalled()
     })
   })
 
-  describe('submission', () => {
-    it('should call onSave with correct data when form is valid', async () => {
-      render(<UserEditModal {...defaultProps} />)
+  describe('error display', () => {
+    it('should show name error when provided', () => {
+      render(
+        <UserEditModal
+          {...defaultProps}
+          errors={{ name: 'El nombre es obligatorio' }}
+        />
+      )
 
-      const nameInput = screen.getByDisplayValue('Patricia López')
-      fireEvent.change(nameInput, { target: { value: 'Patricia López Updated' } })
-
-      fireEvent.click(screen.getByText('Guardar'))
-
-      await waitFor(() => {
-        expect(defaultProps.onSave).toHaveBeenCalledWith(1, {
-          name: 'Patricia López Updated',
-          email: 'patricia.lopez@enteturismo.gov.ar',
-        })
-      })
+      expect(screen.getByText('El nombre es obligatorio')).toBeInTheDocument()
     })
 
-    it('should call onClose after successful save', async () => {
-      render(<UserEditModal {...defaultProps} />)
+    it('should show email error when provided', () => {
+      render(
+        <UserEditModal
+          {...defaultProps}
+          errors={{ email: 'El email es obligatorio' }}
+        />
+      )
 
-      fireEvent.click(screen.getByText('Guardar'))
-
-      await waitFor(() => {
-        expect(defaultProps.onClose).toHaveBeenCalled()
-      })
+      expect(screen.getByText('El email es obligatorio')).toBeInTheDocument()
     })
 
-    it('should not call onClose when save fails', async () => {
-      const onSaveFailing = jest.fn().mockResolvedValue(false)
-      render(<UserEditModal {...defaultProps} onSave={onSaveFailing} />)
+    it('should show error when name exceeds 255 characters', () => {
+      render(
+        <UserEditModal
+          {...defaultProps}
+          errors={{ name: 'El nombre no puede exceder 255 caracteres' }}
+        />
+      )
 
-      fireEvent.click(screen.getByText('Guardar'))
-
-      await waitFor(() => {
-        expect(onSaveFailing).toHaveBeenCalled()
-      })
-      expect(defaultProps.onClose).not.toHaveBeenCalled()
+      expect(screen.getByText('El nombre no puede exceder 255 caracteres')).toBeInTheDocument()
     })
 
-    it('should trim whitespace from values', async () => {
-      render(<UserEditModal {...defaultProps} />)
+    it('should show error when email is invalid', () => {
+      render(
+        <UserEditModal
+          {...defaultProps}
+          errors={{ email: 'El email debe ser válido' }}
+        />
+      )
 
-      const nameInput = screen.getByDisplayValue('Patricia López')
-      fireEvent.change(nameInput, { target: { value: '  Patricia López Updated  ' } })
+      expect(screen.getByText('El email debe ser válido')).toBeInTheDocument()
+    })
 
-      fireEvent.click(screen.getByText('Guardar'))
+    it('should apply red border to name input when name error exists', () => {
+      render(
+        <UserEditModal
+          {...defaultProps}
+          errors={{ name: 'El nombre es obligatorio' }}
+        />
+      )
 
-      await waitFor(() => {
-        expect(defaultProps.onSave).toHaveBeenCalledWith(1, {
-          name: 'Patricia López Updated',
-          email: 'patricia.lopez@enteturismo.gov.ar',
-        })
-      })
+      const nameInput = screen.getByLabelText('Nombre')
+      expect(nameInput).toHaveClass('border-red-500')
+    })
+
+    it('should apply red border to email input when email error exists', () => {
+      render(
+        <UserEditModal
+          {...defaultProps}
+          errors={{ email: 'El email es obligatorio' }}
+        />
+      )
+
+      const emailInput = screen.getByLabelText('Email')
+      expect(emailInput).toHaveClass('border-red-500')
     })
   })
 
@@ -233,35 +199,34 @@ describe('UserEditModal', () => {
     })
   })
 
-  describe('form reset on user change', () => {
-    it('should reset form when user changes', () => {
-      const { rerender } = render(<UserEditModal {...defaultProps} />)
-
-      const nameInput = screen.getByDisplayValue('Patricia López')
-      fireEvent.change(nameInput, { target: { value: 'Changed Name' } })
-
-      expect(screen.getByDisplayValue('Changed Name')).toBeInTheDocument()
-
-      const newUser = { ...mockUser, id: 2, name: 'Miguel Sánchez', email: 'miguel@test.com' }
-      rerender(<UserEditModal {...defaultProps} user={newUser} />)
+  describe('form values from props', () => {
+    it('should display name from props', () => {
+      render(<UserEditModal {...defaultProps} name="Miguel Sánchez" />)
 
       expect(screen.getByDisplayValue('Miguel Sánchez')).toBeInTheDocument()
+    })
+
+    it('should display email from props', () => {
+      render(<UserEditModal {...defaultProps} email="miguel@test.com" />)
+
       expect(screen.getByDisplayValue('miguel@test.com')).toBeInTheDocument()
     })
 
-    it('should clear errors when user changes', () => {
+    it('should update displayed values when props change', () => {
       const { rerender } = render(<UserEditModal {...defaultProps} />)
 
-      const nameInput = screen.getByDisplayValue('Patricia López')
-      fireEvent.change(nameInput, { target: { value: '' } })
-      fireEvent.click(screen.getByText('Guardar'))
+      expect(screen.getByDisplayValue('Patricia López')).toBeInTheDocument()
 
-      expect(screen.getByText('El nombre es obligatorio')).toBeInTheDocument()
+      rerender(
+        <UserEditModal
+          {...defaultProps}
+          name="Updated Name"
+          email="updated@test.com"
+        />
+      )
 
-      const newUser = { ...mockUser, id: 2, name: 'Miguel Sánchez', email: 'miguel@test.com' }
-      rerender(<UserEditModal {...defaultProps} user={newUser} />)
-
-      expect(screen.queryByText('El nombre es obligatorio')).not.toBeInTheDocument()
+      expect(screen.getByDisplayValue('Updated Name')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('updated@test.com')).toBeInTheDocument()
     })
   })
 })

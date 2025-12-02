@@ -14,23 +14,26 @@ export const OrganizerQuickFilters = ({
   onFilterChange
 }: OrganizerQuickFiltersProps) => {
   const filters = [
-    { label: 'All', value: null },
-    { label: 'Draft', value: 'draft' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Published', value: 'published' }
+    { label: 'Todos', value: null },
+    { label: 'Borrador', value: 'draft' },
+    { label: 'Pendiente', value: 'pending_internal_approval' },
+    { label: 'Aprobado', value: 'approved_internal' },
+    { label: 'Publicado', value: 'published' },
+    { label: 'Requiere Cambios', value: 'requires_changes' },
+    { label: 'Rechazado', value: 'rejected' }
   ]
 
   return (
-    <div className="flex gap-2 mb-4" role="group" aria-label="Filter events by status">
+    <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Filtrar eventos por estado">
       {filters.map(filter => (
         <button
           key={filter.label}
           onClick={() => onFilterChange(filter.value)}
           className={`
-            px-4 py-2 rounded-md text-sm font-medium transition-colors
+            px-3 py-1.5 rounded-md text-sm font-medium transition-colors
             ${activeFilter === filter.value
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+              ? 'bg-primary-600 text-white'
+              : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-300'
             }
           `}
           aria-pressed={activeFilter === filter.value}

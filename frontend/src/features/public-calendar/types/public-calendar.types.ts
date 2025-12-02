@@ -13,6 +13,7 @@ export interface PublicEvent {
   category: {
     id: number
     name: string
+    color?: string
   }
   locations: Array<{
     id: number
@@ -66,3 +67,12 @@ export interface CalendarEvent {
 }
 
 export type CalendarView = 'month' | 'week' | 'day' | 'agenda'
+
+/**
+ * Public stats response from API
+ */
+export interface PublicStats {
+  total_events: number
+  total_categories: number
+  events_this_month: number
+}

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import CreateInvitationModal from '../CreateInvitationModal'
 import { AssignableRole } from '../../../types/invitation.types'
 
@@ -15,8 +15,20 @@ describe('CreateInvitationModal', () => {
     { id: 2, role_code: 'entity_staff', role_name: 'Entity Staff' },
   ]
 
-  const mockOnClose = jest.fn()
-  const mockOnSubmit = jest.fn()
+  const defaultProps = {
+    isOpen: true,
+    isLoading: false,
+    roles: mockRoles,
+    email: '',
+    roleId: '' as number | '',
+    errors: {},
+    onEmailChange: jest.fn(),
+    onRoleChange: jest.fn(),
+    onEmailBlur: jest.fn(),
+    onRoleBlur: jest.fn(),
+    onSubmit: jest.fn(),
+    onClose: jest.fn(),
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -24,44 +36,20 @@ describe('CreateInvitationModal', () => {
 
   describe('rendering', () => {
     it('should not render when closed', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={false}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} isOpen={false} />)
 
       expect(screen.queryByTestId('create-invitation-modal')).not.toBeInTheDocument()
     })
 
     it('should render modal when open', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} />)
 
       expect(screen.getByTestId('create-invitation-modal')).toBeInTheDocument()
       expect(screen.getByText('Nueva Invitación')).toBeInTheDocument()
     })
 
     it('should render email input', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} />)
 
       const emailInput = screen.getByTestId('email-input')
       expect(emailInput).toBeInTheDocument()
@@ -69,226 +57,137 @@ describe('CreateInvitationModal', () => {
     })
 
     it('should render role select with options', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} />)
 
       const roleSelect = screen.getByTestId('role-select')
       expect(roleSelect).toBeInTheDocument()
       expect(screen.getByText('Entity Administrator')).toBeInTheDocument()
       expect(screen.getByText('Entity Staff')).toBeInTheDocument()
     })
+
+    it('should display email value from props', () => {
+      render(<CreateInvitationModal {...defaultProps} email="test@example.com" />)
+
+      const emailInput = screen.getByTestId('email-input')
+      expect(emailInput).toHaveValue('test@example.com')
+    })
+
+    it('should display roleId value from props', () => {
+      render(<CreateInvitationModal {...defaultProps} roleId={1} />)
+
+      const roleSelect = screen.getByTestId('role-select')
+      expect(roleSelect).toHaveValue('1')
+    })
   })
 
-  describe('validation', () => {
-    it('should show error when email is empty', async () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+  describe('interactions', () => {
+    it('should call onEmailChange when email is typed', () => {
+      render(<CreateInvitationModal {...defaultProps} />)
+
+      const emailInput = screen.getByTestId('email-input')
+      fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+
+      expect(defaultProps.onEmailChange).toHaveBeenCalledWith('test@example.com')
+    })
+
+    it('should call onEmailBlur when email is changed', () => {
+      render(<CreateInvitationModal {...defaultProps} />)
+
+      const emailInput = screen.getByTestId('email-input')
+      fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+
+      expect(defaultProps.onEmailBlur).toHaveBeenCalled()
+    })
+
+    it('should call onRoleChange when role is selected', () => {
+      render(<CreateInvitationModal {...defaultProps} />)
+
+      const roleSelect = screen.getByTestId('role-select')
+      fireEvent.change(roleSelect, { target: { value: '1' } })
+
+      expect(defaultProps.onRoleChange).toHaveBeenCalledWith(1)
+    })
+
+    it('should call onRoleBlur when role is changed', () => {
+      render(<CreateInvitationModal {...defaultProps} />)
+
+      const roleSelect = screen.getByTestId('role-select')
+      fireEvent.change(roleSelect, { target: { value: '1' } })
+
+      expect(defaultProps.onRoleBlur).toHaveBeenCalled()
+    })
+
+    it('should call onSubmit when form is submitted', () => {
+      render(<CreateInvitationModal {...defaultProps} />)
 
       fireEvent.click(screen.getByTestId('submit-button'))
 
-      await waitFor(() => {
-        expect(screen.getByTestId('email-error')).toBeInTheDocument()
-      })
+      expect(defaultProps.onSubmit).toHaveBeenCalled()
+    })
+  })
+
+  describe('error display', () => {
+    it('should show email error when provided', () => {
+      render(
+        <CreateInvitationModal {...defaultProps} errors={{ email: 'El email es requerido' }} />
+      )
+
+      expect(screen.getByTestId('email-error')).toBeInTheDocument()
       expect(screen.getByText('El email es requerido')).toBeInTheDocument()
     })
 
-    it('should show error when email format is invalid', async () => {
+    it('should show invalid email error when provided', () => {
       render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
+        <CreateInvitationModal {...defaultProps} errors={{ email: 'Ingrese un email válido' }} />
       )
 
-      const emailInput = screen.getByTestId('email-input')
-      const roleSelect = screen.getByTestId('role-select')
-
-      // Enter invalid email (missing @ and domain)
-      fireEvent.change(emailInput, { target: { value: 'notanemail' } })
-      fireEvent.change(roleSelect, { target: { value: '1' } })
-
-      // Submit the form
-      const form = emailInput.closest('form')!
-      fireEvent.submit(form)
-
-      // Validation is synchronous, error should appear immediately
       expect(screen.getByText('Ingrese un email válido')).toBeInTheDocument()
-      expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
-    it('should show error when role is not selected', async () => {
+    it('should show role error when provided', () => {
       render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
+        <CreateInvitationModal {...defaultProps} errors={{ role_id: 'Debe seleccionar un rol' }} />
       )
 
-      fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } })
-      fireEvent.click(screen.getByTestId('submit-button'))
-
-      await waitFor(() => {
-        expect(screen.getByTestId('role-error')).toBeInTheDocument()
-      })
+      expect(screen.getByTestId('role-error')).toBeInTheDocument()
       expect(screen.getByText('Debe seleccionar un rol')).toBeInTheDocument()
     })
 
-    it('should clear email error when user types', async () => {
+    it('should apply red border to email input when error exists', () => {
       render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
+        <CreateInvitationModal {...defaultProps} errors={{ email: 'El email es requerido' }} />
       )
 
-      // Trigger validation error
-      fireEvent.click(screen.getByTestId('submit-button'))
-      await waitFor(() => {
-        expect(screen.getByTestId('email-error')).toBeInTheDocument()
-      })
-
-      // Type to clear error
-      fireEvent.change(screen.getByTestId('email-input'), { target: { value: 't' } })
-
-      expect(screen.queryByTestId('email-error')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('submission', () => {
-    it('should call onSubmit with correct data', async () => {
-      mockOnSubmit.mockResolvedValueOnce(true)
-
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
-
-      fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } })
-      fireEvent.change(screen.getByTestId('role-select'), { target: { value: '1' } })
-      fireEvent.click(screen.getByTestId('submit-button'))
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          role_id: 1,
-        })
-      })
+      const emailInput = screen.getByTestId('email-input')
+      expect(emailInput).toHaveClass('border-red-500')
     })
 
-    it('should close modal on successful submit', async () => {
-      mockOnSubmit.mockResolvedValueOnce(true)
-
+    it('should apply red border to role select when error exists', () => {
       render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
+        <CreateInvitationModal {...defaultProps} errors={{ role_id: 'Debe seleccionar un rol' }} />
       )
 
-      fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } })
-      fireEvent.change(screen.getByTestId('role-select'), { target: { value: '1' } })
-      fireEvent.click(screen.getByTestId('submit-button'))
-
-      await waitFor(() => {
-        expect(mockOnClose).toHaveBeenCalled()
-      })
-    })
-
-    it('should not close modal on failed submit', async () => {
-      mockOnSubmit.mockResolvedValueOnce(false)
-
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
-
-      fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@example.com' } })
-      fireEvent.change(screen.getByTestId('role-select'), { target: { value: '1' } })
-      fireEvent.click(screen.getByTestId('submit-button'))
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalled()
-      })
-      expect(mockOnClose).not.toHaveBeenCalled()
+      const roleSelect = screen.getByTestId('role-select')
+      expect(roleSelect).toHaveClass('border-red-500')
     })
   })
 
   describe('loading state', () => {
     it('should show loading state when submitting', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={true}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} isLoading={true} />)
 
       expect(screen.getByText('Enviando...')).toBeInTheDocument()
       expect(screen.getByTestId('loader-icon')).toBeInTheDocument()
     })
 
     it('should disable submit button while loading', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={true}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} isLoading={true} />)
 
       expect(screen.getByTestId('submit-button')).toBeDisabled()
     })
 
     it('should disable inputs while loading', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={true}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} isLoading={true} />)
 
       expect(screen.getByTestId('email-input')).toBeDisabled()
       expect(screen.getByTestId('role-select')).toBeDisabled()
@@ -297,51 +196,27 @@ describe('CreateInvitationModal', () => {
 
   describe('closing', () => {
     it('should call onClose when cancel button is clicked', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} />)
 
       fireEvent.click(screen.getByTestId('cancel-button'))
 
-      expect(mockOnClose).toHaveBeenCalled()
+      expect(defaultProps.onClose).toHaveBeenCalled()
     })
 
     it('should call onClose when close icon is clicked', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={false}
-        />
-      )
+      render(<CreateInvitationModal {...defaultProps} />)
 
       fireEvent.click(screen.getByTestId('close-modal-button'))
 
-      expect(mockOnClose).toHaveBeenCalled()
+      expect(defaultProps.onClose).toHaveBeenCalled()
     })
 
-    it('should not close when loading', () => {
-      render(
-        <CreateInvitationModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          roles={mockRoles}
-          isLoading={true}
-        />
-      )
+    it('should not call onClose when loading and close is clicked', () => {
+      render(<CreateInvitationModal {...defaultProps} isLoading={true} />)
 
       fireEvent.click(screen.getByTestId('cancel-button'))
 
-      expect(mockOnClose).not.toHaveBeenCalled()
+      expect(defaultProps.onClose).not.toHaveBeenCalled()
     })
   })
 })

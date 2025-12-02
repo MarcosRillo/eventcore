@@ -20,9 +20,11 @@ interface UsePublicEventsReturn {
   loading: boolean
   error: string | null
   filters: EventFilters
+  hasActiveFilters: boolean
   handleCategoryFilter: (categoryId: number | null) => void
   handleLocationFilter: (locationId: number | null) => void
   handleDateRangeFilter: (startDate: string | null, endDate: string | null) => void
+  clearFilters: () => void
   retry: () => void
 }
 
@@ -93,6 +95,21 @@ export const usePublicEvents = (): UsePublicEventsReturn => {
     setFilters(prev => ({ ...prev, start_date: startDate, end_date: endDate }))
   }
 
+  const clearFilters = (): void => {
+    setFilters({
+      category_id: null,
+      location_id: null,
+      start_date: null,
+      end_date: null
+    })
+  }
+
+  const hasActiveFilters =
+    filters.category_id !== null ||
+    filters.location_id !== null ||
+    filters.start_date !== null ||
+    filters.end_date !== null
+
   return {
     events,
     categories,
@@ -100,9 +117,11 @@ export const usePublicEvents = (): UsePublicEventsReturn => {
     loading,
     error,
     filters,
+    hasActiveFilters,
     handleCategoryFilter,
     handleLocationFilter,
     handleDateRangeFilter,
+    clearFilters,
     retry: fetchEvents
   }
 }

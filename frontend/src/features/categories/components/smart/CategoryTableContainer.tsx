@@ -1,39 +1,21 @@
 /**
  * Category Table Container - Smart Component
- * Handles business logic, state management, and configuration for CategoryTable
+ * Uses GenericTable with custom column renderers for categories
+ * Handles business logic, state management, and configuration
  */
 
 'use client';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { Category } from '@/types/category.types';
-import { PaginationMeta } from '@/hooks/usePaginatedData';
-import { CategoryTable } from '@/features/categories/components/dumb/CategoryTable';
+import { PaginationMeta } from '@/types/api-response.types';
+import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-// Column configuration interface
-export interface CategoryColumnConfig {
-  key: string;
-  label: string;
-  visible: boolean;
-  className?: string;
-}
-
-// Action configuration interface
-export interface CategoryActionConfig {
-  key: string;
-  label: string;
-  icon: React.ReactNode;
-  className: string;
-  onClick: (category: Category) => void;
-}
-
-// Confirm dialog data interface
-export interface CategoryConfirmDialogData {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  onConfirm: () => void;
-}
+// Re-export types for backward compatibility
+export type CategoryColumnConfig = TableColumnConfig<Category>;
+export type CategoryActionConfig = TableActionConfig<Category>;
+export type CategoryConfirmDialogData = ConfirmDialogData;
 
 interface CategoryTableContainerProps {
   categories: Category[];
@@ -44,16 +26,18 @@ interface CategoryTableContainerProps {
   loading?: boolean;
 }
 
-export const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
+const BADGE_BASE_CLASSES = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+
+export const CategoryTableContainer = ({
   categories,
   pagination,
   onEdit,
   onDelete,
   onPageChange,
   loading = false,
-}) => {
+}: CategoryTableContainerProps) => {
   // Confirm dialog state
-  const [confirmDialog, setConfirmDialog] = useState<CategoryConfirmDialogData>({
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogData>({
     isOpen: false,
     title: '',
     message: '',
@@ -67,8 +51,6 @@ export const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
       });
     } catch {
       return dateString;
@@ -88,28 +70,79 @@ export const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
     });
   }, [onDelete]);
 
-  // Column configuration
-  const columns = useMemo((): CategoryColumnConfig[] => [
-    { key: 'category', label: 'Categoría', visible: true },
-    { key: 'color', label: 'Color', visible: true },
-    { key: 'status', label: 'Estado', visible: true },
-    { key: 'created', label: 'Creado', visible: true },
-  ], []);
+  // Column configuration with custom renderers
+  const columns = useMemo((): TableColumnConfig<Category>[] => [
+    // Category name and description
+    {
+      key: 'name',
+      label: 'Categoría',
+      render: (category) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-neutral-900">{category.name}</span>
+          {category.description && (
+            <span className="text-sm text-neutral-500 line-clamp-1">
+              {category.description}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    // Color column
+    {
+      key: 'color',
+      label: 'Color',
+      render: (category) => (
+        <div className="flex items-center gap-2">
+          <div
+            className="w-6 h-6 rounded-full border border-neutral-200"
+            style={{ backgroundColor: category.color || '#6b7280' }}
+          />
+          <span className="text-sm text-neutral-600">
+            {category.color || 'Sin color'}
+          </span>
+        </div>
+      ),
+    },
+    // Status column
+    {
+      key: 'is_active',
+      label: 'Estado',
+      render: (category) => (
+        <span className={`${BADGE_BASE_CLASSES} ${
+          category.is_active
+            ? 'bg-success-100 text-success-800'
+            : 'bg-neutral-100 text-neutral-800'
+        }`}>
+          {category.is_active ? 'Activa' : 'Inactiva'}
+        </span>
+      ),
+    },
+    // Created date column
+    {
+      key: 'created_at',
+      label: 'Creado',
+      render: (category) => (
+        <span className="text-sm text-neutral-500">
+          {formatDate(category.created_at)}
+        </span>
+      ),
+    },
+  ], [formatDate]);
 
   // Action configuration
-  const actions = useMemo((): CategoryActionConfig[] => [
+  const actions = useMemo((): TableActionConfig<Category>[] => [
     {
       key: 'edit',
       label: 'Editar',
-      icon: '✏️',
-      className: 'text-indigo-600 hover:text-indigo-800',
+      icon: <PencilIcon className="w-5 h-5" />,
+      variant: 'secondary',
       onClick: onEdit,
     },
     {
       key: 'delete',
       label: 'Eliminar',
-      icon: '🗑️',
-      className: 'text-red-600 hover:text-red-800',
+      icon: <TrashIcon className="w-5 h-5" />,
+      variant: 'danger',
       onClick: handleDeleteCategory,
     },
   ], [onEdit, handleDeleteCategory]);
@@ -120,16 +153,17 @@ export const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
   }, []);
 
   return (
-    <CategoryTable
-      categories={categories}
-      pagination={pagination}
-      loading={loading}
+    <GenericTable<Category>
+      items={categories}
       columns={columns}
       actions={actions}
-      confirmDialog={confirmDialog}
+      isLoading={loading}
+      emptyMessage="No hay categorías disponibles"
+      pagination={pagination}
       onPageChange={onPageChange}
-      onFormatDate={formatDate}
+      confirmDialog={confirmDialog}
       onCloseConfirmDialog={handleCloseConfirmDialog}
+      testId="category-table"
     />
   );
 };

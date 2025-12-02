@@ -185,4 +185,16 @@ class PublicEventController extends Controller
             ], 404);
         }
     }
+
+    /**
+     * Get public statistics for the calendar.
+     */
+    public function stats(): JsonResponse
+    {
+        $stats = $this->publicEventService->getStats();
+
+        return response()->json([
+            'data' => $stats,
+        ]);
+    }
 }

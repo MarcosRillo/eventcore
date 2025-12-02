@@ -8,6 +8,8 @@ use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRotationType;
 use App\Models\EventTheme;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -63,8 +65,12 @@ class EventFactory extends Factory
             'created_by' => User::factory(),
             'entity_id' => \App\Models\Organization::factory(),
             'organization_id' => null,
-            'type_id' => fn() => \DB::table('event_types')->first()?->id ?? 1,
+            'format_id' => fn() => \DB::table('event_formats')->first()?->id ?? 1,
             'status_id' => fn() => \DB::table('event_statuses')->first()?->id ?? 1,
+
+            // Event Type and Subtype (hierarchical categorization - Dec 2, 2025)
+            'event_type_id' => fn() => EventType::inRandomOrder()->first()?->id ?? EventType::factory(),
+            'event_subtype_id' => fn() => EventSubtype::inRandomOrder()->first()?->id ?? EventSubtype::factory(),
 
             // Display
             'is_featured' => false,

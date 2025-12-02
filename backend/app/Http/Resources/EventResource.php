@@ -38,6 +38,7 @@ class EventResource extends JsonResource
             // Event info
             'edition_number' => $this->edition_number,
             'maps_url' => $this->maps_url,
+            'custom_location_name' => $this->custom_location_name,
             'previous_venue' => $this->previous_venue,
             'next_venue' => $this->next_venue,
             'event_website' => $this->event_website,
@@ -65,10 +66,20 @@ class EventResource extends JsonResource
                 'name' => $this->status->status_name,
             ]),
 
-            'type' => $this->whenLoaded('type', fn() => [
-                'id' => $this->type->id,
-                'code' => $this->type->type_code,
-                'name' => $this->type->type_name,
+            'format' => $this->whenLoaded('format', fn() => [
+                'id' => $this->format->id,
+                'code' => $this->format->format_code,
+                'name' => $this->format->format_name,
+            ]),
+
+            'event_type' => $this->whenLoaded('eventType', fn() => [
+                'id' => $this->eventType->id,
+                'name' => $this->eventType->name,
+            ]),
+
+            'event_subtype' => $this->whenLoaded('eventSubtype', fn() => [
+                'id' => $this->eventSubtype->id,
+                'name' => $this->eventSubtype->name,
             ]),
 
             'category' => $this->whenLoaded('category', fn() => new CategoryResource($this->category)),
@@ -151,10 +162,12 @@ class EventResource extends JsonResource
 
             // Foreign key IDs (for forms)
             'status_id' => $this->status_id,
-            'type_id' => $this->type_id,
+            'format_id' => $this->format_id,
             'category_id' => $this->category_id,
             'entity_id' => $this->entity_id,
             'organization_id' => $this->organization_id,
+            'event_type_id' => $this->event_type_id,
+            'event_subtype_id' => $this->event_subtype_id,
             'subtype_id' => $this->subtype_id,
             'origin_id' => $this->origin_id,
             'theme_id' => $this->theme_id,
@@ -186,7 +199,7 @@ class EventResource extends JsonResource
         return [
             'meta' => [
                 'available_statuses' => \App\Models\EventStatus::all(['id', 'status_name', 'status_code']),
-                'available_types' => \App\Models\EventType::all(['id', 'type_name', 'type_code']),
+                'available_formats' => \App\Models\EventFormat::all(['id', 'format_name', 'format_code']),
             ],
         ];
     }

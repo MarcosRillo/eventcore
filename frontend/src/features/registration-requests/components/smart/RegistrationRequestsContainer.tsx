@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui'
 import { useRegistrationRequests } from '../../hooks/useRegistrationRequests'
 import { RegistrationRequestTable } from '../dumb/RegistrationRequestTable'
 import { RegistrationRequestDetailPanel } from '../dumb/RegistrationRequestDetail'
-import { RejectRequestModal } from '../dumb/RejectRequestModal'
+import { RejectRequestModalContainer } from './RejectRequestModalContainer'
 import { SuspendConfirmModal } from '../dumb/SuspendConfirmModal'
 import { DeleteOrganizationModal } from '../dumb/DeleteOrganizationModal'
 import type { RegistrationRequest } from '../../types/registration-request.types'
@@ -247,7 +247,7 @@ export function RegistrationRequestsContainer() {
       />
 
       {/* Reject Modal */}
-      <RejectRequestModal
+      <RejectRequestModalContainer
         isOpen={isRejectModalOpen}
         loading={actionLoading}
         requestName={pendingRejectName}

@@ -59,20 +59,13 @@ export const CalendarView = ({
   currentView,
   loading = false,
 }: CalendarViewProps) => {
+  // Default color for events without category color (primary-600 equivalent)
+  const DEFAULT_EVENT_COLOR = '#0284C7'
+
   // Event style getter - color by category
   const eventStyleGetter = (event: CalendarEvent) => {
-    const categoryColor = event.resource.category?.name || 'blue'
-
-    // Simple color mapping (can be enhanced)
-    const colorMap: Record<string, string> = {
-      'Turismo Aventura': '#FF6B35',
-      'Turismo Gastronómico': '#F7931E',
-      'Turismo Rural': '#8BC34A',
-      'Artes Escénicas': '#9C27B0',
-      'Patrimonio Cultural': '#795548',
-    }
-
-    const backgroundColor = colorMap[categoryColor] || '#3B82F6'
+    // Use category color from backend, fallback to primary color
+    const backgroundColor = event.resource.category?.color || DEFAULT_EVENT_COLOR
 
     return {
       style: {
@@ -92,7 +85,7 @@ export const CalendarView = ({
     <div className="bg-white rounded-lg shadow-sm p-6">
       {loading && (
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
         </div>
       )}
 

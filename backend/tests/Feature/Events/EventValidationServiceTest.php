@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventOrigin;
 use App\Models\EventStatus;
 use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
 use App\Models\Organization;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,10 +29,12 @@ class EventValidationServiceTest extends TestCase
     private Organization $organization;
     private Organization $producerOrg;
     private Category $category;
+    private EventType $eventType;
+    private EventSubtype $eventSubtype;
     private Location $location;
     private Location $locationWithCity;
     private EventStatus $draftStatus;
-    private EventType $eventType;
+    private int $formatId;
     private ?EventOrigin $origin;
 
     protected function setUp(): void
@@ -50,6 +53,9 @@ class EventValidationServiceTest extends TestCase
         $this->organization = Organization::factory()->create();
         $this->producerOrg = Organization::factory()->create(['name' => 'Test Producer Org']);
         $this->category = Category::factory()->create(['entity_id' => $this->organization->id]);
+        $this->eventType = EventType::first() ?? EventType::factory()->create();
+        $this->eventSubtype = EventSubtype::where('event_type_id', $this->eventType->id)->first()
+            ?? EventSubtype::factory()->create(['event_type_id' => $this->eventType->id]);
         $this->location = Location::factory()->create([
             'entity_id' => $this->organization->id,
             'city' => null,
@@ -59,7 +65,7 @@ class EventValidationServiceTest extends TestCase
             'city' => 'San Miguel de Tucumán',
         ]);
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
-        $this->eventType = EventType::first();
+        $this->formatId = \DB::table('event_formats')->value('id') ?? 1;
         $this->origin = EventOrigin::where('code', 'national')->first();
     }
 
@@ -112,25 +118,36 @@ class EventValidationServiceTest extends TestCase
     }
 
     #[Test]
-    public function validates_internal_without_type_id_returns_error(): void
+    public function validates_internal_without_format_id_returns_error(): void
     {
-        $event = $this->createEventWithInternalFields(['type_id' => null]);
+        $event = $this->createEventWithInternalFields(['format_id' => null]);
 
         $result = $this->service->validateForInternalApproval($event);
 
         $this->assertFalse($result->isValid());
-        $this->assertArrayHasKey('type_id', $result->getErrors());
+        $this->assertArrayHasKey('format_id', $result->getErrors());
     }
 
     #[Test]
-    public function validates_internal_without_category_id_returns_error(): void
+    public function validates_internal_without_event_type_id_returns_error(): void
     {
-        $event = $this->createEventWithInternalFields(['category_id' => null]);
+        $event = $this->createEventWithInternalFields(['event_type_id' => null]);
 
         $result = $this->service->validateForInternalApproval($event);
 
         $this->assertFalse($result->isValid());
-        $this->assertArrayHasKey('category_id', $result->getErrors());
+        $this->assertArrayHasKey('event_type_id', $result->getErrors());
+    }
+
+    #[Test]
+    public function validates_internal_without_event_subtype_id_returns_error(): void
+    {
+        $event = $this->createEventWithInternalFields(['event_subtype_id' => null]);
+
+        $result = $this->service->validateForInternalApproval($event);
+
+        $this->assertFalse($result->isValid());
+        $this->assertArrayHasKey('event_subtype_id', $result->getErrors());
     }
 
     #[Test]
@@ -145,14 +162,17 @@ class EventValidationServiceTest extends TestCase
     }
 
     #[Test]
-    public function validates_internal_without_producer_id_returns_error(): void
+    public function validates_internal_without_producer_id_passes_since_auto_filled(): void
     {
+        // producer_id is auto-filled with organization_id on creation (Dec 2, 2025)
+        // Events can pass validation even if producer_id is null at validation time
+        // because it will be auto-filled during the submission flow
         $event = $this->createEventWithInternalFields(['producer_id' => null]);
 
         $result = $this->service->validateForInternalApproval($event);
 
-        $this->assertFalse($result->isValid());
-        $this->assertArrayHasKey('producer_id', $result->getErrors());
+        // producer_id is no longer a required field in validation
+        $this->assertTrue($result->isValid());
     }
 
     #[Test]
@@ -171,18 +191,17 @@ class EventValidationServiceTest extends TestCase
     #[Test]
     public function validates_internal_with_multiple_missing_fields_returns_all_errors(): void
     {
+        // producer_id is no longer required (Dec 2, 2025 - auto-filled)
         $event = $this->createEventWithInternalFields([
             'title' => null,
-            'producer_id' => null,
             'edition_number' => null,
         ]);
 
         $result = $this->service->validateForInternalApproval($event);
 
         $this->assertFalse($result->isValid());
-        $this->assertCount(3, $result->getErrors());
+        $this->assertCount(2, $result->getErrors());
         $this->assertArrayHasKey('title', $result->getErrors());
-        $this->assertArrayHasKey('producer_id', $result->getErrors());
         $this->assertArrayHasKey('edition_number', $result->getErrors());
     }
 
@@ -310,16 +329,15 @@ class EventValidationServiceTest extends TestCase
     #[Test]
     public function get_missing_fields_for_internal_returns_correct_list(): void
     {
+        // producer_id is no longer required (Dec 2, 2025 - auto-filled)
         $event = $this->createEventWithInternalFields([
-            'producer_id' => null,
             'edition_number' => null,
         ]);
 
         $missing = $this->service->getMissingFields($event, 'approved_internal');
 
-        $this->assertArrayHasKey('producer_id', $missing);
         $this->assertArrayHasKey('edition_number', $missing);
-        $this->assertCount(2, $missing);
+        $this->assertCount(1, $missing);
     }
 
     #[Test]
@@ -362,8 +380,10 @@ class EventValidationServiceTest extends TestCase
             'title' => 'Test Event',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
-            'type_id' => $this->eventType->id,
+            'format_id' => $this->formatId,
             'category_id' => $this->category->id,
+            'event_type_id' => $this->eventType->id,
+            'event_subtype_id' => $this->eventSubtype->id,
             'edition_number' => '5ta Edición',
             'producer_id' => $this->producerOrg->id,
             'organization_id' => $this->organization->id,
@@ -398,8 +418,10 @@ class EventValidationServiceTest extends TestCase
             'title' => 'Test Event',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
-            'type_id' => $this->eventType->id,
+            'format_id' => $this->formatId,
             'category_id' => $this->category->id,
+            'event_type_id' => $this->eventType->id,
+            'event_subtype_id' => $this->eventSubtype->id,
             'edition_number' => '5ta Edición',
             'producer_id' => $this->producerOrg->id,
             'organization_id' => $this->organization->id,

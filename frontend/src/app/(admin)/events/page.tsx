@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { PlusIcon, ClockIcon, CheckCircleIcon, ShareIcon, XCircleIcon, ViewColumnsIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
+import { ClockIcon, CheckCircleIcon, ShareIcon, ViewColumnsIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { Event } from '@/types/event.types';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
 import { useApprovalManager } from '@/features/entity-admin/hooks';
 import {
-  CreateEventForm,
-  EditEventForm,
   EventFiltersBar,
 } from '@/features/events/components';
 import { DashboardModeView, EventTableContainer, ApprovalModalContainer } from '@/features/entity-admin';
 import { EventDetailModal } from '@/components/ui';
-import { Pagination, Button, ConfirmDialog, PromptDialog } from '@/components/ui';
+import { Pagination, ConfirmDialog, PromptDialog } from '@/components/ui';
+import { ErrorAlert } from '@/shared/components/alerts';
+import { StatsCard, StatsGrid } from '@/shared/components/stats';
 
 type ViewMode = 'table' | 'dashboard';
 
@@ -58,19 +58,7 @@ export default function EventsPage() {
     rejectEvent: workflowRejectEvent,
     isLoading: approvalLoading,
     error: approvalError,
-    // Workflow functions available but not used in this view
-    // canApproveInternal,
-    // canRequestPublicApproval,
-    // canPublish,
-    // canRequestChanges: workflowCanRequestChanges,
-    // canReject: workflowCanReject,
-    // isInternallyApproved,
-    // isPublished,
-    // getWorkflowStage,
     clearError: clearApprovalError,
-    // Legacy compatibility - not used in this view
-    // approveEvent,
-    // canApprove
   } = useApprovalManager();
 
   const {
@@ -82,13 +70,9 @@ export default function EventsPage() {
     isLoading,
     error,
     currentEvent,
-    isCreateModalOpen,
-    isEditModalOpen,
     isApprovalModalOpen,
 
-    // CRUD operations
-    createEvent,
-    updateEvent,
+    // CRUD operations (only delete for admin - organizers create/edit)
     deleteEvent,
 
     // Approval workflow
@@ -99,8 +83,6 @@ export default function EventsPage() {
     rejectEvent,
 
     // Actions
-    openCreateModal,
-    openEditModal,
     openApprovalModal,
     closeAllModals,
     updateFilters,
@@ -123,13 +105,10 @@ export default function EventsPage() {
     }
   }, [user, shouldShowDashboardByDefault]);
   
-  const handleEditEvent = (event: Event) => {
-    openEditModal(event);
-  };
-
   const handleSelectEvent = (event: Event) => {
-    // In table mode, this could navigate to detail page or open modal
-    void event; // Suppress unused parameter warning
+    // In table mode, open detail modal
+    setSelectedEvent(event);
+    setIsDetailModalOpen(true);
   };
 
   const handleViewDetail = (eventId: number) => {
@@ -239,22 +218,14 @@ export default function EventsPage() {
     });
   };
 
-  // handleToggleFeatured implementation removed - feature not active in this view
-  // const handleToggleFeatured = async (event: Event) => {
-  //   const updatedEvent = await toggleFeatured(event.id);
-  //   if (updatedEvent) {
-  //     refreshData();
-  //   }
-  // };
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-neutral-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestión de Eventos</h1>
-            <p className="mt-2 text-gray-600">
+            <h1 className="text-3xl font-bold text-neutral-900">Gestión de Eventos</h1>
+            <p className="mt-2 text-neutral-600">
               {shouldShowDashboardByDefault()
                 ? 'Dashboard de gestión y aprobación de eventos'
                 : 'Administra y supervisa todos los eventos de la organización'
@@ -262,159 +233,89 @@ export default function EventsPage() {
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
-            {/* View Mode Toggle */}
-            <div className="flex rounded-md shadow-sm" role="group">
-              <button
-                type="button"
-                onClick={() => setViewMode('dashboard')}
-                className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
-                  viewMode === 'dashboard'
-                    ? 'bg-[#228B22] text-white border-[#228B22]'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-                title="Vista Dashboard"
-              >
-                <Squares2X2Icon className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewMode('table')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-md border-l-0 border ${
-                  viewMode === 'table'
-                    ? 'bg-[#228B22] text-white border-[#228B22]'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-                title="Vista Tabla"
-              >
-                <ViewColumnsIcon className="w-4 h-4" />
-              </button>
-            </div>
-
-            <Button
-              onClick={openCreateModal}
-              leftIcon={<PlusIcon className="w-5 h-5" />}
+          {/* View Mode Toggle */}
+          <div className="flex rounded-md shadow-sm" role="group">
+            <button
+              type="button"
+              onClick={() => setViewMode('dashboard')}
+              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
+                viewMode === 'dashboard'
+                  ? 'bg-primary-600 text-white border-primary-600'
+                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+              }`}
+              title="Vista Dashboard"
+              aria-label="Vista Dashboard"
             >
-              Crear Evento
-            </Button>
+              <Squares2X2Icon className="w-4 h-4" aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-2 text-sm font-medium rounded-r-md border-l-0 border ${
+                viewMode === 'table'
+                  ? 'bg-primary-600 text-white border-primary-600'
+                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+              }`}
+              title="Vista Tabla"
+              aria-label="Vista Tabla"
+            >
+              <ViewColumnsIcon className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
 
         {/* Approval Error Notification */}
         {approvalError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <XCircleIcon className="h-5 w-5 text-red-400" />
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error en la operación</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{approvalError.message}</p>
-                  {approvalError.details && (
-                    <p className="mt-1 text-xs text-red-600">{approvalError.details}</p>
-                  )}
-                </div>
-              </div>
-              <div className="ml-auto pl-3">
-                <button
-                  type="button"
-                  onClick={clearApprovalError}
-                  className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600"
-                >
-                  <XCircleIcon className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+          <div className="mb-6">
+            <ErrorAlert
+              message={approvalError.message}
+              title="Error en la operación"
+              details={approvalError.details}
+              onDismiss={clearApprovalError}
+            />
           </div>
         )}
 
         {/* Statistics */}
         {statistics && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-5 h-5 text-blue-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Eventos</p>
-                  <p className="text-2xl font-semibold text-gray-900">{statistics.total}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <ClockIcon className="w-5 h-5 text-yellow-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Pendientes</p>
-                  <p className="text-2xl font-semibold text-gray-900">{statistics.draft}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircleIcon className="w-5 h-5 text-green-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Próximos</p>
-                  <p className="text-2xl font-semibold text-gray-900">{statistics.upcoming}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <ShareIcon className="w-5 h-5 text-green-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Públicos</p>
-                  <p className="text-2xl font-semibold text-gray-900">{statistics.published}</p>
-                </div>
-              </div>
-            </div>
+          <div className="mb-8">
+            <StatsGrid columns={4}>
+              <StatsCard
+                label="Total Eventos"
+                value={statistics.total}
+                icon={<CheckCircleIcon className="w-5 h-5" />}
+                color="primary"
+              />
+              <StatsCard
+                label="Pendientes"
+                value={statistics.draft}
+                icon={<ClockIcon className="w-5 h-5" />}
+                color="warning"
+              />
+              <StatsCard
+                label="Próximos"
+                value={statistics.upcoming}
+                icon={<CheckCircleIcon className="w-5 h-5" />}
+                color="success"
+              />
+              <StatsCard
+                label="Públicos"
+                value={statistics.published}
+                icon={<ShareIcon className="w-5 h-5" />}
+                color="success"
+              />
+            </StatsGrid>
           </div>
         )}
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <XCircleIcon className="h-5 w-5 text-red-400" />
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
-                <div className="mt-4">
-                  <Button
-                    onClick={refreshData}
-                    variant="ghost"
-                    size="sm"
-                    className="text-sm text-red-800 underline hover:text-red-600"
-                  >
-                    Intentar de nuevo
-                  </Button>
-                </div>
-              </div>
-            </div>
+          <div className="mb-6">
+            <ErrorAlert
+              message={error}
+              onRetry={refreshData}
+            />
           </div>
         )}
 
@@ -425,7 +326,6 @@ export default function EventsPage() {
             events={events}
             isLoading={isLoading}
             onViewDetail={handleViewDetail}
-            onEditEvent={handleEditEvent}
             onDeleteEvent={deleteEvent}
             onApproveInternal={handleApproveInternal}
             onRequestPublicApproval={handleRequestPublicApproval}
@@ -453,14 +353,13 @@ export default function EventsPage() {
                 events={events}
                 isLoading={isLoading}
                 onSelectEvent={handleSelectEvent}
-                onEditEvent={handleEditEvent}
                 onDeleteEvent={deleteEvent}
                 onApprovalAction={handleApprovalAction}
               />
 
               {/* Pagination */}
               {pagination && (
-                <div className="border-t border-gray-200 px-6">
+                <div className="border-t border-neutral-200 px-6">
                   <Pagination
                     currentPage={pagination.current_page}
                     totalPages={pagination.last_page}
@@ -477,21 +376,6 @@ export default function EventsPage() {
         )}
 
         {/* Modals */}
-        <CreateEventForm
-          isOpen={isCreateModalOpen}
-          isLoading={isLoading}
-          onClose={closeAllModals}
-          onSubmit={createEvent}
-        />
-
-        <EditEventForm
-          isOpen={isEditModalOpen}
-          isLoading={isLoading}
-          event={currentEvent}
-          onClose={closeAllModals}
-          onSubmit={updateEvent}
-        />
-
         <ApprovalModalContainer
           isOpen={isApprovalModalOpen}
           event={currentEvent}
@@ -511,7 +395,6 @@ export default function EventsPage() {
           isOpen={isDetailModalOpen}
           event={selectedEvent}
           onClose={closeDetailModal}
-          onEdit={handleEditEvent}
           onDelete={deleteEvent}
           onApproveInternal={async (event) => {
             await handleApproveInternal(event);

@@ -12,8 +12,6 @@ use App\Models\EventStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class OrganizerController extends Controller
 {
@@ -23,134 +21,72 @@ class OrganizerController extends Controller
     ) {}
 
     /**
-     * Get paginated list of organization's events with filters
-     */
-    public function events(Request $request): JsonResponse
-    {
-        try {
-            $filters = [
-                'search' => $request->input('search'),
-                'status' => $request->input('status'),
-            ];
-
-            $perPage = $request->input('per_page', 10);
-            $events = $this->organizerService->getPaginatedEvents(
-                $request->user(),
-                $filters,
-                $perPage
-            );
-
-            return response()->json($events);
-        } catch (\RuntimeException $e) {
-            return response()->json(['error' => $e->getMessage()], 403);
-        }
-    }
-
-    /**
-     * Alias for events()
+     * Get paginated list of organization's events with filters.
      */
     public function index(Request $request): JsonResponse
     {
-        return $this->events($request);
+        $filters = [
+            'search' => $request->input('search'),
+            'status' => $request->input('status'),
+        ];
+
+        $events = $this->organizerService->getPaginatedEvents(
+            $request->user(),
+            $filters,
+            $request->input('per_page', 10)
+        );
+
+        return response()->json($events);
     }
 
     /**
-     * Get single event by ID
+     * Get single event by ID.
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        try {
-            $event = $this->organizerService->getEventById($id, $request->user());
-            return response()->json($event);
-        } catch (\RuntimeException $e) {
-            return response()->json(['error' => $e->getMessage()], 403);
-        }
+        $event = $this->organizerService->getEventById($id, $request->user());
+        return response()->json($event);
     }
 
     /**
-     * Create new event
+     * Create new event.
      */
     public function store(StoreOrganizerEventRequest $request): JsonResponse
     {
-        try {
-            $event = $this->organizerService->createEvent($request->validated(), $request->user());
+        $event = $this->organizerService->createEvent($request->validated(), $request->user());
 
-            return response()->json([
-                'message' => 'Event created successfully',
-                'event' => $event
-            ], 201);
-        } catch (\RuntimeException $e) {
-            return response()->json(['error' => $e->getMessage()], 403);
-        } catch (\Exception $e) {
-            Log::error('Failed to create event', [
-                'user_id' => $request->user()->id,
-                'error' => $e->getMessage()
-            ]);
-            return response()->json(['error' => 'Error creating event: ' . $e->getMessage()], 500);
-        }
+        return response()->json([
+            'message' => 'Event created successfully',
+            'event' => $event
+        ], 201);
     }
 
     /**
-     * Update existing event
+     * Update existing event.
      */
     public function update(UpdateOrganizerEventRequest $request, int $id): JsonResponse
     {
         $user = $request->user();
+        $event = $this->getOrganizerEvent($id, $user);
 
-        // Query by organization to enforce ownership (returns 404 if not found)
-        $event = Event::where('id', $id)
-            ->where('organization_id', $user->organization_id)
-            ->with('status')
-            ->firstOrFail();
+        $this->validateEditableStatus($event);
 
-        // Validate editable status with proper 403 response
-        $editableStatuses = ['draft', 'requires_changes'];
-        if (!in_array($event->status->status_code, $editableStatuses)) {
-            return response()->json([
-                'error' => 'Cannot edit event in current status',
-                'current_status' => $event->status->status_code,
-                'editable_statuses' => $editableStatuses
-            ], 403);
-        }
+        $updatedEvent = $this->organizerService->updateEvent($event, $request->validated(), $user);
 
-        try {
-            $updatedEvent = $this->organizerService->updateEvent($event, $request->validated(), $user);
-
-            return response()->json([
-                'message' => 'Event updated successfully',
-                'event' => $updatedEvent
-            ]);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\RuntimeException $e) {
-            return response()->json(['error' => $e->getMessage()], 403);
-        } catch (\Exception $e) {
-            Log::error('Failed to update event', [
-                'user_id' => $user->id,
-                'event_id' => $id,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
+        return response()->json([
+            'message' => 'Event updated successfully',
+            'event' => $updatedEvent
+        ]);
     }
 
     /**
-     * Delete event (draft status only)
+     * Delete event (draft status only).
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
+        $event = $this->getOrganizerEvent($id, $user);
 
-        // Query by organization to enforce ownership (returns 404 if not found)
-        $event = Event::where('id', $id)
-            ->where('organization_id', $user->organization_id)
-            ->with('status')
-            ->firstOrFail();
-
-        // Validate deletable status (only drafts) with proper 403 response
         if ($event->status->status_code !== 'draft') {
             return response()->json([
                 'error' => 'Can only delete draft events',
@@ -158,34 +94,19 @@ class OrganizerController extends Controller
             ], 403);
         }
 
-        try {
-            $this->organizerService->deleteEvent($event, $user);
-            return response()->json(['message' => 'Event deleted successfully']);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\RuntimeException $e) {
-            return response()->json(['error' => $e->getMessage()], 403);
-        } catch (\Exception $e) {
-            Log::error('Failed to delete event', [
-                'user_id' => $user->id,
-                'event_id' => $id,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
+        $this->organizerService->deleteEvent($event, $user);
+
+        return response()->json(['message' => 'Event deleted successfully']);
     }
 
     /**
-     * Get dashboard statistics
+     * Get dashboard statistics.
      */
     public function dashboardStats(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        if (!$user || !$user->organization_id) {
+        if (!$user->organization_id) {
             return response()->json(['error' => 'No organization assigned'], 403);
         }
 
@@ -195,32 +116,19 @@ class OrganizerController extends Controller
     }
 
     /**
-     * Submit event for internal review
-     *
-     * Validates all internal required fields and transitions
-     * from draft/requires_changes to pending_internal_approval
+     * Submit event for internal review.
      */
     public function submit(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
+        $event = $this->getOrganizerEvent($id, $user, ['status', 'locations']);
 
-        // Query by organization to enforce ownership (returns 404 if not found)
-        $event = Event::where('id', $id)
-            ->where('organization_id', $user->organization_id)
-            ->with(['status', 'locations'])
-            ->firstOrFail();
-
-        // Validate submittable status
         $submittableStatuses = ['draft', 'requires_changes'];
         if (!in_array($event->status->status_code, $submittableStatuses)) {
-            return response()->json([
-                'error' => 'Only draft events can be submitted'
-            ], 403);
+            return response()->json(['error' => 'Only draft events can be submitted'], 403);
         }
 
-        // Validate internal required fields
         $validationResult = $this->validationService->validateForInternalApproval($event);
-
         if (!$validationResult->isValid()) {
             return response()->json([
                 'error' => 'Event is missing required fields',
@@ -228,13 +136,10 @@ class OrganizerController extends Controller
             ], 422);
         }
 
-        // Update status to pending_internal_approval
         $pendingStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
 
         return DB::transaction(function () use ($event, $pendingStatus) {
-            $event->status_id = $pendingStatus->id;
-            $event->save();
-            $event->refresh();
+            $event->update(['status_id' => $pendingStatus->id]);
             $event->load('status');
 
             return response()->json([
@@ -243,5 +148,32 @@ class OrganizerController extends Controller
                 'event' => $event
             ]);
         });
+    }
+
+    /**
+     * Get event belonging to user's organization.
+     */
+    private function getOrganizerEvent(int $id, $user, array $with = ['status']): Event
+    {
+        return Event::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->with($with)
+            ->firstOrFail();
+    }
+
+    /**
+     * Validate event is in editable status.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    private function validateEditableStatus(Event $event): void
+    {
+        $editableStatuses = ['draft', 'requires_changes'];
+        if (!in_array($event->status->status_code, $editableStatuses)) {
+            abort(response()->json([
+                'error' => 'Cannot edit event in current status',
+                'current_status' => $event->status->status_code,
+                'editable_statuses' => $editableStatuses
+            ], 403));
+        }
     }
 }

@@ -21,9 +21,12 @@ const createMockAuth = (overrides = {}) => ({
   isAuthenticated: false,
   isLoading: false,
   user: null,
+  token: null,
   login: jest.fn(),
   logout: jest.fn(),
   error: null,
+  clearError: jest.fn(),
+  refreshUser: jest.fn(),
   hasRole: jest.fn(),
   canAccess: jest.fn(),
   getUserPermissions: jest.fn().mockReturnValue([]),
@@ -42,7 +45,12 @@ const createMockLoginForm = (overrides = {}) => ({
   error: null,
   isLoading: false,
   isValid: false,
+  isDirty: false,
   updateField: jest.fn(),
+  setError: jest.fn(),
+  submit: jest.fn(),
+  reset: jest.fn(),
+  validate: jest.fn().mockReturnValue(false),
   handleSubmit: jest.fn((e) => e?.preventDefault()),
   ...overrides,
 });
@@ -62,8 +70,8 @@ describe('LoginPage', () => {
     it('should render login form with all elements', () => {
       render(<LoginPage />);
 
-      expect(screen.getByText('Inicia sesión en CalendApp')).toBeInTheDocument();
-      expect(screen.getByText('Accede a tu panel de administración')).toBeInTheDocument();
+      expect(screen.getByText('Eventos Tucumán')).toBeInTheDocument();
+      expect(screen.getByText('Plataforma de eventos turísticos y culturales')).toBeInTheDocument();
       expect(screen.getByText('Correo electrónico')).toBeInTheDocument();
       expect(screen.getByText('Contraseña')).toBeInTheDocument();
       expect(getEmailInput()).toBeInTheDocument();
@@ -91,12 +99,6 @@ describe('LoginPage', () => {
       expect(forgotLink).toHaveAttribute('href', '/forgot-password');
     });
 
-    it('should render demo credentials info box', () => {
-      render(<LoginPage />);
-
-      expect(screen.getByText('Credenciales de Demo')).toBeInTheDocument();
-      expect(screen.getByText(/admin@ejemplo.com/)).toBeInTheDocument();
-    });
   });
 
   describe('interactions', () => {
@@ -190,7 +192,7 @@ describe('LoginPage', () => {
       render(<LoginPage />);
 
       expect(screen.getByText('Redirigiendo...')).toBeInTheDocument();
-      expect(screen.queryByText('Inicia sesión en CalendApp')).not.toBeInTheDocument();
+      expect(screen.queryByText('Eventos Tucumán')).not.toBeInTheDocument();
     });
   });
 

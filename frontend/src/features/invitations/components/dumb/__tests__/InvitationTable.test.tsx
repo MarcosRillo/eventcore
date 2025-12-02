@@ -1,13 +1,72 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import InvitationTable from '../InvitationTable'
-import { Invitation } from '../../../types/invitation.types'
+import { render, screen, fireEvent } from '@testing-library/react';
+import InvitationTable from '../InvitationTable';
+import { Invitation } from '../../../types/invitation.types';
 
-// Mock lucide-react icons
-jest.mock('lucide-react', () => ({
-  RefreshCw: ({ className }: { className?: string }) => <span data-testid="refresh-icon" className={className} />,
-  Trash2: ({ className }: { className?: string }) => <span data-testid="trash-icon" className={className} />,
-  Mail: () => <span data-testid="mail-icon" />,
-}))
+// Mock GenericTable to test InvitationTable behavior
+jest.mock('@/shared/components/tables', () => ({
+  GenericTable: jest.fn(({ items, columns, actions, isLoading, emptyMessage, testId }) => {
+    if (isLoading) {
+      return <div data-testid={testId} className="animate-pulse">Loading...</div>;
+    }
+
+    if (items.length === 0) {
+      return <div data-testid="table-empty">{emptyMessage}</div>;
+    }
+
+    return (
+      <div data-testid={testId}>
+        <table>
+          <thead>
+            <tr>
+              {columns.map((col: { key: string; label: string }) => (
+                <th key={col.key}>{col.label}</th>
+              ))}
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item: Invitation) => (
+              <tr key={item.id} data-testid={`table-row-${item.id}`}>
+                {columns.map((col: { key: string; render?: (item: Invitation) => React.ReactNode }) => (
+                  <td key={col.key}>
+                    {col.render ? col.render(item) : String(item[col.key as keyof Invitation])}
+                  </td>
+                ))}
+                <td>
+                  {actions.map((action: { key: string; label: string; onClick: (item: Invitation) => void }) => (
+                    <button
+                      key={action.key}
+                      onClick={() => action.onClick(item)}
+                      aria-label={action.label}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }),
+  TableColumnConfig: {},
+  TableActionConfig: {},
+  ConfirmDialogData: {},
+}));
+
+// Mock InvitationStatusBadge
+jest.mock('../InvitationStatusBadge', () => ({
+  __esModule: true,
+  default: ({ invitation }: { invitation: Invitation }) => {
+    const isExpired = new Date(invitation.expires_at) < new Date();
+    return (
+      <span data-testid="invitation-status-badge">
+        {isExpired ? 'Expirada' : 'Pendiente'}
+      </span>
+    );
+  },
+}));
 
 describe('InvitationTable', () => {
   const mockInvitation: Invitation = {
@@ -17,7 +76,7 @@ describe('InvitationTable', () => {
     invited_by: 'Admin User',
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
     created_at: new Date().toISOString(),
-  }
+  };
 
   const expiredInvitation: Invitation = {
     id: 2,
@@ -26,239 +85,150 @@ describe('InvitationTable', () => {
     invited_by: 'Admin User',
     expires_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Yesterday
     created_at: new Date().toISOString(),
-  }
+  };
 
-  const mockOnResend = jest.fn()
-  const mockOnCancel = jest.fn()
+  const mockOnResend = jest.fn();
+  const mockOnCancel = jest.fn();
+
+  const defaultProps = {
+    invitations: [mockInvitation],
+    loading: false,
+    onResend: mockOnResend,
+    onCancel: mockOnCancel,
+  };
 
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   describe('rendering', () => {
     it('should render table with invitations', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
+      render(<InvitationTable {...defaultProps} />);
 
-      expect(screen.getByTestId('invitation-table')).toBeInTheDocument()
-      expect(screen.getByText('test@example.com')).toBeInTheDocument()
-      expect(screen.getByText('Entity Administrator')).toBeInTheDocument()
-      expect(screen.getByText('Admin User')).toBeInTheDocument()
-    })
+      expect(screen.getByTestId('invitation-table')).toBeInTheDocument();
+      expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Entity Administrator')).toBeInTheDocument();
+      expect(screen.getByText('Admin User')).toBeInTheDocument();
+    });
 
     it('should render empty state when no invitations', () => {
-      render(
-        <InvitationTable
-          invitations={[]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
+      render(<InvitationTable {...defaultProps} invitations={[]} />);
 
-      expect(screen.getByTestId('empty-state')).toBeInTheDocument()
-      expect(screen.getByText('No hay invitaciones')).toBeInTheDocument()
-    })
+      expect(screen.getByText(/No hay invitaciones/)).toBeInTheDocument();
+    });
 
     it('should render multiple invitations', () => {
       render(
         <InvitationTable
+          {...defaultProps}
           invitations={[mockInvitation, expiredInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
         />
-      )
+      );
 
-      expect(screen.getByTestId('invitation-row-1')).toBeInTheDocument()
-      expect(screen.getByTestId('invitation-row-2')).toBeInTheDocument()
-    })
+      expect(screen.getByTestId('table-row-1')).toBeInTheDocument();
+      expect(screen.getByTestId('table-row-2')).toBeInTheDocument();
+    });
 
     it('should show status badges', () => {
       render(
         <InvitationTable
+          {...defaultProps}
           invitations={[mockInvitation, expiredInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
         />
-      )
+      );
 
-      const badges = screen.getAllByTestId('invitation-status-badge')
-      expect(badges).toHaveLength(2)
-    })
-  })
+      const badges = screen.getAllByTestId('invitation-status-badge');
+      expect(badges).toHaveLength(2);
+    });
+  });
+
+  describe('loading state', () => {
+    it('should render loading state', () => {
+      render(<InvitationTable {...defaultProps} loading={true} />);
+
+      const table = screen.getByTestId('invitation-table');
+      expect(table).toHaveClass('animate-pulse');
+    });
+
+    it('should not render invitations when loading', () => {
+      render(<InvitationTable {...defaultProps} loading={true} />);
+
+      expect(screen.queryByText('test@example.com')).not.toBeInTheDocument();
+    });
+  });
 
   describe('actions', () => {
-    it('should call onResend when clicking resend button', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
+    it('should call onResend with invitation when clicking resend button', () => {
+      render(<InvitationTable {...defaultProps} />);
 
-      const resendButton = screen.getByTestId('resend-button-1')
-      fireEvent.click(resendButton)
+      const resendButton = screen.getByRole('button', { name: 'Reenviar' });
+      fireEvent.click(resendButton);
 
-      expect(mockOnResend).toHaveBeenCalledWith(1)
-      expect(mockOnResend).toHaveBeenCalledTimes(1)
-    })
+      expect(mockOnResend).toHaveBeenCalledWith(mockInvitation);
+      expect(mockOnResend).toHaveBeenCalledTimes(1);
+    });
 
-    it('should call onCancel when clicking cancel button', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
+    it('should call onCancel with invitation when clicking cancel button', () => {
+      render(<InvitationTable {...defaultProps} />);
 
-      const cancelButton = screen.getByTestId('cancel-button-1')
-      fireEvent.click(cancelButton)
+      const cancelButton = screen.getByRole('button', { name: 'Revocar' });
+      fireEvent.click(cancelButton);
 
-      expect(mockOnCancel).toHaveBeenCalledWith(1)
-      expect(mockOnCancel).toHaveBeenCalledTimes(1)
-    })
-  })
+      expect(mockOnCancel).toHaveBeenCalledWith(mockInvitation);
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
 
-  describe('loading states', () => {
-    it('should disable buttons when resending', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={1}
-          cancellingId={null}
-        />
-      )
+    it('should render both action buttons', () => {
+      render(<InvitationTable {...defaultProps} />);
 
-      const resendButton = screen.getByTestId('resend-button-1')
-      const cancelButton = screen.getByTestId('cancel-button-1')
+      expect(screen.getByRole('button', { name: 'Reenviar' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Revocar' })).toBeInTheDocument();
+    });
+  });
 
-      expect(resendButton).toBeDisabled()
-      expect(cancelButton).toBeDisabled()
-      expect(screen.getByText('Reenviando...')).toBeInTheDocument()
-    })
-
-    it('should disable buttons when cancelling', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={1}
-        />
-      )
-
-      const resendButton = screen.getByTestId('resend-button-1')
-      const cancelButton = screen.getByTestId('cancel-button-1')
-
-      expect(resendButton).toBeDisabled()
-      expect(cancelButton).toBeDisabled()
-      expect(screen.getByText('Revocando...')).toBeInTheDocument()
-    })
-
-    it('should not disable other rows when one is loading', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation, expiredInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={1}
-          cancellingId={null}
-        />
-      )
-
-      const resendButton2 = screen.getByTestId('resend-button-2')
-      const cancelButton2 = screen.getByTestId('cancel-button-2')
-
-      expect(resendButton2).not.toBeDisabled()
-      expect(cancelButton2).not.toBeDisabled()
-    })
-  })
-
-  describe('expired invitations', () => {
-    it('should highlight resend button for expired invitations', () => {
-      render(
-        <InvitationTable
-          invitations={[expiredInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
-
-      const resendButton = screen.getByTestId('resend-button-2')
-      // Expired invitation should have the prominent blue button
-      expect(resendButton).toHaveClass('bg-blue-600')
-    })
-
+  describe('invitation status', () => {
     it('should show pending status for non-expired invitations', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
+      render(<InvitationTable {...defaultProps} />);
 
-      expect(screen.getByText('Pendiente')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Pendiente')).toBeInTheDocument();
+    });
 
     it('should show expired status for expired invitations', () => {
       render(
         <InvitationTable
+          {...defaultProps}
           invitations={[expiredInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
         />
-      )
+      );
 
-      expect(screen.getByText('Expirada')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('Expirada')).toBeInTheDocument();
+    });
+  });
 
-  describe('table structure', () => {
+  describe('column configuration', () => {
     it('should have correct column headers', () => {
-      render(
-        <InvitationTable
-          invitations={[mockInvitation]}
-          onResend={mockOnResend}
-          onCancel={mockOnCancel}
-          resendingId={null}
-          cancellingId={null}
-        />
-      )
+      render(<InvitationTable {...defaultProps} />);
 
-      expect(screen.getByText('Email')).toBeInTheDocument()
-      expect(screen.getByText('Rol')).toBeInTheDocument()
-      expect(screen.getByText('Invitado por')).toBeInTheDocument()
-      expect(screen.getByText('Estado')).toBeInTheDocument()
-      expect(screen.getByText('Expira')).toBeInTheDocument()
-      expect(screen.getByText('Acciones')).toBeInTheDocument()
-    })
-  })
-})
+      expect(screen.getByText('Email')).toBeInTheDocument();
+      expect(screen.getByText('Rol')).toBeInTheDocument();
+      expect(screen.getByText('Invitado por')).toBeInTheDocument();
+      expect(screen.getByText('Estado')).toBeInTheDocument();
+      expect(screen.getByText('Expira')).toBeInTheDocument();
+      expect(screen.getByText('Acciones')).toBeInTheDocument();
+    });
+  });
+
+  describe('GenericTable props', () => {
+    it('should pass testId to GenericTable', () => {
+      render(<InvitationTable {...defaultProps} />);
+
+      expect(screen.getByTestId('invitation-table')).toBeInTheDocument();
+    });
+
+    it('should pass correct empty message', () => {
+      render(<InvitationTable {...defaultProps} invitations={[]} />);
+
+      expect(screen.getByText(/No hay invitaciones/)).toBeInTheDocument();
+    });
+  });
+});

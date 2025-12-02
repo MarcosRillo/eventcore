@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 
 /**
  * Store Event Request
@@ -59,10 +58,10 @@ class StoreEventRequest extends FormRequest
                 'integer',
                 Rule::exists('event_statuses', 'id'),
             ],
-            'type_id' => [
+            'format_id' => [
                 'required',
                 'integer',
-                Rule::exists('event_types', 'id'),
+                Rule::exists('event_formats', 'id'),
             ],
             'category_id' => [
                 'nullable',
@@ -108,6 +107,18 @@ class StoreEventRequest extends FormRequest
 
             // Basic information
             'edition_number' => 'nullable|string|max:100',
+
+            // Event Type and Subtype (hierarchical categorization - Dec 2, 2025)
+            'event_type_id' => [
+                'required',
+                'integer',
+                Rule::exists('event_types', 'id'),
+            ],
+            'event_subtype_id' => [
+                'required',
+                'integer',
+                Rule::exists('event_subtypes', 'id'),
+            ],
 
             // Normalized FKs (Nov 30, 2025)
             'subtype_id' => 'nullable|exists:event_subtypes,id',
@@ -180,8 +191,8 @@ class StoreEventRequest extends FormRequest
             'end_date.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
             'status_id.required' => 'El estado del evento es obligatorio.',
             'status_id.exists' => 'El estado seleccionado no es válido.',
-            'type_id.required' => 'El tipo de evento es obligatorio.',
-            'type_id.exists' => 'El tipo de evento seleccionado no es válido.',
+            'format_id.required' => 'El formato de evento es obligatorio.',
+            'format_id.exists' => 'El formato de evento seleccionado no es válido.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
             'location_ids.required' => 'Debe seleccionar al menos una ubicación.',
             'location_ids.array' => 'Las ubicaciones deben ser un array.',

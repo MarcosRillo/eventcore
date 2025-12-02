@@ -5,13 +5,13 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Organization;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class RoleTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

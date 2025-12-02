@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 
 /**
  * Update Event Request
@@ -62,11 +61,11 @@ class UpdateEventRequest extends FormRequest
                 'integer',
                 Rule::exists('event_statuses', 'id'),
             ],
-            'type_id' => [
+            'format_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                Rule::exists('event_types', 'id'),
+                Rule::exists('event_formats', 'id'),
             ],
             'category_id' => [
                 'nullable',
@@ -111,6 +110,20 @@ class UpdateEventRequest extends FormRequest
 
             // Basic information
             'edition_number' => 'nullable|string|max:100',
+
+            // Event Type and Subtype (hierarchical categorization - Dec 2, 2025)
+            'event_type_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                Rule::exists('event_types', 'id'),
+            ],
+            'event_subtype_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                Rule::exists('event_subtypes', 'id'),
+            ],
 
             // Normalized FKs (Nov 30, 2025)
             'subtype_id' => 'nullable|exists:event_subtypes,id',
@@ -169,7 +182,7 @@ class UpdateEventRequest extends FormRequest
             'end_date.required' => 'La fecha de fin es obligatoria.',
             'end_date.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
             'status_id.exists' => 'El estado seleccionado no es válido.',
-            'type_id.exists' => 'El tipo de evento seleccionado no es válido.',
+            'format_id.exists' => 'El formato de evento seleccionado no es válido.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
             'location_ids.array' => 'Las ubicaciones deben ser un array.',
             'location_ids.max' => 'No puede seleccionar más de 10 ubicaciones.',

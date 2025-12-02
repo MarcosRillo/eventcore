@@ -22,6 +22,7 @@ const createMockForgotPassword = (overrides = {}) => ({
   success: false,
   isValid: false,
   handleSubmit: jest.fn((e) => e?.preventDefault()),
+  reset: jest.fn(),
   ...overrides,
 });
 

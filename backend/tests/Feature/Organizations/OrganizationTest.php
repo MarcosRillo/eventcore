@@ -7,11 +7,11 @@ use App\Models\Organization;
 use App\Models\OrganizationStatus;
 use App\Models\User;
 use App\Models\UserRole;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OrganizationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

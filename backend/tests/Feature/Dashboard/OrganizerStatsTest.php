@@ -6,13 +6,13 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Location;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OrganizerStatsTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

@@ -1,7 +1,8 @@
 'use client'
 
 import { EventFormData, EventFormErrors, AsynchronousDate } from '@/features/organizer/types/event.types'
-import { useState } from 'react'
+import { EventType, EventSubtype } from '@/types/eventType.types'
+import { AsyncSearchableMultiSelect, SelectOption } from '@/shared/components/form'
 
 interface OrganizerEventFormProps {
   formData: EventFormData
@@ -9,11 +10,19 @@ interface OrganizerEventFormProps {
   loading: boolean
   initialLoading: boolean
   categories: { id: number; name: string }[]
-  locations: { id: number; name: string }[]
+  eventTypes: EventType[]
+  eventSubtypes: EventSubtype[]
+  onSearchLocations: (query: string) => Promise<SelectOption[]>
+  selectedLocations: SelectOption[]
   isEditMode: boolean
+  newAsyncDate: { date: string; notes: string }
+  setNewAsyncDate: (value: { date: string; notes: string }) => void
   handleChange: (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => void
   handleSubmit: (e: React.FormEvent) => void
   handleCancel: () => void
+  addAsynchronousDate: () => void
+  removeAsynchronousDate: (index: number) => void
+  handleCustomLocationToggle: (checked: boolean) => void
 }
 
 export const OrganizerEventForm = ({
@@ -22,44 +31,20 @@ export const OrganizerEventForm = ({
   loading,
   initialLoading,
   categories,
-  locations,
+  eventTypes,
+  eventSubtypes,
+  onSearchLocations,
+  selectedLocations,
   isEditMode,
+  newAsyncDate,
+  setNewAsyncDate,
   handleChange,
   handleSubmit,
-  handleCancel
+  handleCancel,
+  addAsynchronousDate,
+  removeAsynchronousDate,
+  handleCustomLocationToggle
 }: OrganizerEventFormProps) => {
-  // Estado local para manejar fechas asincrónicas
-  const [newAsyncDate, setNewAsyncDate] = useState({ date: '', notes: '' })
-
-  const addAsynchronousDate = () => {
-    if (!newAsyncDate.date) {
-      return
-    }
-
-    const newDate: AsynchronousDate = {
-      date: newAsyncDate.date,
-      notes: newAsyncDate.notes || undefined,
-    }
-
-    handleChange('async_dates', [...formData.async_dates, newDate])
-    setNewAsyncDate({ date: '', notes: '' })
-  }
-
-  const removeAsynchronousDate = (index: number) => {
-    handleChange(
-      'async_dates',
-      formData.async_dates.filter((_, i) => i !== index)
-    )
-  }
-
-  const handleLocationChange = (locationId: number, checked: boolean) => {
-    if (checked) {
-      handleChange('location_ids', [...formData.location_ids, locationId])
-    } else {
-      handleChange('location_ids', formData.location_ids.filter(id => id !== locationId))
-    }
-  }
-
   if (initialLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -71,7 +56,7 @@ export const OrganizerEventForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {errors.general && (
-        <div className="bg-red-50 border-l-4 border-red-600 text-red-800 px-4 py-3 rounded-sm">
+        <div className="bg-error-50 border-l-4 border-error-600 text-error-800 px-4 py-3 rounded-sm" role="alert">
           <p className="font-medium">{errors.general}</p>
         </div>
       )}
@@ -94,11 +79,14 @@ export const OrganizerEventForm = ({
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
               disabled={loading}
+              aria-required="true"
+              aria-invalid={!!errors.title}
+              aria-describedby={errors.title ? 'title-error' : undefined}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
               placeholder="Ej: Congreso Internacional de Turismo 2025"
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.title}</p>
+              <p id="title-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.title}</p>
             )}
           </div>
 
@@ -113,33 +101,94 @@ export const OrganizerEventForm = ({
               value={formData.edition_number}
               onChange={(e) => handleChange('edition_number', e.target.value)}
               disabled={loading}
+              aria-invalid={!!errors.edition_number}
+              aria-describedby={errors.edition_number ? 'edition-number-error' : undefined}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
               placeholder="Ej: 10ma Edición"
             />
             {errors.edition_number && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.edition_number}</p>
+              <p id="edition-number-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.edition_number}</p>
             )}
           </div>
 
-          {/* Categoría */}
+          {/* Tipo de Evento (Hierarchical - Dec 2, 2025) */}
+          <div>
+            <label htmlFor="event_type_id" className="block text-sm font-medium text-neutral-600">
+              Tipo de Evento *
+            </label>
+            <select
+              id="event_type_id"
+              value={formData.event_type_id || ''}
+              onChange={(e) => {
+                const newTypeId = e.target.value ? parseInt(e.target.value) : null
+                handleChange('event_type_id', newTypeId)
+                // Reset subtype when type changes
+                handleChange('event_subtype_id', null)
+              }}
+              disabled={loading}
+              aria-required="true"
+              aria-invalid={!!errors.event_type_id}
+              aria-describedby={errors.event_type_id ? 'event-type-error' : undefined}
+              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <option value="">Seleccionar tipo de evento</option>
+              {Array.isArray(eventTypes) && eventTypes.map(type => (
+                <option key={type.id} value={type.id}>{type.name}</option>
+              ))}
+            </select>
+            {errors.event_type_id && (
+              <p id="event-type-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.event_type_id}</p>
+            )}
+          </div>
+
+          {/* Subtipo de Evento (Hierarchical - Dec 2, 2025) */}
+          <div>
+            <label htmlFor="event_subtype_id" className="block text-sm font-medium text-neutral-600">
+              Subtipo de Evento *
+            </label>
+            <select
+              id="event_subtype_id"
+              value={formData.event_subtype_id || ''}
+              onChange={(e) => handleChange('event_subtype_id', e.target.value ? parseInt(e.target.value) : null)}
+              disabled={loading || !formData.event_type_id}
+              aria-required="true"
+              aria-invalid={!!errors.event_subtype_id}
+              aria-describedby={errors.event_subtype_id ? 'event-subtype-error' : undefined}
+              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <option value="">
+                {!formData.event_type_id ? 'Primero selecciona un tipo' : 'Seleccionar subtipo'}
+              </option>
+              {Array.isArray(eventSubtypes) && eventSubtypes.map(subtype => (
+                <option key={subtype.id} value={subtype.id}>{subtype.name}</option>
+              ))}
+            </select>
+            {errors.event_subtype_id && (
+              <p id="event-subtype-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.event_subtype_id}</p>
+            )}
+          </div>
+
+          {/* Categoría (ahora opcional) */}
           <div>
             <label htmlFor="category_id" className="block text-sm font-medium text-neutral-600">
-              Categoría *
+              Categoría
             </label>
             <select
               id="category_id"
               value={formData.category_id || ''}
               onChange={(e) => handleChange('category_id', e.target.value ? parseInt(e.target.value) : null)}
               disabled={loading}
+              aria-invalid={!!errors.category_id}
+              aria-describedby={errors.category_id ? 'category-error' : undefined}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
             >
-              <option value="">Seleccionar categoría</option>
+              <option value="">Seleccionar categoría (opcional)</option>
               {Array.isArray(categories) && categories.map(category => (
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
             </select>
             {errors.category_id && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.category_id}</p>
+              <p id="category-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.category_id}</p>
             )}
           </div>
 
@@ -154,11 +203,14 @@ export const OrganizerEventForm = ({
               onChange={(e) => handleChange('description', e.target.value)}
               disabled={loading}
               rows={4}
+              aria-required="true"
+              aria-invalid={!!errors.description}
+              aria-describedby={errors.description ? 'description-error' : undefined}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
               placeholder="Descripción detallada del evento..."
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.description}</p>
+              <p id="description-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.description}</p>
             )}
           </div>
         </div>
@@ -171,48 +223,75 @@ export const OrganizerEventForm = ({
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Ubicaciones (selección múltiple) */}
+          {/* Ubicaciones (selección múltiple con búsqueda async) */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Ubicaciones *
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {Array.isArray(locations) && locations.map(location => (
-                <div key={location.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`location_${location.id}`}
-                    checked={formData.location_ids.includes(location.id)}
-                    onChange={(e) => handleLocationChange(location.id, e.target.checked)}
-                    disabled={loading}
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-                  />
-                  <label htmlFor={`location_${location.id}`} className="ml-2 block text-sm text-neutral-900">
-                    {location.name}
-                  </label>
-                </div>
-              ))}
-            </div>
-            {errors.location_ids && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.location_ids}</p>
-            )}
-          </div>
-
-          {/* Maps URL */}
-          <div className="md:col-span-2">
-            <label htmlFor="maps_url" className="block text-sm font-medium text-neutral-600">
-              Maps (URL o Embed)
-            </label>
-            <input
-              type="text"
-              id="maps_url"
-              value={formData.maps_url}
-              onChange={(e) => handleChange('maps_url', e.target.value)}
+            <AsyncSearchableMultiSelect
+              label="Ubicaciones"
+              onSearch={onSearchLocations}
+              selected={formData.location_ids}
+              selectedOptions={selectedLocations}
+              onChange={(ids) => handleChange('location_ids', ids)}
+              placeholder="Escribe para buscar ubicación..."
+              error={errors.location_ids}
               disabled={loading}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="Ej: https://maps.google.com/... o código embed"
+              required={!formData.has_custom_location}
             />
           </div>
+
+          {/* Checkbox "Otro" - Ubicación Personalizada */}
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.has_custom_location}
+                onChange={(e) => handleCustomLocationToggle(e.target.checked)}
+                disabled={loading}
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+              />
+              <span className="text-sm text-neutral-700">Agregar ubicación personalizada (Otro)</span>
+            </label>
+          </div>
+
+          {/* Campos de ubicación personalizada - solo visibles cuando has_custom_location es true */}
+          {formData.has_custom_location && (
+            <>
+              <div>
+                <label htmlFor="custom_location_name" className="block text-sm font-medium text-neutral-600">
+                  Nombre del Lugar *
+                </label>
+                <input
+                  type="text"
+                  id="custom_location_name"
+                  value={formData.custom_location_name}
+                  onChange={(e) => handleChange('custom_location_name', e.target.value)}
+                  disabled={loading}
+                  aria-required="true"
+                  aria-invalid={!!errors.custom_location_name}
+                  aria-describedby={errors.custom_location_name ? 'custom-location-error' : undefined}
+                  className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  placeholder="Ej: Salón de Eventos El Jardín"
+                />
+                {errors.custom_location_name && (
+                  <p id="custom-location-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.custom_location_name}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="maps_url" className="block text-sm font-medium text-neutral-600">
+                  URL de Google Maps
+                </label>
+                <input
+                  type="text"
+                  id="maps_url"
+                  value={formData.maps_url}
+                  onChange={(e) => handleChange('maps_url', e.target.value)}
+                  disabled={loading}
+                  className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  placeholder="https://maps.google.com/..."
+                />
+              </div>
+            </>
+          )}
 
           {/* Última Sede */}
           <div>
@@ -266,10 +345,13 @@ export const OrganizerEventForm = ({
               value={formData.start_date}
               onChange={(e) => handleChange('start_date', e.target.value)}
               disabled={loading}
+              aria-required="true"
+              aria-invalid={!!errors.start_date}
+              aria-describedby={errors.start_date ? 'start-date-error' : undefined}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
             />
             {errors.start_date && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.start_date}</p>
+              <p id="start-date-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.start_date}</p>
             )}
           </div>
 
@@ -284,10 +366,12 @@ export const OrganizerEventForm = ({
               value={formData.end_date}
               onChange={(e) => handleChange('end_date', e.target.value)}
               disabled={loading}
+              aria-invalid={!!errors.end_date}
+              aria-describedby={errors.end_date ? 'end-date-error' : undefined}
               className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
             />
             {errors.end_date && (
-              <p className="mt-1 text-sm text-red-600 font-medium">{errors.end_date}</p>
+              <p id="end-date-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.end_date}</p>
             )}
           </div>
         </div>
@@ -322,7 +406,7 @@ export const OrganizerEventForm = ({
                     type="button"
                     onClick={() => removeAsynchronousDate(index)}
                     disabled={loading}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors disabled:opacity-50"
+                    className="text-error-600 hover:text-error-700 text-sm font-medium transition-colors disabled:opacity-50"
                   >
                     Eliminar
                   </button>
@@ -337,7 +421,7 @@ export const OrganizerEventForm = ({
               <input
                 type="date"
                 value={newAsyncDate.date}
-                onChange={(e) => setNewAsyncDate(prev => ({ ...prev, date: e.target.value }))}
+                onChange={(e) => setNewAsyncDate({ ...newAsyncDate, date: e.target.value })}
                 disabled={loading}
                 placeholder="Fecha"
                 className="block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
@@ -347,7 +431,7 @@ export const OrganizerEventForm = ({
               <input
                 type="text"
                 value={newAsyncDate.notes}
-                onChange={(e) => setNewAsyncDate(prev => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) => setNewAsyncDate({ ...newAsyncDate, notes: e.target.value })}
                 disabled={loading}
                 placeholder="Notas (opcional)"
                 className="block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"

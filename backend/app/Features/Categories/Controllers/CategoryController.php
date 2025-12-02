@@ -5,6 +5,7 @@ namespace App\Features\Categories\Controllers;
 use App\Http\Controllers\Controller;
 use App\Features\Categories\Requests\StoreCategoryRequest;
 use App\Features\Categories\Requests\UpdateCategoryRequest;
+use App\Features\Categories\Requests\IndexCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Features\Categories\Services\CategoryService;
@@ -28,9 +29,9 @@ class CategoryController extends Controller
     /**
      * Display a listing of categories for the authenticated user's entity.
      */
-    public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index(IndexCategoriesRequest $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
-        $filters = $request->only(['search', 'active', 'per_page']);
+        $filters = $request->validated();
         $categories = $this->categoryService->getAllCategories($filters);
 
         return CategoryResource::collection($categories);

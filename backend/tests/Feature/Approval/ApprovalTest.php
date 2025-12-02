@@ -4,13 +4,13 @@ namespace Tests\Feature\Approval;
 
 use App\Models\Event;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ApprovalTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -104,12 +104,13 @@ class ApprovalTest extends TestCase
     }
 
     #[Test]
-    public function test_can_publish_approved_event(): void
+    public function test_can_publish_event_pending_public_approval(): void
     {
         $this->authenticateUser();
 
+        // Must start from pending_public_approval state (valid transition to published)
         $event = Event::factory()->create([
-            'status_id' => $this->getStatusId('approved_internal')
+            'status_id' => $this->getStatusId('pending_public_approval')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/publish", [
@@ -128,8 +129,9 @@ class ApprovalTest extends TestCase
     {
         $this->authenticateUser();
 
+        // Must start from approved_internal state (valid transition path)
         $event = Event::factory()->create([
-            'status_id' => $this->getStatusId('draft')
+            'status_id' => $this->getStatusId('approved_internal')
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/request-public");

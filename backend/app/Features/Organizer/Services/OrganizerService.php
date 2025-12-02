@@ -36,13 +36,13 @@ class OrganizerService
             throw new \RuntimeException('Draft status not found in database');
         }
 
-        $typeId = $data['type_id'] ?? DB::table('event_types')->first()?->id;
-        if (!$typeId) {
-            throw new \RuntimeException('No event types found in database');
+        $formatId = $data['format_id'] ?? DB::table('event_formats')->first()?->id;
+        if (!$formatId) {
+            throw new \RuntimeException('No event formats found in database');
         }
 
-        return DB::transaction(function () use ($data, $user, $draftStatus, $typeId) {
-            $eventData = $this->prepareEventData($data, $user, $draftStatus->id, $typeId);
+        return DB::transaction(function () use ($data, $user, $draftStatus, $formatId) {
+            $eventData = $this->prepareEventData($data, $user, $draftStatus->id, $formatId);
             $event = Event::create($eventData);
 
             if (!empty($data['location_ids']) && is_array($data['location_ids'])) {
@@ -60,7 +60,7 @@ class OrganizerService
                 'organization_id' => $user->organization_id,
             ]);
 
-            return $event->load(['category', 'locations', 'status', 'type', 'asyncDates']);
+            return $event->load(['category', 'locations', 'status', 'format', 'asyncDates']);
         });
     }
 
@@ -90,7 +90,7 @@ class OrganizerService
                 'organization_id' => $user->organization_id,
             ]);
 
-            return $event->fresh(['category', 'locations', 'status', 'type', 'asyncDates']);
+            return $event->fresh(['category', 'locations', 'status', 'format', 'asyncDates']);
         });
     }
 
@@ -147,7 +147,7 @@ class OrganizerService
 
         return Event::where('id', $id)
             ->where('organization_id', $user->organization_id)
-            ->with(['category', 'locations', 'status', 'type', 'creator'])
+            ->with(['category', 'locations', 'status', 'format', 'creator'])
             ->firstOrFail();
     }
 

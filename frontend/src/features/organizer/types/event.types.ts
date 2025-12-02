@@ -49,6 +49,36 @@ export interface EventSubtype {
   display_order: number
 }
 
+/**
+ * EventType - Hierarchical event categorization (Dec 2, 2025)
+ * This is different from the old "type" concept (sede_unica/multi_sede)
+ */
+export interface EventTypeHierarchical {
+  id: number
+  name: string
+  slug: string
+  description?: string
+  is_active: boolean
+  subtypes_count?: number
+  created_at?: string
+  updated_at?: string
+}
+
+/**
+ * EventSubtype - Child of EventTypeHierarchical (Dec 2, 2025)
+ */
+export interface EventSubtypeHierarchical {
+  id: number
+  event_type_id: number
+  name: string
+  slug: string
+  description?: string
+  is_active: boolean
+  event_type?: EventTypeHierarchical
+  created_at?: string
+  updated_at?: string
+}
+
 export interface EventService {
   id: number
   code: string
@@ -129,6 +159,10 @@ export interface OrganizerEvent {
   rotation_type_id?: number
   producer_id?: number
 
+  // Event Type/Subtype (hierarchical categorization - Dec 2, 2025)
+  event_type_id?: number
+  event_subtype_id?: number
+
   // Loaded relations
   origin?: EventOrigin
   theme?: EventTheme
@@ -137,11 +171,16 @@ export interface OrganizerEvent {
   subtype?: EventSubtype
   producer?: EventProducer
 
+  // Event Type/Subtype relations (Dec 2, 2025)
+  event_type?: EventTypeHierarchical
+  event_subtype?: EventSubtypeHierarchical
+
   // Services and rooms (many-to-many)
   services?: EventService[]
   rooms?: EventRoom[]
 
   // Location info (kept in events)
+  custom_location_name?: string
   maps_url?: string
   previous_venue?: string
   next_venue?: string
@@ -199,9 +238,13 @@ export interface CreateEventDto {
   description: string
   start_date: string  // ISO 8601 format: YYYY-MM-DDTHH:MM:SS
   end_date?: string   // ISO 8601 format: YYYY-MM-DDTHH:MM:SS
-  category_id: number
+  category_id?: number  // Optional now (Dec 2, 2025)
   location_ids: number[]  // Required: at least one location
   type_id?: number
+
+  // Event Type/Subtype (hierarchical categorization - Dec 2, 2025) - REQUIRED
+  event_type_id: number
+  event_subtype_id: number
 
   // Basic information (string field for edition)
   edition_number?: string
@@ -219,6 +262,7 @@ export interface CreateEventDto {
   room_ids?: number[]
 
   // Location info (kept in events)
+  custom_location_name?: string     // Custom location name (when "Otro" is selected)
   maps_url?: string
   previous_venue?: string
   next_venue?: string
@@ -267,6 +311,10 @@ export interface EventFormData {
   description: string
   edition_number: string
 
+  // Event Type/Subtype (hierarchical categorization - Dec 2, 2025) - REQUIRED
+  event_type_id: number | null
+  event_subtype_id: number | null
+
   // FK references (IDs)
   type_id: number | null
   subtype_id: number | null
@@ -283,7 +331,9 @@ export interface EventFormData {
 
   // Location info
   location_ids: number[]
-  maps_url: string
+  has_custom_location: boolean      // Toggle for "Otro" custom location
+  custom_location_name: string      // Name of custom location (when "Otro" is checked)
+  maps_url: string                  // Google Maps URL (only shown when has_custom_location)
   previous_venue: string
   next_venue: string
 
@@ -316,6 +366,10 @@ export interface EventFormErrors {
   description?: string
   edition_number?: string
 
+  // Event Type/Subtype (hierarchical categorization - Dec 2, 2025)
+  event_type_id?: string
+  event_subtype_id?: string
+
   // FK references
   type_id?: string
   subtype_id?: string
@@ -328,6 +382,7 @@ export interface EventFormErrors {
 
   // Location
   location_ids?: string
+  custom_location_name?: string     // Error for custom location name
   maps_url?: string
   previous_venue?: string
   next_venue?: string

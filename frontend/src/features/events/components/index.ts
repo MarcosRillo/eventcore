@@ -1,6 +1,4 @@
 // Event components
-export { CreateEventForm } from './CreateEventForm';
-export { EditEventForm } from './EditEventForm';
 export { EventFiltersBar } from './EventFiltersBar';
 // EventDetailModal moved to @/components/ui (unified implementation)
 

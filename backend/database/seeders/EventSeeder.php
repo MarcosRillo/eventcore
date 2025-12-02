@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
+use App\Models\EventFormat;
 use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRotationType;
 use App\Models\EventStatus;
 use App\Models\EventTheme;
-use App\Models\EventType;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Category;
@@ -40,9 +40,9 @@ class EventSeeder extends Seeder
         $approvedInternalStatus = EventStatus::where('status_code', 'approved_internal')->first();
         $pendingInternalStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
 
-        // Get event types
-        $multiSedeType = EventType::where('type_code', 'multi_sede')->first();
-        $sedeUnicaType = EventType::where('type_code', 'sede_unica')->first();
+        // Get event formats (previously event types)
+        $multiSedeFormat = EventFormat::where('format_code', 'multi_sede')->first();
+        $sedeUnicaFormat = EventFormat::where('format_code', 'sede_unica')->first();
 
         // Get 3NF lookup values
         $originLocal = EventOrigin::where('code', 'local')->first();
@@ -83,7 +83,7 @@ class EventSeeder extends Seeder
             'start_date' => Carbon::now()->addDays(30)->setHour(18)->setMinute(0),
             'end_date' => Carbon::now()->addDays(32)->setHour(23)->setMinute(0),
             'status_id' => $publishedStatus->id,
-            'type_id' => $multiSedeType->id,
+            'format_id' => $multiSedeFormat->id,
             'featured_image' => 'https://example.com/images/festival-gastronomico.jpg',
             'is_featured' => true,
             'category_id' => $categoriasTurismo->where('slug', 'turismo-gastronomico')->first()?->id,
@@ -113,7 +113,7 @@ class EventSeeder extends Seeder
             'start_date' => Carbon::now()->addDays(15)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(15)->setHour(17)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
-            'type_id' => $sedeUnicaType->id,
+            'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/cerro-san-javier.jpg',
             'is_featured' => false,
             'category_id' => $categoriasTurismo->where('slug', 'turismo-aventura')->first()?->id,
@@ -140,7 +140,7 @@ class EventSeeder extends Seeder
             'start_date' => Carbon::now()->addDays(45)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(45)->setHour(18)->setMinute(0),
             'status_id' => $pendingInternalStatus->id,
-            'type_id' => $sedeUnicaType->id,
+            'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/ruta-dulce.jpg',
             'is_featured' => false,
             'category_id' => $categoriasTurismo->where('slug', 'turismo-rural')->first()?->id,
@@ -168,7 +168,7 @@ class EventSeeder extends Seeder
             'start_date' => Carbon::now()->addDays(20)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->addDays(20)->setHour(22)->setMinute(30),
             'status_id' => $publishedStatus->id,
-            'type_id' => $sedeUnicaType->id,
+            'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/gala-folklorica.jpg',
             'is_featured' => true,
             'category_id' => $categoriasCultura->where('slug', 'artes-escenicas')->first()?->id,
@@ -195,7 +195,7 @@ class EventSeeder extends Seeder
             'start_date' => Carbon::now()->addDays(10)->setHour(10)->setMinute(0),
             'end_date' => Carbon::now()->addDays(40)->setHour(18)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
-            'type_id' => $sedeUnicaType->id,
+            'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/exposicion-patrimonio.jpg',
             'is_featured' => false,
             'category_id' => $categoriasCultura->where('slug', 'patrimonio-cultural')->first()?->id,
@@ -229,7 +229,7 @@ class EventSeeder extends Seeder
                 'start_date' => Carbon::now()->addDays(25)->setHour(20)->setMinute(0),
                 'end_date' => Carbon::now()->addDays(25)->setHour(23)->setMinute(30),
                 'status_id' => $pendingInternalStatus->id,
-                'type_id' => $sedeUnicaType->id,
+                'format_id' => $sedeUnicaFormat->id,
                 'featured_image' => 'https://example.com/images/cena-san-valentin.jpg',
                 'is_featured' => false,
                 'organization_id' => $sheratonHotel->id,
@@ -252,7 +252,7 @@ class EventSeeder extends Seeder
                 'start_date' => Carbon::now()->addDays(50)->setHour(8)->setMinute(0),
                 'end_date' => Carbon::now()->addDays(53)->setHour(18)->setMinute(0),
                 'status_id' => $approvedInternalStatus->id,
-                'type_id' => $multiSedeType->id,
+                'format_id' => $multiSedeFormat->id,
                 'featured_image' => 'https://example.com/images/feria-agropecuaria.jpg',
                 'is_featured' => true,
                 'organization_id' => $laRural->id,
@@ -275,7 +275,7 @@ class EventSeeder extends Seeder
                 'start_date' => Carbon::now()->addDays(12)->setHour(18)->setMinute(0),
                 'end_date' => Carbon::now()->addDays(35)->setHour(21)->setMinute(0),
                 'status_id' => $publishedStatus->id,
-                'type_id' => $sedeUnicaType->id,
+                'format_id' => $sedeUnicaFormat->id,
                 'featured_image' => 'https://example.com/images/arte-contemporaneo.jpg',
                 'is_featured' => false,
                 'organization_id' => $centroVirla->id,

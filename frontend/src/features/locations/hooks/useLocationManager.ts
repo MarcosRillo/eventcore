@@ -72,6 +72,7 @@ export function useLocationManager(): UseLocationManagerReturn {
     page: 1,
     per_page: 10,
     status: 'all',
+    search: '',  // Must be initialized to avoid 422 "search field must be a string"
   };
 
   // Check authentication status
@@ -118,6 +119,8 @@ export function useLocationManager(): UseLocationManagerReturn {
   const currentPage = filters.page || 1;
 
   // Location-specific handlers
+  // Note: Debounce is handled centrally in usePaginatedData via debouncedSearch
+  // Do NOT include page: 1 here - it would trigger the effect immediately (bypassing debounce)
   const handleSearchChange = useCallback((value: string) => {
     setFilters({ search: value });
   }, [setFilters]);

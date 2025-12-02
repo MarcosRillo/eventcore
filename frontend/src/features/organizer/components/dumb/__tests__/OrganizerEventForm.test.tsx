@@ -14,6 +14,19 @@ describe('OrganizerEventForm', () => {
   const mockHandleChange = jest.fn()
   const mockHandleSubmit = jest.fn((e) => e.preventDefault())
   const mockHandleCancel = jest.fn()
+  const mockSetNewAsyncDate = jest.fn()
+  const mockAddAsynchronousDate = jest.fn()
+  const mockRemoveAsynchronousDate = jest.fn()
+  const mockHandleCustomLocationToggle = jest.fn()
+
+  // Mock ResizeObserver for Headless UI Combobox
+  beforeAll(() => {
+    global.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+  })
 
   const mockCategories = [
     { id: 1, name: 'Música' },
@@ -30,6 +43,10 @@ describe('OrganizerEventForm', () => {
     title: '',
     description: '',
     edition_number: '',
+    // Event Type/Subtype (hierarchical - Dec 2, 2025)
+    event_type_id: null,
+    event_subtype_id: null,
+    // FK references
     type_id: null,
     subtype_id: null,
     origin_id: null,
@@ -41,6 +58,8 @@ describe('OrganizerEventForm', () => {
     service_ids: [],
     room_ids: [],
     location_ids: [],
+    has_custom_location: false,
+    custom_location_name: '',
     maps_url: '',
     previous_venue: '',
     next_venue: '',
@@ -62,6 +81,8 @@ describe('OrganizerEventForm', () => {
     title: 'Festival de Jazz',
     description: 'Un evento increíble de música jazz',
     edition_number: '10ma Edición',
+    event_type_id: 1,
+    event_subtype_id: 1,
     category_id: 1,
     location_ids: [1],
     maps_url: 'https://maps.google.com/test',
@@ -82,17 +103,37 @@ describe('OrganizerEventForm', () => {
     responsive_image_url: 'https://ejemplo.com/imagen-mobile.jpg'
   }
 
+  const mockSearchLocations = jest.fn().mockResolvedValue(mockLocations)
+
+  const mockEventTypes = [
+    { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+    { id: 2, name: 'Feria', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' }
+  ]
+
+  const mockEventSubtypes = [
+    { id: 1, event_type_id: 1, name: 'Nacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+    { id: 2, event_type_id: 1, name: 'Internacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' }
+  ]
+
   const defaultProps = {
     formData: emptyFormData,
     errors: {} as EventFormErrors,
     loading: false,
     initialLoading: false,
     categories: mockCategories,
-    locations: mockLocations,
+    eventTypes: mockEventTypes,
+    eventSubtypes: mockEventSubtypes,
+    onSearchLocations: mockSearchLocations,
+    selectedLocations: [] as { id: number; name: string }[],
     isEditMode: false,
+    newAsyncDate: { date: '', notes: '' },
+    setNewAsyncDate: mockSetNewAsyncDate,
     handleChange: mockHandleChange,
     handleSubmit: mockHandleSubmit,
-    handleCancel: mockHandleCancel
+    handleCancel: mockHandleCancel,
+    addAsynchronousDate: mockAddAsynchronousDate,
+    removeAsynchronousDate: mockRemoveAsynchronousDate,
+    handleCustomLocationToggle: mockHandleCustomLocationToggle
   }
 
   beforeEach(() => {
@@ -177,7 +218,8 @@ describe('OrganizerEventForm', () => {
       const categorySelect = document.getElementById('category_id') as HTMLSelectElement
       expect(categorySelect).toBeInTheDocument()
 
-      expect(categorySelect.querySelector('option[value=""]')).toHaveTextContent('Seleccionar categoría')
+      // Category is now optional (Dec 2, 2025)
+      expect(categorySelect.querySelector('option[value=""]')).toHaveTextContent('Seleccionar categoría (opcional)')
       expect(categorySelect.querySelector('option[value="1"]')).toHaveTextContent('Música')
       expect(categorySelect.querySelector('option[value="2"]')).toHaveTextContent('Gastronomía')
     })
@@ -189,21 +231,92 @@ describe('OrganizerEventForm', () => {
       const options = categorySelect.querySelectorAll('option')
       expect(options).toHaveLength(1) // Only placeholder
     })
+
+    test('should render event type select with provided event types', () => {
+      render(<OrganizerEventForm {...defaultProps} />)
+
+      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
+      expect(eventTypeSelect).toBeInTheDocument()
+
+      expect(eventTypeSelect.querySelector('option[value=""]')).toHaveTextContent('Seleccionar tipo de evento')
+      expect(eventTypeSelect.querySelector('option[value="1"]')).toHaveTextContent('Congreso')
+      expect(eventTypeSelect.querySelector('option[value="2"]')).toHaveTextContent('Feria')
+    })
+
+    test('should render event subtype select with provided subtypes', () => {
+      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, event_type_id: 1 }} />)
+
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      expect(eventSubtypeSelect).toBeInTheDocument()
+
+      expect(eventSubtypeSelect.querySelector('option[value="1"]')).toHaveTextContent('Nacional')
+      expect(eventSubtypeSelect.querySelector('option[value="2"]')).toHaveTextContent('Internacional')
+    })
+
+    test('should disable subtype select when no type is selected', () => {
+      render(<OrganizerEventForm {...defaultProps} />)
+
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      expect(eventSubtypeSelect).toBeDisabled()
+      expect(eventSubtypeSelect.querySelector('option[value=""]')).toHaveTextContent('Primero selecciona un tipo')
+    })
+
+    test('should enable subtype select when type is selected', () => {
+      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, event_type_id: 1 }} />)
+
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      expect(eventSubtypeSelect).not.toBeDisabled()
+      expect(eventSubtypeSelect.querySelector('option[value=""]')).toHaveTextContent('Seleccionar subtipo')
+    })
+
+    test('should call handleChange when event_type_id changes', () => {
+      render(<OrganizerEventForm {...defaultProps} />)
+
+      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
+      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
+
+      expect(mockHandleChange).toHaveBeenCalledWith('event_type_id', 1)
+      // Should also reset subtype
+      expect(mockHandleChange).toHaveBeenCalledWith('event_subtype_id', null)
+    })
+
+    test('should call handleChange when event_subtype_id changes', () => {
+      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, event_type_id: 1 }} />)
+
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      fireEvent.change(eventSubtypeSelect, { target: { value: '2' } })
+
+      expect(mockHandleChange).toHaveBeenCalledWith('event_subtype_id', 2)
+    })
   })
 
   describe('section 2: location', () => {
-    test('should render location checkboxes', () => {
+    test('should render location async searchable multi-select', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      expect(screen.getByLabelText('Plaza Independencia')).toBeInTheDocument()
-      expect(screen.getByLabelText('Parque 9 de Julio')).toBeInTheDocument()
+      // AsyncSearchableMultiSelect renders with "Ubicaciones" label
+      expect(screen.getByText('Ubicaciones')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Escribe para buscar ubicación...')).toBeInTheDocument()
     })
 
-    test('should render maps url input', () => {
+    test('should render "Otro" checkbox for custom location', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const mapsInput = screen.getByLabelText(/maps/i)
-      expect(mapsInput).toBeInTheDocument()
+      expect(screen.getByLabelText(/agregar ubicación personalizada/i)).toBeInTheDocument()
+    })
+
+    test('should not render maps_url and custom_location_name inputs by default', () => {
+      render(<OrganizerEventForm {...defaultProps} />)
+
+      expect(document.getElementById('maps_url')).not.toBeInTheDocument()
+      expect(document.getElementById('custom_location_name')).not.toBeInTheDocument()
+    })
+
+    test('should render custom location fields when has_custom_location is true', () => {
+      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, has_custom_location: true }} />)
+
+      expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+      expect(document.getElementById('maps_url')).toBeInTheDocument()
     })
 
     test('should render previous and next venue inputs', () => {
@@ -213,26 +326,26 @@ describe('OrganizerEventForm', () => {
       expect(screen.getByLabelText(/próxima sede/i)).toBeInTheDocument()
     })
 
-    test('should call handleChange when location checkbox is checked', () => {
+    test('should call handleCustomLocationToggle when Otro checkbox is clicked', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const locationCheckbox = screen.getByLabelText('Plaza Independencia')
-      fireEvent.click(locationCheckbox)
+      const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
+      fireEvent.click(otroCheckbox)
 
-      expect(mockHandleChange).toHaveBeenCalledWith('location_ids', [1])
+      expect(mockHandleCustomLocationToggle).toHaveBeenCalledWith(true)
     })
 
-    test('should call handleChange when location checkbox is unchecked', () => {
-      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, location_ids: [1] }} />)
+    test('should call handleChange when custom_location_name input changes', () => {
+      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, has_custom_location: true }} />)
 
-      const locationCheckbox = screen.getByLabelText('Plaza Independencia')
-      fireEvent.click(locationCheckbox)
+      const customNameInput = document.getElementById('custom_location_name') as HTMLInputElement
+      fireEvent.change(customNameInput, { target: { value: 'Salón El Jardín' } })
 
-      expect(mockHandleChange).toHaveBeenCalledWith('location_ids', [])
+      expect(mockHandleChange).toHaveBeenCalledWith('custom_location_name', 'Salón El Jardín')
     })
 
     test('should call handleChange when maps_url input changes', () => {
-      render(<OrganizerEventForm {...defaultProps} />)
+      render(<OrganizerEventForm {...defaultProps} formData={{ ...emptyFormData, has_custom_location: true }} />)
 
       const mapsInput = document.getElementById('maps_url') as HTMLInputElement
       fireEvent.change(mapsInput, { target: { value: 'https://maps.google.com/test' } })
@@ -325,33 +438,32 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('async dates functionality', () => {
-    test('should add async date when date is filled and button clicked', () => {
+    test('should call setNewAsyncDate when date input changes', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
       // Find the date input in the async dates section (it's a type="date" input)
       const asyncDateInput = document.querySelector('input[type="date"]') as HTMLInputElement
       fireEvent.change(asyncDateInput, { target: { value: '2025-12-25' } })
 
+      expect(mockSetNewAsyncDate).toHaveBeenCalledWith({ date: '2025-12-25', notes: '' })
+    })
+
+    test('should call addAsynchronousDate when add button clicked', () => {
+      render(<OrganizerEventForm {...defaultProps} newAsyncDate={{ date: '2025-12-25', notes: '' }} />)
+
       const addButton = screen.getByRole('button', { name: /agregar/i })
       fireEvent.click(addButton)
 
-      expect(mockHandleChange).toHaveBeenCalledWith(
-        'async_dates',
-        expect.arrayContaining([
-          expect.objectContaining({
-            date: '2025-12-25'
-          })
-        ])
-      )
+      expect(mockAddAsynchronousDate).toHaveBeenCalled()
     })
 
-    test('should remove async date when delete button is clicked', () => {
+    test('should call removeAsynchronousDate when delete button is clicked', () => {
       render(<OrganizerEventForm {...defaultProps} formData={filledFormData} />)
 
       const deleteButton = screen.getByRole('button', { name: /eliminar/i })
       fireEvent.click(deleteButton)
 
-      expect(mockHandleChange).toHaveBeenCalledWith('async_dates', [])
+      expect(mockRemoveAsynchronousDate).toHaveBeenCalledWith(0)
     })
   })
 
@@ -549,6 +661,26 @@ describe('OrganizerEventForm', () => {
       expect(screen.getByText('Seleccione una categoría')).toBeInTheDocument()
     })
 
+    test('should display event_type_id error message', () => {
+      const errors: EventFormErrors = {
+        event_type_id: 'El tipo de evento es requerido'
+      }
+
+      render(<OrganizerEventForm {...defaultProps} errors={errors} />)
+
+      expect(screen.getByText('El tipo de evento es requerido')).toBeInTheDocument()
+    })
+
+    test('should display event_subtype_id error message', () => {
+      const errors: EventFormErrors = {
+        event_subtype_id: 'El subtipo de evento es requerido'
+      }
+
+      render(<OrganizerEventForm {...defaultProps} errors={errors} />)
+
+      expect(screen.getByText('El subtipo de evento es requerido')).toBeInTheDocument()
+    })
+
     test('should display location_ids error message', () => {
       const errors: EventFormErrors = {
         location_ids: 'Al menos una ubicación es requerida'
@@ -595,7 +727,7 @@ describe('OrganizerEventForm', () => {
       expect(screen.getByText('Error de fecha')).toBeInTheDocument()
     })
 
-    test('should style error messages with red color', () => {
+    test('should style error messages with error color', () => {
       const errors: EventFormErrors = {
         title: 'El título es requerido'
       }
@@ -603,7 +735,7 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventForm {...defaultProps} errors={errors} />)
 
       const errorMessage = screen.getByText('El título es requerido')
-      expect(errorMessage).toHaveClass('text-red-600')
+      expect(errorMessage).toHaveClass('text-error-600')
     })
   })
 
@@ -620,7 +752,7 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventForm {...defaultProps} loading={true} />)
 
       expect(screen.getByLabelText(/transmisión virtual/i)).toBeDisabled()
-      expect(screen.getByLabelText('Plaza Independencia')).toBeDisabled()
+      expect(screen.getByLabelText(/agregar ubicación personalizada/i)).toBeDisabled()
     })
 
     test('should disable submit button when loading is true', () => {
@@ -705,11 +837,19 @@ describe('OrganizerEventForm', () => {
       expect(document.getElementById('end_date')).toHaveValue('2025-12-16T22:00')
     })
 
-    test('should display selected locations', () => {
-      render(<OrganizerEventForm {...defaultProps} formData={filledFormData} />)
+    test('should display selected locations as chips', () => {
+      // AsyncSearchableMultiSelect needs selectedLocations prop to display chips
+      const selectedLocations = [{ id: 1, name: 'Plaza Independencia' }]
+      render(
+        <OrganizerEventForm
+          {...defaultProps}
+          formData={filledFormData}
+          selectedLocations={selectedLocations}
+        />
+      )
 
-      expect(screen.getByLabelText('Plaza Independencia')).toBeChecked()
-      expect(screen.getByLabelText('Parque 9 de Julio')).not.toBeChecked()
+      // AsyncSearchableMultiSelect shows selected options as chips with the location name
+      expect(screen.getByText('Plaza Independencia')).toBeInTheDocument()
     })
 
     test('should display attendance values', () => {
@@ -746,7 +886,10 @@ describe('OrganizerEventForm', () => {
 
       expect(screen.getByText(/nombre del evento \*/i)).toBeInTheDocument()
       expect(screen.getByText(/descripción \*/i)).toBeInTheDocument()
-      expect(screen.getByText(/categoría \*/i)).toBeInTheDocument()
+      // Use anchor ^ to avoid matching "Subtipo de Evento *" as well
+      expect(screen.getByText(/^tipo de evento \*/i)).toBeInTheDocument()
+      expect(screen.getByText(/^subtipo de evento \*/i)).toBeInTheDocument()
+      // Category is now optional (Dec 2, 2025)
     })
 
     test('should have proper form structure', () => {
@@ -766,8 +909,8 @@ describe('OrganizerEventForm', () => {
       expect(categorySelect).toBeInTheDocument()
     })
 
-    test('should handle undefined locations gracefully', () => {
-      render(<OrganizerEventForm {...defaultProps} locations={undefined as unknown as { id: number; name: string }[]} />)
+    test('should handle empty selectedLocations gracefully', () => {
+      render(<OrganizerEventForm {...defaultProps} selectedLocations={[]} />)
 
       // Should not crash
       expect(screen.getByText('2. Ubicación')).toBeInTheDocument()

@@ -115,6 +115,9 @@ describe('organizer-event.service', () => {
         end_date: '2030-12-01T18:00:00',
         category_id: 1,
         location_ids: [1, 2],
+        // Event Type/Subtype (required - Dec 2, 2025)
+        event_type_id: 1,
+        event_subtype_id: 1,
         edition_number: '10ma Edición',
         virtual_transmission: true,
         maps_url: 'https://maps.google.com/test',
@@ -136,6 +139,9 @@ describe('organizer-event.service', () => {
         start_date: '2030-12-01T10:00:00',
         category_id: 1,
         location_ids: [1],
+        // Event Type/Subtype (required - Dec 2, 2025)
+        event_type_id: 1,
+        event_subtype_id: 1,
       }
 
       const mockResponse = { data: { id: 2, ...newEvent } }

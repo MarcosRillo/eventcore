@@ -1,12 +1,12 @@
-'use client'
+/**
+ * Legacy Create Event Page - Redirects to /organizer/create
+ *
+ * This page is deprecated (Dec 2, 2025).
+ * Event creation is now at /organizer/create.
+ */
 
-import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
+import { redirect } from 'next/navigation'
 
-export default function CreateEventPage() {
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Create New Event</h1>
-      <OrganizerEventFormContainer />
-    </div>
-  )
+export default function LegacyCreateEventPage() {
+  redirect('/organizer/create')
 }

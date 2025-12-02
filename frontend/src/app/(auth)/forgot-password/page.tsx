@@ -27,7 +27,7 @@ const ForgotPasswordPage = () => {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           {/* Logo */}
           <div className="flex justify-center">
@@ -76,7 +76,7 @@ const ForgotPasswordPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo and title */}
         <div className="flex justify-center">
@@ -146,13 +146,6 @@ const ForgotPasswordPage = () => {
             <Link href="/login" className="text-sm text-primary-600 hover:text-primary-500">
               &larr; Volver a iniciar sesión
             </Link>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-neutral-500">
-              © 2025 CalendApp. Sistema de gestión de calendario y eventos.
-            </p>
           </div>
         </div>
       </div>

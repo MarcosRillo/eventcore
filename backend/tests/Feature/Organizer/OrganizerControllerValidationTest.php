@@ -5,10 +5,12 @@ namespace Tests\Feature\Organizer;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventOrigin;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -21,7 +23,7 @@ use Tests\TestCase;
  */
 class OrganizerControllerValidationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -59,11 +61,26 @@ class OrganizerControllerValidationTest extends TestCase
     }
 
     /**
-     * Get a valid type_id
+     * Get a valid format_id
      */
-    private function getValidTypeId(): int
+    private function getValidFormatId(): int
     {
-        return \DB::table('event_types')->value('id') ?? 1;
+        return \DB::table('event_formats')->value('id') ?? 1;
+    }
+
+    /**
+     * Helper: Get valid event_type_id and event_subtype_id
+     */
+    private function getValidEventTypeIds(): array
+    {
+        $eventType = EventType::first() ?? EventType::factory()->create();
+        $eventSubtype = EventSubtype::where('event_type_id', $eventType->id)->first()
+            ?? EventSubtype::factory()->create(['event_type_id' => $eventType->id]);
+
+        return [
+            'event_type_id' => $eventType->id,
+            'event_subtype_id' => $eventSubtype->id,
+        ];
     }
 
     /**
@@ -73,12 +90,15 @@ class OrganizerControllerValidationTest extends TestCase
     {
         $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => $user->organization_id]);
+        $eventTypeIds = $this->getValidEventTypeIds();
 
         return [
             'title' => 'Valid Title',
             'description' => 'Valid Description',
             'start_date' => now()->addDays(10)->format('Y-m-d H:i:s'),
             'category_id' => $category->id,
+            'event_type_id' => $eventTypeIds['event_type_id'],
+            'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
         ];
     }
@@ -125,29 +145,44 @@ class OrganizerControllerValidationTest extends TestCase
     }
 
     #[Test]
-    public function test_validation_fails_without_category_id(): void
+    public function test_validation_fails_without_event_type_id(): void
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        unset($payload['category_id']);
+        unset($payload['event_type_id']);
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['category_id']);
+        $response->assertJsonValidationErrors(['event_type_id']);
     }
 
     #[Test]
-    public function test_validation_fails_without_location_ids(): void
+    public function test_validation_fails_without_event_subtype_id(): void
+    {
+        $user = $this->createAuthenticatedUser();
+        $payload = $this->getMinimalPayload($user);
+        unset($payload['event_subtype_id']);
+
+        $response = $this->postJson('/api/v1/organizer/events', $payload);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['event_subtype_id']);
+    }
+
+    #[Test]
+    public function test_validation_fails_without_location_ids_or_custom_location_name(): void
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
         unset($payload['location_ids']);
+        // Both location_ids and custom_location_name are missing
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['location_ids']);
+        // Custom location name is required when location_ids is not present
+        $response->assertJsonValidationErrors(['custom_location_name']);
     }
 
     // ==================== STRING LENGTH VALIDATIONS ====================
@@ -199,7 +234,7 @@ class OrganizerControllerValidationTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
         $payload['event_website'] = 'https://example.com';
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -243,7 +278,7 @@ class OrganizerControllerValidationTest extends TestCase
         $date = now()->addDays(10)->format('Y-m-d H:i:s');
         $payload['start_date'] = $date;
         $payload['end_date'] = $date; // Same day allowed
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -299,7 +334,7 @@ class OrganizerControllerValidationTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
         $payload['virtual_transmission'] = true;
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -312,16 +347,18 @@ class OrganizerControllerValidationTest extends TestCase
     // ==================== ARRAY VALIDATIONS ====================
 
     #[Test]
-    public function test_validation_fails_when_location_ids_is_empty_array(): void
+    public function test_validation_fails_when_location_ids_is_empty_and_no_custom_location(): void
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        $payload['location_ids'] = []; // Empty array not allowed
+        $payload['location_ids'] = []; // Empty array, and no custom location
+        unset($payload['custom_location_name']);
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['location_ids']);
+        // Custom location name is required when location_ids is empty
+        $response->assertJsonValidationErrors(['custom_location_name']);
     }
 
     #[Test]
@@ -371,7 +408,7 @@ class OrganizerControllerValidationTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
         $payload['origin_id'] = EventOrigin::where('code', 'national')->first()->id;
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -398,7 +435,7 @@ class OrganizerControllerValidationTest extends TestCase
         $payload = $this->getMinimalPayload($user);
         $producer = Organization::factory()->create();
         $payload['producer_id'] = $producer->id;
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -434,7 +471,7 @@ class OrganizerControllerValidationTest extends TestCase
             ['date' => '2025-12-01', 'notes' => 'Day 1 notes'],
             ['date' => '2025-12-03', 'notes' => 'Day 2 notes']
         ];
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -470,7 +507,7 @@ class OrganizerControllerValidationTest extends TestCase
         $payload['event_website'] = null;
         $payload['logo_url'] = null;
         $payload['responsive_image_url'] = null;
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
@@ -479,7 +516,8 @@ class OrganizerControllerValidationTest extends TestCase
         $event = Event::find($response->json('event.id'));
         $this->assertNull($event->edition_number);
         $this->assertNull($event->origin_id);
-        $this->assertNull($event->producer_id);
+        // producer_id is auto-filled with organization_id even when explicitly set to null (Dec 2, 2025)
+        $this->assertEquals($user->organization_id, $event->producer_id);
     }
 
     #[Test]
@@ -487,7 +525,7 @@ class OrganizerControllerValidationTest extends TestCase
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        $payload['type_id'] = $this->getValidTypeId();
+        $payload['format_id'] = $this->getValidFormatId();
 
         // Don't include any optional fields (they should default to null/false)
 

@@ -16,8 +16,10 @@ export {
 
 // Hooks
 export { useRegistrationRequests } from './hooks/useRegistrationRequests'
+export { useRegistrationForm } from './hooks/useRegistrationForm'
 
 // Components
+export { RegistrationForm as RegistrationPublicForm } from './components/dumb/RegistrationPublicForm'
 export { RegistrationRequestTable } from './components/dumb/RegistrationRequestTable'
 export { RegistrationRequestDetailPanel } from './components/dumb/RegistrationRequestDetail'
 export { RejectRequestModal } from './components/dumb/RejectRequestModal'

@@ -155,10 +155,9 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                         {actions.map((action) => (
                           <Button
                             key={action.key}
-                            variant={action.key === 'delete' ? 'danger' : 'secondary'}
+                            variant={action.variant ?? (action.key === 'delete' ? 'danger' : 'secondary')}
                             size="sm"
                             onClick={() => action.onClick(category)}
-                            className={action.className}
                             title={action.label}
                           >
                             {action.icon} {action.label}

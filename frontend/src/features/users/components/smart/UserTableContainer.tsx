@@ -1,16 +1,18 @@
-'use client'
+'use client';
 
 /**
  * User Table Container - Smart Component
  * Connects the hook with the presentational components
  */
 
-import { useState, useCallback } from 'react'
-import { UserTable } from '../dumb/UserTable'
-import { UserEditModal } from '../dumb/UserEditModal'
-import { DeleteConfirmModal } from '@/shared/components/modals/DeleteConfirmModal'
-import { useUserManager } from '../../hooks/useUserManager'
-import { Input, Button } from '@/components/ui'
+import { useState, useCallback } from 'react';
+import { UserTable } from '../dumb/UserTable';
+import { UserEditModalContainer } from './UserEditModalContainer';
+import { ConfirmDialogData } from '@/shared/components/tables';
+import { useUserManager } from '../../hooks/useUserManager';
+import { Input, Button } from '@/components/ui';
+import type { User } from '../../types/user.types';
+import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export function UserTableContainer() {
   const {
@@ -29,102 +31,97 @@ export function UserTableContainer() {
     handleCloseEdit,
     setFilters,
     clearError,
-  } = useUserManager()
+  } = useUserManager();
 
-  const [searchInput, setSearchInput] = useState('')
-  const [deletingUserId, setDeletingUserId] = useState<number | null>(null)
-  const [deletingUserName, setDeletingUserName] = useState('')
+  const [searchInput, setSearchInput] = useState('');
+
+  // Confirm dialog state for delete
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogData>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   const handleSearch = useCallback(() => {
-    setFilters({ search: searchInput, page: 1 })
-  }, [searchInput, setFilters])
+    setFilters({ search: searchInput, page: 1 });
+  }, [searchInput, setFilters]);
 
   const handleSearchKeyPress = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
-        handleSearch()
+        handleSearch();
       }
     },
     [handleSearch]
-  )
+  );
 
   const handleClearSearch = useCallback(() => {
-    setSearchInput('')
-    setFilters({ search: '', page: 1 })
-  }, [setFilters])
+    setSearchInput('');
+    setFilters({ search: '', page: 1 });
+  }, [setFilters]);
 
   const handleStatusFilter = useCallback(
     (status: 'all' | 'active' | 'suspended') => {
-      setFilters({ status, page: 1 })
+      setFilters({ status, page: 1 });
     },
     [setFilters]
-  )
+  );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      setFilters({ page })
+      setFilters({ page });
     },
     [setFilters]
-  )
+  );
 
-  const handleDeleteClick = useCallback((id: number) => {
-    const user = users.find((u) => u.id === id)
-    if (user) {
-      setDeletingUserId(id)
-      setDeletingUserName(user.name)
-    }
-  }, [users])
+  // Handle suspend with User object
+  const handleSuspendUser = useCallback((user: User) => {
+    handleSuspend(user.id);
+  }, [handleSuspend]);
 
-  const handleConfirmDelete = useCallback(async () => {
-    if (deletingUserId) {
-      const success = await handleDelete(deletingUserId)
-      if (success) {
-        setDeletingUserId(null)
-        setDeletingUserName('')
-      }
-    }
-  }, [deletingUserId, handleDelete])
+  // Handle unsuspend with User object
+  const handleUnsuspendUser = useCallback((user: User) => {
+    handleUnsuspend(user.id);
+  }, [handleUnsuspend]);
 
-  const handleCancelDelete = useCallback(() => {
-    setDeletingUserId(null)
-    setDeletingUserName('')
-  }, [])
+  // Delete user handler with confirmation
+  const handleDeleteClick = useCallback((user: User) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Eliminar Usuario',
+      message: `¿Estás seguro de que deseas eliminar a "${user.name}"? Esta acción no se puede deshacer. El usuario perderá acceso al sistema.`,
+      onConfirm: async () => {
+        await handleDelete(user.id);
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+      },
+    });
+  }, [handleDelete]);
+
+  // Close confirm dialog handler
+  const handleCloseConfirmDialog = useCallback(() => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+  }, []);
 
   return (
     <div className="space-y-4">
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="bg-error-50 border border-error-200 rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5 text-red-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <XCircleIcon className="h-5 w-5 text-error-400" aria-hidden="true" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm text-error-700">{error}</p>
             </div>
             <div className="ml-auto pl-3">
               <button
                 onClick={clearError}
-                className="text-red-500 hover:text-red-600"
+                className="text-error-500 hover:text-error-600"
                 type="button"
               >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -186,35 +183,25 @@ export function UserTableContainer() {
         users={users}
         pagination={pagination}
         loading={loading}
-        actionLoading={actionLoading}
         onPageChange={handlePageChange}
         onEdit={handleOpenEdit}
-        onSuspend={handleSuspend}
-        onUnsuspend={handleUnsuspend}
+        onSuspend={handleSuspendUser}
+        onUnsuspend={handleUnsuspendUser}
         onDelete={handleDeleteClick}
+        confirmDialog={confirmDialog}
+        onCloseConfirmDialog={handleCloseConfirmDialog}
       />
 
       {/* Edit Modal */}
-      <UserEditModal
+      <UserEditModalContainer
         user={editingUser}
         isOpen={!!editingUser}
         loading={actionLoading === editingUser?.id}
         onClose={handleCloseEdit}
         onSave={handleUpdate}
       />
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
-        isOpen={!!deletingUserId}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        loading={actionLoading === deletingUserId}
-        title="Eliminar Usuario"
-        itemName={deletingUserName}
-        warningMessage="Esta acción no se puede deshacer. El usuario perderá acceso al sistema."
-      />
     </div>
-  )
+  );
 }
 
-export default UserTableContainer
+export default UserTableContainer;

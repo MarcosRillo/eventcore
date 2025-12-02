@@ -9,12 +9,39 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * User role codes - MUST match backend user_roles.role_code
+ */
+type UserRoleCode = 'platform_admin' | 'entity_admin' | 'entity_staff' | 'organizer_admin';
+
 interface User {
   id: number;
   role?: {
-    role_name: string;
+    role_code: UserRoleCode;
   };
   organization_id?: number;
+}
+
+/**
+ * Check if token is expired based on expires_at cookie
+ * Uses a buffer of 30 seconds to prevent edge cases
+ */
+function isTokenExpired(request: NextRequest): boolean {
+  const expiresAtStr = request.cookies.get('token_expires_at')?.value;
+
+  if (!expiresAtStr) {
+    // No expiry info - let it through (backwards compatibility)
+    return false;
+  }
+
+  try {
+    const expiresAt = new Date(decodeURIComponent(expiresAtStr)).getTime();
+    const bufferMs = 30 * 1000; // 30 seconds buffer
+    return Date.now() >= expiresAt - bufferMs;
+  } catch {
+    // Invalid date format - treat as expired for security
+    return true;
+  }
 }
 
 // Public routes configuration (optimized for Edge Runtime)
@@ -22,8 +49,10 @@ interface User {
 const PUBLIC_ROUTES = new Set([
   '/',                  // Landing page
   '/login',             // Authentication
-  '/solicitar-cuenta',  // Registration request form
+  '/register-request',  // Registration request form
   '/accept-invitation', // Accept invitation (public)
+  '/forgot-password',   // Password recovery
+  '/reset-password',    // Password reset
 ]);
 
 // Public route prefixes (allow sub-routes)
@@ -45,7 +74,7 @@ function isPublicRoute(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
 }
 
-// Helper function to get user from cookies
+// Helper function to get user from cookies with robust validation
 function getUserFromCookies(request: NextRequest): User | null {
   const token = request.cookies.get('token')?.value;
   const userStr = request.cookies.get('user')?.value;
@@ -55,16 +84,33 @@ function getUserFromCookies(request: NextRequest): User | null {
   }
 
   try {
-    const user = JSON.parse(decodeURIComponent(userStr)) as User;
-    return user;
+    const decoded = decodeURIComponent(userStr);
+    const user = JSON.parse(decoded);
+
+    // Validate required user structure
+    if (
+      typeof user !== 'object' ||
+      user === null ||
+      typeof user.id !== 'number' ||
+      user.id <= 0
+    ) {
+      return null;
+    }
+
+    // Validate role structure if present
+    if (user.role && (typeof user.role !== 'object' || typeof user.role.role_code !== 'string')) {
+      return null;
+    }
+
+    return user as User;
   } catch {
     return null;
   }
 }
 
-// Helper function to get role name
-function getRoleName(user: User): string | null {
-  return user?.role?.role_name || null;
+// Helper function to get role code
+function getRoleCode(user: User): UserRoleCode | null {
+  return user?.role?.role_code || null;
 }
 
 export function middleware(request: NextRequest) {
@@ -85,17 +131,25 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const roleName = getRoleName(user);
+  // Token expired - redirect to login with expired flag
+  if (isTokenExpired(request)) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    loginUrl.searchParams.set('expired', '1');
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const roleCode = getRoleCode(user);
 
   // No role - redirect to login (invalid user)
-  if (!roleName) {
+  if (!roleCode) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // ROLE-BASED PROTECTION
 
   // Event Organizer - ONLY /organizer/* and /calendar
-  if (roleName === 'Event Organizer') {
+  if (roleCode === 'organizer_admin') {
     // Allow: /organizer/*, /calendar/*
     const allowedPaths = ['/organizer', '/calendar'];
     const isAllowed = allowedPaths.some(path => pathname.startsWith(path));
@@ -107,8 +161,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Entity roles (Admin, Staff) - NO /organizer/*
-  const entityRoles = ['Entity Administrator', 'Entity Staff', 'Platform Administrator'];
-  if (entityRoles.includes(roleName)) {
+  const entityRoles: UserRoleCode[] = ['entity_admin', 'entity_staff', 'platform_admin'];
+  if (entityRoles.includes(roleCode)) {
     if (pathname.startsWith('/organizer')) {
       // Trying to access Organizer routes - redirect to events
       return NextResponse.redirect(new URL('/events', request.url));
@@ -116,7 +170,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Entity Staff - NO write operations (handled by backend, but good UX to prevent access)
-  if (roleName === 'Entity Staff') {
+  if (roleCode === 'entity_staff') {
     const readOnlyRestrictions = [
       '/events/create',
       '/events/edit',

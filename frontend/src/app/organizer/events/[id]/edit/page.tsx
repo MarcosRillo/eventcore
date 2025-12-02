@@ -1,16 +1,17 @@
-'use client'
+/**
+ * Legacy Edit Event Page - Redirects to /organizer/[id]/edit
+ *
+ * This page is deprecated (Dec 2, 2025).
+ * Event editing is now at /organizer/[id]/edit.
+ */
 
-import { useParams } from 'next/navigation'
-import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
+import { redirect } from 'next/navigation'
 
-export default function EditEventPage() {
-  const params = useParams()
-  const eventId = Number(params.id)
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Edit Event</h1>
-      <OrganizerEventFormContainer eventId={eventId} />
-    </div>
-  )
+export default async function LegacyEditEventPage({ params }: PageProps) {
+  const { id } = await params
+  redirect(`/organizer/${id}/edit`)
 }

@@ -128,6 +128,7 @@ export interface RegistrationRequestFormData {
   organization_logo: File | null
   website: string
   motivation: string
+  accepted_terms: boolean
 }
 
 /**
@@ -146,6 +147,7 @@ export interface RegistrationRequestFormErrors {
   organization_logo?: string
   website?: string
   motivation?: string
+  accepted_terms?: string
   general?: string
 }
 
@@ -185,6 +187,7 @@ export const initialFormData: RegistrationRequestFormData = {
   organization_logo: null,
   website: '',
   motivation: '',
+  accepted_terms: false,
 }
 
 // ============================================

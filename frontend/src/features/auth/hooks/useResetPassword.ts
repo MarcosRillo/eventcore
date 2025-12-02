@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { AxiosError } from 'axios';
 import { validateResetToken, resetPassword } from '@/services/authService';
 
 interface PasswordErrors {
@@ -149,16 +150,18 @@ export const useResetPassword = (): UseResetPasswordReturn => {
       });
       setSuccess(true);
     } catch (err) {
-      if (err instanceof Error) {
-        // Check for specific error messages from backend
-        if (err.message.includes('token') || err.message.includes('expired')) {
-          setError('El enlace ha expirado. Por favor solicita uno nuevo.');
-          setTokenValid(false);
-        } else {
-          setError('Error al restablecer la contraseña. Por favor intenta de nuevo.');
-        }
+      const axiosError = err as AxiosError<{ message?: string }>;
+
+      // Use HTTP status codes for reliable error detection
+      if (axiosError.response?.status === 400 || axiosError.response?.status === 422) {
+        // Token expired, invalid, or already used
+        setError('El enlace ha expirado. Por favor solicita uno nuevo.');
+        setTokenValid(false);
+      } else if (axiosError.response?.data?.message) {
+        // Backend provided a specific error message
+        setError(axiosError.response.data.message);
       } else {
-        setError('Error inesperado. Por favor intenta de nuevo.');
+        setError('Error al restablecer la contraseña. Por favor intenta de nuevo.');
       }
     } finally {
       setIsLoading(false);

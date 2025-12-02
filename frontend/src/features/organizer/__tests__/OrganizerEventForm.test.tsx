@@ -10,10 +10,21 @@ import { OrganizerEventFormContainer } from '@/features/organizer/components/sma
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import * as categoryService from '@/features/categories/services/category.service'
 import * as locationService from '@/features/locations/services/location.service'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
+import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
+
+// Mock ResizeObserver for Headless UI Combobox
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
 
 jest.mock('../services/organizer-event.service')
 jest.mock('@/features/categories/services/category.service')
 jest.mock('@/features/locations/services/location.service')
+jest.mock('@/features/event-types/services/eventType.service')
+jest.mock('@/features/event-types/services/eventSubtype.service')
 
 const mockPush = jest.fn()
 const mockBack = jest.fn()
@@ -35,6 +46,17 @@ describe('OrganizerEventForm', () => {
     { id: 2, name: 'Parque 9 de Julio' }
   ]
 
+  // Event Types/Subtypes (required since Dec 2, 2025)
+  const mockEventTypes = [
+    { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+    { id: 2, name: 'Festival', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' }
+  ]
+
+  const mockEventSubtypes = [
+    { id: 1, name: 'Internacional', event_type_id: 1, entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+    { id: 2, name: 'Nacional', event_type_id: 1, entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' }
+  ]
+
   beforeEach(() => {
     jest.clearAllMocks()
     mockPush.mockClear()
@@ -43,9 +65,11 @@ describe('OrganizerEventForm', () => {
     ;(categoryService.getCategories as jest.Mock).mockResolvedValue({
       data: mockCategories
     })
-    ;(locationService.getLocations as jest.Mock).mockResolvedValue({
-      data: { data: mockLocations }
-    })
+    // Mock searchLocations for async location search
+    ;(locationService.searchLocations as jest.Mock).mockResolvedValue(mockLocations)
+    // Mock event types and subtypes services
+    ;(eventTypeService.getActiveEventTypes as jest.Mock).mockResolvedValue(mockEventTypes)
+    ;(eventSubtypeService.getActiveEventSubtypes as jest.Mock).mockResolvedValue(mockEventSubtypes)
   })
 
   describe('Initial Render', () => {
@@ -54,7 +78,6 @@ describe('OrganizerEventForm', () => {
 
       await waitFor(() => {
         expect(categoryService.getCategories).toHaveBeenCalled()
-        expect(locationService.getLocations).toHaveBeenCalled()
       })
 
       await waitFor(() => {
@@ -62,13 +85,15 @@ describe('OrganizerEventForm', () => {
       })
     })
 
-    test('should load categories and locations on mount', async () => {
+    test('should load categories on mount (locations are async search)', async () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
         expect(categoryService.getCategories).toHaveBeenCalled()
-        expect(locationService.getLocations).toHaveBeenCalled()
       })
+
+      // Locations are no longer pre-loaded, they are searched asynchronously
+      expect(locationService.searchLocations).not.toHaveBeenCalled()
     })
   })
 
@@ -78,7 +103,6 @@ describe('OrganizerEventForm', () => {
 
       await waitFor(() => {
         expect(categoryService.getCategories).toHaveBeenCalled()
-        expect(locationService.getLocations).toHaveBeenCalled()
       })
 
       await waitFor(() => {
@@ -124,7 +148,7 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('Create Mode', () => {
-    test('should create event with valid data', async () => {
+    test('should create event with custom location', async () => {
       const mockNewEvent = {
         id: 1,
         title: 'Festival de Jazz',
@@ -132,7 +156,9 @@ describe('OrganizerEventForm', () => {
         start_date: '2030-12-15T18:00',
         end_date: '2030-12-15T22:00',
         category_id: 1,
-        locations: [{ id: 1, name: 'Plaza Independencia' }],
+        event_type_id: 1,
+        event_subtype_id: 1,
+        custom_location_name: 'Salón El Jardín',
         status: 'draft'
       }
 
@@ -155,16 +181,32 @@ describe('OrganizerEventForm', () => {
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
       const endDateInput = document.getElementById('end_date') as HTMLInputElement
       const categorySelect = document.getElementById('category_id') as HTMLSelectElement
+      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Festival de Jazz' } })
       fireEvent.change(descInput, { target: { value: 'Un evento increíble' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
       fireEvent.change(endDateInput, { target: { value: '2030-12-15T22:00' } })
       fireEvent.change(categorySelect, { target: { value: '1' } })
+      // Select event type and subtype (required since Dec 2, 2025)
+      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
+      // Wait for subtype select to be enabled after type selection
+      await waitFor(() => {
+        expect(eventSubtypeSelect).not.toBeDisabled()
+      })
+      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
 
-      // Select location checkbox
-      const locationCheckbox = screen.getByLabelText('Plaza Independencia')
-      fireEvent.click(locationCheckbox)
+      // Use custom location instead of selecting from dropdown
+      const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
+      fireEvent.click(otroCheckbox)
+
+      await waitFor(() => {
+        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+      })
+
+      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      fireEvent.change(customLocationInput, { target: { value: 'Salón El Jardín' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)
@@ -176,7 +218,9 @@ describe('OrganizerEventForm', () => {
             description: 'Un evento increíble',
             start_date: '2030-12-15T18:00',
             category_id: 1,
-            location_ids: [1]
+            event_type_id: 1,
+            event_subtype_id: 1,
+            custom_location_name: 'Salón El Jardín'
           })
         )
       })
@@ -196,6 +240,8 @@ describe('OrganizerEventForm', () => {
         start_date: '2030-12-15T18:00',
         end_date: '2030-12-15T22:00',
         category_id: 1,
+        event_type_id: 1,
+        event_subtype_id: 1,
         locations: [{ id: 1, name: 'Plaza Independencia' }],
         status: 'draft'
       }
@@ -233,6 +279,8 @@ describe('OrganizerEventForm', () => {
         start_date: '2030-12-15T18:00',
         end_date: '2030-12-15T22:00',
         category_id: 1,
+        event_type_id: 1,
+        event_subtype_id: 1,
         locations: [{ id: 1, name: 'Plaza Independencia' }],
         status: 'draft'
       }
@@ -267,7 +315,9 @@ describe('OrganizerEventForm', () => {
           1,
           expect.objectContaining({
             id: 1,
-            title: 'Updated Title'
+            title: 'Updated Title',
+            event_type_id: 1,
+            event_subtype_id: 1
           })
         )
       })
@@ -298,14 +348,31 @@ describe('OrganizerEventForm', () => {
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
       const categorySelect = document.getElementById('category_id') as HTMLSelectElement
+      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
       fireEvent.change(categorySelect, { target: { value: '1' } })
+      // Select event type and subtype (required since Dec 2, 2025)
+      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
+      // Wait for subtype select to be enabled after type selection
+      await waitFor(() => {
+        expect(eventSubtypeSelect).not.toBeDisabled()
+      })
+      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
 
-      const locationCheckbox = screen.getByLabelText('Plaza Independencia')
-      fireEvent.click(locationCheckbox)
+      // Use custom location
+      const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
+      fireEvent.click(otroCheckbox)
+
+      await waitFor(() => {
+        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+      })
+
+      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      fireEvent.change(customLocationInput, { target: { value: 'Test Location' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)
@@ -335,14 +402,31 @@ describe('OrganizerEventForm', () => {
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
       const categorySelect = document.getElementById('category_id') as HTMLSelectElement
+      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
       fireEvent.change(categorySelect, { target: { value: '1' } })
+      // Select event type and subtype (required since Dec 2, 2025)
+      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
+      // Wait for subtype select to be enabled after type selection
+      await waitFor(() => {
+        expect(eventSubtypeSelect).not.toBeDisabled()
+      })
+      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
 
-      const locationCheckbox = screen.getByLabelText('Plaza Independencia')
-      fireEvent.click(locationCheckbox)
+      // Use custom location
+      const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
+      fireEvent.click(otroCheckbox)
+
+      await waitFor(() => {
+        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+      })
+
+      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      fireEvent.change(customLocationInput, { target: { value: 'Test Location' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)
@@ -373,14 +457,31 @@ describe('OrganizerEventForm', () => {
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
       const categorySelect = document.getElementById('category_id') as HTMLSelectElement
+      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
+      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
       fireEvent.change(categorySelect, { target: { value: '1' } })
+      // Select event type and subtype (required since Dec 2, 2025)
+      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
+      // Wait for subtype select to be enabled after type selection
+      await waitFor(() => {
+        expect(eventSubtypeSelect).not.toBeDisabled()
+      })
+      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
 
-      const locationCheckbox = screen.getByLabelText('Plaza Independencia')
-      fireEvent.click(locationCheckbox)
+      // Use custom location
+      const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
+      fireEvent.click(otroCheckbox)
+
+      await waitFor(() => {
+        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+      })
+
+      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      fireEvent.change(customLocationInput, { target: { value: 'Test Location' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)

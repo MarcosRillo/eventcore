@@ -1,13 +1,16 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Loader2, AlertCircle, RefreshCw, UserPlus } from 'lucide-react'
-import { useInvitations } from '../../hooks/useInvitations'
-import InvitationTable from '../dumb/InvitationTable'
-import CreateInvitationModal from '../dumb/CreateInvitationModal'
+import { useState, useCallback } from 'react';
+import { useInvitations } from '../../hooks/useInvitations';
+import InvitationTable from '../dumb/InvitationTable';
+import { CreateInvitationModalContainer } from './CreateInvitationModalContainer';
+import { ConfirmDialogData } from '@/shared/components/tables';
+import type { Invitation } from '../../types/invitation.types';
+import { ArrowPathIcon, UserPlusIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui';
 
 export const InvitationTableContainer = () => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const {
     invitations,
@@ -15,89 +18,101 @@ export const InvitationTableContainer = () => {
     loading,
     creating,
     error,
-    resendingId,
-    cancellingId,
     fetchInvitations,
     handleCreate,
     handleResend,
     handleCancel,
     clearError,
-  } = useInvitations()
+  } = useInvitations();
 
-  const onResend = async (id: number) => {
-    const success = await handleResend(id)
-    if (success) {
-      // Could show toast here
-    }
-  }
+  // Confirm dialog state for cancel
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogData>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
-  const onCancel = async (id: number) => {
-    const success = await handleCancel(id)
-    if (success) {
-      // Could show toast here
-    }
-  }
+  // Handle resend with Invitation object
+  const onResend = useCallback(async (invitation: Invitation) => {
+    await handleResend(invitation.id);
+  }, [handleResend]);
 
-  if (loading && invitations.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-12" data-testid="loading-state">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-gray-600">Cargando invitaciones...</span>
-      </div>
-    )
-  }
+  // Handle cancel with confirmation
+  const onCancelClick = useCallback((invitation: Invitation) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Revocar Invitación',
+      message: `¿Estás seguro de que deseas revocar la invitación a "${invitation.email}"? Esta acción no se puede deshacer.`,
+      onConfirm: async () => {
+        await handleCancel(invitation.id);
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+      },
+    });
+  }, [handleCancel]);
+
+  // Close confirm dialog handler
+  const handleCloseConfirmDialog = useCallback(() => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+  }, []);
 
   return (
     <div className="space-y-4">
+      {/* Error Alert */}
       {error && (
         <div
-          className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center justify-between"
+          className="bg-error-50 border border-error-200 rounded-md p-4 flex items-center justify-between"
           data-testid="error-state"
         >
           <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-            <span className="text-sm text-red-700">{error}</span>
+            <XCircleIcon className="h-5 w-5 text-error-400 mr-2" aria-hidden="true" />
+            <span className="text-sm text-error-700">{error}</span>
           </div>
           <button
             onClick={clearError}
-            className="text-sm text-red-600 hover:text-red-800 underline"
+            className="text-error-600 hover:text-error-800"
+            type="button"
           >
-            Cerrar
+            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       )}
 
+      {/* Action Buttons */}
       <div className="flex justify-end space-x-2">
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={fetchInvitations}
           disabled={loading}
-          className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
           data-testid="refresh-button"
         >
-          <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+          <ArrowPathIcon className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           data-testid="create-invitation-button"
         >
-          <UserPlus className="h-4 w-4 mr-1" />
+          <UserPlusIcon className="h-4 w-4 mr-1" />
           Nueva invitación
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <InvitationTable
-          invitations={invitations}
-          onResend={onResend}
-          onCancel={onCancel}
-          resendingId={resendingId}
-          cancellingId={cancellingId}
-        />
-      </div>
+      {/* Table */}
+      <InvitationTable
+        invitations={invitations}
+        loading={loading && invitations.length === 0}
+        onResend={onResend}
+        onCancel={onCancelClick}
+        confirmDialog={confirmDialog}
+        onCloseConfirmDialog={handleCloseConfirmDialog}
+      />
 
-      <CreateInvitationModal
+      {/* Create Modal */}
+      <CreateInvitationModalContainer
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreate}
@@ -105,7 +120,7 @@ export const InvitationTableContainer = () => {
         isLoading={creating}
       />
     </div>
-  )
-}
+  );
+};
 
-export default InvitationTableContainer
+export default InvitationTableContainer;

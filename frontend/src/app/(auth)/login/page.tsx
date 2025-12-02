@@ -32,14 +32,14 @@ const LoginPage = () => {
   // Show loading if user is already authenticated
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <LoadingSpinner size="xl" text="Redirigiendo..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo and title */}
         <div className="flex justify-center">
@@ -50,10 +50,10 @@ const LoginPage = () => {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-neutral-900">
-          Inicia sesión en CalendApp
+          Eventos Tucumán
         </h2>
         <p className="mt-2 text-center text-sm text-neutral-600">
-          Accede a tu panel de administración
+          Plataforma de eventos turísticos y culturales
         </p>
       </div>
 
@@ -131,36 +131,6 @@ const LoginPage = () => {
               Iniciar Sesión
             </Button>
           </form>
-
-          {/* Demo credentials info */}
-          <div className="mt-8 pt-6 border-t border-neutral-200">
-            <div className="bg-primary-50 border border-primary-200 rounded-md p-4">
-              <div className="flex">
-                <svg className="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-primary-800">
-                    Credenciales de Demo
-                  </h3>
-                  <div className="mt-2 text-sm text-primary-700">
-                    <p><strong>Email:</strong> admin@ejemplo.com</p>
-                    <p><strong>Contraseña:</strong> password</p>
-                    <p className="mt-1 text-xs">
-                      Estas son las credenciales de prueba para el entorno de desarrollo.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-neutral-500">
-              © 2025 CalendApp. Sistema de gestión de calendario y eventos.
-            </p>
-          </div>
         </div>
       </div>
     </div>

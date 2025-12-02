@@ -1,12 +1,10 @@
-'use client'
-
 /**
  * User Edit Modal - Dumb Component
  * Modal for editing user name and email
+ * Receives all state via props (no hooks)
  */
 
-import { useState, useEffect } from 'react'
-import type { User, UpdateUserData } from '../../types/user.types'
+import type { User } from '../../types/user.types'
 import Modal from '@/components/ui/Modal'
 import { Button } from '@/components/ui'
 
@@ -14,70 +12,32 @@ interface UserEditModalProps {
   user: User | null
   isOpen: boolean
   loading: boolean
+  name: string
+  email: string
+  errors: { name?: string; email?: string }
+  onNameChange: (name: string) => void
+  onEmailChange: (email: string) => void
+  onSubmit: (e: React.FormEvent) => void
   onClose: () => void
-  onSave: (id: number, data: UpdateUserData) => Promise<boolean>
 }
 
 export function UserEditModal({
   user,
   isOpen,
   loading,
+  name,
+  email,
+  errors,
+  onNameChange,
+  onEmailChange,
+  onSubmit,
   onClose,
-  onSave,
 }: UserEditModalProps) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({})
-
-  // Reset form when user changes
-  useEffect(() => {
-    if (user) {
-      setName(user.name)
-      setEmail(user.email)
-      setErrors({})
-    }
-  }, [user])
-
-  const validate = (): boolean => {
-    const newErrors: { name?: string; email?: string } = {}
-
-    if (!name.trim()) {
-      newErrors.name = 'El nombre es obligatorio'
-    } else if (name.length > 255) {
-      newErrors.name = 'El nombre no puede exceder 255 caracteres'
-    }
-
-    if (!email.trim()) {
-      newErrors.email = 'El email es obligatorio'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'El email debe ser válido'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!user || !validate()) return
-
-    const success = await onSave(user.id, { name: name.trim(), email: email.trim() })
-    if (success) {
-      onClose()
-    }
-  }
-
-  const handleClose = () => {
-    setErrors({})
-    onClose()
-  }
-
   if (!user) return null
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Editar Usuario" size="md">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal isOpen={isOpen} onClose={onClose} title="Editar Usuario" size="md">
+      <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label
             htmlFor="edit-user-name"
@@ -89,7 +49,7 @@ export function UserEditModal({
             id="edit-user-name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => onNameChange(e.target.value)}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
               errors.name ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -111,7 +71,7 @@ export function UserEditModal({
             id="edit-user-email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => onEmailChange(e.target.value)}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
               errors.email ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -126,7 +86,7 @@ export function UserEditModal({
           <Button
             type="button"
             variant="secondary"
-            onClick={handleClose}
+            onClick={onClose}
             disabled={loading}
           >
             Cancelar

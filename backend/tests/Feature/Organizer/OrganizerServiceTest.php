@@ -10,7 +10,7 @@ use App\Models\EventStatus;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\Test;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 class OrganizerServiceTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private OrganizerService $service;
     private EventValidator $validator;
@@ -185,7 +185,7 @@ class OrganizerServiceTest extends TestCase
     // ==================== DELETE TESTS ====================
 
     #[Test]
-    public function test_delete_event_removes_from_database(): void
+    public function test_delete_event_soft_deletes_from_database(): void
     {
         $event = Event::factory()->create([
             'organization_id' => $this->organization->id,
@@ -198,7 +198,8 @@ class OrganizerServiceTest extends TestCase
 
         $this->service->deleteEvent($event, $this->user);
 
-        $this->assertDatabaseMissing('events', ['id' => $eventId]);
+        // With SoftDeletes, the record exists but has deleted_at set
+        $this->assertSoftDeleted('events', ['id' => $eventId]);
     }
 
     #[Test]

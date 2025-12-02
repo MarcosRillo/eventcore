@@ -31,16 +31,8 @@ export const useAuthActions = (): AuthContextType => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // CRITICAL FIX: Prevent multiple initialization attempts
+  // Prevent multiple initialization attempts (React Strict Mode)
   const hasInitialized = useRef(false);
-
-  // EMERGENCY FIX: Stop infinite re-renders in development
-  const renderCount = useRef(0);
-  renderCount.current++;
-
-  if (renderCount.current > 10) {
-    // Don't throw error, just log and continue with current state
-  }
 
   // Initialize authentication state on app load
   useEffect(() => {
@@ -91,9 +83,10 @@ export const useAuthActions = (): AuthContextType => {
     setUser(null);
     setError(null);
 
-    // Clear cookies
+    // Clear cookies (including new token_expires_at cookie)
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'token_expires_at=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
   // Login function
@@ -120,9 +113,18 @@ export const useAuthActions = (): AuthContextType => {
       storeTokens(access_token, refresh_token, expires_at);
       localStorage.setItem(TOKEN_KEYS.USER, JSON.stringify(userData));
 
+      // Calculate cookie max-age based on token expiry (sync with backend)
+      const expiresAtTime = new Date(expires_at).getTime();
+      const maxAgeSeconds = Math.max(0, Math.floor((expiresAtTime - Date.now()) / 1000));
+
+      // Determine if we're in production (HTTPS) for secure cookie flag
+      const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
+      const secureFlag = isProduction ? '; secure' : '';
+
       // Store in cookies for middleware access (access token for API, user for role checks)
-      document.cookie = `token=${access_token}; path=/; max-age=86400; samesite=strict`;
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=86400; samesite=strict`;
+      document.cookie = `token=${access_token}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
+      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
 
       // Update state
       setTokenState(access_token);
@@ -181,9 +183,9 @@ export const useAuthActions = (): AuthContextType => {
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch {
-      // If refresh fails, user might need to login again
-      // handleLogout();         // DISABLED FOR DEBUGGING
-      // router.push('/login');  // DISABLED FOR DEBUGGING
+      // Token is invalid or expired - clear auth state and redirect to login
+      handleLogout();
+      router.push('/login');
     }
   };
 

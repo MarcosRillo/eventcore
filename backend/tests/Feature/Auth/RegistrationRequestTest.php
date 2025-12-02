@@ -6,7 +6,7 @@ use App\Models\RegistrationRequest;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Organization;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 class RegistrationRequestTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

@@ -11,7 +11,7 @@ import {
   HeroSection,
   FeaturedEventsSection,
   CategoriesSection,
-  Footer
+  OrganizersSection
 } from '@/features/landing/components/dumb'
 
 export const LandingContainer = () => {
@@ -63,8 +63,8 @@ export const LandingContainer = () => {
         onCategoryClick={handleCategoryClick}
       />
 
-      {/* Footer */}
-      <Footer />
+      {/* Organizers CTA Section */}
+      <OrganizersSection />
     </main>
   )
 }

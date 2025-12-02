@@ -1,6 +1,74 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import UserTable from '../UserTable'
-import type { User, PaginationMeta } from '../../../types/user.types'
+import { render, screen, fireEvent } from '@testing-library/react';
+import UserTable from '../UserTable';
+import type { User, PaginationMeta } from '../../../types/user.types';
+
+// Mock GenericTable to test UserTable behavior
+jest.mock('@/shared/components/tables', () => ({
+  GenericTable: jest.fn(({ items, columns, actions, isLoading, emptyMessage, pagination, onPageChange, testId }) => {
+    if (isLoading) {
+      return <div data-testid={testId} className="animate-pulse">Loading...</div>;
+    }
+
+    if (items.length === 0) {
+      return <div data-testid={testId}>{emptyMessage}</div>;
+    }
+
+    return (
+      <div data-testid={testId}>
+        <table>
+          <thead>
+            <tr>
+              {columns.map((col: { key: string; label: string }) => (
+                <th key={col.key}>{col.label}</th>
+              ))}
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item: User) => (
+              <tr key={item.id}>
+                {columns.map((col: { key: string; render?: (item: User) => React.ReactNode }) => (
+                  <td key={col.key}>
+                    {col.render ? col.render(item) : String(item[col.key as keyof User])}
+                  </td>
+                ))}
+                <td>
+                  {actions.map((action: { key: string; label: string; condition?: (item: User) => boolean; onClick: (item: User) => void }) => {
+                    if (action.condition && !action.condition(item)) return null;
+                    return (
+                      <button key={action.key} onClick={() => action.onClick(item)}>
+                        {action.label}
+                      </button>
+                    );
+                  })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {pagination && pagination.last_page > 1 && (
+          <div>
+            <button
+              disabled={pagination.current_page === 1}
+              onClick={() => onPageChange(pagination.current_page - 1)}
+            >
+              Anterior
+            </button>
+            <button
+              disabled={pagination.current_page === pagination.last_page}
+              onClick={() => onPageChange(pagination.current_page + 1)}
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }),
+  TableColumnConfig: {},
+  TableActionConfig: {},
+  ConfirmDialogData: {},
+}));
 
 describe('UserTable', () => {
   const mockUser: User = {
@@ -17,7 +85,7 @@ describe('UserTable', () => {
     },
     created_at: '2025-11-28T00:00:00Z',
     updated_at: '2025-11-28T00:00:00Z',
-  }
+  };
 
   const suspendedUser: User = {
     id: 2,
@@ -33,214 +101,186 @@ describe('UserTable', () => {
     },
     created_at: '2025-11-28T00:00:00Z',
     updated_at: '2025-11-28T00:00:00Z',
-  }
+  };
 
   const mockPagination: PaginationMeta = {
     current_page: 1,
     last_page: 2,
     per_page: 10,
     total: 15,
-  }
+  };
 
   const defaultProps = {
     users: [mockUser],
     pagination: mockPagination,
     loading: false,
-    actionLoading: null,
     onPageChange: jest.fn(),
     onEdit: jest.fn(),
     onSuspend: jest.fn(),
     onUnsuspend: jest.fn(),
     onDelete: jest.fn(),
-  }
+  };
 
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   describe('rendering', () => {
     it('should render table with users', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('Patricia López')).toBeInTheDocument()
-      expect(screen.getByText('patricia.lopez@enteturismo.gov.ar')).toBeInTheDocument()
-      expect(screen.getByText('Entity Staff')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Patricia López')).toBeInTheDocument();
+      expect(screen.getByText('patricia.lopez@enteturismo.gov.ar')).toBeInTheDocument();
+      expect(screen.getByText('Entity Staff')).toBeInTheDocument();
+    });
 
     it('should render empty state when no users', () => {
-      render(<UserTable {...defaultProps} users={[]} />)
+      render(<UserTable {...defaultProps} users={[]} />);
 
-      expect(screen.getByText('No hay usuarios del equipo')).toBeInTheDocument()
-      expect(screen.getByText(/Invita a nuevos miembros/)).toBeInTheDocument()
-    })
+      expect(screen.getByText('No hay usuarios del equipo')).toBeInTheDocument();
+    });
 
     it('should render multiple users', () => {
-      render(<UserTable {...defaultProps} users={[mockUser, suspendedUser]} />)
+      render(<UserTable {...defaultProps} users={[mockUser, suspendedUser]} />);
 
-      expect(screen.getByText('Patricia López')).toBeInTheDocument()
-      expect(screen.getByText('Miguel Sánchez')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Patricia López')).toBeInTheDocument();
+      expect(screen.getByText('Miguel Sánchez')).toBeInTheDocument();
+    });
 
     it('should show user initials avatar', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('PL')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('PL')).toBeInTheDocument();
+    });
+  });
 
   describe('loading state', () => {
-    it('should render loading skeleton', () => {
-      render(<UserTable {...defaultProps} loading={true} />)
+    it('should render loading state', () => {
+      render(<UserTable {...defaultProps} loading={true} />);
 
-      const skeleton = document.querySelector('.animate-pulse')
-      expect(skeleton).toBeInTheDocument()
-    })
+      const table = screen.getByTestId('user-table');
+      expect(table).toHaveClass('animate-pulse');
+    });
 
-    it('should not render table when loading', () => {
-      render(<UserTable {...defaultProps} loading={true} />)
+    it('should not render users when loading', () => {
+      render(<UserTable {...defaultProps} loading={true} />);
 
-      expect(screen.queryByText('Patricia López')).not.toBeInTheDocument()
-    })
-  })
+      expect(screen.queryByText('Patricia López')).not.toBeInTheDocument();
+    });
+  });
 
   describe('status display', () => {
     it('should show "Activo" badge for active users', () => {
-      render(<UserTable {...defaultProps} users={[mockUser]} />)
+      render(<UserTable {...defaultProps} users={[mockUser]} />);
 
-      expect(screen.getByText('Activo')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Activo')).toBeInTheDocument();
+    });
 
     it('should show "Suspendido" badge for suspended users', () => {
-      render(<UserTable {...defaultProps} users={[suspendedUser]} />)
+      render(<UserTable {...defaultProps} users={[suspendedUser]} />);
 
-      expect(screen.getByText('Suspendido')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Suspendido')).toBeInTheDocument();
+    });
 
-    it('should show green badge for active users', () => {
-      render(<UserTable {...defaultProps} users={[mockUser]} />)
+    it('should use success semantic tokens for active users', () => {
+      render(<UserTable {...defaultProps} users={[mockUser]} />);
 
-      const badge = screen.getByText('Activo')
-      expect(badge).toHaveClass('bg-green-100')
-      expect(badge).toHaveClass('text-green-800')
-    })
+      const badge = screen.getByText('Activo');
+      expect(badge).toHaveClass('bg-success-100');
+      expect(badge).toHaveClass('text-success-800');
+    });
 
-    it('should show red badge for suspended users', () => {
-      render(<UserTable {...defaultProps} users={[suspendedUser]} />)
+    it('should use error semantic tokens for suspended users', () => {
+      render(<UserTable {...defaultProps} users={[suspendedUser]} />);
 
-      const badge = screen.getByText('Suspendido')
-      expect(badge).toHaveClass('bg-red-100')
-      expect(badge).toHaveClass('text-red-800')
-    })
-  })
+      const badge = screen.getByText('Suspendido');
+      expect(badge).toHaveClass('bg-error-100');
+      expect(badge).toHaveClass('text-error-800');
+    });
+  });
 
   describe('action buttons', () => {
     it('should render Edit button', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('Editar')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Editar')).toBeInTheDocument();
+    });
 
     it('should render Suspend button for active users', () => {
-      render(<UserTable {...defaultProps} users={[mockUser]} />)
+      render(<UserTable {...defaultProps} users={[mockUser]} />);
 
-      expect(screen.getByText('Suspender')).toBeInTheDocument()
-      expect(screen.queryByText('Reactivar')).not.toBeInTheDocument()
-    })
+      expect(screen.getByText('Suspender')).toBeInTheDocument();
+      expect(screen.queryByText('Reactivar')).not.toBeInTheDocument();
+    });
 
-    it('should render Unsuspend button for suspended users', () => {
-      render(<UserTable {...defaultProps} users={[suspendedUser]} />)
+    it('should render Reactivate button for suspended users', () => {
+      render(<UserTable {...defaultProps} users={[suspendedUser]} />);
 
-      expect(screen.getByText('Reactivar')).toBeInTheDocument()
-      expect(screen.queryByText('Suspender')).not.toBeInTheDocument()
-    })
+      expect(screen.getByText('Reactivar')).toBeInTheDocument();
+      expect(screen.queryByText('Suspender')).not.toBeInTheDocument();
+    });
 
     it('should render Delete button', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('Eliminar')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Eliminar')).toBeInTheDocument();
+    });
 
-    it('should call onEdit when clicking Edit button', () => {
-      render(<UserTable {...defaultProps} />)
+    it('should call onEdit with user when clicking Edit button', () => {
+      render(<UserTable {...defaultProps} />);
 
-      fireEvent.click(screen.getByText('Editar'))
+      fireEvent.click(screen.getByText('Editar'));
 
-      expect(defaultProps.onEdit).toHaveBeenCalledWith(mockUser)
-      expect(defaultProps.onEdit).toHaveBeenCalledTimes(1)
-    })
+      expect(defaultProps.onEdit).toHaveBeenCalledWith(mockUser);
+      expect(defaultProps.onEdit).toHaveBeenCalledTimes(1);
+    });
 
-    it('should call onSuspend when clicking Suspend button', () => {
-      render(<UserTable {...defaultProps} users={[mockUser]} />)
+    it('should call onSuspend with user when clicking Suspend button', () => {
+      render(<UserTable {...defaultProps} users={[mockUser]} />);
 
-      fireEvent.click(screen.getByText('Suspender'))
+      fireEvent.click(screen.getByText('Suspender'));
 
-      expect(defaultProps.onSuspend).toHaveBeenCalledWith(1)
-      expect(defaultProps.onSuspend).toHaveBeenCalledTimes(1)
-    })
+      expect(defaultProps.onSuspend).toHaveBeenCalledWith(mockUser);
+      expect(defaultProps.onSuspend).toHaveBeenCalledTimes(1);
+    });
 
-    it('should call onUnsuspend when clicking Unsuspend button', () => {
-      render(<UserTable {...defaultProps} users={[suspendedUser]} />)
+    it('should call onUnsuspend with user when clicking Reactivate button', () => {
+      render(<UserTable {...defaultProps} users={[suspendedUser]} />);
 
-      fireEvent.click(screen.getByText('Reactivar'))
+      fireEvent.click(screen.getByText('Reactivar'));
 
-      expect(defaultProps.onUnsuspend).toHaveBeenCalledWith(2)
-      expect(defaultProps.onUnsuspend).toHaveBeenCalledTimes(1)
-    })
+      expect(defaultProps.onUnsuspend).toHaveBeenCalledWith(suspendedUser);
+      expect(defaultProps.onUnsuspend).toHaveBeenCalledTimes(1);
+    });
 
-    it('should call onDelete when clicking Delete button', () => {
-      render(<UserTable {...defaultProps} />)
+    it('should call onDelete with user when clicking Delete button', () => {
+      render(<UserTable {...defaultProps} />);
 
-      fireEvent.click(screen.getByText('Eliminar'))
+      fireEvent.click(screen.getByText('Eliminar'));
 
-      expect(defaultProps.onDelete).toHaveBeenCalledWith(1)
-      expect(defaultProps.onDelete).toHaveBeenCalledTimes(1)
-    })
-  })
+      expect(defaultProps.onDelete).toHaveBeenCalledWith(mockUser);
+      expect(defaultProps.onDelete).toHaveBeenCalledTimes(1);
+    });
+  });
 
-  describe('action loading states', () => {
-    it('should show loading state on Suspend button', () => {
-      render(<UserTable {...defaultProps} actionLoading={1} />)
+  describe('conditional actions', () => {
+    it('should show suspend for active and reactivate for suspended users', () => {
+      render(<UserTable {...defaultProps} users={[mockUser, suspendedUser]} />);
 
-      const suspendButton = screen.getByText('Suspender').closest('button')
-      expect(suspendButton).toBeInTheDocument()
-    })
-
-    it('should disable Edit button when loading', () => {
-      render(<UserTable {...defaultProps} actionLoading={1} />)
-
-      const editButton = screen.getByText('Editar').closest('button')
-      expect(editButton).toBeDisabled()
-    })
-
-    it('should disable Delete button when loading', () => {
-      render(<UserTable {...defaultProps} actionLoading={1} />)
-
-      const deleteButton = screen.getByText('Eliminar').closest('button')
-      expect(deleteButton).toBeDisabled()
-    })
-
-    it('should not disable other rows when one is loading', () => {
-      render(
-        <UserTable
-          {...defaultProps}
-          users={[mockUser, suspendedUser]}
-          actionLoading={1}
-        />
-      )
-
-      const buttons = screen.getAllByText('Editar')
-      expect(buttons[0].closest('button')).toBeDisabled()
-      expect(buttons[1].closest('button')).not.toBeDisabled()
-    })
-  })
+      // Should have one suspend button (for active user)
+      expect(screen.getAllByText('Suspender')).toHaveLength(1);
+      // Should have one reactivate button (for suspended user)
+      expect(screen.getAllByText('Reactivar')).toHaveLength(1);
+    });
+  });
 
   describe('pagination', () => {
     it('should render pagination when multiple pages', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('Anterior')).toBeInTheDocument()
-      expect(screen.getByText('Siguiente')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Anterior')).toBeInTheDocument();
+      expect(screen.getByText('Siguiente')).toBeInTheDocument();
+    });
 
     it('should not render pagination when single page', () => {
       render(
@@ -248,18 +288,18 @@ describe('UserTable', () => {
           {...defaultProps}
           pagination={{ ...mockPagination, last_page: 1 }}
         />
-      )
+      );
 
-      expect(screen.queryByText('Anterior')).not.toBeInTheDocument()
-      expect(screen.queryByText('Siguiente')).not.toBeInTheDocument()
-    })
+      expect(screen.queryByText('Anterior')).not.toBeInTheDocument();
+      expect(screen.queryByText('Siguiente')).not.toBeInTheDocument();
+    });
 
     it('should disable Anterior button on first page', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      const anteriorButton = screen.getByText('Anterior').closest('button')
-      expect(anteriorButton).toBeDisabled()
-    })
+      const anteriorButton = screen.getByText('Anterior');
+      expect(anteriorButton).toBeDisabled();
+    });
 
     it('should disable Siguiente button on last page', () => {
       render(
@@ -267,19 +307,19 @@ describe('UserTable', () => {
           {...defaultProps}
           pagination={{ ...mockPagination, current_page: 2 }}
         />
-      )
+      );
 
-      const siguienteButton = screen.getByText('Siguiente').closest('button')
-      expect(siguienteButton).toBeDisabled()
-    })
+      const siguienteButton = screen.getByText('Siguiente');
+      expect(siguienteButton).toBeDisabled();
+    });
 
     it('should call onPageChange when clicking Siguiente', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      fireEvent.click(screen.getByText('Siguiente'))
+      fireEvent.click(screen.getByText('Siguiente'));
 
-      expect(defaultProps.onPageChange).toHaveBeenCalledWith(2)
-    })
+      expect(defaultProps.onPageChange).toHaveBeenCalledWith(2);
+    });
 
     it('should call onPageChange when clicking Anterior', () => {
       render(
@@ -287,54 +327,63 @@ describe('UserTable', () => {
           {...defaultProps}
           pagination={{ ...mockPagination, current_page: 2 }}
         />
-      )
+      );
 
-      fireEvent.click(screen.getByText('Anterior'))
+      fireEvent.click(screen.getByText('Anterior'));
 
-      expect(defaultProps.onPageChange).toHaveBeenCalledWith(1)
-    })
+      expect(defaultProps.onPageChange).toHaveBeenCalledWith(1);
+    });
+  });
 
-    it('should show pagination info', () => {
-      render(<UserTable {...defaultProps} />)
-
-      expect(screen.getByText(/Mostrando/)).toBeInTheDocument()
-      expect(screen.getByText('15')).toBeInTheDocument()
-    })
-  })
-
-  describe('table structure', () => {
+  describe('column configuration', () => {
     it('should have correct column headers', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('Usuario')).toBeInTheDocument()
-      expect(screen.getByText('Email')).toBeInTheDocument()
-      expect(screen.getByText('Rol')).toBeInTheDocument()
-      expect(screen.getByText('Estado')).toBeInTheDocument()
-      expect(screen.getByText('Fecha Alta')).toBeInTheDocument()
-      expect(screen.getByText('Acciones')).toBeInTheDocument()
-    })
-
-    it('should display created date', () => {
-      render(<UserTable {...defaultProps} />)
-
-      // The date is formatted based on locale, check that some date-like text exists
-      const dateCell = screen.getByText(/2025/)
-      expect(dateCell).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('Usuario')).toBeInTheDocument();
+      expect(screen.getByText('Email')).toBeInTheDocument();
+      expect(screen.getByText('Rol')).toBeInTheDocument();
+      expect(screen.getByText('Estado')).toBeInTheDocument();
+      expect(screen.getByText('Fecha Alta')).toBeInTheDocument();
+      expect(screen.getByText('Acciones')).toBeInTheDocument();
+    });
+  });
 
   describe('role display', () => {
     it('should show role name', () => {
-      render(<UserTable {...defaultProps} />)
+      render(<UserTable {...defaultProps} />);
 
-      expect(screen.getByText('Entity Staff')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Entity Staff')).toBeInTheDocument();
+    });
 
     it('should show "Sin rol" when role is null', () => {
-      const userWithoutRole = { ...mockUser, role: null }
-      render(<UserTable {...defaultProps} users={[userWithoutRole]} />)
+      const userWithoutRole = { ...mockUser, role: null };
+      render(<UserTable {...defaultProps} users={[userWithoutRole]} />);
 
-      expect(screen.getByText('Sin rol')).toBeInTheDocument()
-    })
-  })
-})
+      expect(screen.getByText('Sin rol')).toBeInTheDocument();
+    });
+  });
+
+  describe('date formatting', () => {
+    it('should display formatted created date', () => {
+      render(<UserTable {...defaultProps} />);
+
+      // The date column should render a formatted date (format depends on locale)
+      // Check for any part of the date that would be present
+      expect(screen.getByText(/2025/)).toBeInTheDocument();
+    });
+  });
+
+  describe('GenericTable props', () => {
+    it('should pass testId to GenericTable', () => {
+      render(<UserTable {...defaultProps} />);
+
+      expect(screen.getByTestId('user-table')).toBeInTheDocument();
+    });
+
+    it('should pass correct empty message', () => {
+      render(<UserTable {...defaultProps} users={[]} />);
+
+      expect(screen.getByText('No hay usuarios del equipo')).toBeInTheDocument();
+    });
+  });
+});

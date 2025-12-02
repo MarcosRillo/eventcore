@@ -47,7 +47,7 @@ function AcceptInvitationContent() {
   // No token provided
   if (!token) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
@@ -90,7 +90,7 @@ function AcceptInvitationContent() {
   // Validating token
   if (validating) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <LoadingSpinner size="xl" text="Validando invitación..." />
       </div>
     )
@@ -99,7 +99,7 @@ function AcceptInvitationContent() {
   // Token invalid or expired
   if (tokenError || !tokenValid) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
@@ -146,7 +146,7 @@ function AcceptInvitationContent() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
@@ -182,7 +182,7 @@ function AcceptInvitationContent() {
 
   // Show form
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo and title */}
         <div className="flex justify-center">
@@ -246,7 +246,7 @@ export default function AcceptInvitationPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="flex items-center justify-center py-24">
           <LoadingSpinner size="xl" text="Cargando..." />
         </div>
       }

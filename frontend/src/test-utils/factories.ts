@@ -50,12 +50,13 @@ export const createMockCategory = (overrides: Partial<Category> & { id: number; 
 
 /**
  * Creates a valid Location mock with required fields
+ * Simplified for Tucumán Tourism
  */
 export const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
-  address: 'Default Address 123',
-  city: 'Default City',
+  address: 'Av. Soldati 330',
+  city: 'San Miguel de Tucumán',
+  state: 'Tucumán',
   country: 'Argentina',
-  features: [],
   is_active: true,
   entity_id: 1,
   created_at: '2025-01-01T00:00:00.000Z',

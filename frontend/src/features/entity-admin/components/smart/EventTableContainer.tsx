@@ -1,21 +1,37 @@
 /**
  * Event Table Container - Smart Component
- * Handles business logic, state management, and configuration for EventTable
+ * Uses GenericTable with custom column renderers for events
+ * Handles business logic, state management, and view mode configurations
  */
 
 'use client';
 
-import React, { useMemo, useState, useCallback } from 'react';
-import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types';
+import { useMemo, useState, useCallback } from 'react';
+import { Event, EventStatus, EventType, EVENT_STATUS } from '@/types/event.types';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
 import {
-  EventTable,
-  EventTableViewMode,
-  ColumnConfig,
-  ActionConfig,
-  ConfirmDialogData
-} from '@/features/entity-admin/components/dumb/EventTable';
+  getStatusConfig,
+  getTypeConfig,
+  BADGE_BASE_CLASSES
+} from '@/features/events/constants';
+import {
+  EyeIcon,
+  PencilIcon,
+  CheckCircleIcon,
+  StarIcon,
+  DocumentDuplicateIcon,
+  TrashIcon,
+  PaperAirplaneIcon,
+  ChatBubbleLeftIcon,
+  ShareIcon,
+  CalendarIcon,
+} from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+
+// View mode types
+export type EventTableViewMode = 'admin' | 'organizer' | 'public';
 
 interface EventTableContainerProps {
   events: Event[];
@@ -31,12 +47,19 @@ interface EventTableContainerProps {
   onShareEvent?: (event: Event) => void;
   onExportToCalendar?: (event: Event) => void;
   onViewComments?: (event: Event) => void;
-  // Backward compatibility
-  showActions?: boolean;
-  compactView?: boolean;
 }
 
-export const EventTableContainer: React.FC<EventTableContainerProps> = ({
+// Helper function to extract status code from status object or string
+function getEventStatusCode(status: EventStatus): string {
+  return typeof status === 'object' ? status.status_code : status;
+}
+
+// Helper function to extract type code from type object or string
+function getEventTypeCode(type: EventType): string {
+  return typeof type === 'object' ? type.type_code : type;
+}
+
+export const EventTableContainer = ({
   events,
   isLoading,
   viewMode = 'admin',
@@ -50,9 +73,7 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
   onShareEvent,
   onExportToCalendar,
   onViewComments,
-  showActions = true,
-  compactView = false,
-}) => {
+}: EventTableContainerProps) => {
   // Confirm dialog state
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogData>({
     isOpen: false,
@@ -61,34 +82,16 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
     onConfirm: () => {},
   });
 
-  // Status labels configuration
-  const statusLabels = useMemo(() => ({
-    [EVENT_STATUS.DRAFT]: { label: 'Borrador', className: 'bg-gray-100 text-gray-800' },
-    [EVENT_STATUS.PENDING_INTERNAL_APPROVAL]: { label: 'Pendiente Aprobación Interna', className: 'bg-yellow-100 text-yellow-800' },
-    [EVENT_STATUS.APPROVED_INTERNAL]: { label: 'Aprobado Internamente', className: 'bg-blue-100 text-blue-800' },
-    [EVENT_STATUS.PENDING_PUBLIC_APPROVAL]: { label: 'Pendiente Aprobación Pública', className: 'bg-orange-100 text-orange-800' },
-    [EVENT_STATUS.PUBLISHED]: { label: 'Publicado', className: 'bg-green-100 text-green-800' },
-    [EVENT_STATUS.REQUIRES_CHANGES]: { label: 'Requiere Cambios', className: 'bg-red-100 text-red-800' },
-    [EVENT_STATUS.REJECTED]: { label: 'Rechazado', className: 'bg-red-100 text-red-800' },
-    [EVENT_STATUS.CANCELLED]: { label: 'Cancelado', className: 'bg-gray-100 text-gray-800' },
-  }), []);
-
-  // Type labels configuration
-  const typeLabels = useMemo(() => ({
-    [EVENT_TYPE.SINGLE_LOCATION]: 'Sede Única',
-    [EVENT_TYPE.MULTI_LOCATION]: 'Multi-Sede',
-  }), []);
-
   // Date formatting function
-  const formatDate = (dateString: string): string => {
+  const formatDate = useCallback((dateString: string): string => {
     try {
-      return format(parseISO(dateString), compactView ? 'dd/MM/yy' : 'dd/MM/yyyy HH:mm', { locale: es });
+      return format(parseISO(dateString), 'dd/MM/yyyy HH:mm', { locale: es });
     } catch {
       return dateString;
     }
-  };
+  }, []);
 
-  // Delete event handler with confirmation (defined before useMemo)
+  // Delete event handler with confirmation
   const handleDeleteEvent = useCallback((event: Event) => {
     setConfirmDialog({
       isOpen: true,
@@ -103,52 +106,124 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
     });
   }, [onDeleteEvent]);
 
-  // Column configuration based on view mode
-  const columns = useMemo((): ColumnConfig[] => {
-    const baseColumns: ColumnConfig[] = [
-      { key: 'event', label: 'Evento', visible: true },
-      { key: 'date', label: 'Fecha y Hora', visible: true },
-      { key: 'location', label: 'Ubicación', visible: true },
+  // Column configuration with custom renderers
+  const columns = useMemo((): TableColumnConfig<Event>[] => {
+    const baseColumns: TableColumnConfig<Event>[] = [
+      // Event title with featured badge
+      {
+        key: 'title',
+        label: 'Evento',
+        render: (event) => (
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-neutral-900">{event.title}</span>
+              {event.is_featured && (
+                <StarIconSolid className="w-4 h-4 text-warning-500" aria-label="Destacado" />
+              )}
+            </div>
+          </div>
+        ),
+      },
+      // Date column
+      {
+        key: 'date',
+        label: 'Fecha',
+        render: (event) => (
+          <div className="flex flex-col">
+            <span className="text-sm text-neutral-900">
+              {formatDate(event.start_date)}
+            </span>
+            {event.end_date && event.start_date !== event.end_date && (
+              <span className="text-xs text-neutral-500">
+                hasta {formatDate(event.end_date)}
+              </span>
+            )}
+          </div>
+        ),
+      },
+      // Type column
+      {
+        key: 'type',
+        label: 'Tipo',
+        render: (event) => {
+          const typeCode = getEventTypeCode(event.type);
+          const typeConfig = getTypeConfig(typeCode);
+          return (
+            <span className={`${BADGE_BASE_CLASSES} ${typeConfig.className}`}>
+              {typeConfig.label}
+            </span>
+          );
+        },
+      },
+      // Status column
+      {
+        key: 'status',
+        label: 'Estado',
+        render: (event) => {
+          const statusCode = getEventStatusCode(event.status);
+          const statusConfig = getStatusConfig(statusCode);
+          return (
+            <span className={`${BADGE_BASE_CLASSES} ${statusConfig.className}`}>
+              {statusConfig.label}
+            </span>
+          );
+        },
+      },
+      // Category column
+      {
+        key: 'category',
+        label: 'Categoría',
+        render: (event) => event.category ? (
+          <span
+            className={`${BADGE_BASE_CLASSES} text-white`}
+            style={{ backgroundColor: event.category.color || '#6b7280' }}
+          >
+            {event.category.name}
+          </span>
+        ) : (
+          <span className="text-neutral-400">Sin categoría</span>
+        ),
+      },
+      // Location column
+      {
+        key: 'location',
+        label: 'Ubicación',
+        render: (event) => {
+          const locationText = event.location?.name || event.location_text || 'No especificada';
+          return (
+            <div className="text-sm text-neutral-900">
+              {locationText}
+              {event.locations && event.locations.length > 1 && (
+                <span className="ml-1 text-xs text-neutral-500">
+                  (+{event.locations.length - 1} más)
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
     ];
 
-    switch (viewMode) {
-      case 'admin':
-        return [
-          ...baseColumns,
-          { key: 'type', label: 'Tipo', visible: true },
-          { key: 'status', label: 'Estado', visible: true },
-          { key: 'category', label: 'Categoría', visible: true },
-          { key: 'organizer', label: 'Organizador', visible: true },
-          { key: 'created', label: 'Creado', visible: !compactView },
-          { key: 'actions', label: 'Acciones', visible: showActions, className: 'text-right' },
-        ];
-
-      case 'organizer':
-        return [
-          ...baseColumns,
-          { key: 'type', label: 'Tipo', visible: !compactView },
-          { key: 'status', label: 'Estado', visible: true },
-          { key: 'category', label: 'Categoría', visible: true },
-          { key: 'feedback', label: 'Comentarios', visible: true },
-          { key: 'actions', label: 'Acciones', visible: showActions, className: 'text-right' },
-        ];
-
-      case 'public':
-        return [
-          ...baseColumns,
-          { key: 'category', label: 'Categoría', visible: true },
-          { key: 'type', label: 'Tipo', visible: !compactView },
-          { key: 'actions', label: 'Compartir', visible: showActions, className: 'text-right' },
-        ];
-
-      default:
-        return baseColumns;
+    // Filter columns based on view mode
+    if (viewMode === 'public') {
+      return baseColumns.filter(col =>
+        ['title', 'date', 'category', 'location'].includes(String(col.key))
+      );
     }
-  }, [viewMode, showActions, compactView]);
+
+    if (viewMode === 'organizer') {
+      return baseColumns.filter(col =>
+        ['title', 'date', 'status', 'category', 'location'].includes(String(col.key))
+      );
+    }
+
+    // Admin view - all columns
+    return baseColumns;
+  }, [viewMode, formatDate]);
 
   // Action configuration based on view mode
-  const actions = useMemo((): ActionConfig[] => {
-    const baseActions: ActionConfig[] = [];
+  const actions = useMemo((): TableActionConfig<Event>[] => {
+    const baseActions: TableActionConfig<Event>[] = [];
 
     switch (viewMode) {
       case 'admin':
@@ -156,8 +231,8 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'view',
             label: 'Ver Detalle',
-            icon: '👁️',
-            className: 'text-blue-600 hover:text-blue-800',
+            icon: <EyeIcon className="w-5 h-5" />,
+            variant: 'secondary',
             onClick: onSelectEvent,
           });
         }
@@ -166,10 +241,9 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'edit',
             label: 'Editar',
-            icon: '✏️',
-            className: 'text-indigo-600 hover:text-indigo-800',
+            icon: <PencilIcon className="w-5 h-5" />,
+            variant: 'secondary',
             onClick: onEditEvent,
-            permission: 'manage_entity_events',
           });
         }
 
@@ -177,14 +251,14 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'approve',
             label: 'Gestionar Aprobación',
-            icon: '✅',
-            className: 'text-green-600 hover:text-green-800',
+            icon: <CheckCircleIcon className="w-5 h-5" />,
+            variant: 'primary',
             condition: (event) => {
-              const status = typeof event.status === 'string' ? event.status : event.status?.status_code;
-              return status === EVENT_STATUS.PENDING_INTERNAL_APPROVAL || status === EVENT_STATUS.PENDING_PUBLIC_APPROVAL;
+              const status = getEventStatusCode(event.status);
+              return status === EVENT_STATUS.PENDING_INTERNAL_APPROVAL ||
+                     status === EVENT_STATUS.PENDING_PUBLIC_APPROVAL;
             },
             onClick: onApprovalAction,
-            permission: 'approve_events',
           });
         }
 
@@ -192,10 +266,9 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'featured',
             label: 'Destacar/Quitar',
-            icon: '⭐',
-            className: 'text-yellow-600 hover:text-yellow-800',
+            icon: <StarIcon className="w-5 h-5" />,
+            variant: 'secondary',
             onClick: onToggleFeatured,
-            permission: 'manage_entity_events',
           });
         }
 
@@ -203,10 +276,9 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'duplicate',
             label: 'Duplicar',
-            icon: '📋',
-            className: 'text-purple-600 hover:text-purple-800',
+            icon: <DocumentDuplicateIcon className="w-5 h-5" />,
+            variant: 'secondary',
             onClick: onDuplicateEvent,
-            permission: 'create_events',
           });
         }
 
@@ -214,10 +286,9 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'delete',
             label: 'Eliminar',
-            icon: '🗑️',
-            className: 'text-red-600 hover:text-red-800',
-            onClick: (event) => handleDeleteEvent(event),
-            permission: 'manage_entity_events',
+            icon: <TrashIcon className="w-5 h-5" />,
+            variant: 'danger',
+            onClick: handleDeleteEvent,
           });
         }
         break;
@@ -227,8 +298,8 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'view',
             label: 'Ver Detalle',
-            icon: '👁️',
-            className: 'text-blue-600 hover:text-blue-800',
+            icon: <EyeIcon className="w-5 h-5" />,
+            variant: 'secondary',
             onClick: onSelectEvent,
           });
         }
@@ -237,10 +308,10 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'edit',
             label: 'Editar',
-            icon: '✏️',
-            className: 'text-indigo-600 hover:text-indigo-800',
+            icon: <PencilIcon className="w-5 h-5" />,
+            variant: 'secondary',
             condition: (event) => {
-              const status = typeof event.status === 'string' ? event.status : event.status?.status_code;
+              const status = getEventStatusCode(event.status);
               return status === EVENT_STATUS.DRAFT || status === EVENT_STATUS.REQUIRES_CHANGES;
             },
             onClick: onEditEvent,
@@ -251,10 +322,10 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'request_approval',
             label: 'Solicitar Aprobación',
-            icon: '📨',
-            className: 'text-green-600 hover:text-green-800',
+            icon: <PaperAirplaneIcon className="w-5 h-5" />,
+            variant: 'primary',
             condition: (event) => {
-              const status = typeof event.status === 'string' ? event.status : event.status?.status_code;
+              const status = getEventStatusCode(event.status);
               return status === EVENT_STATUS.DRAFT;
             },
             onClick: onRequestApproval,
@@ -265,8 +336,8 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'comments',
             label: 'Ver Comentarios',
-            icon: '💬',
-            className: 'text-orange-600 hover:text-orange-800',
+            icon: <ChatBubbleLeftIcon className="w-5 h-5" />,
+            variant: 'secondary',
             condition: (event) => !!(event.approval_comments && event.approval_comments.trim()),
             onClick: onViewComments,
           });
@@ -278,8 +349,8 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'share',
             label: 'Compartir',
-            icon: '📤',
-            className: 'text-blue-600 hover:text-blue-800',
+            icon: <ShareIcon className="w-5 h-5" />,
+            variant: 'secondary',
             onClick: onShareEvent,
           });
         }
@@ -288,14 +359,11 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
           baseActions.push({
             key: 'calendar',
             label: 'Agregar a Calendario',
-            icon: '📅',
-            className: 'text-green-600 hover:text-green-800',
+            icon: <CalendarIcon className="w-5 h-5" />,
+            variant: 'primary',
             onClick: onExportToCalendar,
           });
         }
-        break;
-
-      default:
         break;
     }
 
@@ -312,26 +380,24 @@ export const EventTableContainer: React.FC<EventTableContainerProps> = ({
     onShareEvent,
     onExportToCalendar,
     onViewComments,
-    handleDeleteEvent
+    handleDeleteEvent,
   ]);
 
   // Close confirm dialog handler
-  const handleCloseConfirmDialog = () => {
+  const handleCloseConfirmDialog = useCallback(() => {
     setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-  };
+  }, []);
 
   return (
-    <EventTable
-      events={events}
-      isLoading={isLoading}
+    <GenericTable<Event>
+      items={events}
       columns={columns}
       actions={actions}
+      isLoading={isLoading}
+      emptyMessage="No hay eventos disponibles"
       confirmDialog={confirmDialog}
-      statusLabels={statusLabels}
-      typeLabels={typeLabels}
-      compactView={compactView}
-      onFormatDate={formatDate}
       onCloseConfirmDialog={handleCloseConfirmDialog}
+      testId="event-table"
     />
   );
 };

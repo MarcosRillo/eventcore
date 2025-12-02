@@ -230,6 +230,27 @@ class PublicEventService
     }
 
     /**
+     * Get public statistics for the calendar.
+     *
+     * @return array Stats with total_events, total_categories, events_this_month
+     */
+    public function getStats(): array
+    {
+        $totalEvents = Event::published()->count();
+        $totalCategories = Category::active()->count();
+        $eventsThisMonth = Event::published()
+            ->whereMonth('start_date', now()->month)
+            ->whereYear('start_date', now()->year)
+            ->count();
+
+        return [
+            'total_events' => $totalEvents,
+            'total_categories' => $totalCategories,
+            'events_this_month' => $eventsThisMonth,
+        ];
+    }
+
+    /**
      * Apply filters to the event query.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query

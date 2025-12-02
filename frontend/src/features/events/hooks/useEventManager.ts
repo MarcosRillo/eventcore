@@ -1,6 +1,7 @@
 /**
  * useEventManager Hook - Simplified Architecture
  * Now uses direct service functions without adapter layer
+ * Uses useGenericModals for modal state management
  */
 
 'use client';
@@ -9,16 +10,17 @@ import { useState, useCallback, useMemo } from 'react';
 import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
 import { useAuth } from '@/context/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { 
-  Event, 
-  EventFormData, 
-  EventFilters, 
+import { useGenericModals } from '@/shared/hooks/useGenericModals';
+import {
+  Event,
+  EventFormData,
+  EventFilters,
   EventStatistics,
   ApprovalStatistics
 } from '@/types/event.types';
-import { 
-  getEventServiceForContext, 
-  type EventServiceContext 
+import {
+  getEventServiceForContext,
+  type EventServiceContext
 } from '@/features/events/services/event.service';
 
 // Extend base filters for events
@@ -189,21 +191,34 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   });
 
   // Event-specific state
-  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
   const [statistics, setStatistics] = useState<EventStatistics | null>(null);
   const [approvalStatistics, setApprovalStatistics] = useState<ApprovalStatistics | null>(null);
-  
+
   // UI state
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Modal state
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // Modal state management via useGenericModals
+  const {
+    currentItem: currentEvent,
+    isCreateModalOpen,
+    isEditModalOpen,
+    isDeleteModalOpen,
+    isDetailsModalOpen,
+    isApprovalModalOpen = false,
+    openCreateModal,
+    openEditModal,
+    openDeleteModal,
+    openDetailsModal,
+    openApprovalModal: openApprovalModalFn,
+    closeAllModals,
+  } = useGenericModals<Event>({ withApprovalModal: true });
+
+  // Wrapper for approval modal to ensure it's always callable
+  const openApprovalModal = useCallback((event: Event) => {
+    openApprovalModalFn?.(event);
+  }, [openApprovalModalFn]);
 
   // Event-specific actions
   const createEvent = useCallback(async (data: EventFormData) => {
@@ -214,14 +229,14 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
       }
       const newEvent = await eventServiceInstance.createEvent(data);
       addEvent(newEvent);
-      setIsCreateModalOpen(false);
+      closeAllModals();
       refreshData(); // Refresh to get updated pagination
     } catch (error) {
       throw error;
     } finally {
       setIsCreating(false);
     }
-  }, [addEvent, refreshData, eventServiceInstance]);
+  }, [addEvent, refreshData, eventServiceInstance, closeAllModals]);
 
   const updateEvent = useCallback(async (id: number, data: Partial<EventFormData>) => {
     try {
@@ -231,14 +246,13 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
       }
       const updatedEvent = await eventServiceInstance.updateEvent(id, data);
       updateEventInList(id, updatedEvent);
-      setIsEditModalOpen(false);
-      setCurrentEvent(null);
+      closeAllModals();
     } catch (error) {
       throw error;
     } finally {
       setIsUpdating(false);
     }
-  }, [updateEventInList, eventServiceInstance]);
+  }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
   const deleteEvent = useCallback(async (id: number) => {
     try {
@@ -249,8 +263,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
       // Optimistic update
       removeEvent(id);
       await eventServiceInstance.deleteEvent(id);
-      setIsDeleteModalOpen(false);
-      setCurrentEvent(null);
+      closeAllModals();
       refreshData(); // Refresh to get updated pagination
     } catch (error) {
       // Revert optimistic update
@@ -259,7 +272,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     } finally {
       setIsDeleting(false);
     }
-  }, [removeEvent, refreshData, eventServiceInstance]);
+  }, [removeEvent, refreshData, eventServiceInstance, closeAllModals]);
 
   const duplicateEvent = useCallback(async (id: number, overrides?: Partial<EventFormData>) => {
     try {
@@ -293,114 +306,78 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
       if ('approval' in eventServiceInstance) {
         const updatedEvent = await eventServiceInstance.approval.approveInternal(eventId, comment);
         updateEventInList(eventId, updatedEvent);
-        setIsApprovalModalOpen(false);
-        setCurrentEvent(null);
+        closeAllModals();
       } else {
         throw new Error('Approval functionality not available in current context');
       }
     } catch (error) {
       throw error;
     }
-  }, [updateEventInList, eventServiceInstance]);
+  }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
   const requestPublic = useCallback(async (eventId: number, comment?: string) => {
     try {
       if ('approval' in eventServiceInstance) {
         const updatedEvent = await eventServiceInstance.approval.requestPublic(eventId, comment);
         updateEventInList(eventId, updatedEvent);
-        setIsApprovalModalOpen(false);
-        setCurrentEvent(null);
+        closeAllModals();
       } else {
         throw new Error('Approval functionality not available in current context');
       }
     } catch (error) {
       throw error;
     }
-  }, [updateEventInList, eventServiceInstance]);
+  }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
   const approvePublic = useCallback(async (eventId: number, comment?: string) => {
     try {
       if ('approval' in eventServiceInstance) {
         const updatedEvent = await eventServiceInstance.approval.approvePublic(eventId, comment);
         updateEventInList(eventId, updatedEvent);
-        setIsApprovalModalOpen(false);
-        setCurrentEvent(null);
+        closeAllModals();
       } else {
         throw new Error('Approval functionality not available in current context');
       }
     } catch (error) {
       throw error;
     }
-  }, [updateEventInList, eventServiceInstance]);
+  }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
   const requestChanges = useCallback(async (eventId: number, comment: string) => {
     try {
       if ('approval' in eventServiceInstance) {
         const updatedEvent = await eventServiceInstance.approval.requestChanges(eventId, comment);
         updateEventInList(eventId, updatedEvent);
-        setIsApprovalModalOpen(false);
-        setCurrentEvent(null);
+        closeAllModals();
       } else {
         throw new Error('Approval functionality not available in current context');
       }
     } catch (error) {
       throw error;
     }
-  }, [updateEventInList, eventServiceInstance]);
+  }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
   const rejectEvent = useCallback(async (eventId: number, comment: string) => {
     try {
       if ('approval' in eventServiceInstance) {
         const updatedEvent = await eventServiceInstance.approval.rejectEvent(eventId, comment);
         updateEventInList(eventId, updatedEvent);
-        setIsApprovalModalOpen(false);
-        setCurrentEvent(null);
+        closeAllModals();
       } else {
         throw new Error('Approval functionality not available in current context');
       }
     } catch (error) {
       throw error;
     }
-  }, [updateEventInList, eventServiceInstance]);
+  }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
   // Filter actions (wrappers)
   const updateFilters = useCallback((newFilters: Partial<EventFilters>) => {
     setFilters(newFilters);
   }, [setFilters]);
 
-  // Modal actions
-  const openCreateModal = useCallback(() => {
-    setIsCreateModalOpen(true);
-  }, []);
-
-  const openEditModal = useCallback((event: Event) => {
-    setCurrentEvent(event);
-    setIsEditModalOpen(true);
-  }, []);
-
-  const openDeleteModal = useCallback((event: Event) => {
-    setCurrentEvent(event);
-    setIsDeleteModalOpen(true);
-  }, []);
-
-  const openApprovalModal = useCallback((event: Event) => {
-    setCurrentEvent(event);
-    setIsApprovalModalOpen(true);
-  }, []);
-
-  const openDetailsModal = useCallback((event: Event) => {
-    setCurrentEvent(event);
-    setIsDetailsModalOpen(true);
-  }, []);
-
-  const closeAllModals = useCallback(() => {
-    setIsCreateModalOpen(false);
-    setIsEditModalOpen(false);
-    setIsDeleteModalOpen(false);
-    setIsApprovalModalOpen(false);
-    setIsDetailsModalOpen(false);
-    setCurrentEvent(null);
-  }, []);
+  // Modal actions are now provided by useGenericModals:
+  // openCreateModal, openEditModal, openDeleteModal, openApprovalModal, openDetailsModal, closeAllModals
 
   // Utility actions
   const loadStatistics = useCallback(async () => {

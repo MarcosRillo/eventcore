@@ -1,0 +1,563 @@
+/**
+ * Tests for RegistrationRequestForm Component
+ *
+ * Tests form rendering, field interactions, validation display,
+ * file uploads, terms checkbox, and form submission.
+ */
+
+import { render, screen, fireEvent } from '@testing-library/react'
+import { RegistrationRequestForm } from '../RegistrationRequestForm'
+import {
+  RegistrationRequestFormData,
+  RegistrationRequestFormErrors
+} from '../../../types/registration-request.types'
+
+// Mock Next.js Image component
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: function MockImage(props: React.ImgHTMLAttributes<HTMLImageElement> & { unoptimized?: boolean }) {
+    const { unoptimized, alt = '', ...rest } = props
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img {...rest} alt={alt} data-unoptimized={unoptimized ? 'true' : 'false'} />
+  }
+}))
+
+describe('RegistrationRequestForm', () => {
+  const mockOnFieldChange = jest.fn()
+  const mockOnSubmit = jest.fn()
+
+  const defaultFormData: RegistrationRequestFormData = {
+    dni: '',
+    first_name: '',
+    last_name: '',
+    email: '',
+    whatsapp: '',
+    profile_photo: null,
+    organization_name: '',
+    organization_cuit: '',
+    organization_sector: '',
+    organization_logo: null,
+    website: '',
+    motivation: '',
+    accepted_terms: false
+  }
+
+  const defaultFormErrors: RegistrationRequestFormErrors = {}
+
+  const defaultProps = {
+    formData: defaultFormData,
+    formErrors: defaultFormErrors,
+    submitting: false,
+    onFieldChange: mockOnFieldChange,
+    onSubmit: mockOnSubmit
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // Reset URL.createObjectURL mock
+    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
+    global.URL.revokeObjectURL = jest.fn()
+  })
+
+  describe('Rendering - Form Sections', () => {
+    test('renders personal information section', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText('Datos Personales')).toBeInTheDocument()
+      expect(screen.getByText('Nombre')).toBeInTheDocument()
+      expect(screen.getByText('Apellido')).toBeInTheDocument()
+      expect(screen.getByText('DNI')).toBeInTheDocument()
+      expect(screen.getByText('Email')).toBeInTheDocument()
+      expect(screen.getByText('WhatsApp')).toBeInTheDocument()
+    })
+
+    test('renders organization information section', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText('Datos de la Organización')).toBeInTheDocument()
+      expect(screen.getByText('Nombre de la Organización')).toBeInTheDocument()
+      expect(screen.getByText('CUIT')).toBeInTheDocument()
+      // Sector label exists (uses "Sector" as label text)
+      expect(screen.getByRole('combobox')).toBeInTheDocument()
+      expect(screen.getByText(/sitio web \(opcional\)/i)).toBeInTheDocument()
+    })
+
+    test('renders motivation section', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText('Motivación')).toBeInTheDocument()
+      expect(screen.getByText(/¿por qué deseas unirte/i)).toBeInTheDocument()
+    })
+
+    test('renders terms and conditions checkbox', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByRole('checkbox')).toBeInTheDocument()
+      expect(screen.getByText(/acepto los/i)).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /términos y condiciones/i })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /política de privacidad/i })).toBeInTheDocument()
+    })
+
+    test('renders submit button', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByRole('button', { name: /enviar solicitud/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('Field Interactions', () => {
+    test('calls onFieldChange when first name is entered', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const nameInput = screen.getByPlaceholderText(/tu nombre/i)
+      fireEvent.change(nameInput, { target: { name: 'first_name', value: 'Juan' } })
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('first_name', 'Juan')
+    })
+
+    test('calls onFieldChange when email is entered', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const emailInput = screen.getByPlaceholderText(/tu@email/i)
+      fireEvent.change(emailInput, { target: { name: 'email', value: 'test@example.com' } })
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('email', 'test@example.com')
+    })
+
+    test('calls onFieldChange when sector is selected', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const sectorSelect = screen.getByRole('combobox')
+      fireEvent.change(sectorSelect, { target: { name: 'organization_sector', value: 'hotel' } })
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('organization_sector', 'hotel')
+    })
+
+    test('calls onFieldChange when motivation textarea is filled', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const motivationTextarea = screen.getByPlaceholderText(/describe brevemente/i)
+      fireEvent.change(motivationTextarea, {
+        target: { name: 'motivation', value: 'Test motivation' }
+      })
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('motivation', 'Test motivation')
+    })
+
+    test('calls onFieldChange when terms checkbox is checked', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const checkbox = screen.getByRole('checkbox')
+      fireEvent.click(checkbox)
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('accepted_terms', true)
+    })
+  })
+
+  describe('Sector Dropdown', () => {
+    test('renders all organization sectors', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const sectorSelect = screen.getByRole('combobox')
+      const options = sectorSelect.querySelectorAll('option')
+
+      expect(options.length).toBeGreaterThan(5)
+      expect(screen.getByRole('option', { name: /hotel/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: /restaurante/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: /museo/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: /entretenimiento/i })).toBeInTheDocument()
+    })
+
+    test('has default placeholder option', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByRole('option', { name: /seleccionar sector/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('File Upload - Profile Photo', () => {
+    test('renders profile photo upload when no photo selected', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText(/foto de perfil \(opcional\)/i)).toBeInTheDocument()
+      const helperTexts = screen.getAllByText(/máximo 2mb/i)
+      expect(helperTexts.length).toBeGreaterThan(0)
+    })
+
+    test('calls onFieldChange when profile photo is selected', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const fileInputs = document.querySelectorAll('input[type="file"]')
+      const profilePhotoInput = fileInputs[0]
+
+      const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' })
+      fireEvent.change(profilePhotoInput, { target: { files: [file] } })
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('profile_photo', file)
+    })
+
+    test('shows preview when profile photo is selected', () => {
+      const formDataWithPhoto = {
+        ...defaultFormData,
+        profile_photo: new File(['test'], 'photo.jpg', { type: 'image/jpeg' })
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithPhoto} />)
+
+      expect(screen.getByAltText(/vista previa de foto de perfil/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument()
+    })
+
+    test('calls onFieldChange with null when profile photo is removed', () => {
+      const formDataWithPhoto = {
+        ...defaultFormData,
+        profile_photo: new File(['test'], 'photo.jpg', { type: 'image/jpeg' })
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithPhoto} />)
+
+      const removeButtons = screen.getAllByRole('button', { name: /eliminar/i })
+      fireEvent.click(removeButtons[0])
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('profile_photo', null)
+    })
+  })
+
+  describe('File Upload - Organization Logo', () => {
+    test('renders logo upload when no logo selected', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText(/logo de la organización/i)).toBeInTheDocument()
+    })
+
+    test('shows preview when organization logo is selected', () => {
+      const formDataWithLogo = {
+        ...defaultFormData,
+        organization_logo: new File(['test'], 'logo.png', { type: 'image/png' })
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithLogo} />)
+
+      expect(screen.getByAltText(/vista previa del logo/i)).toBeInTheDocument()
+    })
+
+    test('calls onFieldChange with null when logo is removed', () => {
+      const formDataWithLogo = {
+        ...defaultFormData,
+        organization_logo: new File(['test'], 'logo.png', { type: 'image/png' })
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithLogo} />)
+
+      const removeButton = screen.getByRole('button', { name: /eliminar/i })
+      fireEvent.click(removeButton)
+
+      expect(mockOnFieldChange).toHaveBeenCalledWith('organization_logo', null)
+    })
+  })
+
+  describe('Character Counter', () => {
+    test('displays character count for motivation', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText(/0\/1000 caracteres/i)).toBeInTheDocument()
+      expect(screen.getByText(/mínimo 50/i)).toBeInTheDocument()
+    })
+
+    test('updates character count when motivation changes', () => {
+      const formDataWithMotivation = {
+        ...defaultFormData,
+        motivation: 'A'.repeat(100)
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithMotivation} />)
+
+      expect(screen.getByText(/100\/1000 caracteres/i)).toBeInTheDocument()
+    })
+
+    test('shows error styling when character count is below minimum', () => {
+      const formDataWithShortMotivation = {
+        ...defaultFormData,
+        motivation: 'Short'
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithShortMotivation} />)
+
+      const counter = screen.getByText(/5\/1000 caracteres/i)
+      expect(counter).toHaveClass('text-error-500')
+    })
+
+    test('shows error styling when character count exceeds maximum', () => {
+      const formDataWithLongMotivation = {
+        ...defaultFormData,
+        motivation: 'A'.repeat(1001)
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithLongMotivation} />)
+
+      const counter = screen.getByText(/1001\/1000 caracteres/i)
+      expect(counter).toHaveClass('text-error-500')
+    })
+
+    test('shows neutral styling when character count is within range', () => {
+      const formDataWithValidMotivation = {
+        ...defaultFormData,
+        motivation: 'A'.repeat(100)
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithValidMotivation} />)
+
+      const counter = screen.getByText(/100\/1000 caracteres/i)
+      expect(counter).toHaveClass('text-neutral-500')
+    })
+  })
+
+  describe('Submit Button State', () => {
+    test('submit button is disabled when terms not accepted', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
+      expect(submitButton).toBeDisabled()
+    })
+
+    test('submit button is enabled when terms accepted', () => {
+      const formDataWithTerms = {
+        ...defaultFormData,
+        accepted_terms: true
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithTerms} />)
+
+      const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
+      expect(submitButton).toBeEnabled()
+    })
+
+    test('submit button is disabled while submitting', () => {
+      const formDataWithTerms = {
+        ...defaultFormData,
+        accepted_terms: true
+      }
+
+      render(
+        <RegistrationRequestForm
+          {...defaultProps}
+          formData={formDataWithTerms}
+          submitting={true}
+        />
+      )
+
+      const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
+      expect(submitButton).toBeDisabled()
+    })
+  })
+
+  describe('Form Submission', () => {
+    test('calls onSubmit when form is submitted', () => {
+      const formDataWithTerms = {
+        ...defaultFormData,
+        accepted_terms: true
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithTerms} />)
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    test('prevents default form submission behavior', () => {
+      const formDataWithTerms = {
+        ...defaultFormData,
+        accepted_terms: true
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={formDataWithTerms} />)
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      // Verify onSubmit was called without page reload
+      expect(mockOnSubmit).toHaveBeenCalled()
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('Error Display', () => {
+    test('displays general error message', () => {
+      const formErrorsWithGeneral: RegistrationRequestFormErrors = {
+        general: 'Ocurrió un error al enviar el formulario'
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithGeneral} />)
+
+      expect(screen.getByText(/ocurrió un error/i)).toBeInTheDocument()
+    })
+
+    test('displays field-specific error for first name', () => {
+      const formErrorsWithField: RegistrationRequestFormErrors = {
+        first_name: 'El nombre es requerido'
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithField} />)
+
+      expect(screen.getByText(/el nombre es requerido/i)).toBeInTheDocument()
+    })
+
+    test('displays error for organization sector', () => {
+      const formErrorsWithSector: RegistrationRequestFormErrors = {
+        organization_sector: 'Selecciona un sector'
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithSector} />)
+
+      expect(screen.getByText(/selecciona un sector/i)).toBeInTheDocument()
+    })
+
+    test('displays error for motivation', () => {
+      const formErrorsWithMotivation: RegistrationRequestFormErrors = {
+        motivation: 'La motivación debe tener al menos 50 caracteres'
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithMotivation} />)
+
+      expect(screen.getByText(/al menos 50 caracteres/i)).toBeInTheDocument()
+    })
+
+    test('displays error for terms not accepted', () => {
+      const formErrorsWithTerms: RegistrationRequestFormErrors = {
+        accepted_terms: 'Debes aceptar los términos'
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithTerms} />)
+
+      expect(screen.getByText(/debes aceptar los términos/i)).toBeInTheDocument()
+    })
+  })
+
+  describe('Disabled State', () => {
+    test('all inputs are disabled when submitting', () => {
+      render(<RegistrationRequestForm {...defaultProps} submitting={true} />)
+
+      const nameInput = screen.getByPlaceholderText(/tu nombre/i)
+      const emailInput = screen.getByPlaceholderText(/tu@email/i)
+      const sectorSelect = screen.getByRole('combobox')
+      const motivationTextarea = screen.getByPlaceholderText(/describe brevemente/i)
+      const checkbox = screen.getByRole('checkbox')
+
+      expect(nameInput).toBeDisabled()
+      expect(emailInput).toBeDisabled()
+      expect(sectorSelect).toBeDisabled()
+      expect(motivationTextarea).toBeDisabled()
+      expect(checkbox).toBeDisabled()
+    })
+
+    test('file inputs are disabled when submitting', () => {
+      render(<RegistrationRequestForm {...defaultProps} submitting={true} />)
+
+      const fileInputs = document.querySelectorAll('input[type="file"]')
+      fileInputs.forEach(input => {
+        expect(input).toBeDisabled()
+      })
+    })
+
+    test('remove buttons are disabled when submitting', () => {
+      const formDataWithFiles = {
+        ...defaultFormData,
+        profile_photo: new File(['test'], 'photo.jpg', { type: 'image/jpeg' })
+      }
+
+      render(
+        <RegistrationRequestForm
+          {...defaultProps}
+          formData={formDataWithFiles}
+          submitting={true}
+        />
+      )
+
+      const removeButton = screen.getByRole('button', { name: /eliminar/i })
+      expect(removeButton).toBeDisabled()
+    })
+  })
+
+  describe('Accessibility', () => {
+    test('terms links open in new tab with proper attributes', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const termsLink = screen.getByRole('link', { name: /términos y condiciones/i })
+      const privacyLink = screen.getByRole('link', { name: /política de privacidad/i })
+
+      expect(termsLink).toHaveAttribute('target', '_blank')
+      expect(termsLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(privacyLink).toHaveAttribute('target', '_blank')
+      expect(privacyLink).toHaveAttribute('rel', 'noopener noreferrer')
+    })
+
+    test('form has proper structure with labeled fields', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      // All inputs should have labels (via Input component)
+      expect(screen.getByText('Nombre')).toBeInTheDocument()
+      expect(screen.getByText('Apellido')).toBeInTheDocument()
+      expect(screen.getByText('DNI')).toBeInTheDocument()
+      expect(screen.getByText('Email')).toBeInTheDocument()
+      expect(screen.getByText('WhatsApp')).toBeInTheDocument()
+
+      // Verify inputs exist and are accessible via placeholders
+      expect(screen.getByPlaceholderText(/tu nombre/i)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/tu apellido/i)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/tu@email/i)).toBeInTheDocument()
+    })
+
+    test('required fields are marked with asterisk', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const requiredMarkers = document.querySelectorAll('.text-error-500')
+      expect(requiredMarkers.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Helper Text', () => {
+    test('displays CUIT format helper text', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      expect(screen.getByText(/formato: xx-xxxxxxxx-x/i)).toBeInTheDocument()
+    })
+
+    test('displays file size helper text for profile photo', () => {
+      render(<RegistrationRequestForm {...defaultProps} />)
+
+      const helperTexts = screen.getAllByText(/máximo 2mb/i)
+      expect(helperTexts.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Pre-filled Form', () => {
+    test('displays pre-filled values correctly', () => {
+      const prefilledFormData: RegistrationRequestFormData = {
+        dni: '12345678',
+        first_name: 'Juan',
+        last_name: 'Pérez',
+        email: 'juan@example.com',
+        whatsapp: '+54 9 11 1234-5678',
+        profile_photo: null,
+        organization_name: 'Mi Empresa S.A.',
+        organization_cuit: '20-12345678-9',
+        organization_sector: 'hotel',
+        organization_logo: null,
+        website: 'https://miempresa.com',
+        motivation: 'Queremos participar en la plataforma de turismo.',
+        accepted_terms: true
+      }
+
+      render(<RegistrationRequestForm {...defaultProps} formData={prefilledFormData} />)
+
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Pérez')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('12345678')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('juan@example.com')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Mi Empresa S.A.')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('https://miempresa.com')).toBeInTheDocument()
+    })
+  })
+})

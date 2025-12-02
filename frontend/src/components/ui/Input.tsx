@@ -27,11 +27,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   disabled,
   required,
   id,
+  'aria-describedby': externalAriaDescribedBy,
   ...props
 }, ref) => {
   // Generate stable unique ID for accessibility (useId ensures SSR/CSR match)
   const generatedId = useId()
   const inputId = id || `input-${generatedId}`
+
+  // Merge aria-describedby values
+  const computedAriaDescribedBy = [
+    error ? `${inputId}-error` : null,
+    helperText && !error ? `${inputId}-helper` : null,
+    externalAriaDescribedBy,
+  ].filter(Boolean).join(' ') || undefined
 
   // Base input styles
   const baseClasses = [
@@ -117,7 +125,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
           disabled={disabled}
           required={required}
           aria-invalid={error ? 'true' : 'false'}
-          aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
+          aria-describedby={computedAriaDescribedBy}
           {...props}
         />
 

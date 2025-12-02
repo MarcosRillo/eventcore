@@ -9,7 +9,8 @@ import {
   EventsResponse,
   PublicEvent,
   Category,
-  Location
+  Location,
+  PublicStats
 } from '@/features/public-calendar/types/public-calendar.types'
 
 interface FetchEventsParams {
@@ -89,6 +90,14 @@ export const publicEventsService = {
    */
   getLocations: async (): Promise<{ data: Location[] }> => {
     const response = await apiClient.get('/public/locations/active')
+    return response.data
+  },
+
+  /**
+   * Get public stats (total events, categories, events this month)
+   */
+  getStats: async (): Promise<{ data: PublicStats }> => {
+    const response = await apiClient.get('/public/stats')
     return response.data
   }
 }

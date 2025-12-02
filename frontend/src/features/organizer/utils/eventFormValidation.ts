@@ -41,14 +41,35 @@ export const validateEventForm = (data: EventFormData): EventFormErrors => {
     }
   }
 
-  // Category validation
-  if (!data.category_id) {
-    errors.category_id = 'La categoría es requerida'
+  // Event Type validation (required since Dec 2, 2025)
+  if (!data.event_type_id) {
+    errors.event_type_id = 'El tipo de evento es requerido'
   }
 
-  // Location validation (at least one location required)
-  if (!data.location_ids || data.location_ids.length === 0) {
-    errors.location_ids = 'Al menos una ubicación es requerida'
+  // Event Subtype validation (required since Dec 2, 2025)
+  if (!data.event_subtype_id) {
+    errors.event_subtype_id = 'El subtipo de evento es requerido'
+  }
+
+  // Category validation (now optional - Dec 2, 2025)
+  // category_id is no longer required
+
+  // Location validation
+  // Require at least one location OR a custom location with name
+  const hasExistingLocations = data.location_ids && data.location_ids.length > 0
+  const hasValidCustomLocation = data.has_custom_location && data.custom_location_name.trim()
+
+  if (!hasExistingLocations && !hasValidCustomLocation) {
+    if (data.has_custom_location) {
+      errors.custom_location_name = 'El nombre del lugar es requerido'
+    } else {
+      errors.location_ids = 'Selecciona al menos una ubicación o agrega una personalizada'
+    }
+  }
+
+  // If has_custom_location is checked but name is empty, show specific error
+  if (data.has_custom_location && !data.custom_location_name.trim()) {
+    errors.custom_location_name = 'El nombre del lugar es requerido'
   }
 
   return errors

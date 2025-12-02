@@ -34,23 +34,23 @@ interface StatusConfig {
 const statusConfig: Record<DisplayStatus, StatusConfig> = {
   pending: {
     label: 'Pendiente',
-    className: 'bg-yellow-100 text-yellow-800',
+    className: 'bg-warning-100 text-warning-800',
   },
   active: {
     label: 'Activo',
-    className: 'bg-green-100 text-green-800',
+    className: 'bg-success-100 text-success-800',
   },
   suspended: {
     label: 'Suspendido',
-    className: 'bg-gray-100 text-gray-800',
+    className: 'bg-neutral-100 text-neutral-800',
   },
   rejected: {
     label: 'Rechazado',
-    className: 'bg-red-100 text-red-800',
+    className: 'bg-error-100 text-error-800',
   },
   deleted: {
     label: 'Eliminado',
-    className: 'bg-red-200 text-red-900',
+    className: 'bg-error-200 text-error-900',
   },
 }
 

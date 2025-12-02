@@ -8,25 +8,27 @@ use App\Models\Event;
  * EventValidationService - Validates events for approval workflows
  *
  * Updated for 3NF normalized schema (Nov 30, 2025).
+ * Updated Dec 2, 2025: producer_id auto-filled, no longer required in validation.
  *
- * Internal approval requires 8 fields.
- * Public approval requires 19 fields total.
+ * Internal approval requires 7 fields.
+ * Public approval requires 18 fields total.
  */
 class EventValidationService
 {
     /**
      * Fields required for internal calendar approval
      * Note: location is validated separately (relation-based)
-     * Note: producer is now producer_id (FK to organizations)
+     * Note: producer_id is auto-filled on creation (Dec 2, 2025)
+     * Note: event_type_id and event_subtype_id replace category_id (Dec 2, 2025)
      */
     private const INTERNAL_REQUIRED_FIELDS = [
         'title',
         'start_date',
         'end_date',
-        'type_id',
-        'category_id',
+        'format_id',
+        'event_type_id',
+        'event_subtype_id',
         'edition_number',
-        'producer_id',  // FK to organizations (normalized)
     ];
 
     /**
@@ -43,8 +45,8 @@ class EventValidationService
     /**
      * Validate event for internal calendar approval
      *
-     * Requires 8 fields: title, start_date, end_date, type_id,
-     * category_id, edition_number, producer_id, and location (relation)
+     * Requires 7 fields: title, start_date, end_date, format_id,
+     * category_id, edition_number, and location (relation)
      */
     public function validateForInternalApproval(Event $event): ValidationResult
     {

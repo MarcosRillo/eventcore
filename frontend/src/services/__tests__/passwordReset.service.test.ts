@@ -18,7 +18,7 @@ describe('Password Reset Service', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const apiClientModule = await import('@/services/apiClient');
-    mockApiClient = apiClientModule.default as jest.Mocked<{ post: jest.Mock }>;
+    mockApiClient = apiClientModule.default as unknown as jest.Mocked<{ post: jest.Mock }>;
   });
 
   describe('forgotPassword', () => {

@@ -35,9 +35,9 @@ class EventService
             $query->where('status_id', $filters['status_id']);
         }
 
-        // Apply type filter
-        if (!empty($filters['type_id'])) {
-            $query->where('type_id', $filters['type_id']);
+        // Apply format filter
+        if (!empty($filters['format_id'])) {
+            $query->where('format_id', $filters['format_id']);
         }
 
         // Apply category filter
@@ -100,7 +100,7 @@ class EventService
             }
 
             // Load relationships for complete response
-            $event->load(['category', 'locations', 'status', 'type', 'creator']);
+            $event->load(['category', 'locations', 'status', 'format', 'creator', 'eventType', 'eventSubtype']);
 
             return $event;
         });
@@ -128,7 +128,7 @@ class EventService
             }
 
             // Load relationships for complete response
-            $event->load(['category', 'locations', 'status', 'type', 'creator']);
+            $event->load(['category', 'locations', 'status', 'format', 'creator', 'eventType', 'eventSubtype']);
 
             return $event->fresh();
         });
@@ -154,7 +154,7 @@ class EventService
 
         // Filter by status code
         $query->whereHas('status', function ($q) use ($statusCode) {
-            $q->where('code', $statusCode);
+            $q->where('status_code', $statusCode);
         });
 
         // Apply search filter if provided
@@ -241,7 +241,7 @@ class EventService
             }
 
             // Load relationships for complete response
-            $replica->load(['category', 'locations', 'status', 'type']);
+            $replica->load(['category', 'locations', 'status', 'format', 'eventType', 'eventSubtype']);
 
             return $replica;
         });

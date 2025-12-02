@@ -39,7 +39,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Verificando autenticación..." />
       </div>
     );
@@ -51,14 +51,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 lg:hidden"
           onClick={handleToggleSidebar}
+          role="presentation"
         >
-          <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
+          <div className="absolute inset-0 bg-neutral-600 opacity-75"></div>
         </div>
       )}
 

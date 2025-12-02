@@ -10,14 +10,14 @@ use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PublicEventServiceTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private PublicEventService $service;
     private Organization $organization;

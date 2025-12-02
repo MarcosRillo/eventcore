@@ -15,6 +15,7 @@ import {
   Location,
   LocationPagination,
   LocationFilters,
+  LocationPayload,
 } from '@/types/location.types';
 
 /**
@@ -23,14 +24,25 @@ import {
  */
 export const getLocations = async (params: LocationFilters = {}): Promise<LocationPagination> => {
   try {
+    // Build query params, filtering out undefined values to avoid 422 errors
+    const queryParams: Record<string, string | number | boolean> = {
+      page: params.page || 1,
+      per_page: params.per_page || 15,
+    };
+
+    // Only include search if it has a value
+    if (params.search) {
+      queryParams.search = params.search;
+    }
+
+    // Only include active filter if explicitly set (not undefined)
+    if (params.is_active !== undefined) {
+      queryParams.active = params.is_active;
+    }
+
     // Laravel Resource collections with pagination return the paginated data directly
     const response: AxiosResponse<LocationPagination> = await apiClient.get('/locations', {
-      params: {
-        page: params.page || 1,
-        per_page: params.per_page || 15,
-        search: params.search || '',
-        is_active: params.is_active,
-      },
+      params: queryParams,
     });
 
     // Laravel Resource pagination structure is directly in response.data
@@ -68,8 +80,9 @@ export const getLocation = async (id: number): Promise<Location> => {
 
 /**
  * Create a new location
+ * Uses LocationPayload which includes required fields + defaults
  */
-export const createLocation = async (locationData: Omit<Location, 'id' | 'created_at' | 'updated_at'>): Promise<Location> => {
+export const createLocation = async (locationData: LocationPayload): Promise<Location> => {
   try {
     const response: AxiosResponse<{ data: Location }> = await apiClient.post('/locations', locationData);
 
@@ -81,8 +94,9 @@ export const createLocation = async (locationData: Omit<Location, 'id' | 'create
 
 /**
  * Update an existing location
+ * Uses LocationPayload for consistent field structure
  */
-export const updateLocation = async (id: number, locationData: Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>): Promise<Location> => {
+export const updateLocation = async (id: number, locationData: LocationPayload): Promise<Location> => {
   try {
     const response: AxiosResponse<{ data: Location }> = await apiClient.put(`/locations/${id}`, locationData);
 
@@ -104,6 +118,19 @@ export const deleteLocation = async (id: number): Promise<void> => {
 };
 
 /**
+ * Search locations by name (for autocomplete)
+ * Returns simplified options for select components
+ */
+export const searchLocations = async (query: string): Promise<{ id: number; name: string }[]> => {
+  try {
+    const response = await getLocations({ search: query, per_page: 20 });
+    return response.data.map(loc => ({ id: loc.id, name: loc.name }));
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
  * Exported location service object
  */
 export const locationService = {
@@ -113,6 +140,7 @@ export const locationService = {
   createLocation,
   updateLocation,
   deleteLocation,
+  searchLocations,
 };
 
 export default locationService;

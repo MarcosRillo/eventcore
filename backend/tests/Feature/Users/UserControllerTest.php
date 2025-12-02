@@ -5,12 +5,14 @@ namespace Tests\Feature\Users;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserControllerTest extends TestCase
 {
+    use RefreshDatabase;
     private User $entityAdmin;
     private User $entityStaff;
     private User $anotherEntityStaff;

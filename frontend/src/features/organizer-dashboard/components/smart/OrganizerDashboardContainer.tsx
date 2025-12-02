@@ -6,23 +6,23 @@
 
 'use client'
 
-import { useState } from 'react'
 import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 
 export const OrganizerDashboardContainer = () => {
-  const [createModalOpen, setCreateModalOpen] = useState(false)
-
   // Fetch stats
   const { stats, refetch: refetchStats } = useOrganizerStats()
 
-  // Fetch events (includes filter management)
+  // Fetch events (includes filter management and pagination)
   const {
     events,
     loading: eventsLoading,
     error: eventsError,
     statusFilter,
+    currentPage,
+    totalPages,
+    handlePageChange,
     handleStatusFilter,
     retry
   } = useOrganizerEvents()
@@ -38,19 +38,6 @@ export const OrganizerDashboardContainer = () => {
     handleStatusFilter(status)
   }
 
-  // Handle create modal
-  function handleOpenCreateModal(): void {
-    setCreateModalOpen(true)
-  }
-
-  function handleCloseCreateModal(): void {
-    setCreateModalOpen(false)
-  }
-
-  function handleCreateSuccess(): void {
-    handleRefresh()
-  }
-
   return (
     <OrganizerDashboard
       stats={stats}
@@ -58,11 +45,11 @@ export const OrganizerDashboardContainer = () => {
       loading={eventsLoading}
       error={eventsError}
       activeFilter={statusFilter}
-      createModalOpen={createModalOpen}
+      currentPage={currentPage}
+      totalPages={totalPages}
       onFilterChange={handleFilterChange}
-      onOpenCreateModal={handleOpenCreateModal}
-      onCloseCreateModal={handleCloseCreateModal}
-      onCreateSuccess={handleCreateSuccess}
+      onPageChange={handlePageChange}
+      onSuccess={handleRefresh}
     />
   )
 }

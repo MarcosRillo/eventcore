@@ -30,7 +30,7 @@ const ResetPasswordContent = () => {
   // Loading state while validating token
   if (isValidating) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <LoadingSpinner size="xl" text="Validando enlace..." />
       </div>
     );
@@ -39,7 +39,7 @@ const ResetPasswordContent = () => {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           {/* Logo */}
           <div className="flex justify-center">
@@ -86,7 +86,7 @@ const ResetPasswordContent = () => {
   // Invalid token state
   if (tokenValid === false) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           {/* Logo */}
           <div className="flex justify-center">
@@ -138,7 +138,7 @@ const ResetPasswordContent = () => {
 
   // Reset form
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo and title */}
         <div className="flex justify-center">
@@ -186,6 +186,7 @@ const ResetPasswordContent = () => {
                 disabled={isLoading}
                 fullWidth
                 error={fieldErrors.password}
+                aria-describedby="password-requirements"
                 leftIcon={
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -194,9 +195,9 @@ const ResetPasswordContent = () => {
               />
 
               {/* Password requirements */}
-              <div className="mt-2 space-y-1">
+              <div id="password-requirements" className="mt-2 space-y-1" role="list" aria-label="Requisitos de contraseña">
                 {passwordRequirements.map((req, index) => (
-                  <div key={index} className="flex items-center text-xs">
+                  <div key={index} className="flex items-center text-xs" role="listitem">
                     {req.met ? (
                       <svg className="w-4 h-4 text-success-500 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -245,12 +246,6 @@ const ResetPasswordContent = () => {
             </Button>
           </form>
 
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-neutral-500">
-              © 2025 CalendApp. Sistema de gestión de calendario y eventos.
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -261,7 +256,7 @@ const ResetPasswordContent = () => {
 const ResetPasswordPage = () => {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <LoadingSpinner size="xl" text="Cargando..." />
       </div>
     }>

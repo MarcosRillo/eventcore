@@ -2,6 +2,7 @@
 
 namespace App\Features\Approval\Services;
 
+use App\Features\Approval\Exceptions\InvalidStateTransitionException;
 use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
 use App\Models\User;
@@ -12,11 +13,19 @@ class ApprovalService
 {
     use StatusResolvable;
 
+    public function __construct(
+        private ApprovalStateMachine $stateMachine
+    ) {}
+
     /**
      * Approve event internally.
+     *
+     * @throws InvalidStateTransitionException
      */
     public function approveInternal(Event $event, User $approver, ?string $comments = null): void
     {
+        $this->stateMachine->validateTransition($event, 'approved_internal');
+
         DB::transaction(function () use ($event, $approver, $comments) {
             $event->update([
                 'status_id' => $this->getStatusId('approved_internal'),
@@ -33,27 +42,37 @@ class ApprovalService
     }
 
     /**
-     * Request public approval - SIMPLE.
+     * Request public approval.
+     *
+     * @throws InvalidStateTransitionException
      */
     public function requestPublicApproval(Event $event, User $requester): void
     {
-        $event->update([
-            'status_id' => $this->getStatusId('pending_public_approval'),
-            'public_approval_requested_at' => now(),
-            'public_approval_requested_by' => $requester->id
-        ]);
+        $this->stateMachine->validateTransition($event, 'pending_public_approval');
 
-        Log::info('Public approval requested', [
-            'event_id' => $event->id,
-            'requester_id' => $requester->id
-        ]);
+        DB::transaction(function () use ($event, $requester) {
+            $event->update([
+                'status_id' => $this->getStatusId('pending_public_approval'),
+                'public_approval_requested_at' => now(),
+                'public_approval_requested_by' => $requester->id
+            ]);
+
+            Log::info('Public approval requested', [
+                'event_id' => $event->id,
+                'requester_id' => $requester->id
+            ]);
+        });
     }
 
     /**
      * Publish event.
+     *
+     * @throws InvalidStateTransitionException
      */
     public function publishEvent(Event $event, User $publisher, ?string $scheduledAt = null): void
     {
+        $this->stateMachine->validateTransition($event, 'published');
+
         DB::transaction(function () use ($event, $publisher, $scheduledAt) {
             $event->update([
                 'status_id' => $this->getStatusId('published'),
@@ -71,9 +90,13 @@ class ApprovalService
 
     /**
      * Request changes on an event.
+     *
+     * @throws InvalidStateTransitionException
      */
     public function requestChanges(Event $event, string $reason, User $reviewer): void
     {
+        $this->stateMachine->validateTransition($event, 'requires_changes');
+
         DB::transaction(function () use ($event, $reason, $reviewer) {
             $event->update([
                 'status_id' => $this->getStatusId('requires_changes'),
@@ -91,9 +114,13 @@ class ApprovalService
 
     /**
      * Reject an event.
+     *
+     * @throws InvalidStateTransitionException
      */
     public function reject(Event $event, string $reason, User $rejector): void
     {
+        $this->stateMachine->validateTransition($event, 'rejected');
+
         DB::transaction(function () use ($event, $reason, $rejector) {
             $event->update([
                 'status_id' => $this->getStatusId('rejected'),
@@ -111,18 +138,28 @@ class ApprovalService
 
     /**
      * Get approval statistics.
+     * Uses single query with JOIN and groupBy for O(1) performance.
      */
     public function getApprovalStatistics(): array
     {
+        // Single query with JOIN instead of 8 separate whereHas queries
+        $counts = Event::query()
+            ->join('event_statuses', 'events.status_id', '=', 'event_statuses.id')
+            ->selectRaw('event_statuses.status_code, count(*) as count')
+            ->groupBy('event_statuses.status_code')
+            ->pluck('count', 'status_code')
+            ->toArray();
+
+        // Map status codes to expected keys with defaults
         return [
-            'draft' => Event::whereHas('status', fn($q) => $q->where('status_code', 'draft'))->count(),
-            'in_review' => Event::whereHas('status', fn($q) => $q->where('status_code', 'pending_internal_approval'))->count(),
-            'approved_internal' => Event::whereHas('status', fn($q) => $q->where('status_code', 'approved_internal'))->count(),
-            'pending_public_approval' => Event::whereHas('status', fn($q) => $q->where('status_code', 'pending_public_approval'))->count(),
-            'published' => Event::whereHas('status', fn($q) => $q->where('status_code', 'published'))->count(),
-            'rejected' => Event::whereHas('status', fn($q) => $q->where('status_code', 'rejected'))->count(),
-            'requires_changes' => Event::whereHas('status', fn($q) => $q->where('status_code', 'requires_changes'))->count(),
-            'cancelled' => Event::whereHas('status', fn($q) => $q->where('status_code', 'cancelled'))->count(),
+            'draft' => $counts['draft'] ?? 0,
+            'in_review' => $counts['pending_internal_approval'] ?? 0,
+            'approved_internal' => $counts['approved_internal'] ?? 0,
+            'pending_public_approval' => $counts['pending_public_approval'] ?? 0,
+            'published' => $counts['published'] ?? 0,
+            'rejected' => $counts['rejected'] ?? 0,
+            'requires_changes' => $counts['requires_changes'] ?? 0,
+            'cancelled' => $counts['cancelled'] ?? 0,
         ];
     }
 }

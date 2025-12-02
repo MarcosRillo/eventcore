@@ -18,8 +18,10 @@ export const PublicCalendarContainer = () => {
     locations,
     loading,
     error,
+    hasActiveFilters,
     handleCategoryFilter,
-    handleLocationFilter
+    handleLocationFilter,
+    clearFilters
   } = usePublicEvents()
 
   const handleEventClick = (eventId: number): void => {
@@ -33,8 +35,10 @@ export const PublicCalendarContainer = () => {
       locations={locations}
       loading={loading}
       error={error}
+      hasActiveFilters={hasActiveFilters}
       onCategoryFilter={handleCategoryFilter}
       onLocationFilter={handleLocationFilter}
+      onClearFilters={clearFilters}
       onEventClick={handleEventClick}
     />
   )

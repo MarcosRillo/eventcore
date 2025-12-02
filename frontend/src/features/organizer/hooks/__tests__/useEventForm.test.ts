@@ -9,10 +9,14 @@ import { useEventForm } from '../useEventForm'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import * as categoryService from '@/features/categories/services/category.service'
 import * as locationService from '@/features/locations/services/location.service'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
+import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
 
 jest.mock('@/features/organizer/services/organizer-event.service')
 jest.mock('@/features/categories/services/category.service')
 jest.mock('@/features/locations/services/location.service')
+jest.mock('@/features/event-types/services/eventType.service')
+jest.mock('@/features/event-types/services/eventSubtype.service')
 
 const mockRouter = {
   push: jest.fn(),
@@ -53,6 +57,16 @@ describe('useEventForm', () => {
     { id: 2, name: 'Gastronomía' },
   ]
 
+  const mockEventTypes = [
+    { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+    { id: 2, name: 'Feria', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+  ]
+
+  const mockEventSubtypes = [
+    { id: 1, event_type_id: 1, name: 'Nacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+    { id: 2, event_type_id: 1, name: 'Internacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+  ]
+
   const mockLocations = [
     { id: 1, name: 'Plaza Independencia' },
     { id: 2, name: 'Parque 9 de Julio' },
@@ -63,12 +77,16 @@ describe('useEventForm', () => {
     mockRouter.push.mockClear()
     mockRouter.back.mockClear()
 
+    // Categories use Resource Collection format: { data: [...], meta, links }
     ;(categoryService.getCategories as jest.Mock).mockResolvedValue({
       data: mockCategories,
     })
-    ;(locationService.getLocations as jest.Mock).mockResolvedValue({
-      data: { data: mockLocations },
-    })
+    // Event Types (Dec 2, 2025)
+    ;(eventTypeService.getActiveEventTypes as jest.Mock).mockResolvedValue(mockEventTypes)
+    // Event Subtypes are loaded when event_type_id changes
+    ;(eventSubtypeService.getActiveEventSubtypes as jest.Mock).mockResolvedValue(mockEventSubtypes)
+    // Locations are now searched asynchronously
+    ;(locationService.searchLocations as jest.Mock).mockResolvedValue(mockLocations)
   })
 
   describe('Initialization', () => {
@@ -108,22 +126,26 @@ describe('useEventForm', () => {
       })
     })
 
-    it('should load categories and locations on mount', async () => {
+    it('should load categories on mount (locations are async search)', async () => {
       renderHook(() => useEventForm())
 
       await waitFor(() => {
         expect(categoryService.getCategories).toHaveBeenCalled()
-        expect(locationService.getLocations).toHaveBeenCalled()
       })
+
+      // Locations are no longer pre-loaded, they are searched asynchronously
+      expect(locationService.searchLocations).not.toHaveBeenCalled()
     })
 
-    it('should set categories and locations from API response', async () => {
+    it('should set categories from API response', async () => {
       const { result } = renderHook(() => useEventForm())
 
       await waitFor(() => {
         expect(result.current.categories).toEqual(mockCategories)
-        expect(result.current.locations).toEqual(mockLocations)
       })
+
+      // selectedLocations starts empty until user searches or event is loaded
+      expect(result.current.selectedLocations).toEqual([])
     })
   })
 
@@ -280,6 +302,8 @@ describe('useEventForm', () => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
+        result.current.handleChange('event_type_id', 1)
+        result.current.handleChange('event_subtype_id', 1)
         result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
@@ -310,6 +334,8 @@ describe('useEventForm', () => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
+        result.current.handleChange('event_type_id', 1)
+        result.current.handleChange('event_subtype_id', 1)
         result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
@@ -340,6 +366,8 @@ describe('useEventForm', () => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
+        result.current.handleChange('event_type_id', 1)
+        result.current.handleChange('event_subtype_id', 1)
         result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
@@ -365,6 +393,8 @@ describe('useEventForm', () => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
+        result.current.handleChange('event_type_id', 1)
+        result.current.handleChange('event_subtype_id', 1)
         result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
@@ -390,6 +420,8 @@ describe('useEventForm', () => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
+        result.current.handleChange('event_type_id', 1)
+        result.current.handleChange('event_subtype_id', 1)
         result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
@@ -412,6 +444,8 @@ describe('useEventForm', () => {
           start_date: '2030-12-01T10:00',
           end_date: '2030-12-01T18:00',
           category_id: 1,
+          event_type_id: 1,
+          event_subtype_id: 1,
           locations: [{ id: 1, name: 'Location 1' }],
         },
       })
@@ -428,6 +462,8 @@ describe('useEventForm', () => {
         result.current.handleChange('title', 'Updated Title')
         result.current.handleChange('description', 'Updated Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
+        result.current.handleChange('event_type_id', 1)
+        result.current.handleChange('event_subtype_id', 1)
         result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })

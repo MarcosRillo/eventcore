@@ -142,13 +142,15 @@ class AuthService
     private function createRefreshToken(User $user, ?string $familyId = null): string
     {
         $tokenPlain = Str::random(64);
-        $tokenHash = Hash::make($tokenPlain);
+        // SHA256 for fast O(1) lookups (indexed)
+        $tokenHash = hash('sha256', $tokenPlain);
 
         $refreshTokenExpiration = config('tokens.refresh_token_expiration', 10080);
 
         RefreshToken::create([
             'user_id' => $user->id,
-            'token' => $tokenHash,
+            'token' => $tokenHash,       // Keep for backward compatibility
+            'token_hash' => $tokenHash,  // SHA256 for fast lookups
             'family_id' => $familyId ?? Str::uuid()->toString(),
             'expires_at' => Carbon::now()->addMinutes($refreshTokenExpiration),
         ]);
@@ -158,20 +160,25 @@ class AuthService
 
     /**
      * Find a valid refresh token by its plaintext value.
-     * Uses Hash::check for timing-safe comparison.
+     * Uses SHA256 hash for O(1) indexed lookup.
      */
     private function findValidRefreshToken(string $tokenPlain): ?RefreshToken
     {
-        // Get all non-expired tokens for checking
-        $tokens = RefreshToken::where('expires_at', '>', now())->get();
+        $tokenHash = hash('sha256', $tokenPlain);
 
-        foreach ($tokens as $token) {
-            if (Hash::check($tokenPlain, $token->token)) {
-                return $token;
-            }
+        // O(1) lookup using indexed token_hash column
+        $token = RefreshToken::where('token_hash', $tokenHash)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        // Fallback for legacy tokens without token_hash (backward compatibility)
+        if (!$token) {
+            $token = RefreshToken::where('token', $tokenHash)
+                ->where('expires_at', '>', now())
+                ->first();
         }
 
-        return null;
+        return $token;
     }
 
     /**

@@ -32,13 +32,20 @@ class StoreOrganizerEventRequest extends FormRequest
             'description' => 'required|string',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'category_id' => 'required|exists:categories,id',
-            'location_ids' => 'required|array|min:1',
+            'category_id' => 'nullable|exists:categories,id',
+
+            // Event Type and Subtype (hierarchical categorization - Dec 2, 2025)
+            'event_type_id' => 'required|exists:event_types,id',
+            'event_subtype_id' => 'required|exists:event_subtypes,id',
+
+            // Location: require either existing locations OR custom location
+            'location_ids' => 'nullable|array',
             'location_ids.*' => 'exists:locations,id',
+            'custom_location_name' => 'nullable|string|max:255|required_without:location_ids',
 
             // Basic information
             'edition_number' => 'nullable|string|max:100',
-            'type_id' => 'nullable|exists:event_types,id',
+            'format_id' => 'nullable|exists:event_formats,id',
 
             // Normalized FKs (Nov 30, 2025)
             'subtype_id' => 'nullable|exists:event_subtypes,id',

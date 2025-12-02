@@ -31,10 +31,10 @@ class DashboardTransformer
                 'status_code' => $event->status->status_code,
                 'status_name' => $event->status->status_name,
             ],
-            'type' => [
-                'id' => $event->type->id,
-                'type_code' => $event->type->type_code,
-                'type_name' => $event->type->type_name,
+            'format' => [
+                'id' => $event->format->id,
+                'format_code' => $event->format->format_code,
+                'format_name' => $event->format->format_name,
             ],
             'entity' => [
                 'id' => $event->entity->id,
@@ -76,10 +76,10 @@ class DashboardTransformer
                 'status_name' => $event->status->status_name,
                 'description' => $event->status->description,
             ],
-            'type' => [
-                'id' => $event->type->id,
-                'type_code' => $event->type->type_code,
-                'type_name' => $event->type->type_name,
+            'format' => [
+                'id' => $event->format->id,
+                'format_code' => $event->format->format_code,
+                'format_name' => $event->format->format_name,
             ],
             'entity' => [
                 'id' => $event->entity->id,

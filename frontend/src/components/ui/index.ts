@@ -9,6 +9,7 @@ export { default as Button } from './Button';
 export { default as Input } from './Input';
 export { default as Textarea } from './Textarea';
 export { default as Select } from './Select';
+export { SearchableMultiSelect, type SearchableMultiSelectProps, type SelectOption } from './SearchableMultiSelect';
 export { default as LoadingSpinner, LoadingDots, LoadingOverlay } from './LoadingSpinner';
 
 // State Components

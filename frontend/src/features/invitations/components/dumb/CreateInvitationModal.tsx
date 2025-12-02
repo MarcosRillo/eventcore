@@ -1,83 +1,54 @@
-'use client'
+/**
+ * Create Invitation Modal - Dumb Component
+ * Modal for creating new invitations
+ * Receives all state via props (no hooks)
+ */
 
-import { useState, FormEvent } from 'react'
-import { AssignableRole, SendInvitationData } from '../../types/invitation.types'
+import { FormEvent } from 'react'
+import { AssignableRole } from '../../types/invitation.types'
 import { Mail, UserPlus, Loader2 } from 'lucide-react'
-
-interface CreateInvitationModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (data: SendInvitationData) => Promise<boolean>
-  roles: AssignableRole[]
-  isLoading: boolean
-}
 
 interface FormErrors {
   email?: string
   role_id?: string
 }
 
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+interface CreateInvitationModalProps {
+  isOpen: boolean
+  isLoading: boolean
+  roles: AssignableRole[]
+  email: string
+  roleId: number | ''
+  errors: FormErrors
+  onEmailChange: (email: string) => void
+  onRoleChange: (roleId: number | '') => void
+  onEmailBlur: () => void
+  onRoleBlur: () => void
+  onSubmit: (e: FormEvent) => void
+  onClose: () => void
 }
 
 export const CreateInvitationModal = ({
   isOpen,
-  onClose,
-  onSubmit,
-  roles,
   isLoading,
+  roles,
+  email,
+  roleId,
+  errors,
+  onEmailChange,
+  onRoleChange,
+  onEmailBlur,
+  onRoleBlur,
+  onSubmit,
+  onClose,
 }: CreateInvitationModalProps) => {
-  const [email, setEmail] = useState('')
-  const [roleId, setRoleId] = useState<number | ''>('')
-  const [errors, setErrors] = useState<FormErrors>({})
-
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {}
-
-    if (!email.trim()) {
-      newErrors.email = 'El email es requerido'
-    } else if (!validateEmail(email)) {
-      newErrors.email = 'Ingrese un email válido'
-    }
-
-    if (!roleId) {
-      newErrors.role_id = 'Debe seleccionar un rol'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-
-    if (!validate()) return
-
-    const success = await onSubmit({
-      email: email.trim(),
-      role_id: roleId as number,
-    })
-
-    if (success) {
-      setEmail('')
-      setRoleId('')
-      setErrors({})
-      onClose()
-    }
-  }
+  if (!isOpen) return null
 
   const handleClose = () => {
     if (!isLoading) {
-      setEmail('')
-      setRoleId('')
-      setErrors({})
       onClose()
     }
   }
-
-  if (!isOpen) return null
 
   return (
     <div
@@ -108,7 +79,7 @@ export const CreateInvitationModal = ({
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={onSubmit} className="p-4 space-y-4">
           {/* Email field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -122,8 +93,8 @@ export const CreateInvitationModal = ({
                 name="email"
                 value={email}
                 onChange={(e) => {
-                  setEmail(e.target.value)
-                  if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
+                  onEmailChange(e.target.value)
+                  onEmailBlur()
                 }}
                 placeholder="usuario@ejemplo.com"
                 disabled={isLoading}
@@ -150,8 +121,8 @@ export const CreateInvitationModal = ({
               name="role_id"
               value={roleId}
               onChange={(e) => {
-                setRoleId(e.target.value ? Number(e.target.value) : '')
-                if (errors.role_id) setErrors((prev) => ({ ...prev, role_id: undefined }))
+                onRoleChange(e.target.value ? Number(e.target.value) : '')
+                onRoleBlur()
               }}
               disabled={isLoading}
               className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 ${

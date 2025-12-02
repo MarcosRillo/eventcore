@@ -5,11 +5,11 @@ namespace Tests\Feature\Categories;
 use Tests\TestCase;
 use App\Models\Category;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CategoryTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /**
      * Setup the test environment.
@@ -114,7 +114,7 @@ class CategoryTest extends TestCase
     }
 
     /**
-     * Test that we can delete a category.
+     * Test that we can delete a category (soft delete).
      */
     public function test_can_delete_category(): void
     {
@@ -125,9 +125,10 @@ class CategoryTest extends TestCase
         // Act: Delete category using slug (route key name)
         $response = $this->deleteJson("/api/v1/categories/{$category->slug}");
 
-        // Assert: Verify deletion (200 is valid for delete with response body)
+        // Assert: Verify soft deletion (200 is valid for delete with response body)
         $response->assertStatus(200);
-        $this->assertDatabaseMissing('categories', [
+        // With SoftDeletes, the record exists but has deleted_at set
+        $this->assertSoftDeleted('categories', [
             'id' => $category->id,
         ]);
     }

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import apiClient from '@/services/apiClient';
 import { Event } from '@/types/event.types';
-import EventDetailPage from './EventDetailPage';
+import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage';
 
 interface EventPageProps {
   params: Promise<{

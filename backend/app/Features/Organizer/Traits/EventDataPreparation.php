@@ -21,13 +21,13 @@ trait EventDataPreparation
      * @param array $data Input data from request
      * @param User $user The user creating the event
      * @param int $statusId Status ID (draft)
-     * @param int $typeId Event type ID
+     * @param int $formatId Event format ID
      * @return array Prepared data for Event::create()
      */
-    protected function prepareEventData(array $data, User $user, int $statusId, int $typeId): array
+    protected function prepareEventData(array $data, User $user, int $statusId, int $formatId): array
     {
         return array_merge(
-            $this->getSystemFields($user, $statusId, $typeId),
+            $this->getSystemFields($data, $user, $statusId, $formatId),
             $this->getEventFields($data)
         );
     }
@@ -43,23 +43,29 @@ trait EventDataPreparation
     {
         $fields = $this->getEventFields($data);
 
-        // Preserve type_id if not provided in update
-        $fields['type_id'] = $data['type_id'] ?? $event->type_id;
+        // Preserve format_id if not provided in update
+        $fields['format_id'] = $data['format_id'] ?? $event->format_id;
+
+        // Preserve or update producer_id (auto-filled on create, Dec 2, 2025)
+        $fields['producer_id'] = $data['producer_id'] ?? $event->producer_id;
 
         return $fields;
     }
 
     /**
      * Get system fields for event creation.
+     * producer_id defaults to organization_id if not explicitly provided (Dec 2, 2025).
      */
-    private function getSystemFields(User $user, int $statusId, int $typeId): array
+    private function getSystemFields(array $data, User $user, int $statusId, int $formatId): array
     {
         return [
             'organization_id' => $user->organization_id,
             'entity_id' => $user->organization_id,
             'status_id' => $statusId,
             'created_by' => $user->id,
-            'type_id' => $typeId,
+            'format_id' => $formatId,
+            // producer_id defaults to organization_id if not explicitly provided
+            'producer_id' => $data['producer_id'] ?? $user->organization_id,
         ];
     }
 
@@ -81,12 +87,12 @@ trait EventDataPreparation
             'edition_number' => $data['edition_number'] ?? null,
 
             // Normalized FKs (Nov 30, 2025)
+            // Note: producer_id is handled in getSystemFields (auto-fills with organization_id)
             'subtype_id' => $data['subtype_id'] ?? null,
             'origin_id' => $data['origin_id'] ?? null,
             'theme_id' => $data['theme_id'] ?? null,
             'frequency_id' => $data['frequency_id'] ?? null,
             'rotation_type_id' => $data['rotation_type_id'] ?? null,
-            'producer_id' => $data['producer_id'] ?? null,
 
             // Location info
             'maps_url' => $data['maps_url'] ?? null,

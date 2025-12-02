@@ -35,25 +35,25 @@ export default function AppearancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Configuración de Apariencia</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-neutral-900">Configuración de Apariencia</h1>
+          <p className="mt-2 text-neutral-600">
             Personaliza la apariencia de tu plataforma de calendario
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Configuración</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Configuración</h2>
             
             {/* Error Display */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-800">{error}</p>
+              <div className="mb-6 p-4 bg-error-50 border border-error-200 rounded-md">
+                <p className="text-error-800">{error}</p>
               </div>
             )}
 
@@ -80,7 +80,7 @@ export default function AppearancePage() {
 
               {/* Color Scheme */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Esquema de Colores</h3>
+                <h3 className="text-lg font-medium text-neutral-900">Esquema de Colores</h3>
                 
                 <ColorPicker
                   label="Color Primario"
@@ -144,11 +144,11 @@ export default function AppearancePage() {
           </div>
 
           {/* Live Preview Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Vista Previa</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Vista Previa</h2>
             
             <div 
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 min-h-96"
+              className="border-2 border-dashed border-neutral-300 rounded-lg p-6 min-h-96"
               style={{
                 backgroundColor: data.color_background,
                 color: data.color_text,

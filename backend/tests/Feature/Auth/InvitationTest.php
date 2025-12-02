@@ -6,7 +6,7 @@ use App\Models\Invitation;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Organization;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 class InvitationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

@@ -5,14 +5,16 @@ namespace Tests\Feature\Events;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class EventTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -45,6 +47,21 @@ class EventTest extends TestCase
             ->value('id') ?? 1;
     }
 
+    /**
+     * Helper: Get valid event_type_id and event_subtype_id
+     */
+    private function getValidEventTypeIds(): array
+    {
+        $eventType = EventType::first() ?? EventType::factory()->create();
+        $eventSubtype = EventSubtype::where('event_type_id', $eventType->id)->first()
+            ?? EventSubtype::factory()->create(['event_type_id' => $eventType->id]);
+
+        return [
+            'event_type_id' => $eventType->id,
+            'event_subtype_id' => $eventSubtype->id,
+        ];
+    }
+
     #[Test]
     public function test_can_list_events(): void
     {
@@ -71,6 +88,7 @@ class EventTest extends TestCase
 
         $category = Category::factory()->create(['entity_id' => $organization->id]);
         $location = Location::factory()->create(['entity_id' => $organization->id]);
+        $eventTypeIds = $this->getValidEventTypeIds();
 
         $eventData = [
             'title' => 'Test Event Creation',
@@ -78,8 +96,10 @@ class EventTest extends TestCase
             'start_date' => now()->addDays(7)->format('Y-m-d H:i:s'),
             'end_date' => now()->addDays(8)->format('Y-m-d H:i:s'),
             'category_id' => $category->id,
+            'event_type_id' => $eventTypeIds['event_type_id'],
+            'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
-            'type_id' => \DB::table('event_types')->first()->id,
+            'format_id' => \DB::table('event_formats')->first()->id,
             'status_id' => $this->getStatusId('draft'),
             'entity_id' => $organization->id,
             'is_featured' => false,
@@ -136,7 +156,8 @@ class EventTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('events', [
+        // With SoftDeletes, the record exists but has deleted_at set
+        $this->assertSoftDeleted('events', [
             'id' => $event->id
         ]);
     }

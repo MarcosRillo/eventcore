@@ -5,7 +5,6 @@ namespace Tests\Feature\Organizer;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -31,7 +30,7 @@ class OrganizerSubmitTest extends TestCase
     private Location $location;
     private EventStatus $draftStatus;
     private EventStatus $pendingInternalStatus;
-    private EventType $eventType;
+    private int $formatId;
 
     protected function setUp(): void
     {
@@ -82,7 +81,7 @@ class OrganizerSubmitTest extends TestCase
         ]);
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
         $this->pendingInternalStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
-        $this->eventType = EventType::first();
+        $this->formatId = \DB::table('event_formats')->value('id') ?? 1;
     }
 
     // ==========================================
@@ -142,16 +141,22 @@ class OrganizerSubmitTest extends TestCase
     }
 
     #[Test]
-    public function submit_without_producer_returns_validation_error(): void
+    public function submit_without_explicit_producer_succeeds_with_auto_filled_value(): void
     {
-        // producer_id is optional on create but required for submit
-        $event = $this->createEventMissingFields(['producer_id']);
+        // producer_id is auto-filled with organization_id on creation (Dec 2, 2025)
+        // Events created without explicit producer_id should still submit successfully
+        $event = $this->createCompleteInternalEvent();
+
+        // Simulate an event where producer_id was set to organization_id (auto-filled behavior)
+        $event->producer_id = $this->organization->id;
+        $event->save();
 
         $response = $this->actingAs($this->user)
             ->postJson("/api/v1/organizer/events/{$event->id}/submit");
 
-        $response->assertStatus(422)
-            ->assertJsonStructure(['errors' => ['producer_id']]);
+        // Should succeed - producer_id is auto-filled, not required to be set by user
+        $response->assertStatus(200)
+            ->assertJson(['status' => 'pending_internal_approval']);
     }
 
     #[Test]
@@ -168,21 +173,21 @@ class OrganizerSubmitTest extends TestCase
     }
 
     #[Test]
-    public function submit_with_multiple_missing_fields_returns_all_errors(): void
+    public function submit_with_missing_edition_number_returns_error(): void
     {
-        // Create event missing both edition_number and producer_id
-        $event = $this->createEventMissingFields(['producer_id', 'edition_number']);
+        // Create event missing edition_number (producer_id is auto-filled, not required)
+        $event = $this->createEventMissingFields(['edition_number']);
 
         $response = $this->actingAs($this->user)
             ->postJson("/api/v1/organizer/events/{$event->id}/submit");
 
         $response->assertStatus(422)
             ->assertJsonStructure([
-                'errors' => ['producer_id', 'edition_number']
+                'errors' => ['edition_number']
             ]);
 
         $errors = $response->json('errors');
-        $this->assertCount(2, $errors);
+        $this->assertCount(1, $errors);
     }
 
     // ==========================================
@@ -233,7 +238,7 @@ class OrganizerSubmitTest extends TestCase
             'entity_id' => $otherOrg->id,
             'status_id' => $this->draftStatus->id,
             'category_id' => $this->category->id,
-            'type_id' => $this->eventType->id,
+            'format_id' => $this->formatId,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -273,7 +278,7 @@ class OrganizerSubmitTest extends TestCase
             'title' => 'Test Event',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
-            'type_id' => $this->eventType->id,
+            'format_id' => $this->formatId,
             'category_id' => $this->category->id,
             'edition_number' => '5ta Edición',
             'producer_id' => $this->producerOrg->id,
@@ -306,7 +311,7 @@ class OrganizerSubmitTest extends TestCase
             'title' => 'Test Event',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
-            'type_id' => $this->eventType->id,
+            'format_id' => $this->formatId,
             'category_id' => $this->category->id,
             'edition_number' => '5ta Edición',
             'producer_id' => $this->producerOrg->id,

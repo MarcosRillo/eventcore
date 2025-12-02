@@ -120,8 +120,11 @@ export const useEventActions = (
         description: originalEvent.description || '',
         start_date: originalEvent.start_date,
         end_date: originalEvent.end_date,
-        category_id: categoryId || 0,
+        category_id: categoryId,
         location_ids: locationIds,
+        // Event Type/Subtype (required - Dec 2, 2025)
+        event_type_id: originalEvent.event_type_id || originalEvent.event_type?.id || 0,
+        event_subtype_id: originalEvent.event_subtype_id || originalEvent.event_subtype?.id || 0,
         // Copy optional FK fields
         type_id: originalEvent.type_id,
         edition_number: originalEvent.edition_number,

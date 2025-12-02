@@ -35,6 +35,14 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
+                  href="/register-request"
+                  className="text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
+                >
+                  Registrar mi Organización
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/login"
                   className="text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
                 >

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Scopes\TenantScope;
 use Carbon\Carbon;
 
@@ -23,7 +24,7 @@ use Carbon\Carbon;
  */
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -37,10 +38,12 @@ class Event extends Model
         'start_date',
         'end_date',
         'status_id',
-        'type_id',
+        'format_id',
         'category_id',
         'entity_id',
         'organization_id',
+        'event_type_id',
+        'event_subtype_id',
 
         // Approval workflow
         'approval_comments',
@@ -59,6 +62,7 @@ class Event extends Model
         // Event info
         'edition_number',
         'maps_url',
+        'custom_location_name',
         'previous_venue',
         'next_venue',
         'event_website',
@@ -149,11 +153,27 @@ class Event extends Model
     }
 
     /**
-     * Get the type that this event belongs to.
+     * Get the format of this event (presencial, virtual, híbrido).
      */
-    public function type(): BelongsTo
+    public function format(): BelongsTo
     {
-        return $this->belongsTo(EventType::class, 'type_id');
+        return $this->belongsTo(EventFormat::class, 'format_id');
+    }
+
+    /**
+     * Get the event type (hierarchical categorization).
+     */
+    public function eventType(): BelongsTo
+    {
+        return $this->belongsTo(EventType::class, 'event_type_id');
+    }
+
+    /**
+     * Get the event subtype (hierarchical categorization).
+     */
+    public function eventSubtype(): BelongsTo
+    {
+        return $this->belongsTo(EventSubtype::class, 'event_subtype_id');
     }
 
     /**
@@ -320,11 +340,27 @@ class Event extends Model
     }
 
     /**
-     * Scope a query to filter events by type.
+     * Scope a query to filter events by format.
      */
-    public function scopeByType($query, $typeCode)
+    public function scopeByFormat($query, $formatCode)
     {
-        return $query->whereHas('type', fn($q) => $q->where('type_code', $typeCode));
+        return $query->whereHas('format', fn($q) => $q->where('format_code', $formatCode));
+    }
+
+    /**
+     * Scope a query to filter events by event type.
+     */
+    public function scopeByEventType($query, int $eventTypeId)
+    {
+        return $query->where('event_type_id', $eventTypeId);
+    }
+
+    /**
+     * Scope a query to filter events by event subtype.
+     */
+    public function scopeByEventSubtype($query, int $eventSubtypeId)
+    {
+        return $query->where('event_subtype_id', $eventSubtypeId);
     }
 
     /**

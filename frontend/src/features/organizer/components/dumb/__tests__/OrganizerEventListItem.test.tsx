@@ -98,8 +98,8 @@ describe('OrganizerEventListItem', () => {
   describe('status styling', () => {
     const statusTests: Array<{ status: OrganizerEvent['status']; expectedClass: string }> = [
       { status: 'draft', expectedClass: 'bg-gray-200' },
-      { status: 'pending', expectedClass: 'bg-yellow-200' },
-      { status: 'approved', expectedClass: 'bg-green-200' },
+      { status: 'pending_internal_approval', expectedClass: 'bg-yellow-200' },
+      { status: 'approved_internal', expectedClass: 'bg-green-200' },
       { status: 'rejected', expectedClass: 'bg-red-200' },
       { status: 'published', expectedClass: 'bg-blue-200' },
     ]

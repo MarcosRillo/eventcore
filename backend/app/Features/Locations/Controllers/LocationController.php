@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationResource;
 use App\Models\Location;
 use App\Features\Locations\Services\LocationService;
+use App\Features\Locations\Requests\IndexLocationsRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,16 +25,12 @@ class LocationController extends Controller
     /**
      * Display a listing of locations for the authenticated user's entity.
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexLocationsRequest $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
-        $filters = $request->only(['search', 'active', 'per_page']);
+        $filters = $request->validated();
         $locations = $this->locationService->getAllLocations($filters);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Locations retrieved successfully',
-            'data' => $locations,
-        ]);
+        return LocationResource::collection($locations);
     }
 
     /**
@@ -57,17 +54,11 @@ class LocationController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'city' => 'nullable|string|max:100',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
             'state' => 'nullable|string|max:100',
             'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
             'description' => 'nullable|string|max:1000',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'additional_info' => 'nullable|array',
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -99,17 +90,11 @@ class LocationController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'city' => 'nullable|string|max:100',
+            'address' => 'sometimes|required|string|max:500',
+            'city' => 'sometimes|required|string|max:100',
             'state' => 'nullable|string|max:100',
             'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
             'description' => 'nullable|string|max:1000',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'additional_info' => 'nullable|array',
             'is_active' => 'nullable|boolean',
         ]);
 

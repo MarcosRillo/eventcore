@@ -58,11 +58,11 @@ export function RegistrationRequestDetailPanel({
       {/* Slide-over Panel */}
       <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-white shadow-xl z-50 overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Detalle de Solicitud</h2>
+        <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-neutral-900">Detalle de Solicitud</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
+            className="p-2 text-neutral-400 hover:text-neutral-600 rounded-md hover:bg-neutral-100"
           >
             <X className="h-5 w-5" />
           </button>
@@ -75,7 +75,7 @@ export function RegistrationRequestDetailPanel({
               <LoadingSpinner />
             </div>
           ) : !request ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-neutral-500">
               No se pudo cargar el detalle
             </div>
           ) : (
@@ -85,7 +85,7 @@ export function RegistrationRequestDetailPanel({
                 <Badge variant={STATUS_CONFIG[request.status].variant} size="lg">
                   {STATUS_CONFIG[request.status].label}
                 </Badge>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-neutral-500">
                   Enviada el {formatDate(request.created_at)}
                 </span>
               </div>
@@ -93,10 +93,10 @@ export function RegistrationRequestDetailPanel({
               {/* Personal Data Section */}
               <section>
                 <div className="flex items-center gap-2 mb-3">
-                  <User className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">Datos Personales</h3>
+                  <User className="h-5 w-5 text-primary-600" />
+                  <h3 className="font-semibold text-neutral-900">Datos Personales</h3>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="bg-neutral-50 rounded-lg p-4 space-y-3">
                   <DetailRow label="Nombre completo" value={request.full_name} />
                   <DetailRow label="DNI" value={request.dni} />
                   <DetailRow label="Email" value={request.email} />
@@ -107,10 +107,10 @@ export function RegistrationRequestDetailPanel({
               {/* Organization Section */}
               <section>
                 <div className="flex items-center gap-2 mb-3">
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">Organización</h3>
+                  <Building2 className="h-5 w-5 text-primary-600" />
+                  <h3 className="font-semibold text-neutral-900">Organización</h3>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="bg-neutral-50 rounded-lg p-4 space-y-3">
                   <DetailRow label="Nombre" value={request.organization_name} />
                   <DetailRow label="Rubro" value={request.organization_sector} />
                   {request.website && (
@@ -121,7 +121,7 @@ export function RegistrationRequestDetailPanel({
                           href={request.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                          className="text-primary-600 hover:underline"
                         >
                           {request.website}
                         </a>
@@ -134,25 +134,25 @@ export function RegistrationRequestDetailPanel({
               {/* Motivation Section */}
               <section>
                 <div className="flex items-center gap-2 mb-3">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">Motivación</h3>
+                  <FileText className="h-5 w-5 text-primary-600" />
+                  <h3 className="font-semibold text-neutral-900">Motivación</h3>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{request.motivation}</p>
+                <div className="bg-neutral-50 rounded-lg p-4">
+                  <p className="text-neutral-700 whitespace-pre-wrap">{request.motivation}</p>
                 </div>
               </section>
 
               {/* Review Info (if already reviewed) */}
               {request.reviewed_at && (
                 <section className="border-t pt-4">
-                  <h3 className="font-semibold text-gray-900 mb-3">Información de Revisión</h3>
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <h3 className="font-semibold text-neutral-900 mb-3">Información de Revisión</h3>
+                  <div className="bg-neutral-50 rounded-lg p-4 space-y-3">
                     <DetailRow label="Revisado por" value={request.reviewed_by || 'N/A'} />
                     <DetailRow label="Fecha de revisión" value={formatDate(request.reviewed_at)} />
                     {request.rejection_reason && (
                       <div>
-                        <span className="text-sm font-medium text-gray-500">Motivo del rechazo:</span>
-                        <p className="mt-1 text-red-700 bg-red-50 p-3 rounded">
+                        <span className="text-sm font-medium text-neutral-500">Motivo del rechazo:</span>
+                        <p className="mt-1 text-error-700 bg-error-50 p-3 rounded">
                           {request.rejection_reason}
                         </p>
                       </div>
@@ -200,8 +200,8 @@ interface DetailRowProps {
 function DetailRow({ label, value }: DetailRowProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:justify-between">
-      <span className="text-sm font-medium text-gray-500">{label}</span>
-      <span className="text-sm text-gray-900">{value}</span>
+      <span className="text-sm font-medium text-neutral-500">{label}</span>
+      <span className="text-sm text-neutral-900">{value}</span>
     </div>
   )
 }

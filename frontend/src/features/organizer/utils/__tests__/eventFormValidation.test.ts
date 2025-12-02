@@ -6,6 +6,10 @@ describe('eventFormValidation', () => {
     title: 'Valid Event Title',
     description: 'Valid description',
     edition_number: '',
+    // Event Type/Subtype (required since Dec 2, 2025)
+    event_type_id: 1,
+    event_subtype_id: 1,
+    // FK references
     type_id: null,
     subtype_id: null,
     origin_id: null,
@@ -17,6 +21,8 @@ describe('eventFormValidation', () => {
     service_ids: [],
     room_ids: [],
     location_ids: [1],
+    has_custom_location: false,
+    custom_location_name: '',
     maps_url: '',
     previous_venue: '',
     next_venue: '',
@@ -189,25 +195,55 @@ describe('eventFormValidation', () => {
       })
     })
 
+    describe('event_type_id validation', () => {
+      it('should return error when event_type_id is null', () => {
+        const formData = getValidFormData()
+        formData.event_type_id = null
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.event_type_id).toBe('El tipo de evento es requerido')
+      })
+
+      it('should not return error when event_type_id is valid', () => {
+        const formData = getValidFormData()
+        formData.event_type_id = 1
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.event_type_id).toBeUndefined()
+      })
+    })
+
+    describe('event_subtype_id validation', () => {
+      it('should return error when event_subtype_id is null', () => {
+        const formData = getValidFormData()
+        formData.event_subtype_id = null
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.event_subtype_id).toBe('El subtipo de evento es requerido')
+      })
+
+      it('should not return error when event_subtype_id is valid', () => {
+        const formData = getValidFormData()
+        formData.event_subtype_id = 1
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.event_subtype_id).toBeUndefined()
+      })
+    })
+
     describe('category_id validation', () => {
-      it('should return error when category_id is null', () => {
+      // Category is now optional (Dec 2, 2025)
+      it('should not return error when category_id is null (now optional)', () => {
         const formData = getValidFormData()
         formData.category_id = null
 
         const errors = validateEventForm(formData)
 
-        expect(errors.category_id).toBe('La categoría es requerida')
-      })
-
-      it('should return error when category_id is undefined', () => {
-        const formData: Partial<EventFormData> = {
-          ...getValidFormData(),
-          category_id: undefined
-        }
-
-        const errors = validateEventForm(formData as EventFormData)
-
-        expect(errors.category_id).toBe('La categoría es requerida')
+        expect(errors.category_id).toBeUndefined()
       })
 
       it('should not return error when category_id is valid', () => {
@@ -221,24 +257,49 @@ describe('eventFormValidation', () => {
     })
 
     describe('location_ids validation', () => {
-      it('should return error when location_ids is empty array', () => {
+      it('should return error when location_ids is empty and no custom location', () => {
         const formData = getValidFormData()
         formData.location_ids = []
+        formData.has_custom_location = false
 
         const errors = validateEventForm(formData)
 
-        expect(errors.location_ids).toBe('Al menos una ubicación es requerida')
+        expect(errors.location_ids).toBe('Selecciona al menos una ubicación o agrega una personalizada')
       })
 
-      it('should return error when location_ids is undefined', () => {
+      it('should return error when location_ids is undefined and no custom location', () => {
         const formData: Partial<EventFormData> = {
           ...getValidFormData(),
-          location_ids: undefined
+          location_ids: undefined,
+          has_custom_location: false
         }
 
         const errors = validateEventForm(formData as EventFormData)
 
-        expect(errors.location_ids).toBe('Al menos una ubicación es requerida')
+        expect(errors.location_ids).toBe('Selecciona al menos una ubicación o agrega una personalizada')
+      })
+
+      it('should return error when has_custom_location but custom_location_name is empty', () => {
+        const formData = getValidFormData()
+        formData.location_ids = []
+        formData.has_custom_location = true
+        formData.custom_location_name = ''
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.custom_location_name).toBe('El nombre del lugar es requerido')
+      })
+
+      it('should not return error when has_custom_location with valid custom_location_name', () => {
+        const formData = getValidFormData()
+        formData.location_ids = []
+        formData.has_custom_location = true
+        formData.custom_location_name = 'Salón El Jardín'
+
+        const errors = validateEventForm(formData)
+
+        expect(errors.location_ids).toBeUndefined()
+        expect(errors.custom_location_name).toBeUndefined()
       })
 
       it('should not return error when location_ids has at least one location', () => {
@@ -274,7 +335,8 @@ describe('eventFormValidation', () => {
         formData.title = ''
         formData.description = ''
         formData.start_date = ''
-        formData.category_id = null
+        formData.event_type_id = null
+        formData.event_subtype_id = null
         formData.location_ids = []
 
         const errors = validateEventForm(formData)
@@ -282,9 +344,10 @@ describe('eventFormValidation', () => {
         expect(errors.title).toBe('El título es requerido')
         expect(errors.description).toBe('La descripción es requerida')
         expect(errors.start_date).toBe('La fecha de inicio es requerida')
-        expect(errors.category_id).toBe('La categoría es requerida')
-        expect(errors.location_ids).toBe('Al menos una ubicación es requerida')
-        expect(Object.keys(errors).length).toBe(5)
+        expect(errors.event_type_id).toBe('El tipo de evento es requerido')
+        expect(errors.event_subtype_id).toBe('El subtipo de evento es requerido')
+        expect(errors.location_ids).toBe('Selecciona al menos una ubicación o agrega una personalizada')
+        expect(Object.keys(errors).length).toBe(6)
       })
     })
   })

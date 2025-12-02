@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { Building2, CheckCircle } from 'lucide-react'
 import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
 import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
+import { Button } from '@/components/ui'
 
 export default function RegisterRequestPage() {
   const {
@@ -23,29 +24,26 @@ export default function RegisterRequestPage() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-success-100">
+                <CheckCircle className="h-6 w-6 text-success-600" aria-hidden="true" />
               </div>
-              <h2 className="mt-4 text-xl font-semibold text-gray-900">
+              <h2 className="mt-4 text-xl font-semibold text-neutral-900">
                 Solicitud Enviada
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Tu solicitud ha sido recibida exitosamente. Nuestro equipo la revisara
+              <p className="mt-2 text-sm text-neutral-600">
+                Tu solicitud ha sido recibida exitosamente. Nuestro equipo la revisará
                 y te contactaremos por email con el resultado.
               </p>
-              <p className="mt-4 text-sm text-gray-500">
-                El proceso de revision puede tomar hasta 48 horas habiles.
+              <p className="mt-4 text-sm text-neutral-500">
+                El proceso de revisión puede tomar hasta 48 horas hábiles.
               </p>
               <div className="mt-6">
-                <Link
-                  href="/"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Volver al inicio
+                <Link href="/">
+                  <Button>Volver al inicio</Button>
                 </Link>
               </div>
             </div>
@@ -56,19 +54,19 @@ export default function RegisterRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-            <Building2 className="h-6 w-6 text-blue-600" />
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary-100">
+            <Building2 className="h-6 w-6 text-primary-600" aria-hidden="true" />
           </div>
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">
+          <h1 className="mt-4 text-3xl font-bold text-neutral-900">
             Solicitar Registro
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Completa el formulario para solicitar el registro de tu organizacion
-            en la plataforma de eventos turisticos.
+          <p className="mt-2 text-sm text-neutral-600">
+            Completá el formulario para solicitar el registro de tu organización
+            en la plataforma de eventos turísticos.
           </p>
         </div>
 
@@ -87,10 +85,10 @@ export default function RegisterRequestPage() {
 
         {/* Footer */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Ya tienes una cuenta?{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Inicia sesion
+          <p className="text-sm text-neutral-600">
+            ¿Ya tenés una cuenta?{' '}
+            <Link href="/login" className="font-medium text-primary-600 hover:text-primary-500">
+              Iniciá sesión
             </Link>
           </p>
         </div>

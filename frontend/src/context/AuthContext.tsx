@@ -17,17 +17,10 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // DEVELOPMENT FIX: Add stability check for React.StrictMode infinite re-renders
-  const stabilityCheck = useRef(0);
-  stabilityCheck.current++;
-
-  if (stabilityCheck.current > 15) {
-    // Continue with a stable mock state to prevent infinite loops in development
-  }
-
   const authState = useAuthActions();
 
-  // CRITICAL FIX: Use previous value reference to break infinite re-render cycle
+  // Ref to track previous state and prevent unnecessary context updates
+  // when only function references change (functions aren't memoized in useAuthActions)
   const prevContextValue = useRef<AuthContextType | null>(null);
 
   const contextValue: AuthContextType = useMemo(() => {

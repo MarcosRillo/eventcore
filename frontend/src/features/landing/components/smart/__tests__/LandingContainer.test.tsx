@@ -23,6 +23,7 @@ jest.mock('@/features/landing/components/dumb', () => ({
       Categories: {loading ? 'Loading' : categories.length}
     </div>
   ),
+  OrganizersSection: () => <div data-testid="organizers-section">Organizers Section</div>,
   Footer: () => <div data-testid="footer">Footer</div>
 }))
 
@@ -44,7 +45,8 @@ describe('LandingContainer', () => {
     expect(screen.getByTestId('hero-section')).toBeInTheDocument()
     expect(screen.getByTestId('featured-section')).toBeInTheDocument()
     expect(screen.getByTestId('categories-section')).toBeInTheDocument()
-    expect(screen.getByTestId('footer')).toBeInTheDocument()
+    expect(screen.getByTestId('organizers-section')).toBeInTheDocument()
+    // Note: Footer is now rendered in the public layout, not in LandingContainer
   })
 
   it('passes data to sections', () => {

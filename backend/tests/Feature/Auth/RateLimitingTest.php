@@ -4,14 +4,14 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Models\UserRole;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class RateLimitingTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

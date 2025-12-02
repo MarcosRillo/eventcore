@@ -27,6 +27,8 @@ use App\Features\Categories\Controllers\CategoryController;
 use App\Features\Locations\Controllers\LocationController;
 use App\Features\Organizer\Controllers\OrganizerController;
 use App\Features\Organizations\Controllers\OrganizationController;
+use App\Features\EventTypes\Controllers\EventTypeController;
+use App\Features\EventTypes\Controllers\EventSubtypeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -136,6 +138,28 @@ Route::prefix('v1')->group(function () {
             Route::post('locations', [LocationController::class, 'store']);
             Route::put('locations/{location}', [LocationController::class, 'update']);
             Route::delete('locations/{location}', [LocationController::class, 'destroy']);
+            Route::patch('locations/{location}/toggle-status', [LocationController::class, 'toggleStatus']);
+            Route::get('locations/statistics', [LocationController::class, 'statistics']);
+
+            // Event Types CRUD (write operations only - read is in shared section below)
+            Route::post('event-types', [EventTypeController::class, 'store']);
+            Route::get('event-types/stats', [EventTypeController::class, 'stats']);
+            Route::put('event-types/{eventType}', [EventTypeController::class, 'update']);
+            Route::delete('event-types/{eventType}', [EventTypeController::class, 'destroy']);
+            Route::patch('event-types/{eventType}/toggle-status', [EventTypeController::class, 'toggleStatus']);
+
+            // Event Subtypes CRUD (write operations only - read is in shared section below)
+            // Note: 'active' route MUST be before '{subtype}' to prevent 'active' being captured as ID
+            Route::get('event-types/{eventType}/subtypes/active', [EventSubtypeController::class, 'active']);
+            Route::post('event-types/{eventType}/subtypes', [EventSubtypeController::class, 'store']);
+            Route::get('event-types/{eventType}/subtypes/{subtype}', [EventSubtypeController::class, 'show'])
+                ->where('subtype', '[0-9]+');
+            Route::put('event-types/{eventType}/subtypes/{subtype}', [EventSubtypeController::class, 'update'])
+                ->where('subtype', '[0-9]+');
+            Route::delete('event-types/{eventType}/subtypes/{subtype}', [EventSubtypeController::class, 'destroy'])
+                ->where('subtype', '[0-9]+');
+            Route::patch('event-types/{eventType}/subtypes/{subtype}/toggle-status', [EventSubtypeController::class, 'toggleStatus'])
+                ->where('subtype', '[0-9]+');
 
             // Admin routes
             Route::prefix('admin')->group(function () {
@@ -184,7 +208,7 @@ Route::prefix('v1')->group(function () {
             Route::get('organizations/{id}', [OrganizationController::class, 'show']);
         });
 
-        // ===== CATEGORIES & LOCATIONS READ ACCESS (All authenticated users need this) =====
+        // ===== CATEGORIES, LOCATIONS, EVENT TYPES READ ACCESS (All authenticated users need this) =====
         Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer_admin'])->group(function () {
             // Categories y Locations - solo lectura (necesario para formularios)
             Route::get('categories', [CategoryController::class, 'index']);
@@ -194,11 +218,21 @@ Route::prefix('v1')->group(function () {
             Route::get('locations', [LocationController::class, 'index']);
             Route::get('locations/active', [LocationController::class, 'active']);
             Route::get('locations/{location}', [LocationController::class, 'show']);
+
+            // Event Types - solo lectura (necesario para formularios de eventos)
+            Route::get('event-types', [EventTypeController::class, 'index']);
+            Route::get('event-types/active', [EventTypeController::class, 'active']);
+            Route::get('event-types/{eventType}', [EventTypeController::class, 'show']);
+            Route::get('event-types/{eventType}/subtypes', [EventSubtypeController::class, 'index']);
+            // Note: 'active' route is defined in admin section above to prevent route conflict
         });
     });
 
     // ===== PUBLIC ROUTES (sin autenticación) =====
     Route::prefix('public')->group(function () {
+        // Stats
+        Route::get('stats', [PublicEventController::class, 'stats']);
+
         // Events
         Route::get('events', [PublicEventController::class, 'index']);
         Route::get('events/upcoming', [PublicEventController::class, 'upcoming']);

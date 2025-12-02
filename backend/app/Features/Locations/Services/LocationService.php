@@ -215,11 +215,13 @@ class LocationService
      */
     private function applySearchFilter(Builder $query, string $search): void
     {
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('address', 'like', "%{$search}%")
-              ->orWhere('city', 'like', "%{$search}%")
-              ->orWhere('description', 'like', "%{$search}%");
+        // Case-insensitive search using LOWER() - works in PostgreSQL and SQLite
+        $searchLower = strtolower($search);
+        $query->where(function ($q) use ($searchLower) {
+            $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
+              ->orWhereRaw('LOWER(address) LIKE ?', ["%{$searchLower}%"])
+              ->orWhereRaw('LOWER(city) LIKE ?', ["%{$searchLower}%"])
+              ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"]);
         });
     }
 

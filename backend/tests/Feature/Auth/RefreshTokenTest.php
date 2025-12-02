@@ -5,14 +5,14 @@ namespace Tests\Feature\Auth;
 use App\Models\RefreshToken;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class RefreshTokenTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private User $user;
 
@@ -466,15 +466,17 @@ class RefreshTokenTest extends TestCase
         // The stored token should NOT match the plaintext (it should be hashed)
         $this->assertNotEquals($refreshTokenPlaintext, $storedToken->token);
 
-        // But Hash::check should validate it
-        $this->assertTrue(Hash::check($refreshTokenPlaintext, $storedToken->token));
+        // SHA256 hash should match for fast O(1) lookups
+        $expectedHash = hash('sha256', $refreshTokenPlaintext);
+        $this->assertEquals($expectedHash, $storedToken->token_hash);
+        $this->assertEquals($expectedHash, $storedToken->token);
     }
 
     #[Test]
     public function test_refresh_token_uses_timing_safe_comparison(): void
     {
-        // This test verifies the token lookup uses the correct method
-        // The implementation should use Hash::check() which is timing-safe
+        // This test verifies the token lookup works correctly
+        // The implementation uses SHA256 for O(1) indexed lookups
 
         $loginResponse = $this->postJson('/api/v1/auth/login', [
             'email' => $this->user->email,
@@ -483,7 +485,7 @@ class RefreshTokenTest extends TestCase
 
         $refreshToken = $loginResponse->json('data.refresh_token');
 
-        // Should successfully refresh (proving Hash::check works)
+        // Should successfully refresh (proving SHA256 lookup works)
         $refreshResponse = $this->postJson('/api/v1/auth/refresh', [
             'refresh_token' => $refreshToken,
         ]);

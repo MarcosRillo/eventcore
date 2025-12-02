@@ -24,12 +24,12 @@ const createMockResponse = <T>(data: T, status = 200, statusText = 'OK'): AxiosR
   config: { headers: {} } as AxiosResponse['config'],
 })
 
-// Helper to create a valid Location mock
+// Helper to create a valid Location mock (simplified for Tucumán Tourism)
 const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
   address: 'Default Address 123',
   city: 'Default City',
+  state: 'Tucumán',
   country: 'Argentina',
-  features: [],
   is_active: true,
   entity_id: 1,
   created_at: '2025-01-01T00:00:00.000Z',
@@ -66,8 +66,8 @@ describe('location.service', () => {
     it('should fetch paginated locations with default params', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          createMockLocation({ id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA', state: 'Buenos Aires', max_capacity: 500 }),
-          createMockLocation({ id: 2, name: 'Centro Cultural Kirchner', address: 'Sarmiento 151', city: 'CABA', state: 'Buenos Aires', max_capacity: 1000 }),
+          createMockLocation({ id: 1, name: 'Centro de Convenciones Tucumán', address: 'Av. Soldati 330', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
+          createMockLocation({ id: 2, name: 'Parque 9 de Julio', address: 'Av. Aconquija s/n', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
         ],
         meta: createMockMeta({ current_page: 1, last_page: 1, total: 2, per_page: 15, from: 1, to: 2 }),
         links: {
@@ -82,12 +82,11 @@ describe('location.service', () => {
 
       const result = await getLocations()
 
+      // Without search or is_active, only page and per_page are sent
       expect(mockApiClient.get).toHaveBeenCalledWith('/locations', {
         params: {
           page: 1,
           per_page: 15,
-          search: '',
-          is_active: undefined,
         },
       })
       expect(result).toEqual(mockResponse)
@@ -110,12 +109,11 @@ describe('location.service', () => {
 
       await getLocations({ page: 2, per_page: 20 })
 
+      // Without search or is_active, only pagination params are sent
       expect(mockApiClient.get).toHaveBeenCalledWith('/locations', {
         params: {
           page: 2,
           per_page: 20,
-          search: '',
-          is_active: undefined,
         },
       })
     })
@@ -123,7 +121,7 @@ describe('location.service', () => {
     it('should fetch locations with search filter', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          createMockLocation({ id: 1, name: 'Teatro San Martín', address: 'Av. Corrientes 1530', city: 'CABA', state: 'Buenos Aires', max_capacity: 500 }),
+          createMockLocation({ id: 1, name: 'Centro de Convenciones Tucumán', address: 'Av. Soldati 330', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
         ],
         meta: createMockMeta({ current_page: 1, last_page: 1, total: 1, per_page: 15, from: 1, to: 1 }),
         links: {
@@ -136,14 +134,14 @@ describe('location.service', () => {
 
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockResponse))
 
-      await getLocations({ search: 'Teatro' })
+      await getLocations({ search: 'Centro' })
 
+      // Search param is included when provided
       expect(mockApiClient.get).toHaveBeenCalledWith('/locations', {
         params: {
           page: 1,
           per_page: 15,
-          search: 'Teatro',
-          is_active: undefined,
+          search: 'Centro',
         },
       })
     })
@@ -151,7 +149,7 @@ describe('location.service', () => {
     it('should fetch only active locations when is_active filter is true', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          createMockLocation({ id: 1, name: 'Active Location', address: 'Address 1', city: 'City', state: 'Province', max_capacity: 100 }),
+          createMockLocation({ id: 1, name: 'Active Location', address: 'Address 1', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
         ],
         meta: createMockMeta({ current_page: 1, last_page: 1, total: 1, per_page: 15, from: 1, to: 1 }),
         links: {
@@ -166,12 +164,12 @@ describe('location.service', () => {
 
       await getLocations({ is_active: true })
 
+      // Active param is included when explicitly set
       expect(mockApiClient.get).toHaveBeenCalledWith('/locations', {
         params: {
           page: 1,
           per_page: 15,
-          search: '',
-          is_active: true,
+          active: true,
         },
       })
     })

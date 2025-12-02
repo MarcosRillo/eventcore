@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useDebounce } from "./useDebounce";
 import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
 import axios from "axios";
@@ -49,6 +49,14 @@ export function usePaginatedData<T extends { id: number | string }, F extends Ba
   const [error, setError] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(filters.search || "", debounceMs);
+
+  // Filters without search - used in dependency array to avoid bypassing debounce
+  // When search changes, only debouncedSearch should trigger the effect (after delay)
+  // Other filters (page, status, etc.) trigger immediately
+  const filtersWithoutSearch = useMemo(() => {
+    const { search, ...rest } = filters;
+    return rest;
+  }, [filters]);
 
   const setFilters = useCallback((newFilters: Partial<F>) => {
     setFiltersState((prev) => ({
@@ -119,8 +127,9 @@ export function usePaginatedData<T extends { id: number | string }, F extends Ba
       controller.abort();
     };
   
+  // filtersWithoutSearch excludes 'search' to let debouncedSearch control search timing
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(filters), debouncedSearch, autoLoad, fetchFn]);
+  }, [JSON.stringify(filtersWithoutSearch), debouncedSearch, autoLoad, fetchFn]);
 
   const refreshData = useCallback(() => {
     // Force a refresh by adding a timestamp to filters

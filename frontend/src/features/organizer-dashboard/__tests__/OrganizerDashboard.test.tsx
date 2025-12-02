@@ -3,6 +3,7 @@
  *
  * Tests the main dashboard layout, widget integration,
  * filtering, and user interactions.
+ * Updated Dec 2, 2025 for Spanish UI, pagination, and Link-based navigation.
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -55,9 +56,19 @@ describe('OrganizerDashboard', () => {
 
   const mockHandlers = {
     onFilterChange: jest.fn(),
-    onOpenCreateModal: jest.fn(),
-    onCloseCreateModal: jest.fn(),
-    onCreateSuccess: jest.fn()
+    onPageChange: jest.fn(),
+    onSuccess: jest.fn()
+  }
+
+  const defaultProps = {
+    stats: mockStats,
+    events: mockEvents,
+    loading: false,
+    error: null,
+    activeFilter: null,
+    currentPage: 1,
+    totalPages: 1,
+    ...mockHandlers
   }
 
   beforeEach(() => {
@@ -66,58 +77,35 @@ describe('OrganizerDashboard', () => {
 
   describe('Layout Structure', () => {
     test('renders dashboard with all main sections', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       expect(screen.getByRole('main')).toBeInTheDocument()
-      expect(screen.getByText('My Events')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /create new event/i })).toBeInTheDocument()
+      expect(screen.getByText('Mis Eventos')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /crear nuevo evento/i })).toBeInTheDocument()
+    })
+
+    test('create event link points to /organizer/create', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      const createLink = screen.getByRole('link', { name: /crear nuevo evento/i })
+      expect(createLink).toHaveAttribute('href', '/organizer/create')
     })
 
     test('displays stats cards in correct order', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       const statsCards = screen.getAllByRole('article')
 
       expect(statsCards).toHaveLength(5)
-      expect(statsCards[0]).toHaveTextContent('Total Events')
-      expect(statsCards[1]).toHaveTextContent('Pending')
-      expect(statsCards[2]).toHaveTextContent('Approved')
-      expect(statsCards[3]).toHaveTextContent('Published')
-      expect(statsCards[4]).toHaveTextContent('Requires Changes')
+      expect(statsCards[0]).toHaveTextContent('Total Eventos')
+      expect(statsCards[1]).toHaveTextContent('Pendientes')
+      expect(statsCards[2]).toHaveTextContent('Aprobados')
+      expect(statsCards[3]).toHaveTextContent('Publicados')
+      expect(statsCards[4]).toHaveTextContent('Requiere Cambios')
     })
 
     test('displays correct stat values', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       expect(screen.getByText('25')).toBeInTheDocument() // total
       expect(screen.getByText('5')).toBeInTheDocument()  // pending
@@ -127,17 +115,7 @@ describe('OrganizerDashboard', () => {
     })
 
     test('applies responsive grid classes to stats section', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       const statsGrid = screen.getByTestId('stats-grid')
 
@@ -150,17 +128,7 @@ describe('OrganizerDashboard', () => {
 
   describe('Event List Integration', () => {
     test('renders event list with data', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       expect(screen.getByText('Event 1')).toBeInTheDocument()
       expect(screen.getByText('Event 2')).toBeInTheDocument()
@@ -168,15 +136,7 @@ describe('OrganizerDashboard', () => {
 
     test('displays loading state when fetching events', () => {
       renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={[]}
-          loading={true}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
+        <OrganizerDashboard {...defaultProps} events={[]} loading={true} />
       )
 
       expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
@@ -184,15 +144,7 @@ describe('OrganizerDashboard', () => {
 
     test('displays error message when fetch fails', () => {
       renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={[]}
-          loading={false}
-          error="Failed to fetch events"
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
+        <OrganizerDashboard {...defaultProps} events={[]} error="Failed to fetch events" />
       )
 
       expect(screen.getByText(/failed to fetch events/i)).toBeInTheDocument()
@@ -200,162 +152,55 @@ describe('OrganizerDashboard', () => {
 
     test('displays empty state when no events', () => {
       renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={[]}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
+        <OrganizerDashboard {...defaultProps} events={[]} />
       )
 
-      expect(screen.getByText(/no events found/i)).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /create your first event/i })).toBeInTheDocument()
+      expect(screen.getByText(/no se encontraron eventos/i)).toBeInTheDocument()
+      const createFirstLink = screen.getByRole('link', { name: /crear tu primer evento/i })
+      expect(createFirstLink).toBeInTheDocument()
+      expect(createFirstLink).toHaveAttribute('href', '/organizer/create')
     })
   })
 
   describe('Quick Filters', () => {
     test('renders status filter buttons', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /^all$/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /^draft$/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /pending/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /published/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^todos$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^borrador$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /pendiente/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /publicado/i })).toBeInTheDocument()
     })
 
     test('calls onFilterChange when filter button clicked', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /^draft$/i }))
+      fireEvent.click(screen.getByRole('button', { name: /^borrador$/i }))
 
       expect(mockHandlers.onFilterChange).toHaveBeenCalledWith('draft')
     })
 
     test('highlights active filter button', () => {
       renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter="draft"
-          createModalOpen={false}
-          {...mockHandlers}
-        />
+        <OrganizerDashboard {...defaultProps} activeFilter="draft" />
       )
 
-      const draftButton = screen.getByRole('button', { name: /^draft$/i })
+      const draftButton = screen.getByRole('button', { name: /^borrador$/i })
 
-      expect(draftButton.className).toContain('bg-blue-600')
+      expect(draftButton.className).toContain('bg-primary-600')
       expect(draftButton.getAttribute('aria-pressed')).toBe('true')
-    })
-  })
-
-  describe('Create Event Modal', () => {
-    test('calls onOpenCreateModal when create button clicked', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
-
-      fireEvent.click(screen.getByRole('button', { name: /create new event/i }))
-
-      expect(mockHandlers.onOpenCreateModal).toHaveBeenCalled()
-    })
-
-    test('does not render modal when createModalOpen is false', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    })
-
-    test('renders modal when createModalOpen is true', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={true}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
-      expect(screen.getAllByText(/create new event/i).length).toBeGreaterThan(0)
     })
   })
 
   describe('Accessibility', () => {
     test('main container has role="main"', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       expect(screen.getByRole('main')).toBeInTheDocument()
     })
 
     test('stats cards have role="article"', () => {
-      renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter={null}
-          createModalOpen={false}
-          {...mockHandlers}
-        />
-      )
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       const articles = screen.getAllByRole('article')
       expect(articles).toHaveLength(5)
@@ -363,19 +208,29 @@ describe('OrganizerDashboard', () => {
 
     test('filter buttons have aria-pressed attribute', () => {
       renderWithProviders(
-        <OrganizerDashboard
-          stats={mockStats}
-          events={mockEvents}
-          loading={false}
-          error={null}
-          activeFilter="draft"
-          createModalOpen={false}
-          {...mockHandlers}
-        />
+        <OrganizerDashboard {...defaultProps} activeFilter="draft" />
       )
 
-      const draftButton = screen.getByRole('button', { name: /^draft$/i })
+      const draftButton = screen.getByRole('button', { name: /^borrador$/i })
       expect(draftButton).toHaveAttribute('aria-pressed')
+    })
+  })
+
+  describe('Pagination', () => {
+    test('does not render pagination when only one page', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      // Pagination should not be rendered when totalPages is 1
+      expect(screen.queryByRole('navigation', { name: /paginación/i })).not.toBeInTheDocument()
+    })
+
+    test('renders pagination when multiple pages', () => {
+      renderWithProviders(
+        <OrganizerDashboard {...defaultProps} totalPages={3} />
+      )
+
+      // Pagination should be visible when there are multiple pages
+      expect(screen.getByRole('navigation', { name: /paginación/i })).toBeInTheDocument()
     })
   })
 })

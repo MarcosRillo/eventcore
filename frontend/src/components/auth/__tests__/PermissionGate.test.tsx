@@ -11,6 +11,22 @@ jest.mock('@/hooks/usePermissions');
 
 const mockUsePermissions = usePermissions as jest.MockedFunction<typeof usePermissions>;
 
+// Helper to create mock user with proper structure
+const createMockUser = () => ({
+  id: 1,
+  name: 'Test User',
+  email: 'test@example.com',
+  role: {
+    id: 4,
+    name: 'Organizer Admin',
+    role_code: 'organizer_admin' as const,
+    description: 'Event organizer administrator',
+    permissions: ['create_events', 'edit_own_events', 'manage_own_events'] as ('create_events' | 'edit_own_events' | 'manage_own_events')[],
+  },
+  created_at: '2024-01-01T00:00:00.000Z',
+  updated_at: '2024-01-01T00:00:00.000Z',
+});
+
 // Helper to create mock permissions
 const createMockPermissions = (overrides: Partial<ReturnType<typeof usePermissions>> = {}) => ({
   can: jest.fn().mockReturnValue(false),
@@ -18,7 +34,7 @@ const createMockPermissions = (overrides: Partial<ReturnType<typeof usePermissio
   hasAnyRole: jest.fn().mockReturnValue(false),
   canAccess: jest.fn().mockReturnValue(false),
   belongsToOrganization: jest.fn().mockReturnValue(false),
-  currentUser: { id: 1, name: 'Test User', email: 'test@example.com', role: 'organizer_admin' },
+  currentUser: createMockUser(),
   getUserPermissions: jest.fn().mockReturnValue([]),
   isAdmin: jest.fn().mockReturnValue(false),
   isPlatformAdmin: jest.fn().mockReturnValue(false),
@@ -32,7 +48,7 @@ const createMockPermissions = (overrides: Partial<ReturnType<typeof usePermissio
   canManageUsers: jest.fn().mockReturnValue(false),
   canManageOrganization: jest.fn().mockReturnValue(false),
   canViewAnalytics: jest.fn().mockReturnValue(false),
-  currentRole: 'organizer_admin',
+  currentRole: createMockUser().role,
   ...overrides,
 });
 
@@ -47,13 +63,13 @@ describe('PermissionGate', () => {
       mockUsePermissions.mockReturnValue(createMockPermissions({ can: mockCan }));
 
       render(
-        <PermissionGate permission="event:create">
+        <PermissionGate permission="create_events">
           <div data-testid="protected-content">Protected Content</div>
         </PermissionGate>
       );
 
       expect(screen.getByTestId('protected-content')).toBeInTheDocument();
-      expect(mockCan).toHaveBeenCalledWith('event:create');
+      expect(mockCan).toHaveBeenCalledWith('create_events');
     });
 
     it('should render fallback when user lacks required permission', () => {
@@ -62,7 +78,7 @@ describe('PermissionGate', () => {
 
       render(
         <PermissionGate
-          permission="event:create"
+          permission="create_events"
           fallback={<div data-testid="fallback">Access Denied</div>}
         >
           <div data-testid="protected-content">Protected Content</div>
@@ -75,30 +91,30 @@ describe('PermissionGate', () => {
 
     it('should check multiple permissions with requireAll=true', () => {
       const mockCan = jest.fn()
-        .mockReturnValueOnce(true)  // event:create
-        .mockReturnValueOnce(true); // event:edit
+        .mockReturnValueOnce(true)  // create_events
+        .mockReturnValueOnce(true); // edit_own_events
       mockUsePermissions.mockReturnValue(createMockPermissions({ can: mockCan }));
 
       render(
-        <PermissionGate permissions={['event:create', 'event:edit']} requireAll>
+        <PermissionGate permissions={['create_events', 'edit_own_events']} requireAll>
           <div data-testid="protected-content">Protected Content</div>
         </PermissionGate>
       );
 
       expect(screen.getByTestId('protected-content')).toBeInTheDocument();
-      expect(mockCan).toHaveBeenCalledWith('event:create');
-      expect(mockCan).toHaveBeenCalledWith('event:edit');
+      expect(mockCan).toHaveBeenCalledWith('create_events');
+      expect(mockCan).toHaveBeenCalledWith('edit_own_events');
     });
 
     it('should deny access when requireAll=true and user lacks one permission', () => {
       const mockCan = jest.fn()
-        .mockReturnValueOnce(true)  // event:create
-        .mockReturnValueOnce(false); // event:edit
+        .mockReturnValueOnce(true)  // create_events
+        .mockReturnValueOnce(false); // edit_own_events
       mockUsePermissions.mockReturnValue(createMockPermissions({ can: mockCan }));
 
       render(
         <PermissionGate
-          permissions={['event:create', 'event:edit']}
+          permissions={['create_events', 'edit_own_events']}
           requireAll
           fallback={<div data-testid="fallback">Access Denied</div>}
         >
@@ -112,12 +128,12 @@ describe('PermissionGate', () => {
 
     it('should grant access with requireAll=false when user has one permission', () => {
       const mockCan = jest.fn()
-        .mockReturnValueOnce(false) // event:create
-        .mockReturnValueOnce(true); // event:edit
+        .mockReturnValueOnce(false) // create_events
+        .mockReturnValueOnce(true); // edit_own_events
       mockUsePermissions.mockReturnValue(createMockPermissions({ can: mockCan }));
 
       render(
-        <PermissionGate permissions={['event:create', 'event:edit']} requireAll={false}>
+        <PermissionGate permissions={['create_events', 'edit_own_events']} requireAll={false}>
           <div data-testid="protected-content">Protected Content</div>
         </PermissionGate>
       );
@@ -265,7 +281,7 @@ describe('PermissionGate', () => {
       mockUsePermissions.mockReturnValue(createMockPermissions({ currentUser: null }));
 
       render(
-        <PermissionGate showLoading permission="event:create">
+        <PermissionGate showLoading permission="create_events">
           <div data-testid="protected-content">Content</div>
         </PermissionGate>
       );
@@ -279,7 +295,7 @@ describe('PermissionGate', () => {
 
       render(
         <PermissionGate
-          permission="event:create"
+          permission="create_events"
           fallback={<div data-testid="fallback">Login Required</div>}
         >
           <div data-testid="protected-content">Content</div>
@@ -295,7 +311,7 @@ describe('PermissionGate', () => {
       mockUsePermissions.mockReturnValue(createMockPermissions({ can: mockCan }));
 
       const { container } = render(
-        <PermissionGate permission="event:create">
+        <PermissionGate permission="create_events">
           <div data-testid="protected-content">Content</div>
         </PermissionGate>
       );
@@ -314,7 +330,7 @@ describe('PermissionGate', () => {
 
       render(
         <PermissionGate
-          permission="event:create"
+          permission="create_events"
           role="entity_admin"
           fallback={<div data-testid="fallback">Access Denied</div>}
         >
@@ -339,7 +355,7 @@ describe('PermissionGate', () => {
 
       render(
         <PermissionGate
-          permission="event:create"
+          permission="create_events"
           role="entity_admin"
           resource="admin_dashboard"
         >

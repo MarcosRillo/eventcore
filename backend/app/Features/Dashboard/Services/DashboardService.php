@@ -25,7 +25,7 @@ class DashboardService
     public function getEventsSummary(): array
     {
         // Get all events with status information
-        $events = Event::with(['status', 'type'])
+        $events = Event::with(['status', 'format'])
             ->get()
             ->groupBy(function ($event) {
                 return $this->categorizeEventForTab($event);
@@ -50,7 +50,7 @@ class DashboardService
      */
     public function getFilteredEvents(string $tab, int $page, string $search, int $perPage): array
     {
-        $query = Event::with(['status', 'type', 'entity', 'category', 'locations']);
+        $query = Event::with(['status', 'format', 'entity', 'category', 'locations']);
 
         // Apply tab-specific filtering
         $this->applyTabFilter($query, $tab);
@@ -99,7 +99,7 @@ class DashboardService
     {
         $event = Event::with([
             'status',
-            'type',
+            'format',
             'entity',
             'category',
             'locations',

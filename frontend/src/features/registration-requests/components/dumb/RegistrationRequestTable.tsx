@@ -149,15 +149,15 @@ export function RegistrationRequestTable({
     <div className="space-y-4">
       {/* Quick Filters */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-medium text-gray-700">Filtrar:</span>
+        <span className="text-sm font-medium text-neutral-700">Filtrar:</span>
         {FILTER_OPTIONS.map((option) => (
           <button
             key={option.value}
             onClick={() => onDisplayFilterChange(option.value)}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
               displayFilter === option.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary-600 text-white'
+                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
             }`}
           >
             {option.label}
@@ -167,7 +167,7 @@ export function RegistrationRequestTable({
 
       {/* Table */}
       {processedRequests.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 text-neutral-500 bg-neutral-50 rounded-lg">
           <p className="text-lg">No hay solicitudes</p>
           <p className="text-sm mt-1">
             {displayFilter !== 'default'
@@ -176,49 +176,49 @@ export function RegistrationRequestTable({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto border border-neutral-200 rounded-lg">
+          <table className="min-w-full divide-y divide-neutral-200">
+            <thead className="bg-neutral-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                   Solicitante
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                   Organización
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                   Fecha
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-neutral-200">
               {processedRequests.map((request) => (
-                <tr key={request.id} className="hover:bg-gray-50">
+                <tr key={request.id} className="hover:bg-neutral-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-neutral-900">
                         {request.full_name}
                       </span>
-                      <span className="text-sm text-gray-500">{request.email}</span>
+                      <span className="text-sm text-neutral-500">{request.email}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-neutral-900">
                         {request.organization_name}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-neutral-500">
                         {request.organization_sector}
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
                     {formatDate(request.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
