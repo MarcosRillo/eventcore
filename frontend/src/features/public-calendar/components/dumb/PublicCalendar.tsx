@@ -7,18 +7,20 @@
 
 import type { ChangeEvent } from 'react'
 import { useState } from 'react'
-import { PublicEvent, Category, Location } from '@/features/public-calendar/types/public-calendar.types'
+import { PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
 import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface PublicCalendarProps {
   events: PublicEvent[]
-  categories: Category[]
+  eventTypes: EventType[]
+  eventSubtypes: EventSubtype[]
   locations: Location[]
   loading: boolean
   error: string | null
   hasActiveFilters?: boolean
-  onCategoryFilter: (categoryId: number | null) => void
+  onEventTypeFilter: (eventTypeId: number | null) => void
+  onEventSubtypeFilter: (eventSubtypeId: number | null) => void
   onLocationFilter: (locationId: number | null) => void
   onClearFilters?: () => void
   onEventClick: (eventId: number) => void
@@ -26,21 +28,28 @@ interface PublicCalendarProps {
 
 export const PublicCalendar = ({
   events,
-  categories,
+  eventTypes,
+  eventSubtypes,
   locations,
   loading,
   error,
   hasActiveFilters = false,
-  onCategoryFilter,
+  onEventTypeFilter,
+  onEventSubtypeFilter,
   onLocationFilter,
   onClearFilters,
   onEventClick
 }: PublicCalendarProps) => {
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>): void => {
+  const handleEventTypeChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     const value = e.target.value
-    onCategoryFilter(value ? parseInt(value) : null)
+    onEventTypeFilter(value ? parseInt(value) : null)
+  }
+
+  const handleEventSubtypeChange = (e: ChangeEvent<HTMLSelectElement>): void => {
+    const value = e.target.value
+    onEventSubtypeFilter(value ? parseInt(value) : null)
   }
 
   const handleLocationChange = (e: ChangeEvent<HTMLSelectElement>): void => {
@@ -108,25 +117,49 @@ export const PublicCalendar = ({
             id="filters-content"
             className={`p-4 pt-0 md:pt-4 ${filtersOpen ? 'block' : 'hidden md:block'}`}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Category Filter */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Event Type Filter */}
               <div>
                 <label
-                  htmlFor="category-filter"
+                  htmlFor="event-type-filter"
                   className="block text-sm font-medium text-neutral-700 mb-1.5"
                 >
-                  Categoría
+                  Tipo de Evento
                 </label>
                 <select
-                  id="category-filter"
+                  id="event-type-filter"
                   className={selectClasses}
-                  onChange={handleCategoryChange}
-                  aria-label="Categoría"
+                  onChange={handleEventTypeChange}
+                  aria-label="Tipo de Evento"
                 >
-                  <option value="">Todas las categorías</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
+                  <option value="">Todos los tipos</option>
+                  {eventTypes.map(eventType => (
+                    <option key={eventType.id} value={eventType.id}>
+                      {eventType.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Event Subtype Filter (Cascading) */}
+              <div>
+                <label
+                  htmlFor="event-subtype-filter"
+                  className="block text-sm font-medium text-neutral-700 mb-1.5"
+                >
+                  Subtipo (Opcional)
+                </label>
+                <select
+                  id="event-subtype-filter"
+                  className={selectClasses}
+                  onChange={handleEventSubtypeChange}
+                  disabled={eventSubtypes.length === 0}
+                  aria-label="Subtipo de Evento"
+                >
+                  <option value="">Todos los subtipos</option>
+                  {eventSubtypes.map(subtype => (
+                    <option key={subtype.id} value={subtype.id}>
+                      {subtype.name}
                     </option>
                   ))}
                 </select>

@@ -7,13 +7,11 @@ import type { FormEvent } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useEventForm } from '../useEventForm'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
-import * as categoryService from '@/features/categories/services/category.service'
 import * as locationService from '@/features/locations/services/location.service'
 import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
 
 jest.mock('@/features/organizer/services/organizer-event.service')
-jest.mock('@/features/categories/services/category.service')
 jest.mock('@/features/locations/services/location.service')
 jest.mock('@/features/event-types/services/eventType.service')
 jest.mock('@/features/event-types/services/eventSubtype.service')
@@ -52,11 +50,6 @@ const createMockFormEvent = (): FormEvent => {
 }
 
 describe('useEventForm', () => {
-  const mockCategories = [
-    { id: 1, name: 'Música' },
-    { id: 2, name: 'Gastronomía' },
-  ]
-
   const mockEventTypes = [
     { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
     { id: 2, name: 'Feria', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
@@ -77,10 +70,6 @@ describe('useEventForm', () => {
     mockRouter.push.mockClear()
     mockRouter.back.mockClear()
 
-    // Categories use Resource Collection format: { data: [...], meta, links }
-    ;(categoryService.getCategories as jest.Mock).mockResolvedValue({
-      data: mockCategories,
-    })
     // Event Types (Dec 2, 2025)
     ;(eventTypeService.getActiveEventTypes as jest.Mock).mockResolvedValue(mockEventTypes)
     // Event Subtypes are loaded when event_type_id changes
@@ -99,10 +88,6 @@ describe('useEventForm', () => {
       expect(result.current.isEditMode).toBe(false)
       expect(result.current.loading).toBe(false)
       expect(result.current.initialLoading).toBe(false)
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should set isEditMode to true when eventId is provided', async () => {
@@ -126,23 +111,15 @@ describe('useEventForm', () => {
       })
     })
 
-    it('should load categories on mount (locations are async search)', async () => {
+    it('should verify locations are async search only', async () => {
       renderHook(() => useEventForm())
-
-      await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
 
       // Locations are no longer pre-loaded, they are searched asynchronously
       expect(locationService.searchLocations).not.toHaveBeenCalled()
     })
 
-    it('should set categories from API response', async () => {
+    it('should initialize selectedLocations as empty array', async () => {
       const { result } = renderHook(() => useEventForm())
-
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
 
       // selectedLocations starts empty until user searches or event is loaded
       expect(result.current.selectedLocations).toEqual([])
@@ -158,10 +135,6 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.formData.title).toBe('New Event Title')
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should update boolean fields correctly', async () => {
@@ -172,24 +145,16 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.formData.virtual_transmission).toBe(true)
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should update number fields correctly', async () => {
       const { result } = renderHook(() => useEventForm())
 
       act(() => {
-        result.current.handleChange('category_id', 5)
+        result.current.handleChange('event_type_id', 5)
       })
 
-      expect(result.current.formData.category_id).toBe(5)
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
+      expect(result.current.formData.event_type_id).toBe(5)
     })
 
     it('should update array fields correctly', async () => {
@@ -200,10 +165,6 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.formData.location_ids).toEqual([1, 2])
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should clear field error when field value changes', async () => {
@@ -222,10 +183,6 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.errors.title).toBeUndefined()
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
   })
 
@@ -239,10 +196,6 @@ describe('useEventForm', () => {
 
       expect(Object.keys(result.current.errors).length).toBeGreaterThan(0)
       expect(organizerEventService.createEvent).not.toHaveBeenCalled()
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should show error for missing title', async () => {
@@ -253,10 +206,6 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.errors.title).toBe('El título es requerido')
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should show error for missing description', async () => {
@@ -267,10 +216,6 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.errors.description).toBe('La descripción es requerida')
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
 
     it('should show error for missing start_date', async () => {
@@ -281,10 +226,6 @@ describe('useEventForm', () => {
       })
 
       expect(result.current.errors.start_date).toBe('La fecha de inicio es requerida')
-
-      await waitFor(() => {
-        expect(result.current.categories.length).toBeGreaterThan(0)
-      })
     })
   })
 
@@ -294,17 +235,12 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
-
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('event_type_id', 1)
         result.current.handleChange('event_subtype_id', 1)
-        result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
 
@@ -324,10 +260,6 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
-
       expect(result.current.loading).toBe(false)
 
       act(() => {
@@ -336,7 +268,6 @@ describe('useEventForm', () => {
         result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('event_type_id', 1)
         result.current.handleChange('event_subtype_id', 1)
-        result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
 
@@ -358,17 +289,12 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
-
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('event_type_id', 1)
         result.current.handleChange('event_subtype_id', 1)
-        result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
 
@@ -385,17 +311,12 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm({ onSuccess }))
 
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
-
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('event_type_id', 1)
         result.current.handleChange('event_subtype_id', 1)
-        result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
 
@@ -412,17 +333,12 @@ describe('useEventForm', () => {
 
       const { result } = renderHook(() => useEventForm())
 
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
-
       act(() => {
         result.current.handleChange('title', 'Test Event')
         result.current.handleChange('description', 'Test Description')
         result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('event_type_id', 1)
         result.current.handleChange('event_subtype_id', 1)
-        result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
 
@@ -443,7 +359,6 @@ describe('useEventForm', () => {
           description: 'Original Description',
           start_date: '2030-12-01T10:00',
           end_date: '2030-12-01T18:00',
-          category_id: 1,
           event_type_id: 1,
           event_subtype_id: 1,
           locations: [{ id: 1, name: 'Location 1' }],
@@ -455,7 +370,6 @@ describe('useEventForm', () => {
 
       await waitFor(() => {
         expect(result.current.formData.title).toBe('Original Title')
-        expect(result.current.categories).toEqual(mockCategories)
       })
 
       act(() => {
@@ -464,7 +378,6 @@ describe('useEventForm', () => {
         result.current.handleChange('start_date', '2030-12-01T10:00')
         result.current.handleChange('event_type_id', 1)
         result.current.handleChange('event_subtype_id', 1)
-        result.current.handleChange('category_id', 1)
         result.current.handleChange('location_ids', [1])
       })
 
@@ -483,10 +396,6 @@ describe('useEventForm', () => {
     it('should call router.back when onCancel is not provided', async () => {
       const { result } = renderHook(() => useEventForm())
 
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
-
       act(() => {
         result.current.handleCancel()
       })
@@ -497,10 +406,6 @@ describe('useEventForm', () => {
     it('should call onCancel callback when provided', async () => {
       const onCancel = jest.fn()
       const { result } = renderHook(() => useEventForm({ onCancel }))
-
-      await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
-      })
 
       act(() => {
         result.current.handleCancel()
@@ -519,7 +424,7 @@ describe('useEventForm', () => {
         description: 'Test Description',
         start_date: '2030-12-01T10:00',
         end_date: '2030-12-01T18:00',
-        category_id: 1,
+        event_type_id: 1,
         locations: [{ id: 2, name: 'Location 2' }],
         featured_image: 'https://example.com/image.jpg',
       }
@@ -533,7 +438,7 @@ describe('useEventForm', () => {
       await waitFor(() => {
         expect(result.current.formData.title).toBe('Test Event')
         expect(result.current.formData.description).toBe('Test Description')
-        expect(result.current.formData.category_id).toBe(1)
+        expect(result.current.formData.event_type_id).toBe(1)
         expect(result.current.formData.location_ids).toEqual([2])
         expect(result.current.formData.featured_image).toBe('https://example.com/image.jpg')
       })

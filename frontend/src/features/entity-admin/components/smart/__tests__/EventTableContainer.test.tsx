@@ -76,8 +76,10 @@ const createMockEvent = (overrides?: Partial<Event>): Event => ({
   end_date: '2025-12-15T18:00:00Z',
   status: EVENT_STATUS.DRAFT,
   type: EVENT_TYPE.SINGLE_LOCATION,
-  category_id: 1,
-  category: { id: 1, name: 'Music', slug: 'music', color: '#FF5733', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  event_type_id: 1,
+  event_subtype_id: 1,
+  event_type: { id: 1, name: 'Cultural', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  event_subtype: { id: 1, name: 'Music Festival', event_type_id: 1, entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   locations: [],
   location: { id: 1, name: 'Teatro', address: 'Test 123', city: 'CABA', country: 'Argentina', features: [], is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   organizer: { id: 1, name: 'Test Org', organization: 'Test Org' },
@@ -130,10 +132,10 @@ describe('EventTableContainer', () => {
       );
 
       const columnsCount = parseInt(screen.getByTestId('columns-count').textContent || '0');
-      expect(columnsCount).toBe(6); // title, date, type, status, category, location
+      expect(columnsCount).toBe(5); // title, date, type, status, location (category removed)
     });
 
-    it('should configure 5 columns for organizer view mode', () => {
+    it('should configure 4 columns for organizer view mode', () => {
       render(
         <EventTableContainer
           events={mockEvents}
@@ -143,10 +145,10 @@ describe('EventTableContainer', () => {
       );
 
       const columnsCount = parseInt(screen.getByTestId('columns-count').textContent || '0');
-      expect(columnsCount).toBe(5); // title, date, status, category, location
+      expect(columnsCount).toBe(4); // title, date, status, location (category removed)
     });
 
-    it('should configure 4 columns for public view mode', () => {
+    it('should configure 3 columns for public view mode', () => {
       render(
         <EventTableContainer
           events={mockEvents}
@@ -156,7 +158,7 @@ describe('EventTableContainer', () => {
       );
 
       const columnsCount = parseInt(screen.getByTestId('columns-count').textContent || '0');
-      expect(columnsCount).toBe(4); // title, date, category, location
+      expect(columnsCount).toBe(3); // title, date, location (category removed)
     });
 
     it('should include correct column labels for admin view', () => {
@@ -172,8 +174,8 @@ describe('EventTableContainer', () => {
       expect(screen.getByTestId('column-date')).toHaveTextContent('Fecha');
       expect(screen.getByTestId('column-type')).toHaveTextContent('Tipo');
       expect(screen.getByTestId('column-status')).toHaveTextContent('Estado');
-      expect(screen.getByTestId('column-category')).toHaveTextContent('Categoría');
       expect(screen.getByTestId('column-location')).toHaveTextContent('Ubicación');
+      // Category column was removed from the migration
     });
   });
 

@@ -18,9 +18,9 @@ jest.mock('@/features/landing/components/dumb', () => ({
       Featured: {loading ? 'Loading' : events.length}
     </div>
   ),
-  CategoriesSection: ({ loading, categories }: { loading: boolean; categories: unknown[] }) => (
+  CategoriesSection: ({ loading, eventTypes }: { loading: boolean; eventTypes: unknown[] }) => (
     <div data-testid="categories-section">
-      Categories: {loading ? 'Loading' : categories.length}
+      Event Types: {loading ? 'Loading' : eventTypes.length}
     </div>
   ),
   OrganizersSection: () => <div data-testid="organizers-section">Organizers Section</div>,
@@ -35,7 +35,7 @@ describe('LandingContainer', () => {
   it('renders all sections', () => {
     ;(useLandingData as jest.Mock).mockReturnValue({
       featuredEvents: [],
-      categories: [],
+      eventTypes: [],
       loading: true,
       error: null
     })
@@ -51,11 +51,11 @@ describe('LandingContainer', () => {
 
   it('passes data to sections', () => {
     const mockEvents = [{ id: 1 }]
-    const mockCategories = [{ id: 1 }]
+    const mockEventTypes = [{ id: 1, name: 'Cultural', is_active: true }]
 
     ;(useLandingData as jest.Mock).mockReturnValue({
       featuredEvents: mockEvents,
-      categories: mockCategories,
+      eventTypes: mockEventTypes,
       loading: false,
       error: null
     })
@@ -63,13 +63,13 @@ describe('LandingContainer', () => {
     render(<LandingContainer />)
 
     expect(screen.getByText('Featured: 1')).toBeInTheDocument()
-    expect(screen.getByText('Categories: 1')).toBeInTheDocument()
+    expect(screen.getByText('Event Types: 1')).toBeInTheDocument()
   })
 
   it('renders error state', () => {
     ;(useLandingData as jest.Mock).mockReturnValue({
       featuredEvents: [],
-      categories: [],
+      eventTypes: [],
       loading: false,
       error: 'Failed to load'
     })

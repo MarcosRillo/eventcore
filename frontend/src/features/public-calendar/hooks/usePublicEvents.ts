@@ -2,26 +2,30 @@
  * Custom hook for public events
  *
  * Fetches and manages public events with filtering support.
+ * Implements cascading filter logic for EventType → EventSubtype.
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   PublicEvent,
-  Category,
+  EventType,
+  EventSubtype,
   Location,
   EventFilters
 } from '@/features/public-calendar/types/public-calendar.types'
 
 interface UsePublicEventsReturn {
   events: PublicEvent[]
-  categories: Category[]
+  eventTypes: EventType[]
+  eventSubtypes: EventSubtype[]
   locations: Location[]
   loading: boolean
   error: string | null
   filters: EventFilters
   hasActiveFilters: boolean
-  handleCategoryFilter: (categoryId: number | null) => void
+  handleEventTypeFilter: (eventTypeId: number | null) => void
+  handleEventSubtypeFilter: (eventSubtypeId: number | null) => void
   handleLocationFilter: (locationId: number | null) => void
   handleDateRangeFilter: (startDate: string | null, endDate: string | null) => void
   clearFilters: () => void
@@ -30,12 +34,14 @@ interface UsePublicEventsReturn {
 
 export const usePublicEvents = (): UsePublicEventsReturn => {
   const [events, setEvents] = useState<PublicEvent[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [eventTypes, setEventTypes] = useState<EventType[]>([])
+  const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<EventFilters>({
-    category_id: null,
+    event_type_id: null,
+    event_subtype_id: null,
     location_id: null,
     start_date: null,
     end_date: null
@@ -46,7 +52,8 @@ export const usePublicEvents = (): UsePublicEventsReturn => {
     setError(null)
     try {
       const data = await publicEventsService.getAll({
-        category_id: filters.category_id,
+        event_type_id: filters.event_type_id,
+        event_subtype_id: filters.event_subtype_id,
         location_id: filters.location_id,
         start_date: filters.start_date,
         end_date: filters.end_date
@@ -59,29 +66,51 @@ export const usePublicEvents = (): UsePublicEventsReturn => {
     }
   }, [filters])
 
-  const fetchCategoriesAndLocations = async (): Promise<void> => {
+  const fetchEventTypesAndLocations = async (): Promise<void> => {
     try {
-      const [categoriesRes, locationsRes] = await Promise.all([
-        publicEventsService.getCategories(),
+      const [eventTypesRes, locationsRes] = await Promise.all([
+        publicEventsService.getEventTypes(),
         publicEventsService.getLocations()
       ])
-      setCategories(categoriesRes.data)
+      setEventTypes(eventTypesRes.data)
       setLocations(locationsRes.data)
     } catch {
       // Silently fail - not critical
     }
   }
 
+  const fetchEventSubtypes = async (eventTypeId: number | null): Promise<void> => {
+    if (!eventTypeId) {
+      setEventSubtypes([])
+      return
+    }
+    try {
+      const subtypesRes = await publicEventsService.getEventSubtypes(eventTypeId)
+      setEventSubtypes(subtypesRes.data)
+    } catch {
+      setEventSubtypes([])
+    }
+  }
+
   useEffect(() => {
-    fetchCategoriesAndLocations()
+    fetchEventTypesAndLocations()
   }, [])
 
   useEffect(() => {
     fetchEvents()
   }, [fetchEvents])
 
-  const handleCategoryFilter = (categoryId: number | null): void => {
-    setFilters(prev => ({ ...prev, category_id: categoryId }))
+  const handleEventTypeFilter = (eventTypeId: number | null): void => {
+    setFilters(prev => ({
+      ...prev,
+      event_type_id: eventTypeId,
+      event_subtype_id: null // Reset subtype when type changes
+    }))
+    fetchEventSubtypes(eventTypeId)
+  }
+
+  const handleEventSubtypeFilter = (eventSubtypeId: number | null): void => {
+    setFilters(prev => ({ ...prev, event_subtype_id: eventSubtypeId }))
   }
 
   const handleLocationFilter = (locationId: number | null): void => {
@@ -97,28 +126,33 @@ export const usePublicEvents = (): UsePublicEventsReturn => {
 
   const clearFilters = (): void => {
     setFilters({
-      category_id: null,
+      event_type_id: null,
+      event_subtype_id: null,
       location_id: null,
       start_date: null,
       end_date: null
     })
+    setEventSubtypes([])
   }
 
   const hasActiveFilters =
-    filters.category_id !== null ||
+    filters.event_type_id !== null ||
+    filters.event_subtype_id !== null ||
     filters.location_id !== null ||
     filters.start_date !== null ||
     filters.end_date !== null
 
   return {
     events,
-    categories,
+    eventTypes,
+    eventSubtypes,
     locations,
     loading,
     error,
     filters,
     hasActiveFilters,
-    handleCategoryFilter,
+    handleEventTypeFilter,
+    handleEventSubtypeFilter,
     handleLocationFilter,
     handleDateRangeFilter,
     clearFilters,

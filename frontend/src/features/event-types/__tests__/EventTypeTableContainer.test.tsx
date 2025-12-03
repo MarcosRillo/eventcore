@@ -8,7 +8,7 @@
  */
 
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { EventTypeTableContainer } from '../components/smart/EventTypeTableContainer'
 import type { EventType } from '@/types/eventType.types'
 import type { PaginationMeta } from '@/types/api-response.types'
@@ -79,11 +79,11 @@ describe('EventTypeTableContainer', () => {
     })
 
     it('should render with loading prop', () => {
-      render(<EventTypeTableContainer {...defaultProps} loading={true} />)
+      const { container } = render(<EventTypeTableContainer {...defaultProps} loading={true} />)
 
-      // Component should render (loading state may affect display)
+      // Component should render without crashing (loading state may hide data)
       // The component handles loading internally
-      expect(screen.queryByText('Conferencia')).toBeTruthy
+      expect(container).toBeInTheDocument()
     })
 
     it('should render with null pagination', () => {

@@ -2,6 +2,22 @@
  * TypeScript interfaces for public calendar
  */
 
+export interface EventType {
+  id: number
+  name: string
+  slug?: string
+  color?: string
+  is_active: boolean
+}
+
+export interface EventSubtype {
+  id: number
+  name: string
+  slug?: string
+  event_type_id: number
+  is_active: boolean
+}
+
 export interface PublicEvent {
   id: number
   title: string
@@ -10,10 +26,15 @@ export interface PublicEvent {
   end_date: string
   start_time?: string
   end_time?: string
-  category: {
+  event_type: {
     id: number
     name: string
     color?: string
+  }
+  event_subtype?: {
+    id: number
+    name: string
+    event_type_id: number
   }
   locations: Array<{
     id: number
@@ -35,11 +56,6 @@ export interface EventsResponse {
   }
 }
 
-export interface Category {
-  id: number
-  name: string
-}
-
 export interface Location {
   id: number
   name: string
@@ -47,7 +63,8 @@ export interface Location {
 }
 
 export interface EventFilters {
-  category_id?: number | null
+  event_type_id?: number | null
+  event_subtype_id?: number | null
   location_id?: number | null
   start_date?: string | null
   end_date?: string | null
@@ -73,6 +90,6 @@ export type CalendarView = 'month' | 'week' | 'day' | 'agenda'
  */
 export interface PublicStats {
   total_events: number
-  total_categories: number
+  total_event_types: number
   events_this_month: number
 }

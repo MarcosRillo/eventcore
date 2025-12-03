@@ -109,7 +109,6 @@ export const useEventActions = (
 
       // Extract location IDs from locations array
       const locationIds = originalEvent.locations?.map((l: { id: number }) => l.id) || []
-      const categoryId = originalEvent.category?.id || originalEvent.category_id
 
       if (locationIds.length === 0) {
         throw new Error('No location available for duplication')
@@ -120,7 +119,6 @@ export const useEventActions = (
         description: originalEvent.description || '',
         start_date: originalEvent.start_date,
         end_date: originalEvent.end_date,
-        category_id: categoryId,
         location_ids: locationIds,
         // Event Type/Subtype (required - Dec 2, 2025)
         event_type_id: originalEvent.event_type_id || originalEvent.event_type?.id || 0,

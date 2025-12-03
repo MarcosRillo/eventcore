@@ -7,36 +7,46 @@
 
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PublicCalendar } from '../components/dumb/PublicCalendar'
-import { PublicEvent, Category, Location } from '../types/public-calendar.types'
+import { PublicEvent, EventType, EventSubtype, Location } from '../types/public-calendar.types'
 
 describe('PublicCalendar', () => {
   const mockEvents: PublicEvent[] = [
     {
       id: 1,
       title: 'Festival de Música',
+      slug: 'festival-de-musica',
       description: 'Gran evento musical',
+      image_url: 'https://example.com/image1.jpg',
       start_date: '2025-11-15',
       end_date: '2025-11-17',
-      category: { id: 1, name: 'Música' },
+      event_type: { id: 1, name: 'Música' },
+      event_subtype: { id: 1, name: 'Festival', event_type_id: 1 },
       locations: [{ id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' }],
       is_featured: true
     },
     {
       id: 2,
       title: 'Exposición de Arte',
+      slug: 'exposicion-de-arte',
       description: 'Arte contemporáneo',
+      image_url: 'https://example.com/image2.jpg',
       start_date: '2025-11-20',
       end_date: '2025-11-20',
-      category: { id: 2, name: 'Arte' },
+      event_type: { id: 2, name: 'Arte' },
       locations: [{ id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }],
       is_featured: false
     }
   ]
 
-  const mockCategories: Category[] = [
-    { id: 1, name: 'Música' },
-    { id: 2, name: 'Arte' },
-    { id: 3, name: 'Gastronomía' }
+  const mockEventTypes: EventType[] = [
+    { id: 1, name: 'Música', slug: 'musica', is_active: true },
+    { id: 2, name: 'Arte', slug: 'arte', is_active: true },
+    { id: 3, name: 'Gastronomía', slug: 'gastronomia', is_active: true }
+  ]
+
+  const mockEventSubtypes: EventSubtype[] = [
+    { id: 1, name: 'Festival', slug: 'festival', event_type_id: 1, is_active: true },
+    { id: 2, name: 'Concierto', slug: 'concierto', event_type_id: 1, is_active: true }
   ]
 
   const mockLocations: Location[] = [
@@ -45,7 +55,8 @@ describe('PublicCalendar', () => {
   ]
 
   const mockHandlers = {
-    onCategoryFilter: jest.fn(),
+    onEventTypeFilter: jest.fn(),
+    onEventSubtypeFilter: jest.fn(),
     onLocationFilter: jest.fn(),
     onEventClick: jest.fn()
   }
@@ -59,7 +70,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -76,7 +88,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -92,7 +105,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -110,11 +124,12 @@ describe('PublicCalendar', () => {
   })
 
   describe('Filters', () => {
-    test('renders category filter dropdown', () => {
-      render(
+    test('renders event type filter dropdown', () => {
+      const { container } = render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -122,16 +137,35 @@ describe('PublicCalendar', () => {
         />
       )
 
-      expect(screen.getByLabelText(/categoría/i)).toBeInTheDocument()
+      const select = container.querySelector('#event-type-filter')
+      expect(select).toBeInTheDocument()
       expect(screen.getByRole('option', { name: 'Música' })).toBeInTheDocument()
       expect(screen.getByRole('option', { name: 'Arte' })).toBeInTheDocument()
+    })
+
+    test('renders event subtype filter dropdown', () => {
+      render(
+        <PublicCalendar
+          events={mockEvents}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
+          locations={mockLocations}
+          loading={false}
+          error={null}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByLabelText(/subtipo/i)).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'Festival' })).toBeInTheDocument()
     })
 
     test('renders location filter dropdown', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -143,11 +177,12 @@ describe('PublicCalendar', () => {
       expect(screen.getByRole('option', { name: /Teatro San Martín/i })).toBeInTheDocument()
     })
 
-    test('calls onCategoryFilter when category is selected', () => {
-      render(
+    test('calls onEventTypeFilter when event type is selected', () => {
+      const { container } = render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -155,17 +190,37 @@ describe('PublicCalendar', () => {
         />
       )
 
-      const select = screen.getByLabelText(/categoría/i)
+      const select = container.querySelector('#event-type-filter') as HTMLSelectElement
       fireEvent.change(select, { target: { value: '1' } })
 
-      expect(mockHandlers.onCategoryFilter).toHaveBeenCalledWith(1)
+      expect(mockHandlers.onEventTypeFilter).toHaveBeenCalledWith(1)
+    })
+
+    test('calls onEventSubtypeFilter when event subtype is selected', () => {
+      const { container } = render(
+        <PublicCalendar
+          events={mockEvents}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
+          locations={mockLocations}
+          loading={false}
+          error={null}
+          {...mockHandlers}
+        />
+      )
+
+      const select = container.querySelector('#event-subtype-filter') as HTMLSelectElement
+      fireEvent.change(select, { target: { value: '1' } })
+
+      expect(mockHandlers.onEventSubtypeFilter).toHaveBeenCalledWith(1)
     })
 
     test('calls onLocationFilter when location is selected', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -185,7 +240,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={[]}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={true}
           error={null}
@@ -200,7 +256,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={true}
           error={null}
@@ -217,7 +274,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={[]}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error="Failed to load events"
@@ -232,7 +290,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error="Failed to load events"
@@ -249,7 +308,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={[]}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -266,7 +326,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}
@@ -283,7 +344,8 @@ describe('PublicCalendar', () => {
       render(
         <PublicCalendar
           events={mockEvents}
-          categories={mockCategories}
+          eventTypes={mockEventTypes}
+          eventSubtypes={mockEventSubtypes}
           locations={mockLocations}
           loading={false}
           error={null}

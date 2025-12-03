@@ -3,7 +3,6 @@
  * Type definitions for event-related data structures
  */
 
-import type { Category } from '@/types/category.types';
 import type { Location } from '@/types/location.types';
 import type { User } from '@/types/auth.types';
 import type { EntityStats } from '@/types/generic-infrastructure.types';
@@ -89,12 +88,10 @@ export interface Event {
   // Location fields (aligned with backend flexible location system)
   location_text?: string;      // Free text location
   virtual_link?: string;
-  
+
   // Relationships
-  category_id: number;
-  category: Category;
   location_id?: number;        // Legacy single location support
-  location?: Location;         // Legacy single location support  
+  location?: Location;         // Legacy single location support
   locations: Location[];       // Array of structured locations
   
   // Capacity field (aligned with backend)
@@ -159,8 +156,7 @@ export interface EventFormData {
   end_date?: string;
   type: EventTypeCode;
   status?: EventStatusCode;     // Added to match backend requirements
-  category_id?: number;
-  
+
   // Flexible location system - only one should be used
   location_text?: string;      // Free text location
   location_ids?: number[];     // Structured locations
@@ -196,7 +192,6 @@ export interface EventFilters {
   search?: string;
   status?: EventStatusCode;
   type?: EventTypeCode;
-  category_id?: number;
   location_id?: number;
   start_date?: string;
   end_date?: string;

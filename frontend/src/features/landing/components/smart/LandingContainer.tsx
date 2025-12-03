@@ -16,7 +16,7 @@ import {
 
 export const LandingContainer = () => {
   const router = useRouter()
-  const { featuredEvents, categories, loading, error } = useLandingData()
+  const { featuredEvents, eventTypes, loading, error } = useLandingData()
 
   const handleExploreClick = (): void => {
     router.push('/calendar')
@@ -30,8 +30,8 @@ export const LandingContainer = () => {
     router.push('/calendar')
   }
 
-  const handleCategoryClick = (categoryId: number): void => {
-    router.push(`/calendar?category_id=${categoryId}`)
+  const handleEventTypeClick = (eventTypeId: number): void => {
+    router.push(`/calendar?event_type_id=${eventTypeId}`)
   }
 
   return (
@@ -58,9 +58,9 @@ export const LandingContainer = () => {
 
       {/* Categories Section */}
       <CategoriesSection
-        categories={categories}
+        eventTypes={eventTypes}
         loading={loading}
-        onCategoryClick={handleCategoryClick}
+        onCategoryClick={handleEventTypeClick}
       />
 
       {/* Organizers CTA Section */}

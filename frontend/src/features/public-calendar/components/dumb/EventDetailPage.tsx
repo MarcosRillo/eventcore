@@ -158,12 +158,6 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
                   </span>
                 )}
               </div>
-              <div
-                className="w-6 h-6 rounded-full flex-shrink-0"
-                style={{ backgroundColor: event.category?.color || '#228B22' }}
-                aria-hidden="true"
-                title={event.category?.name}
-              />
             </div>
 
             {/* Event Details Grid */}
@@ -202,20 +196,8 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
                 </div>
               </div>
 
-              {/* Category and Contact */}
+              {/* Contact Information */}
               <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div
-                    className="w-6 h-6 rounded-full mt-1"
-                    style={{ backgroundColor: event.category?.color || '#228B22' }}
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-neutral-900">Categoría</h3>
-                    <p className="text-neutral-600">{event.category?.name}</p>
-                  </div>
-                </div>
-
                 {(event.contact_email || event.contact_phone) && (
                   <div>
                     <h3 className="font-semibold text-neutral-900 mb-2">Información de contacto</h3>

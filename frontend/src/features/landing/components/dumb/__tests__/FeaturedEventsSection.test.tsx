@@ -26,13 +26,14 @@ describe('FeaturedEventsSection', () => {
   it('renders events list', () => {
     const eventsWithCategory = mockEvents.map(e => ({
       ...e,
+      slug: `event-${e.id}`,
       description: 'Test Description',
-      category: { id: 1, name: 'Test Category' },
-      location: { name: 'Test Location' },
+      image_url: 'https://example.com/image.jpg',
+      event_type: { id: 1, name: 'Test Category' },
       start_date: '2023-01-01',
       end_date: '2023-01-02',
       is_featured: true,
-      locations: []
+      locations: [{ id: 1, name: 'Test Location', city: 'Test City' }]
     }))
     render(<FeaturedEventsSection events={eventsWithCategory} loading={false} onEventClick={jest.fn()} onViewAllClick={jest.fn()} />)
     expect(screen.getAllByTestId('event-card')).toHaveLength(2)

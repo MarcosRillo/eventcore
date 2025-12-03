@@ -135,9 +135,9 @@ describe('eventSubtype.service', () => {
     it('should fetch single event subtype by id', async () => {
       mockedApiClient.get.mockResolvedValue({ data: mockEventSubtype })
 
-      const result = await getEventSubtype(1)
+      const result = await getEventSubtype(1, 1)
 
-      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-subtypes/1')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes/1')
       expect(result).toEqual(mockEventSubtype)
       expect(result.id).toBe(1)
       expect(result.name).toBe('Congreso Nacional')
@@ -147,9 +147,9 @@ describe('eventSubtype.service', () => {
       const largeIdSubtype = { ...mockEventSubtype, id: 999999 }
       mockedApiClient.get.mockResolvedValue({ data: largeIdSubtype })
 
-      const result = await getEventSubtype(999999)
+      const result = await getEventSubtype(1, 999999)
 
-      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-subtypes/999999')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes/999999')
       expect(result.id).toBe(999999)
     })
 
@@ -157,7 +157,7 @@ describe('eventSubtype.service', () => {
       const error = new Error('Event subtype not found')
       mockedApiClient.get.mockRejectedValue(error)
 
-      await expect(getEventSubtype(999)).rejects.toThrow('Event subtype not found')
+      await expect(getEventSubtype(1, 999)).rejects.toThrow('Event subtype not found')
     })
   })
 
@@ -172,8 +172,7 @@ describe('eventSubtype.service', () => {
 
       const result = await createEventSubtype(1, createData)
 
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-subtypes', {
-        event_type_id: 1,
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types/1/subtypes', {
         name: 'Seminario Regional',
         is_active: true,
       })
@@ -191,8 +190,7 @@ describe('eventSubtype.service', () => {
 
       const result = await createEventSubtype(1, createData)
 
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-subtypes', {
-        event_type_id: 1,
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types/1/subtypes', {
         name: 'Borrador',
         is_active: false,
       })
@@ -209,8 +207,7 @@ describe('eventSubtype.service', () => {
 
       const result = await createEventSubtype(2, createData)
 
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-subtypes', {
-        event_type_id: 2,
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types/2/subtypes', {
         name: 'Taller Intensivo',
         is_active: true,
       })
@@ -234,9 +231,9 @@ describe('eventSubtype.service', () => {
         data: { data: updatedSubtype },
       })
 
-      const result = await updateEventSubtype(1, updateData)
+      const result = await updateEventSubtype(1, 1, updateData)
 
-      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-subtypes/1', {
+      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-types/1/subtypes/1', {
         name: 'Congreso Actualizado',
         is_active: undefined,
       })
@@ -251,9 +248,9 @@ describe('eventSubtype.service', () => {
         data: { data: updatedSubtype },
       })
 
-      const result = await updateEventSubtype(1, updateData)
+      const result = await updateEventSubtype(1, 1, updateData)
 
-      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-subtypes/1', {
+      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-types/1/subtypes/1', {
         name: undefined,
         is_active: false,
       })
@@ -268,9 +265,9 @@ describe('eventSubtype.service', () => {
         data: { data: updatedSubtype },
       })
 
-      const result = await updateEventSubtype(1, updateData)
+      const result = await updateEventSubtype(1, 1, updateData)
 
-      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-subtypes/1', {
+      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-types/1/subtypes/1', {
         name: 'Nuevo Nombre',
         is_active: true,
       })
@@ -282,7 +279,7 @@ describe('eventSubtype.service', () => {
       const error = new Error('Update failed')
       mockedApiClient.put.mockRejectedValue(error)
 
-      await expect(updateEventSubtype(1, { name: 'Test' })).rejects.toThrow('Update failed')
+      await expect(updateEventSubtype(1, 1, { name: 'Test' })).rejects.toThrow('Update failed')
     })
   })
 
@@ -290,9 +287,9 @@ describe('eventSubtype.service', () => {
     it('should delete event subtype by id', async () => {
       mockedApiClient.delete.mockResolvedValue({ data: { message: 'Deleted' } })
 
-      await expect(deleteEventSubtype(1)).resolves.not.toThrow()
+      await expect(deleteEventSubtype(1, 1)).resolves.not.toThrow()
 
-      expect(mockedApiClient.delete).toHaveBeenCalledWith('/event-subtypes/1')
+      expect(mockedApiClient.delete).toHaveBeenCalledWith('/event-types/1/subtypes/1')
     })
 
     it('should handle 404 not found error', async () => {
@@ -301,7 +298,7 @@ describe('eventSubtype.service', () => {
       }
       mockedApiClient.delete.mockRejectedValue(error)
 
-      await expect(deleteEventSubtype(999)).rejects.toThrow(
+      await expect(deleteEventSubtype(1, 999)).rejects.toThrow(
         'El subtipo de evento no existe o ya fue eliminado.'
       )
     })
@@ -312,7 +309,7 @@ describe('eventSubtype.service', () => {
       }
       mockedApiClient.delete.mockRejectedValue(error)
 
-      await expect(deleteEventSubtype(1)).rejects.toThrow(
+      await expect(deleteEventSubtype(1, 1)).rejects.toThrow(
         'No tienes permiso para eliminar este subtipo de evento.'
       )
     })
@@ -323,7 +320,7 @@ describe('eventSubtype.service', () => {
       }
       mockedApiClient.delete.mockRejectedValue(error)
 
-      await expect(deleteEventSubtype(1)).rejects.toThrow(
+      await expect(deleteEventSubtype(1, 1)).rejects.toThrow(
         'No se puede eliminar el subtipo porque tiene eventos asociados.'
       )
     })
@@ -334,7 +331,7 @@ describe('eventSubtype.service', () => {
       }
       mockedApiClient.delete.mockRejectedValue(error)
 
-      await expect(deleteEventSubtype(1)).rejects.toThrow('Internal server error')
+      await expect(deleteEventSubtype(1, 1)).rejects.toThrow('Internal server error')
     })
 
     it('should handle generic error without API message', async () => {
@@ -343,7 +340,7 @@ describe('eventSubtype.service', () => {
       }
       mockedApiClient.delete.mockRejectedValue(error)
 
-      await expect(deleteEventSubtype(1)).rejects.toThrow(
+      await expect(deleteEventSubtype(1, 1)).rejects.toThrow(
         'Error al eliminar el subtipo de evento. Inténtalo de nuevo.'
       )
     })
@@ -357,9 +354,9 @@ describe('eventSubtype.service', () => {
         data: { data: toggledSubtype },
       })
 
-      const result = await toggleEventSubtypeStatus(1)
+      const result = await toggleEventSubtypeStatus(1, 1)
 
-      expect(mockedApiClient.patch).toHaveBeenCalledWith('/event-subtypes/1/toggle-status')
+      expect(mockedApiClient.patch).toHaveBeenCalledWith('/event-types/1/subtypes/1/toggle-status')
       expect(result.is_active).toBe(false)
     })
 
@@ -370,9 +367,9 @@ describe('eventSubtype.service', () => {
         data: { data: toggledSubtype },
       })
 
-      const result = await toggleEventSubtypeStatus(2)
+      const result = await toggleEventSubtypeStatus(1, 2)
 
-      expect(mockedApiClient.patch).toHaveBeenCalledWith('/event-subtypes/2/toggle-status')
+      expect(mockedApiClient.patch).toHaveBeenCalledWith('/event-types/1/subtypes/2/toggle-status')
       expect(result.is_active).toBe(true)
     })
 
@@ -380,7 +377,7 @@ describe('eventSubtype.service', () => {
       const error = new Error('Toggle failed')
       mockedApiClient.patch.mockRejectedValue(error)
 
-      await expect(toggleEventSubtypeStatus(1)).rejects.toThrow('Toggle failed')
+      await expect(toggleEventSubtypeStatus(1, 1)).rejects.toThrow('Toggle failed')
     })
   })
 
@@ -578,19 +575,19 @@ describe('eventSubtype.service', () => {
 
       // Read
       mockedApiClient.get.mockResolvedValueOnce({ data: createdSubtype })
-      const fetched = await getEventSubtype(10)
+      const fetched = await getEventSubtype(1, 10)
       expect(fetched.name).toBe('Test Subtype')
 
       // Update
       const updateData: UpdateEventSubtypeData = { name: 'Updated Subtype' }
       const updatedSubtype = { ...createdSubtype, name: 'Updated Subtype' }
       mockedApiClient.put.mockResolvedValueOnce({ data: { data: updatedSubtype } })
-      const updated = await updateEventSubtype(10, updateData)
+      const updated = await updateEventSubtype(1, 10, updateData)
       expect(updated.name).toBe('Updated Subtype')
 
       // Delete
       mockedApiClient.delete.mockResolvedValueOnce({ data: { message: 'Deleted' } })
-      await expect(deleteEventSubtype(10)).resolves.not.toThrow()
+      await expect(deleteEventSubtype(1, 10)).resolves.not.toThrow()
     })
 
     it('should handle search and filter workflow', async () => {
@@ -626,8 +623,7 @@ describe('eventSubtype.service', () => {
       // Create subtype for type 1
       mockedApiClient.post.mockResolvedValueOnce({ data: { data: mockEventSubtype } })
       await createEventSubtype(1, { name: 'Test' })
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-subtypes', {
-        event_type_id: 1,
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types/1/subtypes', {
         name: 'Test',
         is_active: true,
       })

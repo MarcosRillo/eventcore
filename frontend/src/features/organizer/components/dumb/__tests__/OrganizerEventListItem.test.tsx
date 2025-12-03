@@ -30,7 +30,7 @@ describe('OrganizerEventListItem', () => {
     start_date: '2025-06-15',
     end_date: '2025-06-15',
     status: 'draft',
-    category: { id: 1, name: 'Category 1', slug: 'category-1' },
+    event_type: { id: 1, name: 'Category 1' },
     locations: [{ id: 1, name: 'Location 1' }]
   }
 
@@ -64,10 +64,10 @@ describe('OrganizerEventListItem', () => {
       expect(screen.getByText('Location: Location 1')).toBeInTheDocument()
     })
 
-    test('should render category name', () => {
+    test('should render event type name', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('Category: Category 1')).toBeInTheDocument()
+      expect(screen.getByText('Type: Category 1')).toBeInTheDocument()
     })
 
     test('should render status badge', () => {
@@ -181,19 +181,19 @@ describe('OrganizerEventListItem', () => {
     })
   })
 
-  describe('category handling', () => {
-    test('should render category when available', () => {
+  describe('event type handling', () => {
+    test('should render event type when available', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('Category: Category 1')).toBeInTheDocument()
+      expect(screen.getByText('Type: Category 1')).toBeInTheDocument()
     })
 
-    test('should not render category when not available', () => {
-      // Type assertion needed for edge case testing - component handles missing category gracefully
-      const event = { ...baseEvent, category: undefined } as unknown as OrganizerEvent
+    test('should show N/A when event type is not available', () => {
+      // Type assertion needed for edge case testing - component handles missing event type gracefully
+      const event = { ...baseEvent, event_type: undefined } as unknown as OrganizerEvent
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.queryByText(/Category:/)).not.toBeInTheDocument()
+      expect(screen.getByText('Type: N/A')).toBeInTheDocument()
     })
   })
 

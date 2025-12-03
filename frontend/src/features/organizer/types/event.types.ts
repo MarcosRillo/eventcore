@@ -134,13 +134,6 @@ export interface OrganizerEvent {
   }
 
   // Relationships (loaded with eager loading)
-  category?: {
-    id: number
-    name: string
-    slug: string
-    color?: string
-  }
-
   locations?: Array<{
     id: number
     name: string
@@ -150,7 +143,6 @@ export interface OrganizerEvent {
 
   // Normalized FK fields (3NF)
   type_id?: number
-  category_id?: number
   edition_number?: string
   subtype_id?: number
   origin_id?: number
@@ -238,7 +230,6 @@ export interface CreateEventDto {
   description: string
   start_date: string  // ISO 8601 format: YYYY-MM-DDTHH:MM:SS
   end_date?: string   // ISO 8601 format: YYYY-MM-DDTHH:MM:SS
-  category_id?: number  // Optional now (Dec 2, 2025)
   location_ids: number[]  // Required: at least one location
   type_id?: number
 
@@ -323,7 +314,6 @@ export interface EventFormData {
   frequency_id: number | null
   rotation_type_id: number | null
   producer_id: number | null
-  category_id: number | null
 
   // Services and Rooms (arrays of IDs)
   service_ids: number[]
@@ -378,7 +368,6 @@ export interface EventFormErrors {
   frequency_id?: string
   rotation_type_id?: string
   producer_id?: string
-  category_id?: string
 
   // Location
   location_ids?: string

@@ -280,7 +280,8 @@ export const eventAdminApprovalService = {
    * Auto-approve events based on criteria
    */
   async autoApprove(criteria: {
-    category_ids?: number[];
+    event_type_ids?: number[];
+    event_subtype_ids?: number[];
     organizer_ids?: number[];
     location_ids?: number[];
     max_days_old?: number;

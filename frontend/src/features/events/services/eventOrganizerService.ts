@@ -39,10 +39,11 @@ export interface OrganizerStatistics {
     events_published: number;
     total_views: number;
   }[];
-  
-  // Category breakdown
-  category_breakdown: {
-    category: string;
+
+  // Event type breakdown
+  event_type_breakdown: {
+    event_type: string;
+    event_subtype?: string;
     count: number;
   }[];
 }

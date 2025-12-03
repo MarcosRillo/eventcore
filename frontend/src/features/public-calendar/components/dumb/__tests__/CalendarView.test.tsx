@@ -49,7 +49,8 @@ describe('CalendarView', () => {
         end_date: '2025-01-15',
         is_featured: false,
         locations: [{ id: 1, name: 'Location 1', city: 'City 1' }],
-        category: { id: 1, name: 'Turismo Aventura' }
+        event_type: { id: 1, name: 'Cultural' },
+        event_subtype: { id: 1, name: 'Music Festival' }
       }
     },
     {
@@ -65,7 +66,8 @@ describe('CalendarView', () => {
         end_date: '2025-01-20',
         is_featured: false,
         locations: [{ id: 2, name: 'Location 2', city: 'City 2' }],
-        category: { id: 2, name: 'Turismo Gastronómico' }
+        event_type: { id: 2, name: 'Business' },
+        event_subtype: { id: 2, name: 'Conference' }
       }
     }
   ]

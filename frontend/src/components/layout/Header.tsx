@@ -41,12 +41,15 @@ const Header = ({
 
     const routeTitles: Record<string, string> = {
       '/': 'Dashboard',
-      '/categories': 'Gestión de Categorías',
+      '/event-types': 'Gestión de Tipos de Evento',
+      '/event-types/subtypes': 'Gestión de Subtipos',
       '/calendar': 'Calendario de Eventos',
       '/events': 'Gestión de Eventos',
+      '/organizations': 'Gestión de Organizaciones',
+      '/locations': 'Gestión de Ubicaciones',
       '/users': 'Gestión de Usuarios',
-      '/organization': 'Configuración de Organización',
-      '/settings': 'Configuración del Sistema',
+      '/invitations': 'Gestión de Invitaciones',
+      '/registration-requests': 'Solicitudes de Registro',
       '/appearance': 'Personalización de Apariencia',
     };
 

@@ -4,7 +4,7 @@ import { publicEventsService } from '@/features/public-calendar/services/public-
 import {
   PublicEvent,
   EventsResponse,
-  Category,
+  EventType,
   Location,
 } from '@/features/public-calendar/types/public-calendar.types'
 
@@ -34,7 +34,8 @@ describe('useCalendarEvents', () => {
     start_date: '2025-12-15T10:00:00Z',
     end_date: '2025-12-15T18:00:00Z',
     is_featured: true,
-    category: { id: 1, name: 'Music' },
+    event_type: { id: 1, name: 'Cultural' },
+    event_subtype: { id: 1, name: 'Music Festival' },
     locations: [{ id: 1, name: 'Teatro', city: 'City 1' }],
   }
 
@@ -47,9 +48,9 @@ describe('useCalendarEvents', () => {
     },
   }
 
-  const mockCategories: Category[] = [
-    { id: 1, name: 'Music' },
-    { id: 2, name: 'Sports' },
+  const mockEventTypes: EventType[] = [
+    { id: 1, name: 'Cultural', is_active: true },
+    { id: 2, name: 'Business', is_active: true },
   ]
 
   const mockLocations: Location[] = [
@@ -62,7 +63,7 @@ describe('useCalendarEvents', () => {
 
     // Default mocks
     mockPublicEventsService.getAll.mockResolvedValue(mockEventsResponse)
-    mockPublicEventsService.getCategories.mockResolvedValue({ data: mockCategories })
+    mockPublicEventsService.getEventTypes.mockResolvedValue({ data: mockEventTypes })
     mockPublicEventsService.getLocations.mockResolvedValue({ data: mockLocations })
   })
 
@@ -73,7 +74,7 @@ describe('useCalendarEvents', () => {
       expect(result.current.loading).toBe(true)
       expect(result.current.error).toBeNull()
       expect(result.current.currentView).toBe('month')
-      expect(result.current.selectedCategory).toBeNull()
+      expect(result.current.selectedEventType).toBeNull()
       expect(result.current.selectedLocation).toBeNull()
       expect(result.current.currentDate).toBeInstanceOf(Date)
 
@@ -83,11 +84,11 @@ describe('useCalendarEvents', () => {
       })
     })
 
-    it('should fetch categories and locations on mount', async () => {
+    it('should fetch event types and locations on mount', async () => {
       const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
-        expect(mockPublicEventsService.getCategories).toHaveBeenCalled()
+        expect(mockPublicEventsService.getEventTypes).toHaveBeenCalled()
         expect(mockPublicEventsService.getLocations).toHaveBeenCalled()
       })
 
@@ -110,11 +111,11 @@ describe('useCalendarEvents', () => {
       })
     })
 
-    it('should populate categories and locations after fetch', async () => {
+    it('should populate event types and locations after fetch', async () => {
       const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
-        expect(result.current.categories).toEqual(mockCategories)
+        expect(result.current.eventTypes).toEqual(mockEventTypes)
         expect(result.current.locations).toEqual(mockLocations)
       })
 
@@ -334,8 +335,8 @@ describe('useCalendarEvents', () => {
     })
   })
 
-  describe('handleCategoryFilter', () => {
-    it('should update selected category', async () => {
+  describe('handleEventTypeFilter', () => {
+    it('should update selected event type', async () => {
       const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
@@ -343,10 +344,10 @@ describe('useCalendarEvents', () => {
       })
 
       act(() => {
-        result.current.handleCategoryFilter(1)
+        result.current.handleEventTypeFilter(1)
       })
 
-      expect(result.current.selectedCategory).toBe(1)
+      expect(result.current.selectedEventType).toBe(1)
 
       // Wait for refetch to complete
       await waitFor(() => {
@@ -354,7 +355,7 @@ describe('useCalendarEvents', () => {
       })
     })
 
-    it('should clear category filter when null', async () => {
+    it('should clear event type filter when null', async () => {
       const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
@@ -362,19 +363,19 @@ describe('useCalendarEvents', () => {
       })
 
       act(() => {
-        result.current.handleCategoryFilter(1)
+        result.current.handleEventTypeFilter(1)
       })
-      expect(result.current.selectedCategory).toBe(1)
+      expect(result.current.selectedEventType).toBe(1)
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
       act(() => {
-        result.current.handleCategoryFilter(null)
+        result.current.handleEventTypeFilter(null)
       })
 
-      expect(result.current.selectedCategory).toBeNull()
+      expect(result.current.selectedEventType).toBeNull()
 
       // Wait for refetch to complete
       await waitFor(() => {
@@ -382,7 +383,7 @@ describe('useCalendarEvents', () => {
       })
     })
 
-    it('should trigger refetch with category filter', async () => {
+    it('should trigger refetch with event type filter', async () => {
       const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
@@ -392,7 +393,7 @@ describe('useCalendarEvents', () => {
       const initialCallCount = mockPublicEventsService.getAll.mock.calls.length
 
       act(() => {
-        result.current.handleCategoryFilter(1)
+        result.current.handleEventTypeFilter(1)
       })
 
       await waitFor(() => {
@@ -402,7 +403,7 @@ describe('useCalendarEvents', () => {
       await waitFor(() => {
         expect(mockPublicEventsService.getAll).toHaveBeenCalledWith(
           expect.objectContaining({
-            category_id: 1,
+            event_type_id: 1,
           })
         )
       })
@@ -495,7 +496,7 @@ describe('useCalendarEvents', () => {
   })
 
   describe('Combined Filters', () => {
-    it('should apply both category and location filters', async () => {
+    it('should apply both event type and location filters', async () => {
       const { result } = renderHook(() => useCalendarEvents())
 
       await waitFor(() => {
@@ -503,14 +504,14 @@ describe('useCalendarEvents', () => {
       })
 
       act(() => {
-        result.current.handleCategoryFilter(1)
+        result.current.handleEventTypeFilter(1)
         result.current.handleLocationFilter(2)
       })
 
       await waitFor(() => {
         expect(mockPublicEventsService.getAll).toHaveBeenCalledWith(
           expect.objectContaining({
-            category_id: 1,
+            event_type_id: 1,
             location_id: 2,
           })
         )
@@ -524,8 +525,8 @@ describe('useCalendarEvents', () => {
   })
 
   describe('Filter Error Handling', () => {
-    it('should continue working if categories fetch fails', async () => {
-      mockPublicEventsService.getCategories.mockRejectedValueOnce(new Error('Failed'))
+    it('should continue working if event types fetch fails', async () => {
+      mockPublicEventsService.getEventTypes.mockRejectedValueOnce(new Error('Failed'))
 
       const { result } = renderHook(() => useCalendarEvents())
 
@@ -533,7 +534,7 @@ describe('useCalendarEvents', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      // Should still fetch events even if categories failed
+      // Should still fetch events even if event types failed
       expect(mockPublicEventsService.getAll).toHaveBeenCalled()
       expect(result.current.calendarEvents).toHaveLength(1)
     })
@@ -553,7 +554,7 @@ describe('useCalendarEvents', () => {
     })
 
     it('should handle both filters failing gracefully', async () => {
-      mockPublicEventsService.getCategories.mockRejectedValueOnce(new Error('Failed'))
+      mockPublicEventsService.getEventTypes.mockRejectedValueOnce(new Error('Failed'))
       mockPublicEventsService.getLocations.mockRejectedValueOnce(new Error('Failed'))
 
       const { result } = renderHook(() => useCalendarEvents())
@@ -562,7 +563,7 @@ describe('useCalendarEvents', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      expect(result.current.categories).toHaveLength(0)
+      expect(result.current.eventTypes).toHaveLength(0)
       expect(result.current.locations).toHaveLength(0)
       expect(result.current.calendarEvents).toHaveLength(1)
     })

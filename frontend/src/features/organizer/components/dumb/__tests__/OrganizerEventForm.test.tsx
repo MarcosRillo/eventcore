@@ -28,12 +28,6 @@ describe('OrganizerEventForm', () => {
     }
   })
 
-  const mockCategories = [
-    { id: 1, name: 'Música' },
-    { id: 2, name: 'Gastronomía' },
-    { id: 3, name: 'Tecnología' }
-  ]
-
   const mockLocations = [
     { id: 1, name: 'Plaza Independencia' },
     { id: 2, name: 'Parque 9 de Julio' }
@@ -54,7 +48,6 @@ describe('OrganizerEventForm', () => {
     frequency_id: null,
     rotation_type_id: null,
     producer_id: null,
-    category_id: null,
     service_ids: [],
     room_ids: [],
     location_ids: [],
@@ -83,7 +76,6 @@ describe('OrganizerEventForm', () => {
     edition_number: '10ma Edición',
     event_type_id: 1,
     event_subtype_id: 1,
-    category_id: 1,
     location_ids: [1],
     maps_url: 'https://maps.google.com/test',
     previous_venue: 'Buenos Aires 2024',
@@ -120,7 +112,6 @@ describe('OrganizerEventForm', () => {
     errors: {} as EventFormErrors,
     loading: false,
     initialLoading: false,
-    categories: mockCategories,
     eventTypes: mockEventTypes,
     eventSubtypes: mockEventSubtypes,
     onSearchLocations: mockSearchLocations,
@@ -210,26 +201,6 @@ describe('OrganizerEventForm', () => {
       expect(descriptionInput).toBeInTheDocument()
       expect(descriptionInput.tagName).toBe('TEXTAREA')
       expect(descriptionInput).toHaveAttribute('rows', '4')
-    })
-
-    test('should render category select with provided categories', () => {
-      render(<OrganizerEventForm {...defaultProps} />)
-
-      const categorySelect = document.getElementById('category_id') as HTMLSelectElement
-      expect(categorySelect).toBeInTheDocument()
-
-      // Category is now optional (Dec 2, 2025)
-      expect(categorySelect.querySelector('option[value=""]')).toHaveTextContent('Seleccionar categoría (opcional)')
-      expect(categorySelect.querySelector('option[value="1"]')).toHaveTextContent('Música')
-      expect(categorySelect.querySelector('option[value="2"]')).toHaveTextContent('Gastronomía')
-    })
-
-    test('should handle empty categories array', () => {
-      render(<OrganizerEventForm {...defaultProps} categories={[]} />)
-
-      const categorySelect = screen.getByLabelText(/categoría/i)
-      const options = categorySelect.querySelectorAll('option')
-      expect(options).toHaveLength(1) // Only placeholder
     })
 
     test('should render event type select with provided event types', () => {
@@ -592,24 +563,6 @@ describe('OrganizerEventForm', () => {
       expect(mockHandleChange).toHaveBeenCalledWith('description', 'Nueva descripción')
     })
 
-    test('should call handleChange with parsed number for category_id', () => {
-      render(<OrganizerEventForm {...defaultProps} />)
-
-      const categorySelect = screen.getByLabelText(/categoría/i)
-      fireEvent.change(categorySelect, { target: { value: '2' } })
-
-      expect(mockHandleChange).toHaveBeenCalledWith('category_id', 2)
-    })
-
-    test('should call handleChange with null for empty category_id', () => {
-      render(<OrganizerEventForm {...defaultProps} />)
-
-      const categorySelect = screen.getByLabelText(/categoría/i)
-      fireEvent.change(categorySelect, { target: { value: '' } })
-
-      expect(mockHandleChange).toHaveBeenCalledWith('category_id', null)
-    })
-
     test('should call handleChange when edition_number input changes', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
@@ -649,16 +602,6 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventForm {...defaultProps} errors={errors} />)
 
       expect(screen.getByText('La descripción es requerida')).toBeInTheDocument()
-    })
-
-    test('should display category error message', () => {
-      const errors: EventFormErrors = {
-        category_id: 'Seleccione una categoría'
-      }
-
-      render(<OrganizerEventForm {...defaultProps} errors={errors} />)
-
-      expect(screen.getByText('Seleccione una categoría')).toBeInTheDocument()
     })
 
     test('should display event_type_id error message', () => {
@@ -745,7 +688,8 @@ describe('OrganizerEventForm', () => {
 
       expect(document.getElementById('title')).toBeDisabled()
       expect(document.getElementById('description')).toBeDisabled()
-      expect(document.getElementById('category_id')).toBeDisabled()
+      expect(document.getElementById('event_type_id')).toBeDisabled()
+      expect(document.getElementById('event_subtype_id')).toBeDisabled()
     })
 
     test('should disable checkboxes when loading is true', () => {
@@ -875,7 +819,8 @@ describe('OrganizerEventForm', () => {
 
       expect(document.getElementById('title')).toBeInTheDocument()
       expect(document.getElementById('description')).toBeInTheDocument()
-      expect(document.getElementById('category_id')).toBeInTheDocument()
+      expect(document.getElementById('event_type_id')).toBeInTheDocument()
+      expect(document.getElementById('event_subtype_id')).toBeInTheDocument()
 
       expect(document.querySelector('label[for="title"]')).toBeInTheDocument()
       expect(document.querySelector('label[for="description"]')).toBeInTheDocument()
@@ -902,13 +847,6 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('edge cases', () => {
-    test('should handle undefined categories gracefully', () => {
-      render(<OrganizerEventForm {...defaultProps} categories={undefined as unknown as { id: number; name: string }[]} />)
-
-      const categorySelect = screen.getByLabelText(/categoría/i)
-      expect(categorySelect).toBeInTheDocument()
-    })
-
     test('should handle empty selectedLocations gracefully', () => {
       render(<OrganizerEventForm {...defaultProps} selectedLocations={[]} />)
 

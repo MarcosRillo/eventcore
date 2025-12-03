@@ -38,6 +38,10 @@ export const OrganizerEventListItem = ({
   // Get location name from locations array
   const locationName = event.locations?.[0]?.name || 'N/A'
 
+  // Get event type and subtype names
+  const eventTypeName = event.event_type?.name || 'N/A'
+  const eventSubtypeName = event.event_subtype?.name
+
   return (
     <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
       <div className="flex-1">
@@ -45,7 +49,10 @@ export const OrganizerEventListItem = ({
         <div className="mt-1 space-y-1 text-sm text-gray-600">
           <p>Date: {eventDate ? new Date(eventDate).toLocaleDateString() : 'N/A'}</p>
           <p>Location: {locationName}</p>
-          {event.category && <p>Category: {event.category.name}</p>}
+          <p>
+            Type: {eventTypeName}
+            {eventSubtypeName && ` - ${eventSubtypeName}`}
+          </p>
         </div>
         <span className={`inline-block mt-2 px-2 py-1 text-xs font-medium rounded ${statusColors[statusCode as keyof typeof statusColors] || 'bg-gray-200 text-gray-700'}`}>
           {statusDisplay}

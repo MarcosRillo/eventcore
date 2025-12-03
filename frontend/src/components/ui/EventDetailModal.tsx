@@ -528,22 +528,6 @@ export const EventDetailModal = ({
                           )}
                         </div>
 
-                        {/* Category */}
-                        {event.category && (
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <h4 className="font-medium text-gray-900 mb-3">Categoría</h4>
-                            <div className="flex items-center gap-2">
-                              {event.category.color && (
-                                <div
-                                  className="w-4 h-4 rounded-full"
-                                  style={{ backgroundColor: event.category.color }}
-                                />
-                              )}
-                              <span className="text-sm text-gray-700">{event.category.name}</span>
-                            </div>
-                          </div>
-                        )}
-
                         {/* Capacity */}
                         {event.max_attendees && (
                           <div className="bg-gray-50 rounded-lg p-4">

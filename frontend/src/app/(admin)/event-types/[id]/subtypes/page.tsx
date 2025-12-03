@@ -86,8 +86,7 @@ const EventSubtypesPage: React.FC = () => {
 
   // Handle delete
   const handleDelete = async (
-    subtypeId: number,
-    _subtypeName: string
+    subtypeId: number
   ): Promise<void> => {
     try {
       await handleDeleteEventSubtype(subtypeId);

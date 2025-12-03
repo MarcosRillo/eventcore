@@ -78,8 +78,7 @@ const EventTypesPage: React.FC = () => {
 
   // Handle delete
   const handleDelete = async (
-    eventTypeId: number,
-    _eventTypeName: string
+    eventTypeId: number
   ): Promise<void> => {
     try {
       await handleDeleteEventType(eventTypeId);

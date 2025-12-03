@@ -48,8 +48,13 @@ export const getEventSubtypes = async (
  * Get a single event subtype by ID
  * Returns EventSubtype data directly
  */
-export const getEventSubtype = async (id: number): Promise<EventSubtype> => {
-  const response = await apiClient.get<EventSubtype>(`/event-subtypes/${id}`);
+export const getEventSubtype = async (
+  eventTypeId: number,
+  id: number
+): Promise<EventSubtype> => {
+  const response = await apiClient.get<EventSubtype>(
+    `/event-types/${eventTypeId}/subtypes/${id}`
+  );
   return response.data;
 };
 
@@ -62,9 +67,8 @@ export const createEventSubtype = async (
   subtypeData: CreateEventSubtypeData
 ): Promise<EventSubtype> => {
   const response: AxiosResponse<ApiResponse<EventSubtype>> = await apiClient.post(
-    '/event-subtypes',
+    `/event-types/${eventTypeId}/subtypes`,
     {
-      event_type_id: eventTypeId,
       name: subtypeData.name,
       is_active:
         subtypeData.is_active !== undefined ? subtypeData.is_active : true,
@@ -79,11 +83,12 @@ export const createEventSubtype = async (
  * Returns ApiResponse<EventSubtype> wrapper structure
  */
 export const updateEventSubtype = async (
+  eventTypeId: number,
   id: number,
   subtypeData: UpdateEventSubtypeData
 ): Promise<EventSubtype> => {
   const response: AxiosResponse<ApiResponse<EventSubtype>> = await apiClient.put(
-    `/event-subtypes/${id}`,
+    `/event-types/${eventTypeId}/subtypes/${id}`,
     {
       name: subtypeData.name,
       is_active: subtypeData.is_active,
@@ -97,9 +102,12 @@ export const updateEventSubtype = async (
  * Delete an event subtype
  * Returns success message only
  */
-export const deleteEventSubtype = async (id: number): Promise<void> => {
+export const deleteEventSubtype = async (
+  eventTypeId: number,
+  id: number
+): Promise<void> => {
   try {
-    await apiClient.delete(`/event-subtypes/${id}`);
+    await apiClient.delete(`/event-types/${eventTypeId}/subtypes/${id}`);
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
 
@@ -129,10 +137,11 @@ export const deleteEventSubtype = async (id: number): Promise<void> => {
  * Returns ApiResponse<EventSubtype> wrapper structure
  */
 export const toggleEventSubtypeStatus = async (
+  eventTypeId: number,
   id: number
 ): Promise<EventSubtype> => {
   const response: AxiosResponse<ApiResponse<EventSubtype>> =
-    await apiClient.patch(`/event-subtypes/${id}/toggle-status`);
+    await apiClient.patch(`/event-types/${eventTypeId}/subtypes/${id}/toggle-status`);
 
   return response.data.data;
 };

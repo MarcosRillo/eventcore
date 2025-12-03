@@ -18,7 +18,7 @@ const getCategoryIcon = (categoryName: string): string => {
 }
 
 export const CategoriesSection = ({
-  categories,
+  eventTypes,
   loading,
   onCategoryClick
 }: CategoriesSectionProps) => {
@@ -28,7 +28,7 @@ export const CategoriesSection = ({
         {/* Section Header */}
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
-            Explorar por Categoría
+            Explorar Eventos
           </h2>
           <p className="text-lg text-neutral-500 max-w-xl mx-auto">
             Encuentra eventos según tus intereses
@@ -42,13 +42,13 @@ export const CategoriesSection = ({
           </div>
         )}
 
-        {/* Categories Grid */}
-        {!loading && categories.length > 0 && (
+        {/* Event Types Grid */}
+        {!loading && eventTypes.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {categories.map(category => (
+            {eventTypes.map(eventType => (
               <button
-                key={category.id}
-                onClick={() => onCategoryClick(category.id)}
+                key={eventType.id}
+                onClick={() => onCategoryClick(eventType.id)}
                 className="
                   group
                   bg-neutral-50 p-6 md:p-8 rounded-xl
@@ -57,16 +57,16 @@ export const CategoriesSection = ({
                   transition-all duration-200
                   focus:outline-none focus:ring-2 focus:ring-primary-500/20
                 "
-                aria-label={`Ver eventos de ${category.name}`}
+                aria-label={`Ver eventos de ${eventType.name}`}
               >
                 <div
                   className="text-4xl md:text-5xl mb-4 group-hover:scale-110 transition-transform duration-200"
                   aria-hidden="true"
                 >
-                  {getCategoryIcon(category.name)}
+                  {getCategoryIcon(eventType.name)}
                 </div>
                 <h3 className="text-base md:text-lg font-semibold text-neutral-900">
-                  {category.name}
+                  {eventType.name}
                 </h3>
               </button>
             ))}
@@ -74,11 +74,11 @@ export const CategoriesSection = ({
         )}
 
         {/* Empty State */}
-        {!loading && categories.length === 0 && (
+        {!loading && eventTypes.length === 0 && (
           <EmptyState
             icon={EmptyStateIcons.folder}
-            title="Sin categorías disponibles"
-            description="No hay categorías de eventos en este momento."
+            title="Sin tipos de eventos disponibles"
+            description="No hay tipos de eventos en este momento."
           />
         )}
       </div>

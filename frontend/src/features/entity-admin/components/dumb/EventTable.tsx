@@ -220,18 +220,6 @@ function renderTableCell(
         </span>
       );
 
-    case 'category':
-      return event.category ? (
-        <span
-          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-          style={{ backgroundColor: event.category.color || '#gray-300' }}
-        >
-          {event.category.name}
-        </span>
-      ) : (
-        <span className="text-gray-400">Sin categoría</span>
-      );
-
     case 'organizer':
       return event.organizer ? (
         <div className="text-sm text-gray-900">

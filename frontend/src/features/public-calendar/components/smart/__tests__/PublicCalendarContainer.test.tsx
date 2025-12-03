@@ -18,31 +18,37 @@ jest.mock('next/navigation', () => ({
 jest.mock('@/features/public-calendar/components/dumb/PublicCalendar', () => ({
   PublicCalendar: ({
     events,
-    categories,
+    eventTypes,
+    eventSubtypes,
     locations,
     loading,
     error,
-    onCategoryFilter,
+    onEventTypeFilter,
+    onEventSubtypeFilter,
     onLocationFilter,
     onEventClick
   }: {
     events: unknown[]
-    categories: unknown[]
+    eventTypes: unknown[]
+    eventSubtypes: unknown[]
     locations: unknown[]
     loading: boolean
     error: string | null
-    onCategoryFilter: (id: number | null) => void
+    onEventTypeFilter: (id: number | null) => void
+    onEventSubtypeFilter: (id: number | null) => void
     onLocationFilter: (id: number | null) => void
     onEventClick: (id: number) => void
   }) => (
     <div data-testid="public-calendar">
       <span data-testid="events-count">{events.length}</span>
-      <span data-testid="categories-count">{categories.length}</span>
+      <span data-testid="event-types-count">{eventTypes.length}</span>
+      <span data-testid="event-subtypes-count">{eventSubtypes.length}</span>
       <span data-testid="locations-count">{locations.length}</span>
       <span data-testid="loading-state">{loading ? 'loading' : 'loaded'}</span>
       <span data-testid="error-state">{error || 'no-error'}</span>
-      <button onClick={() => onCategoryFilter(1)}>Filter Category 1</button>
-      <button onClick={() => onCategoryFilter(null)}>Clear Category Filter</button>
+      <button onClick={() => onEventTypeFilter(1)}>Filter EventType 1</button>
+      <button onClick={() => onEventTypeFilter(null)}>Clear EventType Filter</button>
+      <button onClick={() => onEventSubtypeFilter(2)}>Filter EventSubtype 2</button>
       <button onClick={() => onLocationFilter(2)}>Filter Location 2</button>
       <button onClick={() => onLocationFilter(null)}>Clear Location Filter</button>
       <button onClick={() => onEventClick(456)}>Click Event</button>
@@ -52,7 +58,8 @@ jest.mock('@/features/public-calendar/components/dumb/PublicCalendar', () => ({
 
 describe('PublicCalendarContainer', () => {
   const mockPush = jest.fn()
-  const mockHandleCategoryFilter = jest.fn()
+  const mockHandleEventTypeFilter = jest.fn()
+  const mockHandleEventSubtypeFilter = jest.fn()
   const mockHandleLocationFilter = jest.fn()
 
   const mockEvents = [
@@ -61,9 +68,14 @@ describe('PublicCalendarContainer', () => {
     { id: 3, title: 'Event 3' }
   ]
 
-  const mockCategories = [
-    { id: 1, name: 'Category 1' },
-    { id: 2, name: 'Category 2' }
+  const mockEventTypes = [
+    { id: 1, name: 'Cultural', is_active: true },
+    { id: 2, name: 'Business', is_active: true }
+  ]
+
+  const mockEventSubtypes = [
+    { id: 1, name: 'Festival', event_type_id: 1, is_active: true },
+    { id: 2, name: 'Conference', event_type_id: 2, is_active: true }
   ]
 
   const mockLocations = [
@@ -81,11 +93,13 @@ describe('PublicCalendarContainer', () => {
 
     ;(usePublicEvents as jest.Mock).mockReturnValue({
       events: mockEvents,
-      categories: mockCategories,
+      eventTypes: mockEventTypes,
+      eventSubtypes: mockEventSubtypes,
       locations: mockLocations,
       loading: false,
       error: null,
-      handleCategoryFilter: mockHandleCategoryFilter,
+      handleEventTypeFilter: mockHandleEventTypeFilter,
+      handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
       handleLocationFilter: mockHandleLocationFilter
     })
   })
@@ -103,10 +117,10 @@ describe('PublicCalendarContainer', () => {
       expect(screen.getByTestId('events-count')).toHaveTextContent('3')
     })
 
-    test('should pass categories to PublicCalendar', () => {
+    test('should pass event types to PublicCalendar', () => {
       render(<PublicCalendarContainer />)
 
-      expect(screen.getByTestId('categories-count')).toHaveTextContent('2')
+      expect(screen.getByTestId('event-types-count')).toHaveTextContent('2')
     })
 
     test('should pass locations to PublicCalendar', () => {
@@ -124,11 +138,13 @@ describe('PublicCalendarContainer', () => {
     test('should show loading when loading is true', () => {
       ;(usePublicEvents as jest.Mock).mockReturnValue({
         events: [],
-        categories: [],
+        eventTypes: [],
+        eventSubtypes: [],
         locations: [],
         loading: true,
         error: null,
-        handleCategoryFilter: mockHandleCategoryFilter,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
       })
 
@@ -140,11 +156,13 @@ describe('PublicCalendarContainer', () => {
     test('should pass error to PublicCalendar', () => {
       ;(usePublicEvents as jest.Mock).mockReturnValue({
         events: [],
-        categories: [],
+        eventTypes: [],
+        eventSubtypes: [],
         locations: [],
         loading: false,
         error: 'Failed to load',
-        handleCategoryFilter: mockHandleCategoryFilter,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
       })
 
@@ -155,20 +173,20 @@ describe('PublicCalendarContainer', () => {
   })
 
   describe('filtering', () => {
-    test('should call handleCategoryFilter when category filter is applied', () => {
+    test('should call handleEventTypeFilter when event type filter is applied', () => {
       render(<PublicCalendarContainer />)
 
-      fireEvent.click(screen.getByText('Filter Category 1'))
+      fireEvent.click(screen.getByText('Filter EventType 1'))
 
-      expect(mockHandleCategoryFilter).toHaveBeenCalledWith(1)
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(1)
     })
 
-    test('should call handleCategoryFilter with null to clear filter', () => {
+    test('should call handleEventTypeFilter with null to clear filter', () => {
       render(<PublicCalendarContainer />)
 
-      fireEvent.click(screen.getByText('Clear Category Filter'))
+      fireEvent.click(screen.getByText('Clear EventType Filter'))
 
-      expect(mockHandleCategoryFilter).toHaveBeenCalledWith(null)
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(null)
     })
 
     test('should call handleLocationFilter when location filter is applied', () => {
@@ -224,11 +242,13 @@ describe('PublicCalendarContainer', () => {
     test('should handle empty events array', () => {
       ;(usePublicEvents as jest.Mock).mockReturnValue({
         events: [],
-        categories: mockCategories,
+        eventTypes: mockEventTypes,
+        eventSubtypes: mockEventSubtypes,
         locations: mockLocations,
         loading: false,
         error: null,
-        handleCategoryFilter: mockHandleCategoryFilter,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
       })
 
@@ -237,30 +257,34 @@ describe('PublicCalendarContainer', () => {
       expect(screen.getByTestId('events-count')).toHaveTextContent('0')
     })
 
-    test('should handle empty categories array', () => {
+    test('should handle empty event types array', () => {
       ;(usePublicEvents as jest.Mock).mockReturnValue({
         events: mockEvents,
-        categories: [],
+        eventTypes: [],
+        eventSubtypes: [],
         locations: mockLocations,
         loading: false,
         error: null,
-        handleCategoryFilter: mockHandleCategoryFilter,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
       })
 
       render(<PublicCalendarContainer />)
 
-      expect(screen.getByTestId('categories-count')).toHaveTextContent('0')
+      expect(screen.getByTestId('event-types-count')).toHaveTextContent('0')
     })
 
     test('should handle empty locations array', () => {
       ;(usePublicEvents as jest.Mock).mockReturnValue({
         events: mockEvents,
-        categories: mockCategories,
+        eventTypes: mockEventTypes,
+        eventSubtypes: mockEventSubtypes,
         locations: [],
         loading: false,
         error: null,
-        handleCategoryFilter: mockHandleCategoryFilter,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
       })
 
@@ -272,11 +296,13 @@ describe('PublicCalendarContainer', () => {
     test('should handle all data being empty', () => {
       ;(usePublicEvents as jest.Mock).mockReturnValue({
         events: [],
-        categories: [],
+        eventTypes: [],
+        eventSubtypes: [],
         locations: [],
         loading: false,
         error: null,
-        handleCategoryFilter: mockHandleCategoryFilter,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
       })
 
@@ -284,8 +310,115 @@ describe('PublicCalendarContainer', () => {
 
       expect(screen.getByTestId('public-calendar')).toBeInTheDocument()
       expect(screen.getByTestId('events-count')).toHaveTextContent('0')
-      expect(screen.getByTestId('categories-count')).toHaveTextContent('0')
+      expect(screen.getByTestId('event-types-count')).toHaveTextContent('0')
       expect(screen.getByTestId('locations-count')).toHaveTextContent('0')
+    })
+  })
+
+  describe('filter state management', () => {
+    test('should pass hasActiveFilters as false when no filters are active', () => {
+      ;(usePublicEvents as jest.Mock).mockReturnValue({
+        events: mockEvents,
+        eventTypes: mockEventTypes,
+        eventSubtypes: mockEventSubtypes,
+        locations: mockLocations,
+        loading: false,
+        error: null,
+        hasActiveFilters: false,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
+        handleLocationFilter: mockHandleLocationFilter
+      })
+
+      render(<PublicCalendarContainer />)
+
+      expect(screen.getByTestId('public-calendar')).toBeInTheDocument()
+    })
+
+    test('should pass hasActiveFilters as true when filters are active', () => {
+      ;(usePublicEvents as jest.Mock).mockReturnValue({
+        events: mockEvents,
+        eventTypes: mockEventTypes,
+        eventSubtypes: mockEventSubtypes,
+        locations: mockLocations,
+        loading: false,
+        error: null,
+        hasActiveFilters: true,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
+        handleLocationFilter: mockHandleLocationFilter
+      })
+
+      render(<PublicCalendarContainer />)
+
+      expect(screen.getByTestId('public-calendar')).toBeInTheDocument()
+    })
+
+    test('should pass clearFilters callback to PublicCalendar', () => {
+      const mockClearFilters = jest.fn()
+      ;(usePublicEvents as jest.Mock).mockReturnValue({
+        events: mockEvents,
+        eventTypes: mockEventTypes,
+        eventSubtypes: mockEventSubtypes,
+        locations: mockLocations,
+        loading: false,
+        error: null,
+        hasActiveFilters: true,
+        handleEventTypeFilter: mockHandleEventTypeFilter,
+        handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
+        handleLocationFilter: mockHandleLocationFilter,
+        clearFilters: mockClearFilters
+      })
+
+      render(<PublicCalendarContainer />)
+
+      expect(screen.getByTestId('public-calendar')).toBeInTheDocument()
+    })
+
+    test('should pass event subtype filter callback to PublicCalendar', () => {
+      render(<PublicCalendarContainer />)
+
+      fireEvent.click(screen.getByText('Filter EventSubtype 2'))
+
+      expect(mockHandleEventSubtypeFilter).toHaveBeenCalledWith(2)
+    })
+  })
+
+  describe('advanced filtering scenarios', () => {
+    test('should handle event type and location filters simultaneously', () => {
+      render(<PublicCalendarContainer />)
+
+      fireEvent.click(screen.getByText('Filter EventType 1'))
+      fireEvent.click(screen.getByText('Filter Location 2'))
+
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(1)
+      expect(mockHandleLocationFilter).toHaveBeenCalledWith(2)
+    })
+
+    test('should handle filter clearing and reapplication', () => {
+      render(<PublicCalendarContainer />)
+
+      fireEvent.click(screen.getByText('Filter EventType 1'))
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(1)
+
+      fireEvent.click(screen.getByText('Clear EventType Filter'))
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(null)
+
+      fireEvent.click(screen.getByText('Filter EventType 1'))
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(1)
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledTimes(3)
+    })
+
+    test('should handle all three filter types in sequence', () => {
+      render(<PublicCalendarContainer />)
+
+      fireEvent.click(screen.getByText('Filter EventType 1'))
+      fireEvent.click(screen.getByText('Filter EventSubtype 2'))
+      fireEvent.click(screen.getByText('Filter Location 2'))
+
+      expect(mockHandleEventTypeFilter).toHaveBeenCalledWith(1)
+      expect(mockHandleEventSubtypeFilter).toHaveBeenCalledWith(2)
+      expect(mockHandleLocationFilter).toHaveBeenCalledWith(2)
     })
   })
 })

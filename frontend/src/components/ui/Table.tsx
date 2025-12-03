@@ -11,10 +11,9 @@ import { PermissionGate } from '@/components/auth/PermissionGate'
 import type { Permission } from '@/types/auth.types'
 import type { Event } from '@/types/event.types'
 import type { User } from '@/types/auth.types'
-import type { Category } from '@/types/category.types'
 import type { TablePaginationProps } from '@/types/pagination.types'
 
-type TableDataType = Event | User | Category
+type TableDataType = Event | User
 
 export interface TableColumn<T extends TableDataType = TableDataType> {
   key: string

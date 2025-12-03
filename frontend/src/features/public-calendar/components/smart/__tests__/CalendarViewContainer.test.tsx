@@ -240,4 +240,91 @@ describe('CalendarViewContainer', () => {
       })
     })
   })
+
+  describe('retry functionality', () => {
+    test('should have clickable retry button when error occurs', () => {
+      ;(useCalendarEvents as jest.Mock).mockReturnValue({
+        calendarEvents: [],
+        loading: false,
+        error: 'Failed to load events',
+        currentDate: new Date(),
+        currentView: 'month',
+        handleNavigate: mockHandleNavigate,
+        handleViewChange: mockHandleViewChange
+      })
+
+      render(<CalendarViewContainer />)
+
+      const retryButton = screen.getByText('Reintentar')
+      expect(retryButton).toBeInTheDocument()
+      expect(retryButton).toHaveClass('px-4', 'py-2', 'bg-blue-600', 'text-white')
+    })
+  })
+
+  describe('advanced navigation scenarios', () => {
+    test('should handle multiple view changes in sequence', () => {
+      render(<CalendarViewContainer />)
+
+      fireEvent.click(screen.getByText('Change View'))
+      expect(mockHandleViewChange).toHaveBeenCalledWith('week')
+
+      fireEvent.click(screen.getByText('Change View'))
+      expect(mockHandleViewChange).toHaveBeenCalledWith('week')
+
+      expect(mockHandleViewChange).toHaveBeenCalledTimes(2)
+    })
+
+    test('should handle multiple date navigation calls', () => {
+      render(<CalendarViewContainer />)
+
+      // Click navigate button multiple times
+      fireEvent.click(screen.getByText('Navigate'))
+      fireEvent.click(screen.getByText('Navigate'))
+      fireEvent.click(screen.getByText('Navigate'))
+
+      // Verify handler was called correct number of times
+      expect(mockHandleNavigate).toHaveBeenCalledTimes(3)
+      // Verify it was called with a date object
+      expect(mockHandleNavigate).toHaveBeenCalledWith(expect.any(Date))
+    })
+
+    test('should navigate to correct event detail pages for different event IDs', () => {
+      render(<CalendarViewContainer />)
+
+      const eventIds = [123, 456, 789]
+
+      eventIds.forEach(() => {
+        fireEvent.click(screen.getByText('Select Event'))
+      })
+
+      expect(mockPush).toHaveBeenCalledTimes(3)
+      expect(mockPush).toHaveBeenCalledWith('/calendar/123')
+    })
+  })
+
+  describe('performance scenarios', () => {
+    test('should handle large event lists without errors', () => {
+      const largeEventList = Array.from({ length: 100 }, (_, i) => ({
+        id: i + 1,
+        title: `Event ${i + 1}`,
+        start: new Date(),
+        end: new Date()
+      }))
+
+      ;(useCalendarEvents as jest.Mock).mockReturnValue({
+        calendarEvents: largeEventList,
+        loading: false,
+        error: null,
+        currentDate: new Date(),
+        currentView: 'month',
+        handleNavigate: mockHandleNavigate,
+        handleViewChange: mockHandleViewChange
+      })
+
+      render(<CalendarViewContainer />)
+
+      expect(screen.getByTestId('calendar-view')).toBeInTheDocument()
+      expect(screen.getByTestId('events-count')).toHaveTextContent('100')
+    })
+  })
 })

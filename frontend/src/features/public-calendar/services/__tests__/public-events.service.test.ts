@@ -1,6 +1,6 @@
 import apiClient from '@/services/apiClient'
 import { publicEventsService } from '../public-events.service'
-import { EventsResponse, PublicEvent, Category, Location } from '@/features/public-calendar/types/public-calendar.types'
+import { EventsResponse, PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
 import { AxiosResponse } from 'axios'
 
 // Mock apiClient
@@ -25,9 +25,14 @@ describe('publicEventsService', () => {
     start_date: '2025-12-01',
     end_date: '2025-12-01',
     is_featured: true,
-    category: {
+    event_type: {
       id: 1,
-      name: 'Music',
+      name: 'Cultural',
+    },
+    event_subtype: {
+      id: 1,
+      name: 'Music Festival',
+      event_type_id: 1,
     },
     locations: [{
       id: 1,
@@ -60,12 +65,20 @@ describe('publicEventsService', () => {
       expect(result.data).toHaveLength(1)
     })
 
-    it('should fetch events with category_id filter', async () => {
+    it('should fetch events with event_type_id filter', async () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
-      await publicEventsService.getAll({ category_id: 1 })
+      await publicEventsService.getAll({ event_type_id: 1 })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?category_id=1')
+      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?event_type_id=1')
+    })
+
+    it('should fetch events with event_subtype_id filter', async () => {
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+
+      await publicEventsService.getAll({ event_subtype_id: 2 })
+
+      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?event_subtype_id=2')
     })
 
     it('should fetch events with location_id filter', async () => {
@@ -104,16 +117,18 @@ describe('publicEventsService', () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
-        category_id: 1,
-        location_id: 2,
+        event_type_id: 1,
+        event_subtype_id: 2,
+        location_id: 3,
         start_date: '2025-12-01',
         end_date: '2025-12-31',
         page: 2,
       })
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
-      expect(callUrl).toContain('category_id=1')
-      expect(callUrl).toContain('location_id=2')
+      expect(callUrl).toContain('event_type_id=1')
+      expect(callUrl).toContain('event_subtype_id=2')
+      expect(callUrl).toContain('location_id=3')
       expect(callUrl).toContain('start_date=2025-12-01')
       expect(callUrl).toContain('end_date=2025-12-31')
       expect(callUrl).toContain('page=2')
@@ -123,7 +138,8 @@ describe('publicEventsService', () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
-        category_id: null,
+        event_type_id: null,
+        event_subtype_id: null,
         location_id: null,
         start_date: null,
         end_date: null,
@@ -136,7 +152,8 @@ describe('publicEventsService', () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
-        category_id: undefined,
+        event_type_id: undefined,
+        event_subtype_id: undefined,
         location_id: undefined,
       })
 
@@ -294,49 +311,120 @@ describe('publicEventsService', () => {
     })
   })
 
-  describe('getCategories', () => {
-    it('should fetch active categories successfully', async () => {
-      const mockCategories: Category[] = [
-        { id: 1, name: 'Music' },
-        { id: 2, name: 'Sports' },
-        { id: 3, name: 'Arts' },
+  describe('getEventTypes', () => {
+    it('should fetch event types from /public/event-types', async () => {
+      const mockEventTypes = [
+        { id: 1, name: 'Cultural', is_active: true },
+        { id: 2, name: 'Business', is_active: true },
+        { id: 3, name: 'Deportivo', is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockCategories }))
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
 
-      const result = await publicEventsService.getCategories()
+      const result = await publicEventsService.getEventTypes()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/categories/active')
+      expect(mockApiClient.get).toHaveBeenCalledWith('/public/event-types')
       expect(result.data).toHaveLength(3)
-      expect(result.data[0].name).toBe('Music')
-      expect(result.data[1].name).toBe('Sports')
+      expect(result.data[0].name).toBe('Cultural')
+      expect(result.data[1].name).toBe('Business')
+      expect(result.data[2].name).toBe('Deportivo')
     })
 
-    it('should handle empty categories list', async () => {
+    it('should handle empty event types list', async () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
-      const result = await publicEventsService.getCategories()
+      const result = await publicEventsService.getEventTypes()
 
       expect(result.data).toHaveLength(0)
     })
 
-    it('should handle API errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch categories'))
+    it('should handle errors when fetching event types', async () => {
+      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
 
-      await expect(publicEventsService.getCategories()).rejects.toThrow('Failed to fetch categories')
+      await expect(publicEventsService.getEventTypes()).rejects.toThrow('Network error')
     })
 
-    it('should fetch categories with all required fields', async () => {
-      const mockCategories: Category[] = [
-        { id: 1, name: 'Music' },
+    it('should fetch event types with all required fields', async () => {
+      const mockEventTypes = [
+        { id: 1, name: 'Cultural', is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockCategories }))
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
 
-      const result = await publicEventsService.getCategories()
+      const result = await publicEventsService.getEventTypes()
 
       expect(result.data[0]).toHaveProperty('id')
       expect(result.data[0]).toHaveProperty('name')
+      expect(result.data[0]).toHaveProperty('is_active')
+      expect(result.data[0].is_active).toBe(true)
+    })
+
+    it('should return only active event types', async () => {
+      const mockEventTypes = [
+        { id: 1, name: 'Active Type', is_active: true },
+      ]
+
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
+
+      const result = await publicEventsService.getEventTypes()
+
+      // Service should return data as-is (backend filters inactive types)
+      expect(result.data.every(type => type.is_active)).toBe(true)
+    })
+  })
+
+  describe('getEventSubtypes', () => {
+    it('should fetch subtypes for specific event type', async () => {
+      const mockSubtypes = [
+        { id: 1, name: 'Music Festival', event_type_id: 1, is_active: true },
+        { id: 2, name: 'Theatre Performance', event_type_id: 1, is_active: true },
+      ]
+
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockSubtypes }))
+
+      const result = await publicEventsService.getEventSubtypes(1)
+
+      expect(mockApiClient.get).toHaveBeenCalledWith('/public/event-types/1/subtypes')
+      expect(result.data).toHaveLength(2)
+      expect(result.data[0].name).toBe('Music Festival')
+      expect(result.data[0].event_type_id).toBe(1)
+    })
+
+    it('should handle empty subtypes list', async () => {
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+
+      const result = await publicEventsService.getEventSubtypes(1)
+
+      expect(result.data).toHaveLength(0)
+    })
+
+    it('should handle errors when fetching subtypes', async () => {
+      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
+
+      await expect(publicEventsService.getEventSubtypes(1)).rejects.toThrow('Network error')
+    })
+
+    it('should fetch subtypes with all required fields', async () => {
+      const mockSubtypes = [
+        { id: 1, name: 'Music Festival', event_type_id: 1, is_active: true },
+      ]
+
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockSubtypes }))
+
+      const result = await publicEventsService.getEventSubtypes(1)
+
+      expect(result.data[0]).toHaveProperty('id')
+      expect(result.data[0]).toHaveProperty('name')
+      expect(result.data[0]).toHaveProperty('event_type_id')
+      expect(result.data[0]).toHaveProperty('is_active')
+    })
+
+    it('should call correct endpoint for different event type ids', async () => {
+      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+
+      await publicEventsService.getEventSubtypes(5)
+
+      expect(mockApiClient.get).toHaveBeenCalledWith('/public/event-types/5/subtypes')
     })
   })
 
@@ -395,7 +483,7 @@ describe('publicEventsService', () => {
       await expect(publicEventsService.getById(1)).rejects.toThrow('Not found')
       await expect(publicEventsService.getUpcoming()).rejects.toThrow('Not found')
       await expect(publicEventsService.getFeatured()).rejects.toThrow('Not found')
-      await expect(publicEventsService.getCategories()).rejects.toThrow('Not found')
+      await expect(publicEventsService.getEventTypes()).rejects.toThrow('Not found')
       await expect(publicEventsService.getLocations()).rejects.toThrow('Not found')
     })
 

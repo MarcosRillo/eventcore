@@ -4,11 +4,10 @@
  * Updated for 3NF schema (Nov 30, 2025)
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
-import * as categoryService from '@/features/categories/services/category.service'
 import * as locationService from '@/features/locations/services/location.service'
 import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
@@ -21,7 +20,6 @@ global.ResizeObserver = class ResizeObserver {
 }
 
 jest.mock('../services/organizer-event.service')
-jest.mock('@/features/categories/services/category.service')
 jest.mock('@/features/locations/services/location.service')
 jest.mock('@/features/event-types/services/eventType.service')
 jest.mock('@/features/event-types/services/eventSubtype.service')
@@ -36,11 +34,6 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('OrganizerEventForm', () => {
-  const mockCategories = [
-    { id: 1, name: 'Música' },
-    { id: 2, name: 'Gastronomía' }
-  ]
-
   const mockLocations = [
     { id: 1, name: 'Plaza Independencia' },
     { id: 2, name: 'Parque 9 de Julio' }
@@ -62,9 +55,6 @@ describe('OrganizerEventForm', () => {
     mockPush.mockClear()
     mockBack.mockClear()
 
-    ;(categoryService.getCategories as jest.Mock).mockResolvedValue({
-      data: mockCategories
-    })
     // Mock searchLocations for async location search
     ;(locationService.searchLocations as jest.Mock).mockResolvedValue(mockLocations)
     // Mock event types and subtypes services
@@ -77,19 +67,16 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
-
-      await waitFor(() => {
         expect(screen.getByRole('button', { name: /crear evento/i })).toBeInTheDocument()
       })
     })
 
-    test('should load categories on mount (locations are async search)', async () => {
+    test('should verify locations are async search only', async () => {
       render(<OrganizerEventFormContainer />)
 
+      // Wait for component to complete initial async operations
       await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
+        expect(screen.getByRole('button', { name: /crear evento/i })).toBeInTheDocument()
       })
 
       // Locations are no longer pre-loaded, they are searched asynchronously
@@ -100,10 +87,6 @@ describe('OrganizerEventForm', () => {
   describe('Validation', () => {
     test('should show validation errors for required fields when submitted empty', async () => {
       render(<OrganizerEventFormContainer />)
-
-      await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /crear evento/i })).toBeInTheDocument()
@@ -121,10 +104,6 @@ describe('OrganizerEventForm', () => {
 
     test('should show error when date is in the past', async () => {
       render(<OrganizerEventFormContainer />)
-
-      await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
 
       await waitFor(() => {
         expect(document.getElementById('title')).toBeInTheDocument()
@@ -155,7 +134,6 @@ describe('OrganizerEventForm', () => {
         description: 'Un evento increíble',
         start_date: '2030-12-15T18:00',
         end_date: '2030-12-15T22:00',
-        category_id: 1,
         event_type_id: 1,
         event_subtype_id: 1,
         custom_location_name: 'Salón El Jardín',
@@ -169,10 +147,6 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
-
-      await waitFor(() => {
         expect(document.getElementById('title')).toBeInTheDocument()
       })
 
@@ -180,7 +154,6 @@ describe('OrganizerEventForm', () => {
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
       const endDateInput = document.getElementById('end_date') as HTMLInputElement
-      const categorySelect = document.getElementById('category_id') as HTMLSelectElement
       const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
       const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
@@ -188,7 +161,6 @@ describe('OrganizerEventForm', () => {
       fireEvent.change(descInput, { target: { value: 'Un evento increíble' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
       fireEvent.change(endDateInput, { target: { value: '2030-12-15T22:00' } })
-      fireEvent.change(categorySelect, { target: { value: '1' } })
       // Select event type and subtype (required since Dec 2, 2025)
       fireEvent.change(eventTypeSelect, { target: { value: '1' } })
       // Wait for subtype select to be enabled after type selection
@@ -196,6 +168,10 @@ describe('OrganizerEventForm', () => {
         expect(eventSubtypeSelect).not.toBeDisabled()
       })
       fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
+      // Wait for value to be set
+      await waitFor(() => {
+        expect(eventSubtypeSelect.value).toBe('1')
+      })
 
       // Use custom location instead of selecting from dropdown
       const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
@@ -217,7 +193,6 @@ describe('OrganizerEventForm', () => {
             title: 'Festival de Jazz',
             description: 'Un evento increíble',
             start_date: '2030-12-15T18:00',
-            category_id: 1,
             event_type_id: 1,
             event_subtype_id: 1,
             custom_location_name: 'Salón El Jardín'
@@ -239,7 +214,6 @@ describe('OrganizerEventForm', () => {
         description: 'Existing description',
         start_date: '2030-12-15T18:00',
         end_date: '2030-12-15T22:00',
-        category_id: 1,
         event_type_id: 1,
         event_subtype_id: 1,
         locations: [{ id: 1, name: 'Plaza Independencia' }],
@@ -254,10 +228,6 @@ describe('OrganizerEventForm', () => {
 
       await waitFor(() => {
         expect(organizerEventService.getEvent).toHaveBeenCalledWith(1)
-      })
-
-      await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
       })
 
       await waitFor(() => {
@@ -278,7 +248,6 @@ describe('OrganizerEventForm', () => {
         description: 'Original description',
         start_date: '2030-12-15T18:00',
         end_date: '2030-12-15T22:00',
-        category_id: 1,
         event_type_id: 1,
         event_subtype_id: 1,
         locations: [{ id: 1, name: 'Plaza Independencia' }],
@@ -294,10 +263,6 @@ describe('OrganizerEventForm', () => {
       })
 
       render(<OrganizerEventFormContainer eventId={1} />)
-
-      await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
 
       await waitFor(() => {
         const titleInput = document.getElementById('title') as HTMLInputElement
@@ -337,24 +302,18 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
-
-      await waitFor(() => {
         expect(document.getElementById('title')).toBeInTheDocument()
       })
 
       const titleInput = document.getElementById('title') as HTMLInputElement
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const categorySelect = document.getElementById('category_id') as HTMLSelectElement
       const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
       const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
-      fireEvent.change(categorySelect, { target: { value: '1' } })
       // Select event type and subtype (required since Dec 2, 2025)
       fireEvent.change(eventTypeSelect, { target: { value: '1' } })
       // Wait for subtype select to be enabled after type selection
@@ -391,24 +350,18 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
-
-      await waitFor(() => {
         expect(document.getElementById('title')).toBeInTheDocument()
       })
 
       const titleInput = document.getElementById('title') as HTMLInputElement
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const categorySelect = document.getElementById('category_id') as HTMLSelectElement
       const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
       const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
-      fireEvent.change(categorySelect, { target: { value: '1' } })
       // Select event type and subtype (required since Dec 2, 2025)
       fireEvent.change(eventTypeSelect, { target: { value: '1' } })
       // Wait for subtype select to be enabled after type selection
@@ -446,24 +399,18 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
-
-      await waitFor(() => {
         expect(document.getElementById('title')).toBeInTheDocument()
       })
 
       const titleInput = document.getElementById('title') as HTMLInputElement
       const descInput = document.getElementById('description') as HTMLTextAreaElement
       const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const categorySelect = document.getElementById('category_id') as HTMLSelectElement
       const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
       const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
-      fireEvent.change(categorySelect, { target: { value: '1' } })
       // Select event type and subtype (required since Dec 2, 2025)
       fireEvent.change(eventTypeSelect, { target: { value: '1' } })
       // Wait for subtype select to be enabled after type selection
@@ -497,10 +444,6 @@ describe('OrganizerEventForm', () => {
   describe('Cancel Action', () => {
     test('should navigate back when cancel button is clicked', async () => {
       render(<OrganizerEventFormContainer />)
-
-      await waitFor(() => {
-        expect(categoryService.getCategories).toHaveBeenCalled()
-      })
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()

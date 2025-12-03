@@ -17,7 +17,8 @@ describe('EventCard', () => {
     end_date: '2025-11-17',
     start_time: '18:00',
     end_time: '23:00',
-    category: { id: 1, name: 'Música' },
+    event_type: { id: 1, name: 'Música', color: '#8B5CF6' },
+    event_subtype: { id: 1, name: 'Festival', event_type_id: 1 },
     locations: [
       {
         id: 1,

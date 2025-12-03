@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { getEvent, createEvent, updateEvent } from '@/features/organizer/services/organizer-event.service'
-import { getCategories } from '@/features/categories/services/category.service'
 import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
 import { getActiveEventSubtypes } from '@/features/event-types/services/eventSubtype.service'
 import { searchLocations } from '@/features/locations/services/location.service'
@@ -42,7 +41,6 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     frequency_id: null,
     rotation_type_id: null,
     producer_id: null,
-    category_id: null,
 
     // Services and Rooms (arrays of IDs)
     service_ids: [],
@@ -79,23 +77,15 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
   const [errors, setErrors] = useState<EventFormErrors>({})
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(isEditMode)
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([])
   const [eventTypes, setEventTypes] = useState<EventType[]>([])
   const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
   const [selectedLocations, setSelectedLocations] = useState<{ id: number; name: string }[]>([])
 
-  // Load categories and event types on mount
+  // Load event types on mount
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [categoriesRes, eventTypesRes] = await Promise.all([
-          getCategories(),
-          getActiveEventTypes()
-        ])
-
-        // Resource Collection: { data: [...], meta, links }
-        const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : []
-        setCategories(categoriesData)
+        const eventTypesRes = await getActiveEventTypes()
 
         // Event Types (Dec 2, 2025)
         setEventTypes(eventTypesRes || [])
@@ -154,7 +144,6 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
           frequency_id: event.frequency_id || null,
           rotation_type_id: event.rotation_type_id || null,
           producer_id: event.producer_id || null,
-          category_id: event.category?.id || event.category_id || null,
 
           // Services and Rooms (arrays of IDs)
           service_ids: event.services?.map((s: { id: number }) => s.id) || [],
@@ -318,7 +307,6 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
         description: formData.description,
         start_date: formData.start_date,
         end_date: formData.end_date || undefined,
-        category_id: formData.category_id || undefined,
         location_ids: formData.location_ids,
 
         // Event Type/Subtype (hierarchical categorization - Dec 2, 2025) - REQUIRED
@@ -397,7 +385,6 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     errors,
     loading,
     initialLoading,
-    categories,
     eventTypes,
     eventSubtypes,
     selectedLocations,

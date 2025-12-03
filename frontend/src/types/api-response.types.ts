@@ -4,7 +4,6 @@
  */
 
 import { Event } from '@/types/event.types';
-import { Category } from '@/types/category.types';
 import { User } from '@/types/auth.types';
 
 /**
@@ -41,7 +40,6 @@ export interface PaginatedResponse<T> {
 
 // DEPRECATED: Use PaginatedResponse<T> directly
 export type EventsResponse = PaginatedResponse<Event>;
-export type CategoriesResponse = PaginatedResponse<Category>;
 export type UsersResponse = PaginatedResponse<User>;
 
 // API error interface

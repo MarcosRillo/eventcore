@@ -174,8 +174,8 @@ export function middleware(request: NextRequest) {
     const readOnlyRestrictions = [
       '/events/create',
       '/events/edit',
-      '/categories/create',
-      '/categories/edit',
+      '/event-types/create',
+      '/event-types/edit',
       '/locations/create',
       '/locations/edit',
       '/admin',

@@ -18,7 +18,6 @@ export const OrganizerEventFormContainer = ({
     errors,
     loading,
     initialLoading,
-    categories,
     eventTypes,
     eventSubtypes,
     selectedLocations,
@@ -40,7 +39,6 @@ export const OrganizerEventFormContainer = ({
       errors={errors}
       loading={loading}
       initialLoading={initialLoading}
-      categories={categories}
       eventTypes={eventTypes}
       eventSubtypes={eventSubtypes}
       onSearchLocations={handleSearchLocations}

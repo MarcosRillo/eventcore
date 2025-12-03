@@ -10,13 +10,13 @@ import {
   PublicEvent,
   CalendarEvent,
   CalendarView,
-  Category,
+  EventType,
   Location,
 } from '@/features/public-calendar/types/public-calendar.types'
 
 interface UseCalendarEventsReturn {
   calendarEvents: CalendarEvent[]
-  categories: Category[]
+  eventTypes: EventType[]
   locations: Location[]
   loading: boolean
   error: string | null
@@ -24,9 +24,9 @@ interface UseCalendarEventsReturn {
   currentView: CalendarView
   handleNavigate: (date: Date) => void
   handleViewChange: (view: CalendarView) => void
-  handleCategoryFilter: (categoryId: number | null) => void
+  handleEventTypeFilter: (eventTypeId: number | null) => void
   handleLocationFilter: (locationId: number | null) => void
-  selectedCategory: number | null
+  selectedEventType: number | null
   selectedLocation: number | null
 }
 
@@ -45,24 +45,24 @@ const transformToCalendarEvent = (event: PublicEvent): CalendarEvent => {
 
 export const useCalendarEvents = (): UseCalendarEventsReturn => {
   const [events, setEvents] = useState<PublicEvent[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [eventTypes, setEventTypes] = useState<EventType[]>([])
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [currentView, setCurrentView] = useState<CalendarView>('month')
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [selectedEventType, setSelectedEventType] = useState<number | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
 
-  // Fetch categories and locations on mount
+  // Fetch event types and locations on mount
   useEffect(() => {
     const fetchFilters = async (): Promise<void> => {
       try {
-        const [categoriesRes, locationsRes] = await Promise.all([
-          publicEventsService.getCategories(),
+        const [eventTypesRes, locationsRes] = await Promise.all([
+          publicEventsService.getEventTypes(),
           publicEventsService.getLocations(),
         ])
-        setCategories(categoriesRes.data)
+        setEventTypes(eventTypesRes.data)
         setLocations(locationsRes.data)
       } catch {
         // Silently fail - not critical for calendar functionality
@@ -85,7 +85,7 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
       const response = await publicEventsService.getAll({
         start_date: format(startDate, 'yyyy-MM-dd'),
         end_date: format(endDate, 'yyyy-MM-dd'),
-        category_id: selectedCategory,
+        event_type_id: selectedEventType,
         location_id: selectedLocation,
         page: 1,
       })
@@ -97,7 +97,7 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
     } finally {
       setLoading(false)
     }
-  }, [currentDate, selectedCategory, selectedLocation])
+  }, [currentDate, selectedEventType, selectedLocation])
 
   // Fetch events when dependencies change
   useEffect(() => {
@@ -114,9 +114,9 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
     setCurrentView(view)
   }, [])
 
-  // Handle category filter
-  const handleCategoryFilter = useCallback((categoryId: number | null): void => {
-    setSelectedCategory(categoryId)
+  // Handle event type filter
+  const handleEventTypeFilter = useCallback((eventTypeId: number | null): void => {
+    setSelectedEventType(eventTypeId)
   }, [])
 
   // Handle location filter
@@ -129,7 +129,7 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
 
   return {
     calendarEvents,
-    categories,
+    eventTypes,
     locations,
     loading,
     error,
@@ -137,9 +137,9 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
     currentView,
     handleNavigate,
     handleViewChange,
-    handleCategoryFilter,
+    handleEventTypeFilter,
     handleLocationFilter,
-    selectedCategory,
+    selectedEventType,
     selectedLocation,
   }
 }

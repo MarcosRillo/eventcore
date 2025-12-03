@@ -104,7 +104,7 @@ const CreateEventSubtypeModal: React.FC<CreateEventSubtypeModalProps> = ({
               id="is_active"
               name="is_active"
               label="Subtipo activo"
-              checked={formData.is_active}
+              checked={formData.is_active ?? false}
               onChange={(checked) => handleFieldChange('is_active', checked)}
               disabled={isLoading}
             />

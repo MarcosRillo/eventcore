@@ -57,17 +57,25 @@ const createMockEvent = (overrides?: Partial<Event>): Event => ({
   end_date: '2025-12-15T18:00:00Z',
   status: EVENT_STATUS.DRAFT,
   type: EVENT_TYPE.SINGLE_LOCATION,
-  category_id: 1,
+  event_type_id: 1,
+  event_subtype_id: 1,
   is_featured: false,
   created_at: '2025-11-01T00:00:00Z',
   updated_at: '2025-11-01T00:00:00Z',
   approval_history: [],
   locations: [],
-  category: {
+  event_type: {
     id: 1,
-    name: 'Music',
-    slug: 'music',
-    color: '#FF5733',
+    name: 'Cultural',
+    entity_id: 1,
+    is_active: true,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  },
+  event_subtype: {
+    id: 1,
+    name: 'Music Festival',
+    event_type_id: 1,
     entity_id: 1,
     is_active: true,
     created_at: '2025-01-01T00:00:00Z',
@@ -566,55 +574,6 @@ describe('EventTable', () => {
       )
 
       expect(screen.getByText('Multi-Sede')).toBeInTheDocument()
-    })
-  })
-
-  describe('Category Rendering', () => {
-    it('should render category badge with color', () => {
-      const columns: ColumnConfig[] = [
-        { key: 'category', label: 'Categoría', visible: true },
-      ]
-      const events = [createMockEvent()]
-
-      render(
-        <EventTable
-          events={events}
-          isLoading={false}
-          columns={columns}
-          actions={mockActions}
-          confirmDialog={mockConfirmDialog}
-          statusLabels={mockStatusLabels}
-          typeLabels={mockTypeLabels}
-          onFormatDate={mockFormatDate}
-          onCloseConfirmDialog={jest.fn()}
-        />
-      )
-
-      const badge = screen.getByText('Music')
-      expect(badge).toHaveStyle({ backgroundColor: '#FF5733' })
-    })
-
-    it('should show placeholder when category is missing', () => {
-      const columns: ColumnConfig[] = [
-        { key: 'category', label: 'Categoría', visible: true },
-      ]
-      const events = [createMockEvent({ category: undefined })]
-
-      render(
-        <EventTable
-          events={events}
-          isLoading={false}
-          columns={columns}
-          actions={mockActions}
-          confirmDialog={mockConfirmDialog}
-          statusLabels={mockStatusLabels}
-          typeLabels={mockTypeLabels}
-          onFormatDate={mockFormatDate}
-          onCloseConfirmDialog={jest.fn()}
-        />
-      )
-
-      expect(screen.getByText('Sin categoría')).toBeInTheDocument()
     })
   })
 

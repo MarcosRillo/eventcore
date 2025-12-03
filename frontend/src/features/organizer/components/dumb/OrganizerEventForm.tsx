@@ -9,7 +9,6 @@ interface OrganizerEventFormProps {
   errors: EventFormErrors
   loading: boolean
   initialLoading: boolean
-  categories: { id: number; name: string }[]
   eventTypes: EventType[]
   eventSubtypes: EventSubtype[]
   onSearchLocations: (query: string) => Promise<SelectOption[]>
@@ -30,7 +29,6 @@ export const OrganizerEventForm = ({
   errors,
   loading,
   initialLoading,
-  categories,
   eventTypes,
   eventSubtypes,
   onSearchLocations,
@@ -165,30 +163,6 @@ export const OrganizerEventForm = ({
             </select>
             {errors.event_subtype_id && (
               <p id="event-subtype-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.event_subtype_id}</p>
-            )}
-          </div>
-
-          {/* Categoría (ahora opcional) */}
-          <div>
-            <label htmlFor="category_id" className="block text-sm font-medium text-neutral-600">
-              Categoría
-            </label>
-            <select
-              id="category_id"
-              value={formData.category_id || ''}
-              onChange={(e) => handleChange('category_id', e.target.value ? parseInt(e.target.value) : null)}
-              disabled={loading}
-              aria-invalid={!!errors.category_id}
-              aria-describedby={errors.category_id ? 'category-error' : undefined}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed cursor-pointer"
-            >
-              <option value="">Seleccionar categoría (opcional)</option>
-              {Array.isArray(categories) && categories.map(category => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-            {errors.category_id && (
-              <p id="category-error" role="alert" className="mt-1 text-sm text-error-600 font-medium">{errors.category_id}</p>
             )}
           </div>
 

@@ -93,10 +93,10 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
 
       {/* Content */}
       <div className="p-4">
-        {/* Category */}
+        {/* Event Type */}
         <div className="mb-2">
           <Badge variant="info" size="sm">
-            {event.category.name}
+            {event.event_type.name}
           </Badge>
         </div>
 

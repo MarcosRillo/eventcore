@@ -14,12 +14,14 @@ export const PublicCalendarContainer = () => {
   const router = useRouter()
   const {
     events,
-    categories,
+    eventTypes,
+    eventSubtypes,
     locations,
     loading,
     error,
     hasActiveFilters,
-    handleCategoryFilter,
+    handleEventTypeFilter,
+    handleEventSubtypeFilter,
     handleLocationFilter,
     clearFilters
   } = usePublicEvents()
@@ -31,12 +33,14 @@ export const PublicCalendarContainer = () => {
   return (
     <PublicCalendar
       events={events}
-      categories={categories}
+      eventTypes={eventTypes}
+      eventSubtypes={eventSubtypes}
       locations={locations}
       loading={loading}
       error={error}
       hasActiveFilters={hasActiveFilters}
-      onCategoryFilter={handleCategoryFilter}
+      onEventTypeFilter={handleEventTypeFilter}
+      onEventSubtypeFilter={handleEventSubtypeFilter}
       onLocationFilter={handleLocationFilter}
       onClearFilters={clearFilters}
       onEventClick={handleEventClick}

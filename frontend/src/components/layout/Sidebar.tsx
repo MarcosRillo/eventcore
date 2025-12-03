@@ -6,17 +6,16 @@ import { usePermissions } from '@/hooks/usePermissions';
 import {
   HomeIcon,
   CalendarIcon,
-  TagIcon,
   TicketIcon,
+  SquaresPlusIcon,
+  RectangleStackIcon,
+  MapPinIcon,
+  BuildingStorefrontIcon,
+  UserGroupIcon,
   EnvelopeIcon,
   ClipboardDocumentListIcon,
-  BuildingOffice2Icon,
-  BuildingStorefrontIcon,
-  Cog6ToothIcon,
-  ChevronDoubleLeftIcon,
   PaintBrushIcon,
-  UserGroupIcon,
-  MapPinIcon,
+  ChevronDoubleLeftIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarItem {
@@ -49,47 +48,55 @@ const Sidebar: React.FC<SidebarProps> = ({
   // Check if user can manage team users (entity_staff)
   const canManageUsers = hasRole('entity_admin') || hasRole('platform_admin');
 
-  const principalItems = [
-    {
-      name: 'Dashboard',
-      href: '/',
-      icon: <HomeIcon className="w-5 h-5" />,
-    },
-    {
-      name: 'Calendario',
-      href: '/calendar',
-      icon: <CalendarIcon className="w-5 h-5" />,
-    },
-  ];
-
   const sidebarSections: SidebarSection[] = [
     {
       name: 'Principal',
-      items: principalItems,
-    },
-    {
-      name: 'Gestión',
       items: [
         {
-          name: 'Categorías',
-          href: '/categories',
-          icon: <TagIcon className="w-5 h-5" />,
+          name: 'Dashboard',
+          href: '/',
+          icon: <HomeIcon className="w-5 h-5" />,
         },
+        {
+          name: 'Calendario',
+          href: '/calendar',
+          icon: <CalendarIcon className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      name: 'Gestión de Eventos',
+      items: [
         {
           name: 'Eventos',
           href: '/events',
           icon: <TicketIcon className="w-5 h-5" />,
-          ...(canAccessEntityDashboard && { badge: '5' }), // Mock badge for dashboard functionality
+          ...(canAccessEntityDashboard && { badge: '5' }),
         },
         {
-          name: 'Organizaciones',
-          href: '/organizations',
-          icon: <BuildingStorefrontIcon className="w-5 h-5" />,
+          name: 'Tipos de Evento',
+          href: '/event-types',
+          icon: <SquaresPlusIcon className="w-5 h-5" />,
+        },
+        {
+          name: 'Subtipos de Evento',
+          href: '/event-types/subtypes',
+          icon: <RectangleStackIcon className="w-5 h-5" />,
         },
         {
           name: 'Ubicaciones',
           href: '/locations',
           icon: <MapPinIcon className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      name: 'Gestión de Usuarios',
+      items: [
+        {
+          name: 'Organizaciones',
+          href: '/organizations',
+          icon: <BuildingStorefrontIcon className="w-5 h-5" />,
         },
         ...(canManageUsers ? [{
           name: 'Usuarios',
@@ -112,19 +119,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       name: 'Configuración',
       items: [
         {
-          name: 'Organización',
-          href: '/organization',
-          icon: <BuildingOffice2Icon className="w-5 h-5" />,
-        },
-        {
           name: 'Apariencia',
           href: '/appearance',
           icon: <PaintBrushIcon className="w-5 h-5" />,
-        },
-        {
-          name: 'Configuración',
-          href: '/settings',
-          icon: <Cog6ToothIcon className="w-5 h-5" />,
         },
       ],
     },
@@ -138,77 +135,68 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`bg-primary text-white transition-all duration-300 h-full shadow-2xl ${isCollapsed ? 'w-16' : 'w-64'} flex flex-col`}>
+    <div className={`bg-white border-r border-neutral-200 transition-all duration-150 h-full ${isCollapsed ? 'w-16' : 'w-64'} flex flex-col`}>
       {/* Logo and toggle button */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-primary-hover bg-primary-hover/20">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-200">
         {!isCollapsed && (
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mr-3 shadow-lg">
-              <CalendarIcon className="w-6 h-6 text-primary" />
-            </div>
+          <div className="flex items-center gap-3">
+            <CalendarIcon className="w-10 h-10 text-primary-500" />
             <div className="flex flex-col">
-              <span className="text-lg font-bold leading-tight">Tucumán</span>
-              <span className="text-xs text-primary-light leading-tight">Turismo</span>
+              <span className="text-lg font-bold text-neutral-900 leading-tight">Tucumán</span>
+              <span className="text-xs text-neutral-500 leading-tight">Turismo</span>
             </div>
           </div>
         )}
-        
+
         {onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
-            className="p-2 rounded-lg hover:bg-primary-hover transition-all duration-200 group"
+            className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition-all duration-150 group focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             title={isCollapsed ? 'Expandir sidebar' : 'Contraer sidebar'}
           >
-            <ChevronDoubleLeftIcon 
-              className={`w-5 h-5 transition-transform duration-300 group-hover:scale-110 ${isCollapsed ? 'rotate-180' : ''}`}
+            <ChevronDoubleLeftIcon
+              className={`w-5 h-5 transition-transform duration-150 ${isCollapsed ? 'rotate-180' : ''}`}
             />
           </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-hover scrollbar-track-transparent">
+      <nav className="flex-1 px-3 py-6 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-transparent">
         {sidebarSections.map((section) => (
           <div key={section.name}>
             {!isCollapsed && (
-              <h3 className="text-xs font-bold text-primary-light uppercase tracking-wider mb-4 px-3">
+              <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 px-3">
                 {section.name}
               </h3>
             )}
-            
+
             <ul className="space-y-1">
               {section.items.map((item) => {
                 const active = isActiveLink(item.href);
-                
+
                 return (
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className={`group relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                      className={`group relative flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-150 ${
                         active
-                          ? 'bg-white text-primary shadow-lg transform scale-[1.02]'
-                          : 'text-primary-light hover:bg-primary-hover hover:text-white hover:transform hover:scale-105'
+                          ? 'bg-primary-50 text-primary-600 border-l-2 border-primary-500'
+                          : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'
                       }`}
                       title={isCollapsed ? item.name : undefined}
                     >
-                      {/* Active indicator */}
-                      {active && (
-                        <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-accent rounded-r-full" />
-                      )}
-                      
-                      <span className={`flex-shrink-0 transition-transform duration-200 ${
-                        active ? 'text-primary' : 'group-hover:scale-110'
-                      }`}>
+                      <span className={`flex-shrink-0 ${active ? 'text-primary-600' : 'text-neutral-500'}`}>
                         {item.icon}
                       </span>
-                      
+
                       {!isCollapsed && (
                         <>
-                          <span className="ml-4 flex-1 font-semibold tracking-wide">
+                          <span className="ml-3 flex-1 font-medium">
                             {item.name}
                           </span>
                           {item.badge && (
-                            <span className="ml-2 px-2.5 py-1 text-xs font-bold bg-accent text-white rounded-full shadow-sm">
+                            <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-primary-100 text-primary-700 rounded-full">
                               {item.badge}
                             </span>
                           )}
@@ -224,22 +212,22 @@ const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-primary-hover bg-primary-hover/20 p-4">
+      <div className="border-t border-neutral-200 bg-neutral-50 p-4">
         {!isCollapsed && (
           <div className="text-center">
-            <p className="text-xs text-primary-light font-medium">
+            <p className="text-xs text-neutral-600 font-medium">
               Ente de Turismo de Tucumán
             </p>
-            <p className="text-xs text-primary-light/70 mt-1">
+            <p className="text-xs text-neutral-400 mt-1">
               © 2025 • v1.0.0
             </p>
           </div>
         )}
-        
+
         {isCollapsed && (
           <div className="flex justify-center">
-            <div className="w-8 h-8 rounded-full bg-primary-hover flex items-center justify-center">
-              <span className="text-xs font-bold text-primary-light">T</span>
+            <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center">
+              <span className="text-xs font-semibold text-neutral-600">T</span>
             </div>
           </div>
         )}

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     return {
       title: `${event.title} - Eventos Tucumán`,
       description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
-      keywords: `tucuman, turismo, evento, ${event.title}, ${event.category?.name}`,
+      keywords: `tucuman, turismo, evento, ${event.title}`,
       openGraph: {
         title: event.title,
         description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
             alt: event.title,
           }
         ] : [],
-        section: event.category?.name || 'Eventos',
+        section: 'Eventos',
       },
       twitter: {
         card: 'summary_large_image',

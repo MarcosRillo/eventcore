@@ -100,7 +100,7 @@ const CreateEventTypeModal: React.FC<CreateEventTypeModalProps> = ({
               id="is_active"
               name="is_active"
               label="Tipo de evento activo"
-              checked={formData.is_active}
+              checked={formData.is_active ?? false}
               onChange={(checked) => handleFieldChange('is_active', checked)}
               disabled={isLoading}
             />

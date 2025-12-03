@@ -342,7 +342,6 @@ export default function EventsPage() {
             <EventFiltersBar
               filters={filters}
               onFiltersChange={updateFilters}
-              categories={[]}
               sections={[]}
               onClearFilters={resetFilters}
             />

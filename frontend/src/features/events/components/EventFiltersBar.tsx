@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { EventFilters, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types';
-import { Category } from '@/types/category.types';
 import { Button, Input, Select } from '@/components/ui';
 
 // Define Section interface for type safety
@@ -13,7 +12,6 @@ interface Section {
 }
 
 interface EventFiltersBarProps {
-  categories: Category[];
   sections: Section[];
   filters: EventFilters;
   onFiltersChange: (filters: EventFilters) => void;
@@ -23,7 +21,6 @@ interface EventFiltersBarProps {
 export const EventFiltersBar = ({
   filters,
   onFiltersChange,
-  categories,
   onClearFilters,
 }: EventFiltersBarProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -36,11 +33,10 @@ export const EventFiltersBar = ({
   };
 
   const hasActiveFilters = () => {
-    return filters.search || 
-           filters.status || 
-           filters.type || 
-           filters.category_id || 
-           filters.start_date || 
+    return filters.search ||
+           filters.status ||
+           filters.type ||
+           filters.start_date ||
            filters.end_date;
   };
 
@@ -129,25 +125,7 @@ export const EventFiltersBar = ({
 
       {/* Filtros avanzados - expandibles */}
       {isExpanded && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
-          {/* Categoría */}
-          <div>
-            <Select
-              label="Categoría"
-              value={filters.category_id || ''}
-              onChange={(value) => handleFilterChange('category_id', value ? Number(value) : undefined)}
-              placeholder="Todas las categorías"
-              options={[
-                { value: '', label: 'Todas las categorías' },
-                ...categories.map((category) => ({
-                  value: category.id.toString(),
-                  label: category.name,
-                }))
-              ]}
-              fullWidth
-            />
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
           {/* Ubicación - Temporarily disabled since locations are now free text
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -62,10 +62,10 @@ export const CalendarView = ({
   // Default color for events without category color (primary-600 equivalent)
   const DEFAULT_EVENT_COLOR = '#0284C7'
 
-  // Event style getter - color by category
+  // Event style getter - color by event type
   const eventStyleGetter = (event: CalendarEvent) => {
-    // Use category color from backend, fallback to primary color
-    const backgroundColor = event.resource.category?.color || DEFAULT_EVENT_COLOR
+    // Use event type color from backend, fallback to primary color
+    const backgroundColor = event.resource.event_type?.color || DEFAULT_EVENT_COLOR
 
     return {
       style: {

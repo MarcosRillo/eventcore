@@ -3,11 +3,11 @@
  * Type definitions for landing page components
  */
 
-import { PublicEvent, Category } from '@/features/public-calendar/types/public-calendar.types'
+import { PublicEvent, EventType } from '@/features/public-calendar/types/public-calendar.types'
 
 export interface LandingData {
   featuredEvents: PublicEvent[]
-  categories: Category[]
+  eventTypes: EventType[]
   loading: boolean
   error: string | null
 }
@@ -24,7 +24,7 @@ export interface FeaturedEventsSectionProps {
 }
 
 export interface CategoriesSectionProps {
-  categories: Category[]
+  eventTypes: EventType[]
   loading: boolean
   onCategoryClick: (categoryId: number) => void
 }

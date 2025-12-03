@@ -6,7 +6,7 @@ import { publicEventsService } from '@/features/public-calendar/services/public-
 jest.mock('@/features/public-calendar/services/public-events.service', () => ({
   publicEventsService: {
     getFeatured: jest.fn(),
-    getCategories: jest.fn()
+    getEventTypes: jest.fn()
   }
 }))
 
@@ -17,10 +17,13 @@ describe('useLandingData', () => {
 
   it('should fetch data successfully', async () => {
     const mockEvents = [{ id: 1, title: 'Event 1' }]
-    const mockCategories = [{ id: 1, name: 'Category 1' }]
+    const mockEventTypes = [
+      { id: 1, name: 'Cultural', is_active: true },
+      { id: 2, name: 'Business', is_active: true }
+    ]
 
     ;(publicEventsService.getFeatured as jest.Mock).mockResolvedValue({ data: mockEvents })
-    ;(publicEventsService.getCategories as jest.Mock).mockResolvedValue({ data: mockCategories })
+    ;(publicEventsService.getEventTypes as jest.Mock).mockResolvedValue({ data: mockEventTypes })
 
     const { result } = renderHook(() => useLandingData())
 
@@ -34,13 +37,13 @@ describe('useLandingData', () => {
     })
 
     expect(result.current.featuredEvents).toEqual(mockEvents)
-    expect(result.current.categories).toEqual(mockCategories)
+    expect(result.current.eventTypes).toEqual(mockEventTypes)
     expect(result.current.error).toBeNull()
   })
 
   it('should handle errors', async () => {
     ;(publicEventsService.getFeatured as jest.Mock).mockRejectedValue(new Error('Network error'))
-    ;(publicEventsService.getCategories as jest.Mock).mockResolvedValue({ data: [] })
+    ;(publicEventsService.getEventTypes as jest.Mock).mockResolvedValue({ data: [] })
 
     const { result } = renderHook(() => useLandingData())
 
@@ -50,6 +53,25 @@ describe('useLandingData', () => {
 
     expect(result.current.error).toBe('Failed to load landing data')
     expect(result.current.featuredEvents).toEqual([])
-    expect(result.current.categories).toEqual([])
+    expect(result.current.eventTypes).toEqual([])
+  })
+
+  it('should fetch event types on mount', async () => {
+    const mockEventTypes = [
+      { id: 1, name: 'Cultural', is_active: true },
+      { id: 2, name: 'Business', is_active: true }
+    ]
+
+    ;(publicEventsService.getFeatured as jest.Mock).mockResolvedValue({ data: [] })
+    ;(publicEventsService.getEventTypes as jest.Mock).mockResolvedValue({ data: mockEventTypes })
+
+    const { result } = renderHook(() => useLandingData())
+
+    await waitFor(() => {
+      expect(result.current.eventTypes).toEqual(mockEventTypes)
+    })
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.error).toBeNull()
   })
 })

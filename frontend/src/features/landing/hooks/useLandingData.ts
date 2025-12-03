@@ -1,6 +1,6 @@
 /**
  * Custom hook for landing page data
- * Fetches featured events and categories
+ * Fetches featured events and event types
  */
 
 import { useState, useEffect } from 'react'
@@ -9,7 +9,7 @@ import { LandingData } from '@/features/landing/types/landing.types'
 
 export const useLandingData = (): LandingData => {
   const [featuredEvents, setFeaturedEvents] = useState<LandingData['featuredEvents']>([])
-  const [categories, setCategories] = useState<LandingData['categories']>([])
+  const [eventTypes, setEventTypes] = useState<LandingData['eventTypes']>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -18,18 +18,18 @@ export const useLandingData = (): LandingData => {
       setLoading(true)
       setError(null)
       try {
-        // Fetch featured events and categories in parallel
-        const [eventsResponse, categoriesResponse] = await Promise.all([
+        // Fetch featured events and event types in parallel
+        const [eventsResponse, eventTypesResponse] = await Promise.all([
           publicEventsService.getFeatured(),
-          publicEventsService.getCategories()
+          publicEventsService.getEventTypes()
         ])
 
         setFeaturedEvents(eventsResponse.data)
-        setCategories(categoriesResponse.data)
+        setEventTypes(eventTypesResponse.data)
       } catch {
         setError('Failed to load landing data')
         setFeaturedEvents([])
-        setCategories([])
+        setEventTypes([])
       } finally {
         setLoading(false)
       }
@@ -40,7 +40,7 @@ export const useLandingData = (): LandingData => {
 
   return {
     featuredEvents,
-    categories,
+    eventTypes,
     loading,
     error
   }

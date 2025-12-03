@@ -42,17 +42,6 @@ describe('EventDetailPage', () => {
     end_date: '2025-11-17T23:00:00.000Z',
     type: 'sede_unica',
     status: 'published',
-    category_id: 1,
-    category: {
-      id: 1,
-      name: 'Música',
-      slug: 'musica',
-      color: '#FF6B35',
-      is_active: true,
-      entity_id: 1,
-      created_at: '2025-01-01',
-      updated_at: '2025-01-01'
-    },
     locations: [
       {
         id: 1,
@@ -91,15 +80,6 @@ describe('EventDetailPage', () => {
       expect(screen.getByText('Festival de Música Tucumán')).toBeInTheDocument()
       // Description contains HTML, so we check for text content
       expect(screen.getByText(/Gran festival con artistas/i)).toBeInTheDocument()
-    })
-
-    test('renders event category with color indicator', () => {
-      render(<EventDetailPage event={mockEvent} />)
-
-      expect(screen.getByText('Música')).toBeInTheDocument()
-      // Category color indicator should exist
-      const colorIndicators = document.querySelectorAll('[style*="background-color"]')
-      expect(colorIndicators.length).toBeGreaterThan(0)
     })
 
     test('displays featured badge when event is featured', () => {
@@ -348,17 +328,6 @@ describe('EventDetailPage', () => {
         end_date: '2025-11-15',
         type: 'sede_unica',
         status: 'published',
-        category_id: 1,
-        category: {
-          id: 1,
-          name: 'General',
-          slug: 'general',
-          color: '#000000',
-          is_active: true,
-          entity_id: 1,
-          created_at: '2025-01-01',
-          updated_at: '2025-01-01'
-        },
         locations: [],
         is_featured: false,
         approval_history: [],

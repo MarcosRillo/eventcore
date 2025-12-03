@@ -8,8 +8,8 @@
 
 import { useState, useEffect, FormEvent, ReactNode } from 'react';
 import { Modal, Button } from '@/components/ui';
-import { CreateCategoryData, UpdateCategoryData } from '@/types/category.types';
 import { EventFormData } from '@/types/event.types';
+import { EventType, EventSubtype } from '@/types/eventType.types';
 
 // Form data types supported by FormModal - specific domain types only
 interface ApprovalFormData {
@@ -17,7 +17,7 @@ interface ApprovalFormData {
   comment: string;
 }
 
-type FormDataType = CreateCategoryData | UpdateCategoryData | EventFormData | ApprovalFormData;
+type FormDataType = EventFormData | ApprovalFormData | Partial<EventType> | Partial<EventSubtype>;
 
 // API error structure
 interface ApiError {

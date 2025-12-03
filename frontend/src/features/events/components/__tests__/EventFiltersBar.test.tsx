@@ -7,7 +7,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { EventFiltersBar } from '../EventFiltersBar'
 import { EventFilters, EVENT_TYPE } from '@/types/event.types'
-import { Category } from '@/types/category.types'
 
 // Mock UI components
 jest.mock('@/components/ui', () => ({
@@ -66,12 +65,6 @@ describe('EventFiltersBar', () => {
   const mockOnFiltersChange = jest.fn()
   const mockOnClearFilters = jest.fn()
 
-  const mockCategories: Category[] = [
-    { id: 1, name: 'Música', slug: 'musica', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
-    { id: 2, name: 'Gastronomía', slug: 'gastronomia', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
-    { id: 3, name: 'Tecnología', slug: 'tecnologia', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
-  ]
-
   const emptyFilters: EventFilters = {
     page: 1,
     per_page: 10
@@ -81,12 +74,10 @@ describe('EventFiltersBar', () => {
     page: 1,
     per_page: 10,
     search: 'test',
-    status: 'published',
-    category_id: 1
+    status: 'published'
   }
 
   const defaultProps = {
-    categories: mockCategories,
     sections: [],
     filters: emptyFilters,
     onFiltersChange: mockOnFiltersChange,
@@ -199,7 +190,7 @@ describe('EventFiltersBar', () => {
       const toggleButton = screen.getByText(/mostrar filtros avanzados/i)
       fireEvent.click(toggleButton)
 
-      expect(screen.getByLabelText('Categoría')).toBeInTheDocument()
+      // Category filter was removed from UI, only date filters remain
       expect(screen.getByLabelText('Fecha desde')).toBeInTheDocument()
       expect(screen.getByLabelText('Fecha hasta')).toBeInTheDocument()
     })
@@ -220,40 +211,9 @@ describe('EventFiltersBar', () => {
       fireEvent.click(toggleButton)
       fireEvent.click(screen.getByText(/ocultar filtros avanzados/i))
 
-      expect(screen.queryByLabelText('Categoría')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('category filter', () => {
-    test('should render categories in select', () => {
-      render(<EventFiltersBar {...defaultProps} />)
-
-      const toggleButton = screen.getByText(/mostrar filtros avanzados/i)
-      fireEvent.click(toggleButton)
-
-      const categorySelect = screen.getByLabelText('Categoría')
-      expect(categorySelect).toBeInTheDocument()
-
-      // Check that category options are available
-      expect(screen.getByText('Música')).toBeInTheDocument()
-      expect(screen.getByText('Gastronomía')).toBeInTheDocument()
-    })
-
-    test('should call onFiltersChange when category changes', () => {
-      render(<EventFiltersBar {...defaultProps} />)
-
-      const toggleButton = screen.getByText(/mostrar filtros avanzados/i)
-      fireEvent.click(toggleButton)
-
-      const categorySelect = screen.getByLabelText('Categoría')
-      fireEvent.change(categorySelect, { target: { value: '2' } })
-
-      expect(mockOnFiltersChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          category_id: 2,
-          page: 1
-        })
-      )
+      // Verify date filters are hidden (category filter was removed from UI)
+      expect(screen.queryByLabelText('Fecha desde')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Fecha hasta')).not.toBeInTheDocument()
     })
   })
 
@@ -423,16 +383,6 @@ describe('EventFiltersBar', () => {
   })
 
   describe('edge cases', () => {
-    test('should handle empty categories array', () => {
-      render(<EventFiltersBar {...defaultProps} categories={[]} />)
-
-      const toggleButton = screen.getByText(/mostrar filtros avanzados/i)
-      fireEvent.click(toggleButton)
-
-      // Should still render category select without crashing
-      expect(screen.getByLabelText('Categoría')).toBeInTheDocument()
-    })
-
     test('should handle filters with only page and per_page', () => {
       render(<EventFiltersBar {...defaultProps} />)
 

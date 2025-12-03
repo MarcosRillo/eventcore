@@ -169,21 +169,6 @@ export const EventTableContainer = ({
           );
         },
       },
-      // Category column
-      {
-        key: 'category',
-        label: 'Categoría',
-        render: (event) => event.category ? (
-          <span
-            className={`${BADGE_BASE_CLASSES} text-white`}
-            style={{ backgroundColor: event.category.color || '#6b7280' }}
-          >
-            {event.category.name}
-          </span>
-        ) : (
-          <span className="text-neutral-400">Sin categoría</span>
-        ),
-      },
       // Location column
       {
         key: 'location',

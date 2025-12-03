@@ -4,7 +4,6 @@
  */
 
 import { Event, EventStatusCode, EventTypeCode, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
-import { Category } from '@/types/category.types'
 import { Location } from '@/types/location.types'
 import { PaginationMeta, PaginationLinks } from '@/types/api-response.types'
 
@@ -17,32 +16,9 @@ export const createMockEvent = (overrides: Partial<Event> & { id: number; title:
   end_date: '2025-01-15T18:00:00.000Z',
   type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
   status: EVENT_STATUS.DRAFT as EventStatusCode,
-  category_id: 1,
-  category: {
-    id: 1,
-    name: 'Test Category',
-    slug: 'test-category',
-    entity_id: 1,
-    is_active: true,
-    created_at: '2025-01-01T00:00:00.000Z',
-    updated_at: '2025-01-01T00:00:00.000Z',
-  },
   locations: [],
   is_featured: false,
   approval_history: [],
-  created_at: '2025-01-01T00:00:00.000Z',
-  updated_at: '2025-01-01T00:00:00.000Z',
-  ...overrides,
-})
-
-/**
- * Creates a valid Category mock with required fields
- */
-export const createMockCategory = (overrides: Partial<Category> & { id: number; name: string }): Category => ({
-  slug: overrides.name.toLowerCase().replace(/\s+/g, '-'),
-  entity_id: 1,
-  is_active: true,
-  color: '#000000',
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z',
   ...overrides,

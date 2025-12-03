@@ -8,13 +8,15 @@ import apiClient from '@/services/apiClient'
 import {
   EventsResponse,
   PublicEvent,
-  Category,
+  EventType,
+  EventSubtype,
   Location,
   PublicStats
 } from '@/features/public-calendar/types/public-calendar.types'
 
 interface FetchEventsParams {
-  category_id?: number | null
+  event_type_id?: number | null
+  event_subtype_id?: number | null
   location_id?: number | null
   start_date?: string | null
   end_date?: string | null
@@ -28,8 +30,11 @@ export const publicEventsService = {
   getAll: async (params: FetchEventsParams = {}): Promise<EventsResponse> => {
     const queryParams = new URLSearchParams()
 
-    if (params.category_id) {
-      queryParams.append('category_id', params.category_id.toString())
+    if (params.event_type_id) {
+      queryParams.append('event_type_id', params.event_type_id.toString())
+    }
+    if (params.event_subtype_id) {
+      queryParams.append('event_subtype_id', params.event_subtype_id.toString())
     }
     if (params.location_id) {
       queryParams.append('location_id', params.location_id.toString())
@@ -78,10 +83,18 @@ export const publicEventsService = {
   },
 
   /**
-   * Get active categories
+   * Get active event types
    */
-  getCategories: async (): Promise<{ data: Category[] }> => {
-    const response = await apiClient.get('/public/categories/active')
+  getEventTypes: async (): Promise<{ data: EventType[] }> => {
+    const response = await apiClient.get('/public/event-types')
+    return response.data
+  },
+
+  /**
+   * Get active event subtypes for a specific event type
+   */
+  getEventSubtypes: async (eventTypeId: number): Promise<{ data: EventSubtype[] }> => {
+    const response = await apiClient.get(`/public/event-types/${eventTypeId}/subtypes`)
     return response.data
   },
 

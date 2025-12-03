@@ -61,7 +61,7 @@ const EditEventSubtypeModal: React.FC<EditEventSubtypeModalProps> = ({
   const handleSubmit: FormSubmitHandler<UpdateEventSubtypeData> = async (
     formData
   ) => {
-    await updateEventSubtype(eventSubtype!.id, {
+    await updateEventSubtype(eventSubtype!.event_type_id, eventSubtype!.id, {
       name: formData.name?.trim(),
       is_active: formData.is_active,
     });
@@ -119,7 +119,7 @@ const EditEventSubtypeModal: React.FC<EditEventSubtypeModalProps> = ({
               id="is_active"
               name="is_active"
               label="Subtipo activo"
-              checked={formData.is_active}
+              checked={formData.is_active ?? false}
               onChange={(checked) => handleFieldChange('is_active', checked)}
               disabled={isLoading}
             />

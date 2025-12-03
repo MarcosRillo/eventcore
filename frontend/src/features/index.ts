@@ -6,9 +6,6 @@
 // Events Feature
 export * as Events from './events';
 
-// Categories Feature
-export * as Categories from './categories';
-
 // Auth Feature
 export * as Auth from './auth';
 

@@ -408,10 +408,42 @@ describe('EditEventSubtypeModal', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, {
+        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, 1, {
           name: 'Congreso Actualizado',
           is_active: true,
         })
+      })
+    })
+
+    it('should pass eventTypeId from eventSubtype when calling updateEventSubtype', async () => {
+      const subtypeWithDifferentTypeId: EventSubtype = {
+        ...mockEventSubtype,
+        id: 5,
+        event_type_id: 3,
+        name: 'Seminario',
+      }
+
+      render(<EditEventSubtypeModal {...defaultProps} eventSubtype={subtypeWithDifferentTypeId} />)
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/nombre del subtipo/i)).toHaveValue('Seminario')
+      })
+
+      const nameInput = screen.getByLabelText(/nombre del subtipo/i)
+      fireEvent.change(nameInput, { target: { value: 'Taller' } })
+
+      const submitButton = screen.getByRole('button', { name: /guardar cambios/i })
+      fireEvent.click(submitButton)
+
+      await waitFor(() => {
+        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(
+          3,  // eventTypeId from eventSubtype.event_type_id
+          5,  // subtypeId
+          {
+            name: 'Taller',
+            is_active: true,
+          }
+        )
       })
     })
 
@@ -459,7 +491,7 @@ describe('EditEventSubtypeModal', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, {
+        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, 1, {
           name: 'Congreso Existente',
           is_active: false,
         })
@@ -480,7 +512,7 @@ describe('EditEventSubtypeModal', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, {
+        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, 1, {
           name: 'Trimmed Update',
           is_active: true,
         })
@@ -598,7 +630,7 @@ describe('EditEventSubtypeModal', () => {
 
       // Should submit successfully without error
       await waitFor(() => {
-        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, {
+        expect(mockedService.updateEventSubtype).toHaveBeenCalledWith(1, 1, {
           name: 'Subtipo Actualizado',
           is_active: true,
         })
