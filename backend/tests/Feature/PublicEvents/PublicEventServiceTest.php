@@ -3,9 +3,10 @@
 namespace Tests\Feature\PublicEvents;
 
 use App\Features\PublicEvents\Services\PublicEventService;
-use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventStatus;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -21,7 +22,8 @@ class PublicEventServiceTest extends TestCase
 
     private PublicEventService $service;
     private Organization $organization;
-    private Category $category;
+    private EventType $eventType;
+    private EventSubtype $eventSubtype;
     private Location $location;
     private EventStatus $publishedStatus;
     private EventStatus $draftStatus;
@@ -46,8 +48,14 @@ class PublicEventServiceTest extends TestCase
         $this->user = User::factory()->create();
         $this->user->organizations()->attach($this->organization->id);
 
-        // Create category
-        $this->category = Category::factory()->create([
+        // Create event type and subtype
+        $this->eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id,
+            'is_active' => true,
+        ]);
+
+        $this->eventSubtype = EventSubtype::factory()->create([
+            'event_type_id' => $this->eventType->id,
             'entity_id' => $this->organization->id,
             'is_active' => true,
         ]);
@@ -71,7 +79,8 @@ class PublicEventServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
+            'event_type_id' => $this->eventType->id,
+            'event_subtype_id' => $this->eventSubtype->id,
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(5)->addHours(2),
             'created_by' => $this->user->id,
@@ -104,23 +113,6 @@ class PublicEventServiceTest extends TestCase
         $this->assertContains('Published Event 1', $titles);
         $this->assertContains('Published Event 2', $titles);
         $this->assertNotContains('Draft Event', $titles);
-    }
-
-    #[Test]
-    public function test_get_published_events_applies_category_filter(): void
-    {
-        $category2 = Category::factory()->create([
-            'entity_id' => $this->organization->id,
-            'is_active' => true,
-        ]);
-
-        $this->createPublishedEvent(['category_id' => $this->category->id, 'title' => 'Category 1 Event']);
-        $this->createPublishedEvent(['category_id' => $category2->id, 'title' => 'Category 2 Event']);
-
-        $result = $this->service->getPublishedEvents(['category_id' => $this->category->id]);
-
-        $this->assertEquals(1, $result->total());
-        $this->assertEquals('Category 1 Event', $result->items()[0]->title);
     }
 
     #[Test]
@@ -170,7 +162,8 @@ class PublicEventServiceTest extends TestCase
 
         $result = $this->service->getPublishedEvents();
 
-        $this->assertTrue($result->items()[0]->relationLoaded('category'));
+        $this->assertTrue($result->items()[0]->relationLoaded('eventType'));
+        $this->assertTrue($result->items()[0]->relationLoaded('eventSubtype'));
         $this->assertTrue($result->items()[0]->relationLoaded('locations'));
     }
 
@@ -186,7 +179,8 @@ class PublicEventServiceTest extends TestCase
 
         $this->assertEquals($event->id, $result->id);
         $this->assertEquals('Test Event', $result->title);
-        $this->assertTrue($result->relationLoaded('category'));
+        $this->assertTrue($result->relationLoaded('eventType'));
+        $this->assertTrue($result->relationLoaded('eventSubtype'));
         $this->assertTrue($result->relationLoaded('locations'));
         $this->assertTrue($result->relationLoaded('creator'));
     }
@@ -208,65 +202,6 @@ class PublicEventServiceTest extends TestCase
         $this->expectException(ModelNotFoundException::class);
 
         $this->service->getPublishedEventById(99999);
-    }
-
-    // ==================== GET PUBLIC CATEGORIES TESTS ====================
-
-    #[Test]
-    public function test_get_public_categories_returns_categories_with_event_counts(): void
-    {
-        // Create events for the category
-        $this->createPublishedEvent(['category_id' => $this->category->id]);
-        $this->createPublishedEvent(['category_id' => $this->category->id]);
-
-        $result = $this->service->getPublicCategories();
-
-        $this->assertCount(1, $result);
-        $this->assertEquals($this->category->id, $result[0]['id']);
-        $this->assertEquals($this->category->name, $result[0]['name']);
-        $this->assertEquals(2, $result[0]['event_count']);
-        $this->assertArrayHasKey('slug', $result[0]);
-        $this->assertArrayHasKey('color', $result[0]);
-    }
-
-    #[Test]
-    public function test_get_public_categories_excludes_categories_without_published_events(): void
-    {
-        $emptyCategory = Category::factory()->create([
-            'entity_id' => $this->organization->id,
-            'is_active' => true,
-            'name' => 'Empty Category',
-        ]);
-
-        // Create event only for the main category
-        $this->createPublishedEvent(['category_id' => $this->category->id]);
-
-        // Create draft event for empty category (should not count)
-        $this->createDraftEvent(['category_id' => $emptyCategory->id]);
-
-        $result = $this->service->getPublicCategories();
-
-        $this->assertCount(1, $result);
-        $categoryIds = $result->pluck('id')->toArray();
-        $this->assertContains($this->category->id, $categoryIds);
-        $this->assertNotContains($emptyCategory->id, $categoryIds);
-    }
-
-    #[Test]
-    public function test_get_public_categories_uses_cache(): void
-    {
-        $this->createPublishedEvent(['category_id' => $this->category->id]);
-
-        // First call - should hit database
-        $result1 = $this->service->getPublicCategories();
-
-        // Verify cache was set
-        $this->assertTrue(Cache::has('public.categories'));
-
-        // Second call - should use cache
-        $result2 = $this->service->getPublicCategories();
-
-        $this->assertEquals($result1->toArray(), $result2->toArray());
     }
 
     // ==================== GET CALENDAR MONTH TESTS ====================
@@ -517,80 +452,102 @@ class PublicEventServiceTest extends TestCase
     }
 
     #[Test]
-    public function test_search_events_applies_category_filter(): void
+    public function test_get_stats_returns_accurate_counts(): void
     {
-        $category2 = Category::factory()->create([
-            'entity_id' => $this->organization->id,
-            'is_active' => true,
+        // Arrange: Create published events in next month (not this month)
+        $this->createPublishedEvent([
+            'title' => 'Event 1',
+            'start_date' => now()->addMonth()->startOfMonth(),
+            'end_date' => now()->addMonth()->startOfMonth(),
+        ]);
+        $this->createPublishedEvent([
+            'title' => 'Event 2',
+            'start_date' => now()->addMonth()->startOfMonth()->addDays(5),
+            'end_date' => now()->addMonth()->startOfMonth()->addDays(5),
+        ]);
+        $this->createPublishedEvent([
+            'title' => 'Event 3',
+            'start_date' => now()->addMonth()->startOfMonth()->addDays(10),
+            'end_date' => now()->addMonth()->startOfMonth()->addDays(10),
+        ]);
+
+        // Create a draft event (should NOT be counted)
+        $this->createDraftEvent([
+            'title' => 'Draft Event',
+        ]);
+
+        // Create events this month (current month)
+        $this->createPublishedEvent([
+            'title' => 'This Month Event 1',
+            'start_date' => now()->startOfMonth()->addDays(5),
+            'end_date' => now()->startOfMonth()->addDays(5),
         ]);
 
         $this->createPublishedEvent([
-            'title' => 'Tech Conference',
-            'category_id' => $this->category->id,
+            'title' => 'This Month Event 2',
+            'start_date' => now()->startOfMonth()->addDays(15),
+            'end_date' => now()->startOfMonth()->addDays(15),
         ]);
 
-        $this->createPublishedEvent([
-            'title' => 'Tech Workshop',
-            'category_id' => $category2->id,
+        // Create active event types (should be counted)
+        EventType::factory()->count(3)->create(['is_active' => true]);
+
+        // Create inactive event type (should NOT be counted)
+        EventType::factory()->create(['is_active' => false]);
+
+        // Act
+        $stats = $this->service->getStats();
+
+        // Assert: Verify all three stat values
+        $this->assertIsArray($stats);
+        $this->assertArrayHasKey('total_events', $stats);
+        $this->assertArrayHasKey('total_event_types', $stats);
+        $this->assertArrayHasKey('events_this_month', $stats);
+
+        // Total events should be 5 (3 next month + 2 this month)
+        $this->assertEquals(5, $stats['total_events']);
+
+        // Total active event types should be 4 (1 from setUp + 3 created here)
+        $this->assertEquals(4, $stats['total_event_types']);
+
+        // Events this month should be 2
+        $this->assertEquals(2, $stats['events_this_month']);
+    }
+
+    #[Test]
+    public function test_get_stats_excludes_draft_events(): void
+    {
+        // Arrange: Create only draft events
+        $this->createDraftEvent([
+            'title' => 'Draft 1',
         ]);
 
-        $result = $this->service->searchEvents('Tech', $this->category->id);
-
-        $this->assertEquals(1, $result['total_results']);
-        $this->assertEquals('Tech Conference', $result['events']->first()->title);
-    }
-
-    // ==================== GET EVENTS BY CATEGORY TESTS ====================
-
-    #[Test]
-    public function test_get_events_by_category_returns_category_and_events(): void
-    {
-        $this->createPublishedEvent(['category_id' => $this->category->id]);
-        $this->createPublishedEvent(['category_id' => $this->category->id]);
-
-        $result = $this->service->getEventsByCategory($this->category->id);
-
-        $this->assertArrayHasKey('category', $result);
-        $this->assertArrayHasKey('events', $result);
-        $this->assertEquals($this->category->id, $result['category']->id);
-        $this->assertEquals(2, $result['events']->total());
-    }
-
-    #[Test]
-    public function test_get_events_by_category_throws_for_inactive_category(): void
-    {
-        $inactiveCategory = Category::factory()->create([
-            'entity_id' => $this->organization->id,
-            'is_active' => false,
+        $this->createDraftEvent([
+            'title' => 'Draft 2',
         ]);
 
-        $this->expectException(ModelNotFoundException::class);
-        $this->expectExceptionMessage('Category not found or inactive');
+        // Act
+        $stats = $this->service->getStats();
 
-        $this->service->getEventsByCategory($inactiveCategory->id);
+        // Assert: No published events counted
+        $this->assertEquals(0, $stats['total_events']);
+        $this->assertEquals(0, $stats['events_this_month']);
     }
 
     #[Test]
-    public function test_get_events_by_category_throws_for_nonexistent_category(): void
+    public function test_get_stats_returns_zero_when_no_data(): void
     {
-        $this->expectException(ModelNotFoundException::class);
+        // Arrange: Delete all events and event types created in setUp()
+        Event::query()->delete();
+        EventType::query()->delete();
 
-        $this->service->getEventsByCategory(99999);
+        // Act
+        $stats = $this->service->getStats();
+
+        // Assert: All stats should be 0
+        $this->assertEquals(0, $stats['total_events']);
+        $this->assertEquals(0, $stats['total_event_types']);
+        $this->assertEquals(0, $stats['events_this_month']);
     }
 
-    #[Test]
-    public function test_get_events_by_category_paginates_results(): void
-    {
-        for ($i = 1; $i <= 20; $i++) {
-            $this->createPublishedEvent([
-                'title' => "Event {$i}",
-                'category_id' => $this->category->id,
-            ]);
-        }
-
-        $result = $this->service->getEventsByCategory($this->category->id, 5);
-
-        $this->assertEquals(20, $result['events']->total());
-        $this->assertCount(5, $result['events']->items());
-    }
 }

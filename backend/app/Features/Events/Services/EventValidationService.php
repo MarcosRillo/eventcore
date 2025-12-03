@@ -46,7 +46,7 @@ class EventValidationService
      * Validate event for internal calendar approval
      *
      * Requires 7 fields: title, start_date, end_date, format_id,
-     * category_id, edition_number, and location (relation)
+     * event_type_id, event_subtype_id, edition_number, and location (relation)
      */
     public function validateForInternalApproval(Event $event): ValidationResult
     {

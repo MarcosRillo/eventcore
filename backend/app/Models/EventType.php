@@ -20,6 +20,7 @@ class EventType extends Model
     protected $fillable = [
         'name',
         'entity_id',
+        'color',
         'is_active',
     ];
 

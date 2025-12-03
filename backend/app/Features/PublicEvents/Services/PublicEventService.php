@@ -2,8 +2,8 @@
 
 namespace App\Features\PublicEvents\Services;
 
-use App\Models\Category;
 use App\Models\Event;
+use App\Models\EventType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -12,9 +12,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
  * Public Event Service
  *
  * Handles public-facing event queries for the tourist calendar.
- * Delegates category and calendar operations to specialized services.
+ * Delegates calendar operations to specialized services.
  *
  * Updated for 3NF normalized schema (Nov 30, 2025).
+ * Categories removed - now using EventType/EventSubtype (Dec 2, 2025).
  *
  * @package App\Features\PublicEvents\Services
  */
@@ -31,14 +32,13 @@ class PublicEventService
     private const DEFAULT_PER_PAGE = 15;
 
     public function __construct(
-        private PublicCategoryService $categoryService,
         private PublicCalendarService $calendarService
     ) {}
 
     /**
      * Get paginated list of published events with optional filters.
      *
-     * @param array $filters Available filters: category_id, date_from, date_to, search
+     * @param array $filters Available filters: event_type_id, date_from, date_to, search
      * @param int $perPage Items per page (max 50)
      * @return LengthAwarePaginator
      */
@@ -47,7 +47,7 @@ class PublicEventService
         $perPage = $this->normalizePerPage($perPage);
 
         $query = Event::published()
-            ->with(['category', 'locations', 'origin', 'theme', 'frequency'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency'])
             ->orderBy('start_date', 'asc');
 
         $this->applyFilters($query, $filters);
@@ -65,7 +65,7 @@ class PublicEventService
     public function getPublishedEventById(int $id): Event
     {
         $event = Event::published()
-            ->with(['category', 'locations', 'creator', 'origin', 'theme', 'frequency', 'rotationType', 'services'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'theme', 'frequency', 'rotationType', 'services'])
             ->find($id);
 
         if (!$event) {
@@ -76,14 +76,14 @@ class PublicEventService
     }
 
     /**
-     * Get all active categories with published event counts.
-     * Delegates to PublicCategoryService.
+     * @deprecated Categories removed - use event types instead (Dec 2, 2025)
+     * Returns empty collection for backward compatibility
      *
      * @return \Illuminate\Support\Collection
      */
     public function getPublicCategories(): \Illuminate\Support\Collection
     {
-        return $this->categoryService->getPublicCategories();
+        return collect([]);
     }
 
     /**
@@ -124,7 +124,7 @@ class PublicEventService
         $limit = min($limit, self::MAX_PER_PAGE);
 
         return Event::published()
-            ->with(['category', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations'])
             ->where('start_date', '>=', now())
             ->orderBy('start_date')
             ->take($limit)
@@ -142,7 +142,7 @@ class PublicEventService
         $limit = min($limit, 20);
 
         return Event::published()
-            ->with(['category', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations'])
             ->where('is_featured', true)
             ->where('start_date', '>=', now())
             ->orderBy('start_date')
@@ -155,17 +155,17 @@ class PublicEventService
      * Searches in title, description, and related locations.
      *
      * @param string $query Search query
-     * @param int|null $categoryId Optional category filter
+     * @param int|null $eventTypeId Optional event type filter
      * @param int $limit Maximum results (max 50)
      * @return array Search results with metadata
      */
-    public function searchEvents(string $query, ?int $categoryId = null, int $limit = 15): array
+    public function searchEvents(string $query, ?int $eventTypeId = null, int $limit = 15): array
     {
         $limit = min($limit, self::MAX_PER_PAGE);
         $searchTerm = trim($query);
 
         $builder = Event::published()
-            ->with(['category', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations'])
             ->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'ilike', "%{$searchTerm}%")
                     ->orWhere('description', 'ilike', "%{$searchTerm}%")
@@ -177,8 +177,8 @@ class PublicEventService
                     });
             });
 
-        if ($categoryId !== null) {
-            $builder->where('category_id', $categoryId);
+        if ($eventTypeId !== null) {
+            $builder->where('event_type_id', $eventTypeId);
         }
 
         // Order by relevance: title matches first, then description
@@ -199,45 +199,16 @@ class PublicEventService
         ];
     }
 
-    /**
-     * Get published events by category.
-     *
-     * @param int $categoryId Category ID
-     * @param int $perPage Items per page
-     * @return array Category info and paginated events
-     * @throws ModelNotFoundException When category not found or inactive
-     */
-    public function getEventsByCategory(int $categoryId, int $perPage = self::DEFAULT_PER_PAGE): array
-    {
-        $category = Category::active()->find($categoryId);
-
-        if (!$category) {
-            throw new ModelNotFoundException('Category not found or inactive');
-        }
-
-        $perPage = $this->normalizePerPage($perPage);
-
-        $events = Event::published()
-            ->with(['category', 'locations'])
-            ->where('category_id', $categoryId)
-            ->orderBy('start_date')
-            ->paginate($perPage);
-
-        return [
-            'category' => $category,
-            'events' => $events,
-        ];
-    }
 
     /**
      * Get public statistics for the calendar.
      *
-     * @return array Stats with total_events, total_categories, events_this_month
+     * @return array Stats with total_events, events_this_month
      */
     public function getStats(): array
     {
         $totalEvents = Event::published()->count();
-        $totalCategories = Category::active()->count();
+        $totalEventTypes = EventType::where('is_active', true)->count();
         $eventsThisMonth = Event::published()
             ->whereMonth('start_date', now()->month)
             ->whereYear('start_date', now()->year)
@@ -245,7 +216,7 @@ class PublicEventService
 
         return [
             'total_events' => $totalEvents,
-            'total_categories' => $totalCategories,
+            'total_event_types' => $totalEventTypes,
             'events_this_month' => $eventsThisMonth,
         ];
     }
@@ -259,8 +230,8 @@ class PublicEventService
      */
     private function applyFilters($query, array $filters): void
     {
-        if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+        if (!empty($filters['event_type_id'])) {
+            $query->where('event_type_id', $filters['event_type_id']);
         }
 
         if (!empty($filters['date_from'])) {

@@ -82,8 +82,6 @@ class EventResource extends JsonResource
                 'name' => $this->eventSubtype->name,
             ]),
 
-            'category' => $this->whenLoaded('category', fn() => new CategoryResource($this->category)),
-
             'locations' => $this->whenLoaded('locations', fn() => $this->locations->map(fn($location) => [
                 'id' => $location->id,
                 'name' => $location->name,
@@ -163,7 +161,6 @@ class EventResource extends JsonResource
             // Foreign key IDs (for forms)
             'status_id' => $this->status_id,
             'format_id' => $this->format_id,
-            'category_id' => $this->category_id,
             'entity_id' => $this->entity_id,
             'organization_id' => $this->organization_id,
             'event_type_id' => $this->event_type_id,

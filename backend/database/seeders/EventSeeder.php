@@ -11,7 +11,8 @@ use App\Models\EventStatus;
 use App\Models\EventTheme;
 use App\Models\Organization;
 use App\Models\User;
-use App\Models\Category;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -68,9 +69,21 @@ class EventSeeder extends Seeder
         $entityAdminTurismo = User::where('email', 'ana.garcia@enteturismo.gov.ar')->first();
         $entityAdminCultura = User::where('email', 'carlos.mendoza@cultura.gov.ar')->first();
 
-        // Get categories for each entity
-        $categoriasTurismo = Category::where('entity_id', $enteDeturismo->id)->get();
-        $categoriasCultura = Category::where('entity_id', $secretariaCultura->id)->get();
+        // Get event types and subtypes
+        $festivalesType = EventType::where('name', 'Festivales')->first();
+        $turismoType = EventType::where('name', 'Turismo')->first();
+        $culturaType = EventType::where('name', 'Cultura')->first();
+
+        $gastronomicoSubtype = EventSubtype::where('event_type_id', $festivalesType->id)
+            ->where('name', 'Festival Gastronómico')->first();
+        $excursionSubtype = EventSubtype::where('event_type_id', $turismoType->id)
+            ->where('name', 'Tour Guiado')->first();
+        $rutaTuristicaSubtype = EventSubtype::where('event_type_id', $turismoType->id)
+            ->where('name', 'Ruta Turística')->first();
+        $danzaSubtype = EventSubtype::where('event_type_id', $culturaType->id)
+            ->where('name', 'Danza')->first();
+        $exposicionSubtype = EventSubtype::where('event_type_id', $culturaType->id)
+            ->where('name', 'Exposición de Arte')->first();
 
         // Get locations for each entity
         $ubicacionesTurismo = Location::where('entity_id', $enteDeturismo->id)->get();
@@ -86,7 +99,8 @@ class EventSeeder extends Seeder
             'format_id' => $multiSedeFormat->id,
             'featured_image' => 'https://example.com/images/festival-gastronomico.jpg',
             'is_featured' => true,
-            'category_id' => $categoriasTurismo->where('slug', 'turismo-gastronomico')->first()?->id,
+            'event_type_id' => $festivalesType->id,
+            'event_subtype_id' => $gastronomicoSubtype->id,
             'organization_id' => $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
@@ -116,7 +130,8 @@ class EventSeeder extends Seeder
             'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/cerro-san-javier.jpg',
             'is_featured' => false,
-            'category_id' => $categoriasTurismo->where('slug', 'turismo-aventura')->first()?->id,
+            'event_type_id' => $turismoType->id,
+            'event_subtype_id' => $excursionSubtype->id,
             'organization_id' => $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
@@ -143,7 +158,8 @@ class EventSeeder extends Seeder
             'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/ruta-dulce.jpg',
             'is_featured' => false,
-            'category_id' => $categoriasTurismo->where('slug', 'turismo-rural')->first()?->id,
+            'event_type_id' => $turismoType->id,
+            'event_subtype_id' => $rutaTuristicaSubtype->id,
             'organization_id' => $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
@@ -171,7 +187,8 @@ class EventSeeder extends Seeder
             'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/gala-folklorica.jpg',
             'is_featured' => true,
-            'category_id' => $categoriasCultura->where('slug', 'artes-escenicas')->first()?->id,
+            'event_type_id' => $culturaType->id,
+            'event_subtype_id' => $danzaSubtype->id,
             'organization_id' => $secretariaCultura->id,
             'entity_id' => $secretariaCultura->id,
             'created_by' => $entityAdminCultura->id,
@@ -198,7 +215,8 @@ class EventSeeder extends Seeder
             'format_id' => $sedeUnicaFormat->id,
             'featured_image' => 'https://example.com/images/exposicion-patrimonio.jpg',
             'is_featured' => false,
-            'category_id' => $categoriasCultura->where('slug', 'patrimonio-cultural')->first()?->id,
+            'event_type_id' => $culturaType->id,
+            'event_subtype_id' => $exposicionSubtype->id,
             'organization_id' => $secretariaCultura->id,
             'entity_id' => $secretariaCultura->id,
             'created_by' => $entityAdminCultura->id,
@@ -235,7 +253,8 @@ class EventSeeder extends Seeder
                 'organization_id' => $sheratonHotel->id,
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
-                'category_id' => $categoriasTurismo->where('slug', 'turismo-gastronomico')->first()?->id,
+                'event_type_id' => $festivalesType->id,
+                'event_subtype_id' => $gastronomicoSubtype->id,
                 // 3NF fields
                 'origin_id' => $originLocal->id,
                 'theme_id' => $themeGastronomico->id,
@@ -258,7 +277,8 @@ class EventSeeder extends Seeder
                 'organization_id' => $laRural->id,
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
-                'category_id' => $categoriasTurismo->where('slug', 'turismo-rural')->first()?->id,
+                'event_type_id' => $turismoType->id,
+                'event_subtype_id' => $rutaTuristicaSubtype->id,
                 // 3NF fields
                 'origin_id' => $originNational->id,
                 'theme_id' => $themeNegocios->id,
@@ -281,7 +301,8 @@ class EventSeeder extends Seeder
                 'organization_id' => $centroVirla->id,
                 'entity_id' => $secretariaCultura->id,
                 'created_by' => null,
-                'category_id' => $categoriasCultura->where('slug', 'patrimonio-cultural')->first()?->id,
+                'event_type_id' => $culturaType->id,
+                'event_subtype_id' => $exposicionSubtype->id,
                 // 3NF fields
                 'origin_id' => $originLocal->id,
                 'theme_id' => $themeCultural->id,

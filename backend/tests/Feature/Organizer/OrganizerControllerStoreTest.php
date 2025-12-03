@@ -4,7 +4,6 @@ namespace Tests\Feature\Organizer;
 
 use App\Models\User;
 use App\Models\Event;
-use App\Models\Category;
 use App\Models\EventOrigin;
 use App\Models\EventType;
 use App\Models\EventSubtype;
@@ -103,7 +102,6 @@ class OrganizerControllerStoreTest extends TestCase
     {
         // Arrange
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location1 = Location::factory()->create(['entity_id' => 1]);
         $location2 = Location::factory()->create(['entity_id' => 1]);
         $formatId = $this->getValidFormatId();
@@ -117,7 +115,6 @@ class OrganizerControllerStoreTest extends TestCase
             'description' => 'Evento anual que reúne a los principales actores del sector turístico',
             'start_date' => now()->addDays(30)->format('Y-m-d H:i:s'),
             'end_date' => now()->addDays(32)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location1->id, $location2->id],
@@ -195,7 +192,6 @@ class OrganizerControllerStoreTest extends TestCase
     {
         // Arrange
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $formatId = $this->getValidFormatId();
         $eventTypeIds = $this->getValidEventTypeIds();
@@ -204,7 +200,6 @@ class OrganizerControllerStoreTest extends TestCase
             'title' => 'Evento Mínimo',
             'description' => 'Descripción básica',
             'start_date' => now()->addDays(10)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -234,14 +229,12 @@ class OrganizerControllerStoreTest extends TestCase
     public function test_validation_fails_without_required_title(): void
     {
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $payload = [
             'description' => 'Test description',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -257,14 +250,12 @@ class OrganizerControllerStoreTest extends TestCase
     public function test_validation_fails_without_required_description(): void
     {
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $payload = [
             'title' => 'Test Event',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -301,14 +292,12 @@ class OrganizerControllerStoreTest extends TestCase
     public function test_validation_fails_without_location_ids_or_custom_location(): void
     {
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $payload = [
             'title' => 'Test Event',
             'description' => 'Test description',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             // Neither location_ids nor custom_location_name provided
@@ -327,7 +316,6 @@ class OrganizerControllerStoreTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $userOrganization = $user->organization_id;
         $otherOrganization = Organization::factory()->create();
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $formatId = $this->getValidFormatId();
         $eventTypeIds = $this->getValidEventTypeIds();
@@ -336,7 +324,6 @@ class OrganizerControllerStoreTest extends TestCase
             'title' => 'Security Test Event',
             'description' => 'Testing organization security',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -358,7 +345,6 @@ class OrganizerControllerStoreTest extends TestCase
     public function test_syncs_multiple_locations_correctly(): void
     {
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create();
         $location1 = Location::factory()->create(['entity_id' => 1]);
         $location2 = Location::factory()->create(['entity_id' => 1]);
         $location3 = Location::factory()->create(['entity_id' => 1]);
@@ -369,7 +355,6 @@ class OrganizerControllerStoreTest extends TestCase
             'title' => 'Multi-Location Event',
             'description' => 'Event across 3 locations',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location1->id, $location2->id, $location3->id],
@@ -399,7 +384,6 @@ class OrganizerControllerStoreTest extends TestCase
     public function test_async_dates_creates_entries_in_normalized_table(): void
     {
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $formatId = $this->getValidFormatId();
         $eventTypeIds = $this->getValidEventTypeIds();
@@ -408,7 +392,6 @@ class OrganizerControllerStoreTest extends TestCase
             'title' => 'Async Dates Test',
             'description' => 'Testing async dates normalization',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -439,7 +422,6 @@ class OrganizerControllerStoreTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user, 'sanctum');
 
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -447,7 +429,6 @@ class OrganizerControllerStoreTest extends TestCase
             'title' => 'Test Event',
             'description' => 'Test description',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],

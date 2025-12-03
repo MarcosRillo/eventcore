@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('type_code', 50)->unique();
             $table->string('type_name', 100);
             $table->text('description')->nullable();
+            $table->string('color', 7)->default('#3B82F6');
             $table->boolean('allows_multiple_locations')->default(false);
             $table->timestamps();
         });

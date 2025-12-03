@@ -4,9 +4,11 @@ namespace Tests\Feature\Organizer;
 
 use App\Features\Organizer\Services\EventValidator;
 use App\Features\Organizer\Services\OrganizerService;
-use App\Models\Category;
+
 use App\Models\Event;
 use App\Models\EventStatus;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -24,10 +26,11 @@ class OrganizerServiceTest extends TestCase
     private EventValidator $validator;
     private User $user;
     private Organization $organization;
-    private Category $category;
     private Location $location;
     private EventStatus $draftStatus;
     private EventStatus $publishedStatus;
+    private EventType $eventType;
+    private EventSubtype $eventSubtype;
 
     protected function setUp(): void
     {
@@ -37,7 +40,6 @@ class OrganizerServiceTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
         $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
 
         $this->validator = new EventValidator();
         $this->service = new OrganizerService($this->validator);
@@ -49,11 +51,6 @@ class OrganizerServiceTest extends TestCase
         $this->user = User::factory()->create();
         $this->user->organizations()->attach($this->organization->id);
 
-        // Create category
-        $this->category = Category::factory()->create([
-            'entity_id' => $this->organization->id,
-        ]);
-
         // Create location
         $this->location = Location::factory()->create([
             'entity_id' => $this->organization->id,
@@ -62,6 +59,30 @@ class OrganizerServiceTest extends TestCase
         // Get statuses
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
         $this->publishedStatus = EventStatus::where('status_code', 'published')->first();
+
+        // Create event format for testing
+        DB::table('event_formats')->insert([
+            'format_code' => 'sede_unica',
+            'format_name' => 'Sede Única',
+            'description' => 'Event held at a single location',
+            'allows_multiple_locations' => false,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Create event types for testing
+        $this->eventType = EventType::create([
+            'name' => 'Test Event Type',
+            'entity_id' => $this->organization->id,
+            'is_active' => true,
+        ]);
+
+        $this->eventSubtype = EventSubtype::create([
+            'name' => 'Test Event Subtype',
+            'event_type_id' => $this->eventType->id,
+            'entity_id' => $this->organization->id,
+            'is_active' => true,
+        ]);
     }
 
     private function getValidEventData(): array
@@ -70,8 +91,9 @@ class OrganizerServiceTest extends TestCase
             'title' => 'Test Event',
             'description' => 'Test event description',
             'start_date' => now()->addDays(10)->format('Y-m-d'),
-            'category_id' => $this->category->id,
             'location_ids' => [$this->location->id],
+            'event_type_id' => $this->eventType->id,
+            'event_subtype_id' => $this->eventSubtype->id,
         ];
     }
 
@@ -112,7 +134,7 @@ class OrganizerServiceTest extends TestCase
     {
         // Verify transaction behavior by checking DB state on failure
         $data = $this->getValidEventData();
-        $data['category_id'] = 99999; // Invalid category - will fail
+        $data['event_type_id'] = 99999; // Invalid event type - will fail
 
         $initialCount = Event::count();
 
@@ -148,7 +170,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Original Title',
         ]);
 
@@ -172,7 +193,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $data = $this->getValidEventData();
@@ -191,7 +211,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $eventId = $event->id;
@@ -209,7 +228,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $this->expectException(ValidationException::class);
@@ -227,7 +245,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         // Create events for another organization
@@ -236,7 +253,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $otherOrg->id,
             'entity_id' => $otherOrg->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $result = $this->service->getPaginatedEvents($this->user, []);
@@ -254,7 +270,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Marketing Event',
         ]);
 
@@ -262,7 +277,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Sales Event',
         ]);
 
@@ -279,14 +293,13 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
         $event->locations()->attach($this->location->id);
 
         $result = $this->service->getEventById($event->id, $this->user);
 
         $this->assertEquals($event->id, $result->id);
-        $this->assertTrue($result->relationLoaded('category'));
+        $this->assertTrue($result->relationLoaded('eventType'));
         $this->assertTrue($result->relationLoaded('locations'));
         $this->assertTrue($result->relationLoaded('status'));
     }
@@ -306,7 +319,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $this->expectException(ValidationException::class);
@@ -321,7 +333,6 @@ class OrganizerServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $this->expectException(ValidationException::class);

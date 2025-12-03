@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Organizer;
 
-use App\Models\Category;
+
 use App\Models\Event;
 use App\Models\EventOrigin;
 use App\Models\EventType;
@@ -88,7 +88,6 @@ class OrganizerControllerValidationTest extends TestCase
      */
     private function getMinimalPayload(User $user): array
     {
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => $user->organization_id]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -96,7 +95,6 @@ class OrganizerControllerValidationTest extends TestCase
             'title' => 'Valid Title',
             'description' => 'Valid Description',
             'start_date' => now()->addDays(10)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -372,19 +370,6 @@ class OrganizerControllerValidationTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['location_ids.0']);
-    }
-
-    #[Test]
-    public function test_validation_fails_when_category_id_does_not_exist(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['category_id'] = 99999; // Non-existent category
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['category_id']);
     }
 
     // ==================== FK VALIDATIONS (3NF NORMALIZED) ====================

@@ -81,7 +81,8 @@ trait EventDataPreparation
             'description' => $data['description'],
             'start_date' => $data['start_date'],
             'end_date' => $data['end_date'] ?? $data['start_date'],
-            'category_id' => $data['category_id'],
+            'event_type_id' => $data['event_type_id'],
+            'event_subtype_id' => $data['event_subtype_id'],
 
             // Basic information
             'edition_number' => $data['edition_number'] ?? null,

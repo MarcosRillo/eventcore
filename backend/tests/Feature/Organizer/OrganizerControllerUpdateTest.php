@@ -4,7 +4,7 @@ namespace Tests\Feature\Organizer;
 
 use App\Models\User;
 use App\Models\Event;
-use App\Models\Category;
+
 use App\Models\EventOrigin;
 use App\Models\EventType;
 use App\Models\EventSubtype;
@@ -127,7 +127,6 @@ class OrganizerControllerUpdateTest extends TestCase
     {
         // Arrange: Create event with minimal data
         $user = $this->createAuthenticatedUser();
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
 
         $event = Event::factory()->create([
@@ -142,7 +141,6 @@ class OrganizerControllerUpdateTest extends TestCase
 
         $event->locations()->sync([$location->id]);
 
-        $newCategory = Category::factory()->create(['entity_id' => $user->organization_id]);
         $newLocation1 = Location::factory()->create(['entity_id' => 1]);
         $newLocation2 = Location::factory()->create(['entity_id' => 1]);
         $producer = Organization::factory()->create(['name' => 'Producer Org']);
@@ -155,7 +153,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'description' => 'Updated: Evento anual renovado',
             'start_date' => now()->addDays(40)->format('Y-m-d H:i:s'),
             'end_date' => now()->addDays(42)->format('Y-m-d H:i:s'),
-            'category_id' => $newCategory->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$newLocation1->id, $newLocation2->id],
@@ -208,7 +205,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'id' => $event->id,
             'title' => 'Updated: Congreso Internacional de Turismo 2025',
             'description' => 'Updated: Evento anual renovado',
-            'category_id' => $newCategory->id,
             'edition_number' => '16va Edición',
             'origin_id' => $originId,
             'producer_id' => $producer->id,
@@ -247,7 +243,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'producer_id' => $producer->id,
         ]);
 
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -255,7 +250,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Updated Title',
             'description' => 'Updated Description',
             'start_date' => now()->addDays(10)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -308,7 +302,6 @@ class OrganizerControllerUpdateTest extends TestCase
         $userB->refresh();
         $this->actingAs($userB, 'sanctum');
 
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -316,7 +309,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Malicious Update',
             'description' => 'Should not work',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -348,7 +340,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Published Event',
         ]);
 
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -356,7 +347,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Attempted Update',
             'description' => 'Should not work',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -390,7 +380,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Draft Event',
         ]);
 
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -398,7 +387,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Updated Draft',
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -429,7 +417,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Requires Changes Event',
         ]);
 
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -437,7 +424,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Fixed Event',
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -467,14 +453,12 @@ class OrganizerControllerUpdateTest extends TestCase
             'format_id' => $this->getValidFormatId(),
         ]);
 
-        $category = Category::factory()->create();
         $location = Location::factory()->create();
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $updatePayload = [
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -511,14 +495,12 @@ class OrganizerControllerUpdateTest extends TestCase
         $location4 = Location::factory()->create(['entity_id' => 1]);
         $location5 = Location::factory()->create(['entity_id' => 1]);
 
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $updatePayload = [
             'title' => 'Updated',
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location3->id, $location4->id, $location5->id],
@@ -560,7 +542,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'notes' => 'Initial session'
         ]);
 
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -568,7 +549,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Updated',
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -606,7 +586,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'producer_id' => $initialProducer->id,
         ]);
 
-        $category = Category::factory()->create(['entity_id' => $user->organization_id]);
         $location = Location::factory()->create(['entity_id' => 1]);
         $newProducer = Organization::factory()->create(['name' => 'New Producer']);
         $originId = EventOrigin::where('code', 'international')->first()->id;
@@ -616,7 +595,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Updated Event',
             'description' => 'Updated',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],

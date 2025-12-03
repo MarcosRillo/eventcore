@@ -40,9 +40,9 @@ class EventService
             $query->where('format_id', $filters['format_id']);
         }
 
-        // Apply category filter
-        if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+        // Apply event type filter
+        if (!empty($filters['event_type_id'])) {
+            $query->where('event_type_id', $filters['event_type_id']);
         }
 
         // Apply date range filter
@@ -100,7 +100,7 @@ class EventService
             }
 
             // Load relationships for complete response
-            $event->load(['category', 'locations', 'status', 'format', 'creator', 'eventType', 'eventSubtype']);
+            $event->load(['locations', 'status', 'format', 'creator', 'eventType', 'eventSubtype']);
 
             return $event;
         });
@@ -128,7 +128,7 @@ class EventService
             }
 
             // Load relationships for complete response
-            $event->load(['category', 'locations', 'status', 'format', 'creator', 'eventType', 'eventSubtype']);
+            $event->load(['locations', 'status', 'format', 'creator', 'eventType', 'eventSubtype']);
 
             return $event->fresh();
         });
@@ -241,7 +241,7 @@ class EventService
             }
 
             // Load relationships for complete response
-            $replica->load(['category', 'locations', 'status', 'format', 'eventType', 'eventSubtype']);
+            $replica->load(['locations', 'status', 'format', 'eventType', 'eventSubtype']);
 
             return $replica;
         });

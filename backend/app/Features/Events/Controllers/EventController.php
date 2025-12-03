@@ -64,13 +64,13 @@ class EventController extends Controller
     public function index(IndexEventsRequest $request)
     {
         $events = Event::query()
-            ->with(['category', 'organization', 'status', 'format', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
             ->when($request->validated('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
                       ->orWhere('description', 'like', "%{$search}%");
             })
-            ->when($request->validated('category_id'), function ($query, $categoryId) {
-                $query->where('category_id', $categoryId);
+            ->when($request->validated('event_type_id'), function ($query, $eventTypeId) {
+                $query->where('event_type_id', $eventTypeId);
             })
             ->when($request->validated('status_id'), function ($query, $statusId) {
                 $query->where('status_id', $statusId);
@@ -106,7 +106,7 @@ class EventController extends Controller
     public function show(Request $request, string $id)
     {
         $event = Event::withoutGlobalScopes()
-                      ->with(['category', 'organization', 'status', 'format', 'locations'])
+                      ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
                       ->findOrFail($id);
 
         $this->authorizeEventAccess($event, $request->user(), 'view');

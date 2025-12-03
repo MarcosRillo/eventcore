@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Organizer;
 
-use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventStatus;
 use App\Models\Location;
@@ -26,7 +25,6 @@ class OrganizerSubmitTest extends TestCase
     private User $user;
     private Organization $organization;
     private Organization $producerOrg;
-    private Category $category;
     private Location $location;
     private EventStatus $draftStatus;
     private EventStatus $pendingInternalStatus;
@@ -74,7 +72,6 @@ class OrganizerSubmitTest extends TestCase
             $this->user->save();
         }
 
-        $this->category = Category::factory()->create(['entity_id' => $this->organization->id]);
         $this->location = Location::factory()->create([
             'entity_id' => $this->organization->id,
             'city' => 'San Miguel de Tucumán',
@@ -237,7 +234,6 @@ class OrganizerSubmitTest extends TestCase
             'organization_id' => $otherOrg->id,
             'entity_id' => $otherOrg->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'format_id' => $this->formatId,
         ]);
 
@@ -279,7 +275,6 @@ class OrganizerSubmitTest extends TestCase
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
             'format_id' => $this->formatId,
-            'category_id' => $this->category->id,
             'edition_number' => '5ta Edición',
             'producer_id' => $this->producerOrg->id,
             'organization_id' => $this->organization->id,
@@ -312,7 +307,6 @@ class OrganizerSubmitTest extends TestCase
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
             'format_id' => $this->formatId,
-            'category_id' => $this->category->id,
             'edition_number' => '5ta Edición',
             'producer_id' => $this->producerOrg->id,
             'organization_id' => $this->organization->id,

@@ -63,12 +63,12 @@ class TenantScope implements Scope
             $organizationId = $this->getUserOrganizationId($user);
             $modelClass = get_class($model);
 
-            // Models que pertenecen al ENTE (categorías, ubicaciones, etc)
+            // Models que pertenecen al ENTE (event types, subtypes, ubicaciones, etc)
             $entityOwnedModels = [
-                \App\Models\Category::class,
                 \App\Models\Location::class,
                 \App\Models\EventStatus::class,
                 \App\Models\EventType::class,
+                \App\Models\EventSubtype::class,
             ];
 
             if (in_array($modelClass, $entityOwnedModels)) {

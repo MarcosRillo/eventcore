@@ -3,9 +3,11 @@
 namespace Tests\Feature\Events;
 
 use App\Features\Events\Services\EventService;
-use App\Models\Category;
+
 use App\Models\Event;
 use App\Models\EventStatus;
+use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -20,7 +22,8 @@ class EventServiceTest extends TestCase
     private EventService $service;
     private User $user;
     private Organization $organization;
-    private Category $category;
+    private EventType $eventType;
+    private EventSubtype $eventSubtype;
     private Location $location;
     private EventStatus $draftStatus;
     private EventStatus $publishedStatus;
@@ -44,9 +47,16 @@ class EventServiceTest extends TestCase
         $this->user = User::factory()->create();
         $this->user->organizations()->attach($this->organization->id);
 
-        // Create category
-        $this->category = Category::factory()->create([
+        // Create event type and subtype
+        $this->eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
+            'is_active' => true,
+        ]);
+
+        $this->eventSubtype = EventSubtype::factory()->create([
+            'event_type_id' => $this->eventType->id,
+            'entity_id' => $this->organization->id,
+            'is_active' => true,
         ]);
 
         // Create location
@@ -67,7 +77,6 @@ class EventServiceTest extends TestCase
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $result = $this->service->getAllEvents();
@@ -83,14 +92,12 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Festival de Jazz Tucumán',
         ]);
 
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Feria de Artesanías',
         ]);
 
@@ -101,27 +108,33 @@ class EventServiceTest extends TestCase
     }
 
     #[Test]
-    public function test_get_all_events_filters_by_category_id(): void
+    public function test_get_all_events_filters_by_event_type_id(): void
     {
-        $category2 = Category::factory()->create(['entity_id' => $this->organization->id]);
+        // Create another event type for comparison
+        $otherEventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id,
+            'is_active' => true,
+        ]);
 
+        // Events with main event type
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
+            'event_type_id' => $this->eventType->id,
         ]);
 
+        // Events with other event type (should not be returned)
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $category2->id,
+            'event_type_id' => $otherEventType->id,
         ]);
 
-        $result = $this->service->getAllEvents(['category_id' => $this->category->id]);
+        $result = $this->service->getAllEvents(['event_type_id' => $this->eventType->id]);
 
         $this->assertEquals(3, $result->total());
         foreach ($result->items() as $event) {
-            $this->assertEquals($this->category->id, $event->category_id);
+            $this->assertEquals($this->eventType->id, $event->event_type_id);
         }
     }
 
@@ -131,13 +144,11 @@ class EventServiceTest extends TestCase
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $result = $this->service->getAllEvents(['status_id' => $this->publishedStatus->id]);
@@ -155,7 +166,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'start_date' => now()->subDays(30),
             'end_date' => now()->subDays(25),
         ]);
@@ -164,7 +174,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Target Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
@@ -174,7 +183,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'start_date' => now()->addDays(60),
             'end_date' => now()->addDays(65),
         ]);
@@ -195,7 +203,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'XYZZY123 Festival Published',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
@@ -205,7 +212,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'XYZZY123 Festival Draft',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
@@ -215,7 +221,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Other Festival Published',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
@@ -238,13 +243,11 @@ class EventServiceTest extends TestCase
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $result = $this->service->getEventsByStatus('published');
@@ -261,7 +264,6 @@ class EventServiceTest extends TestCase
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
         ]);
 
         $result = $this->service->getEventsByStatus('published');
@@ -279,7 +281,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(5),
         ]);
@@ -288,7 +289,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Future Event 1',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
@@ -297,7 +297,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Future Event 2',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(12),
@@ -317,7 +316,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Later Event',
             'start_date' => now()->addDays(20),
             'end_date' => now()->addDays(22),
@@ -326,7 +324,6 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'title' => 'Sooner Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
@@ -349,7 +346,6 @@ class EventServiceTest extends TestCase
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'is_featured' => false,
         ]);
 
@@ -357,7 +353,6 @@ class EventServiceTest extends TestCase
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'is_featured' => true,
         ]);
 
@@ -375,7 +370,6 @@ class EventServiceTest extends TestCase
         Event::factory()->count(20)->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'category_id' => $this->category->id,
             'is_featured' => true,
         ]);
 

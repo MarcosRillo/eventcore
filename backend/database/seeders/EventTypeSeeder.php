@@ -30,60 +30,79 @@ class EventTypeSeeder extends Seeder
             return;
         }
 
-        // Define event types with their subtypes
+        // Define event types with their colors and subtypes
         $typesWithSubtypes = [
             'Festivales' => [
-                'Festival de Música',
-                'Festival Gastronómico',
-                'Festival Cultural',
-                'Festival Folclórico',
+                'color' => '#8B5CF6',  // Purple
+                'subtypes' => [
+                    'Festival de Música',
+                    'Festival Gastronómico',
+                    'Festival Cultural',
+                    'Festival Folclórico',
+                ],
             ],
             'Deportes' => [
-                'Competencia',
-                'Maratón',
-                'Torneo',
-                'Exhibición Deportiva',
+                'color' => '#10B981',  // Green
+                'subtypes' => [
+                    'Competencia',
+                    'Maratón',
+                    'Torneo',
+                    'Exhibición Deportiva',
+                ],
             ],
             'Cultura' => [
-                'Exposición de Arte',
-                'Teatro',
-                'Concierto',
-                'Danza',
+                'color' => '#F59E0B',  // Orange
+                'subtypes' => [
+                    'Exposición de Arte',
+                    'Teatro',
+                    'Concierto',
+                    'Danza',
+                ],
             ],
             'Turismo' => [
-                'Tour Guiado',
-                'Excursión',
-                'Ruta Turística',
-                'Experiencia Gastronómica',
+                'color' => '#3B82F6',  // Blue
+                'subtypes' => [
+                    'Tour Guiado',
+                    'Excursión',
+                    'Ruta Turística',
+                    'Experiencia Gastronómica',
+                ],
             ],
             'Ferias' => [
-                'Feria Artesanal',
-                'Feria del Libro',
-                'Feria Productiva',
-                'Expo Comercial',
+                'color' => '#EF4444',  // Red
+                'subtypes' => [
+                    'Feria Artesanal',
+                    'Feria del Libro',
+                    'Feria Productiva',
+                    'Expo Comercial',
+                ],
             ],
             'Conferencias' => [
-                'Congreso',
-                'Seminario',
-                'Workshop',
-                'Charla',
+                'color' => '#6366F1',  // Indigo
+                'subtypes' => [
+                    'Congreso',
+                    'Seminario',
+                    'Workshop',
+                    'Charla',
+                ],
             ],
         ];
 
         $typesCreated = 0;
         $subtypesCreated = 0;
 
-        foreach ($typesWithSubtypes as $typeName => $subtypes) {
+        foreach ($typesWithSubtypes as $typeName => $typeData) {
             // Create event type
             $eventType = EventType::create([
                 'name' => $typeName,
                 'entity_id' => $enteTurismo->id,
+                'color' => $typeData['color'],
                 'is_active' => true,
             ]);
             $typesCreated++;
 
             // Create subtypes for this type
-            foreach ($subtypes as $subtypeName) {
+            foreach ($typeData['subtypes'] as $subtypeName) {
                 EventSubtype::create([
                     'name' => $subtypeName,
                     'event_type_id' => $eventType->id,

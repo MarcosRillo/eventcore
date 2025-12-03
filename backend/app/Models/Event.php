@@ -15,7 +15,7 @@ use Carbon\Carbon;
  * Event Model
  *
  * Represents events that can be scheduled at one or multiple locations.
- * Each event belongs to an organization (multi-tenant) and optionally to a category.
+ * Each event belongs to an organization (multi-tenant), event type and event subtype.
  *
  * Normalized to 3NF (Nov 30, 2025):
  * - String fields replaced with FK relationships
@@ -39,7 +39,6 @@ class Event extends Model
         'end_date',
         'status_id',
         'format_id',
-        'category_id',
         'entity_id',
         'organization_id',
         'event_type_id',
@@ -134,14 +133,6 @@ class Event extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'organization_id');
-    }
-
-    /**
-     * Get the category that this event belongs to.
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     /**
@@ -329,14 +320,6 @@ class Event extends Model
                             ->where('end_date', '>=', $endDate);
                   });
         });
-    }
-
-    /**
-     * Scope a query to filter events by category.
-     */
-    public function scopeByCategory($query, $categoryId)
-    {
-        return $query->where('category_id', $categoryId);
     }
 
     /**

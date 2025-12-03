@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Event;
-use App\Models\Category;
 use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRotationType;
@@ -61,7 +60,6 @@ class EventFactory extends Factory
             'end_date' => $endDate,
 
             // Relationships
-            'category_id' => Category::factory(),
             'created_by' => User::factory(),
             'entity_id' => \App\Models\Organization::factory(),
             'organization_id' => null,

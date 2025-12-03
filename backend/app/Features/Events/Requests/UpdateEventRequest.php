@@ -67,23 +67,6 @@ class UpdateEventRequest extends FormRequest
                 'integer',
                 Rule::exists('event_formats', 'id'),
             ],
-            'category_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('categories', 'id')->where(function ($query) {
-                    $user = $this->user();
-                    if ($user) {
-                        $organization = $user->organizations()->first();
-                        if ($organization) {
-                            $query->where('entity_id', $organization->id);
-                        } else {
-                            $query->where('id', null);
-                        }
-                    } else {
-                        $query->where('id', null);
-                    }
-                }),
-            ],
 
             // Locations
             'location_ids' => [
@@ -183,7 +166,6 @@ class UpdateEventRequest extends FormRequest
             'end_date.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
             'status_id.exists' => 'El estado seleccionado no es válido.',
             'format_id.exists' => 'El formato de evento seleccionado no es válido.',
-            'category_id.exists' => 'La categoría seleccionada no existe.',
             'location_ids.array' => 'Las ubicaciones deben ser un array.',
             'location_ids.max' => 'No puede seleccionar más de 10 ubicaciones.',
             'location_ids.*.integer' => 'Los IDs de ubicación deben ser números enteros.',

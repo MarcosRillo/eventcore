@@ -40,10 +40,13 @@ class DashboardTransformer
                 'id' => $event->entity->id,
                 'name' => $event->entity->name,
             ],
-            'category' => $event->category ? [
-                'id' => $event->category->id,
-                'name' => $event->category->name,
-                'color' => $event->category->color,
+            'event_type' => $event->eventType ? [
+                'id' => $event->eventType->id,
+                'name' => $event->eventType->name,
+            ] : null,
+            'event_subtype' => $event->eventSubtype ? [
+                'id' => $event->eventSubtype->id,
+                'name' => $event->eventSubtype->name,
             ] : null,
             'is_featured' => $event->is_featured,
             'featured_image' => $event->featured_image,
@@ -87,10 +90,13 @@ class DashboardTransformer
                 'email' => $event->entity->email,
                 'phone' => $event->entity->phone,
             ],
-            'category' => $event->category ? [
-                'id' => $event->category->id,
-                'name' => $event->category->name,
-                'color' => $event->category->color,
+            'event_type' => $event->eventType ? [
+                'id' => $event->eventType->id,
+                'name' => $event->eventType->name,
+            ] : null,
+            'event_subtype' => $event->eventSubtype ? [
+                'id' => $event->eventSubtype->id,
+                'name' => $event->eventSubtype->name,
             ] : null,
             'locations' => $event->locations->map(function ($location) {
                 return [

@@ -4,7 +4,7 @@ namespace Tests\Feature\Events;
 
 use App\Models\Event;
 use App\Models\User;
-use App\Models\Category;
+
 use App\Models\EventType;
 use App\Models\EventSubtype;
 use App\Models\Location;
@@ -23,7 +23,7 @@ class EventTest extends TestCase
         // Seed only lookup tables
         $this->seed(\Database\Seeders\UserRolesSeeder::class);
         $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
+        $this->seed(\Database\Seeders\EventTypesSeeder::class);  // Seeds event_formats
         $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
@@ -86,7 +86,6 @@ class EventTest extends TestCase
         $user = $this->authenticateUser();
         $organization = $user->organizations()->first();
 
-        $category = Category::factory()->create(['entity_id' => $organization->id]);
         $location = Location::factory()->create(['entity_id' => $organization->id]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -95,7 +94,6 @@ class EventTest extends TestCase
             'description' => 'Test event description for automated testing',
             'start_date' => now()->addDays(7)->format('Y-m-d H:i:s'),
             'end_date' => now()->addDays(8)->format('Y-m-d H:i:s'),
-            'category_id' => $category->id,
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],

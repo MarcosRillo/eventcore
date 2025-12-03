@@ -116,20 +116,6 @@ class SuspendedUserTest extends TestCase
         ]);
     }
 
-    #[Test]
-    public function test_suspended_user_cannot_access_categories(): void
-    {
-        $token = $this->suspendedUser->createToken('test-token')->plainTextToken;
-
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->getJson('/api/v1/categories');
-
-        $response->assertStatus(403);
-        $response->assertJson([
-            'error' => 'Account suspended',
-        ]);
-    }
-
     // ==================== EDGE CASES ====================
 
     #[Test]

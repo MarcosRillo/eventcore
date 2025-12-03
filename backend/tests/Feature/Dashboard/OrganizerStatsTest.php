@@ -4,7 +4,6 @@ namespace Tests\Feature\Dashboard;
 
 use App\Models\Event;
 use App\Models\User;
-use App\Models\Category;
 use App\Models\Location;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;

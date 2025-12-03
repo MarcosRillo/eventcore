@@ -50,7 +50,7 @@ class DashboardService
      */
     public function getFilteredEvents(string $tab, int $page, string $search, int $perPage): array
     {
-        $query = Event::with(['status', 'format', 'entity', 'category', 'locations']);
+        $query = Event::with(['status', 'format', 'entity', 'eventType', 'eventSubtype', 'locations']);
 
         // Apply tab-specific filtering
         $this->applyTabFilter($query, $tab);
@@ -101,7 +101,8 @@ class DashboardService
             'status',
             'format',
             'entity',
-            'category',
+            'eventType',
+            'eventSubtype',
             'locations',
             'creator',
             'approver'

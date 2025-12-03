@@ -60,7 +60,7 @@ class OrganizerService
                 'organization_id' => $user->organization_id,
             ]);
 
-            return $event->load(['category', 'locations', 'status', 'format', 'asyncDates']);
+            return $event->load(['eventType', 'eventSubtype', 'locations', 'status', 'format', 'asyncDates']);
         });
     }
 
@@ -90,7 +90,7 @@ class OrganizerService
                 'organization_id' => $user->organization_id,
             ]);
 
-            return $event->fresh(['category', 'locations', 'status', 'format', 'asyncDates']);
+            return $event->fresh(['eventType', 'eventSubtype', 'locations', 'status', 'format', 'asyncDates']);
         });
     }
 
@@ -122,7 +122,7 @@ class OrganizerService
         $this->validator->validateUserHasOrganization($user);
 
         $query = Event::withoutGlobalScopes()
-            ->with(['status', 'category', 'locations'])
+            ->with(['status', 'eventType', 'eventSubtype', 'locations'])
             ->where('organization_id', $user->organization_id);
 
         if (!empty($filters['search'])) {
@@ -147,7 +147,7 @@ class OrganizerService
 
         return Event::where('id', $id)
             ->where('organization_id', $user->organization_id)
-            ->with(['category', 'locations', 'status', 'format', 'creator'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'status', 'format', 'creator'])
             ->firstOrFail();
     }
 

@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Event;
 use App\Models\EventStatus;
+use App\Models\EventFormat;
 use App\Models\EventType;
+use App\Models\EventSubtype;
 use App\Models\Organization;
-use App\Models\Category;
 use App\Models\Location;
 use App\Models\User;
 use Carbon\Carbon;
@@ -39,12 +40,16 @@ class LandingTestSeeder extends Seeder
         // Get required relationships
         $publishedStatus = EventStatus::where('status_code', 'published')->first();
         $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $categories = Category::where('entity_id', $enteDeturismo->id)->get();
         $locations = Location::where('entity_id', $enteDeturismo->id)->get();
         $entityAdmin = User::where('email', 'ana.garcia@enteturismo.gov.ar')->first();
-        $sedeUnicaType = EventType::where('type_code', 'sede_unica')->first();
 
-        if (!$publishedStatus || !$enteDeturismo || $categories->isEmpty() || $locations->isEmpty()) {
+        // Get event format (what was previously called "type")
+        $sedeUnicaFormat = EventFormat::where('format_code', 'sede_unica')->first();
+
+        // Get event types and subtypes for deterministic assignment
+        $eventTypes = EventType::with('subtypes')->where('is_active', true)->get();
+
+        if (!$publishedStatus || !$enteDeturismo || $locations->isEmpty() || $eventTypes->isEmpty()) {
             $this->command->error('❌ Missing required data. Run DatabaseSeeder first.');
             return;
         }
@@ -56,6 +61,13 @@ class LandingTestSeeder extends Seeder
             $startDate = Carbon::now()->addDays(rand(5, 90))->setHour(rand(10, 20))->setMinute(0);
             $endDate = (clone $startDate)->addHours(rand(2, 8));
 
+            // Cycle through event types and subtypes deterministically
+            $typeIndex = $i % $eventTypes->count();
+            $selectedType = $eventTypes[$typeIndex];
+            $subtypes = $selectedType->subtypes;
+            $subtypeIndex = $i % $subtypes->count();
+            $selectedSubtype = $subtypes[$subtypeIndex];
+
             $event = Event::factory()
                 ->published()
                 ->featured()
@@ -63,9 +75,10 @@ class LandingTestSeeder extends Seeder
                     'status_id' => $publishedStatus->id,
                     'entity_id' => $enteDeturismo->id,
                     'organization_id' => $enteDeturismo->id,
-                    'category_id' => $categories->random()->id,
+                    'event_type_id' => $selectedType->id,
+                    'event_subtype_id' => $selectedSubtype->id,
                     'created_by' => $entityAdmin->id,
-                    'type_id' => $sedeUnicaType->id,
+                    'format_id' => $sedeUnicaFormat->id,
                     'is_featured' => true,
                     'start_date' => $startDate,
                     'end_date' => $endDate,
@@ -86,15 +99,23 @@ class LandingTestSeeder extends Seeder
             $startDate = Carbon::now()->addDays(rand(1, 120))->setHour(rand(8, 21))->setMinute(0);
             $endDate = (clone $startDate)->addHours(rand(1, 10));
 
+            // Cycle through event types and subtypes deterministically
+            $typeIndex = $i % $eventTypes->count();
+            $selectedType = $eventTypes[$typeIndex];
+            $subtypes = $selectedType->subtypes;
+            $subtypeIndex = $i % $subtypes->count();
+            $selectedSubtype = $subtypes[$subtypeIndex];
+
             $event = Event::factory()
                 ->published()
                 ->create([
                     'status_id' => $publishedStatus->id,
                     'entity_id' => $enteDeturismo->id,
                     'organization_id' => $enteDeturismo->id,
-                    'category_id' => $categories->random()->id,
+                    'event_type_id' => $selectedType->id,
+                    'event_subtype_id' => $selectedSubtype->id,
                     'created_by' => $entityAdmin->id,
-                    'type_id' => $sedeUnicaType->id,
+                    'format_id' => $sedeUnicaFormat->id,
                     'is_featured' => false,
                     'start_date' => $startDate,
                     'end_date' => $endDate,

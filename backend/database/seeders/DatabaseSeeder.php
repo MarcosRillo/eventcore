@@ -30,13 +30,12 @@ class DatabaseSeeder extends Seeder
             // 2. Main tables with foreign key dependencies
             OrganizationSeeder::class,  // Uses org statuses and types
             UserSeeder::class,          // Uses user roles and organizations
-            CategorySeeder::class,      // Uses organizations
             LocationSeeder::class,      // Uses organizations
-            EventSeeder::class,         // Uses all previous tables including 3NF lookups
+            EventTypeSeeder::class,     // Creates hierarchical EventTypes and EventSubtypes
+            EventSeeder::class,         // Uses EventType/EventSubtype (3NF)
 
             // 3. Optional: Additional test data for UI testing
-            // Uncomment to seed 26 additional events for landing page testing
-            // LandingTestSeeder::class,  // 6 featured + 20 published events
+            LandingTestSeeder::class,  // 6 featured + 20 published events (uses EventType/EventSubtype)
         ]);
 
         $this->command->newLine();
@@ -56,9 +55,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         $this->command->info('• 2 Primary Entities + 4 Event Organizers');
         $this->command->info('• 13 Users: 1 platform_admin, 2 entity_admin, 4 organizer_admin, 6 entity_staff');
-        $this->command->info('• 5 Categories (3 Tourism + 2 Culture)');
+        $this->command->info('• 6 EventTypes with 24 EventSubtypes (3NF structure)');
         $this->command->info('• 5 Locations (3 Tourism + 2 Culture)');
-        $this->command->info('• 8 Events with varied statuses for testing workflows');
+        $this->command->info('• 34 Events total (8 base + 26 landing test events)');
         $this->command->info('• 1 Suspended user (fernando.ruiz@enteturismo.gov.ar) for testing');
         $this->command->info('• Complete entity-tenant isolation for multi-tenant testing');
         $this->command->newLine();

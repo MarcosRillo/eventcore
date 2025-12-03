@@ -3,7 +3,6 @@
 namespace Tests\Feature\Events;
 
 use App\Features\Events\Services\EventValidationService;
-use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventOrigin;
 use App\Models\EventStatus;
@@ -28,7 +27,6 @@ class EventValidationServiceTest extends TestCase
     private EventValidationService $service;
     private Organization $organization;
     private Organization $producerOrg;
-    private Category $category;
     private EventType $eventType;
     private EventSubtype $eventSubtype;
     private Location $location;
@@ -52,7 +50,6 @@ class EventValidationServiceTest extends TestCase
 
         $this->organization = Organization::factory()->create();
         $this->producerOrg = Organization::factory()->create(['name' => 'Test Producer Org']);
-        $this->category = Category::factory()->create(['entity_id' => $this->organization->id]);
         $this->eventType = EventType::first() ?? EventType::factory()->create();
         $this->eventSubtype = EventSubtype::where('event_type_id', $this->eventType->id)->first()
             ?? EventSubtype::factory()->create(['event_type_id' => $this->eventType->id]);
@@ -381,7 +378,6 @@ class EventValidationServiceTest extends TestCase
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
             'format_id' => $this->formatId,
-            'category_id' => $this->category->id,
             'event_type_id' => $this->eventType->id,
             'event_subtype_id' => $this->eventSubtype->id,
             'edition_number' => '5ta Edición',
@@ -419,7 +415,6 @@ class EventValidationServiceTest extends TestCase
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
             'format_id' => $this->formatId,
-            'category_id' => $this->category->id,
             'event_type_id' => $this->eventType->id,
             'event_subtype_id' => $this->eventSubtype->id,
             'edition_number' => '5ta Edición',

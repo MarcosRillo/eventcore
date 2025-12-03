@@ -4,8 +4,8 @@ namespace App\Features\PublicEvents\Controllers;
 
 use App\Features\PublicEvents\Services\PublicEventService;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
 use App\Http\Resources\EventResource;
+use App\Models\EventType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,15 +28,17 @@ class PublicEventController extends Controller
     public function index(Request $request): JsonResponse
     {
         $request->validate([
-            'category_id' => 'sometimes|exists:categories,id',
-            'date_from' => 'sometimes|date',
-            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'event_type_id' => 'sometimes|exists:event_types,id',
+            'event_subtype_id' => 'sometimes|exists:event_subtypes,id',
+            'location_id' => 'sometimes|exists:locations,id',
+            'start_date' => 'sometimes|date',
+            'end_date' => 'sometimes|date|after_or_equal:start_date',
             'search' => 'sometimes|string|max:255',
             'page' => 'sometimes|integer|min:1',
             'per_page' => 'sometimes|integer|min:1|max:50',
         ]);
 
-        $filters = $request->only(['category_id', 'date_from', 'date_to', 'search']);
+        $filters = $request->only(['event_type_id', 'event_subtype_id', 'location_id', 'start_date', 'end_date', 'search']);
         $perPage = $request->get('per_page', 15);
 
         $events = $this->publicEventService->getPublishedEvents($filters, $perPage);
@@ -60,18 +62,6 @@ class PublicEventController extends Controller
                 'message' => 'Event not found or not published',
             ], 404);
         }
-    }
-
-    /**
-     * Get published categories with event counts.
-     */
-    public function categories(): JsonResponse
-    {
-        $categories = $this->publicEventService->getPublicCategories();
-
-        return response()->json([
-            'data' => $categories,
-        ]);
     }
 
     /**
@@ -149,13 +139,13 @@ class PublicEventController extends Controller
     {
         $request->validate([
             'q' => 'required|string|max:255',
-            'category_id' => 'sometimes|exists:categories,id',
+            'event_type_id' => 'sometimes|exists:event_types,id',
             'limit' => 'sometimes|integer|min:1|max:50',
         ]);
 
         $result = $this->publicEventService->searchEvents(
             $request->q,
-            $request->category_id,
+            $request->event_type_id,
             $request->get('limit', 15)
         );
 
@@ -167,26 +157,6 @@ class PublicEventController extends Controller
     }
 
     /**
-     * Get events by category.
-     */
-    public function byCategory(int $categoryId, Request $request): JsonResponse
-    {
-        try {
-            $perPage = $request->get('per_page', 15);
-            $result = $this->publicEventService->getEventsByCategory($categoryId, $perPage);
-
-            return response()->json([
-                'category' => new CategoryResource($result['category']),
-                'events' => $result['events'],
-            ]);
-        } catch (ModelNotFoundException) {
-            return response()->json([
-                'message' => 'Category not found or inactive',
-            ], 404);
-        }
-    }
-
-    /**
      * Get public statistics for the calendar.
      */
     public function stats(): JsonResponse
@@ -195,6 +165,42 @@ class PublicEventController extends Controller
 
         return response()->json([
             'data' => $stats,
+        ]);
+    }
+
+    /**
+     * Get all active event types
+     * GET /api/v1/public/event-types
+     *
+     * @return JsonResponse
+     */
+    public function eventTypes(): JsonResponse
+    {
+        $eventTypes = EventType::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'color', 'is_active']);
+
+        return response()->json([
+            'data' => $eventTypes
+        ]);
+    }
+
+    /**
+     * Get all active subtypes for a specific event type
+     * GET /api/v1/public/event-types/{eventType}/subtypes
+     *
+     * @param EventType $eventType
+     * @return JsonResponse
+     */
+    public function eventSubtypes(EventType $eventType): JsonResponse
+    {
+        $subtypes = $eventType->subtypes()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'event_type_id', 'is_active']);
+
+        return response()->json([
+            'data' => $subtypes
         ]);
     }
 }

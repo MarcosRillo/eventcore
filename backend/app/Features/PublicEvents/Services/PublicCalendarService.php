@@ -40,7 +40,7 @@ class PublicCalendarService
             $endDate = $startDate->copy()->endOfMonth()->endOfDay();
 
             $events = Event::published()
-                ->with(['category', 'locations'])
+                ->with(['eventType', 'eventSubtype', 'locations'])
                 ->whereBetween('start_date', [$startDate, $endDate])
                 ->orderBy('start_date')
                 ->get();
@@ -71,7 +71,7 @@ class PublicCalendarService
     public function getEventsByDateRange(string $startDate, string $endDate): Collection
     {
         return Event::published()
-            ->with(['category', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations'])
             ->whereBetween('start_date', [
                 $startDate . ' 00:00:00',
                 $endDate . ' 23:59:59',

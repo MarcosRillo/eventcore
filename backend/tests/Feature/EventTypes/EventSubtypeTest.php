@@ -280,6 +280,26 @@ class EventSubtypeTest extends TestCase
         ]);
     }
 
+    /**
+     * Test that flat route (without event_type_id in URL) returns 404.
+     * This test verifies that the old flat route structure is not supported.
+     */
+    public function test_cannot_create_subtype_using_flat_route(): void
+    {
+        // Arrange
+        $this->authenticateAndSetup();
+
+        // Act - Try to POST to flat route (old structure)
+        $response = $this->postJson('/api/v1/event-subtypes', [
+            'event_type_id' => $this->eventType->id,
+            'name' => 'Test Subtype',
+            'is_active' => true,
+        ]);
+
+        // Assert - Should return 404 because route doesn't exist
+        $response->assertStatus(404);
+    }
+
     // ==================== SHOW TESTS ====================
 
     /**
@@ -645,5 +665,84 @@ class EventSubtypeTest extends TestCase
         // Assert
         $response->assertStatus(201)
             ->assertJsonPath('data.is_active', true);
+    }
+
+    // ==================== PERMISSION TESTS ====================
+
+    /**
+     * Test that organizer can access active subtypes endpoint.
+     * This is required for organizers to load subtypes when creating events.
+     *
+     * @test
+     */
+    public function test_organizer_can_access_active_subtypes(): void
+    {
+        // Arrange - Create fresh organization and event type
+        $organization = Organization::factory()->create();
+        $eventType = EventType::factory()->create([
+            'entity_id' => $organization->id,
+            'name' => 'Test Event Type For Organizer'
+        ]);
+
+        // Create organizer and associate with organization
+        $organizer = User::factory()->create();
+        $organizerRole = \DB::table('user_roles')->where('role_code', 'organizer_admin')->first();
+        if ($organizerRole) {
+            $organizer->role_id = $organizerRole->id;
+            $organizer->save();
+        }
+        $organizer->organizations()->attach($organization->id);
+        $organizer->refresh();
+
+        // Create active and inactive subtypes
+        $activeSubtype1 = EventSubtype::factory()->create([
+            'event_type_id' => $eventType->id,
+            'entity_id' => $organization->id,
+            'is_active' => true,
+            'name' => 'Active Subtype 1',
+        ]);
+
+        $activeSubtype2 = EventSubtype::factory()->create([
+            'event_type_id' => $eventType->id,
+            'entity_id' => $organization->id,
+            'is_active' => true,
+            'name' => 'Active Subtype 2',
+        ]);
+
+        $inactiveSubtype = EventSubtype::factory()->create([
+            'event_type_id' => $eventType->id,
+            'entity_id' => $organization->id,
+            'is_active' => false,
+            'name' => 'Inactive Subtype',
+        ]);
+
+        // Act - Organizer requests active subtypes
+        $this->actingAs($organizer);
+        $response = $this->getJson("/api/v1/event-types/{$eventType->id}/subtypes/active");
+
+        // Assert - Should return 200 with only active subtypes
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'event_type_id',
+                        'is_active',
+                    ]
+                ]
+            ])
+            ->assertJsonCount(2, 'data')  // Only 2 active subtypes
+            ->assertJsonFragment(['name' => 'Active Subtype 1'])
+            ->assertJsonFragment(['name' => 'Active Subtype 2'])
+            ->assertJsonMissing(['name' => 'Inactive Subtype']);  // Inactive not included
+
+        // Additional assertions
+        $data = $response->json('data');
+        $this->assertCount(2, $data);
+        $this->assertTrue($data[0]['is_active']);
+        $this->assertTrue($data[1]['is_active']);
     }
 }

@@ -32,7 +32,6 @@ class UpdateOrganizerEventRequest extends FormRequest
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'category_id' => 'nullable|exists:categories,id',
 
             // Event Type and Subtype (hierarchical categorization - Dec 2, 2025)
             'event_type_id' => 'required|exists:event_types,id',
