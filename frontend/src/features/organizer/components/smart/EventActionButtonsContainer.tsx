@@ -30,16 +30,11 @@ export const EventActionButtonsContainer = ({
     openDeleteModal,
     closeDeleteModal,
     submitForReview,
-    duplicateEvent,
     deleteEvent
   } = useEventActions(onSuccess)
 
   const handleSubmit = (): void => {
     openSubmitModal(event.id)
-  }
-
-  const handleDuplicate = async (): Promise<void> => {
-    await duplicateEvent(event.id)
   }
 
   const handleDelete = (): void => {
@@ -63,7 +58,6 @@ export const EventActionButtonsContainer = ({
       <EventActionButtons
         event={event}
         onSubmit={handleSubmit}
-        onDuplicate={handleDuplicate}
         onDelete={handleDelete}
         loading={loading}
       />

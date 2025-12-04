@@ -29,7 +29,6 @@ export const EventManagementModalContainer = ({
     commentError,
     availableActions,
     isLoading,
-    openModal,
     closeModal,
     selectAction,
     setComment,

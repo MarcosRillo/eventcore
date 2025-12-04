@@ -10,18 +10,21 @@ export const useOrganizerEvents = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [showPast, setShowPast] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
 
   // Use refs to access current state values in refetch
   const currentPageRef = useRef(currentPage)
   const statusFilterRef = useRef(statusFilter)
+  const showPastRef = useRef(showPast)
   currentPageRef.current = currentPage
   statusFilterRef.current = statusFilter
+  showPastRef.current = showPast
 
   const perPage = 10
 
-  const fetchEvents = async (page = currentPage, status = statusFilter) => {
+  const fetchEvents = async (page = currentPage, status = statusFilter, isPast = showPast) => {
     setLoading(true)
     setError(null)
 
@@ -29,7 +32,8 @@ export const useOrganizerEvents = () => {
       const params: EventListParams = {
         page,
         per_page: perPage,
-        status
+        status,
+        show_past: isPast ? '1' : undefined
       }
 
       const response = await getEvents(params)
@@ -52,7 +56,7 @@ export const useOrganizerEvents = () => {
   // Effect to refetch when refreshKey changes (triggered by refetch())
   useEffect(() => {
     if (refreshKey > 0) {
-      fetchEvents(currentPageRef.current, statusFilterRef.current)
+      fetchEvents(currentPageRef.current, statusFilterRef.current, showPastRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey])
@@ -64,13 +68,19 @@ export const useOrganizerEvents = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    fetchEvents(page)
+    fetchEvents(page, statusFilter, showPast)
   }
 
   const handleStatusFilter = (status: string | null) => {
     setStatusFilter(status)
     setCurrentPage(1) // Reset to page 1
-    fetchEvents(1, status)
+    fetchEvents(1, status, showPast)
+  }
+
+  const handleShowPastToggle = (isPast: boolean) => {
+    setShowPast(isPast)
+    setCurrentPage(1) // Reset to page 1
+    fetchEvents(1, statusFilter, isPast)
   }
 
   const handleDelete = async (id: number) => {
@@ -81,7 +91,7 @@ export const useOrganizerEvents = () => {
     setIsDeleting(true)
     try {
       await deleteEvent(id)
-      fetchEvents() // Refresh list
+      fetchEvents(currentPage, statusFilter, showPast) // Refresh list
     } catch {
       setError('Error deleting event')
     } finally {
@@ -97,10 +107,13 @@ export const useOrganizerEvents = () => {
     totalPages,
     total,
     statusFilter,
+    showPast,
     isDeleting,
     handlePageChange,
     handleStatusFilter,
+    handleShowPastToggle,
     handleDelete,
+    setShowPast,
     retry: refetch
   }
 }

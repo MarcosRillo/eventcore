@@ -25,15 +25,23 @@ class OrganizerController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'search' => 'sometimes|string|max:255',
+            'status' => 'sometimes|string',
+            'show_past' => 'sometimes|string|in:0,1',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
         $filters = [
-            'search' => $request->input('search'),
-            'status' => $request->input('status'),
+            'search' => $validated['search'] ?? null,
+            'status' => $validated['status'] ?? null,
+            'show_past' => $validated['show_past'] ?? null,
         ];
 
         $events = $this->organizerService->getPaginatedEvents(
             $request->user(),
             $filters,
-            $request->input('per_page', 10)
+            $validated['per_page'] ?? 10
         );
 
         return response()->json($events);

@@ -4,7 +4,7 @@
  * Smart component that composes the event management modal with all panels.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EventManagementModalContainer } from '../EventManagementModalContainer';
 import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
 import * as useApprovalManagerModule from '@/features/entity-admin/hooks/useApprovalManager';
@@ -227,7 +227,7 @@ describe('EventManagementModalContainer', () => {
 
   test('exposes openModal function via ref', () => {
     const onActionSuccess = jest.fn();
-    const { rerender } = render(
+    render(
       <EventManagementModalContainer onActionSuccess={onActionSuccess} />
     );
 

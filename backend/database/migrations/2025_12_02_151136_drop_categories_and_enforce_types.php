@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('event_subtype_id')->nullable(false)->change();
 
             // 2. Remover foreign key y columna category_id
+            // IMPORTANT: SQLite requires dropping index BEFORE column
+            $table->dropIndex('events_category_id_index');
             $table->dropForeign(['category_id']);
             $table->dropColumn('category_id');
         });
@@ -44,6 +46,7 @@ return new class extends Migration
         // Re-agregar category_id a events
         Schema::table('events', function (Blueprint $table) {
             $table->foreignId('category_id')->nullable()->after('id')->constrained('categories');
+            $table->index('category_id'); // Re-create the index
 
             // Hacer nullable los campos de type/subtype
             $table->foreignId('event_type_id')->nullable()->change();

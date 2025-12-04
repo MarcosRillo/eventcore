@@ -7,19 +7,17 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { Event, EventStatus, EventType, EVENT_STATUS } from '@/types/event.types';
+import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
 import {
   getStatusConfig,
-  getTypeConfig,
   BADGE_BASE_CLASSES
 } from '@/features/events/constants';
 import {
   EyeIcon,
   PencilIcon,
-  CheckCircleIcon,
   StarIcon,
   DocumentDuplicateIcon,
   TrashIcon,
@@ -57,10 +55,6 @@ function getEventStatusCode(status: EventStatus): string {
   return status.status_code || (status as { code?: string }).code || '';
 }
 
-// Helper function to extract type code from type object or string
-function getEventTypeCode(type: EventType): string {
-  return typeof type === 'object' ? type.type_code : type;
-}
 
 export const EventTableContainer = ({
   events,
@@ -163,8 +157,7 @@ export const EventTableContainer = ({
         key: 'status',
         label: 'Estado',
         render: (event) => {
-          // Extract status code from backend object (3NF structure)
-          const statusCode = event.status?.code || (typeof event.status === 'string' ? event.status : undefined);
+          const statusCode = getEventStatusCode(event.status);
           const statusConfig = getStatusConfig(statusCode);
           return (
             <span className={`${BADGE_BASE_CLASSES} ${statusConfig.className}`}>

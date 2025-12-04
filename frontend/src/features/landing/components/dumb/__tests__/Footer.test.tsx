@@ -120,7 +120,7 @@ describe('Footer', () => {
     })
 
     test('should render exactly 3 contact SVG icons', () => {
-      const { container } = render(<Footer />)
+      render(<Footer />)
 
       // Query all SVGs in the contact section
       const contactHeading = screen.getByText('Contacto')

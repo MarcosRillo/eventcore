@@ -256,4 +256,126 @@ class EventTest extends TestCase
                      ]
                  ]);
     }
+
+    #[Test]
+    public function test_upcoming_scope_filters_future_and_ongoing_events(): void
+    {
+        $this->authenticateUser();
+
+        // Create events with different dates
+        $pastEvent = Event::factory()->create([
+            'title' => 'Past Event',
+            'start_date' => now()->subDays(5),
+            'end_date' => now()->subDays(4),
+        ]);
+
+        $ongoingEvent = Event::factory()->create([
+            'title' => 'Ongoing Event',
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addDay(),
+        ]);
+
+        $futureEvent = Event::factory()->create([
+            'title' => 'Future Event',
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(4),
+        ]);
+
+        // Apply upcoming scope
+        $upcomingEvents = Event::upcoming()->get();
+
+        // Assert only ongoing and future events are included
+        $this->assertCount(2, $upcomingEvents);
+        $this->assertTrue($upcomingEvents->contains('id', $ongoingEvent->id));
+        $this->assertTrue($upcomingEvents->contains('id', $futureEvent->id));
+        $this->assertFalse($upcomingEvents->contains('id', $pastEvent->id));
+    }
+
+    #[Test]
+    public function test_upcoming_scope_excludes_past_events(): void
+    {
+        $this->authenticateUser();
+
+        // Create only past events
+        $pastEvent1 = Event::factory()->create([
+            'title' => 'Past Event 1',
+            'start_date' => now()->subDays(10),
+            'end_date' => now()->subDays(9),
+        ]);
+
+        $pastEvent2 = Event::factory()->create([
+            'title' => 'Past Event 2',
+            'start_date' => now()->subDays(3),
+            'end_date' => now()->subDay(),
+        ]);
+
+        // Apply upcoming scope
+        $upcomingEvents = Event::upcoming()->get();
+
+        // Assert no events are returned
+        $this->assertCount(0, $upcomingEvents);
+        $this->assertFalse($upcomingEvents->contains('id', $pastEvent1->id));
+        $this->assertFalse($upcomingEvents->contains('id', $pastEvent2->id));
+    }
+
+    #[Test]
+    public function test_past_scope_filters_past_events(): void
+    {
+        $this->authenticateUser();
+
+        // Create events with different dates
+        $pastEvent = Event::factory()->create([
+            'title' => 'Past Event',
+            'start_date' => now()->subDays(5),
+            'end_date' => now()->subDays(4),
+        ]);
+
+        $ongoingEvent = Event::factory()->create([
+            'title' => 'Ongoing Event',
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addDay(),
+        ]);
+
+        $futureEvent = Event::factory()->create([
+            'title' => 'Future Event',
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(4),
+        ]);
+
+        // Apply past scope
+        $pastEvents = Event::past()->get();
+
+        // Assert only past events are included
+        $this->assertCount(1, $pastEvents);
+        $this->assertTrue($pastEvents->contains('id', $pastEvent->id));
+        $this->assertFalse($pastEvents->contains('id', $ongoingEvent->id));
+        $this->assertFalse($pastEvents->contains('id', $futureEvent->id));
+    }
+
+    #[Test]
+    public function test_past_scope_excludes_upcoming_events(): void
+    {
+        $this->authenticateUser();
+
+        // Create only future/ongoing events
+        $ongoingEvent = Event::factory()->create([
+            'title' => 'Ongoing Event',
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addDay(),
+        ]);
+
+        $futureEvent = Event::factory()->create([
+            'title' => 'Future Event',
+            'start_date' => now()->addDays(2),
+            'end_date' => now()->addDays(3),
+        ]);
+
+        // Apply past scope
+        $pastEvents = Event::past()->get();
+
+        // Assert no events are returned
+        $this->assertCount(0, $pastEvents);
+        $this->assertFalse($pastEvents->contains('id', $ongoingEvent->id));
+        $this->assertFalse($pastEvents->contains('id', $futureEvent->id));
+    }
 }

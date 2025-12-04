@@ -59,9 +59,20 @@ class OrganizerStatsService
                 'rejected' => $statusCounts->get($statusIds['rejected'] ?? 0, 0),
             ];
 
+            // Add upcoming vs past breakdown
+            $stats['upcoming_events'] = Event::where('created_by', $userId)
+                ->upcoming()
+                ->count();
+
+            $stats['past_events'] = Event::where('created_by', $userId)
+                ->past()
+                ->count();
+
             Log::info('Organizer stats fetched successfully', [
                 'user_id' => $userId,
-                'total_events' => $stats['total_events']
+                'total_events' => $stats['total_events'],
+                'upcoming_events' => $stats['upcoming_events'],
+                'past_events' => $stats['past_events']
             ]);
 
             return $stats;

@@ -6,7 +6,6 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AdminQuickFilters } from '../AdminQuickFilters';
-import type { EventStatusCode } from '@/types/event.types';
 
 describe('AdminQuickFilters', () => {
   const mockOnFilterChange = jest.fn();

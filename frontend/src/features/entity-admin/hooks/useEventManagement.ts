@@ -9,7 +9,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { useApprovalManager } from './useApprovalManager';
-import type { Event } from '@/types/event.types';
+import type { Event, EventStatusCode } from '@/types/event.types';
 import type { ApprovalAction } from '@/features/entity-admin/types';
 import { MIN_COMMENT_LENGTH, STATUS_ACTIONS_MAP } from '@/features/entity-admin/types';
 
@@ -69,7 +69,6 @@ export const useEventManagement = (
     publishEvent,
     requestChanges,
     rejectEvent,
-    getAvailableActions,
   } = useApprovalManager();
 
   // Compute available actions based on selected event

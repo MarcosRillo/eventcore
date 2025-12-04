@@ -12,7 +12,6 @@ import { Tooltip } from '@/components/ui/Tooltip'
 interface EventActionButtonsProps {
   event: OrganizerEvent
   onSubmit: (eventId: number) => void
-  onDuplicate: (eventId: number) => void
   onDelete: (eventId: number) => void
   loading?: boolean
 }
@@ -30,7 +29,6 @@ const getStatusCode = (status: OrganizerEvent['status']): string => {
 export const EventActionButtons = ({
   event,
   onSubmit,
-  onDuplicate,
   onDelete,
   loading = false
 }: EventActionButtonsProps) => {

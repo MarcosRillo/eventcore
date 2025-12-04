@@ -31,6 +31,8 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe('OrganizerDashboard', () => {
   const mockStats = {
     total_events: 25,
+    upcoming_events: 12,
+    past_events: 6,
     pending_internal: 5,
     approved_internal: 8,
     pending_public: 3,
@@ -68,6 +70,7 @@ describe('OrganizerDashboard', () => {
     loading: false,
     error: null,
     activeFilter: null,
+    showPast: false,
     currentPage: 1,
     totalPages: 1,
     ...mockHandlers
@@ -98,18 +101,22 @@ describe('OrganizerDashboard', () => {
 
       const statsCards = screen.getAllByRole('article')
 
-      expect(statsCards).toHaveLength(5)
+      expect(statsCards).toHaveLength(7)
       expect(statsCards[0]).toHaveTextContent('Total Eventos')
-      expect(statsCards[1]).toHaveTextContent('Pendientes')
-      expect(statsCards[2]).toHaveTextContent('Aprobados')
-      expect(statsCards[3]).toHaveTextContent('Publicados')
-      expect(statsCards[4]).toHaveTextContent('Requiere Cambios')
+      expect(statsCards[1]).toHaveTextContent('Próximos')
+      expect(statsCards[2]).toHaveTextContent('Pasados')
+      expect(statsCards[3]).toHaveTextContent('Pendientes')
+      expect(statsCards[4]).toHaveTextContent('Aprobados')
+      expect(statsCards[5]).toHaveTextContent('Publicados')
+      expect(statsCards[6]).toHaveTextContent('Requiere Cambios')
     })
 
     test('displays correct stat values', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       expect(screen.getByText('25')).toBeInTheDocument() // total
+      expect(screen.getByText('12')).toBeInTheDocument() // upcoming
+      expect(screen.getByText('6')).toBeInTheDocument()  // past
       expect(screen.getByText('5')).toBeInTheDocument()  // pending
       expect(screen.getByText('8')).toBeInTheDocument()  // approved
       expect(screen.getByText('10')).toBeInTheDocument() // published
@@ -124,7 +131,7 @@ describe('OrganizerDashboard', () => {
       expect(statsGrid.className).toContain('grid')
       expect(statsGrid.className).toMatch(/grid-cols-1/)
       expect(statsGrid.className).toMatch(/md:grid-cols-2/)
-      expect(statsGrid.className).toMatch(/lg:grid-cols-5/)
+      expect(statsGrid.className).toMatch(/lg:grid-cols-7/)
     })
   })
 
@@ -206,7 +213,7 @@ describe('OrganizerDashboard', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       const articles = screen.getAllByRole('article')
-      expect(articles).toHaveLength(5)
+      expect(articles).toHaveLength(7)
     })
 
     test('filter buttons have aria-pressed attribute', () => {

@@ -187,19 +187,35 @@ class OrganizerServiceTest extends TestCase
     }
 
     #[Test]
-    public function test_update_event_validates_editable_status(): void
+    public function test_update_published_event_changes_status_to_pending_approval(): void
     {
+        // Arrange: Create published event
         $event = Event::factory()->create([
             'organization_id' => $this->organization->id,
             'entity_id' => $this->organization->id,
             'status_id' => $this->publishedStatus->id,
+            'title' => 'Original Title',
         ]);
 
+        // Act: Update the published event
         $data = $this->getValidEventData();
+        $data['title'] = 'Updated Title';
 
-        $this->expectException(ValidationException::class);
+        $updatedEvent = $this->service->updateEvent($event, $data, $this->user);
 
-        $this->service->updateEvent($event, $data, $this->user);
+        // Assert: Update succeeds (no exception thrown)
+        $this->assertEquals('Updated Title', $updatedEvent->title);
+
+        // Assert: Status automatically changed to pending_internal_approval
+        $pendingStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
+        $this->assertEquals($pendingStatus->id, $updatedEvent->status_id);
+
+        // Assert: Verify in database
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'title' => 'Updated Title',
+            'status_id' => $pendingStatus->id,
+        ]);
     }
 
     // ==================== DELETE TESTS ====================
@@ -338,5 +354,149 @@ class OrganizerServiceTest extends TestCase
         $this->expectException(ValidationException::class);
 
         $this->validator->validateDeletable($event);
+    }
+
+    // ==================== DATE FILTERING TESTS ====================
+
+    #[Test]
+    public function test_paginates_upcoming_events_by_default(): void
+    {
+        // Create past event
+        $pastEvent = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Past Event',
+            'start_date' => now()->subDays(5),
+            'end_date' => now()->subDays(4),
+        ]);
+
+        // Create upcoming event
+        $upcomingEvent = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Upcoming Event',
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(4),
+        ]);
+
+        // Default: should only show upcoming events
+        $result = $this->service->getPaginatedEvents($this->user, []);
+
+        $this->assertCount(1, $result->items());
+        $this->assertEquals('Upcoming Event', $result->items()[0]->title);
+        $this->assertFalse($result->contains('id', $pastEvent->id));
+    }
+
+    #[Test]
+    public function test_paginates_past_events_when_filter_applied(): void
+    {
+        // Create past event
+        $pastEvent = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Past Event',
+            'start_date' => now()->subDays(5),
+            'end_date' => now()->subDays(4),
+        ]);
+
+        // Create upcoming event
+        $upcomingEvent = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Upcoming Event',
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(4),
+        ]);
+
+        // With show_past filter: should only show past events
+        $result = $this->service->getPaginatedEvents($this->user, ['show_past' => '1']);
+
+        $this->assertCount(1, $result->items());
+        $this->assertEquals('Past Event', $result->items()[0]->title);
+        $this->assertFalse($result->contains('id', $upcomingEvent->id));
+    }
+
+    #[Test]
+    public function test_orders_upcoming_events_chronologically(): void
+    {
+        // Create events in non-chronological order
+        $event3 = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Event in 10 days',
+            'start_date' => now()->addDays(10),
+            'end_date' => now()->addDays(11),
+        ]);
+
+        $event1 = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Event in 2 days',
+            'start_date' => now()->addDays(2),
+            'end_date' => now()->addDays(3),
+        ]);
+
+        $event2 = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Event in 5 days',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+        ]);
+
+        $result = $this->service->getPaginatedEvents($this->user, []);
+
+        // Should be ordered chronologically (earliest first)
+        $this->assertCount(3, $result->items());
+        $this->assertEquals('Event in 2 days', $result->items()[0]->title);
+        $this->assertEquals('Event in 5 days', $result->items()[1]->title);
+        $this->assertEquals('Event in 10 days', $result->items()[2]->title);
+    }
+
+    #[Test]
+    public function test_orders_past_events_reverse_chronologically(): void
+    {
+        // Create past events
+        $event1 = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Event 10 days ago',
+            'start_date' => now()->subDays(11),
+            'end_date' => now()->subDays(10),
+        ]);
+
+        $event2 = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Event 3 days ago',
+            'start_date' => now()->subDays(4),
+            'end_date' => now()->subDays(3),
+        ]);
+
+        $event3 = Event::factory()->create([
+            'organization_id' => $this->organization->id,
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->draftStatus->id,
+            'title' => 'Event 7 days ago',
+            'start_date' => now()->subDays(8),
+            'end_date' => now()->subDays(7),
+        ]);
+
+        $result = $this->service->getPaginatedEvents($this->user, ['show_past' => '1']);
+
+        // Should be ordered reverse chronologically (most recent first)
+        $this->assertCount(3, $result->items());
+        $this->assertEquals('Event 3 days ago', $result->items()[0]->title);
+        $this->assertEquals('Event 7 days ago', $result->items()[1]->title);
+        $this->assertEquals('Event 10 days ago', $result->items()[2]->title);
     }
 }

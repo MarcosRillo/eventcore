@@ -204,6 +204,7 @@ export interface EventListParams {
   per_page?: number
   status?: string | null
   search?: string
+  show_past?: '0' | '1'  // Filter for past events ('1' = show past, undefined = show upcoming)
 }
 
 export interface EventListResponse {

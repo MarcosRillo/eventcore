@@ -22,10 +22,12 @@ export const OrganizerDashboardContainer = () => {
     loading: eventsLoading,
     error: eventsError,
     statusFilter,
+    showPast,
     currentPage,
     totalPages,
     handlePageChange,
     handleStatusFilter,
+    handleShowPastToggle,
     retry
   } = useOrganizerEvents()
 
@@ -56,9 +58,11 @@ export const OrganizerDashboardContainer = () => {
       loading={eventsLoading}
       error={eventsError}
       activeFilter={statusFilter}
+      showPast={showPast}
       currentPage={currentPage}
       totalPages={totalPages}
       onFilterChange={handleFilterChange}
+      onShowPastChange={handleShowPastToggle}
       onPageChange={handlePageChange}
       onSuccess={handleRefresh}
       onEdit={handleEdit}

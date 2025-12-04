@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * EventSubtype Controller Tests
@@ -672,9 +673,8 @@ class EventSubtypeTest extends TestCase
     /**
      * Test that organizer can access active subtypes endpoint.
      * This is required for organizers to load subtypes when creating events.
-     *
-     * @test
      */
+    #[Test]
     public function test_organizer_can_access_active_subtypes(): void
     {
         // Arrange - Use helper for proper authentication setup

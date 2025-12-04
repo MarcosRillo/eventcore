@@ -157,17 +157,30 @@ class OrganizerService
             ->with(['status', 'eventType', 'eventSubtype', 'locations'])
             ->where('organization_id', $user->organization_id);
 
+        // Apply search filter
         if (!empty($filters['search'])) {
             $query->where('title', 'ILIKE', "%{$filters['search']}%");
         }
 
+        // Apply status filter
         if (!empty($filters['status'])) {
             $query->whereHas('status', function ($q) use ($filters) {
                 $q->where('status_code', $filters['status']);
             });
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+        // Apply date filtering and ordering
+        if (isset($filters['show_past']) && $filters['show_past'] === '1') {
+            // Show only past events
+            $query->past();
+            // Order past events by most recent first
+            return $query->orderBy('end_date', 'desc')->paginate($perPage);
+        } else {
+            // Default: Show only upcoming/ongoing events
+            $query->upcoming();
+            // Order upcoming events chronologically
+            return $query->orderBy('start_date', 'asc')->paginate($perPage);
+        }
     }
 
     /**

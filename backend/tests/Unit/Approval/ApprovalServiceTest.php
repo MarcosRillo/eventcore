@@ -222,7 +222,7 @@ class ApprovalServiceTest extends TestCase
         // Verify correct counts
         // Note: setUp() creates 1 event in pending_internal_approval, + 2 more = 3 total
         $this->assertEquals(3, $stats['draft']);
-        $this->assertEquals(3, $stats['in_review']); // pending_internal_approval (1 from setUp + 2 here)
+        $this->assertEquals(3, $stats['pending_internal_approval']); // pending_internal_approval (1 from setUp + 2 here)
         $this->assertEquals(1, $stats['published']);
         $this->assertEquals(1, $stats['rejected']);
         $this->assertEquals(0, $stats['approved_internal']);

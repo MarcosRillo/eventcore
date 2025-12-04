@@ -398,6 +398,24 @@ class Event extends Model
         return $query->whereHas('theme', fn($q) => $q->where('code', $themeCode));
     }
 
+    /**
+     * Scope to filter upcoming and ongoing events.
+     * Events where end_date is today or in the future.
+     */
+    public function scopeUpcoming($query)
+    {
+        return $query->where('end_date', '>=', now()->startOfDay());
+    }
+
+    /**
+     * Scope to filter past events.
+     * Events where end_date is before today.
+     */
+    public function scopePast($query)
+    {
+        return $query->where('end_date', '<', now()->startOfDay());
+    }
+
     // =====================================================
     // ACCESSORS
     // =====================================================
