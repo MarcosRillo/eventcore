@@ -50,8 +50,11 @@ interface EventTableContainerProps {
 }
 
 // Helper function to extract status code from status object or string
+// Supports both 'status_code' (type definition) and 'code' (API response from EventResource)
 function getEventStatusCode(status: EventStatus): string {
-  return typeof status === 'object' ? status.status_code : status;
+  if (typeof status === 'string') return status;
+  // Backend EventResource returns 'code', type definition expects 'status_code'
+  return status.status_code || (status as { code?: string }).code || '';
 }
 
 // Helper function to extract type code from type object or string
@@ -146,11 +149,11 @@ export const EventTableContainer = ({
         key: 'type',
         label: 'Tipo',
         render: (event) => {
-          const typeCode = getEventTypeCode(event.type);
-          const typeConfig = getTypeConfig(typeCode);
+          // Use event_type.name directly from backend (3NF structure)
+          const typeName = event.event_type?.name || 'Sin tipo';
           return (
-            <span className={`${BADGE_BASE_CLASSES} ${typeConfig.className}`}>
-              {typeConfig.label}
+            <span className={`${BADGE_BASE_CLASSES} bg-primary-100 text-primary-700`}>
+              {typeName}
             </span>
           );
         },
@@ -160,7 +163,8 @@ export const EventTableContainer = ({
         key: 'status',
         label: 'Estado',
         render: (event) => {
-          const statusCode = getEventStatusCode(event.status);
+          // Extract status code from backend object (3NF structure)
+          const statusCode = event.status?.code || (typeof event.status === 'string' ? event.status : undefined);
           const statusConfig = getStatusConfig(statusCode);
           return (
             <span className={`${BADGE_BASE_CLASSES} ${statusConfig.className}`}>
@@ -169,36 +173,18 @@ export const EventTableContainer = ({
           );
         },
       },
-      // Location column
-      {
-        key: 'location',
-        label: 'Ubicación',
-        render: (event) => {
-          const locationText = event.location?.name || event.location_text || 'No especificada';
-          return (
-            <div className="text-sm text-neutral-900">
-              {locationText}
-              {event.locations && event.locations.length > 1 && (
-                <span className="ml-1 text-xs text-neutral-500">
-                  (+{event.locations.length - 1} más)
-                </span>
-              )}
-            </div>
-          );
-        },
-      },
     ];
 
     // Filter columns based on view mode
     if (viewMode === 'public') {
       return baseColumns.filter(col =>
-        ['title', 'date', 'category', 'location'].includes(String(col.key))
+        ['title', 'date', 'category'].includes(String(col.key))
       );
     }
 
     if (viewMode === 'organizer') {
       return baseColumns.filter(col =>
-        ['title', 'date', 'status', 'category', 'location'].includes(String(col.key))
+        ['title', 'date', 'status', 'category'].includes(String(col.key))
       );
     }
 
@@ -236,13 +222,9 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'approve',
             label: 'Gestionar Aprobación',
-            icon: <CheckCircleIcon className="w-5 h-5" />,
+            icon: <EyeIcon className="w-5 h-5" />,
             variant: 'primary',
-            condition: (event) => {
-              const status = getEventStatusCode(event.status);
-              return status === EVENT_STATUS.PENDING_INTERNAL_APPROVAL ||
-                     status === EVENT_STATUS.PENDING_PUBLIC_APPROVAL;
-            },
+            // No condition - entity_admin/entity_staff can manage ALL events regardless of status
             onClick: onApprovalAction,
           });
         }

@@ -12,6 +12,8 @@ class ApprovalTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $organization;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,9 +28,15 @@ class ApprovalTest extends TestCase
 
     private function authenticateUser(): User
     {
-        $user = User::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
+        // Specify entity_admin role explicitly (FormRequests only allow entity_admin and entity_staff)
+        $entityAdminRole = \App\Models\UserRole::where('role_code', 'entity_admin')->first();
+
+        $user = User::factory()->create([
+            'role_id' => $entityAdminRole->id
+        ]);
+
+        $this->organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
         $this->actingAs($user, 'sanctum');
         return $user;
     }
@@ -49,6 +57,7 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
@@ -69,6 +78,7 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
@@ -89,6 +99,7 @@ class ApprovalTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
@@ -110,6 +121,7 @@ class ApprovalTest extends TestCase
 
         // Must start from pending_public_approval state (valid transition to published)
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'status_id' => $this->getStatusId('pending_public_approval')
         ]);
 
@@ -131,6 +143,7 @@ class ApprovalTest extends TestCase
 
         // Must start from approved_internal state (valid transition path)
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'status_id' => $this->getStatusId('approved_internal')
         ]);
 
@@ -152,11 +165,16 @@ class ApprovalTest extends TestCase
 
         $response->assertStatus(200);
 
-        // Verify statistics data structure
-        $data = $response->json();
+        // Verify statistics data structure (wrapped in data key)
+        $json = $response->json();
+        $this->assertArrayHasKey('data', $json);
+
+        $data = $json['data'];
         $this->assertIsArray($data);
         $this->assertArrayHasKey('draft', $data);
+        $this->assertArrayHasKey('pending_internal_approval', $data);
         $this->assertArrayHasKey('published', $data);
         $this->assertArrayHasKey('rejected', $data);
+        $this->assertArrayHasKey('total', $data);
     }
 }

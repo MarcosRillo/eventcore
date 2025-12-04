@@ -5,6 +5,7 @@ namespace App\Features\Approval\Services;
 use App\Features\Approval\Exceptions\InvalidStateTransitionException;
 use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
+use App\Models\EventApproval;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,11 +28,16 @@ class ApprovalService
         $this->stateMachine->validateTransition($event, 'approved_internal');
 
         DB::transaction(function () use ($event, $approver, $comments) {
-            $event->update([
-                'status_id' => $this->getStatusId('approved_internal'),
-                'approved_by' => $approver->id,
-                'approved_at' => now(),
-                'approval_comments' => $comments
+            // Update event status
+            $event->update(['status_id' => $this->getStatusId('approved_internal')]);
+
+            // Record approval in audit table
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $approver->id,
+                'action' => EventApproval::ACTION_APPROVE_INTERNAL,
+                'comments' => $comments,
+                'performed_at' => now(),
             ]);
 
             Log::info('Event approved internally', [
@@ -51,10 +57,15 @@ class ApprovalService
         $this->stateMachine->validateTransition($event, 'pending_public_approval');
 
         DB::transaction(function () use ($event, $requester) {
-            $event->update([
-                'status_id' => $this->getStatusId('pending_public_approval'),
-                'public_approval_requested_at' => now(),
-                'public_approval_requested_by' => $requester->id
+            // Update event status
+            $event->update(['status_id' => $this->getStatusId('pending_public_approval')]);
+
+            // Record approval action in audit table
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $requester->id,
+                'action' => EventApproval::ACTION_REQUEST_PUBLIC,
+                'performed_at' => now(),
             ]);
 
             Log::info('Public approval requested', [
@@ -74,11 +85,16 @@ class ApprovalService
         $this->stateMachine->validateTransition($event, 'published');
 
         DB::transaction(function () use ($event, $publisher, $scheduledAt) {
-            $event->update([
-                'status_id' => $this->getStatusId('published'),
-                'published_by' => $publisher->id,
-                'published_at' => $scheduledAt ?? now(),
-                'scheduled_publish_at' => $scheduledAt
+            // Update event status
+            $event->update(['status_id' => $this->getStatusId('published')]);
+
+            // Record publish action in audit table
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $publisher->id,
+                'action' => EventApproval::ACTION_PUBLISH,
+                'performed_at' => $scheduledAt ?? now(),
+                'scheduled_publish_at' => $scheduledAt,
             ]);
 
             Log::info('Event published', [
@@ -98,11 +114,16 @@ class ApprovalService
         $this->stateMachine->validateTransition($event, 'requires_changes');
 
         DB::transaction(function () use ($event, $reason, $reviewer) {
-            $event->update([
-                'status_id' => $this->getStatusId('requires_changes'),
-                'changes_requested_by' => $reviewer->id,
-                'changes_requested_at' => now(),
-                'approval_comments' => $reason
+            // Update event status
+            $event->update(['status_id' => $this->getStatusId('requires_changes')]);
+
+            // Record request changes action in audit table
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $reviewer->id,
+                'action' => EventApproval::ACTION_REQUEST_CHANGES,
+                'comments' => $reason,
+                'performed_at' => now(),
             ]);
 
             Log::info('Changes requested', [
@@ -122,11 +143,16 @@ class ApprovalService
         $this->stateMachine->validateTransition($event, 'rejected');
 
         DB::transaction(function () use ($event, $reason, $rejector) {
-            $event->update([
-                'status_id' => $this->getStatusId('rejected'),
-                'rejected_by' => $rejector->id,
-                'rejected_at' => now(),
-                'rejection_reason' => $reason
+            // Update event status
+            $event->update(['status_id' => $this->getStatusId('rejected')]);
+
+            // Record reject action in audit table
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $rejector->id,
+                'action' => EventApproval::ACTION_REJECT,
+                'comments' => $reason,
+                'performed_at' => now(),
             ]);
 
             Log::info('Event rejected', [
@@ -151,9 +177,9 @@ class ApprovalService
             ->toArray();
 
         // Map status codes to expected keys with defaults
-        return [
+        $stats = [
             'draft' => $counts['draft'] ?? 0,
-            'in_review' => $counts['pending_internal_approval'] ?? 0,
+            'pending_internal_approval' => $counts['pending_internal_approval'] ?? 0,
             'approved_internal' => $counts['approved_internal'] ?? 0,
             'pending_public_approval' => $counts['pending_public_approval'] ?? 0,
             'published' => $counts['published'] ?? 0,
@@ -161,5 +187,10 @@ class ApprovalService
             'requires_changes' => $counts['requires_changes'] ?? 0,
             'cancelled' => $counts['cancelled'] ?? 0,
         ];
+
+        // Add total count
+        $stats['total'] = array_sum($stats);
+
+        return $stats;
     }
 }

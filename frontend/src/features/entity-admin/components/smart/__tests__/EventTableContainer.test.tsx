@@ -132,7 +132,7 @@ describe('EventTableContainer', () => {
       );
 
       const columnsCount = parseInt(screen.getByTestId('columns-count').textContent || '0');
-      expect(columnsCount).toBe(5); // title, date, type, status, location (category removed)
+      expect(columnsCount).toBe(4); // title, date, type, status (location and category removed)
     });
 
     it('should configure 4 columns for organizer view mode', () => {
@@ -145,7 +145,7 @@ describe('EventTableContainer', () => {
       );
 
       const columnsCount = parseInt(screen.getByTestId('columns-count').textContent || '0');
-      expect(columnsCount).toBe(4); // title, date, status, location (category removed)
+      expect(columnsCount).toBe(3); // title, date, status (location and category removed)
     });
 
     it('should configure 3 columns for public view mode', () => {
@@ -158,7 +158,7 @@ describe('EventTableContainer', () => {
       );
 
       const columnsCount = parseInt(screen.getByTestId('columns-count').textContent || '0');
-      expect(columnsCount).toBe(3); // title, date, location (category removed)
+      expect(columnsCount).toBe(2); // title, date (location and category removed)
     });
 
     it('should include correct column labels for admin view', () => {
@@ -174,8 +174,7 @@ describe('EventTableContainer', () => {
       expect(screen.getByTestId('column-date')).toHaveTextContent('Fecha');
       expect(screen.getByTestId('column-type')).toHaveTextContent('Tipo');
       expect(screen.getByTestId('column-status')).toHaveTextContent('Estado');
-      expect(screen.getByTestId('column-location')).toHaveTextContent('Ubicación');
-      // Category column was removed from the migration
+      // Location and Category columns were removed
     });
   });
 
@@ -233,7 +232,7 @@ describe('EventTableContainer', () => {
       expect(onApprovalAction).toHaveBeenCalledWith(pendingEvent);
     });
 
-    it('should not show approval action for draft events', () => {
+    it('should show approval action for ALL events including draft', () => {
       const onApprovalAction = jest.fn();
       const draftEvent = createMockEvent({ status: EVENT_STATUS.DRAFT });
 
@@ -246,7 +245,8 @@ describe('EventTableContainer', () => {
         />
       );
 
-      expect(screen.queryByTestId('action-approve')).not.toBeInTheDocument();
+      // Admin can manage ALL events regardless of status
+      expect(screen.getByTestId('action-approve')).toBeInTheDocument();
     });
 
     it('should configure featured toggle action', () => {

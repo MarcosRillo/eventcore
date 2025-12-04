@@ -4,6 +4,10 @@ namespace App\Features\Approval\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Features\Approval\Services\ApprovalService;
+use App\Http\Requests\Approval\ApproveEventRequest;
+use App\Http\Requests\Approval\PublishEventRequest;
+use App\Http\Requests\Approval\RequestChangesRequest;
+use App\Http\Requests\Approval\RejectEventRequest;
 use App\Models\Event;
 use App\Http\Resources\EventResource;
 use Illuminate\Http\Request;
@@ -16,14 +20,10 @@ class ApprovalController extends Controller
     ) {}
 
     /**
-     * Approve event internally (entity_admin).
+     * Approve event internally (entity_admin, entity_staff).
      */
-    public function approve(Request $request, string $id): JsonResponse
+    public function approve(ApproveEventRequest $request, string $id): JsonResponse
     {
-        $request->validate([
-            'comments' => 'nullable|string|max:500'
-        ]);
-
         $event = Event::findOrFail($id);
 
         $this->approvalService->approveInternal(
@@ -39,10 +39,11 @@ class ApprovalController extends Controller
     }
 
     /**
-     * Request public approval (entity_staff).
+     * Request public approval (entity_admin, entity_staff).
      */
     public function requestPublicApproval(Request $request, string $id): JsonResponse
     {
+        // Authorization checked in middleware
         $event = Event::findOrFail($id);
 
         $this->approvalService->requestPublicApproval(
@@ -57,15 +58,10 @@ class ApprovalController extends Controller
     }
 
     /**
-     * Publish event (platform_admin).
+     * Publish event (entity_admin, entity_staff).
      */
-    public function publish(Request $request, string $id): JsonResponse
+    public function publish(PublishEventRequest $request, string $id): JsonResponse
     {
-        $request->validate([
-            'publish_immediately' => 'boolean',
-            'scheduled_at' => 'nullable|date|after:now'
-        ]);
-
         $event = Event::findOrFail($id);
 
         $this->approvalService->publishEvent(
@@ -81,14 +77,10 @@ class ApprovalController extends Controller
     }
 
     /**
-     * Request changes on event.
+     * Request changes on event (entity_admin, entity_staff).
      */
-    public function requestChanges(Request $request, string $id): JsonResponse
+    public function requestChanges(RequestChangesRequest $request, string $id): JsonResponse
     {
-        $request->validate([
-            'reason' => 'required|string|min:10|max:1000'
-        ]);
-
         $event = Event::findOrFail($id);
 
         $this->approvalService->requestChanges(
@@ -104,14 +96,10 @@ class ApprovalController extends Controller
     }
 
     /**
-     * Reject event.
+     * Reject event (entity_admin, entity_staff).
      */
-    public function reject(Request $request, string $id): JsonResponse
+    public function reject(RejectEventRequest $request, string $id): JsonResponse
     {
-        $request->validate([
-            'reason' => 'required|string|min:10|max:1000'
-        ]);
-
         $event = Event::findOrFail($id);
 
         $this->approvalService->reject(
@@ -133,6 +121,6 @@ class ApprovalController extends Controller
     {
         $statistics = $this->approvalService->getApprovalStatistics();
 
-        return response()->json($statistics);
+        return response()->json(['data' => $statistics]);
     }
 }
