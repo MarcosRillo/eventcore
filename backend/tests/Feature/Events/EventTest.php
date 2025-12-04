@@ -378,4 +378,292 @@ class EventTest extends TestCase
         $this->assertFalse($pastEvents->contains('id', $ongoingEvent->id));
         $this->assertFalse($pastEvents->contains('id', $futureEvent->id));
     }
+
+    // ========================================================================
+    // NEW TESTS: Date Ordering and Past/Upcoming Events Filtering
+    // ========================================================================
+
+    #[Test]
+    public function index_returns_upcoming_events_by_default(): void
+    {
+        $this->authenticateUser();
+
+        // Create 3 upcoming events with different start dates
+        $upcoming1 = Event::factory()->create([
+            'title' => 'Upcoming Event 1',
+            'start_date' => now()->addDays(10),
+            'end_date' => now()->addDays(11),
+        ]);
+        $upcoming2 = Event::factory()->create([
+            'title' => 'Upcoming Event 2',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+        ]);
+        $upcoming3 = Event::factory()->create([
+            'title' => 'Upcoming Event 3',
+            'start_date' => now()->addDays(15),
+            'end_date' => now()->addDays(16),
+        ]);
+
+        // Create 2 past events (should not be returned)
+        Event::factory()->create([
+            'title' => 'Past Event 1',
+            'start_date' => now()->subDays(10),
+            'end_date' => now()->subDays(9),
+        ]);
+        Event::factory()->create([
+            'title' => 'Past Event 2',
+            'start_date' => now()->subDays(5),
+            'end_date' => now()->subDays(4),
+        ]);
+
+        // Act: GET /api/v1/events (without show_past parameter)
+        $response = $this->getJson('/api/v1/events');
+
+        // Assert: Returns 200 OK
+        $response->assertOk();
+
+        // Assert: Only upcoming events returned (3 total)
+        $data = $response->json('data');
+        $this->assertCount(3, $data);
+
+        // Assert: Ordered by start_date ASC (closest first)
+        // Expected order: upcoming2 (5 days), upcoming1 (10 days), upcoming3 (15 days)
+        $this->assertEquals($upcoming2->id, $data[0]['id'], 'First event should be closest (5 days)');
+        $this->assertEquals($upcoming1->id, $data[1]['id'], 'Second event should be 10 days away');
+        $this->assertEquals($upcoming3->id, $data[2]['id'], 'Third event should be furthest (15 days)');
+
+        // Assert: Verify start dates are in ascending order
+        $startDate1 = \Carbon\Carbon::parse($data[0]['start_date']);
+        $startDate2 = \Carbon\Carbon::parse($data[1]['start_date']);
+        $startDate3 = \Carbon\Carbon::parse($data[2]['start_date']);
+        $this->assertTrue($startDate1->lt($startDate2));
+        $this->assertTrue($startDate2->lt($startDate3));
+    }
+
+    #[Test]
+    public function index_returns_past_events_when_show_past_is_1(): void
+    {
+        $this->authenticateUser();
+
+        // Create 3 past events with different end dates
+        $past1 = Event::factory()->create([
+            'title' => 'Past Event 1',
+            'start_date' => now()->subDays(10),
+            'end_date' => now()->subDays(5),  // More recent
+        ]);
+        $past2 = Event::factory()->create([
+            'title' => 'Past Event 2',
+            'start_date' => now()->subDays(20),
+            'end_date' => now()->subDays(15),  // Oldest
+        ]);
+        $past3 = Event::factory()->create([
+            'title' => 'Past Event 3',
+            'start_date' => now()->subDays(8),
+            'end_date' => now()->subDays(2),  // Most recent
+        ]);
+
+        // Create 2 upcoming events (should not be returned)
+        Event::factory()->create([
+            'title' => 'Upcoming Event 1',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+        ]);
+        Event::factory()->create([
+            'title' => 'Upcoming Event 2',
+            'start_date' => now()->addDays(10),
+            'end_date' => now()->addDays(11),
+        ]);
+
+        // Act: GET /api/v1/events?show_past=1
+        $response = $this->getJson('/api/v1/events?show_past=1');
+
+        // Assert: Returns 200 OK
+        $response->assertOk();
+
+        // Assert: Only past events returned (3 total)
+        $data = $response->json('data');
+        $this->assertCount(3, $data);
+
+        // Assert: Ordered by end_date DESC (most recent first)
+        // Expected order: past3 (2 days ago), past1 (5 days ago), past2 (15 days ago)
+        $this->assertEquals($past3->id, $data[0]['id'], 'First should be most recent past event');
+        $this->assertEquals($past1->id, $data[1]['id'], 'Second should be mid-recent past event');
+        $this->assertEquals($past2->id, $data[2]['id'], 'Third should be oldest past event');
+
+        // Assert: Verify end dates are in descending order
+        $endDate1 = \Carbon\Carbon::parse($data[0]['end_date']);
+        $endDate2 = \Carbon\Carbon::parse($data[1]['end_date']);
+        $endDate3 = \Carbon\Carbon::parse($data[2]['end_date']);
+        $this->assertTrue($endDate1->gt($endDate2));
+        $this->assertTrue($endDate2->gt($endDate3));
+    }
+
+    #[Test]
+    public function index_orders_upcoming_events_by_start_date_asc(): void
+    {
+        $this->authenticateUser();
+
+        // Create upcoming events in random order
+        $eventFar = Event::factory()->create([
+            'start_date' => now()->addDays(30),
+            'end_date' => now()->addDays(31),
+        ]);
+        $eventNear = Event::factory()->create([
+            'start_date' => now()->addDays(2),
+            'end_date' => now()->addDays(3),
+        ]);
+        $eventMid = Event::factory()->create([
+            'start_date' => now()->addDays(15),
+            'end_date' => now()->addDays(16),
+        ]);
+
+        // Act
+        $response = $this->getJson('/api/v1/events');
+
+        // Assert: Ordered chronologically (ASC)
+        $data = $response->json('data');
+        $this->assertEquals($eventNear->id, $data[0]['id']);
+        $this->assertEquals($eventMid->id, $data[1]['id']);
+        $this->assertEquals($eventFar->id, $data[2]['id']);
+    }
+
+    #[Test]
+    public function index_orders_past_events_by_end_date_desc(): void
+    {
+        $this->authenticateUser();
+
+        // Create past events in random order
+        $eventOldest = Event::factory()->create([
+            'start_date' => now()->subDays(30),
+            'end_date' => now()->subDays(29),
+        ]);
+        $eventRecent = Event::factory()->create([
+            'start_date' => now()->subDays(3),
+            'end_date' => now()->subDays(2),
+        ]);
+        $eventMid = Event::factory()->create([
+            'start_date' => now()->subDays(15),
+            'end_date' => now()->subDays(14),
+        ]);
+
+        // Act
+        $response = $this->getJson('/api/v1/events?show_past=1');
+
+        // Assert: Ordered reverse chronologically (DESC)
+        $data = $response->json('data');
+        $this->assertEquals($eventRecent->id, $data[0]['id']);
+        $this->assertEquals($eventMid->id, $data[1]['id']);
+        $this->assertEquals($eventOldest->id, $data[2]['id']);
+    }
+
+    #[Test]
+    public function index_filters_by_status_code(): void
+    {
+        $this->authenticateUser();
+
+        $publishedStatusId = $this->getStatusId('published');
+        $draftStatusId = $this->getStatusId('draft');
+
+        // Create upcoming events with different statuses
+        $publishedEvent = Event::factory()->create([
+            'title' => 'Published Event',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+            'status_id' => $publishedStatusId,
+        ]);
+
+        Event::factory()->create([
+            'title' => 'Draft Event',
+            'start_date' => now()->addDays(7),
+            'end_date' => now()->addDays(8),
+            'status_id' => $draftStatusId,
+        ]);
+
+        // Act: Filter by status code (string)
+        $response = $this->getJson('/api/v1/events?status=published');
+
+        // Assert: Returns only published event
+        $response->assertOk();
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertEquals($publishedEvent->id, $data[0]['id']);
+        $this->assertEquals('published', $data[0]['status']['status_code'] ?? $data[0]['status']['code']);
+    }
+
+    #[Test]
+    public function index_filters_by_status_id(): void
+    {
+        $this->authenticateUser();
+
+        $publishedStatusId = $this->getStatusId('published');
+        $draftStatusId = $this->getStatusId('draft');
+
+        // Create upcoming events with different statuses
+        $publishedEvent = Event::factory()->create([
+            'title' => 'Published Event',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+            'status_id' => $publishedStatusId,
+        ]);
+
+        Event::factory()->create([
+            'title' => 'Draft Event',
+            'start_date' => now()->addDays(7),
+            'end_date' => now()->addDays(8),
+            'status_id' => $draftStatusId,
+        ]);
+
+        // Act: Filter by status_id (integer) - backward compatibility
+        $response = $this->getJson("/api/v1/events?status_id={$publishedStatusId}");
+
+        // Assert: Returns only published event
+        $response->assertOk();
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertEquals($publishedEvent->id, $data[0]['id']);
+    }
+
+    #[Test]
+    public function index_combines_show_past_with_status_filter(): void
+    {
+        $this->authenticateUser();
+
+        $publishedStatusId = $this->getStatusId('published');
+        $draftStatusId = $this->getStatusId('draft');
+
+        // Create past published event
+        $pastPublished = Event::factory()->create([
+            'title' => 'Past Published Event',
+            'start_date' => now()->subDays(10),
+            'end_date' => now()->subDays(9),
+            'status_id' => $publishedStatusId,
+        ]);
+
+        // Create past draft event (should not be returned)
+        Event::factory()->create([
+            'title' => 'Past Draft Event',
+            'start_date' => now()->subDays(8),
+            'end_date' => now()->subDays(7),
+            'status_id' => $draftStatusId,
+        ]);
+
+        // Create upcoming published event (should not be returned)
+        Event::factory()->create([
+            'title' => 'Upcoming Published Event',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+            'status_id' => $publishedStatusId,
+        ]);
+
+        // Act: Combine show_past with status filter
+        $response = $this->getJson('/api/v1/events?show_past=1&status=published');
+
+        // Assert: Returns only past published event
+        $response->assertOk();
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertEquals($pastPublished->id, $data[0]['id']);
+        $this->assertEquals('published', $data[0]['status']['status_code'] ?? $data[0]['status']['code']);
+    }
 }

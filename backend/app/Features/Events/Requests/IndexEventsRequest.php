@@ -19,7 +19,9 @@ class IndexEventsRequest extends PaginationRequest
         return array_merge(parent::rules(), [
             'category_id' => 'sometimes|integer|exists:categories,id',
             'status_id' => 'sometimes|integer|exists:event_statuses,id',
+            'status' => 'sometimes|string|max:50',
             'is_featured' => 'sometimes|boolean',
+            'show_past' => 'sometimes|string|in:1',
         ]);
     }
 }

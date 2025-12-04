@@ -241,6 +241,7 @@ export interface EventFilters {
   end_date?: string;
   is_featured?: boolean;
   created_by?: number;
+  show_past?: string; // '1' to show past events, undefined for upcoming
   page?: number;
   per_page?: number;
 }

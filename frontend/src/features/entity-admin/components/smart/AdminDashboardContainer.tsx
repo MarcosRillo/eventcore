@@ -13,6 +13,7 @@ import { useEventManagement } from '@/features/entity-admin/hooks/useEventManage
 import { useEventManager } from '@/features/events/hooks/useEventManager';
 import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid';
 import { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters';
+import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
 import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
 import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
 import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
@@ -23,6 +24,7 @@ import type { Event, EventStatusCode } from '@/types/event.types';
 
 export const AdminDashboardContainer = () => {
   const [activeFilter, setActiveFilter] = useState<EventStatusCode | null>(null);
+  const [showPast, setShowPast] = useState(false);
 
   const { cardData, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
 
@@ -62,11 +64,20 @@ export const AdminDashboardContainer = () => {
   const handleFilterChange = useCallback((status: EventStatusCode | null) => {
     setActiveFilter(status);
     if (status) {
-      updateFilters({ status });
+      updateFilters({ status, show_past: showPast ? '1' : undefined });
     } else {
-      updateFilters({ status: undefined });
+      updateFilters({ status: undefined, show_past: showPast ? '1' : undefined });
     }
-  }, [updateFilters]);
+  }, [updateFilters, showPast]);
+
+  // Handle show past toggle
+  const handleShowPastChange = useCallback((checked: boolean) => {
+    setShowPast(checked);
+    updateFilters({
+      status: activeFilter || undefined,
+      show_past: checked ? '1' : undefined,
+    });
+  }, [updateFilters, activeFilter]);
 
   // Handle opening modal from event table
   const handleApprovalAction = useCallback((event: Event) => {
@@ -106,10 +117,18 @@ export const AdminDashboardContainer = () => {
       )}
 
       {/* Quick Filters */}
-      <AdminQuickFilters
-        activeFilter={activeFilter}
-        onFilterChange={handleFilterChange}
-      />
+      <div className="flex items-center justify-between gap-4">
+        <AdminQuickFilters
+          activeFilter={activeFilter}
+          onFilterChange={handleFilterChange}
+        />
+
+        {/* Past Events Toggle */}
+        <EventsPastToggle
+          checked={showPast}
+          onChange={handleShowPastChange}
+        />
+      </div>
 
       {/* Event Table */}
       <div className="bg-white shadow-sm rounded-lg">

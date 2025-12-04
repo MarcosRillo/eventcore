@@ -63,7 +63,7 @@ class EventController extends Controller
      */
     public function index(IndexEventsRequest $request)
     {
-        $events = Event::query()
+        $query = Event::query()
             ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
             ->when($request->validated('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
@@ -75,11 +75,25 @@ class EventController extends Controller
             ->when($request->validated('status_id'), function ($query, $statusId) {
                 $query->where('status_id', $statusId);
             })
+            ->when($request->validated('status'), function ($query, $statusCode) {
+                $query->whereHas('status', function ($subQuery) use ($statusCode) {
+                    $subQuery->where('status_code', $statusCode);
+                });
+            })
             ->when($request->has('is_featured'), function ($query) use ($request) {
                 $query->where('is_featured', $request->validated('is_featured'));
-            })
-            ->orderBy('updated_at', 'desc')
-            ->paginate($request->getPerPage());
+            });
+
+        // Apply date filtering and ordering
+        if ($request->validated('show_past') === '1') {
+            // Show only past events, ordered by end_date DESC (most recent first)
+            $query->past();
+            $events = $query->orderBy('end_date', 'desc')->paginate($request->getPerPage());
+        } else {
+            // Show only upcoming events (default), ordered by start_date ASC (closest first)
+            $query->upcoming();
+            $events = $query->orderBy('start_date', 'asc')->paginate($request->getPerPage());
+        }
 
         return EventResource::collection($events);
     }

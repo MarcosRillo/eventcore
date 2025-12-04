@@ -242,4 +242,62 @@ describe('AdminDashboardContainer', () => {
     expect(screen.getByText('50')).toBeInTheDocument();
     expect(screen.getByText('30')).toBeInTheDocument();
   });
+
+  test('renders EventsPastToggle component', () => {
+    render(<AdminDashboardContainer />);
+
+    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
+
+    // Assert: Toggle exists and is unchecked by default
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).not.toBeChecked();
+  });
+
+  test('updates showPast state when toggle is changed', () => {
+    render(<AdminDashboardContainer />);
+
+    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
+
+    // Act: Click the toggle to show past events
+    fireEvent.click(toggle);
+
+    // Assert: Toggle is now checked
+    expect(toggle).toBeChecked();
+
+    // Act: Click again to hide past events
+    fireEvent.click(toggle);
+
+    // Assert: Toggle is unchecked again
+    expect(toggle).not.toBeChecked();
+  });
+
+  test('passes show_past filter to useEventManager when toggle is enabled', () => {
+    render(<AdminDashboardContainer />);
+
+    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
+
+    // Act: Enable show past events
+    fireEvent.click(toggle);
+
+    // Assert: updateFilters should be called with show_past: '1'
+    expect(mockUseEventManager.updateFilters).toHaveBeenCalledWith(
+      expect.objectContaining({ show_past: '1' })
+    );
+  });
+
+  test('removes show_past filter when toggle is disabled', () => {
+    render(<AdminDashboardContainer />);
+
+    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
+
+    // Act: Enable then disable
+    fireEvent.click(toggle); // Enable
+    fireEvent.click(toggle); // Disable
+
+    // Assert: Last call should not include show_past or should be undefined
+    const lastCall = mockUseEventManager.updateFilters.mock.calls[
+      mockUseEventManager.updateFilters.mock.calls.length - 1
+    ][0];
+    expect(lastCall.show_past).toBeUndefined();
+  });
 });
