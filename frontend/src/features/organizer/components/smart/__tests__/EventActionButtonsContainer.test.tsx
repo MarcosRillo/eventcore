@@ -39,7 +39,7 @@ describe('EventActionButtonsContainer', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
       expect(screen.getByRole('button', { name: /submit.*review/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /duplicate/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /duplicar/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
     })
 
@@ -163,36 +163,21 @@ describe('EventActionButtonsContainer', () => {
   })
 
   describe('Duplicate action', () => {
-    it('should call duplicateEvent when duplicate button clicked', async () => {
+    it('should render duplicate button as disabled (coming soon feature)', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const duplicateButton = screen.getByRole('button', { name: /duplicate/i })
-      fireEvent.click(duplicateButton)
-
-      await waitFor(() => {
-        expect(mockUseEventActions.duplicateEvent).toHaveBeenCalledWith(mockEvent.id)
-      })
+      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
+      expect(duplicateButton).toBeDisabled()
+      expect(duplicateButton).toHaveAttribute('aria-label', 'Duplicar evento (próximamente)')
     })
 
-    it('should show loading state while duplicating', async () => {
-      let resolvePromise: () => void
-      const duplicatePromise = new Promise<void>((resolve) => {
-        resolvePromise = resolve
-      })
-
-      mockUseEventActions.duplicateEvent.mockReturnValue(duplicatePromise)
-
+    it('should not call duplicateEvent when duplicate button is clicked', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const duplicateButton = screen.getByRole('button', { name: /duplicate/i })
+      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
       fireEvent.click(duplicateButton)
 
-      // Wait a bit to ensure promise is pending
-      await new Promise((resolve) => setTimeout(resolve, 10))
-
-      // Resolve the promise
-      resolvePromise!()
-      await duplicatePromise
+      expect(mockUseEventActions.duplicateEvent).not.toHaveBeenCalled()
     })
   })
 
@@ -229,7 +214,7 @@ describe('EventActionButtonsContainer', () => {
 
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const confirmButton = screen.getByRole('button', { name: /^delete$/i })
+      const confirmButton = screen.getByRole('button', { name: /^eliminar$/i })
 
       await act(async () => {
         fireEvent.click(confirmButton)
@@ -256,7 +241,7 @@ describe('EventActionButtonsContainer', () => {
 
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const confirmButton = screen.getByRole('button', { name: /^delete$/i })
+      const confirmButton = screen.getByRole('button', { name: /^eliminar$/i })
 
       await act(async () => {
         fireEvent.click(confirmButton)
@@ -304,7 +289,7 @@ describe('EventActionButtonsContainer', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
       const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-      const duplicateButton = screen.getByRole('button', { name: /duplicate/i })
+      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
       const deleteButton = screen.getByRole('button', { name: /delete/i })
 
       expect(submitButton).toBeDisabled()

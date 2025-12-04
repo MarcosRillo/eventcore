@@ -92,13 +92,11 @@ describe('useEventForm', () => {
 
     it('should set isEditMode to true when eventId is provided', async () => {
       ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: {
-          id: 1,
-          title: 'Test Event',
-          description: 'Test Description',
-          start_date: '2030-12-01T10:00',
-          locations: [{ id: 1, name: 'Location 1' }],
-        },
+        id: 1,
+        title: 'Test Event',
+        description: 'Test Description',
+        start_date: '2030-12-01T10:00',
+        locations: [{ id: 1, name: 'Location 1' }],
       })
 
       const { result } = renderHook(() => useEventForm({ eventId: 1 }))
@@ -353,16 +351,14 @@ describe('useEventForm', () => {
   describe('handleSubmit - edit mode', () => {
     it('should call updateEvent when in edit mode', async () => {
       ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: {
-          id: 1,
-          title: 'Original Title',
-          description: 'Original Description',
-          start_date: '2030-12-01T10:00',
-          end_date: '2030-12-01T18:00',
-          event_type_id: 1,
-          event_subtype_id: 1,
-          locations: [{ id: 1, name: 'Location 1' }],
-        },
+        id: 1,
+        title: 'Original Title',
+        description: 'Original Description',
+        start_date: '2030-12-01T10:00',
+        end_date: '2030-12-01T18:00',
+        event_type_id: 1,
+        event_subtype_id: 1,
+        locations: [{ id: 1, name: 'Location 1' }],
       })
       ;(organizerEventService.updateEvent as jest.Mock).mockResolvedValue({ data: { id: 1 } })
 
@@ -429,9 +425,7 @@ describe('useEventForm', () => {
         featured_image: 'https://example.com/image.jpg',
       }
 
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: mockEvent,
-      })
+      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockEvent)
 
       const { result } = renderHook(() => useEventForm({ eventId: 1 }))
 
@@ -456,11 +450,9 @@ describe('useEventForm', () => {
 
     it('should set initialLoading to false after loading', async () => {
       ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: {
-          id: 1,
-          title: 'Test',
-          locations: [],
-        },
+        id: 1,
+        title: 'Test',
+        locations: [],
       })
 
       const { result } = renderHook(() => useEventForm({ eventId: 1 }))

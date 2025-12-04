@@ -72,12 +72,10 @@ describe('organizer-event.service', () => {
   describe('getEvent', () => {
     it('should fetch single event by id', async () => {
       const mockEvent = {
-        data: {
-          id: 1,
-          title: 'Test Event',
-          description: 'Test Description',
-          status: 'draft',
-        },
+        id: 1,
+        title: 'Test Event',
+        description: 'Test Description',
+        status: 'draft',
       }
 
       mockedApiClient.get.mockResolvedValue({ data: mockEvent })
@@ -89,7 +87,7 @@ describe('organizer-event.service', () => {
     })
 
     it('should fetch event with large id', async () => {
-      const mockEvent = { data: { id: 999999, title: 'Event' } }
+      const mockEvent = { id: 999999, title: 'Event' }
       mockedApiClient.get.mockResolvedValue({ data: mockEvent })
 
       const result = await getEvent(999999)

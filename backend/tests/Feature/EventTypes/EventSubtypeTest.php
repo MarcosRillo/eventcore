@@ -677,48 +677,33 @@ class EventSubtypeTest extends TestCase
      */
     public function test_organizer_can_access_active_subtypes(): void
     {
-        // Arrange - Create fresh organization and event type
-        $organization = Organization::factory()->create();
-        $eventType = EventType::factory()->create([
-            'entity_id' => $organization->id,
-            'name' => 'Test Event Type For Organizer'
-        ]);
+        // Arrange - Use helper for proper authentication setup
+        $this->authenticateAndSetup();
 
-        // Create organizer and associate with organization
-        $organizer = User::factory()->create();
-        $organizerRole = \DB::table('user_roles')->where('role_code', 'organizer_admin')->first();
-        if ($organizerRole) {
-            $organizer->role_id = $organizerRole->id;
-            $organizer->save();
-        }
-        $organizer->organizations()->attach($organization->id);
-        $organizer->refresh();
-
-        // Create active and inactive subtypes
+        // Create active and inactive subtypes for the event type
         $activeSubtype1 = EventSubtype::factory()->create([
-            'event_type_id' => $eventType->id,
-            'entity_id' => $organization->id,
+            'event_type_id' => $this->eventType->id,
+            'entity_id' => $this->organization->id,
             'is_active' => true,
             'name' => 'Active Subtype 1',
         ]);
 
         $activeSubtype2 = EventSubtype::factory()->create([
-            'event_type_id' => $eventType->id,
-            'entity_id' => $organization->id,
+            'event_type_id' => $this->eventType->id,
+            'entity_id' => $this->organization->id,
             'is_active' => true,
             'name' => 'Active Subtype 2',
         ]);
 
         $inactiveSubtype = EventSubtype::factory()->create([
-            'event_type_id' => $eventType->id,
-            'entity_id' => $organization->id,
+            'event_type_id' => $this->eventType->id,
+            'entity_id' => $this->organization->id,
             'is_active' => false,
             'name' => 'Inactive Subtype',
         ]);
 
         // Act - Organizer requests active subtypes
-        $this->actingAs($organizer);
-        $response = $this->getJson("/api/v1/event-types/{$eventType->id}/subtypes/active");
+        $response = $this->getJson("/api/v1/event-types/{$this->eventType->id}/subtypes/active");
 
         // Assert - Should return 200 with only active subtypes
         $response->assertStatus(200)

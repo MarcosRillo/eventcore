@@ -81,9 +81,9 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
         // ===== PLATFORM ADMIN + ENTITY ADMIN =====
-        // Full CRUD, approval, admin features
+        // Full CRUD, admin features (NO entity_staff - admin-only operations)
         Route::middleware(['role:platform_admin,entity_admin'])->group(function () {
-            // Users management (entity_staff)
+            // Users management
             Route::get('users', [UserController::class, 'index']);
             Route::get('users/{id}', [UserController::class, 'show']);
             Route::put('users/{id}', [UserController::class, 'update']);
@@ -113,14 +113,6 @@ Route::prefix('v1')->group(function () {
             Route::get('events/statistics', [FeatureEventController::class, 'statistics']);
             Route::patch('events/{id}/toggle-featured', [FeatureEventController::class, 'toggleFeatured']);
             Route::post('events/{id}/duplicate', [FeatureEventController::class, 'duplicate']);
-
-            // Approval routes
-            Route::patch('events/{id}/approve', [ApprovalController::class, 'approve']);
-            Route::patch('events/{id}/request-public', [ApprovalController::class, 'requestPublicApproval']);
-            Route::patch('events/{id}/publish', [ApprovalController::class, 'publish']);
-            Route::patch('events/{id}/request-changes', [ApprovalController::class, 'requestChanges']);
-            Route::patch('events/{id}/reject', [ApprovalController::class, 'reject']);
-            Route::get('events/approval/statistics', [ApprovalController::class, 'statistics']);
 
             // Event CRUD (solo para eventos del Ente)
             Route::post('events', [FeatureEventController::class, 'store']);
@@ -160,6 +152,17 @@ Route::prefix('v1')->group(function () {
 
             // Organizations management (write operations)
             Route::patch('organizations/{id}/status', [OrganizationController::class, 'toggleStatus']);
+        });
+
+        // ===== APPROVAL ROUTES (PLATFORM ADMIN + ENTITY ADMIN + ENTITY STAFF) =====
+        // Event approval workflow - entity_staff can approve/reject events
+        Route::middleware(['role:platform_admin,entity_admin,entity_staff'])->group(function () {
+            Route::patch('events/{id}/approve', [ApprovalController::class, 'approve']);
+            Route::patch('events/{id}/request-public', [ApprovalController::class, 'requestPublicApproval']);
+            Route::patch('events/{id}/publish', [ApprovalController::class, 'publish']);
+            Route::patch('events/{id}/request-changes', [ApprovalController::class, 'requestChanges']);
+            Route::patch('events/{id}/reject', [ApprovalController::class, 'reject']);
+            Route::get('events/approval/statistics', [ApprovalController::class, 'statistics']);
         });
 
         // ===== EVENT ORGANIZER =====

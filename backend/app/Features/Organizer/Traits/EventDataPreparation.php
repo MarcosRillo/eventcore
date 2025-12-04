@@ -4,6 +4,7 @@ namespace App\Features\Organizer\Traits;
 
 use App\Models\Event;
 use App\Models\EventAsyncDate;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -55,12 +56,20 @@ trait EventDataPreparation
     /**
      * Get system fields for event creation.
      * producer_id defaults to organization_id if not explicitly provided (Dec 2, 2025).
+     * entity_id uses parent_id when organizer, own ID when entity (Dec 4, 2025).
      */
     private function getSystemFields(array $data, User $user, int $statusId, int $formatId): array
     {
+        // Get user's organization
+        $organization = Organization::find($user->organization_id);
+
+        // If organization has parent (is an organizer), use parent_id as entity_id
+        // Otherwise (is an entity), use its own ID
+        $entityId = $organization->parent_id ?? $user->organization_id;
+
         return [
             'organization_id' => $user->organization_id,
-            'entity_id' => $user->organization_id,
+            'entity_id' => $entityId,
             'status_id' => $statusId,
             'created_by' => $user->id,
             'format_id' => $formatId,

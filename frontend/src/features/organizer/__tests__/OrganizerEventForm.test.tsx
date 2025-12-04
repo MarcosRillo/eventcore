@@ -4,7 +4,7 @@
  * Updated for 3NF schema (Nov 30, 2025)
  */
 
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
@@ -220,9 +220,7 @@ describe('OrganizerEventForm', () => {
         status: 'draft'
       }
 
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: mockEvent
-      })
+      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockEvent)
 
       render(<OrganizerEventFormContainer eventId={1} />)
 
@@ -254,9 +252,7 @@ describe('OrganizerEventForm', () => {
         status: 'draft'
       }
 
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        data: mockEvent
-      })
+      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockEvent)
 
       ;(organizerEventService.updateEvent as jest.Mock).mockResolvedValue({
         data: { ...mockEvent, title: 'Updated Title' }

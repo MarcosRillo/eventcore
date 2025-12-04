@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getEvents, deleteEvent } from '@/features/organizer/services/organizer-event.service'
 import { OrganizerEvent, EventListParams } from '@/features/organizer/types/event.types'
 
@@ -11,6 +11,13 @@ export const useOrganizerEvents = () => {
   const [total, setTotal] = useState(0)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Use refs to access current state values in refetch
+  const currentPageRef = useRef(currentPage)
+  const statusFilterRef = useRef(statusFilter)
+  currentPageRef.current = currentPage
+  statusFilterRef.current = statusFilter
 
   const perPage = 10
 
@@ -41,6 +48,19 @@ export const useOrganizerEvents = () => {
     fetchEvents()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Effect to refetch when refreshKey changes (triggered by refetch())
+  useEffect(() => {
+    if (refreshKey > 0) {
+      fetchEvents(currentPageRef.current, statusFilterRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey])
+
+  // Function to force a re-fetch of current page/filter
+  const refetch = () => {
+    setRefreshKey(prev => prev + 1)
+  }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -81,6 +101,6 @@ export const useOrganizerEvents = () => {
     handlePageChange,
     handleStatusFilter,
     handleDelete,
-    retry: fetchEvents
+    retry: refetch
   }
 }

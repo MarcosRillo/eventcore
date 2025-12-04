@@ -76,16 +76,16 @@ describe('OrganizerEventListItem', () => {
       expect(screen.getByText('draft')).toBeInTheDocument()
     })
 
-    test('should render View button', () => {
+    test('should render Ver button', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /view test event/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /ver test event/i })).toBeInTheDocument()
     })
 
-    test('should render Edit button', () => {
+    test('should render Editar button', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /edit test event/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /editar test event/i })).toBeInTheDocument()
     })
 
     test('should render EventActionButtonsContainer', () => {
@@ -96,12 +96,13 @@ describe('OrganizerEventListItem', () => {
   })
 
   describe('status styling', () => {
+    // Badge component uses semantic color variants
     const statusTests: Array<{ status: OrganizerEvent['status']; expectedClass: string }> = [
-      { status: 'draft', expectedClass: 'bg-gray-200' },
-      { status: 'pending_internal_approval', expectedClass: 'bg-yellow-200' },
-      { status: 'approved_internal', expectedClass: 'bg-green-200' },
-      { status: 'rejected', expectedClass: 'bg-red-200' },
-      { status: 'published', expectedClass: 'bg-blue-200' },
+      { status: 'draft', expectedClass: 'bg-neutral-100' },
+      { status: 'pending_internal_approval', expectedClass: 'bg-warning-50' },
+      { status: 'approved_internal', expectedClass: 'bg-success-50' },
+      { status: 'rejected', expectedClass: 'bg-error-50' },
+      { status: 'published', expectedClass: 'bg-primary-50' },
     ]
 
     statusTests.forEach(({ status, expectedClass }) => {
@@ -123,7 +124,7 @@ describe('OrganizerEventListItem', () => {
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
       const badge = screen.getByText('Unknown Status')
-      expect(badge).toHaveClass('bg-gray-200')
+      expect(badge).toHaveClass('bg-neutral-100')
     })
   })
 
@@ -201,7 +202,7 @@ describe('OrganizerEventListItem', () => {
     test('should call onView when View button is clicked', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /view test event/i }))
+      fireEvent.click(screen.getByRole('button', { name: /ver test event/i }))
 
       expect(mockOnView).toHaveBeenCalledTimes(1)
     })
@@ -209,7 +210,7 @@ describe('OrganizerEventListItem', () => {
     test('should call onEdit when Edit button is clicked', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /edit test event/i }))
+      fireEvent.click(screen.getByRole('button', { name: /editar test event/i }))
 
       expect(mockOnEdit).toHaveBeenCalledTimes(1)
     })
@@ -233,20 +234,20 @@ describe('OrganizerEventListItem', () => {
     test('should disable View button when disabled is true', () => {
       render(<OrganizerEventListItem {...defaultProps} disabled={true} />)
 
-      expect(screen.getByRole('button', { name: /view test event/i })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /ver test event/i })).toBeDisabled()
     })
 
     test('should disable Edit button when disabled is true', () => {
       render(<OrganizerEventListItem {...defaultProps} disabled={true} />)
 
-      expect(screen.getByRole('button', { name: /edit test event/i })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /editar test event/i })).toBeDisabled()
     })
 
     test('should not disable buttons by default', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /view test event/i })).not.toBeDisabled()
-      expect(screen.getByRole('button', { name: /edit test event/i })).not.toBeDisabled()
+      expect(screen.getByRole('button', { name: /ver test event/i })).not.toBeDisabled()
+      expect(screen.getByRole('button', { name: /editar test event/i })).not.toBeDisabled()
     })
   })
 
@@ -254,13 +255,13 @@ describe('OrganizerEventListItem', () => {
     test('should have accessible aria-label on View button', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: 'View Test Event' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Ver Test Event' })).toBeInTheDocument()
     })
 
     test('should have accessible aria-label on Edit button', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: 'Edit Test Event' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Editar Test Event' })).toBeInTheDocument()
     })
   })
 })

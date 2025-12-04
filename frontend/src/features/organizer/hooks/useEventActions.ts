@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { AxiosError } from 'axios'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { SubmitEventError } from '@/features/organizer/types/event.types'
@@ -37,6 +37,10 @@ export const useEventActions = (
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
   const [validationErrors, setValidationErrors] = useState<Record<string, string> | null>(null)
   const { addToast } = useToast()
+
+  // Ref to always have the latest onSuccess callback (prevents stale closure)
+  const onSuccessRef = useRef(onSuccess)
+  onSuccessRef.current = onSuccess
 
   const openSubmitModal = (eventId: number): void => {
     setSelectedEventId(eventId)
@@ -70,7 +74,7 @@ export const useEventActions = (
         type: 'success'
       })
       closeSubmitModal()
-      onSuccess?.()
+      onSuccessRef.current?.()
     } catch (error) {
       const axiosError = error as AxiosError<SubmitEventError>
       if (axiosError.response?.status === 422) {
@@ -100,8 +104,7 @@ export const useEventActions = (
   const duplicateEvent = async (eventId: number): Promise<void> => {
     setLoading(true)
     try {
-      const response = await organizerEventService.getEvent(eventId)
-      const originalEvent = response.data
+      const originalEvent = await organizerEventService.getEvent(eventId)
 
       if (!originalEvent.start_date) {
         throw new Error('No date available for duplication')
@@ -141,7 +144,7 @@ export const useEventActions = (
         message: 'Evento duplicado exitosamente',
         type: 'success'
       })
-      onSuccess?.()
+      onSuccessRef.current?.()
     } catch {
       addToast({
         message: 'Error al duplicar evento',
@@ -157,14 +160,14 @@ export const useEventActions = (
     try {
       await organizerEventService.deleteEvent(eventId)
       addToast({
-        message: 'Event deleted successfully',
+        message: 'Evento eliminado exitosamente',
         type: 'success'
       })
       closeDeleteModal()
-      onSuccess?.()
+      onSuccessRef.current?.()
     } catch {
       addToast({
-        message: 'Failed to delete event',
+        message: 'Error al eliminar evento',
         type: 'error'
       })
     } finally {

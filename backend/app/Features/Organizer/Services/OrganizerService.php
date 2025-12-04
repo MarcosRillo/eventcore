@@ -73,6 +73,15 @@ class OrganizerService
 
         return DB::transaction(function () use ($event, $data, $user) {
             $updateData = $this->prepareUpdateData($data, $event);
+
+            // Determine if event status should change after update
+            $currentStatusCode = $event->status->status_code;
+            $newStatusId = $this->determineStatusAfterUpdate($currentStatusCode);
+
+            if ($newStatusId) {
+                $updateData['status_id'] = $newStatusId;
+            }
+
             $event->update($updateData);
 
             if (!empty($data['location_ids']) && is_array($data['location_ids'])) {
@@ -88,10 +97,33 @@ class OrganizerService
                 'event_id' => $event->id,
                 'user_id' => $user->id,
                 'organization_id' => $user->organization_id,
+                'status_changed' => $newStatusId !== null,
+                'new_status' => $newStatusId ? 'pending_internal_approval' : $currentStatusCode
             ]);
 
             return $event->fresh(['eventType', 'eventSubtype', 'locations', 'status', 'format', 'asyncDates']);
         });
+    }
+
+    /**
+     * Determine if event status should change after update.
+     *
+     * Published or approved events must be re-approved after editing.
+     *
+     * @param string $currentStatusCode Current event status code
+     * @return int|null New status ID or null to keep current status
+     */
+    private function determineStatusAfterUpdate(string $currentStatusCode): ?int
+    {
+        // Events that are published or approved must go back to review
+        $statusesThatRequireReapproval = ['published', 'approved_internal'];
+
+        if (in_array($currentStatusCode, $statusesThatRequireReapproval)) {
+            return EventStatus::where('status_code', 'pending_internal_approval')->value('id');
+        }
+
+        // Draft and requires_changes maintain their status
+        return null;
     }
 
     /**

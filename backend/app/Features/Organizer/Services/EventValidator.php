@@ -85,6 +85,10 @@ class EventValidator
     /**
      * Validate all preconditions for event update.
      *
+     * Note: Removed editable status check to allow editing published/approved events.
+     * Published or approved events will automatically change to pending_internal_approval
+     * after update (handled in OrganizerService).
+     *
      * @param Event $event
      * @param User $user
      * @throws ValidationException|\RuntimeException
@@ -92,7 +96,7 @@ class EventValidator
     public function validateForUpdate(Event $event, User $user): void
     {
         $this->validateUserHasOrganization($user);
-        $this->validateEditable($event);
+        // Removed: $this->validateEditable($event);
         $this->validateOwnership($event, $user);
     }
 

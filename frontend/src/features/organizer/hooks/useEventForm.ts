@@ -123,8 +123,7 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     const loadEvent = async () => {
       setInitialLoading(true)
       try {
-        const response = await getEvent(eventId)
-        const event = response.data
+        const event = await getEvent(eventId)
 
         setFormData({
           // Basic information

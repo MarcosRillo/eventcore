@@ -7,6 +7,7 @@
 
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import Button from '@/components/ui/Button'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface EventActionButtonsProps {
   event: OrganizerEvent
@@ -51,15 +52,17 @@ export const EventActionButtons = ({
         </Button>
       )}
 
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => onDuplicate(event.id)}
-        disabled={loading}
-        aria-label={`Duplicate event ${event.title}`}
-      >
-        Duplicar
-      </Button>
+      <Tooltip content="Próximamente" position="top">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {}}
+          disabled={true}
+          aria-label="Duplicar evento (próximamente)"
+        >
+          Duplicar
+        </Button>
+      </Tooltip>
 
       {canDelete && (
         <Button

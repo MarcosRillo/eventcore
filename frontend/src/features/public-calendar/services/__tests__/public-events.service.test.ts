@@ -1,6 +1,6 @@
 import apiClient from '@/services/apiClient'
 import { publicEventsService } from '../public-events.service'
-import { EventsResponse, PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
+import { EventsResponse, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 import { AxiosResponse } from 'axios'
 
 // Mock apiClient

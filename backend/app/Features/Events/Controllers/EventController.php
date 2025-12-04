@@ -78,7 +78,7 @@ class EventController extends Controller
             ->when($request->has('is_featured'), function ($query) use ($request) {
                 $query->where('is_featured', $request->validated('is_featured'));
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->paginate($request->getPerPage());
 
         return EventResource::collection($events);

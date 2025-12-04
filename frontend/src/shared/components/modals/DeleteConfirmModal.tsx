@@ -23,9 +23,9 @@ export const DeleteConfirmModal = ({
   onClose,
   onConfirm,
   loading,
-  title = 'Delete Item',
+  title = 'Eliminar elemento',
   itemName,
-  warningMessage = 'Warning: This action cannot be undone'
+  warningMessage = 'Advertencia: Esta acción no se puede deshacer'
 }: DeleteConfirmModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
@@ -37,7 +37,7 @@ export const DeleteConfirmModal = ({
         </div>
 
         <p className="text-neutral-700">
-          Are you sure you want to delete{' '}
+          ¿Está seguro de que desea eliminar{' '}
           {itemName && <strong>&quot;{itemName}&quot;</strong>}?
         </p>
 
@@ -47,14 +47,14 @@ export const DeleteConfirmModal = ({
             onClick={onClose}
             disabled={loading}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             variant="danger"
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? 'Deleting...' : 'Delete'}
+            {loading ? 'Eliminando...' : 'Eliminar'}
           </Button>
         </div>
       </div>

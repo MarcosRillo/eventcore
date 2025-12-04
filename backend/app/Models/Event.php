@@ -276,6 +276,42 @@ class Event extends Model
         return $this->hasMany(EventAsyncDate::class);
     }
 
+    /**
+     * Get all approval actions for this event (audit trail).
+     * Ordered by performed_at descending (most recent first).
+     */
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(EventApproval::class)->orderBy('performed_at', 'desc');
+    }
+
+    // =====================================================
+    // APPROVAL HELPERS
+    // =====================================================
+
+    /**
+     * Get the last approval action of a specific type.
+     *
+     * @param string $action Action constant from EventApproval
+     * @return EventApproval|null
+     */
+    public function getLastApproval(string $action): ?EventApproval
+    {
+        return $this->approvals()->where('action', $action)->first();
+    }
+
+    /**
+     * Check if this event has been published.
+     *
+     * @return bool
+     */
+    public function isPublished(): bool
+    {
+        return $this->approvals()
+            ->where('action', EventApproval::ACTION_PUBLISH)
+            ->exists();
+    }
+
     // =====================================================
     // SCOPES
     // =====================================================

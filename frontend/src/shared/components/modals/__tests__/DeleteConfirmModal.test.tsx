@@ -88,7 +88,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Delete Item')
+      expect(screen.getByTestId('modal-title')).toHaveTextContent('Eliminar elemento')
     })
 
     it('should display custom title when provided', () => {
@@ -115,7 +115,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText('Warning: This action cannot be undone')).toBeInTheDocument()
+      expect(screen.getByText('Advertencia: Esta acción no se puede deshacer')).toBeInTheDocument()
     })
 
     it('should display custom warning message when provided', () => {
@@ -140,7 +140,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      const warningElement = screen.getByText('Warning: This action cannot be undone')
+      const warningElement = screen.getByText('Advertencia: Esta acción no se puede deshacer')
       expect(warningElement).toHaveClass('text-red-800', 'font-semibold')
     })
   })
@@ -155,7 +155,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument()
+      expect(screen.getByText(/¿Está seguro de que desea eliminar/)).toBeInTheDocument()
     })
 
     it('should display item name in confirmation message when provided', () => {
@@ -168,7 +168,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument()
+      expect(screen.getByText(/¿Está seguro de que desea eliminar/)).toBeInTheDocument()
       expect(screen.getByText('"Test Event"')).toBeInTheDocument()
     })
 
@@ -197,7 +197,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-secondary')).toHaveTextContent('Cancel')
+      expect(screen.getByTestId('button-secondary')).toHaveTextContent('Cancelar')
     })
 
     it('should call onClose when cancel button is clicked', () => {
@@ -252,7 +252,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-danger')).toHaveTextContent('Delete')
+      expect(screen.getByTestId('button-danger')).toHaveTextContent('Eliminar')
     })
 
     it('should call onConfirm when delete button is clicked', () => {
@@ -279,7 +279,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-danger')).toHaveTextContent('Deleting...')
+      expect(screen.getByTestId('button-danger')).toHaveTextContent('Eliminando...')
     })
 
     it('should disable delete button when loading', () => {
@@ -353,7 +353,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-danger')).toHaveTextContent('Deleting...')
+      expect(screen.getByTestId('button-danger')).toHaveTextContent('Eliminando...')
       expect(screen.getByTestId('button-danger')).toBeDisabled()
       expect(screen.getByTestId('button-secondary')).toBeDisabled()
     })
@@ -467,7 +467,7 @@ describe('DeleteConfirmModal', () => {
       )
 
       // Should still render the confirmation message
-      expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument()
+      expect(screen.getByText(/¿Está seguro de que desea eliminar/)).toBeInTheDocument()
     })
 
     it('should handle rapid state changes', () => {

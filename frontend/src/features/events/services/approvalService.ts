@@ -51,9 +51,9 @@ export const approvalService = {
   /**
    * Request changes to event (any_state → requires_changes)
    */
-  requestChanges: async (eventId: number, feedback: string): Promise<Event> => {
+  requestChanges: async (eventId: number, reason: string): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/request-changes`, {
-      feedback
+      reason
     });
     return response.data.data;
   },

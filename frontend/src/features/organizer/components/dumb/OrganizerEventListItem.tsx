@@ -1,5 +1,7 @@
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 interface OrganizerEventListItemProps {
   event: OrganizerEvent
@@ -16,16 +18,16 @@ export const OrganizerEventListItem = ({
   onSuccess,
   disabled = false
 }: OrganizerEventListItemProps) => {
-  const statusColors = {
-    draft: 'bg-gray-200 text-gray-700',
-    pending: 'bg-yellow-200 text-yellow-800',
-    pending_internal_approval: 'bg-yellow-200 text-yellow-800',
-    approved_internal: 'bg-green-200 text-green-800',
-    approved: 'bg-green-200 text-green-800',
-    rejected: 'bg-red-200 text-red-800',
-    published: 'bg-blue-200 text-blue-800',
-    requires_changes: 'bg-orange-200 text-orange-800',
-    cancelled: 'bg-gray-300 text-gray-700'
+  const statusBadgeVariant: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
+    draft: 'default',
+    pending: 'warning',
+    pending_internal_approval: 'warning',
+    approved_internal: 'success',
+    approved: 'success',
+    rejected: 'danger',
+    published: 'info',
+    requires_changes: 'warning',
+    cancelled: 'default'
   }
 
   // Extract status code from status object or use as string
@@ -43,10 +45,10 @@ export const OrganizerEventListItem = ({
   const eventSubtypeName = event.event_subtype?.name
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white border rounded-lg hover:shadow-md transition-shadow gap-4">
       <div className="flex-1">
-        <h3 className="text-lg font-semibold text-gray-900">{event.title}</h3>
-        <div className="mt-1 space-y-1 text-sm text-gray-600">
+        <h3 className="text-lg font-semibold text-neutral-900">{event.title}</h3>
+        <div className="mt-1 space-y-1 text-sm text-neutral-600">
           <p>Date: {eventDate ? new Date(eventDate).toLocaleDateString() : 'N/A'}</p>
           <p>Location: {locationName}</p>
           <p>
@@ -54,29 +56,36 @@ export const OrganizerEventListItem = ({
             {eventSubtypeName && ` - ${eventSubtypeName}`}
           </p>
         </div>
-        <span className={`inline-block mt-2 px-2 py-1 text-xs font-medium rounded ${statusColors[statusCode as keyof typeof statusColors] || 'bg-gray-200 text-gray-700'}`}>
+        <Badge
+          variant={statusBadgeVariant[statusCode as keyof typeof statusBadgeVariant] || 'default'}
+          size="sm"
+          dot
+          className="mt-2"
+        >
           {statusDisplay}
-        </span>
+        </Badge>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
+      <div className="flex items-center gap-2 w-full md:w-auto">
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onView}
           disabled={disabled}
-          aria-label={`View ${event.title}`}
-          className="px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 disabled:opacity-50"
+          aria-label={`Ver ${event.title}`}
         >
-          View
-        </button>
+          Ver
+        </Button>
 
-        <button
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={onEdit}
           disabled={disabled}
-          aria-label={`Edit ${event.title}`}
-          className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50"
+          aria-label={`Editar ${event.title}`}
         >
-          Edit
-        </button>
+          Editar
+        </Button>
 
         <EventActionButtonsContainer
           event={event}

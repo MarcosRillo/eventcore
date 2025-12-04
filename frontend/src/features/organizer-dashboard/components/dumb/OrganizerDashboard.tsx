@@ -8,6 +8,8 @@ import Link from 'next/link'
 import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
 import Pagination from '@/components/ui/Pagination'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
@@ -23,6 +25,8 @@ interface OrganizerDashboardProps {
   onFilterChange: (status: string | null) => void
   onPageChange: (page: number) => void
   onSuccess: () => void
+  onEdit: (id: number) => void
+  onView: (id: number) => void
 }
 
 export const OrganizerDashboard = ({
@@ -35,7 +39,9 @@ export const OrganizerDashboard = ({
   totalPages,
   onFilterChange,
   onPageChange,
-  onSuccess
+  onSuccess,
+  onEdit,
+  onView
 }: OrganizerDashboardProps) => {
   return (
     <main className="container mx-auto px-4 max-w-7xl" role="main">
@@ -45,12 +51,10 @@ export const OrganizerDashboard = ({
           <h1 className="text-3xl font-bold text-neutral-900">Mis Eventos</h1>
           <p className="text-neutral-600 mt-1">Gestiona tus eventos y su proceso de aprobación</p>
         </div>
-        <Link
-          href="/organizer/create"
-          className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
-          aria-label="Crear nuevo evento"
-        >
-          + Crear Evento
+        <Link href="/organizer/create" aria-label="Crear nuevo evento">
+          <Button variant="primary" size="lg">
+            + Crear Evento
+          </Button>
         </Link>
       </div>
 
@@ -91,7 +95,7 @@ export const OrganizerDashboard = ({
           <div role="article">
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-sm font-medium text-neutral-500">Requiere Cambios</h3>
-              <p className="text-3xl font-bold text-danger-600 mt-2">{stats.requires_changes}</p>
+              <p className="text-3xl font-bold text-error-600 mt-2">{stats.requires_changes}</p>
             </div>
           </div>
         </div>
@@ -106,35 +110,51 @@ export const OrganizerDashboard = ({
       {/* Event List Section */}
       <div className="bg-white rounded-lg shadow">
         {loading ? (
-          <div className="p-8 flex justify-center" role="status" aria-label="Loading events">
-            <LoadingSpinner />
+          <div className="p-12 flex justify-center animate-fadeIn" role="status" aria-label="Cargando eventos">
+            <LoadingSpinner size="lg" text="Cargando eventos..." />
           </div>
         ) : error ? (
-          <div className="p-8 text-center">
-            <p className="text-danger-600">{error}</p>
-          </div>
+          <EmptyState
+            icon={EmptyStateIcons.inbox}
+            title="Error al cargar eventos"
+            description={error}
+            size="md"
+            className="py-12"
+          />
         ) : events.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-neutral-600 mb-4">No se encontraron eventos</p>
-            <Link
-              href="/organizer/create"
-              className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
-              aria-label="Crear tu primer evento"
-            >
-              Crear tu Primer Evento
-            </Link>
-          </div>
+          <EmptyState
+            icon={EmptyStateIcons.calendar}
+            title={activeFilter ? "No hay eventos con este filtro" : "Aún no tienes eventos"}
+            description={activeFilter
+              ? "Prueba cambiando los filtros o crea un nuevo evento"
+              : "Comienza creando tu primer evento para verlo aquí"
+            }
+            size="lg"
+            className="py-16"
+            action={
+              <Link href="/organizer/create">
+                <Button variant="primary" size="lg">
+                  + Crear Evento
+                </Button>
+              </Link>
+            }
+          />
         ) : (
           <>
             <div className="p-4 space-y-2">
-              {events.map((event) => (
-                <OrganizerEventListItem
+              {events.map((event, index) => (
+                <div
                   key={event.id}
-                  event={event}
-                  onEdit={() => {}}
-                  onView={() => {}}
-                  onSuccess={onSuccess}
-                />
+                  className="animate-slideInUp"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <OrganizerEventListItem
+                    event={event}
+                    onEdit={() => onEdit(event.id)}
+                    onView={() => onView(event.id)}
+                    onSuccess={onSuccess}
+                  />
+                </div>
               ))}
             </div>
             {/* Pagination */}

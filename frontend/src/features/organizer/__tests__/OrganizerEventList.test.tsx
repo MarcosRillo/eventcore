@@ -317,11 +317,11 @@ describe('OrganizerEventList', () => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
       })
 
-      const editButton = screen.getByLabelText(/edit.*event 1/i)
+      const editButton = screen.getByLabelText(/editar.*event 1/i)
       fireEvent.click(editButton)
 
       // ASSERT
-      expect(mockPush).toHaveBeenCalledWith('/organizer/events/1/edit')
+      expect(mockPush).toHaveBeenCalledWith('/organizer/1/edit')
     })
 
     // Test 9: Handles view action
@@ -346,11 +346,11 @@ describe('OrganizerEventList', () => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
       })
 
-      const viewButton = screen.getByLabelText(/view.*event 1/i)
+      const viewButton = screen.getByLabelText(/ver.*event 1/i)
       fireEvent.click(viewButton)
 
       // ASSERT
-      expect(mockPush).toHaveBeenCalledWith('/organizer/events/1')
+      expect(mockPush).toHaveBeenCalledWith('/organizer/1')
     })
   })
 

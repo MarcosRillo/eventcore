@@ -116,12 +116,12 @@ describe('EventActionButtons', () => {
           />
         )
 
-        expect(screen.getByRole('button', { name: /duplicate/i })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /duplicar/i })).toBeInTheDocument()
         unmount()
       })
     })
 
-    test('calls onDuplicate with event id when duplicate button clicked', () => {
+    test('duplicate button is always disabled (coming soon feature)', () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -129,13 +129,12 @@ describe('EventActionButtons', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /duplicate/i }))
-
-      expect(mockHandlers.onDuplicate).toHaveBeenCalledWith(1)
-      expect(mockHandlers.onDuplicate).toHaveBeenCalledTimes(1)
+      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
+      expect(duplicateButton).toBeDisabled()
+      expect(duplicateButton).toHaveAttribute('aria-label', 'Duplicar evento (próximamente)')
     })
 
-    test('disables duplicate button when loading', () => {
+    test('duplicate button remains disabled when loading', () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -144,7 +143,7 @@ describe('EventActionButtons', () => {
         />
       )
 
-      const duplicateButton = screen.getByRole('button', { name: /duplicate/i })
+      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
       expect(duplicateButton).toBeDisabled()
     })
   })
@@ -227,7 +226,7 @@ describe('EventActionButtons', () => {
       )
 
       expect(screen.getByRole('button', { name: /submit.*review/i })).toHaveAttribute('aria-label')
-      expect(screen.getByRole('button', { name: /duplicate/i })).toHaveAttribute('aria-label')
+      expect(screen.getByRole('button', { name: /duplicar/i })).toHaveAttribute('aria-label')
       expect(screen.getByRole('button', { name: /delete/i })).toHaveAttribute('aria-label')
     })
   })

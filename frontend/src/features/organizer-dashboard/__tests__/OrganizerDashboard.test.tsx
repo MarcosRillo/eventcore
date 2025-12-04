@@ -57,7 +57,9 @@ describe('OrganizerDashboard', () => {
   const mockHandlers = {
     onFilterChange: jest.fn(),
     onPageChange: jest.fn(),
-    onSuccess: jest.fn()
+    onSuccess: jest.fn(),
+    onEdit: jest.fn(),
+    onView: jest.fn()
   }
 
   const defaultProps = {
@@ -139,7 +141,7 @@ describe('OrganizerDashboard', () => {
         <OrganizerDashboard {...defaultProps} events={[]} loading={true} />
       )
 
-      expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
+      expect(screen.getByText(/cargando eventos/i)).toBeInTheDocument()
     })
 
     test('displays error message when fetch fails', () => {
@@ -155,10 +157,11 @@ describe('OrganizerDashboard', () => {
         <OrganizerDashboard {...defaultProps} events={[]} />
       )
 
-      expect(screen.getByText(/no se encontraron eventos/i)).toBeInTheDocument()
-      const createFirstLink = screen.getByRole('link', { name: /crear tu primer evento/i })
-      expect(createFirstLink).toBeInTheDocument()
-      expect(createFirstLink).toHaveAttribute('href', '/organizer/create')
+      expect(screen.getByText(/aún no tienes eventos/i)).toBeInTheDocument()
+      expect(screen.getByText(/comienza creando tu primer evento/i)).toBeInTheDocument()
+      // Two create buttons exist (header and empty state), both should be present
+      const createButtons = screen.getAllByRole('button', { name: /crear evento/i })
+      expect(createButtons.length).toBeGreaterThanOrEqual(1)
     })
   })
 

@@ -66,7 +66,7 @@ const createMockEvent = (overrides?: Partial<Event>): Event => ({
   locations: [],
   event_type: {
     id: 1,
-    name: 'Cultural',
+    name: 'Sede Única',
     entity_id: 1,
     is_active: true,
     created_at: '2025-01-01T00:00:00Z',
@@ -556,6 +556,14 @@ describe('EventTable', () => {
             type_code: EVENT_TYPE.MULTI_LOCATION,
             type_name: 'Multi-Sede',
           } as EventTypeObject,
+          event_type: {
+            id: 2,
+            name: 'Multi-Sede',
+            entity_id: 1,
+            is_active: true,
+            created_at: '2025-01-01T00:00:00Z',
+            updated_at: '2025-01-01T00:00:00Z',
+          },
         }),
       ]
 

@@ -109,6 +109,7 @@ class EventSeeder extends Seeder
             'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
+            'edition_number' => '15',
         ]);
 
         // Associate locations with the first tourism event
@@ -140,6 +141,7 @@ class EventSeeder extends Seeder
             'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
+            'edition_number' => '3',
         ]);
 
         // Associate location with the second tourism event
@@ -168,6 +170,7 @@ class EventSeeder extends Seeder
             'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
+            'edition_number' => '8',
         ]);
 
         // Associate location with the third tourism event
@@ -197,6 +200,7 @@ class EventSeeder extends Seeder
             'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
+            'edition_number' => '20',
         ]);
 
         // Associate location with the first culture event
@@ -225,6 +229,7 @@ class EventSeeder extends Seeder
             'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
+            'edition_number' => '5',
         ]);
 
         // Associate location with the second culture event
@@ -241,7 +246,7 @@ class EventSeeder extends Seeder
 
         // Event from Sheraton Hotel (requires approval from Ente de Turismo)
         if ($sheratonHotel) {
-            Event::create([
+            $eventoSheraton = Event::create([
                 'title' => 'Cena de Gala San Valentín 2025',
                 'description' => 'Elegante cena de gala para celebrar San Valentín en el hotel más exclusivo de Tucumán. Incluye menú gourmet de cinco tiempos, música en vivo y vista panorámica de la ciudad.',
                 'start_date' => Carbon::now()->addDays(25)->setHour(20)->setMinute(0),
@@ -260,12 +265,23 @@ class EventSeeder extends Seeder
                 'theme_id' => $themeGastronomico->id,
                 'frequency_id' => $frequencyAnual->id,
                 'rotation_type_id' => $rotationFijo->id,
+                'edition_number' => '10',
             ]);
+
+            // Associate location with Sheraton event
+            if ($ubicacionesTurismo->count() > 0) {
+                $eventoSheraton->locations()->attach([
+                    $ubicacionesTurismo->first()->id => [
+                        'location_specific_notes' => 'Evento en salón principal del hotel',
+                        'max_attendees_for_location' => 150,
+                    ]
+                ]);
+            }
         }
 
         // Event from La Rural (approved internally, ready for public approval)
         if ($laRural) {
-            Event::create([
+            $eventoRural = Event::create([
                 'title' => 'Feria Agropecuaria del Norte 2025',
                 'description' => 'Gran feria que reúne a productores agropecuarios del norte argentino. Exposición de ganado, maquinaria agrícola, productos regionales y conferencias técnicas del sector.',
                 'start_date' => Carbon::now()->addDays(50)->setHour(8)->setMinute(0),
@@ -284,12 +300,23 @@ class EventSeeder extends Seeder
                 'theme_id' => $themeNegocios->id,
                 'frequency_id' => $frequencyAnual->id,
                 'rotation_type_id' => $rotationRotativo->id,
+                'edition_number' => '42',
             ]);
+
+            // Associate location with La Rural event
+            if ($ubicacionesTurismo->count() > 0) {
+                $eventoRural->locations()->attach([
+                    $ubicacionesTurismo->first()->id => [
+                        'location_specific_notes' => 'Uso completo del predio ferial',
+                        'max_attendees_for_location' => 5000,
+                    ]
+                ]);
+            }
         }
 
         // Event from Centro Cultural Virla (published external event)
         if ($centroVirla) {
-            Event::create([
+            $eventoVirla = Event::create([
                 'title' => 'Muestra de Arte Contemporáneo Tucumano',
                 'description' => 'Exhibición de obras de artistas contemporáneos tucumanos emergentes. Incluye pintura, escultura, fotografía y nuevos medios digitales.',
                 'start_date' => Carbon::now()->addDays(12)->setHour(18)->setMinute(0),
@@ -308,13 +335,103 @@ class EventSeeder extends Seeder
                 'theme_id' => $themeCultural->id,
                 'frequency_id' => $frequencyUnico->id,
                 'rotation_type_id' => $rotationFijo->id,
+                'edition_number' => '12',
             ]);
+
+            // Associate location with Centro Virla event
+            if ($ubicacionesCultura->count() > 0) {
+                $eventoVirla->locations()->attach([
+                    $ubicacionesCultura->first()->id => [
+                        'location_specific_notes' => 'Galería principal',
+                        'max_attendees_for_location' => 200,
+                    ]
+                ]);
+            }
+        }
+
+        // Create 2 draft events from organizers (for testing organizer workflow)
+        $draftStatus = EventStatus::where('status_code', 'draft')->first();
+        $negociosType = EventType::where('name', 'Negocios y Conferencias')->first();
+        $conferenciaProfesionalSubtype = $negociosType?->eventSubtypes()
+            ->where('name', 'Conferencia Profesional')->first();
+        $themeAcademico = DB::table('event_themes')->where('name', 'academico')->first();
+
+        if ($sheratonHotel && $draftStatus && $negociosType && $conferenciaProfesionalSubtype) {
+            $workshopMarketing = Event::create([
+                'title' => 'Workshop de Marketing Digital',
+                'description' => 'Taller práctico de estrategias de marketing digital para el sector turístico.',
+                'start_date' => Carbon::now()->addDays(20)->setHour(10)->setMinute(0),
+                'end_date' => Carbon::now()->addDays(20)->setHour(18)->setMinute(0),
+                'status_id' => $draftStatus->id,
+                'format_id' => $sedeUnicaFormat->id,
+                'event_type_id' => $negociosType->id,
+                'event_subtype_id' => $conferenciaProfesionalSubtype->id,
+                'organization_id' => $sheratonHotel->id,
+                'entity_id' => $enteDeturismo->id,  // Parent de Sheraton
+                'created_by' => null,
+                'origin_id' => $originLocal->id,
+                'theme_id' => $themeAcademico?->id,
+                'frequency_id' => $frequencyUnico->id,
+                'rotation_type_id' => $rotationFijo->id,
+                'edition_number' => '1',
+                // Campos opcionales para testing
+                'local_attendance' => 50,
+                'national_attendance' => 10,
+                'event_website' => 'https://ejemplo.com/workshop-marketing',
+                'maps_url' => 'https://maps.google.com/?q=Sheraton+Tucuman',
+            ]);
+
+            // Associate location with Workshop event
+            if ($ubicacionesTurismo->count() > 0) {
+                $workshopMarketing->locations()->attach([
+                    $ubicacionesTurismo->first()->id => [
+                        'location_specific_notes' => 'Sala de conferencias nivel 2',
+                        'max_attendees_for_location' => 80,
+                    ]
+                ]);
+            }
+        }
+
+        if ($laRural && $draftStatus && $festivalesType && $gastronomicoSubtype) {
+            $degustacionVinos = Event::create([
+                'title' => 'Degustación de Vinos Tucumanos',
+                'description' => 'Cata de vinos de las bodegas más prestigiosas de los Valles Calchaquíes.',
+                'start_date' => Carbon::now()->addDays(25)->setHour(19)->setMinute(0),
+                'end_date' => Carbon::now()->addDays(25)->setHour(22)->setMinute(0),
+                'status_id' => $draftStatus->id,
+                'format_id' => $sedeUnicaFormat->id,
+                'event_type_id' => $festivalesType->id,
+                'event_subtype_id' => $gastronomicoSubtype->id,
+                'organization_id' => $laRural->id,
+                'entity_id' => $enteDeturismo->id,  // Parent de La Rural
+                'created_by' => null,
+                'origin_id' => $originLocal->id,
+                'theme_id' => $themeGastronomico->id,
+                'frequency_id' => $frequencyAnual->id,
+                'rotation_type_id' => $rotationRotativo->id,
+                'edition_number' => '6',
+                // Campos opcionales
+                'local_attendance' => 80,
+                'international_attendance' => 5,
+                'virtual_transmission' => false,
+            ]);
+
+            // Associate location with Degustación event
+            if ($ubicacionesTurismo->count() > 0) {
+                $degustacionVinos->locations()->attach([
+                    $ubicacionesTurismo->first()->id => [
+                        'location_specific_notes' => 'Pabellón de degustaciones',
+                        'max_attendees_for_location' => 120,
+                    ]
+                ]);
+            }
         }
 
         $this->command->info('Events created successfully!');
         $this->command->info('- 3 events created for Ente de Turismo (Internal)');
         $this->command->info('- 2 events created for Secretaría de Cultura (Internal)');
         $this->command->info('- 3 events created by External Organizations');
+        $this->command->info('- 2 draft events created by External Organizations (for testing)');
         $this->command->info('- All events have 3NF lookup relationships (origin, theme, frequency, rotation_type)');
     }
 }

@@ -88,15 +88,13 @@ describe('useEventActions', () => {
   describe('duplicateEvent', () => {
     test('duplicates event successfully and shows success toast', async () => {
       const mockOriginalEvent = {
-        data: {
-          id: 1,
-          title: 'Original Event',
-          description: 'Test description',
-          status: 'published' as const,
-          start_date: '2025-11-01T10:00',
-          locations: [{ id: 1, name: 'Test Location' }],
-          category: { id: 1, name: 'Test Category' }
-        }
+        id: 1,
+        title: 'Original Event',
+        description: 'Test description',
+        status: 'published' as const,
+        start_date: '2025-11-01T10:00',
+        locations: [{ id: 1, name: 'Test Location' }],
+        category: { id: 1, name: 'Test Category' }
       }
       const mockDuplicatedEvent = {
         data: {
@@ -133,17 +131,15 @@ describe('useEventActions', () => {
 
     test('removes id and timestamps when duplicating', async () => {
       const mockOriginalEvent = {
-        data: {
-          id: 1,
-          title: 'Original Event',
-          description: 'Test description',
-          start_date: '2025-11-01T10:00',
-          locations: [{ id: 1, name: 'Test Location' }],
-          category: { id: 1, name: 'Test Category' },
-          status: 'draft' as const,
-          created_at: '2025-10-29T00:00:00Z',
-          updated_at: '2025-10-29T00:00:00Z'
-        }
+        id: 1,
+        title: 'Original Event',
+        description: 'Test description',
+        start_date: '2025-11-01T10:00',
+        locations: [{ id: 1, name: 'Test Location' }],
+        category: { id: 1, name: 'Test Category' },
+        status: 'draft' as const,
+        created_at: '2025-10-29T00:00:00Z',
+        updated_at: '2025-10-29T00:00:00Z'
       }
 
       ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockOriginalEvent)
@@ -194,7 +190,7 @@ describe('useEventActions', () => {
 
       expect(organizerEventService.deleteEvent).toHaveBeenCalledWith(1)
       expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Event deleted successfully',
+        message: 'Evento eliminado exitosamente',
         type: 'success'
       })
       expect(mockRefresh).toHaveBeenCalled()
@@ -213,7 +209,7 @@ describe('useEventActions', () => {
       })
 
       expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Failed to delete event',
+        message: 'Error al eliminar evento',
         type: 'error'
       })
       expect(mockRefresh).not.toHaveBeenCalled()

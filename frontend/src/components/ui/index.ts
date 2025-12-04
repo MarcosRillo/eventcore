@@ -11,6 +11,7 @@ export { default as Textarea } from './Textarea';
 export { default as Select } from './Select';
 export { SearchableMultiSelect, type SearchableMultiSelectProps, type SelectOption } from './SearchableMultiSelect';
 export { default as LoadingSpinner, LoadingDots, LoadingOverlay } from './LoadingSpinner';
+export { Tooltip } from './Tooltip';
 
 // State Components
 export { default as Skeleton, SkeletonText, SkeletonAvatar, SkeletonButton, SkeletonCard, SkeletonTable } from './Skeleton';

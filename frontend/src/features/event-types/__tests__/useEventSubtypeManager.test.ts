@@ -340,7 +340,7 @@ describe('useEventSubtypeManager', () => {
         await result.current.handleDeleteEventSubtype(1)
       })
 
-      expect(mockedEventSubtypeService.deleteEventSubtype).toHaveBeenCalledWith(1)
+      expect(mockedEventSubtypeService.deleteEventSubtype).toHaveBeenCalledWith(1, 1)
     })
 
     it('should perform optimistic update on delete', async () => {

@@ -6,11 +6,13 @@
 
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 
 export const OrganizerDashboardContainer = () => {
+  const router = useRouter()
   // Fetch stats
   const { stats, refetch: refetchStats } = useOrganizerStats()
 
@@ -38,6 +40,15 @@ export const OrganizerDashboardContainer = () => {
     handleStatusFilter(status)
   }
 
+  // Navigation handlers
+  function handleEdit(id: number): void {
+    router.push(`/organizer/${id}/edit`)
+  }
+
+  function handleView(id: number): void {
+    router.push(`/organizer/${id}`)
+  }
+
   return (
     <OrganizerDashboard
       stats={stats}
@@ -50,6 +61,8 @@ export const OrganizerDashboardContainer = () => {
       onFilterChange={handleFilterChange}
       onPageChange={handlePageChange}
       onSuccess={handleRefresh}
+      onEdit={handleEdit}
+      onView={handleView}
     />
   )
 }

@@ -69,8 +69,6 @@ class OrganizerController extends Controller
         $user = $request->user();
         $event = $this->getOrganizerEvent($id, $user);
 
-        $this->validateEditableStatus($event);
-
         $updatedEvent = $this->organizerService->updateEvent($event, $request->validated(), $user);
 
         return response()->json([
@@ -159,21 +157,5 @@ class OrganizerController extends Controller
             ->where('organization_id', $user->organization_id)
             ->with($with)
             ->firstOrFail();
-    }
-
-    /**
-     * Validate event is in editable status.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-     */
-    private function validateEditableStatus(Event $event): void
-    {
-        $editableStatuses = ['draft', 'requires_changes'];
-        if (!in_array($event->status->status_code, $editableStatuses)) {
-            abort(response()->json([
-                'error' => 'Cannot edit event in current status',
-                'current_status' => $event->status->status_code,
-                'editable_statuses' => $editableStatuses
-            ], 403));
-        }
     }
 }

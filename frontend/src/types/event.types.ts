@@ -64,6 +64,45 @@ export interface EventTypeObject {
 export type EventType = EventTypeCode | EventTypeObject;
 
 /**
+ * Event Type Resource from backend (3NF structure)
+ * This is what EventResource returns for the event_type relationship
+ */
+export interface EventTypeInfo {
+  id: number;
+  name: string;
+  entity_id?: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Event Subtype Resource from backend (3NF structure)
+ * This is what EventResource returns for the event_subtype relationship
+ */
+export interface EventSubtypeInfo {
+  id: number;
+  name: string;
+  event_type_id: number;
+  entity_id?: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Event Status Resource from backend (3NF structure)
+ * This is what EventResource returns for the status relationship
+ */
+export interface EventStatusInfo {
+  id: number;
+  status_code: EventStatusCode;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
  * Approval history entry interface
  */
 export interface ApprovalHistoryEntry {
@@ -84,7 +123,12 @@ export interface Event {
   end_date: string;
   type: EventType;
   status: EventStatus;
-  
+
+  // Backend relationship objects (3NF normalized structure from EventResource)
+  event_type?: EventTypeInfo;
+  event_subtype?: EventSubtypeInfo;
+  status_object?: EventStatusInfo;
+
   // Location fields (aligned with backend flexible location system)
   location_text?: string;      // Free text location
   virtual_link?: string;

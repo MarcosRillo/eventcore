@@ -12,6 +12,19 @@ import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvent
 jest.mock('@/features/organizer-dashboard/hooks/useOrganizerStats')
 jest.mock('@/features/organizer/hooks/useOrganizerEvents')
 
+// Mock Next.js router
+const mockPush = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn()
+  })
+}))
+
 // Mock OrganizerDashboard to simplify testing
 jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', () => ({
   OrganizerDashboard: ({
@@ -21,7 +34,9 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
     error,
     activeFilter,
     onFilterChange,
-    onSuccess
+    onSuccess,
+    onEdit,
+    onView
   }: {
     stats: unknown
     events: unknown
@@ -30,6 +45,8 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
     activeFilter: string | null
     onFilterChange: (status: string | null) => void
     onSuccess: () => void
+    onEdit: (id: number) => void
+    onView: (id: number) => void
   }) => (
     <div data-testid="organizer-dashboard">
       <span data-testid="loading-state">{loading ? 'loading' : 'loaded'}</span>
@@ -40,6 +57,8 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
       <button onClick={() => onFilterChange('draft')}>Filter Draft</button>
       <button onClick={() => onFilterChange(null)}>Show All</button>
       <button onClick={onSuccess}>Refresh Data</button>
+      <button onClick={() => onEdit(1)}>Edit Event 1</button>
+      <button onClick={() => onView(1)}>View Event 1</button>
     </div>
   )
 }))
@@ -69,6 +88,7 @@ describe('OrganizerDashboardContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockPush.mockClear()
 
     ;(useOrganizerStats as jest.Mock).mockReturnValue({
       stats: mockStats,
@@ -245,6 +265,24 @@ describe('OrganizerDashboardContainer', () => {
 
       // Events loading is what's passed to dashboard
       expect(screen.getByTestId('loading-state')).toHaveTextContent('loaded')
+    })
+  })
+
+  describe('navigation handling', () => {
+    test('should navigate to edit page when onEdit is called', () => {
+      render(<OrganizerDashboardContainer />)
+
+      fireEvent.click(screen.getByText('Edit Event 1'))
+
+      expect(mockPush).toHaveBeenCalledWith('/organizer/1/edit')
+    })
+
+    test('should navigate to event detail when onView is called', () => {
+      render(<OrganizerDashboardContainer />)
+
+      fireEvent.click(screen.getByText('View Event 1'))
+
+      expect(mockPush).toHaveBeenCalledWith('/organizer/1')
     })
   })
 })

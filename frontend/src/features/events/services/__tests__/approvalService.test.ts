@@ -133,14 +133,14 @@ describe('approvalService', () => {
   })
 
   describe('requestChanges', () => {
-    it('should request changes with feedback', async () => {
+    it('should request changes with reason', async () => {
       mockApiClient.patch.mockResolvedValueOnce(
         createMockResponse({ message: 'Changes requested', data: { ...mockEvent, status: 'requires_changes' } })
       )
 
       const result = await approvalService.requestChanges(1, 'Please fix the date')
 
-      expect(mockApiClient.patch).toHaveBeenCalledWith('/events/1/request-changes', { feedback: 'Please fix the date' })
+      expect(mockApiClient.patch).toHaveBeenCalledWith('/events/1/request-changes', { reason: 'Please fix the date' })
       expect(result.status).toBe('requires_changes')
     })
 

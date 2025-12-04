@@ -203,8 +203,11 @@ function renderTableCell(
       );
 
     case 'type':
-      const typeCode = getEventTypeCode(event.type);
-      const typeLabel = typeLabels[typeCode] || typeCode;
+      // Prefer event_type from backend (3NF structure)
+      const typeLabel = event.event_type?.name || (() => {
+        const typeCode = getEventTypeCode(event.type);
+        return typeLabels[typeCode] || typeCode;
+      })();
       return (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
           {typeLabel}
@@ -212,11 +215,13 @@ function renderTableCell(
       );
 
     case 'status':
-      const statusCode = getEventStatusCode(event.status);
+      // Prefer status_object from backend (3NF structure)
+      const statusCode = event.status_object?.status_code || getEventStatusCode(event.status);
+      const statusLabel = event.status_object?.name;
       const statusInfo = statusLabels[statusCode] || { label: statusCode, className: 'bg-gray-100 text-gray-800' };
       return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.className}`}>
-          {statusInfo.label}
+          {statusLabel || statusInfo.label}
         </span>
       );
 

@@ -94,7 +94,7 @@ describe('StatsBar', () => {
     })
 
     test('should apply correct text styling to values and labels', () => {
-      const { container } = render(<StatsBar stats={mockStats} loading={false} />)
+      render(<StatsBar stats={mockStats} loading={false} />)
 
       const value = screen.getByText('45')
       expect(value).toHaveClass('font-semibold', 'text-primary-900')

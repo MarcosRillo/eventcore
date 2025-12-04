@@ -185,7 +185,7 @@ export function useEventSubtypeManager(
         removeEventSubtype(subtypeId);
 
         // API call
-        await deleteEventSubtype(subtypeId);
+        await deleteEventSubtype(eventTypeId, subtypeId);
 
         // Refresh to get updated pagination
         refreshData();
@@ -195,7 +195,7 @@ export function useEventSubtypeManager(
         throw new Error('Error al eliminar el subtipo de evento');
       }
     },
-    [removeEventSubtype, refreshData]
+    [eventTypeId, removeEventSubtype, refreshData]
   );
 
   // Calculate statistics

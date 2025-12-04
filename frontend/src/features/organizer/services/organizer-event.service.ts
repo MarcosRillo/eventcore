@@ -6,8 +6,8 @@ export const getEvents = async (params: EventListParams): Promise<EventListRespo
   return response.data
 }
 
-export const getEvent = async (id: number): Promise<{ data: OrganizerEvent }> => {
-  const response = await apiClient.get(`/organizer/events/${id}`)
+export const getEvent = async (id: number): Promise<OrganizerEvent> => {
+  const response = await apiClient.get<OrganizerEvent>(`/organizer/events/${id}`)
   return response.data
 }
 

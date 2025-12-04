@@ -21,11 +21,11 @@ export const OrganizerEventListContainer = () => {
   } = useOrganizerEvents()
 
   const handleEdit = (id: number) => {
-    router.push(`/organizer/events/${id}/edit`)
+    router.push(`/organizer/${id}/edit`)
   }
 
   const handleView = (id: number) => {
-    router.push(`/organizer/events/${id}`)
+    router.push(`/organizer/${id}`)
   }
 
   return (

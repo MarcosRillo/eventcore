@@ -100,6 +100,22 @@ class OrganizerControllerUpdateTest extends TestCase
     }
 
     /**
+     * Helper: Get approved_internal status ID
+     */
+    private function getApprovedInternalStatusId(): int
+    {
+        return \DB::table('event_statuses')->where('status_code', 'approved_internal')->value('id');
+    }
+
+    /**
+     * Helper: Get pending_internal_approval status ID
+     */
+    private function getPendingInternalApprovalStatusId(): int
+    {
+        return \DB::table('event_statuses')->where('status_code', 'pending_internal_approval')->value('id');
+    }
+
+    /**
      * Helper: Get valid format_id
      */
     private function getValidFormatId(): int
@@ -327,10 +343,12 @@ class OrganizerControllerUpdateTest extends TestCase
     }
 
     #[Test]
-    public function test_cannot_update_published_event(): void
+    public function test_can_update_published_event_and_changes_to_pending(): void
     {
         // Arrange: Create published event
         $user = $this->createAuthenticatedUser();
+        $location = Location::factory()->create(['entity_id' => 1]);
+
         $event = Event::factory()->create([
             'organization_id' => $user->organization_id,
             'entity_id' => $user->organization_id,
@@ -340,13 +358,14 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Published Event',
         ]);
 
-        $location = Location::factory()->create();
+        $event->locations()->sync([$location->id]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $updatePayload = [
-            'title' => 'Attempted Update',
-            'description' => 'Should not work',
+            'title' => 'Updated Published Event',
+            'description' => 'This was published but now edited',
             'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(6)->format('Y-m-d H:i:s'),
             'event_type_id' => $eventTypeIds['event_type_id'],
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
@@ -355,19 +374,70 @@ class OrganizerControllerUpdateTest extends TestCase
         // Act
         $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
 
-        // Assert
-        $response->assertStatus(403);
-        $response->assertJsonFragment(['error' => 'Cannot edit event in current status']);
-        $response->assertJsonStructure(['error', 'current_status', 'editable_statuses']);
+        // Assert: Update should succeed
+        $response->assertStatus(200);
 
-        $this->assertDatabaseHas('events', [
-            'id' => $event->id,
-            'title' => 'Published Event'
-        ]);
+        // Verify title was updated
+        $event->refresh();
+        $this->assertEquals('Updated Published Event', $event->title);
+
+        // Verify status changed to pending_internal_approval
+        $this->assertEquals(
+            'pending_internal_approval',
+            $event->status->status_code,
+            'Published event should change to pending_internal_approval after edit'
+        );
     }
 
     #[Test]
-    public function test_can_update_draft_event(): void
+    public function test_can_update_approved_internal_event_and_changes_to_pending(): void
+    {
+        // Arrange: Create approved_internal event
+        $user = $this->createAuthenticatedUser();
+        $location = Location::factory()->create(['entity_id' => 1]);
+
+        $event = Event::factory()->create([
+            'organization_id' => $user->organization_id,
+            'entity_id' => $user->organization_id,
+            'created_by' => $user->id,
+            'status_id' => $this->getApprovedInternalStatusId(),
+            'format_id' => $this->getValidFormatId(),
+            'title' => 'Approved Event',
+        ]);
+
+        $event->locations()->sync([$location->id]);
+        $eventTypeIds = $this->getValidEventTypeIds();
+
+        $updatePayload = [
+            'title' => 'Updated Approved Event',
+            'description' => 'This was approved but now edited',
+            'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(6)->format('Y-m-d H:i:s'),
+            'event_type_id' => $eventTypeIds['event_type_id'],
+            'event_subtype_id' => $eventTypeIds['event_subtype_id'],
+            'location_ids' => [$location->id],
+        ];
+
+        // Act
+        $response = $this->putJson("/api/v1/organizer/events/{$event->id}", $updatePayload);
+
+        // Assert: Update should succeed
+        $response->assertStatus(200);
+
+        // Verify title was updated
+        $event->refresh();
+        $this->assertEquals('Updated Approved Event', $event->title);
+
+        // Verify status changed to pending_internal_approval
+        $this->assertEquals(
+            'pending_internal_approval',
+            $event->status->status_code,
+            'Approved event should change to pending_internal_approval after edit'
+        );
+    }
+
+    #[Test]
+    public function test_can_update_draft_event_and_maintains_draft_status(): void
     {
         // Arrange
         $user = $this->createAuthenticatedUser();
@@ -401,6 +471,10 @@ class OrganizerControllerUpdateTest extends TestCase
             'id' => $event->id,
             'title' => 'Updated Draft'
         ]);
+
+        // Verify status remains draft (does not change to pending)
+        $event->refresh();
+        $this->assertEquals('draft', $event->status->status_code, 'Draft event should maintain draft status after edit');
     }
 
     #[Test]
