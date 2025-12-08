@@ -17,6 +17,9 @@ use App\Features\Users\Controllers\UserController;
 // Feature Controllers - PublicEvents
 use App\Features\PublicEvents\Controllers\PublicEventController;
 
+// Feature Controllers - InternalCalendar
+use App\Features\InternalCalendar\Controllers\InternalCalendarController;
+
 // Feature Controllers - Appearance
 use App\Features\Appearance\Controllers\AppearanceController;
 
@@ -201,6 +204,14 @@ Route::prefix('v1')->group(function () {
             // Organizations read-only
             Route::get('organizations', [OrganizationController::class, 'index']);
             Route::get('organizations/{id}', [OrganizationController::class, 'show']);
+        });
+
+        // ===== INTERNAL CALENDAR (entity_admin, entity_staff, organizer_admin) =====
+        Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer_admin'])->group(function () {
+            Route::prefix('internal-calendar')->group(function () {
+                Route::get('events', [InternalCalendarController::class, 'index']);
+                Route::get('event-statuses', [InternalCalendarController::class, 'eventStatuses']);
+            });
         });
 
         // ===== LOCATIONS, EVENT TYPES READ ACCESS (All authenticated users need this) =====

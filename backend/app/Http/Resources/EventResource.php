@@ -75,6 +75,7 @@ class EventResource extends JsonResource
             'event_type' => $this->whenLoaded('eventType', fn() => [
                 'id' => $this->eventType->id,
                 'name' => $this->eventType->name,
+                'color' => $this->eventType->color,
             ]),
 
             'event_subtype' => $this->whenLoaded('eventSubtype', fn() => [

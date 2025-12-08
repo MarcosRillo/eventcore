@@ -325,6 +325,31 @@ class Event extends Model
     }
 
     /**
+     * Scope a query to only include internal calendar events.
+     *
+     * Internal calendar shows events that have been approved for internal viewing
+     * or public display. This includes events in the following statuses:
+     * - approved_internal: Approved for internal calendar only
+     * - pending_public_approval: Waiting for final approval to be published
+     * - published: Live on public calendar
+     *
+     * Excludes: draft, requires_changes, rejected, cancelled
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInternalCalendar($query)
+    {
+        return $query->whereHas('status', function($q) {
+            $q->whereIn('status_code', [
+                'approved_internal',
+                'pending_public_approval',
+                'published'
+            ]);
+        });
+    }
+
+    /**
      * Scope a query to only include featured events.
      */
     public function scopeFeatured($query)
