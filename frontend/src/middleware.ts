@@ -57,7 +57,7 @@ const PUBLIC_ROUTES = new Set([
 
 // Public route prefixes (allow sub-routes)
 const PUBLIC_PREFIXES = [
-  '/calendar', // Public calendar and event details
+  '/calendar/', // Public calendar and event details (trailing slash prevents matching /organizer/calendar)
 ];
 
 /**
@@ -68,6 +68,12 @@ function isPublicRoute(pathname: string): boolean {
   // Exact match for static routes (O(1))
   if (PUBLIC_ROUTES.has(pathname)) {
     return true;
+  }
+
+  // Explicitly exclude authenticated calendar routes
+  const authenticatedRoutes = ['/organizer/calendar', '/internal-calendar'];
+  if (authenticatedRoutes.some(route => pathname.startsWith(route))) {
+    return false;
   }
 
   // Prefix match for dynamic routes
@@ -148,11 +154,16 @@ export function middleware(request: NextRequest) {
 
   // ROLE-BASED PROTECTION
 
-  // Event Organizer - ONLY /organizer/* and /calendar
+  // Event Organizer - ONLY /organizer/* and /calendar (public)
   if (roleCode === 'organizer_admin') {
-    // Allow: /organizer/*, /calendar/*
+    // Allow: /organizer/*, /calendar/* (public), NO /internal-calendar
     const allowedPaths = ['/organizer', '/calendar'];
     const isAllowed = allowedPaths.some(path => pathname.startsWith(path));
+
+    // Block internal calendar for organizers
+    if (pathname.startsWith('/internal-calendar')) {
+      return NextResponse.redirect(new URL('/organizer/calendar', request.url));
+    }
 
     if (!isAllowed) {
       // Trying to access Entity routes - redirect to organizer dashboard

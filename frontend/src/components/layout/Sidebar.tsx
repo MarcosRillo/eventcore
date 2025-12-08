@@ -58,8 +58,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           icon: <HomeIcon className="w-5 h-5" />,
         },
         {
-          name: 'Calendario',
-          href: '/calendar',
+          name: 'Calendario Interno',
+          href: '/internal-calendar',
           icon: <CalendarIcon className="w-5 h-5" />,
         },
       ],

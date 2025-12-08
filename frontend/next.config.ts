@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false, // Temporarily disabled for development - was causing infinite re-renders
+  reactStrictMode: true, // Re-enabled after fixing infinite loop in useInternalCalendarEvents hook
   images: {
     // Allow external images from any domain for user-uploaded content
     // In production, you should restrict this to specific domains for security

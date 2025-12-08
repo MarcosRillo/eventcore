@@ -9,12 +9,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
+  CalendarIcon,
   PlusCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/organizer/dashboard', icon: HomeIcon },
+  { name: 'Mi Calendario', href: '/organizer/calendar', icon: CalendarIcon },
   { name: 'Crear Evento', href: '/organizer/create', icon: PlusCircleIcon },
 ];
 
