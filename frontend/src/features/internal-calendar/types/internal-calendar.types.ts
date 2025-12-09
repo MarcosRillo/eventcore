@@ -108,3 +108,28 @@ export interface BigCalendarEvent {
   color: string; // Hex color from event_type
   allDay?: boolean;
 }
+
+/**
+ * View mode type for calendar/grid toggle
+ */
+export type ViewMode = 'grid' | 'calendar';
+
+/**
+ * Calendar view type for react-big-calendar
+ */
+export type CalendarView = 'month' | 'week' | 'day' | 'agenda';
+
+/**
+ * Internal calendar statistics
+ *
+ * Statistics for events with approved_internal or published status.
+ * Used in StatsBar component.
+ */
+export interface InternalStats {
+  /** Total number of approved_internal + published events */
+  total_events: number;
+  /** Total number of active event types with events */
+  total_event_types: number;
+  /** Number of events starting this month */
+  events_this_month: number;
+}

@@ -21,6 +21,7 @@ describe('InternalEventCard', () => {
     eventType: {
       id: 1,
       name: 'Conferencia',
+      color: '#FF5733',
     },
     locations: [
       {

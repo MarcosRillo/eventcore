@@ -19,6 +19,14 @@ jest.mock('react-big-calendar', () => ({
     views?: string[]
   }) => {
     const Toolbar = components?.toolbar
+    const mockLocalizer = {
+      format: jest.fn(),
+      parse: jest.fn(),
+      startOfWeek: jest.fn(),
+      getDay: jest.fn(),
+      locales: {},
+      messages: {},
+    }
     const toolbarProps = {
       date: new Date('2025-12-10T12:00:00.000Z'),
       view: defaultView || 'month',
@@ -26,12 +34,13 @@ jest.mock('react-big-calendar', () => ({
       label: 'December 2025',
       onNavigate: jest.fn(),
       onView: jest.fn(),
+      localizer: mockLocalizer,
     }
 
     return (
       <div data-testid="big-calendar">
         <div data-testid="calendar-toolbar">
-          {Toolbar && <Toolbar {...toolbarProps} />}
+          {Toolbar && <Toolbar {...(toolbarProps as unknown as Record<string, unknown>)} />}
         </div>
         <div data-testid="calendar-events">
           {events.map((event: BigCalendarEvent) => (
@@ -54,14 +63,12 @@ jest.mock('react-big-calendar', () => ({
     DAY: 'day',
     AGENDA: 'agenda',
   },
-  momentLocalizer: jest.fn(() => ({})),
+  dateFnsLocalizer: jest.fn(() => ({})),
 }))
 
-// Mock moment
-jest.mock('moment', () => {
-  const actualMoment = jest.requireActual('moment')
-  return actualMoment
-})
+// Mock CSS imports
+jest.mock('react-big-calendar/lib/css/react-big-calendar.css', () => ({}))
+jest.mock('@/features/internal-calendar/styles/calendar.css', () => ({}))
 
 describe('BigCalendarView', () => {
   const mockOnSelectEvent = jest.fn()

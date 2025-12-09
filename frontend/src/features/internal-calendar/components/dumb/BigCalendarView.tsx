@@ -1,22 +1,30 @@
 /**
  * BigCalendarView Component (Dumb)
  *
- * Main calendar view using react-big-calendar.
+ * Main calendar view using react-big-calendar with date-fns.
  * Displays events in Month, Week, Day, and Agenda views.
  * Created following TDD methodology (tests written first).
  */
 
 'use client'
 
-import { Calendar, momentLocalizer, Views, type ToolbarProps } from 'react-big-calendar'
-import moment from 'moment'
+import { Calendar, dateFnsLocalizer, Views, type ToolbarProps } from 'react-big-calendar'
+import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import '@/features/internal-calendar/styles/calendar.css'
 import { CalendarToolbar } from './CalendarToolbar'
 import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 
-// Configure moment localizer
-const localizer = momentLocalizer(moment)
+// Configure date-fns localizer with Spanish locale
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales: { es },
+})
 
 /**
  * BigCalendarView Props

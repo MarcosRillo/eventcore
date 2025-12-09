@@ -6,7 +6,7 @@
  * Created following TDD methodology (tests written first).
  */
 
-import type { View, NavigateAction, ToolbarProps } from 'react-big-calendar'
+import type { ToolbarProps } from 'react-big-calendar'
 
 /**
  * CalendarToolbar Props (matches ToolbarProps from react-big-calendar)

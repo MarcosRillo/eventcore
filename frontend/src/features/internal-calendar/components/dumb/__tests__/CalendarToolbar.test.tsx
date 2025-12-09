@@ -13,6 +13,16 @@ describe('CalendarToolbar', () => {
   const mockOnNavigate = jest.fn()
   const mockOnView = jest.fn()
 
+  // Mock localizer (required for ToolbarProps)
+  const mockLocalizer = {
+    format: jest.fn(),
+    parse: jest.fn(),
+    startOfWeek: jest.fn(),
+    getDay: jest.fn(),
+    locales: {},
+    messages: {},
+  }
+
   const defaultProps = {
     date: new Date('2025-12-10T12:00:00.000Z'),
     view: 'month' as View,
@@ -20,6 +30,7 @@ describe('CalendarToolbar', () => {
     label: 'December 2025',
     onNavigate: mockOnNavigate,
     onView: mockOnView,
+    localizer: mockLocalizer,
   }
 
   beforeEach(() => {

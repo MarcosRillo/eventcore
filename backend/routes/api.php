@@ -19,6 +19,7 @@ use App\Features\PublicEvents\Controllers\PublicEventController;
 
 // Feature Controllers - InternalCalendar
 use App\Features\InternalCalendar\Controllers\InternalCalendarController;
+use App\Features\InternalCalendar\Controllers\InternalCalendarStatsController;
 
 // Feature Controllers - Appearance
 use App\Features\Appearance\Controllers\AppearanceController;
@@ -211,6 +212,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('internal-calendar')->group(function () {
                 Route::get('events', [InternalCalendarController::class, 'index']);
                 Route::get('event-statuses', [InternalCalendarController::class, 'eventStatuses']);
+                Route::get('stats', [InternalCalendarStatsController::class, 'index']);
             });
         });
 

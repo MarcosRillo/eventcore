@@ -20,10 +20,11 @@ describe('Admin Calendar Page', () => {
     });
   });
 
-  test('should render page title', () => {
+  test('should render view toggle buttons', () => {
     render(<CalendarPage />);
 
-    expect(screen.getByText('Calendario Interno')).toBeInTheDocument();
+    expect(screen.getByText('Vista Grid')).toBeInTheDocument();
+    expect(screen.getByText('Vista Calendario')).toBeInTheDocument();
   });
 
   test('should render InternalCalendarContainer', () => {
