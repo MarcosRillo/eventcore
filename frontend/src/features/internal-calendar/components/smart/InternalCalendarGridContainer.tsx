@@ -3,22 +3,29 @@
  *
  * Container for grid view that fetches and manages event data.
  * Passes data to InternalCalendar dumb component.
+ * Navigates to event detail page on click.
  */
 
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import { InternalCalendar } from '@/features/internal-calendar/components/dumb/InternalCalendar';
+import type { InternalCalendarFilters } from '@/features/internal-calendar/types/internal-calendar.types';
 
-export function InternalCalendarGridContainer() {
-  const { events, loading, error } = useInternalCalendarEvents();
+export interface InternalCalendarGridContainerProps {
+  filters?: InternalCalendarFilters;
+}
+
+export function InternalCalendarGridContainer({
+  filters = {},
+}: InternalCalendarGridContainerProps) {
+  const router = useRouter();
+  const { events, loading, error } = useInternalCalendarEvents(filters);
 
   const handleEventClick = (eventId: number) => {
-    // TODO: Navigate to event detail page when implemented
-    // For now, just log the event ID
-    if (typeof window !== 'undefined') {
-      console.log('Event clicked:', eventId);
-    }
+    // Navigate to event detail page
+    router.push(`/internal-calendar/${eventId}`);
   };
 
   return (

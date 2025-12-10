@@ -9,7 +9,7 @@
 'use client'
 
 import Modal from '@/components/ui/Modal'
-import moment from 'moment'
+import { format } from 'date-fns'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 
 /**
@@ -39,9 +39,9 @@ export function EventDetailModal({
   const { resource } = event
 
   // Format dates
-  const startDate = moment(event.start).format('MMMM DD, YYYY')
-  const startTime = moment(event.start).format('HH:mm')
-  const endTime = moment(event.end).format('HH:mm')
+  const startDate = format(event.start, 'MMMM dd, yyyy')
+  const startTime = format(event.start, 'HH:mm')
+  const endTime = format(event.end, 'HH:mm')
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={event.title} size="lg">

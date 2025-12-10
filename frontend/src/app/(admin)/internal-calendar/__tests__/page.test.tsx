@@ -5,18 +5,30 @@
 import { render, screen } from '@testing-library/react';
 import CalendarPage from '../page';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
-// Mock the hook
+// Mock the hooks
 jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
+jest.mock('@/context/AuthContext');
+jest.mock('next/navigation');
 
 describe('Admin Calendar Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useRouter as jest.Mock).mockReturnValue({
+      push: jest.fn(),
+    });
     (useInternalCalendarEvents as jest.Mock).mockReturnValue({
       events: [],
       loading: false,
       error: null,
       refetch: jest.fn(),
+    });
+    (useAuth as jest.Mock).mockReturnValue({
+      token: 'mock-token',
+      user: { id: 1, name: 'Test User' },
+      isAuthenticated: true,
     });
   });
 

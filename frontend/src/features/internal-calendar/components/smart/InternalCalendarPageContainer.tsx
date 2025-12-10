@@ -2,29 +2,66 @@
  * InternalCalendarPageContainer - Smart Component
  *
  * Main container for internal calendar page.
- * Orchestrates StatsBar, view toggle (grid/calendar), and event display.
+ * Orchestrates StatsBar, filters, view toggle (grid/calendar), and event display.
  *
  * Created following TDD methodology.
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
-import type { ViewMode } from '@/features/internal-calendar/types/internal-calendar.types';
-// import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
+import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
+import type {
+  ViewMode,
+  InternalCalendarFilters,
+} from '@/features/internal-calendar/types/internal-calendar.types';
+import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
+import { useAuth } from '@/context/AuthContext';
+import { getEventTypes } from '@/features/event-types/services/eventType.service';
+import type { EventType } from '@/types/eventType.types';
 
 export function InternalCalendarPageContainer() {
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
+  const [filters, setFilters] = useState<InternalCalendarFilters>({});
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [eventTypesLoading, setEventTypesLoading] = useState(false);
+  const { token } = useAuth();
+
+  // Fetch event types for filter dropdown
+  useEffect(() => {
+    const fetchEventTypes = async () => {
+      setEventTypesLoading(true);
+      try {
+        const data = await getEventTypes({ active: true, per_page: 100 });
+        setEventTypes(data.data);
+      } catch {
+        // Silently fail - filter will show empty dropdown
+        setEventTypes([]);
+      } finally {
+        setEventTypesLoading(false);
+      }
+    };
+
+    fetchEventTypes();
+  }, []);
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Stats Bar - temporarily commented out until backend endpoint is verified */}
-      {/* <StatsBarContainer /> */}
+      {/* Stats Bar */}
+      <StatsBarContainer token={token || ''} />
 
-      {/* View Toggle */}
+      {/* View Toggle and Filters */}
       <div className="container mx-auto px-4 py-6">
+        {/* Filter Bar */}
+        <InternalCalendarFilterBar
+          filters={filters}
+          onFiltersChange={setFilters}
+          eventTypes={eventTypes}
+          eventTypesLoading={eventTypesLoading}
+        />
+
         <div className="bg-neutral-100 rounded-lg p-1 inline-flex mb-6">
           <button
             onClick={() => setViewMode('grid')}
@@ -60,9 +97,9 @@ export function InternalCalendarPageContainer() {
 
         {/* Conditional View Rendering */}
         {viewMode === 'grid' ? (
-          <InternalCalendarGridContainer />
+          <InternalCalendarGridContainer filters={filters} />
         ) : (
-          <InternalCalendarViewContainer />
+          <InternalCalendarViewContainer filters={filters} />
         )}
       </div>
     </div>

@@ -3,30 +3,36 @@
  *
  * Container for calendar view that fetches events and transforms them
  * to BigCalendar format. Passes data to BigCalendarView.
+ * Navigates to event detail page on click.
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView';
 import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform';
-import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal';
-import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
+import type {
+  BigCalendarEvent,
+  InternalCalendarFilters,
+} from '@/features/internal-calendar/types/internal-calendar.types';
 
-export function InternalCalendarViewContainer() {
-  const { events, loading, error } = useInternalCalendarEvents();
-  const [selectedEvent, setSelectedEvent] = useState<BigCalendarEvent | null>(null);
+export interface InternalCalendarViewContainerProps {
+  filters?: InternalCalendarFilters;
+}
+
+export function InternalCalendarViewContainer({
+  filters = {},
+}: InternalCalendarViewContainerProps) {
+  const router = useRouter();
+  const { events, loading, error } = useInternalCalendarEvents(filters);
 
   // Transform events to BigCalendar format
   const bigCalendarEvents = transformToBigCalendarEvents(events);
 
   const handleSelectEvent = (event: BigCalendarEvent) => {
-    setSelectedEvent(event);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedEvent(null);
+    // Navigate to event detail page
+    router.push(`/internal-calendar/${event.id}`);
   };
 
   if (error) {
@@ -38,20 +44,10 @@ export function InternalCalendarViewContainer() {
   }
 
   return (
-    <>
-      <BigCalendarView
-        events={bigCalendarEvents}
-        loading={loading}
-        onSelectEvent={handleSelectEvent}
-      />
-
-      {selectedEvent && (
-        <EventDetailModal
-          event={selectedEvent}
-          isOpen={true}
-          onClose={handleCloseModal}
-        />
-      )}
-    </>
+    <BigCalendarView
+      events={bigCalendarEvents}
+      loading={loading}
+      onSelectEvent={handleSelectEvent}
+    />
   );
 }

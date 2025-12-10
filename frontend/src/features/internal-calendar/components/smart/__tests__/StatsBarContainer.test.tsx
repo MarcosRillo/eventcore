@@ -50,7 +50,7 @@ describe('StatsBarContainer', () => {
       expect(screen.getByTestId('stats-loading')).toBeInTheDocument()
     })
 
-    it('calls getInternalStats with token on mount', () => {
+    it('calls getInternalStats with token on mount', async () => {
       const mockGetStats = getInternalStats as jest.MockedFunction<typeof getInternalStats>
       mockGetStats.mockResolvedValue(mockStats)
 
@@ -58,6 +58,11 @@ describe('StatsBarContainer', () => {
 
       expect(mockGetStats).toHaveBeenCalledWith(mockToken)
       expect(mockGetStats).toHaveBeenCalledTimes(1)
+
+      // Wait for state updates to complete to avoid act() warnings
+      await waitFor(() => {
+        expect(screen.getByTestId('stats-bar')).toBeInTheDocument()
+      })
     })
   })
 
