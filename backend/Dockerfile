@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2.29-fpm
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -51,7 +51,7 @@ RUN { \
     } > /usr/local/etc/php/conf.d/custom.ini
 
 # Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # Crear usuario del sistema para ejecutar comandos de Composer y Artisan
 RUN groupadd -g 1000 www

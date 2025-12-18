@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20.18-alpine
 
 # Instalar dependencias del sistema
 RUN apk add --no-cache libc6-compat

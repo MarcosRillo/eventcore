@@ -1,7 +1,7 @@
 services:
   # Base de datos PostgreSQL
   db:
-    image: postgres:15
+    image: postgres:15.13
     container_name: plataforma-calendario-db
     restart: unless-stopped
     env_file: .env.docker
@@ -69,7 +69,7 @@ services:
 
   # Servidor web Nginx
   nginx:
-    image: nginx:alpine
+    image: nginx:1.25-alpine
     container_name: plataforma-calendario-nginx
     restart: unless-stopped
     ports:
@@ -86,7 +86,7 @@ services:
 
   # MailHog - SMTP testing server
   mailhog:
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     container_name: plataforma-calendario-mailhog
     restart: unless-stopped
     ports:
