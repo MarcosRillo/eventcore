@@ -92,12 +92,6 @@ class LocationService
 
                 $location = Location::create($locationData);
 
-                Log::info('Location created', [
-                    'location_id' => $location->id,
-                    'location_name' => $location->name,
-                    'user_id' => $user->id
-                ]);
-
                 return $location;
             });
         } catch (\Exception $e) {
@@ -117,15 +111,7 @@ class LocationService
     {
         try {
             return DB::transaction(function () use ($location, $data) {
-                $originalData = $location->toArray();
-
                 $location->update($data);
-
-                Log::info('Location updated', [
-                    'location_id' => $location->id,
-                    'location_name' => $location->name,
-                    'changes' => array_diff_assoc($data, $originalData)
-                ]);
 
                 return $location->fresh();
             });
@@ -146,15 +132,9 @@ class LocationService
     {
         try {
             return DB::transaction(function () use ($location) {
-                $locationId = $location->id;
                 $locationName = $location->name;
 
                 $location->delete();
-
-                Log::info('Location deleted', [
-                    'location_id' => $locationId,
-                    'location_name' => $locationName
-                ]);
 
                 return "Location '{$locationName}' deleted successfully";
             });
