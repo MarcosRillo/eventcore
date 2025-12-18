@@ -2,10 +2,17 @@
  * InternalShareButtons Component Tests
  *
  * Tests for social media share buttons with browser API mocking.
+ * Updated to test useToast instead of alert (Dec 10, 2025).
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { InternalShareButtons } from '../InternalShareButtons';
+import { useToast } from '@/components/ui';
+
+// Mock useToast
+jest.mock('@/components/ui', () => ({
+  useToast: jest.fn(),
+}));
 
 describe('InternalShareButtons', () => {
   const mockEventId = 123;
@@ -14,7 +21,7 @@ describe('InternalShareButtons', () => {
   // Mock browser APIs
   const mockWindowOpen = jest.fn();
   const mockClipboardWriteText = jest.fn(() => Promise.resolve());
-  const mockAlert = jest.fn();
+  const mockAddToast = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,8 +36,10 @@ describe('InternalShareButtons', () => {
       },
     });
 
-    // Mock window.alert
-    global.alert = mockAlert;
+    // Mock useToast hook
+    (useToast as jest.Mock).mockReturnValue({
+      addToast: mockAddToast,
+    });
   });
 
   test('renders all 4 share buttons', () => {
@@ -133,7 +142,7 @@ describe('InternalShareButtons', () => {
     expect(copiedUrl).toContain(`/internal-calendar/${mockEventId}`);
   });
 
-  test('Copy link shows alert on success', async () => {
+  test('Copy link shows toast notification on success', async () => {
     render(
       <InternalShareButtons eventId={mockEventId} eventTitle={mockEventTitle} />
     );
@@ -146,8 +155,11 @@ describe('InternalShareButtons', () => {
     // Wait for promise to resolve
     await Promise.resolve();
 
-    // Should show success alert
-    expect(mockAlert).toHaveBeenCalledTimes(1);
-    expect(mockAlert).toHaveBeenCalledWith('Enlace copiado al portapapeles');
+    // Should show success toast
+    expect(mockAddToast).toHaveBeenCalledTimes(1);
+    expect(mockAddToast).toHaveBeenCalledWith({
+      message: 'Enlace copiado al portapapeles',
+      type: 'success',
+    });
   });
 });

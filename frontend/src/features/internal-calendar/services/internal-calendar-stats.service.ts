@@ -2,14 +2,14 @@
  * Internal Calendar Stats Service
  *
  * Service for fetching internal calendar statistics.
- * Communicates with /api/v1/internal-calendar/stats endpoint.
+ * Communicates with /internal-calendar/stats endpoint.
  *
  * Created following TDD methodology.
+ * Refactored to use apiClient for consistency (Dec 10, 2025).
  */
 
+import apiClient from '@/services/apiClient'
 import type { InternalStats } from '@/features/internal-calendar/types/internal-calendar.types'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 /**
  * API response wrapper for stats endpoint
@@ -21,24 +21,35 @@ interface StatsApiResponse {
 /**
  * Fetches internal calendar statistics
  *
- * @param token - JWT authentication token
+ * Uses apiClient for consistency with other services.
+ * Authentication token is handled automatically by apiClient.
+ *
+ * @param token - JWT authentication token (optional, apiClient handles it)
  * @returns Promise with internal calendar stats
- * @throws Error if API call fails
+ * @throws Error if API call fails or response is malformed
  */
-export async function getInternalStats(token: string): Promise<InternalStats> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/internal-calendar/stats`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-    },
-  })
+export async function getInternalStats(token?: string): Promise<InternalStats> {
+  try {
+    const response = await apiClient.get<StatsApiResponse>(
+      '/internal-calendar/stats',
+      token ? {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      } : undefined
+    )
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch internal stats: ${response.status} ${response.statusText}`)
+    // Validate response structure
+    if (!response.data || !response.data.data) {
+      throw new Error('Invalid response structure from stats endpoint')
+    }
+
+    return response.data.data
+  } catch (error) {
+    // Re-throw error for handling by caller
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch internal stats: ${error.message}`)
+    }
+    throw new Error('Failed to fetch internal stats: Unknown error')
   }
-
-  const data: StatsApiResponse = await response.json()
-  return data.data
 }

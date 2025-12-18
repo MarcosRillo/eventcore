@@ -210,9 +210,17 @@ Route::prefix('v1')->group(function () {
         // ===== INTERNAL CALENDAR (entity_admin, entity_staff, organizer_admin) =====
         Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer_admin'])->group(function () {
             Route::prefix('internal-calendar')->group(function () {
-                Route::get('events', [InternalCalendarController::class, 'index']);
-                Route::get('event-statuses', [InternalCalendarController::class, 'eventStatuses']);
-                Route::get('stats', [InternalCalendarStatsController::class, 'index']);
+                // Events listing - moderate limit (consulta frecuente)
+                Route::get('events', [InternalCalendarController::class, 'index'])
+                    ->middleware('throttle:60,1');
+
+                // Event statuses - low limit (consultado ocasionalmente)
+                Route::get('event-statuses', [InternalCalendarController::class, 'eventStatuses'])
+                    ->middleware('throttle:30,1');
+
+                // Stats - moderate limit (puede ser costoso computacionalmente)
+                Route::get('stats', [InternalCalendarStatsController::class, 'index'])
+                    ->middleware('throttle:30,1');
             });
         });
 

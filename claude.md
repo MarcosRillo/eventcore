@@ -1,4 +1,10 @@
-# claude.md - Plataforma Multi-Tenant de Eventos Turísticos
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
+
+# Plataforma Multi-Tenant de Eventos Turísticos
 
 **Project Status:** MVP 95% completo
 **Tests:** 305/305 passing (36 backend + 269 frontend) ✅
@@ -6,12 +12,127 @@
 
 ---
 
+## 🚀 QUICK START FOR CLAUDE CODE
+
+### Development Environment Setup
+
+**Start the entire stack:**
+```bash
+docker compose up -d
+cd frontend && npm install && npm run dev
+```
+
+**Access points:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000/api/v1/
+- Database: localhost:5432 (PostgreSQL)
+
+### Common Development Commands
+
+**Backend (Laravel in Docker):**
+```bash
+# Run all tests
+docker compose exec backend php artisan test
+
+# Run specific test file
+docker compose exec backend php artisan test --filter=EventTest
+
+# Run migrations
+docker compose exec backend php artisan migrate
+
+# Run seeders
+docker compose exec backend php artisan db:seed
+
+# Clear cache
+docker compose exec backend php artisan config:clear
+docker compose exec backend php artisan cache:clear
+
+# View logs
+docker compose exec backend php artisan pail
+
+# Access backend shell
+docker compose exec backend bash
+```
+
+**Frontend (Next.js):**
+```bash
+cd frontend
+
+# Run dev server
+npm run dev
+
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test file
+npm test -- InternalShareButtons.test.tsx
+
+# Run tests with coverage
+npm run test:coverage
+
+# Build for production
+npm run build
+
+# Run linter
+npm run lint
+```
+
+**Docker Management:**
+```bash
+# Start containers
+docker compose up -d
+
+# Stop containers
+docker compose down
+
+# View logs
+docker compose logs -f
+
+# Rebuild containers
+docker compose up -d --build
+
+# View running containers
+docker ps
+```
+
+### Project Structure Overview
+
+```
+plataforma-calendario/
+├── frontend/               # Next.js 15 + React 19 + TypeScript
+│   └── src/
+│       ├── app/           # Next.js App Router pages
+│       └── features/      # Feature-based organization (10 features)
+│           ├── events/
+│           ├── entity-admin/
+│           ├── organizer/
+│           ├── organizer-dashboard/
+│           └── shared/
+│
+├── backend/               # Laravel 12 + PHP 8.2 (runs in Docker)
+│   └── app/
+│       ├── Features/      # Feature-based organization (9 features)
+│       │   ├── Events/
+│       │   ├── Approval/
+│       │   └── Organizer/
+│       └── Models/
+│
+└── docs/                  # Documentation
+    ├── ARCHITECTURE.md
+    └── cards/             # TDD specification cards
+```
+
+---
+
 ## 🎯 PROJECT OVERVIEW
 
-Sistema de gestión de eventos turísticos multi-tenant para Argentina. 
+Sistema de gestión de eventos turísticos multi-tenant para Argentina.
 
-**Primary Entity:** Ente de Turismo de Tucumán (aprueba/rechaza eventos)  
-**Secondary Entities:** Hoteles, restaurantes, organizadores (crean eventos)  
+**Primary Entity:** Ente de Turismo de Tucumán (aprueba/rechaza eventos)
+**Secondary Entities:** Hoteles, restaurantes, organizadores (crean eventos)
 **Public:** Turistas (ven calendario público)
 
 ---
@@ -245,15 +366,15 @@ test('creates event with all required fields and saves to database', async () =>
     locationId: 1,
     startDate: '2025-10-30'
   }
-  
+
   // Act
   const result = await createEvent(eventData)
-  
+
   // Assert
   expect(result.id).toBeGreaterThan(0)         // ✅ Assertion 1
   expect(result.title).toBe('Test Event')      // ✅ Assertion 2
   expect(result.status).toBe('draft')          // ✅ Assertion 3
-  
+
   // Verify database state
   const dbEvent = await Event.findById(result.id)
   expect(dbEvent).toBeDefined()                // ✅ Assertion 4
@@ -344,7 +465,7 @@ import { eventService } from '@/services/eventService'  // unused!
 const MyComponent = () => {
   const [data, setData] = useState(null)
   const unusedVariable = 'test'  // ❌ unused!
-  
+
   return <div>{data}</div>
 }
 ```
@@ -382,7 +503,7 @@ class EventController extends Controller
     public function __construct(
         private EventService $eventService
     ) {}
-    
+
     public function store(StoreEventRequest $request): JsonResponse
     {
         $event = $this->eventService->createEvent($request->validated());
@@ -397,9 +518,9 @@ class EventService
     {
         return DB::transaction(function () use ($data) {
             $event = Event::create($data);
-            
+
             // Business logic here
-            
+
             Log::info('Event created', ['event_id' => $event->id]);
             return $event;
         });
@@ -428,9 +549,9 @@ export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
 // Smart (Container - src/features/events/components/smart/)
 export const EventCardContainer = ({ eventId }: { eventId: number }) => {
   const { event, loading, handleEdit, handleDelete } = useEventManager(eventId)
-  
+
   if (loading) return <LoadingSpinner />
-  
+
   return (
     <EventCard
       event={event}
@@ -448,7 +569,7 @@ export const useEventManager = (eventId?: number) => {
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const fetchEvent = async () => {
     setLoading(true)
     setError(null)
@@ -461,11 +582,11 @@ export const useEventManager = (eventId?: number) => {
       setLoading(false)
     }
   }
-  
+
   const handleEdit = async (data: Partial<Event>) => {
     // ... implementation
   }
-  
+
   return { event, loading, error, fetchEvent, handleEdit }
 }
 ```
@@ -514,79 +635,65 @@ export const hasErrors = (errors: EventFormErrors): boolean => {
 
 ## 🎯 CURRENT FOCUS
 
-**Sprint 1 Goal:** Completar Panel Organizador (90% → 100%)
+**MVP Status:** 95% complete
 
-**Completed Cards (Oct 27, 2025):**
-- ✅ CARD-001: Backend Stats API (10 tests) - Oct 27
-- ✅ CARD-002: Frontend Stats Widget (13 tests) - Oct 27
-- ✅ CARD-003: Event List Widget (12 tests) - Oct 27
-- ✅ CARD-004: Event Form Widget (12 tests) - Oct 28
+**Completed Features:**
+- ✅ Panel Organizador: 100% (Sprints 1-3)
+- ✅ Panel Entity Admin: 100%
+- ✅ Architecture refactoring: 100%
 
-**Next Cards:**
-- [ ] CARD-005: Event Action Buttons (publish, duplicate, delete)
-- [ ] CARD-006: Dashboard Layout Integration
-- [ ] CARD-007: Entity Admin Dashboard (similar to organizer)
+**Next Priorities:**
+- [ ] Sistema Notificaciones (in-app + email)
+- [ ] Dashboard Analytics (admin metrics)
+- [ ] Public calendar enhancements
+- [ ] Internal calendar feature
 
-**Current Card:** CARD-005 (Event Action Buttons)
-
-**Panel Organizador Status:**
-```
-✅ Stats Widget (total events, by status, recent)
-✅ Event List (paginated, filtered, actions)
-✅ Event Form (create/edit modes, validation)
-⏳ Action Buttons (publish, duplicate, delete with confirmation)
-⏳ Dashboard Layout (integrate all widgets)
-```
-
-**Success Criteria per Card:**
-- [ ] TDD methodology (RED→GREEN→REFACTOR)
-- [ ] All tests passing (>10 tests per card)
-- [ ] Coverage >60% on new code
-- [ ] Architectural review score >9/10
-- [ ] Zero over-engineering
-- [ ] Zero technical debt added
+**Current Work:**
+- Internal calendar implementation with dual view (public/internal)
+- Stats tracking for internal calendar
+- Share functionality with QR codes
 
 ---
 
 ## 📝 RECENT ARCHITECTURAL DECISIONS (ADRs)
 
 ### ADR-001: PostgreSQL 3NF over MySQL
-**Date:** Octubre 2025  
-**Decision:** Migrar de MySQL a PostgreSQL con normalización 3NF  
-**Reason:** Escalabilidad multi-tenant, lookup tables para i18n  
+**Date:** Octubre 2025
+**Decision:** Migrar de MySQL a PostgreSQL con normalización 3NF
+**Reason:** Escalabilidad multi-tenant, lookup tables para i18n
 **Impact:** Base de datos profesional, vendible a provincias
 
 ### ADR-002: Features-Based Architecture
-**Date:** Octubre 2025  
-**Decision:** Migrar de monolítico a Features-based (backend y frontend)  
-**Reason:** Mantenibilidad, escalabilidad, separación de concerns  
+**Date:** Octubre 2025
+**Decision:** Migrar de monolítico a Features-based (backend y frontend)
+**Reason:** Mantenibilidad, escalabilidad, separación de concerns
 **Impact:** 100% código reorganizado, más fácil de mantener
 
 ### ADR-003: TypeScript Strict Mode
-**Date:** Octubre 2025  
-**Decision:** Enforcement de TypeScript strict, zero any types  
-**Reason:** Type safety, reducción de bugs runtime  
+**Date:** Octubre 2025
+**Decision:** Enforcement de TypeScript strict, zero any types
+**Reason:** Type safety, reducción de bugs runtime
 **Impact:** Interfaces consolidadas de 85+ a 27 (-68%)
 
 ### ADR-004: TDD Obligatorio
-**Date:** Octubre 27, 2025  
-**Decision:** Tests escritos ANTES de implementación (TDD RED→GREEN→REFACTOR)  
-**Reason:** Prevenir bugs, forzar diseño, documentación viva  
-**Impact:** Workflow cambia a test-first, más lento inicial pero mejor calidad  
+**Date:** Octubre 27, 2025
+**Decision:** Tests escritos ANTES de implementación (TDD RED→GREEN→REFACTOR)
+**Reason:** Prevenir bugs, forzar diseño, documentación viva
+**Impact:** Workflow cambia a test-first, más lento inicial pero mejor calidad
 **Resultado:** 4 CARDs completadas con TDD perfecto, 47 tests nuevos, 0 regressions
 
 ### ADR-005: Human-in-the-Loop para Claude Code
-**Date:** Octubre 24, 2025  
-**Decision:** Human review en puntos críticos del workflow  
-**Reason:** Prevenir deuda técnica generada por IA (sobre-ingeniería, logging, tests superficiales)  
-**Impact:** +35% tiempo humano, pero tech debt mínima  
+**Date:** Octubre 24, 2025
+**Decision:** Human review en puntos críticos del workflow
+**Reason:** Prevenir deuda técnica generada por IA (sobre-ingeniería, logging, tests superficiales)
+**Impact:** +35% tiempo humano, pero tech debt mínima
 **Status:** Validado exitosamente en CARDs 001-004
 
 ### ADR-006: Validation Utilities Pattern
-**Date:** Octubre 28, 2025  
-**Decision:** Extraer validación a archivos `/utils/` separados (no en hooks/components)  
-**Reason:** Reusabilidad, testabilidad, separación de concerns  
-**Impact:** Validación client-side más mantenible y testeable  
+**Date:** Octubre 28, 2025
+**Decision:** Extraer validación a archivos `/utils/` separados (no en hooks/components)
+**Reason:** Reusabilidad, testabilidad, separación de concerns
+**Impact:** Validación client-side más mantenible y testeable
 **Example:** `eventFormValidation.ts` con 7 reglas de validación extraídas
 
 ---
@@ -634,12 +741,12 @@ docs/
     ├── CARD-001-TDD-spec.md
     ├── CARD-002-TDD-spec.md
     ├── CARD-003-TDD-spec.md
-    ├── CARD-004-TDD-spec.md      ← LATEST
+    ├── CARD-004-TDD-spec.md
     └── [otras cards...]
 ```
 
 **Read Before Starting ANY Task:**
-1. claude.md (this file) - Architecture rules
+1. CLAUDE.md (this file) - Architecture rules
 2. docs/ARCHITECTURE.md - Detailed architecture
 3. docs/cards/CARD-XXX-TDD-spec.md - Current card spec (with full implementation)
 
@@ -650,7 +757,7 @@ docs/
 When generating code, ALWAYS follow this checklist:
 
 ### Before Generating Code
-- [ ] Read claude.md (architecture rules)
+- [ ] Read CLAUDE.md (architecture rules)
 - [ ] Read relevant CARD-XXX-TDD-spec.md (complete implementation reference)
 - [ ] Read reference implementations (similar features)
 - [ ] Identify files to create/modify (explicit paths)
@@ -768,7 +875,7 @@ If you encounter these situations, STOP and ask the human:
 
 ## 🎓 REMINDERS FOR CLAUDE CODE
 
-1. **Read claude.md FIRST** before every task
+1. **Read CLAUDE.md FIRST** before every task
 2. **Follow TDD strictly:** RED → GREEN → REFACTOR
 3. **Use CARD-XXX-TDD-spec.md** for complete implementation reference
 4. **Extract validation to utils/** when >3 validation rules

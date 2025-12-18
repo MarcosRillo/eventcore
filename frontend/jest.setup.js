@@ -55,6 +55,21 @@ console.error = (...args) => {
   originalError.apply(console, args);
 };
 
+// Suppress outdated JSX transform warning from react-big-calendar
+// (library v1.19.4 uses old JSX transform but works fine with React 19)
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  const message = args.join(' ');
+
+  // Filter out JSX transform warning from external library
+  if (message.includes('outdated JSX transform')) {
+    return;
+  }
+
+  // Pass through all other warnings
+  originalWarn.apply(console, args);
+};
+
 // Global cleanup after each test to prevent resource leaks
 // This is a gentle approach that clears mocks without affecting test behavior
 afterEach(() => {

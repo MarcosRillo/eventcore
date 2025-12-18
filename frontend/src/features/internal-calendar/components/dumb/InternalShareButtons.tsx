@@ -2,9 +2,12 @@
  * InternalShareButtons - Dumb Component
  *
  * Social media share buttons for internal calendar events.
+ * Uses project's Toast system for notifications.
  */
 
 'use client';
+
+import { useToast } from '@/components/ui';
 
 export interface InternalShareButtonsProps {
   eventId: number;
@@ -15,6 +18,8 @@ export function InternalShareButtons({
   eventId,
   eventTitle,
 }: InternalShareButtonsProps) {
+  const { addToast } = useToast();
+
   // Get current page URL (will be dynamic in production)
   const eventUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/internal-calendar/${eventId}`
@@ -49,7 +54,10 @@ export function InternalShareButtons({
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(eventUrl).then(() => {
-      alert('Enlace copiado al portapapeles');
+      addToast({
+        message: 'Enlace copiado al portapapeles',
+        type: 'success',
+      });
     });
   };
 

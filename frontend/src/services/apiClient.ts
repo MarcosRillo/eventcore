@@ -99,6 +99,25 @@ apiClient.interceptors.request.use(
   }
 );
 
+/**
+ * Public API routes that should not trigger redirect on 401
+ * These routes are accessible without authentication
+ */
+const PUBLIC_API_ROUTES = [
+  '/public/events',
+  '/public/stats',
+  '/public/locations/active',
+  '/public/event-types',
+];
+
+/**
+ * Check if a URL is a public API route
+ */
+const isPublicApiRoute = (url: string | undefined): boolean => {
+  if (!url) return false;
+  return PUBLIC_API_ROUTES.some(route => url.includes(route));
+};
+
 // Response interceptor with auto-refresh on 401
 apiClient.interceptors.response.use(
   <T>(response: AxiosResponse<ApiResponse<T>>) => {
@@ -117,10 +136,17 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // Check if we have a refresh token
+      // For public routes with 401: clear invalid token but do NOT redirect
+      // This happens when there's an expired token stored locally
+      if (isPublicApiRoute(originalRequest.url)) {
+        clearTokens();  // Clear invalid/expired token
+        return Promise.reject(error);  // Let component handle error (will retry without token)
+      }
+
+      // Check if we have a refresh token (only for protected routes)
       const refreshToken = getRefreshToken();
       if (!refreshToken) {
-        // No refresh token - clear state and redirect
+        // No refresh token - clear state and redirect (protected routes only)
         clearTokens();
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
           window.location.href = '/login';

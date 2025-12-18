@@ -3,17 +3,19 @@
  *
  * Tests for the internal calendar stats API service.
  * Following TDD methodology.
+ * Refactored to mock apiClient instead of fetch (Dec 10, 2025).
  */
 
 import { getInternalStats } from '../internal-calendar-stats.service';
+import apiClient from '@/services/apiClient';
 import type { InternalStats } from '@/features/internal-calendar/types/internal-calendar.types';
 
-// Mock fetch globally
-global.fetch = jest.fn();
+// Mock apiClient
+jest.mock('@/services/apiClient');
 
 describe('InternalCalendarStatsService', () => {
   const mockToken = 'test-jwt-token-123';
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,37 +29,36 @@ describe('InternalCalendarStatsService', () => {
     };
 
     it('fetches stats successfully with correct endpoint', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: mockStatsData }),
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: mockStatsData },
       });
 
       const result = await getInternalStats(mockToken);
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        `${API_BASE_URL}/api/v1/internal-calendar/stats`,
-        expect.objectContaining({
-          method: 'GET',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
+      expect(mockedApiClient.get).toHaveBeenCalledWith(
+        '/internal-calendar/stats',
+        {
+          headers: {
             'Authorization': `Bearer ${mockToken}`,
-            'Accept': 'application/json',
-          }),
-        })
+          },
+        }
       );
       expect(result).toEqual(mockStatsData);
     });
 
-    it('includes Authorization header with token', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: mockStatsData }),
+    it('includes Authorization header with token when provided', async () => {
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: mockStatsData },
       });
 
       await getInternalStats(mockToken);
 
-      const fetchCall = (global.fetch as jest.Mock).mock.calls[0][1];
-      expect(fetchCall.headers.Authorization).toBe(`Bearer ${mockToken}`);
+      const getCall = mockedApiClient.get.mock.calls[0];
+      expect(getCall[1]).toEqual({
+        headers: {
+          'Authorization': `Bearer ${mockToken}`,
+        },
+      });
     });
 
     it('returns stats data from response.data envelope', async () => {
@@ -67,9 +68,8 @@ describe('InternalCalendarStatsService', () => {
         events_this_month: 50,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: customStats }),
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: customStats },
       });
 
       const result = await getInternalStats(mockToken);
@@ -80,39 +80,32 @@ describe('InternalCalendarStatsService', () => {
       expect(result.events_this_month).toBe(50);
     });
 
-    it('throws error when API returns 401 Unauthorized', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        statusText: 'Unauthorized',
-      });
+    it('throws error when API returns error', async () => {
+      const errorMessage = 'Request failed with status code 401';
+      mockedApiClient.get.mockRejectedValueOnce(new Error(errorMessage));
 
       await expect(getInternalStats(mockToken)).rejects.toThrow(
-        'Failed to fetch internal stats: 401 Unauthorized'
+        `Failed to fetch internal stats: ${errorMessage}`
       );
     });
 
-    it('throws error when API returns 500 Server Error', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
+    it('throws error when response structure is invalid (missing data)', async () => {
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: {},  // Missing data.data
       });
 
       await expect(getInternalStats(mockToken)).rejects.toThrow(
-        'Failed to fetch internal stats: 500 Internal Server Error'
+        'Failed to fetch internal stats: Invalid response structure from stats endpoint'
       );
     });
 
-    it('throws error when API returns 403 Forbidden', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
+    it('throws error when response structure is invalid (null data)', async () => {
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: null },  // null instead of stats object
       });
 
       await expect(getInternalStats(mockToken)).rejects.toThrow(
-        'Failed to fetch internal stats: 403 Forbidden'
+        'Failed to fetch internal stats: Invalid response structure from stats endpoint'
       );
     });
 
@@ -123,9 +116,8 @@ describe('InternalCalendarStatsService', () => {
         events_this_month: 0,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: zeroStats }),
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: zeroStats },
       });
 
       const result = await getInternalStats(mockToken);
@@ -141,9 +133,8 @@ describe('InternalCalendarStatsService', () => {
         events_this_month: 888,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: largeStats }),
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: largeStats },
       });
 
       const result = await getInternalStats(mockToken);

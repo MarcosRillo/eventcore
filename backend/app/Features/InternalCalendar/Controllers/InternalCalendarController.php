@@ -2,11 +2,11 @@
 
 namespace App\Features\InternalCalendar\Controllers;
 
+use App\Features\InternalCalendar\Requests\IndexInternalCalendarRequest;
 use App\Features\InternalCalendar\Services\InternalCalendarService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
  * Internal Calendar Controller
@@ -36,19 +36,13 @@ class InternalCalendarController extends Controller
      * - end_date (optional): Filter by end date (requires start_date)
      * - event_type_id (optional): Filter by event type ID
      *
-     * @param Request $request
+     * @param IndexInternalCalendarRequest $request
      * @return JsonResponse Returns EventResource collection
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexInternalCalendarRequest $request): JsonResponse
     {
-        $request->validate([
-            'status' => 'sometimes|string|in:approved_internal,pending_public_approval,published',
-            'start_date' => 'sometimes|date',
-            'end_date' => 'sometimes|date|after_or_equal:start_date',
-            'event_type_id' => 'sometimes|exists:event_types,id',
-        ]);
-
-        $filters = $request->only(['status', 'start_date', 'end_date', 'event_type_id']);
+        // Validation is handled by IndexInternalCalendarRequest
+        $filters = $request->validated();
 
         $events = $this->internalCalendarService->getInternalCalendarEvents($filters);
 

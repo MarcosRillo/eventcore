@@ -2,13 +2,21 @@
 
 namespace App\Features\InternalCalendar\Controllers;
 
+use App\Features\InternalCalendar\Services\InternalCalendarStatsService;
 use App\Http\Controllers\Controller;
-use App\Models\Event;
-use App\Models\EventType;
 use Illuminate\Http\JsonResponse;
 
 class InternalCalendarStatsController extends Controller
 {
+    /**
+     * Inject Internal Calendar Stats Service
+     *
+     * @param InternalCalendarStatsService $statsService Service for calculating stats
+     */
+    public function __construct(
+        private InternalCalendarStatsService $statsService
+    ) {}
+
     /**
      * Get internal calendar statistics
      *
@@ -17,27 +25,13 @@ class InternalCalendarStatsController extends Controller
      * - Total active event types count
      * - Events count for current month
      *
+     * Delegates all business logic to InternalCalendarStatsService.
+     *
      * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        $stats = [
-            'total_events' => Event::whereHas('status', function ($query) {
-                $query->whereIn('status_code', ['approved_internal', 'published']);
-            })->count(),
-
-            'total_event_types' => EventType::whereHas('events', function ($query) {
-                $query->whereHas('status', function ($statusQuery) {
-                    $statusQuery->whereIn('status_code', ['approved_internal', 'published']);
-                });
-            })->count(),
-
-            'events_this_month' => Event::whereHas('status', function ($query) {
-                $query->whereIn('status_code', ['approved_internal', 'published']);
-            })
-            ->whereBetween('start_date', [now()->startOfMonth(), now()->endOfMonth()])
-            ->count(),
-        ];
+        $stats = $this->statsService->getStats();
 
         return response()->json(['data' => $stats]);
     }
