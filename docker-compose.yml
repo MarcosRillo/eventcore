@@ -4,10 +4,7 @@ services:
     image: postgres:15
     container_name: plataforma-calendario-db
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: plataforma_calendario
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
+    env_file: .env.docker
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
@@ -16,7 +13,7 @@ services:
       - plataforma-network
     # Healthcheck para PostgreSQL
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app_user -d plataforma_calendario"]
+      test: ["CMD-SHELL", "pg_isready -U plataforma_user -d plataforma_calendario"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,13 +29,10 @@ services:
     user: 'www'
     volumes:
       - ./backend:/var/www
+    env_file: .env.docker
     environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
       - DB_DATABASE=plataforma_calendario
-      - DB_USERNAME=app_user
-      - DB_PASSWORD=app_password
+      - DB_USERNAME=plataforma_user
     networks:
       - plataforma-network
     ports:
