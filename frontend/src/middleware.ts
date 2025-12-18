@@ -82,7 +82,7 @@ function isPublicRoute(pathname: string): boolean {
 
 // Helper function to get user from cookies with robust validation
 function getUserFromCookies(request: NextRequest): User | null {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('access_token')?.value;
   const userStr = request.cookies.get('user')?.value;
 
   if (!token || !userStr) {

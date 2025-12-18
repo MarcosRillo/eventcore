@@ -34,25 +34,21 @@ const processQueue = (error: Error | null, token: string | null = null): void =>
 /**
  * Perform token refresh using refresh_token
  * Uses standalone axios call to avoid interceptor loops
+ * Token is sent via httpOnly cookie automatically (withCredentials: true)
  */
 const performTokenRefresh = async (): Promise<string> => {
-  const refreshToken = getRefreshToken();
-
-  if (!refreshToken) {
-    throw new Error('No refresh token available');
-  }
-
   const response = await axios.post<{
     success: boolean;
     data: { access_token: string; refresh_token: string; expires_at: string };
   }>(
     `${API_BASE_URL}/api/v1/auth/refresh`,
-    { refresh_token: refreshToken },
+    {}, // Empty body - refresh_token comes from httpOnly cookie
     {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      withCredentials: true, // Send httpOnly cookies with request
     }
   );
 
@@ -75,6 +71,7 @@ const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true, // Send httpOnly cookies with requests
   timeout: 10000, // 10 second timeout
 });
 

@@ -44,6 +44,13 @@ export const isTokenExpiringSoon = (
 
 /**
  * Get access token from localStorage
+ *
+ * Note: With httpOnly cookie migration, tokens are stored in BOTH places:
+ * - HttpOnly cookies: Used automatically for API requests (XSS-protected)
+ * - localStorage: Used for frontend React state management (this function)
+ *
+ * This function reads from localStorage for frontend state checks (isAuthenticated, etc.)
+ * API requests automatically use httpOnly cookies via withCredentials: true
  */
 export const getAccessToken = (): string | null => {
   if (typeof window === 'undefined') return null;

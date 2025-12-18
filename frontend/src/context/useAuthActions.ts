@@ -83,10 +83,9 @@ export const useAuthActions = (): AuthContextType => {
     setUser(null);
     setError(null);
 
-    // Clear cookies (including new token_expires_at cookie)
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    // Note: HttpOnly cookies (access_token, refresh_token) are cleared by backend on logout endpoint
+    // We only clear the user cookie (non-httpOnly) manually
     document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'token_expires_at=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
   // Login function
@@ -113,18 +112,11 @@ export const useAuthActions = (): AuthContextType => {
       storeTokens(access_token, refresh_token, expires_at);
       localStorage.setItem(TOKEN_KEYS.USER, JSON.stringify(userData));
 
-      // Calculate cookie max-age based on token expiry (sync with backend)
+      // Note: HttpOnly cookies (access_token, refresh_token) are set by backend automatically
+      // We only set user cookie for Next.js middleware role checks (non-sensitive data)
       const expiresAtTime = new Date(expires_at).getTime();
       const maxAgeSeconds = Math.max(0, Math.floor((expiresAtTime - Date.now()) / 1000));
-
-      // Determine if we're in production (HTTPS) for secure cookie flag
-      const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
-      const secureFlag = isProduction ? '; secure' : '';
-
-      // Store in cookies for middleware access (access token for API, user for role checks)
-      document.cookie = `token=${access_token}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
-      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
 
       // Update state
       setTokenState(access_token);
@@ -156,9 +148,16 @@ export const useAuthActions = (): AuthContextType => {
   };
 
   // Public logout function
-  const logout = () => {
-    handleLogout();
-    router.push('/login');
+  const logout = async () => {
+    try {
+      // Call backend to clear httpOnly cookies
+      await apiClient.post('/auth/logout');
+    } catch {
+      // Even if logout endpoint fails, clear local state
+    } finally {
+      handleLogout();
+      router.push('/login');
+    }
   };
 
   // Clear error function
