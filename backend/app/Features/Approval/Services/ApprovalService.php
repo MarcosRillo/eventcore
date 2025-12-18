@@ -39,11 +39,6 @@ class ApprovalService
                 'comments' => $comments,
                 'performed_at' => now(),
             ]);
-
-            Log::info('Event approved internally', [
-                'event_id' => $event->id,
-                'approver_id' => $approver->id
-            ]);
         });
     }
 
@@ -66,11 +61,6 @@ class ApprovalService
                 'performed_by' => $requester->id,
                 'action' => EventApproval::ACTION_REQUEST_PUBLIC,
                 'performed_at' => now(),
-            ]);
-
-            Log::info('Public approval requested', [
-                'event_id' => $event->id,
-                'requester_id' => $requester->id
             ]);
         });
     }
@@ -96,11 +86,6 @@ class ApprovalService
                 'performed_at' => $scheduledAt ?? now(),
                 'scheduled_publish_at' => $scheduledAt,
             ]);
-
-            Log::info('Event published', [
-                'event_id' => $event->id,
-                'publisher_id' => $publisher->id
-            ]);
         });
     }
 
@@ -125,11 +110,6 @@ class ApprovalService
                 'comments' => $reason,
                 'performed_at' => now(),
             ]);
-
-            Log::info('Changes requested', [
-                'event_id' => $event->id,
-                'reviewer_id' => $reviewer->id
-            ]);
         });
     }
 
@@ -153,11 +133,6 @@ class ApprovalService
                 'action' => EventApproval::ACTION_REJECT,
                 'comments' => $reason,
                 'performed_at' => now(),
-            ]);
-
-            Log::info('Event rejected', [
-                'event_id' => $event->id,
-                'rejector_id' => $rejector->id
             ]);
         });
     }
