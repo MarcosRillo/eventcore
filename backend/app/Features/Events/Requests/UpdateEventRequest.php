@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\Event;
 use App\Models\EventStatus;
+use Mews\Purifier\Facades\Purifier;
 
 /**
  * Update Event Request
@@ -21,6 +22,21 @@ class UpdateEventRequest extends FormRequest
     public function authorize(): bool
     {
         return true; // Authorization handled by middleware/policies
+    }
+
+    /**
+     * CAPA 1: Sanitize description before validation (defense in depth layer 1).
+     *
+     * This method runs BEFORE validation, removing malicious HTML/JavaScript
+     * from the description field. This is the first layer of defense.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('description') && !empty($this->input('description'))) {
+            $this->merge([
+                'description' => Purifier::clean($this->input('description'))
+            ]);
+        }
     }
 
     /**

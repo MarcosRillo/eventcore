@@ -15,12 +15,18 @@ import { Event } from '@/types/event.types';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons';
 import { Button } from '@/components/ui';
+import { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML';
 
 interface EventDetailPageProps {
   event: Event;
 }
 
 export default function EventDetailPage({ event }: EventDetailPageProps) {
+  // CAPA 3: Sanitize description on frontend (third layer of defense)
+  // Even though backend already sanitized (CAPA 1 + CAPA 2), this provides
+  // additional protection against compromised database or old unsanitized data
+  const sanitizedDescription = useSanitizedHTML(event.description || '');
+
   const formatDate = (dateString: string) => {
     return moment(dateString).format('dddd, DD [de] MMMM [de] YYYY');
   };
@@ -263,13 +269,13 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
             </div>
           </div>
 
-          {/* Description */}
-          {event.description && (
+          {/* Description - Sanitized (CAPA 3) */}
+          {sanitizedDescription && (
             <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
               <h2 className="text-2xl font-bold text-neutral-900 mb-4">Descripción</h2>
               <div
                 className="prose prose-lg max-w-none text-neutral-700"
-                dangerouslySetInnerHTML={{ __html: event.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
               />
             </div>
           )}

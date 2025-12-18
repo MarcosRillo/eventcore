@@ -111,10 +111,14 @@ class EventTest extends TestCase
                      'title' => 'Test Event Creation'
                  ]);
 
+        // Verify event was created (description is sanitized with <p> tags by HTMLPurifier)
         $this->assertDatabaseHas('events', [
             'title' => 'Test Event Creation',
-            'description' => 'Test event description for automated testing'
         ]);
+
+        // Verify description contains the expected text (sanitized)
+        $event = Event::where('title', 'Test Event Creation')->first();
+        $this->assertStringContainsString('Test event description for automated testing', $event->description);
     }
 
     #[Test]

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Mews\Purifier\Facades\Purifier;
 
 class EventService
 {
@@ -70,6 +71,12 @@ class EventService
     public function createEvent(array $data, User $user): Event
     {
         return DB::transaction(function () use ($data, $user) {
+            // CAPA 2: Sanitize description in Service layer (defense in depth layer 2)
+            // This provides protection even if FormRequest layer is bypassed
+            if (isset($data['description'])) {
+                $data['description'] = $this->sanitizeDescription($data['description']);
+            }
+
             // Get the user's primary organization for entity_id if not provided
             if (!isset($data['entity_id'])) {
                 $organization = $user->organizations()->first();
@@ -112,6 +119,12 @@ class EventService
     public function updateEvent(Event $event, array $data, User $user): Event
     {
         return DB::transaction(function () use ($event, $data, $user) {
+            // CAPA 2: Sanitize description in Service layer (defense in depth layer 2)
+            // This provides protection even if FormRequest layer is bypassed
+            if (isset($data['description'])) {
+                $data['description'] = $this->sanitizeDescription($data['description']);
+            }
+
             // Track who updated the event
             $data['updated_by'] = $user->id;
 
@@ -280,5 +293,20 @@ class EventService
         }
 
         return $perPage;
+    }
+
+    /**
+     * CAPA 2: Sanitize HTML description (allows safe tags, removes scripts/onclick/etc).
+     *
+     * This method is the second layer of defense in our triple-layer XSS protection.
+     * It runs in the Service layer, providing protection even if the FormRequest
+     * layer is bypassed.
+     *
+     * @param string $description Raw HTML description
+     * @return string Sanitized HTML description
+     */
+    private function sanitizeDescription(string $description): string
+    {
+        return Purifier::clean($description);
     }
 }
