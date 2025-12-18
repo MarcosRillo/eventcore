@@ -152,7 +152,9 @@ class EventService
      */
     public function deleteEvent(Event $event): bool
     {
-        return $event->delete();
+        return DB::transaction(function () use ($event) {
+            return $event->delete();
+        });
     }
 
     /**
