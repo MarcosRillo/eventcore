@@ -43,6 +43,13 @@ RUN { \
     echo 'pcov.exclude="~vendor|tests|database|bootstrap|storage~"'; \
     } > /usr/local/etc/php/conf.d/pcov.ini
 
+# Configuración PHP personalizada
+# - Aumentar memory_limit a 512M para tests con HTMLPurifier (Sprint 3)
+# - 128M default no era suficiente para ejecutar 481 tests
+RUN { \
+    echo 'memory_limit = 512M'; \
+    } > /usr/local/etc/php/conf.d/custom.ini
+
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

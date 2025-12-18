@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class TenantScope implements Scope
 {
@@ -19,17 +18,8 @@ class TenantScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        // Debug logging
-        Log::info('TenantScope applying', [
-            'model' => get_class($model),
-            'authenticated' => Auth::check(),
-            'user_id' => Auth::check() ? Auth::user()->id : null,
-            'user_role' => Auth::check() ? Auth::user()->role : null,
-        ]);
-
         // Check if there's an authenticated user
         if (!Auth::check()) {
-            Log::info('TenantScope: No authenticated user, returning');
             return;
         }
 
@@ -38,22 +28,15 @@ class TenantScope implements Scope
 
         // Don't apply scope for platform admins - they can see everything
         if ($user->isPlatformAdmin()) {
-            Log::info('TenantScope: Platform admin detected, bypassing scope');
             return;
         }
-
-        Log::info('TenantScope: Applying tenant filtering for user', [
-            'user_id' => $user->id,
-            'role' => $user->role,
-        ]);
 
         // Apply tenant filtering for entity_admin and entity_staff
         if ($user->isEntityAdmin() || $user->isEntityStaff()) {
             // Get the user's primary organization ID
             $organizationId = $this->getUserOrganizationId($user);
-            
+
             if ($organizationId) {
-                Log::info('TenantScope: Adding entity_id filter', ['entity_id' => $organizationId]);
                 $builder->where('entity_id', $organizationId);
             }
         }
@@ -73,20 +56,12 @@ class TenantScope implements Scope
 
             if (in_array($modelClass, $entityOwnedModels)) {
                 // Organizadores ven TODOS los recursos del ente (entity_id = 1)
-                Log::info('TenantScope: Filtering entity-owned model for organizer', [
-                    'model' => $modelClass,
-                    'entity_id' => 1
-                ]);
                 $builder->where('entity_id', 1);
                 return;
             }
 
             // Modelos que pertenecen a ORGANIZACIONES (eventos)
             if ($modelClass === \App\Models\Event::class && $organizationId) {
-                Log::info('TenantScope: Filtering organization-owned model', [
-                    'model' => $modelClass,
-                    'organization_id' => $organizationId
-                ]);
                 $builder->where('organization_id', $organizationId);
                 return;
             }
