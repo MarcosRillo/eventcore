@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'active' => \App\Http\Middleware\CheckActiveUser::class,
         ]);
+
+        // Inject httpOnly cookie tokens into Authorization header for Sanctum
+        $middleware->append(\App\Http\Middleware\CookieTokenMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

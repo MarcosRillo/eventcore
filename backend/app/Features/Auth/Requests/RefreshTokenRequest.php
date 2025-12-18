@@ -14,14 +14,14 @@ class RefreshTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'refresh_token' => ['required', 'string'],
+            // Nullable because token can come from httpOnly cookie instead of request body
+            'refresh_token' => ['nullable', 'string'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'refresh_token.required' => 'Refresh token is required',
             'refresh_token.string' => 'Refresh token must be a string',
         ];
     }
