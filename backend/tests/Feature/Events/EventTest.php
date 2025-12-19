@@ -55,21 +55,39 @@ class EventTest extends EventTestCase
     }
 
     #[Test]
-    public function test_can_list_events(): void
+    public function test_can_list_events_with_pagination_and_content(): void
     {
-        $this->authenticateUser();
+        $user = $this->authenticateUser();
 
-        $response = $this->getJson('/api/v1/events');
+        // Arrange: Create known events
+        $event1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
+            'title' => 'Event A',
+            'created_at' => now()->subDays(2)
+        ]);
+        $event2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
+            'title' => 'Event B',
+            'created_at' => now()->subDay()
+        ]);
 
-        $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data',
-                     'links',
-                     'meta'
-                 ]);
+        // Act
+        $response = $this->getJson('/api/v1/events?page=1&per_page=10');
 
-        // Verify data is array
-        $this->assertTrue(is_array($response->json('data')));
+        // Assert (8+ assertions)
+        $response->assertStatus(200);                          // 1
+        $response->assertJsonStructure(['data', 'meta', 'links']); // 2
+        $this->assertCount(2, $response->json('data'));       // 3
+        $response->assertJsonPath('meta.total', 2);           // 4
+        $response->assertJsonPath('meta.current_page', 1);    // 5
+
+        // Verify actual content
+        $titles = array_column($response->json('data'), 'title');
+        $this->assertContains('Event A', $titles);            // 6
+        $this->assertContains('Event B', $titles);            // 7
+
+        // Verify DB state
+        $this->assertEquals(2, Event::where('entity_id', $this->organization->id)->count()); // 8
     }
 
     #[Test]
@@ -159,25 +177,46 @@ class EventTest extends EventTestCase
     }
 
     #[Test]
-    public function test_can_get_event_statistics(): void
+    public function test_can_get_event_statistics_with_accurate_counts(): void
     {
-        $this->authenticateUser();
+        $user = $this->authenticateUser();
 
+        // Arrange: Create events with specific statuses
+        Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('published')
+        ]);
+        Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('pending_internal_approval')
+        ]);
+        Event::factory()->count(1)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('draft')
+        ]);
+
+        // Act
         $response = $this->getJson('/api/v1/events/statistics');
 
-        $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data' => [
-                         'total',
-                         'published',
-                         'pending',
-                         'draft'
-                     ]
-                 ]);
+        // Assert (8+ assertions)
+        $response->assertStatus(200);                         // 1
+        $response->assertJsonStructure(['data' => [
+            'total',
+            'published',
+            'pending',
+            'draft'
+        ]]);                                                   // 2
 
-        // Verify statistics structure
-        $data = $response->json('data');
-        $this->assertIsArray($data);
+        // Verify exact counts
+        $response->assertJsonPath('data.total', 6);           // 3
+        $response->assertJsonPath('data.published', 3);       // 4
+        $response->assertJsonPath('data.pending', 2);         // 5
+        $response->assertJsonPath('data.draft', 1);           // 6
+
+        // Verify DB state
+        $this->assertEquals(6, Event::where('entity_id', $this->organization->id)->count()); // 7
+        $this->assertEquals(3, Event::where('entity_id', $this->organization->id)
+            ->where('status_id', $this->getStatusId('published'))->count()); // 8
     }
 
     #[Test]
