@@ -10,11 +10,11 @@ use App\Models\EventSubtype;
 use App\Models\Location;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
-
-class EventTest extends TestCase
+class EventTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     protected function setUp(): void
     {
@@ -28,23 +28,15 @@ class EventTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
-    private function authenticateUser(): User
-    {
-        $user = User::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
-        $this->actingAs($user, 'sanctum');
-        return $user;
-    }
-
     /**
-     * Get event status ID by status code
+     * Override to add organization attachment for event tests
      */
-    private function getStatusId(string $statusCode): int
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        return \DB::table('event_statuses')
-            ->where('status_code', $statusCode)
-            ->value('id') ?? 1;
+        $user = parent::authenticateUser($role);
+        $this->organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
+        return $user;
     }
 
     /**
@@ -127,6 +119,7 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Original Event Title'
         ]);
 
@@ -151,6 +144,7 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'status_id' => $this->getStatusId('draft')
         ]);
 
@@ -192,6 +186,7 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Original Event for Duplication'
         ]);
 
@@ -211,6 +206,7 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'is_featured' => false
         ]);
 
@@ -241,6 +237,7 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Detailed Event Test'
         ]);
 
@@ -268,18 +265,21 @@ class EventTest extends TestCase
 
         // Create events with different dates
         $pastEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event',
             'start_date' => now()->subDays(5),
             'end_date' => now()->subDays(4),
         ]);
 
         $ongoingEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Ongoing Event',
             'start_date' => now()->subDay(),
             'end_date' => now()->addDay(),
         ]);
 
         $futureEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Future Event',
             'start_date' => now()->addDays(3),
             'end_date' => now()->addDays(4),
@@ -302,12 +302,14 @@ class EventTest extends TestCase
 
         // Create only past events
         $pastEvent1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 1',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(9),
         ]);
 
         $pastEvent2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 2',
             'start_date' => now()->subDays(3),
             'end_date' => now()->subDay(),
@@ -329,18 +331,21 @@ class EventTest extends TestCase
 
         // Create events with different dates
         $pastEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event',
             'start_date' => now()->subDays(5),
             'end_date' => now()->subDays(4),
         ]);
 
         $ongoingEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Ongoing Event',
             'start_date' => now()->subDay(),
             'end_date' => now()->addDay(),
         ]);
 
         $futureEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Future Event',
             'start_date' => now()->addDays(3),
             'end_date' => now()->addDays(4),
@@ -363,12 +368,14 @@ class EventTest extends TestCase
 
         // Create only future/ongoing events
         $ongoingEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Ongoing Event',
             'start_date' => now()->subDay(),
             'end_date' => now()->addDay(),
         ]);
 
         $futureEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Future Event',
             'start_date' => now()->addDays(2),
             'end_date' => now()->addDays(3),
@@ -394,16 +401,19 @@ class EventTest extends TestCase
 
         // Create 3 upcoming events with different start dates
         $upcoming1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 1',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
         ]);
         $upcoming2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 2',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
         ]);
         $upcoming3 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 3',
             'start_date' => now()->addDays(15),
             'end_date' => now()->addDays(16),
@@ -411,11 +421,13 @@ class EventTest extends TestCase
 
         // Create 2 past events (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 1',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(9),
         ]);
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 2',
             'start_date' => now()->subDays(5),
             'end_date' => now()->subDays(4),
@@ -452,16 +464,19 @@ class EventTest extends TestCase
 
         // Create 3 past events with different end dates
         $past1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 1',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(5),  // More recent
         ]);
         $past2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 2',
             'start_date' => now()->subDays(20),
             'end_date' => now()->subDays(15),  // Oldest
         ]);
         $past3 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 3',
             'start_date' => now()->subDays(8),
             'end_date' => now()->subDays(2),  // Most recent
@@ -469,11 +484,13 @@ class EventTest extends TestCase
 
         // Create 2 upcoming events (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 1',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
         ]);
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 2',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
@@ -510,14 +527,17 @@ class EventTest extends TestCase
 
         // Create upcoming events in random order
         $eventFar = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->addDays(30),
             'end_date' => now()->addDays(31),
         ]);
         $eventNear = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->addDays(2),
             'end_date' => now()->addDays(3),
         ]);
         $eventMid = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->addDays(15),
             'end_date' => now()->addDays(16),
         ]);
@@ -539,14 +559,17 @@ class EventTest extends TestCase
 
         // Create past events in random order
         $eventOldest = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->subDays(30),
             'end_date' => now()->subDays(29),
         ]);
         $eventRecent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->subDays(3),
             'end_date' => now()->subDays(2),
         ]);
         $eventMid = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->subDays(15),
             'end_date' => now()->subDays(14),
         ]);
@@ -571,6 +594,7 @@ class EventTest extends TestCase
 
         // Create upcoming events with different statuses
         $publishedEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Published Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
@@ -578,6 +602,7 @@ class EventTest extends TestCase
         ]);
 
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Draft Event',
             'start_date' => now()->addDays(7),
             'end_date' => now()->addDays(8),
@@ -605,6 +630,7 @@ class EventTest extends TestCase
 
         // Create upcoming events with different statuses
         $publishedEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Published Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
@@ -612,6 +638,7 @@ class EventTest extends TestCase
         ]);
 
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Draft Event',
             'start_date' => now()->addDays(7),
             'end_date' => now()->addDays(8),
@@ -638,6 +665,7 @@ class EventTest extends TestCase
 
         // Create past published event
         $pastPublished = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Published Event',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(9),
@@ -646,6 +674,7 @@ class EventTest extends TestCase
 
         // Create past draft event (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Draft Event',
             'start_date' => now()->subDays(8),
             'end_date' => now()->subDays(7),
@@ -654,6 +683,7 @@ class EventTest extends TestCase
 
         // Create upcoming published event (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Published Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),

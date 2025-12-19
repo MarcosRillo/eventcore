@@ -2,14 +2,16 @@
 
 namespace Tests\Feature\Locations;
 
-use Tests\TestCase;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Events\EventTestCase;
 
-class LocationTest extends TestCase
+class LocationTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     /**
      * Setup the test environment.
@@ -25,14 +27,13 @@ class LocationTest extends TestCase
     }
 
     /**
-     * Authenticate a user for testing protected endpoints.
+     * Override to add organization attachment for location tests
      */
-    protected function authenticateUser(): User
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        $user = User::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
-        $this->actingAs($user);
+        $user = parent::authenticateUser($role);
+        $this->organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
         return $user;
     }
 
@@ -98,7 +99,10 @@ class LocationTest extends TestCase
     {
         // Arrange: Authenticate and create location
         $this->authenticateUser();
-        $location = Location::factory()->create(['name' => 'Original Location']);
+        $location = Location::factory()->create([
+            'entity_id' => $this->organization->id,
+            'name' => 'Original Location'
+        ]);
 
         // Act: Update location
         $response = $this->putJson("/api/v1/locations/{$location->id}", [
@@ -120,7 +124,9 @@ class LocationTest extends TestCase
     {
         // Arrange: Authenticate and create location
         $this->authenticateUser();
-        $location = Location::factory()->create();
+        $location = Location::factory()->create([
+            'entity_id' => $this->organization->id
+        ]);
 
         // Act: Delete location
         $response = $this->deleteJson("/api/v1/locations/{$location->id}");
@@ -446,7 +452,9 @@ class LocationTest extends TestCase
     {
         // Arrange: Authenticate and create location
         $this->authenticateUser();
-        $location = Location::factory()->create();
+        $location = Location::factory()->create([
+            'entity_id' => $this->organization->id
+        ]);
 
         // Act: Update with valid data
         $response = $this->putJson("/api/v1/locations/{$location->id}", [

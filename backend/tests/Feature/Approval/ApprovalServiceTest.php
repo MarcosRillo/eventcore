@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Approval;
+namespace Tests\Feature\Approval;
 
 use App\Features\Approval\Exceptions\InvalidStateTransitionException;
 use App\Features\Approval\Services\ApprovalService;

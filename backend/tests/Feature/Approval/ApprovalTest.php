@@ -6,9 +6,9 @@ use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
+use Tests\Feature\Events\EventTestCase;
 
-class ApprovalTest extends TestCase
+class ApprovalTest extends EventTestCase
 {
     use RefreshDatabase;
 
@@ -26,29 +26,15 @@ class ApprovalTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
-    private function authenticateUser(): User
+    /**
+     * Override to add organization attachment for approval tests
+     */
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        // Specify entity_admin role explicitly (FormRequests only allow entity_admin and entity_staff)
-        $entityAdminRole = \App\Models\UserRole::where('role_code', 'entity_admin')->first();
-
-        $user = User::factory()->create([
-            'role_id' => $entityAdminRole->id
-        ]);
-
+        $user = parent::authenticateUser($role);
         $this->organization = \App\Models\Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
-        $this->actingAs($user, 'sanctum');
         return $user;
-    }
-
-    /**
-     * Get event status ID by status code
-     */
-    private function getStatusId(string $statusCode): int
-    {
-        return \DB::table('event_statuses')
-            ->where('status_code', $statusCode)
-            ->value('id') ?? 1;
     }
 
     #[Test]

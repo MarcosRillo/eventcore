@@ -7,11 +7,13 @@ use App\Models\User;
 use App\Models\Location;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
+use Tests\Feature\Events\EventTestCase;
 
-class OrganizerStatsTest extends TestCase
+class OrganizerStatsTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     protected function setUp(): void
     {
@@ -26,66 +28,60 @@ class OrganizerStatsTest extends TestCase
     }
 
     /**
-     * Helper method to create an organizer user and authenticate.
+     * Override to add organization attachment for organizer stats tests
      */
-    private function createAuthenticatedOrganizer(): User
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        // Create user with their own organization
-        $user = User::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
-        $this->actingAs($user, 'sanctum');
+        $user = parent::authenticateUser($role);
+        $this->organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
         return $user;
-    }
-
-    /**
-     * Helper method to get status ID by status code.
-     */
-    private function getStatusId(string $statusCode): int
-    {
-        return \DB::table('event_statuses')
-            ->where('status_code', $statusCode)
-            ->value('id') ?? 1;
     }
 
     #[Test]
     public function test_returns_correct_stats_for_authenticated_organizer(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Create 12 events with all different statuses (mutually exclusive)
         // 2 pending_internal
         Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         // 3 approved_internal
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('approved_internal')
         ]);
 
         // 1 pending_public
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval')
         ]);
 
         // 4 published
         Event::factory()->count(4)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published')
         ]);
 
         // 1 requires_changes
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('requires_changes')
         ]);
 
         // 1 rejected
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('rejected')
         ]);
@@ -124,19 +120,21 @@ class OrganizerStatsTest extends TestCase
     public function test_only_counts_organizers_own_events(): void
     {
         // Arrange: Create two organizers with events
-        $organizerA = $this->createAuthenticatedOrganizer();
+        $organizerA = $this->authenticateUser();
         $organizerB = User::factory()->create();
         $organizationB = \App\Models\Organization::factory()->create();
         $organizerB->organizations()->attach($organizationB->id);
 
         // Organizer A: 5 events
         Event::factory()->count(5)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizerA->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         // Organizer B: 3 events (should not be counted)
         Event::factory()->count(3)->create([
+            'entity_id' => $organizationB->id,
             'created_by' => $organizerB->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
@@ -148,7 +146,7 @@ class OrganizerStatsTest extends TestCase
         $response->assertStatus(200);                                 // Assertion 1
         $response->assertJsonPath('data.total_events', 5);            // Assertion 2: Only A's events
         $this->assertEquals(5, Event::where('created_by', $organizerA->id)->count()); // Assertion 3
-        $this->assertEquals(3, Event::where('created_by', $organizerB->id)->count()); // Assertion 4
+        $this->assertEquals(3, Event::withoutGlobalScopes()->where('created_by', $organizerB->id)->count()); // Assertion 4
         $this->assertDatabaseHas('events', [                          // Assertion 5
             'created_by' => $organizerA->id
         ]);
@@ -161,7 +159,7 @@ class OrganizerStatsTest extends TestCase
     public function test_returns_zero_for_organizer_with_no_events(): void
     {
         // Arrange: Organizer with no events
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Act
         $response = $this->getJson('/api/v1/organizer/stats');
@@ -183,20 +181,23 @@ class OrganizerStatsTest extends TestCase
     #[Test]
     public function test_pending_internal_count_only_includes_pending_internal_status(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Mix of statuses
         Event::factory()->count(4)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval')
         ]);
 
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published')
         ]);
@@ -217,20 +218,23 @@ class OrganizerStatsTest extends TestCase
     #[Test]
     public function test_approved_internal_count_only_includes_approved_internal_status(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Mix of statuses
         Event::factory()->count(5)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('approved_internal')
         ]);
 
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published')
         ]);
 
         Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
@@ -251,20 +255,23 @@ class OrganizerStatsTest extends TestCase
     #[Test]
     public function test_pending_public_count_only_includes_pending_public_status(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Mix of statuses
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval')
         ]);
 
         Event::factory()->count(4)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published')
         ]);
@@ -285,20 +292,23 @@ class OrganizerStatsTest extends TestCase
     #[Test]
     public function test_published_count_only_includes_published_status(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Mix of statuses
         Event::factory()->count(6)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published')
         ]);
 
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('approved_internal')
         ]);
 
         Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval')
         ]);
@@ -321,20 +331,23 @@ class OrganizerStatsTest extends TestCase
     #[Test]
     public function test_requires_changes_count_only_includes_requires_changes_status(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Mix of statuses
         Event::factory()->count(4)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('requires_changes')
         ]);
 
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('rejected')
         ]);
 
         Event::factory()->count(5)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
@@ -355,20 +368,23 @@ class OrganizerStatsTest extends TestCase
     #[Test]
     public function test_rejected_count_only_includes_rejected_status(): void
     {
-        $organizer = $this->createAuthenticatedOrganizer();
+        $organizer = $this->authenticateUser();
 
         // Arrange: Mix of statuses
         Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('rejected')
         ]);
 
         Event::factory()->count(5)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval')
         ]);
 
         Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('requires_changes')
         ]);

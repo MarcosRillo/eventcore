@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\EventTypes;
 
-use Tests\TestCase;
 use App\Models\EventType;
 use App\Models\EventSubtype;
 use App\Models\User;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Events\EventTestCase;
 
 /**
  * EventType Controller Tests
@@ -24,9 +24,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  *
  * Created: December 2, 2025
  */
-class EventTypeTest extends TestCase
+class EventTypeTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     /**
      * Setup the test environment.
@@ -42,15 +44,13 @@ class EventTypeTest extends TestCase
     }
 
     /**
-     * Authenticate a user for testing protected endpoints.
+     * Override to add organization attachment for event type tests
      */
-    protected function authenticateUser(): User
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        $user = User::factory()->create();
-        $organization = Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
-
-        $this->actingAs($user);
+        $user = parent::authenticateUser($role);
+        $this->organization = Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
         return $user;
     }
 
@@ -247,6 +247,7 @@ class EventTypeTest extends TestCase
         // Arrange
         $this->authenticateUser();
         $eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id,
             'name' => 'Festival Cultural'
         ]);
 
@@ -284,6 +285,7 @@ class EventTypeTest extends TestCase
         // Arrange
         $this->authenticateUser();
         $eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id,
             'name' => 'Original Name'
         ]);
 
@@ -310,7 +312,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->active()->create();
+        $eventType = EventType::factory()->active()->create([
+            'entity_id' => $this->organization->id
+        ]);
 
         // Act
         $response = $this->putJson("/api/v1/event-types/{$eventType->id}", [
@@ -354,7 +358,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->create();
+        $eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id
+        ]);
 
         // Act
         $response = $this->deleteJson("/api/v1/event-types/{$eventType->id}");
@@ -375,7 +381,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->create();
+        $eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id
+        ]);
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $eventType->entity_id,
@@ -418,7 +426,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->active()->create();
+        $eventType = EventType::factory()->active()->create([
+            'entity_id' => $this->organization->id
+        ]);
 
         // Act
         $response = $this->patchJson("/api/v1/event-types/{$eventType->id}/toggle-status");
@@ -436,7 +446,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->inactive()->create();
+        $eventType = EventType::factory()->inactive()->create([
+            'entity_id' => $this->organization->id
+        ]);
 
         // Act
         $response = $this->patchJson("/api/v1/event-types/{$eventType->id}/toggle-status");
