@@ -51,11 +51,25 @@ class ApprovalTest extends EventTestCase
             'comments' => 'Event approved for publication'
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description']
+            ]
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'approved_internal');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be approved
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('approved_internal'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('approved_internal')
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -72,11 +86,25 @@ class ApprovalTest extends EventTestCase
             'reason' => 'Event does not meet quality standards'
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description']
+            ]
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'rejected');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be rejected
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('rejected'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('rejected')
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -93,11 +121,25 @@ class ApprovalTest extends EventTestCase
             'reason' => 'Please improve the event description and add more details'
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description']
+            ]
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'requires_changes');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should have changes requested
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('requires_changes'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('requires_changes')
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -115,11 +157,25 @@ class ApprovalTest extends EventTestCase
             'publish_immediately' => true
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description']
+            ]
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'published');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be published
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('published'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('published')
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -135,11 +191,25 @@ class ApprovalTest extends EventTestCase
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/request-public");
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description']
+            ]
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'pending_public_approval');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be pending public approval
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('pending_public_approval'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('pending_public_approval')
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]

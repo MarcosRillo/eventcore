@@ -95,7 +95,7 @@ export function EventDetailModal({
         {/* Status */}
         <div>
           <h3 className="text-sm font-semibold text-gray-900 mb-1">Status</h3>
-          <p className="text-sm text-gray-600">{resource.status.name}</p>
+          <p className="text-sm text-gray-600">{resource.status.status_name}</p>
         </div>
 
         {/* Locations */}

@@ -97,7 +97,8 @@ export interface EventSubtypeInfo {
 export interface EventStatusInfo {
   id: number;
   status_code: EventStatusCode;
-  name: string;
+  status_name: string;
+  description: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -32,7 +32,15 @@ abstract class EventTestCase extends TestCase
      */
     protected function getStatusId(string $statusCode): int
     {
-        return EventStatus::where('status_code', $statusCode)->first()->id;
+        $status = EventStatus::where('status_code', $statusCode)->first();
+
+        if (!$status) {
+            throw new \RuntimeException(
+                "EventStatus '{$statusCode}' not found. Did you seed EventStatusesSeeder?"
+            );
+        }
+
+        return $status->id;
     }
 
     /**

@@ -34,7 +34,7 @@ describe('useInternalCalendarEvents', () => {
         title: 'Event 1',
         start_date: '2025-12-10',
         end_date: '2025-12-11',
-        status: { id: 1, status_code: 'approved_internal', name: 'Approved Internal' },
+        status: { id: 1, status_code: 'approved_internal', status_name: 'Approved Internal', description: 'Event approved for internal use' },
         organization: { id: 1, name: 'Test Org' },
       },
       {
@@ -42,7 +42,7 @@ describe('useInternalCalendarEvents', () => {
         title: 'Event 2',
         start_date: '2025-12-15',
         end_date: '2025-12-16',
-        status: { id: 2, status_code: 'published', name: 'Published' },
+        status: { id: 2, status_code: 'published', status_name: 'Published', description: 'Event published' },
         organization: { id: 1, name: 'Test Org' },
       },
     ];
@@ -80,7 +80,7 @@ describe('useInternalCalendarEvents', () => {
         title: 'Filtered Event',
         start_date: '2025-12-20',
         end_date: '2025-12-21',
-        status: { id: 3, status_code: 'published', name: 'Published' },
+        status: { id: 3, status_code: 'published', status_name: 'Published', description: 'Event published' },
         organization: { id: 2, name: 'Org 2' },
       },
     ];
@@ -126,7 +126,7 @@ describe('useInternalCalendarEvents', () => {
         title: 'Refetched Event',
         start_date: '2025-12-25',
         end_date: '2025-12-26',
-        status: { id: 1, status_code: 'approved_internal', name: 'Approved Internal' },
+        status: { id: 1, status_code: 'approved_internal', status_name: 'Approved Internal', description: 'Event approved for internal use' },
         organization: { id: 1, name: 'Test Org' },
       },
     ];

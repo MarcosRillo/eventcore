@@ -34,7 +34,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento aprobado internamente',
-            'data' => new EventResource($event->fresh())
+            'data' => new EventResource($event->fresh()->load('status'))
         ]);
     }
 
@@ -53,7 +53,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Aprobación pública solicitada',
-            'data' => new EventResource($event->fresh())
+            'data' => new EventResource($event->fresh()->load('status'))
         ]);
     }
 
@@ -72,7 +72,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento publicado exitosamente',
-            'data' => new EventResource($event->fresh())
+            'data' => new EventResource($event->fresh()->load('status'))
         ]);
     }
 
@@ -91,7 +91,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Cambios solicitados',
-            'data' => new EventResource($event->fresh())
+            'data' => new EventResource($event->fresh()->load('status'))
         ]);
     }
 
@@ -110,7 +110,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento rechazado',
-            'data' => new EventResource($event->fresh())
+            'data' => new EventResource($event->fresh()->load('status'))
         ]);
     }
 

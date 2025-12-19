@@ -62,8 +62,9 @@ class EventResource extends JsonResource
             // Core relationships
             'status' => $this->whenLoaded('status', fn() => [
                 'id' => $this->status->id,
-                'code' => $this->status->status_code,
-                'name' => $this->status->status_name,
+                'status_code' => $this->status->status_code,
+                'status_name' => $this->status->status_name,
+                'description' => $this->status->description,
             ]),
 
             'format' => $this->whenLoaded('format', fn() => [
