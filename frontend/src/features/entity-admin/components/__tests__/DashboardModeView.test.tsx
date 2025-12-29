@@ -249,10 +249,22 @@ describe('DashboardModeView', () => {
     it('should calculate all counters correctly with mixed events', async () => {
       const events = [
         // requires-action: 2
-        createMockEvent({ id: 1, status: 'pending_internal_approval' }),
-        createMockEvent({ id: 2, status: 'pending_public_approval' }),
+        createMockEvent({
+          id: 1,
+          status: 'pending_internal_approval',
+          end_date: '2030-12-31T00:00:00Z'
+        }),
+        createMockEvent({
+          id: 2,
+          status: 'pending_public_approval',
+          end_date: '2030-12-31T00:00:00Z'
+        }),
         // pending: 1
-        createMockEvent({ id: 3, status: 'draft' }),
+        createMockEvent({
+          id: 3,
+          status: 'draft',
+          end_date: '2030-12-31T00:00:00Z'
+        }),
         // published: 1
         createMockEvent({ id: 4, status: 'published', end_date: '2030-12-31T00:00:00Z' }),
         // historic: 1

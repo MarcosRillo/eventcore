@@ -244,8 +244,8 @@ describe('AuthContext', () => {
       expect(result.current.isAuthenticated).toBe(true);
 
       // Now logout
-      act(() => {
-        result.current.logout();
+      await act(async () => {
+        await result.current.logout();
       });
 
       expect(result.current.user).toBeNull();
@@ -274,8 +274,8 @@ describe('AuthContext', () => {
       expect(result.current.error).toBeTruthy();
 
       // Logout should clear error
-      act(() => {
-        result.current.logout();
+      await act(async () => {
+        await result.current.logout();
       });
 
       expect(result.current.error).toBeNull();

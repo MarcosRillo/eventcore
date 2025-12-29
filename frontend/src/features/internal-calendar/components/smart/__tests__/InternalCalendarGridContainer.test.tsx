@@ -24,7 +24,8 @@ describe('InternalCalendarGridContainer', () => {
       status: {
         id: 1,
         status_code: 'approved_internal',
-        name: 'Approved Internal',
+        status_name: 'Approved Internal',
+        description: 'Event approved for internal use',
       },
       organization: {
         id: 1,

@@ -19,7 +19,8 @@ export type InternalCalendarStatusCode =
 export interface EventStatus {
   id: number;
   status_code: string;
-  name: string;
+  status_name: string;
+  description: string;
 }
 
 /**
