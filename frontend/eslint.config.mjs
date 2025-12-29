@@ -18,13 +18,13 @@ const eslintConfig = [
       jsdoc,
     },
     rules: {
-      // Console statements: WARN (preparar transición a ERROR en Fase 3)
+      // Console statements: ERROR (Fase 3 completada)
       // NO permite ningún console.* (ni log, ni warn, ni error)
-      "no-console": "warn",
+      "no-console": "error",
 
-      // Relative imports: WARN (447 casos a migrar en Fase 2)
+      // Relative imports: ERROR (Fase 3 completada)
       "no-restricted-imports": [
-        "warn",
+        "error",
         {
           patterns: [
             {
@@ -35,9 +35,9 @@ const eslintConfig = [
         }
       ],
 
-      // Import ordering (organización de imports)
+      // Import ordering (organización de imports): ERROR (Fase 3 completada)
       "import/order": [
-        "warn",
+        "error",
         {
           groups: [
             "builtin",   // Node.js built-ins
@@ -90,6 +90,31 @@ const eslintConfig = [
           project: "./tsconfig.json"
         }
       }
+    }
+  },
+  // Excepciones legítimas para relative imports
+  {
+    files: ["**/index.ts", "**/index.tsx"],
+    rules: {
+      "no-restricted-imports": "off" // Barrel exports pueden usar ./*
+    }
+  },
+  {
+    files: ["**/__tests__/page.test.tsx"],
+    rules: {
+      "no-restricted-imports": "off" // Page tests pueden importar ../page
+    }
+  },
+  {
+    files: ["src/app/layout.tsx"],
+    rules: {
+      "no-restricted-imports": "off" // Layout puede importar ./globals.css
+    }
+  },
+  {
+    files: ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "no-console": "off" // Tests pueden usar console para debugging
     }
   }
 ];

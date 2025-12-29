@@ -97,7 +97,6 @@ jest.mock('@heroicons/react/24/outline', () => ({
   MapPinIcon: () => <span data-testid="map-pin-icon" />,
 }))
 
-import React from 'react'
 
 // Helper to create mock location
 const createMockLocation = (overrides: Partial<Location> = {}): Location => ({

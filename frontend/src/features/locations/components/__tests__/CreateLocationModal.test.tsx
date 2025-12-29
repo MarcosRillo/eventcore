@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 
 import { CreateLocationModal } from '@/features/locations/components/CreateLocationModal'
 import * as locationService from '@/features/locations/services/location.service'
@@ -166,9 +167,6 @@ jest.mock('@/components/ui', () => ({
     </div>
   ),
 }))
-
-// Need to import React for the mock
-import React from 'react'
 
 describe('CreateLocationModal', () => {
   const defaultProps = {

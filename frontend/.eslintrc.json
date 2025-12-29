@@ -15,15 +15,15 @@
         "destructuredArrayIgnorePattern": "^_"
       }
     ],
-    "@typescript-eslint/no-floating-promises": "warn",
+    "@typescript-eslint/no-floating-promises": "error",
     "no-console": [
-      "warn",
+      "error",
       {
         "allow": []
       }
     ],
     "no-restricted-imports": [
-      "warn",
+      "error",
       {
         "patterns": [
           {
@@ -34,7 +34,7 @@
       }
     ],
     "import/order": [
-      "warn",
+      "error",
       {
         "groups": [
           "builtin",
@@ -80,6 +80,26 @@
     "prefer-const": "error",
     "no-var": "error"
   },
+  "overrides": [
+    {
+      "files": ["src/**/index.ts", "src/**/index.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["src/**/__tests__/page.test.tsx", "src/**/page.test.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["src/app/layout.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json"

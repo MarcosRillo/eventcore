@@ -8,8 +8,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 
 import { useToast } from '@/components/ui/Toast'
-import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { useEventActions } from '@/features/organizer/hooks/useEventActions'
+import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 
 // Mock dependencies
 jest.mock('@/features/organizer/services/organizer-event.service')

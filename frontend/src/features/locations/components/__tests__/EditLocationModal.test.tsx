@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 
 import { EditLocationModal } from '@/features/locations/components/EditLocationModal'
 import * as locationService from '@/features/locations/services/location.service'
@@ -163,8 +164,6 @@ jest.mock('@/components/ui', () => ({
   ),
 }))
 
-// Need to import React for the mock
-import React from 'react'
 
 // Helper to create mock location
 const createMockLocation = (overrides: Partial<Location> = {}): Location => ({

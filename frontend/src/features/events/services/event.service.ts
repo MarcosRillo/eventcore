@@ -1,18 +1,14 @@
 /**
  * Event Service - Main Aggregator
- * 
+ *
  * Main event service that delegates to specialized services based on user context.
- * This service acts as a facade and maintains backward compatibility while 
+ * This service acts as a facade and maintains backward compatibility while
  * providing role-based functionality.
  */
 
-
-// Import specialized services
 import { combinedEventAdminService } from '@/features/events/services/eventAdminService';
 import { combinedEventOrganizerService } from '@/features/events/services/eventOrganizerService';
 import { combinedEventPublicService } from '@/features/events/services/eventPublicService';
-
-// Import the type from types.ts to avoid conflicts
 import { EventServiceContext } from '@/features/events/services/types';
 import {
   Event,
