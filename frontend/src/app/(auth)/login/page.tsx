@@ -7,9 +7,10 @@
 'use client';
 
 import Link from 'next/link';
+
+import { Button, Input, LoadingSpinner } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/features/auth';
-import { Button, Input, LoadingSpinner } from '@/components/ui';
 
 const LoginPage = () => {
   const { isAuthenticated } = useAuth();

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { LocationTable } from '../LocationTable'
+
+import { LocationTable } from '@/features/locations/components/dumb/LocationTable'
 import { Location } from '@/types/location.types'
 
 // Mock heroicons

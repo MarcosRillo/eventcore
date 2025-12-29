@@ -6,11 +6,11 @@
 
 'use client'
 
-import { AdminDashboard } from '@/features/approval/components/dumb/AdminDashboard'
-import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
-import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
-import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
 import { ConfirmDialog, PromptDialog } from '@/components/ui'
+import { AdminDashboard } from '@/features/approval/components/dumb/AdminDashboard'
+import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
+import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
+import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
 import { PublishConfirmModal } from '@/shared/components/modals'
 
 export const AdminDashboardContainer = () => {

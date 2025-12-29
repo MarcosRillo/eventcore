@@ -7,6 +7,11 @@
 
 import { InternalEventDetailPageContainer } from '@/features/internal-calendar/components/smart/InternalEventDetailPageContainer';
 
+/**
+ *
+ * @param root0
+ * @param root0.params
+ */
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const eventId = parseInt(id, 10);

@@ -4,8 +4,8 @@
  * Fetches events for admin dashboard.
  */
 
-import apiClient from '@/services/apiClient'
 import { EventsResponse } from '@/features/approval/types/approval.types'
+import apiClient from '@/services/apiClient'
 
 interface FetchEventsParams {
   status?: string | null
@@ -15,6 +15,7 @@ interface FetchEventsParams {
 export const adminEventService = {
   /**
    * Get all events (admin view)
+   * @param params
    */
   getAll: async (params: FetchEventsParams = {}): Promise<EventsResponse> => {
     const queryParams = new URLSearchParams()

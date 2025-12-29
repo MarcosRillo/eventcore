@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ApprovalModalContainer } from '../ApprovalModalContainer'
+
+import { ApprovalModalContainer } from '@/features/entity-admin/components/smart/ApprovalModalContainer'
 import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types'
 
 interface ApprovalActionOption {

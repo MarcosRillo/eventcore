@@ -2,5 +2,5 @@
  * Organizer Dashboard Components
  */
 
-export * from './dumb';
-export * from './smart';
+export * from '@/features/organizer-dashboard/components/dumb';
+export * from '@/features/organizer-dashboard/components/smart';

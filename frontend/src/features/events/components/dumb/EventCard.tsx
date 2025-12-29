@@ -6,11 +6,12 @@
 
 'use client';
 
-import React from 'react';
-import { Event } from '@/types/event.types';
-import { Card, Badge } from '@/components/ui';
 import { CalendarIcon, ClockIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
+import React from 'react';
+
+import { Card, Badge } from '@/components/ui';
+import { Event } from '@/types/event.types';
 
 interface EventCardProps {
   event: Event;

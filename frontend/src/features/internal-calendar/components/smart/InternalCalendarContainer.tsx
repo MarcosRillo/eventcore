@@ -9,14 +9,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents'
+
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView'
 import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal'
-import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform'
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents'
 import type {
   InternalCalendarFilters,
   BigCalendarEvent,
 } from '@/features/internal-calendar/types/internal-calendar.types'
+import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform'
 
 /**
  * InternalCalendarContainer Props
@@ -31,6 +32,8 @@ interface InternalCalendarContainerProps {
  *
  * Smart container for internal calendar with BigCalendar view and event detail modal.
  *
+ * @param root0
+ * @param root0.filters
  * @example
  * ```tsx
  * <InternalCalendarContainer filters={{ status: 'approved_internal' }} />

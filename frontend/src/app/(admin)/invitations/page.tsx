@@ -1,6 +1,7 @@
 'use client'
 
 import { Mail } from 'lucide-react'
+
 import InvitationTableContainer from '@/features/invitations/components/smart/InvitationTableContainer'
 
 const InvitationsPage = () => {

@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+
+import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
   initialFormData,
-} from '../types/registration-request.types'
-import { createRegistrationRequest } from '../services/registration-request.service'
+} from '@/features/registration-requests/types/registration-request.types'
 
 // Type aliases for simpler usage in this hook
 type RegistrationFormData = Omit<RegistrationRequestFormData, 'profile_photo' | 'organization_logo'> & {

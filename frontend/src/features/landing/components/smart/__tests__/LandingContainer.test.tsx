@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
-import { LandingContainer } from '../LandingContainer'
-import { useLandingData } from '../../../hooks/useLandingData'
+
+import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
+import { useLandingData } from '@/features/landing/hooks/useLandingData'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

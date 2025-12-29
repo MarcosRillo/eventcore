@@ -8,9 +8,10 @@
  * - waitFor is used to wait for state transitions
  */
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useRegistrationRequests } from '../useRegistrationRequests'
-import registrationRequestService from '../../services/registration-request.service'
-import { RegistrationRequest, RegistrationRequestDetail } from '../../types/registration-request.types'
+
+import { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
+import registrationRequestService from '@/features/registration-requests/services/registration-request.service'
+import { RegistrationRequest, RegistrationRequestDetail } from '@/features/registration-requests/types/registration-request.types'
 
 jest.mock('../../services/registration-request.service')
 
@@ -19,6 +20,8 @@ const mockService = registrationRequestService as jest.Mocked<typeof registratio
 /**
  * Helper function to wait for initial data fetch to complete
  * This ensures the hook's useEffect has finished before running test assertions
+ * @param result
+ * @param result.current
  */
 const waitForInitialFetch = async (result: { current: ReturnType<typeof useRegistrationRequests> }) => {
   await waitFor(() => {

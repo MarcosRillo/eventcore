@@ -4,7 +4,7 @@
  */
 
 // useApprovalManager moved to @/features/entity-admin
-export { useEventManager } from './useEventManager';
-export { useEventCardLogic } from './useEventCardLogic';
-export { useEventUrgency } from './useEventUrgency';
-export { useEventActions } from './useEventActions';
+export { useEventManager } from '@/features/events/hooks/useEventManager';
+export { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic';
+export { useEventUrgency } from '@/features/events/hooks/useEventUrgency';
+export { useEventActions } from '@/features/events/hooks/useEventActions';

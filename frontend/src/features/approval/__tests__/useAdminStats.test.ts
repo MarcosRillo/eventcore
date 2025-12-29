@@ -5,7 +5,8 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useAdminStats } from '../hooks/useAdminStats'
+
+import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
 import { adminStatsService } from '@/features/approval/services/admin-stats.service'
 
 jest.mock('@/features/approval/services/admin-stats.service')

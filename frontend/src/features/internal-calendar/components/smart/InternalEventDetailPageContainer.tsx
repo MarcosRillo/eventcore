@@ -7,17 +7,23 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
-import { InternalEventDetailPage } from '@/features/internal-calendar/components/dumb/InternalEventDetailPage';
+import { useState, useEffect } from 'react';
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { InternalEventDetailPage } from '@/features/internal-calendar/components/dumb/InternalEventDetailPage';
+import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 export interface InternalEventDetailPageContainerProps {
   eventId: number;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.eventId
+ */
 export function InternalEventDetailPageContainer({
   eventId,
 }: InternalEventDetailPageContainerProps) {

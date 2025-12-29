@@ -4,7 +4,6 @@
  * Handles API calls for public calendar (no auth required).
  */
 
-import apiClient from '@/services/apiClient'
 import {
   EventsResponse,
   PublicEvent,
@@ -13,6 +12,7 @@ import {
   Location,
   PublicStats
 } from '@/features/public-calendar/types/public-calendar.types'
+import apiClient from '@/services/apiClient'
 
 interface FetchEventsParams {
   event_type_id?: number | null
@@ -26,6 +26,7 @@ interface FetchEventsParams {
 export const publicEventsService = {
   /**
    * Get all published events
+   * @param params
    */
   getAll: async (params: FetchEventsParams = {}): Promise<EventsResponse> => {
     const queryParams = new URLSearchParams()
@@ -60,6 +61,7 @@ export const publicEventsService = {
 
   /**
    * Get event by ID
+   * @param id
    */
   getById: async (id: number): Promise<{ data: PublicEvent }> => {
     const response = await apiClient.get(`/public/events/${id}`)
@@ -92,6 +94,7 @@ export const publicEventsService = {
 
   /**
    * Get active event subtypes for a specific event type
+   * @param eventTypeId
    */
   getEventSubtypes: async (eventTypeId: number): Promise<{ data: EventSubtype[] }> => {
     const response = await apiClient.get(`/public/event-types/${eventTypeId}/subtypes`)

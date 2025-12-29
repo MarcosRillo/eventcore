@@ -5,9 +5,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EventManagementModalContainer } from '../EventManagementModalContainer';
-import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
+
+import { EventManagementModalContainer } from '@/features/entity-admin/components/smart/EventManagementModalContainer';
 import * as useApprovalManagerModule from '@/features/entity-admin/hooks/useApprovalManager';
+import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
 import type { Event } from '@/types/event.types';
 
 jest.mock('@/features/entity-admin/hooks/useEventManagement');

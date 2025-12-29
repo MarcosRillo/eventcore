@@ -3,10 +3,10 @@
  * Re-exports for the reusable table component
  */
 
-export { GenericTable } from './GenericTable';
+export { GenericTable } from '@/shared/components/tables/GenericTable';
 export type {
   GenericTableProps,
   TableColumnConfig,
   TableActionConfig,
   ConfirmDialogData,
-} from './types';
+} from '@/shared/components/tables/types';

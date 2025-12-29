@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+
 import { ModalId, ModalState } from '@/types/modal.types';
 
 // Single modal hook

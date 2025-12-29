@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
-import { useEventUrgency } from '../useEventUrgency'
+
+import { useEventUrgency } from '@/features/events/hooks/useEventUrgency'
 import { Event, EventStatus } from '@/types/event.types'
 
 // Helper to create mock events

@@ -6,8 +6,8 @@
  * Created: December 2, 2025
  */
 
-import type { PaginatedResponse } from './api-response.types';
-import type { TableProps, ModalProps, EntityFilters } from './generic-infrastructure.types';
+import type { PaginatedResponse } from '@/types/api-response.types';
+import type { TableProps, ModalProps, EntityFilters } from '@/types/generic-infrastructure.types';
 
 // ==========================================
 // BASE INTERFACES

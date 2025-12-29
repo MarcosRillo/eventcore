@@ -4,9 +4,9 @@
  * Main admin dashboard UI integrating stats, filters, and event list.
  */
 
-import { AdminQuickFilters } from './AdminQuickFilters'
-import { AdminEventList } from './AdminEventList'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { AdminEventList } from '@/features/approval/components/dumb/AdminEventList'
+import { AdminQuickFilters } from '@/features/approval/components/dumb/AdminQuickFilters'
 import { AdminStats, EventsResponse } from '@/features/approval/types/approval.types'
 
 interface AdminDashboardProps {

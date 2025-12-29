@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useInvitations } from '../../hooks/useInvitations';
-import InvitationTable from '../dumb/InvitationTable';
-import { CreateInvitationModalContainer } from './CreateInvitationModalContainer';
-import { ConfirmDialogData } from '@/shared/components/tables';
-import type { Invitation } from '../../types/invitation.types';
 import { ArrowPathIcon, UserPlusIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState, useCallback } from 'react';
+
 import { Button } from '@/components/ui';
+import InvitationTable from '@/features/invitations/components/dumb/InvitationTable';
+import { CreateInvitationModalContainer } from '@/features/invitations/components/smart/CreateInvitationModalContainer';
+import { useInvitations } from '@/features/invitations/hooks/useInvitations';
+import type { Invitation } from '@/features/invitations/types/invitation.types';
+import { ConfirmDialogData } from '@/shared/components/tables';
 
 export const InvitationTableContainer = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

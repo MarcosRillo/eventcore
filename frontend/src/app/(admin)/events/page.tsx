@@ -13,6 +13,9 @@
 
 import { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer';
 
+/**
+ *
+ */
 export default function EventsPage() {
   return (
     <div className="min-h-screen bg-neutral-50 py-8">

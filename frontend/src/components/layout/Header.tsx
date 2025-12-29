@@ -5,8 +5,6 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -17,6 +15,9 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
 } from '@heroicons/react/24/outline';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
 import { User } from '@/types/auth.types';
 
 interface HeaderProps {

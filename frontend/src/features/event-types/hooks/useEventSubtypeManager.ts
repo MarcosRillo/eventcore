@@ -7,13 +7,14 @@
  */
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+
 import { useAuth } from '@/context/AuthContext';
 import {
   getEventSubtypes,
   deleteEventSubtype,
 } from '@/features/event-types/services/eventSubtype.service';
 import { getEventType } from '@/features/event-types/services/eventType.service';
+import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
 import {
   EventType,
   EventSubtype,
@@ -71,6 +72,10 @@ interface UseEventSubtypeManagerReturn {
   };
 }
 
+/**
+ *
+ * @param eventTypeId
+ */
 export function useEventSubtypeManager(
   eventTypeId: number
 ): UseEventSubtypeManagerReturn {

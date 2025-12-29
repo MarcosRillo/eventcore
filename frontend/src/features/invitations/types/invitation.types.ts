@@ -113,6 +113,7 @@ export interface AcceptInvitationResponse {
 
 /**
  * Checks if an invitation is expired based on expires_at
+ * @param invitation
  */
 export const isInvitationExpired = (invitation: Invitation): boolean => {
   return new Date(invitation.expires_at) < new Date()
@@ -120,6 +121,7 @@ export const isInvitationExpired = (invitation: Invitation): boolean => {
 
 /**
  * Gets the display status of an invitation
+ * @param invitation
  */
 export const getInvitationStatus = (invitation: Invitation): InvitationStatus => {
   if (isInvitationExpired(invitation)) {

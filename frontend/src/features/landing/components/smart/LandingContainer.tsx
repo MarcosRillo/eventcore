@@ -6,13 +6,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useLandingData } from '@/features/landing/hooks/useLandingData'
+
 import {
   HeroSection,
   FeaturedEventsSection,
   CategoriesSection,
   OrganizersSection
 } from '@/features/landing/components/dumb'
+import { useLandingData } from '@/features/landing/hooks/useLandingData'
 
 export const LandingContainer = () => {
   const router = useRouter()

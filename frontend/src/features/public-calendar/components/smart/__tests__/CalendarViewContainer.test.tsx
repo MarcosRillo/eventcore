@@ -5,9 +5,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { CalendarViewContainer } from '../CalendarViewContainer'
-import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 import { useRouter } from 'next/navigation'
+
+import { CalendarViewContainer } from '@/features/public-calendar/components/smart/CalendarViewContainer'
+import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 
 jest.mock('@/features/public-calendar/hooks/useCalendarEvents')
 jest.mock('next/navigation', () => ({

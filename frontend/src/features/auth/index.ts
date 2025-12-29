@@ -4,10 +4,10 @@
  */
 
 // Components (when moved)
-// export * from './components';
+// export * from '@/features/auth/components';
 
 // Hooks
-export * from './hooks';
+export * from '@/features/auth/hooks';
 
 // Services (shared services, imported for convenience)
 export {
@@ -20,4 +20,4 @@ export {
 } from '@/services/authService';
 
 // Types (when created)
-// export * from './types';
+// export * from '@/features/auth/types';

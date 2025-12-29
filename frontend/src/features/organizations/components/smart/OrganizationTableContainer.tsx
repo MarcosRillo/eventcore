@@ -6,10 +6,11 @@
  */
 
 import React, { useState, useCallback } from 'react'
-import { OrganizationTable } from '../dumb/OrganizationTable'
-import { OrganizationDetailModal } from '../dumb/OrganizationDetailModal'
-import { useOrganizations } from '../../hooks/useOrganizations'
+
 import { Input, Button } from '@/components/ui'
+import { OrganizationDetailModal } from '@/features/organizations/components/dumb/OrganizationDetailModal'
+import { OrganizationTable } from '@/features/organizations/components/dumb/OrganizationTable'
+import { useOrganizations } from '@/features/organizations/hooks/useOrganizations'
 
 export const OrganizationTableContainer: React.FC = () => {
   const {

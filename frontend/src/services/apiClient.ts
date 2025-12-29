@@ -4,8 +4,9 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { ApiResponse, ApiErrorResponse } from '@/types/api-response.types';
+
 import { getAccessToken, storeTokens, clearTokens, getRefreshToken } from '@/services/tokenUtils';
+import { ApiResponse, ApiErrorResponse } from '@/types/api-response.types';
 
 // Base API URL from environment variables
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -19,6 +20,8 @@ let failedQueue: Array<{
 
 /**
  * Process queued requests after refresh completes
+ * @param error
+ * @param token
  */
 const processQueue = (error: Error | null, token: string | null = null): void => {
   failedQueue.forEach((promise) => {
@@ -109,6 +112,7 @@ const PUBLIC_API_ROUTES = [
 
 /**
  * Check if a URL is a public API route
+ * @param url
  */
 const isPublicApiRoute = (url: string | undefined): boolean => {
   if (!url) return false;

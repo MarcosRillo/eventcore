@@ -20,6 +20,8 @@ export const approvalService = {
   /**
    * Approve event internally (pending_internal_approval → approved_internal)
    * This approves the event for internal calendar use
+   * @param eventId
+   * @param comment
    */
   approveInternal: async (eventId: number, comment?: string): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/approve`, {
@@ -31,6 +33,8 @@ export const approvalService = {
   /**
    * Request public approval (approved_internal → pending_public_approval)
    * This submits the internally approved event for public calendar review
+   * @param eventId
+   * @param comment
    */
   requestPublicApproval: async (eventId: number, comment?: string): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/request-public`, {
@@ -42,6 +46,7 @@ export const approvalService = {
   /**
    * Publish event (pending_public_approval → published)
    * This publishes the event to the public calendar
+   * @param eventId
    */
   publishEvent: async (eventId: number): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/publish`);
@@ -50,6 +55,8 @@ export const approvalService = {
 
   /**
    * Request changes to event (any_state → requires_changes)
+   * @param eventId
+   * @param reason
    */
   requestChanges: async (eventId: number, reason: string): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/request-changes`, {
@@ -60,6 +67,8 @@ export const approvalService = {
 
   /**
    * Reject event (any_state → rejected)
+   * @param eventId
+   * @param reason
    */
   rejectEvent: async (eventId: number, reason: string): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/reject`, {
@@ -70,6 +79,7 @@ export const approvalService = {
 
   /**
    * Toggle featured status of event
+   * @param eventId
    */
   toggleFeatured: async (eventId: number): Promise<Event> => {
     const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/toggle-featured`);
@@ -88,6 +98,7 @@ export const approvalService = {
 export const approvalValidation = {
   /**
    * Check if an event can be approved internally (pending_internal_approval → approved_internal)
+   * @param event
    */
   canApproveInternal: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -96,6 +107,7 @@ export const approvalValidation = {
 
   /**
    * Check if an internally approved event can request public approval (approved_internal → pending_public_approval)
+   * @param event
    */
   canRequestPublicApproval: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -104,6 +116,7 @@ export const approvalValidation = {
 
   /**
    * Check if an event pending public approval can be published (pending_public_approval → published)
+   * @param event
    */
   canPublish: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -112,6 +125,7 @@ export const approvalValidation = {
 
   /**
    * Check if changes can be requested (available for most states)
+   * @param event
    */
   canRequestChanges: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -121,6 +135,7 @@ export const approvalValidation = {
 
   /**
    * Check if an event can be rejected (available for most states)
+   * @param event
    */
   canReject: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -130,6 +145,7 @@ export const approvalValidation = {
 
   /**
    * Check if event is internally approved (available in internal calendar)
+   * @param event
    */
   isInternallyApproved: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -138,6 +154,7 @@ export const approvalValidation = {
 
   /**
    * Check if event is published (available in public calendar)
+   * @param event
    */
   isPublished: (event: Event): boolean => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -146,6 +163,7 @@ export const approvalValidation = {
 
   /**
    * Get workflow stage description
+   * @param event
    */
   getWorkflowStage: (event: Event): string => {
     const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
@@ -173,6 +191,7 @@ export const approvalValidation = {
 
   /**
    * Get available actions for an event based on its current state
+   * @param event
    */
   getAvailableActions: (event: Event): string[] => {
     const actions: string[] = [];

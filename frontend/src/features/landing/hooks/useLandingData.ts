@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect } from 'react'
-import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
+
 import { LandingData } from '@/features/landing/types/landing.types'
+import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 
 export const useLandingData = (): LandingData => {
   const [featuredEvents, setFeaturedEvents] = useState<LandingData['featuredEvents']>([])

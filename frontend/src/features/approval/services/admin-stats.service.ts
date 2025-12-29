@@ -4,8 +4,8 @@
  * Fetches approval statistics for admin dashboard.
  */
 
-import apiClient from '@/services/apiClient'
 import { AdminStats } from '@/features/approval/types/approval.types'
+import apiClient from '@/services/apiClient'
 
 export const adminStatsService = {
   /**

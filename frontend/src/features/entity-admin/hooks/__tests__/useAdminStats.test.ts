@@ -6,7 +6,8 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useAdminStats } from '../useAdminStats';
+
+import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { adminStatsService } from '@/features/entity-admin/services';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';
 

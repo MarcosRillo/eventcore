@@ -1,7 +1,9 @@
-import apiClient from '@/services/apiClient'
-import { publicEventsService } from '../public-events.service'
-import { EventsResponse, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 import { AxiosResponse } from 'axios'
+
+import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
+import { EventsResponse, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
+import apiClient from '@/services/apiClient'
+
 
 // Mock apiClient
 jest.mock('@/services/apiClient')

@@ -3,9 +3,10 @@
  * Tests for public registration form submission
  */
 import { renderHook, act } from '@testing-library/react'
-import { useRegistrationRequest } from '../useRegistrationRequest'
-import { createRegistrationRequest } from '../../services/registration-request.service'
-import { initialFormData } from '../../types/registration-request.types'
+
+import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
+import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
+import { initialFormData } from '@/features/registration-requests/types/registration-request.types'
 
 jest.mock('../../services/registration-request.service', () => ({
   createRegistrationRequest: jest.fn(),

@@ -1,5 +1,5 @@
+import { getAppearanceSettings, updateAppearanceSettings } from '@/features/appearance/services/appearance.service'
 import apiClient from '@/services/apiClient'
-import { getAppearanceSettings, updateAppearanceSettings } from '../appearance.service'
 import { ThemeSettings } from '@/types/appearance.types'
 
 // Mock apiClient

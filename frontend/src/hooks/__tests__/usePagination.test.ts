@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
-import { usePagination } from '../usePagination'
+
+import { usePagination } from '@/hooks/usePagination'
 
 describe('usePagination', () => {
   describe('Initialization', () => {

@@ -3,8 +3,10 @@
  * Tests for token validation, form rendering, success state, and error handling
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import ResetPasswordPage from '../page';
+
 import { useResetPassword } from '@/features/auth';
+
+import ResetPasswordPage from '../page';
 
 // Mock dependencies
 jest.mock('@/features/auth', () => ({

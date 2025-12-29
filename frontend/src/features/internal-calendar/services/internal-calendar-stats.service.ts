@@ -8,8 +8,8 @@
  * Refactored to use apiClient for consistency (Dec 10, 2025).
  */
 
-import apiClient from '@/services/apiClient'
 import type { InternalStats } from '@/features/internal-calendar/types/internal-calendar.types'
+import apiClient from '@/services/apiClient'
 
 /**
  * API response wrapper for stats endpoint

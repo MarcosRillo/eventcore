@@ -8,7 +8,7 @@
  * 4. Error Handling (API failures, network errors)
  */
 
-import { eventService, eventApprovalService } from '../event.service';
+import { eventService, eventApprovalService } from '@/features/events/services/event.service';
 import apiClient from '@/services/apiClient';
 import { Event, EventFormData, EventFilters } from '@/types/event.types';
 

@@ -11,6 +11,6 @@ export {
   getTypeConfig,
   BADGE_BASE_CLASSES,
   TABLE_STYLES,
-} from './eventConfig';
+} from '@/features/events/constants/eventConfig';
 
-export type { StatusConfig, TypeConfig } from './eventConfig';
+export type { StatusConfig, TypeConfig } from '@/features/events/constants/eventConfig';

@@ -5,7 +5,8 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useAdminEvents } from '../hooks/useAdminEvents'
+
+import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
 import { adminEventService } from '@/features/approval/services/admin-event.service'
 
 jest.mock('@/features/approval/services/admin-event.service')

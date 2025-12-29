@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { EventActionButtons } from '../components/dumb/EventActionButtons'
+
+import { EventActionButtons } from '@/features/organizer/components/dumb/EventActionButtons'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 
 describe('EventActionButtons', () => {

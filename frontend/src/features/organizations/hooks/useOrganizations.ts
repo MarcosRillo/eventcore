@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+
+import organizationService from '@/features/organizations/services/organization.service'
 import type {
   Organization,
   OrganizationFilters,
   PaginationMeta,
-} from '../types/organization.types'
-import organizationService from '../services/organization.service'
+} from '@/features/organizations/types/organization.types'
 
 interface UseOrganizationsReturn {
   organizations: Organization[]

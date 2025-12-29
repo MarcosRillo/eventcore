@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { BigCalendarView } from '../BigCalendarView'
+
+import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 
 // Mock react-big-calendar to avoid complex calendar rendering in tests

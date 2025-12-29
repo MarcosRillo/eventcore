@@ -17,6 +17,15 @@ interface UserEditModalContainerProps {
   onSave: (id: number, data: UpdateUserData) => Promise<boolean>
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.user
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.onClose
+ * @param root0.onSave
+ */
 export function UserEditModalContainer({
   user,
   isOpen,

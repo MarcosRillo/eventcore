@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+
 import { getEvents, deleteEvent } from '@/features/organizer/services/organizer-event.service'
 import { OrganizerEvent, EventListParams } from '@/features/organizer/types/event.types'
 

@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+
 import { Event } from '@/types/event.types';
 
 export const useEventCardLogic = (event: Event) => {

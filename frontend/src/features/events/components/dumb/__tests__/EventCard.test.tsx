@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { EventCard } from '../EventCard'
+
+import { EventCard } from '@/features/events/components/dumb/EventCard'
 import { Event, EventType, EventStatus } from '@/types/event.types'
 
 // Mock UI components

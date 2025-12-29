@@ -1,5 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useOrganizerEvents } from '../useOrganizerEvents'
+
+import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 
 jest.mock('@/features/organizer/services/organizer-event.service')

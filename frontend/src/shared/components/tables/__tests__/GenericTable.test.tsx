@@ -4,12 +4,13 @@
  */
 
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { GenericTable } from '../GenericTable';
+
+import { GenericTable } from '@/shared/components/tables/GenericTable';
 import type {
   TableColumnConfig,
   TableActionConfig,
   ConfirmDialogData,
-} from '../types';
+} from '@/shared/components/tables/types';
 import { PaginationMeta } from '@/types/api-response.types';
 
 // Test item type

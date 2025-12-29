@@ -8,8 +8,12 @@
  */
 
 import { useRouter } from 'next/navigation'
+
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
 
+/**
+ *
+ */
 export default function CreateEventPage() {
   const router = useRouter()
 

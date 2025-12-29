@@ -6,7 +6,6 @@
 
 'use client';
 
-import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import {
   XMarkIcon,
@@ -17,9 +16,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import moment from 'moment';
-import { Event } from '@/types/event.types';
+import { Fragment, useState } from 'react';
+
 import { Button, ConfirmDialog } from '@/components/ui';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
+import { Event } from '@/types/event.types';
 
 // Context-specific configuration
 export type EventDetailContext = 'public' | 'admin' | 'dashboard';

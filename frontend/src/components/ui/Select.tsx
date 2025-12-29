@@ -3,9 +3,9 @@
  * Clean dropdown using Headless UI for accessibility
  */
 
-import { Fragment } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { Fragment } from 'react'
 
 export interface SelectOption {
   value: string | number

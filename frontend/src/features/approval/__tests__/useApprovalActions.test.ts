@@ -6,9 +6,10 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useApprovalActions } from '../hooks/useApprovalActions'
-import { approvalService } from '@/features/approval/services/approval.service'
+
 import { useToast } from '@/components/ui/Toast'
+import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
+import { approvalService } from '@/features/approval/services/approval.service'
 
 jest.mock('@/features/approval/services/approval.service')
 jest.mock('@/components/ui/Toast')

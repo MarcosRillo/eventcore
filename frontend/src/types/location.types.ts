@@ -7,8 +7,8 @@
  * Defaults: state="Tucumán", country="Argentina", is_active=true
  */
 
-import { PaginatedResponse } from './api-response.types';
-import { UniversalFilters } from './filter.types';
+import { PaginatedResponse } from '@/types/api-response.types';
+import { UniversalFilters } from '@/types/filter.types';
 
 /**
  * Base Location interface - aligned with backend schema

@@ -5,17 +5,18 @@
 
 'use client';
 
-import { useMemo, useCallback } from 'react';
-import type { User, PaginationMeta } from '../../types/user.types';
-import { getUserStatusLabel } from '../../types/user.types';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
-import type { PaginationMeta as GenericPaginationMeta } from '@/types/api-response.types';
 import {
   PencilIcon,
   TrashIcon,
   NoSymbolIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+import { useMemo, useCallback } from 'react';
+
+import type { User, PaginationMeta } from '@/features/users/types/user.types';
+import { getUserStatusLabel } from '@/features/users/types/user.types';
+import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
+import type { PaginationMeta as GenericPaginationMeta } from '@/types/api-response.types';
 
 interface UserTableProps {
   users: User[];
@@ -34,6 +35,7 @@ const BADGE_BASE_CLASSES = 'inline-flex items-center px-2.5 py-0.5 rounded-full 
 
 /**
  * Get user initials from name
+ * @param name
  */
 function getUserInitials(name: string): string {
   return name
@@ -44,6 +46,20 @@ function getUserInitials(name: string): string {
     .toUpperCase();
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.users
+ * @param root0.pagination
+ * @param root0.loading
+ * @param root0.onPageChange
+ * @param root0.onEdit
+ * @param root0.onSuspend
+ * @param root0.onUnsuspend
+ * @param root0.onDelete
+ * @param root0.confirmDialog
+ * @param root0.onCloseConfirmDialog
+ */
 export function UserTable({
   users,
   pagination,

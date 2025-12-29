@@ -1,6 +1,7 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { EventTable, ColumnConfig, ActionConfig, ConfirmDialogData } from '../EventTable'
+import React from 'react'
+
+import { EventTable, ColumnConfig, ActionConfig, ConfirmDialogData } from '@/features/entity-admin/components/dumb/EventTable'
 import { Event, EVENT_STATUS, EVENT_TYPE, EventStatusObject, EventTypeObject } from '@/types/event.types'
 
 interface MockConfirmDialogProps {

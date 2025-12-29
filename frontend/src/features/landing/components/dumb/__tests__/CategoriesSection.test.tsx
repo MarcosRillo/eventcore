@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { CategoriesSection } from '../CategoriesSection'
+
+import { CategoriesSection } from '@/features/landing/components/dumb/CategoriesSection'
 import type { EventType } from '@/features/landing/types/landing.types'
 
 describe('CategoriesSection', () => {

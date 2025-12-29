@@ -5,8 +5,9 @@
  * Dumb component - receives history data via props.
  */
 
-import { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+
 import type { ApprovalHistoryEntry } from '@/types/event.types';
 
 interface ApprovalHistoryTimelineProps {
@@ -16,6 +17,7 @@ interface ApprovalHistoryTimelineProps {
 
 /**
  * Format timestamp for display
+ * @param timestamp
  */
 const formatTimestamp = (timestamp: string): string => {
   const date = new Date(timestamp);

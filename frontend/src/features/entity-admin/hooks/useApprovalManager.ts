@@ -7,9 +7,10 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Event } from '@/types/event.types';
+
 import { approvalService, approvalValidation } from '@/features/events/services/approvalService';
 import { ApiError } from '@/types/api-response.types';
+import { Event } from '@/types/event.types';
 
 interface ApprovalError {
   message: string;

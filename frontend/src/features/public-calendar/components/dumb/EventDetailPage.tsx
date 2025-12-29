@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
 import {
   ArrowLeft,
   Calendar,
@@ -11,16 +9,24 @@ import {
   ExternalLink
 } from 'lucide-react';
 import moment from 'moment';
-import { Event } from '@/types/event.types';
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons';
-import { Button } from '@/components/ui';
 import { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML';
+import { Event } from '@/types/event.types';
 
 interface EventDetailPageProps {
   event: Event;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.event
+ */
 export default function EventDetailPage({ event }: EventDetailPageProps) {
   // CAPA 3: Sanitize description on frontend (third layer of defense)
   // Even though backend already sanitized (CAPA 1 + CAPA 2), this provides

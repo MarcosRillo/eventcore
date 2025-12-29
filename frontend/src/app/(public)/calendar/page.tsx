@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+
 import { CalendarPageContainer } from '@/features/public-calendar/components/smart/CalendarPageContainer'
 
 export const metadata: Metadata = {
@@ -22,6 +23,9 @@ export const metadata: Metadata = {
   }
 }
 
+/**
+ *
+ */
 export default function CalendarPage() {
   return <CalendarPageContainer />
 }

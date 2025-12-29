@@ -6,8 +6,9 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { CalendarToolbar } from '../CalendarToolbar'
 import type { View } from 'react-big-calendar'
+
+import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'
 
 describe('CalendarToolbar', () => {
   const mockOnNavigate = jest.fn()

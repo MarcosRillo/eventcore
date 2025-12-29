@@ -5,8 +5,9 @@
  * Modal for confirming suspension of user + organization
  */
 
-import { useCallback } from 'react'
 import { AlertTriangle } from 'lucide-react'
+import { useCallback } from 'react'
+
 import { Modal, Button } from '@/components/ui'
 
 interface SuspendConfirmModalProps {
@@ -17,6 +18,15 @@ interface SuspendConfirmModalProps {
   onConfirm: () => void
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.organizationName
+ * @param root0.onClose
+ * @param root0.onConfirm
+ */
 export function SuspendConfirmModal({
   isOpen,
   loading,

@@ -6,8 +6,8 @@
  */
 
 // Services
-export { default as eventTypeService } from './services/eventType.service';
-export { default as eventSubtypeService } from './services/eventSubtype.service';
+export { default as eventTypeService } from '@/features/event-types/services/eventType.service';
+export { default as eventSubtypeService } from '@/features/event-types/services/eventSubtype.service';
 export {
   getEventTypes,
   getEventType,
@@ -18,7 +18,7 @@ export {
   getActiveEventTypes,
   searchEventTypes,
   validateEventTypeData,
-} from './services/eventType.service';
+} from '@/features/event-types/services/eventType.service';
 export {
   getEventSubtypes,
   getEventSubtype,
@@ -29,18 +29,18 @@ export {
   getActiveEventSubtypes,
   searchEventSubtypes,
   validateEventSubtypeData,
-} from './services/eventSubtype.service';
+} from '@/features/event-types/services/eventSubtype.service';
 
 // Hooks
-export { useEventTypeManager } from './hooks/useEventTypeManager';
-export { useEventSubtypeManager } from './hooks/useEventSubtypeManager';
+export { useEventTypeManager } from '@/features/event-types/hooks/useEventTypeManager';
+export { useEventSubtypeManager } from '@/features/event-types/hooks/useEventSubtypeManager';
 
 // Components - Smart
-export { EventTypeTableContainer } from './components/smart/EventTypeTableContainer';
-export { EventSubtypeTableContainer } from './components/smart/EventSubtypeTableContainer';
+export { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer';
+export { EventSubtypeTableContainer } from '@/features/event-types/components/smart/EventSubtypeTableContainer';
 
 // Components - Modals
-export { default as CreateEventTypeModal } from './components/CreateEventTypeModal';
-export { default as EditEventTypeModal } from './components/EditEventTypeModal';
-export { default as CreateEventSubtypeModal } from './components/CreateEventSubtypeModal';
-export { default as EditEventSubtypeModal } from './components/EditEventSubtypeModal';
+export { default as CreateEventTypeModal } from '@/features/event-types/components/CreateEventTypeModal';
+export { default as EditEventTypeModal } from '@/features/event-types/components/EditEventTypeModal';
+export { default as CreateEventSubtypeModal } from '@/features/event-types/components/CreateEventSubtypeModal';
+export { default as EditEventSubtypeModal } from '@/features/event-types/components/EditEventSubtypeModal';

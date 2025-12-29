@@ -10,7 +10,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useEventManager } from '../useEventManager';
+
+import { useEventManager } from '@/features/events/hooks/useEventManager';
 import * as eventService from '@/features/events/services/event.service';
 import { Event, EventFormData } from '@/types/event.types';
 

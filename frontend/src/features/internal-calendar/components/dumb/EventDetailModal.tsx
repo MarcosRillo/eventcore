@@ -8,8 +8,9 @@
 
 'use client'
 
-import Modal from '@/components/ui/Modal'
 import { format } from 'date-fns'
+
+import Modal from '@/components/ui/Modal'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 
 /**
@@ -27,6 +28,9 @@ export interface EventDetailModalProps {
  * Displays comprehensive event information in a modal.
  *
  * @param props - EventDetailModal props
+ * @param props.event
+ * @param props.isOpen
+ * @param props.onClose
  * @returns React component
  */
 export function EventDetailModal({

@@ -7,16 +7,20 @@
 'use client';
 
 import { Fragment } from 'react';
+
 import { Button, ConfirmDialog } from '@/components/ui';
 import Pagination from '@/components/ui/Pagination';
 import type {
   GenericTableProps,
   TableColumnConfig,
   TableActionConfig,
-} from './types';
+} from '@/shared/components/tables/types';
 
 /**
  * Loading skeleton component for table rows
+ * @param root0
+ * @param root0.rows
+ * @param root0.columns
  */
 function TableSkeleton({ rows, columns }: { rows: number; columns: number }) {
   return (
@@ -46,6 +50,8 @@ function TableSkeleton({ rows, columns }: { rows: number; columns: number }) {
 
 /**
  * Empty state component
+ * @param root0
+ * @param root0.message
  */
 function EmptyState({ message }: { message: string }) {
   return (
@@ -82,6 +88,19 @@ const actionVariantStyles = {
 
 /**
  * GenericTable - Reusable typed table component
+ * @param root0
+ * @param root0.items
+ * @param root0.columns
+ * @param root0.actions
+ * @param root0.isLoading
+ * @param root0.emptyMessage
+ * @param root0.pagination
+ * @param root0.onPageChange
+ * @param root0.confirmDialog
+ * @param root0.onCloseConfirmDialog
+ * @param root0.skeletonRows
+ * @param root0.className
+ * @param root0.testId
  * @template T - The type of items in the table (must have an id property)
  */
 export function GenericTable<T extends { id: number | string }>({
@@ -202,6 +221,8 @@ export function GenericTable<T extends { id: number | string }>({
 
 /**
  * Render cell content based on column configuration
+ * @param item
+ * @param column
  */
 function renderCell<T>(item: T, column: TableColumnConfig<T>): React.ReactNode {
   // Use custom render function if provided
@@ -222,6 +243,8 @@ function renderCell<T>(item: T, column: TableColumnConfig<T>): React.ReactNode {
 
 /**
  * Render action buttons for a row
+ * @param item
+ * @param actions
  */
 function renderActions<T extends { id: number | string }>(
   item: T,

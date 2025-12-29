@@ -7,18 +7,22 @@
  * for edit, delete, and submit for review operations.
  */
 
-import { useEffect, useState, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
 import Image from 'next/image'
-import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { getEvent } from '@/features/organizer/services/organizer-event.service'
-import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
+import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
+import { getEvent } from '@/features/organizer/services/organizer-event.service'
+import { OrganizerEvent } from '@/features/organizer/types/event.types'
 
+/**
+ *
+ */
 export default function OrganizerEventDetailPage() {
   const params = useParams()
   const router = useRouter()

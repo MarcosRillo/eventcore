@@ -5,9 +5,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { InternalCalendarGridContainer } from '../InternalCalendarGridContainer';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import { useRouter } from 'next/navigation';
+
+import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 // Mock the hooks

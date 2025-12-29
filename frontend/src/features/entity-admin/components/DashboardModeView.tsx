@@ -7,9 +7,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '@/context/AuthContext';
-import { Event } from '@/types/event.types';
 import { EventsFilterTabs, EventsList, DashboardTab } from '@/features/events/components';
+import { Event } from '@/types/event.types';
 
 interface DashboardModeViewProps {
   events: Event[];

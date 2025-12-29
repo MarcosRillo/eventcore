@@ -5,11 +5,12 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AdminDashboardContainer } from '../AdminDashboardContainer';
+
+import { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer';
 import * as useAdminStatsModule from '@/features/entity-admin/hooks/useAdminStats';
 import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
-import * as useEventManagerModule from '@/features/events/hooks/useEventManager';
 import type { AdminStatCardData } from '@/features/entity-admin/types';
+import * as useEventManagerModule from '@/features/events/hooks/useEventManager';
 
 jest.mock('@/features/entity-admin/hooks/useAdminStats');
 jest.mock('@/features/entity-admin/hooks/useEventManagement');

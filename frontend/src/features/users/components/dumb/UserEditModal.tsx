@@ -4,9 +4,9 @@
  * Receives all state via props (no hooks)
  */
 
-import type { User } from '../../types/user.types'
-import Modal from '@/components/ui/Modal'
 import { Button } from '@/components/ui'
+import Modal from '@/components/ui/Modal'
+import type { User } from '@/features/users/types/user.types'
 
 interface UserEditModalProps {
   user: User | null
@@ -21,6 +21,20 @@ interface UserEditModalProps {
   onClose: () => void
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.user
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.name
+ * @param root0.email
+ * @param root0.errors
+ * @param root0.onNameChange
+ * @param root0.onEmailChange
+ * @param root0.onSubmit
+ * @param root0.onClose
+ */
 export function UserEditModal({
   user,
   isOpen,

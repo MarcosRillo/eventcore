@@ -2,12 +2,12 @@
  * Hooks Export Index
  */
 
-export { useDebounce } from './useDebounce';
-export { usePaginatedData } from './usePaginatedData';
-export { default as usePermissions } from './usePermissions';
+export { useDebounce } from '@/hooks/useDebounce';
+export { usePaginatedData } from '@/hooks/usePaginatedData';
+export { default as usePermissions } from '@/hooks/usePermissions';
 
 // Generic table and UI hooks
-export { useTableSorting } from './useTableSorting';
-export { usePagination } from './usePagination';
-export { useModal, useMultiModal, useModalWithData } from './useModal';
-export { useTableSelection } from './useTableSelection';
+export { useTableSorting } from '@/hooks/useTableSorting';
+export { usePagination } from '@/hooks/usePagination';
+export { useModal, useMultiModal, useModalWithData } from '@/hooks/useModal';
+export { useTableSelection } from '@/hooks/useTableSelection';

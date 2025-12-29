@@ -6,9 +6,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
-import { CalendarViewContainer } from '@/features/public-calendar/components/smart/CalendarViewContainer'
+
 import { StatsBar } from '@/features/public-calendar/components/dumb/StatsBar'
+import { CalendarViewContainer } from '@/features/public-calendar/components/smart/CalendarViewContainer'
+import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import { PublicStats } from '@/features/public-calendar/types/public-calendar.types'
 

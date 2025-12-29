@@ -1,8 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
+
 import { OrganizerEventList } from '@/features/organizer/components/dumb/OrganizerEventList'
+import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 
 export const OrganizerEventListContainer = () => {
   const router = useRouter()

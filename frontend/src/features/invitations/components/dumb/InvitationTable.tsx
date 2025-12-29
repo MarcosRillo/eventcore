@@ -5,11 +5,12 @@
 
 'use client';
 
-import { useMemo, useCallback } from 'react';
-import { Invitation } from '../../types/invitation.types';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
 import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
-import InvitationStatusBadge from './InvitationStatusBadge';
+import { useMemo, useCallback } from 'react';
+
+import InvitationStatusBadge from '@/features/invitations/components/dumb/InvitationStatusBadge';
+import { Invitation } from '@/features/invitations/types/invitation.types';
+import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
 
 interface InvitationTableProps {
   invitations: Invitation[];

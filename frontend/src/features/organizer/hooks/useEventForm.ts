@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { getEvent, createEvent, updateEvent } from '@/features/organizer/services/organizer-event.service'
-import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
+import { useState, useEffect, useCallback } from 'react'
+
 import { getActiveEventSubtypes } from '@/features/event-types/services/eventSubtype.service'
+import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
 import { searchLocations } from '@/features/locations/services/location.service'
-import { validateEventForm, hasErrors } from '@/features/organizer/utils/eventFormValidation'
+import { getEvent, createEvent, updateEvent } from '@/features/organizer/services/organizer-event.service'
 import { EventFormData, EventFormErrors, AsynchronousDate } from '@/features/organizer/types/event.types'
+import { validateEventForm, hasErrors } from '@/features/organizer/utils/eventFormValidation'
 import { EventType, EventSubtype } from '@/types/eventType.types'
 
 interface UseEventFormProps {

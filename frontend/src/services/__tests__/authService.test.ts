@@ -3,6 +3,7 @@
  * Tests for loginUser, getCurrentUser, logoutUser, refreshTokens, validateToken
  */
 import axios from 'axios';
+
 import {
   loginUser,
   getCurrentUser,

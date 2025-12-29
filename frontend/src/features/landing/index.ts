@@ -2,6 +2,6 @@
  * Landing Feature - Main Barrel Export
  */
 
-export * from './components'
-export * from './hooks'
-export * from './types/landing.types'
+export * from '@/features/landing/components'
+export * from '@/features/landing/hooks'
+export * from '@/features/landing/types/landing.types'

@@ -13,6 +13,7 @@ import {
   ApprovalStatistics,
   EventStatus
 } from '@/types/event.types';
+import { EventTemplate, EventMessage } from '@/types/event.types';
 import {
   PublicEventFilters,
   OrganizerEventFilters,
@@ -21,7 +22,6 @@ import {
   EventTemplateFilters,
   EventMessageFilters
 } from '@/types/filter.types';
-import { EventTemplate, EventMessage } from '@/types/event.types';
 
 /**
  * Service Context Type for role-based delegation

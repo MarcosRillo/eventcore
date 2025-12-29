@@ -5,8 +5,9 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { InternalCalendarPageContainer } from '../InternalCalendarPageContainer';
+
 import { useAuth } from '@/context/AuthContext';
+import { InternalCalendarPageContainer } from '@/features/internal-calendar/components/smart/InternalCalendarPageContainer';
 
 // Mock dependencies
 jest.mock('@/context/AuthContext');

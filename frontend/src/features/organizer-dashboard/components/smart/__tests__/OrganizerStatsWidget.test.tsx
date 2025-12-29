@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerStatsWidget } from '../OrganizerStatsWidget'
+
+import { OrganizerStatsWidget } from '@/features/organizer-dashboard/components/smart/OrganizerStatsWidget'
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
 
 jest.mock('@/features/organizer-dashboard/hooks/useOrganizerStats')

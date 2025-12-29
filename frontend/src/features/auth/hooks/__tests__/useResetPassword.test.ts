@@ -2,7 +2,8 @@
  * useResetPassword Hook Tests
  */
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useResetPassword } from '../useResetPassword';
+
+import { useResetPassword } from '@/features/auth/hooks/useResetPassword';
 import * as authService from '@/services/authService';
 
 // Mock next/navigation

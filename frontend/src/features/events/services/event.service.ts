@@ -6,6 +6,14 @@
  * providing role-based functionality.
  */
 
+
+// Import specialized services
+import { combinedEventAdminService } from '@/features/events/services/eventAdminService';
+import { combinedEventOrganizerService } from '@/features/events/services/eventOrganizerService';
+import { combinedEventPublicService } from '@/features/events/services/eventPublicService';
+
+// Import the type from types.ts to avoid conflicts
+import { EventServiceContext } from '@/features/events/services/types';
 import {
   Event,
   EventFormData,
@@ -15,18 +23,11 @@ import {
   ApprovalStatistics,
   EventStatus
 } from '@/types/event.types';
-
-// Import specialized services
-import { combinedEventAdminService } from './eventAdminService';
-import { combinedEventPublicService } from './eventPublicService';
-import { combinedEventOrganizerService } from './eventOrganizerService';
-
-// Import the type from types.ts to avoid conflicts
-import { EventServiceContext } from './types';
-export type { EventServiceContext } from './types';
+export type { EventServiceContext } from '@/features/events/services/types';
 
 /**
  * Get the appropriate service based on context/role
+ * @param context
  */
 export const getEventServiceForContext = (context: EventServiceContext = 'admin') => {
   switch (context) {
@@ -53,6 +54,7 @@ export const getEventServiceForContext = (context: EventServiceContext = 'admin'
 export const eventService = {
   /**
    * Get paginated list of events with filters
+   * @param filters
    * @deprecated Use getEventServiceForContext('admin').getEvents() instead
    */
   async getEvents(filters: EventFilters = {}): Promise<EventPagination> {
@@ -61,6 +63,7 @@ export const eventService = {
 
   /**
    * Get a single event by ID
+   * @param id
    * @deprecated Use getEventServiceForContext('admin').getEvent() instead
    */
   async getEvent(id: number): Promise<Event> {
@@ -69,6 +72,7 @@ export const eventService = {
 
   /**
    * Create a new event
+   * @param data
    * @deprecated Use getEventServiceForContext('admin').createEvent() instead
    */
   async createEvent(data: EventFormData): Promise<Event> {
@@ -77,6 +81,8 @@ export const eventService = {
 
   /**
    * Update an existing event
+   * @param id
+   * @param data
    * @deprecated Use getEventServiceForContext('admin').updateEvent() instead
    */
   async updateEvent(id: number, data: Partial<EventFormData>): Promise<Event> {
@@ -85,6 +91,7 @@ export const eventService = {
 
   /**
    * Delete an event
+   * @param id
    * @deprecated Use getEventServiceForContext('admin').deleteEvent() instead
    */
   async deleteEvent(id: number): Promise<void> {
@@ -93,6 +100,8 @@ export const eventService = {
 
   /**
    * Duplicate an event
+   * @param id
+   * @param overrides
    * @deprecated Use getEventServiceForContext('admin').duplicateEvent() instead
    */
   async duplicateEvent(id: number, overrides: Partial<EventFormData> = {}): Promise<Event> {
@@ -101,6 +110,7 @@ export const eventService = {
 
   /**
    * Toggle featured status
+   * @param id
    * @deprecated Use getEventServiceForContext('admin').toggleFeatured() instead
    */
   async toggleFeatured(id: number): Promise<Event> {
@@ -124,6 +134,8 @@ export const eventService = {
 export const eventApprovalService = {
   /**
    * Get events by approval status
+   * @param status
+   * @param filters
    * @deprecated Use getEventServiceForContext('admin').approval.getEventsByStatus() instead
    */
   async getEventsByStatus(status: EventStatus, filters: EventFilters = {}): Promise<EventPagination> {
@@ -140,6 +152,8 @@ export const eventApprovalService = {
 
   /**
    * Approve event for internal use
+   * @param eventId
+   * @param comment
    * @deprecated Use getEventServiceForContext('admin').approval.approveInternal() instead
    */
   async approveInternal(eventId: number, comment?: string): Promise<Event> {
@@ -148,6 +162,8 @@ export const eventApprovalService = {
 
   /**
    * Request public approval for an internally approved event
+   * @param eventId
+   * @param comment
    * @deprecated Use getEventServiceForContext('admin').approval.requestPublic() instead
    */
   async requestPublic(eventId: number, comment?: string): Promise<Event> {
@@ -156,6 +172,8 @@ export const eventApprovalService = {
 
   /**
    * Approve event for public publication
+   * @param eventId
+   * @param comment
    * @deprecated Use getEventServiceForContext('admin').approval.approvePublic() instead
    */
   async approvePublic(eventId: number, comment?: string): Promise<Event> {
@@ -164,6 +182,8 @@ export const eventApprovalService = {
 
   /**
    * Request changes to an event
+   * @param eventId
+   * @param comment
    * @deprecated Use getEventServiceForContext('admin').approval.requestChanges() instead
    */
   async requestChanges(eventId: number, comment: string): Promise<Event> {
@@ -172,6 +192,8 @@ export const eventApprovalService = {
 
   /**
    * Reject an event
+   * @param eventId
+   * @param comment
    * @deprecated Use getEventServiceForContext('admin').approval.rejectEvent() instead
    */
   async rejectEvent(eventId: number, comment: string): Promise<Event> {

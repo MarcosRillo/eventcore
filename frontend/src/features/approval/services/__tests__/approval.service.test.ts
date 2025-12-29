@@ -1,4 +1,4 @@
-import { approvalService } from '../approval.service'
+import { approvalService } from '@/features/approval/services/approval.service'
 import apiClient from '@/services/apiClient'
 
 jest.mock('@/services/apiClient')

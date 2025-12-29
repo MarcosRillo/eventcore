@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { useDebounce } from "./useDebounce";
-import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
 import axios from "axios";
+import { useState, useCallback, useEffect, useMemo } from "react";
+
+import { useDebounce } from "@/hooks/useDebounce";
+import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
 
 // Re-export for backward compatibility
 export type LaravelPaginatedResponse<T> = PaginatedResponse<T>;
@@ -36,6 +37,14 @@ export interface UsePaginatedDataReturn<T, F extends BaseFilters> {
   removeItem: (id: number | string) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.fetchFn
+ * @param root0.initialFilters
+ * @param root0.debounceMs
+ * @param root0.autoLoad
+ */
 export function usePaginatedData<T extends { id: number | string }, F extends BaseFilters>({
   fetchFn,
   initialFilters,

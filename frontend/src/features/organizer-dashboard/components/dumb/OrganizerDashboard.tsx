@@ -5,13 +5,14 @@
  */
 
 import Link from 'next/link'
-import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
-import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
-import { EventViewTabs } from '@/features/organizer/components/dumb/EventViewTabs'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
+
 import Button from '@/components/ui/Button'
+import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Pagination from '@/components/ui/Pagination'
+import { EventViewTabs } from '@/features/organizer/components/dumb/EventViewTabs'
+import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
+import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
 

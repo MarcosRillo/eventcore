@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { EditLocationModal } from '../EditLocationModal'
+
+import { EditLocationModal } from '@/features/locations/components/EditLocationModal'
 import * as locationService from '@/features/locations/services/location.service'
 import { Location } from '@/types/location.types'
 

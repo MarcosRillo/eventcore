@@ -3,7 +3,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ErrorAlert } from '../ErrorAlert';
+
+import { ErrorAlert } from '@/shared/components/alerts/ErrorAlert';
 
 describe('ErrorAlert', () => {
   const defaultProps = {

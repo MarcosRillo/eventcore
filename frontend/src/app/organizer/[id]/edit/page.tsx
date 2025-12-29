@@ -8,9 +8,13 @@
 
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
-import { useToast } from '@/components/ui/Toast'
 
+import { useToast } from '@/components/ui/Toast'
+import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
+
+/**
+ *
+ */
 export default function EditEventPage() {
   const params = useParams()
   const router = useRouter()

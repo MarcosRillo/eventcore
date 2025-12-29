@@ -6,9 +6,9 @@
  * Refactored to mock apiClient instead of fetch (Dec 10, 2025).
  */
 
-import { getInternalStats } from '../internal-calendar-stats.service';
-import apiClient from '@/services/apiClient';
+import { getInternalStats } from '@/features/internal-calendar/services/internal-calendar-stats.service';
 import type { InternalStats } from '@/features/internal-calendar/types/internal-calendar.types';
+import apiClient from '@/services/apiClient';
 
 // Mock apiClient
 jest.mock('@/services/apiClient');

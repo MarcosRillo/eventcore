@@ -6,7 +6,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import { StatsBarContainer } from '../StatsBarContainer'
+
+import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer'
 import { getInternalStats } from '@/features/internal-calendar/services/internal-calendar-stats.service'
 import type { InternalStats } from '@/features/internal-calendar/types/internal-calendar.types'
 

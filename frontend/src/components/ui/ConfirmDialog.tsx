@@ -6,8 +6,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import Modal from './Modal'
-import Button from './Button'
+
+import Button from '@/components/ui/Button'
+import Modal from '@/components/ui/Modal'
 
 interface ConfirmDialogProps {
   isOpen: boolean

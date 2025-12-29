@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { User, UpdateUserData } from '../types/user.types'
+
+import type { User, UpdateUserData } from '@/features/users/types/user.types'
 
 interface UserEditErrors {
   name?: string
@@ -26,6 +27,10 @@ interface UseUserEditReturn {
 
 /**
  * Hook to manage user edit form state and validation
+ * @param root0
+ * @param root0.user
+ * @param root0.onSave
+ * @param root0.onClose
  */
 export const useUserEdit = ({
   user,

@@ -2,4 +2,4 @@
  * Landing Hooks - Barrel Export
  */
 
-export { useLandingData } from './useLandingData'
+export { useLandingData } from '@/features/landing/hooks/useLandingData'

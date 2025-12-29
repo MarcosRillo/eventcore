@@ -8,7 +8,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -19,13 +18,15 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/solid';
+import { useState } from 'react';
+
+import { Button, Input, LoadingSpinner, Select } from '@/components/ui';
 import {
   EventTypeTableContainer,
   CreateEventTypeModal,
   EditEventTypeModal,
   useEventTypeManager,
 } from '@/features/event-types';
-import { Button, Input, LoadingSpinner, Select } from '@/components/ui';
 import { EventType, EventTypeFilterStatus } from '@/types/eventType.types';
 
 const EventTypesPage: React.FC = () => {

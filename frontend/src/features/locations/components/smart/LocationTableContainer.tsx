@@ -6,11 +6,12 @@
 
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { Location } from '@/types/location.types';
-import { PaginationMeta } from '@/types/api-response.types';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
 import { PencilIcon, TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { useState, useCallback, useMemo } from 'react';
+
+import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
+import { PaginationMeta } from '@/types/api-response.types';
+import { Location } from '@/types/location.types';
 
 interface LocationTableContainerProps {
   locations: Location[];
@@ -21,6 +22,16 @@ interface LocationTableContainerProps {
   onPageChange: (page: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.locations
+ * @param root0.pagination
+ * @param root0.loading
+ * @param root0.onEdit
+ * @param root0.onDelete
+ * @param root0.onPageChange
+ */
 export function LocationTableContainer({
   locations,
   pagination,

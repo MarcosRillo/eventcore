@@ -12,7 +12,9 @@
  */
 
 import { AxiosResponse, AxiosError } from 'axios';
+
 import apiClient from '@/services/apiClient';
+import { ApiResponse, ApiError } from '@/types/api-response.types';
 import {
   EventType,
   EventTypePagination,
@@ -20,11 +22,11 @@ import {
   UpdateEventTypeData,
   EventTypeQueryParams,
 } from '@/types/eventType.types';
-import { ApiResponse, ApiError } from '@/types/api-response.types';
 
 /**
  * Fetch paginated event types
  * Returns Laravel Resource Collection with pagination metadata
+ * @param params
  */
 export const getEventTypes = async (
   params: EventTypeQueryParams = {}
@@ -46,6 +48,7 @@ export const getEventTypes = async (
 /**
  * Get a single event type by ID
  * Returns EventType data directly
+ * @param id
  */
 export const getEventType = async (id: number): Promise<EventType> => {
   const response = await apiClient.get<EventType>(`/event-types/${id}`);
@@ -55,6 +58,7 @@ export const getEventType = async (id: number): Promise<EventType> => {
 /**
  * Create a new event type
  * Returns ApiResponse<EventType> wrapper structure
+ * @param eventTypeData
  */
 export const createEventType = async (
   eventTypeData: CreateEventTypeData
@@ -74,6 +78,8 @@ export const createEventType = async (
 /**
  * Update an existing event type
  * Returns ApiResponse<EventType> wrapper structure
+ * @param id
+ * @param eventTypeData
  */
 export const updateEventType = async (
   id: number,
@@ -93,6 +99,7 @@ export const updateEventType = async (
 /**
  * Delete an event type
  * Returns success message only
+ * @param id
  */
 export const deleteEventType = async (id: number): Promise<void> => {
   try {
@@ -124,6 +131,7 @@ export const deleteEventType = async (id: number): Promise<void> => {
 /**
  * Toggle event type active status
  * Returns ApiResponse<EventType> wrapper structure
+ * @param id
  */
 export const toggleEventTypeStatus = async (id: number): Promise<EventType> => {
   const response: AxiosResponse<ApiResponse<EventType>> = await apiClient.patch(
@@ -153,6 +161,8 @@ export const getActiveEventTypes = async (): Promise<EventType[]> => {
 /**
  * Search event types by name
  * Convenience method using getEventTypes with search parameter
+ * @param query
+ * @param page
  */
 export const searchEventTypes = async (
   query: string,
@@ -168,6 +178,7 @@ export const searchEventTypes = async (
 /**
  * Validate event type data before submission
  * Client-side validation to reduce server round trips
+ * @param data
  */
 export const validateEventTypeData = (
   data: CreateEventTypeData | UpdateEventTypeData

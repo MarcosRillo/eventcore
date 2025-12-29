@@ -5,12 +5,13 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+
 import '@testing-library/jest-dom'
+import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
+import * as locationService from '@/features/locations/services/location.service'
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
-import * as locationService from '@/features/locations/services/location.service'
-import * as eventTypeService from '@/features/event-types/services/eventType.service'
-import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
 
 // Mock ResizeObserver for Headless UI Combobox
 global.ResizeObserver = class ResizeObserver {

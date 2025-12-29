@@ -1,7 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useLoginForm } from '../useLoginForm'
-import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
+
+import { useAuth } from '@/context/AuthContext'
+import { useLoginForm } from '@/features/auth/hooks/useLoginForm'
 
 // Mock dependencies
 jest.mock('@/context/AuthContext')

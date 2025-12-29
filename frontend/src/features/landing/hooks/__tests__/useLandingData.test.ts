@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { useLandingData } from '../useLandingData'
+
+import { useLandingData } from '@/features/landing/hooks/useLandingData'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 
 // Mock the service

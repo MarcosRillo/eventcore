@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
+
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   PublicEvent,

@@ -7,11 +7,11 @@
 
 'use client';
 
-import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
-import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
-import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
 import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline';
+import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
+import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
+import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import type { Event, EventStatusCode } from '@/types/event.types';
 
 interface EventManagementModalContainerProps {

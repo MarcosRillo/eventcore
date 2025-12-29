@@ -30,6 +30,14 @@ const STATUS_OPTIONS: { value: InternalCalendarStatusCode; label: string }[] = [
   { value: 'published', label: 'Publicado' },
 ];
 
+/**
+ *
+ * @param root0
+ * @param root0.filters
+ * @param root0.onFiltersChange
+ * @param root0.eventTypes
+ * @param root0.eventTypesLoading
+ */
 export function InternalCalendarFilterBar({
   filters,
   onFiltersChange,

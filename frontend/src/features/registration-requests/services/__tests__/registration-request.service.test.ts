@@ -2,7 +2,8 @@
  * Registration Request Service Tests
  * Tests for both public (createRequest) and admin API functions
  */
-import apiClient from '@/services/apiClient'
+import { AxiosResponse } from 'axios'
+
 import registrationRequestService, {
   createRegistrationRequest,
   getRegistrationRequests,
@@ -12,9 +13,10 @@ import registrationRequestService, {
   suspendRegistrationRequest,
   unsuspendRegistrationRequest,
   deleteRegistrationRequest,
-} from '../registration-request.service'
-import { RegistrationRequest, RegistrationRequestDetail } from '../../types/registration-request.types'
-import { AxiosResponse } from 'axios'
+} from '@/features/registration-requests/services/registration-request.service'
+import { RegistrationRequest, RegistrationRequestDetail } from '@/features/registration-requests/types/registration-request.types'
+import apiClient from '@/services/apiClient'
+
 
 jest.mock('@/services/apiClient')
 

@@ -1,4 +1,4 @@
-import { adminEventService } from '../admin-event.service'
+import { adminEventService } from '@/features/approval/services/admin-event.service'
 import apiClient from '@/services/apiClient'
 
 jest.mock('@/services/apiClient')

@@ -5,9 +5,9 @@
  * Buttons visibility depends on event status.
  */
 
-import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import Button from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { OrganizerEvent } from '@/features/organizer/types/event.types'
 
 interface EventActionButtonsProps {
   event: OrganizerEvent
@@ -18,6 +18,7 @@ interface EventActionButtonsProps {
 
 /**
  * Get status code from event status (handles both string and object formats)
+ * @param status
  */
 const getStatusCode = (status: OrganizerEvent['status']): string => {
   if (typeof status === 'string') {

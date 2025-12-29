@@ -5,7 +5,8 @@
  */
 
 import { render, screen } from '@testing-library/react'
-import { CalendarView } from '../CalendarView'
+
+import { CalendarView } from '@/features/public-calendar/components/dumb/CalendarView'
 import { CalendarEvent, CalendarView as CalendarViewType } from '@/features/public-calendar/types/public-calendar.types'
 
 // Mock react-big-calendar

@@ -5,12 +5,16 @@
  * Allows organizations to submit a request to join the platform
  */
 
-import Link from 'next/link'
 import { Building2, CheckCircle } from 'lucide-react'
-import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
-import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
-import { Button } from '@/components/ui'
+import Link from 'next/link'
 
+import { Button } from '@/components/ui'
+import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
+import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
+
+/**
+ *
+ */
 export default function RegisterRequestPage() {
   const {
     formData,

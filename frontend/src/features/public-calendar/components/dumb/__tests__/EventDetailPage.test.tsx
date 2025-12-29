@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import EventDetailPage from '../EventDetailPage'
+
+import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage'
 import { Event } from '@/types/event.types'
 
 // Mock Next.js Image

@@ -5,10 +5,11 @@
  * Manages the state and logic for accepting an invitation
  */
 
-import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { validateInvitationToken, acceptInvitation } from '../services/invitation.service'
-import type { AcceptInvitationData } from '../types/invitation.types'
+import { useState, useCallback } from 'react'
+
+import { validateInvitationToken, acceptInvitation } from '@/features/invitations/services/invitation.service'
+import type { AcceptInvitationData } from '@/features/invitations/types/invitation.types'
 
 interface InvitationInfo {
   email: string

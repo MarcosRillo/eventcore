@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { LocationTableContainer } from '../LocationTableContainer'
-import { Location } from '@/types/location.types'
+
+import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer'
 import { PaginationMeta } from '@/types/api-response.types'
+import { Location } from '@/types/location.types'
 
 // Mock GenericTable
 jest.mock('@/shared/components/tables', () => ({

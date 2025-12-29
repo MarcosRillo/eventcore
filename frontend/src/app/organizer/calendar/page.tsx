@@ -8,6 +8,9 @@
 
 import { InternalCalendarPageContainer } from '@/features/internal-calendar/components/smart/InternalCalendarPageContainer'
 
+/**
+ *
+ */
 export default function CalendarPage() {
   return <InternalCalendarPageContainer />
 }

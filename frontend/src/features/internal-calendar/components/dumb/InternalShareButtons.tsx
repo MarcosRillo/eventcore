@@ -14,6 +14,12 @@ export interface InternalShareButtonsProps {
   eventTitle: string;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.eventId
+ * @param root0.eventTitle
+ */
 export function InternalShareButtons({
   eventId,
   eventTitle,

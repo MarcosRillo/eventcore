@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ApprovalActionPanel } from '../ApprovalActionPanel';
+
+import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
 import type { ApprovalAction } from '@/features/entity-admin/types';
 
 describe('ApprovalActionPanel', () => {

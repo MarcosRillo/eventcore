@@ -6,8 +6,9 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { PublicCalendar } from '../components/dumb/PublicCalendar'
-import { PublicEvent, EventType, EventSubtype, Location } from '../types/public-calendar.types'
+
+import { PublicCalendar } from '@/features/public-calendar/components/dumb/PublicCalendar'
+import { PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
 
 describe('PublicCalendar', () => {
   const mockEvents: PublicEvent[] = [

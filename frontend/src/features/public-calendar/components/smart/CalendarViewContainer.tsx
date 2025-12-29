@@ -6,8 +6,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
+
 import { CalendarView } from '@/features/public-calendar/components/dumb/CalendarView'
+import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 import { CalendarEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 export const CalendarViewContainer = () => {

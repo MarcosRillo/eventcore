@@ -4,7 +4,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useGenericModals } from '../useGenericModals';
+
+import { useGenericModals } from '@/shared/hooks/useGenericModals';
 
 interface TestItem {
   id: number;

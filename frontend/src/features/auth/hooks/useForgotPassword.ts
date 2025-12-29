@@ -3,6 +3,7 @@
  * Manages forgot password form state and submission
  */
 import { useState, useCallback } from 'react';
+
 import { forgotPassword } from '@/services/authService';
 
 interface UseForgotPasswordReturn {
@@ -18,6 +19,7 @@ interface UseForgotPasswordReturn {
 
 /**
  * Validates email format
+ * @param email
  */
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -1,7 +1,9 @@
-import apiClient from '@/services/apiClient'
-import { eventAdminService, eventAdminApprovalService, combinedEventAdminService } from '../eventAdminService'
-import { Event, EventFormData, EventPagination, EventFilters, EventStatistics, ApprovalStatistics, EventStatus, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
 import { AxiosResponse } from 'axios'
+
+import { eventAdminService, eventAdminApprovalService, combinedEventAdminService } from '@/features/events/services/eventAdminService'
+import apiClient from '@/services/apiClient'
+import { Event, EventFormData, EventPagination, EventFilters, EventStatistics, ApprovalStatistics, EventStatus, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
+
 
 // Mock apiClient
 jest.mock('@/services/apiClient')

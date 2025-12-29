@@ -2,5 +2,5 @@
  * Landing Components - Barrel Export
  */
 
-export * from './dumb'
-export * from './smart'
+export * from '@/features/landing/components/dumb'
+export * from '@/features/landing/components/smart'

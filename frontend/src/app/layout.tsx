@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AuthProvider } from '@/context/AuthContext';
+
 import { ToastProvider } from '@/components/ui';
+import { AuthProvider } from '@/context/AuthContext';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,6 +20,11 @@ export const metadata: Metadata = {
   description: "Sistema completo de gestión de calendario y eventos con multi-tenancy",
 };
 
+/**
+ *
+ * @param root0
+ * @param root0.children
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

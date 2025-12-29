@@ -4,10 +4,10 @@
  */
 
 // Events Feature
-export * as Events from './events';
+export * as Events from '@/features/events';
 
 // Auth Feature
-export * as Auth from './auth';
+export * as Auth from '@/features/auth';
 
 // Appearance Feature
-export * as Appearance from './appearance';
+export * as Appearance from '@/features/appearance';

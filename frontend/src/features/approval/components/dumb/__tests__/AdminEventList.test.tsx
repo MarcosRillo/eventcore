@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { AdminEventList } from '../AdminEventList'
+
+import { AdminEventList } from '@/features/approval/components/dumb/AdminEventList'
 import { Event, EventStatus } from '@/features/approval/types/approval.types'
 
 interface MockApprovalActionButtonsProps {

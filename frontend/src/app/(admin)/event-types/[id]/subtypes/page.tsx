@@ -8,8 +8,6 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -21,13 +19,16 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/solid';
+import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { Button, Input, LoadingSpinner, Select } from '@/components/ui';
 import {
   EventSubtypeTableContainer,
   CreateEventSubtypeModal,
   EditEventSubtypeModal,
   useEventSubtypeManager,
 } from '@/features/event-types';
-import { Button, Input, LoadingSpinner, Select } from '@/components/ui';
 import { EventSubtype, EventTypeFilterStatus } from '@/types/eventType.types';
 
 const EventSubtypesPage: React.FC = () => {

@@ -4,8 +4,9 @@
  * Receives all state via props (no hooks)
  */
 
-import { type ChangeEvent } from 'react'
 import { AlertCircle } from 'lucide-react'
+import { type ChangeEvent } from 'react'
+
 import { Modal, Button, Textarea } from '@/components/ui'
 
 interface RejectRequestModalProps {
@@ -22,6 +23,21 @@ interface RejectRequestModalProps {
   onClose: () => void
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.requestName
+ * @param root0.reason
+ * @param root0.error
+ * @param root0.isValid
+ * @param root0.minLength
+ * @param root0.maxLength
+ * @param root0.onReasonChange
+ * @param root0.onConfirm
+ * @param root0.onClose
+ */
 export function RejectRequestModal({
   isOpen,
   loading,

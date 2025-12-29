@@ -17,6 +17,9 @@ interface InternalEventCardProps {
  * Displays an event card for the internal calendar.
  * Shows title, status, organization, dates, and location.
  *
+ * @param root0
+ * @param root0.event
+ * @param root0.onClick
  * @example
  * ```tsx
  * <InternalEventCard

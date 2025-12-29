@@ -16,6 +16,12 @@ interface StatsBarProps {
   loading: boolean
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.stats
+ * @param root0.loading
+ */
 export function StatsBar({ stats, loading }: StatsBarProps) {
   // Loading state - show skeleton
   if (loading) {

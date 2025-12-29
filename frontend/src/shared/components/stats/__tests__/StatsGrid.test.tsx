@@ -3,7 +3,8 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { StatsGrid } from '../StatsGrid';
+
+import { StatsGrid } from '@/shared/components/stats/StatsGrid';
 
 describe('StatsGrid', () => {
   describe('rendering', () => {

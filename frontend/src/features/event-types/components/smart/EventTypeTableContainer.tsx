@@ -8,17 +8,19 @@
 
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { PencilIcon, TrashIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
-import { EventType } from '@/types/eventType.types';
-import { PaginationMeta } from '@/types/api-response.types';
+import { useMemo, useState, useCallback } from 'react';
+
 import {
   GenericTable,
   TableColumnConfig,
   TableActionConfig,
   ConfirmDialogData,
 } from '@/shared/components/tables';
-import { PencilIcon, TrashIcon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { PaginationMeta } from '@/types/api-response.types';
+import { EventType } from '@/types/eventType.types';
+
 
 // Re-export types for backward compatibility
 export type EventTypeColumnConfig = TableColumnConfig<EventType>;

@@ -1,9 +1,10 @@
-import apiClient from '@/services/apiClient'
-import { eventPublicService, eventPublicExportService, combinedEventPublicService } from '../eventPublicService'
-import { Event, EventPagination, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
-import { Location } from '@/types/location.types'
-import { PublicEventFilters } from '@/types/filter.types'
 import { AxiosResponse } from 'axios'
+
+import { eventPublicService, eventPublicExportService, combinedEventPublicService } from '@/features/events/services/eventPublicService'
+import apiClient from '@/services/apiClient'
+import { Event, EventPagination, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
+import { PublicEventFilters } from '@/types/filter.types'
+import { Location } from '@/types/location.types'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')

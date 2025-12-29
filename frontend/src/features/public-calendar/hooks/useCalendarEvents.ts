@@ -3,8 +3,9 @@
  * Fetches events for calendar view with date range filtering
  */
 
-import { useState, useEffect, useCallback } from 'react'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { useState, useEffect, useCallback } from 'react'
+
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   PublicEvent,
@@ -32,6 +33,7 @@ interface UseCalendarEventsReturn {
 
 /**
  * Transform PublicEvent to CalendarEvent format
+ * @param event
  */
 const transformToCalendarEvent = (event: PublicEvent): CalendarEvent => {
   return {

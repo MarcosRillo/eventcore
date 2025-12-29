@@ -29,6 +29,15 @@ const colorClasses: Record<SemanticColor, string> = {
   neutral: 'bg-neutral-100 text-neutral-600',
 };
 
+/**
+ *
+ * @param root0
+ * @param root0.label
+ * @param root0.value
+ * @param root0.icon
+ * @param root0.color
+ * @param root0.testId
+ */
 export function StatsCard({
   label,
   value,

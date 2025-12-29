@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+
 import { DashboardTab } from '@/features/events/components/EventsFilterTabs';
 
 interface UseEventsFiltersReturn {

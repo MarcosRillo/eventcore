@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { InternalCalendarContainer } from '../InternalCalendarContainer'
+
+import { InternalCalendarContainer } from '@/features/internal-calendar/components/smart/InternalCalendarContainer'
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents'
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 

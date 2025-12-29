@@ -4,17 +4,17 @@
  */
 
 // Hooks
-export { useLocationManager } from './hooks/useLocationManager';
+export { useLocationManager } from '@/features/locations/hooks/useLocationManager';
 
 // Components - Smart
-export { LocationTableContainer } from './components/smart/LocationTableContainer';
+export { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer';
 
 // Components - Dumb
-export { LocationTable } from './components/dumb/LocationTable';
+export { LocationTable } from '@/features/locations/components/dumb/LocationTable';
 
 // Components - Modals
-export { CreateLocationModal } from './components/CreateLocationModal';
-export { EditLocationModal } from './components/EditLocationModal';
+export { CreateLocationModal } from '@/features/locations/components/CreateLocationModal';
+export { EditLocationModal } from '@/features/locations/components/EditLocationModal';
 
 // Services
 export {
@@ -25,4 +25,4 @@ export {
   updateLocation,
   deleteLocation,
   locationService,
-} from './services/location.service';
+} from '@/features/locations/services/location.service';

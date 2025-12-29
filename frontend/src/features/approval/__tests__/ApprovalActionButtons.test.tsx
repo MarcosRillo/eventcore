@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ApprovalActionButtons } from '../components/dumb/ApprovalActionButtons'
+
+import { ApprovalActionButtons } from '@/features/approval/components/dumb/ApprovalActionButtons'
 import { Event } from '@/features/approval/types/approval.types'
 
 describe('ApprovalActionButtons', () => {

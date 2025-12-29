@@ -7,7 +7,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerEventForm } from '../OrganizerEventForm'
+
+import { OrganizerEventForm } from '@/features/organizer/components/dumb/OrganizerEventForm'
 import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
 
 describe('OrganizerEventForm', () => {

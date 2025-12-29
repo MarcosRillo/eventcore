@@ -1,6 +1,7 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ApprovalModal, ApprovalFormData, ApprovalActionOption } from '../ApprovalModal'
+import React from 'react'
+
+import { ApprovalModal, ApprovalFormData, ApprovalActionOption } from '@/features/entity-admin/components/dumb/ApprovalModal'
 import { Event, EventStatus, EventStatusObject, EVENT_STATUS } from '@/types/event.types'
 
 interface MockModalProps {

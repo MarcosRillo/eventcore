@@ -6,11 +6,12 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { RegistrationRequestForm } from '../RegistrationRequestForm'
+
+import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors
-} from '../../../types/registration-request.types'
+} from '@/features/registration-requests/types/registration-request.types'
 
 // Mock Next.js Image component
 jest.mock('next/image', () => ({

@@ -9,18 +9,24 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
+
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView';
-import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform';
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import type {
   BigCalendarEvent,
   InternalCalendarFilters,
 } from '@/features/internal-calendar/types/internal-calendar.types';
+import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform';
 
 export interface InternalCalendarViewContainerProps {
   filters?: InternalCalendarFilters;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.filters
+ */
 export function InternalCalendarViewContainer({
   filters = {},
 }: InternalCalendarViewContainerProps) {

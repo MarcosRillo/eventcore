@@ -1,7 +1,8 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import InvitationTableContainer from '../InvitationTableContainer';
-import invitationService from '../../../services/invitation.service';
-import type { Invitation } from '../../../types/invitation.types';
+
+import InvitationTableContainer from '@/features/invitations/components/smart/InvitationTableContainer';
+import invitationService from '@/features/invitations/services/invitation.service';
+import type { Invitation } from '@/features/invitations/types/invitation.types';
 
 jest.mock('../../../services/invitation.service');
 

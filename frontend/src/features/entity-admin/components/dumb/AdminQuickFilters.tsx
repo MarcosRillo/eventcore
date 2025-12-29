@@ -5,8 +5,8 @@
  * Dumb component - receives data via props, no business logic.
  */
 
-import type { EventStatusCode } from '@/types/event.types';
 import { QUICK_FILTERS } from '@/features/entity-admin/types';
+import type { EventStatusCode } from '@/types/event.types';
 
 interface AdminQuickFiltersProps {
   activeFilter: EventStatusCode | null;

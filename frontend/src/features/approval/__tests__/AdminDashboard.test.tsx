@@ -6,9 +6,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { AdminDashboard } from '../components/dumb/AdminDashboard'
-import { Event } from '@/features/approval/types/approval.types'
+
 import { ToastProvider } from '@/components/ui/Toast'
+import { AdminDashboard } from '@/features/approval/components/dumb/AdminDashboard'
+import { Event } from '@/features/approval/types/approval.types'
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

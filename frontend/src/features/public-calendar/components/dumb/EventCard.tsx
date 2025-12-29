@@ -5,8 +5,9 @@
  * and featured badge. Uses Card and Badge UI components.
  */
 
-import type { KeyboardEvent } from 'react'
 import Image from 'next/image'
+import type { KeyboardEvent } from 'react'
+
 import { Badge } from '@/components/ui'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 

@@ -4,7 +4,7 @@
  */
 
 // Hooks
-export * from './hooks';
+export * from '@/features/appearance/hooks';
 
 // Services
-export * from './services';
+export * from '@/features/appearance/services';

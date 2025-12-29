@@ -5,9 +5,9 @@
  * with useEventActions hook for business logic.
  */
 
-import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { useEventActions } from '@/features/organizer/hooks/useEventActions'
 import { EventActionButtons } from '@/features/organizer/components/dumb/EventActionButtons'
+import { useEventActions } from '@/features/organizer/hooks/useEventActions'
+import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { DeleteConfirmModal, PublishConfirmModal } from '@/shared/components/modals'
 
 interface EventActionButtonsContainerProps {

@@ -6,15 +6,6 @@
 
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
-import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
-import {
-  getStatusConfig,
-  BADGE_BASE_CLASSES
-} from '@/features/events/constants';
 import {
   EyeIcon,
   PencilIcon,
@@ -27,6 +18,18 @@ import {
   CalendarIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useMemo, useState, useCallback } from 'react';
+
+import {
+  getStatusConfig,
+  BADGE_BASE_CLASSES
+} from '@/features/events/constants';
+import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
+import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types';
+
+
 
 // View mode types
 export type EventTableViewMode = 'admin' | 'organizer' | 'public';

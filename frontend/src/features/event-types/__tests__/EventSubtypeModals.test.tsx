@@ -7,11 +7,12 @@
  * Created: December 2, 2025
  */
 
-import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import CreateEventSubtypeModal from '../components/CreateEventSubtypeModal'
-import EditEventSubtypeModal from '../components/EditEventSubtypeModal'
-import * as eventSubtypeService from '../services/eventSubtype.service'
+import React from 'react'
+
+import CreateEventSubtypeModal from '@/features/event-types/components/CreateEventSubtypeModal'
+import EditEventSubtypeModal from '@/features/event-types/components/EditEventSubtypeModal'
+import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
 import type { EventSubtype } from '@/types/eventType.types'
 
 // Mock service

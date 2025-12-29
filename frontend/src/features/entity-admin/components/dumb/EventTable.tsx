@@ -6,10 +6,11 @@
 'use client';
 
 import React from 'react';
-import { Event, EventStatus, EventType } from '@/types/event.types';
-import { Permission } from '@/types/auth.types';
-import { Button, LoadingSpinner, ConfirmDialog } from '@/components/ui';
+
 import { PermissionGate } from '@/components/auth/PermissionGate';
+import { Button, LoadingSpinner, ConfirmDialog } from '@/components/ui';
+import { Permission } from '@/types/auth.types';
+import { Event, EventStatus, EventType } from '@/types/event.types';
 
 // View mode types
 export type EventTableViewMode = 'admin' | 'organizer' | 'public';

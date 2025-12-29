@@ -19,6 +19,9 @@ interface EventStatusBadgeProps {
  * Displays a colored badge for event status codes.
  * Used in the internal calendar to show event approval states.
  *
+ * @param root0
+ * @param root0.statusCode
+ * @param root0.className
  * @example
  * ```tsx
  * <EventStatusBadge statusCode="approved_internal" />

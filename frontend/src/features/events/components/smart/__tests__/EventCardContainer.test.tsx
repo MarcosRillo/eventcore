@@ -5,10 +5,11 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { EventCardContainer } from '../EventCardContainer'
+
+import { EventCardContainer } from '@/features/events/components/smart/EventCardContainer'
+import { useEventActions } from '@/features/events/hooks/useEventActions'
 import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic'
 import { useEventUrgency } from '@/features/events/hooks/useEventUrgency'
-import { useEventActions } from '@/features/events/hooks/useEventActions'
 import { Event, EventType, EventStatus } from '@/types/event.types'
 
 // Mock hooks

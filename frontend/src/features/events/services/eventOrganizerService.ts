@@ -5,6 +5,7 @@
  * Provides limited CRUD operations for organizers to manage only their own events.
  */
 
+import { OrganizerEventService } from '@/features/events/services/types';
 import apiClient from '@/services/apiClient';
 import {
   Event,
@@ -13,7 +14,6 @@ import {
   EventTemplate,
   EventMessage
 } from '@/types/event.types';
-import { OrganizerEventService } from './types';
 import { OrganizerEventFilters } from '@/types/filter.types';
 
 // ExtendedOrganizerEventFilters eliminated - consolidated into OrganizerEventFilters
@@ -57,6 +57,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 } = {
   /**
    * Get organizer's own events
+   * @param filters
    */
   async getMyEvents(filters: OrganizerEventFilters = {}): Promise<EventPagination> {
     const params = new URLSearchParams();
@@ -73,6 +74,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Get a single event owned by the organizer
+   * @param id
    */
   async getMyEvent(id: number): Promise<Event> {
     const response = await apiClient.get(`/organizer/events/${id}`);
@@ -81,6 +83,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Create a new event as organizer
+   * @param data
    */
   async createEvent(data: EventFormData): Promise<Event> {
     const payload = {
@@ -95,6 +98,8 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Update organizer's own event (only if not published)
+   * @param id
+   * @param data
    */
   async updateEvent(id: number, data: Partial<EventFormData>): Promise<Event> {
     const payload = {
@@ -108,6 +113,7 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Delete organizer's own event (only if draft or rejected)
+   * @param id
    */
   async deleteEvent(id: number): Promise<void> {
     await apiClient.delete(`/organizer/events/${id}`);
@@ -115,6 +121,8 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Duplicate organizer's own event
+   * @param id
+   * @param overrides
    */
   async duplicateEvent(id: number, overrides: Partial<EventFormData> = {}): Promise<Event> {
     const response = await apiClient.post(`/organizer/events/${id}/duplicate`, overrides);
@@ -123,6 +131,8 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Submit event for approval
+   * @param id
+   * @param comment
    */
   async submitForApproval(id: number, comment?: string): Promise<Event> {
     const response = await apiClient.post(`/organizer/events/${id}/submit`, { comment });
@@ -134,6 +144,8 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 
   /**
    * Save event as template
+   * @param id
+   * @param templateName
    */
   async saveAsTemplate(id: number, templateName: string): Promise<EventTemplate> {
     const response = await apiClient.post(`/organizer/events/${id}/save-template`, {
@@ -158,6 +170,9 @@ export const eventOrganizerService: Omit<OrganizerEventService, 'communication' 
 export const eventOrganizerCommunicationService = {
   /**
    * Send message to admin about an event
+   * @param eventId
+   * @param subject
+   * @param message
    */
   async sendMessageToAdmin(eventId: number, subject: string, message: string): Promise<void> {
     await apiClient.post(`/organizer/events/${eventId}/message`, {
@@ -168,6 +183,8 @@ export const eventOrganizerCommunicationService = {
 
   /**
    * Get messages/communications about events
+   * @param filters
+   * @param filters.event_id
    */
   async getEventMessages(filters?: { event_id?: number }): Promise<EventMessage[]> {
     const eventId = filters?.event_id;
@@ -180,6 +197,7 @@ export const eventOrganizerCommunicationService = {
 
   /**
    * Mark message as read
+   * @param messageId
    */
   async markMessageAsRead(messageId: number): Promise<void> {
     await apiClient.post(`/organizer/messages/${messageId}/read`);

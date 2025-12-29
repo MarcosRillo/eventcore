@@ -6,6 +6,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+
 import { usePermissions } from '@/hooks/usePermissions';
 import { UserRoleCode, Permission } from '@/types/auth.types';
 

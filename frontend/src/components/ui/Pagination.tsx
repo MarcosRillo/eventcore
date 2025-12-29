@@ -6,6 +6,7 @@
 'use client'
 
 import { Fragment } from 'react'
+
 import type { SimplePaginationProps, AdvancedPaginationProps } from '@/types/pagination.types'
 
 type PaginationProps = SimplePaginationProps | AdvancedPaginationProps

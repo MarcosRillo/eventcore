@@ -24,6 +24,17 @@ interface ErrorAlertProps {
   testId?: string;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.message
+ * @param root0.title
+ * @param root0.details
+ * @param root0.onDismiss
+ * @param root0.onRetry
+ * @param root0.retryText
+ * @param root0.testId
+ */
 export function ErrorAlert({
   message,
   title = 'Error',

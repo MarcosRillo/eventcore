@@ -53,6 +53,7 @@ export interface UpdateUserData {
 
 /**
  * Helper to check if user is active
+ * @param user
  */
 export const isUserActive = (user: User): boolean => {
   return user.status === 'active'
@@ -60,6 +61,7 @@ export const isUserActive = (user: User): boolean => {
 
 /**
  * Helper to get status badge color
+ * @param status
  */
 export const getUserStatusColor = (status: string): string => {
   switch (status) {
@@ -74,6 +76,7 @@ export const getUserStatusColor = (status: string): string => {
 
 /**
  * Helper to get status display name
+ * @param status
  */
 export const getUserStatusLabel = (status: string): string => {
   switch (status) {

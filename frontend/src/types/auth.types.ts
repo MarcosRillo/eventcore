@@ -6,7 +6,7 @@
  * Backend: database/seeders/UserRolesSeeder.php
  */
 
-import type { FormHook } from './generic-infrastructure.types';
+import type { FormHook } from '@/types/generic-infrastructure.types';
 
 /**
  * User role codes - MUST match backend user_roles.role_code

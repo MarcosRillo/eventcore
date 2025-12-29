@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { ShareButtons } from '../ShareButtons'
+
+import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons'
 
 // Mock window.open
 const mockOpen = jest.fn()

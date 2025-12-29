@@ -25,6 +25,7 @@ interface User {
 /**
  * Check if token is expired based on expires_at cookie
  * Uses a buffer of 30 seconds to prevent edge cases
+ * @param request
  */
 function isTokenExpired(request: NextRequest): boolean {
   const expiresAtStr = request.cookies.get('token_expires_at')?.value;
@@ -208,6 +209,10 @@ function getRoleCode(user: User): UserRoleCode | null {
   return user?.role?.role_code || null;
 }
 
+/**
+ *
+ * @param request
+ */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 

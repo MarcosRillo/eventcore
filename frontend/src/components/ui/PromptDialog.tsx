@@ -7,10 +7,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Modal from './Modal';
-import Button from './Button';
-import Input from './Input';
-import Textarea from './Textarea';
+
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
+import Textarea from '@/components/ui/Textarea';
 
 interface PromptDialogProps {
   isOpen: boolean;

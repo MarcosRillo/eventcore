@@ -6,13 +6,14 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
+
+import registrationRequestService from '@/features/registration-requests/services/registration-request.service'
 import {
   RegistrationRequest,
   RegistrationRequestDetail,
   RegistrationRequestStatus,
   DisplayStatusFilter,
-} from '../types/registration-request.types'
-import registrationRequestService from '../services/registration-request.service'
+} from '@/features/registration-requests/types/registration-request.types'
 
 interface UseRegistrationRequestsReturn {
   // Data

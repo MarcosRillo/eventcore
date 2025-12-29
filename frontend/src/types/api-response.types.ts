@@ -3,8 +3,8 @@
  * Standardized response interfaces for all API services
  */
 
-import { Event } from '@/types/event.types';
 import { User } from '@/types/auth.types';
+import { Event } from '@/types/event.types';
 
 /**
  * Core pagination interfaces - essential for API responses

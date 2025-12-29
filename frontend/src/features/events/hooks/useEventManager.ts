@@ -7,8 +7,13 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+
 import { useAuth } from '@/context/AuthContext';
+import {
+  getEventServiceForContext,
+  type EventServiceContext
+} from '@/features/events/services/event.service';
+import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useGenericModals } from '@/shared/hooks/useGenericModals';
 import {
@@ -18,10 +23,6 @@ import {
   EventStatistics,
   ApprovalStatistics
 } from '@/types/event.types';
-import {
-  getEventServiceForContext,
-  type EventServiceContext
-} from '@/features/events/services/event.service';
 
 // Extend base filters for events
 interface EventFiltersExtended extends EventFilters {
@@ -103,6 +104,10 @@ interface UseEventManagerOptions {
   autoDetectContext?: boolean;
 }
 
+/**
+ *
+ * @param options
+ */
 export function useEventManager(options: UseEventManagerOptions = {}): UseEventManagerReturn {
   
   // Initial filters

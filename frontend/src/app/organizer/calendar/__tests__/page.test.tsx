@@ -3,10 +3,12 @@
  * Tests page rendering and integration with InternalCalendarContainer
  */
 import { render, screen } from '@testing-library/react';
-import CalendarPage from '../page';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import { useRouter } from 'next/navigation';
+
 import { useAuth } from '@/context/AuthContext';
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
+
+import CalendarPage from '../page';
 
 // Mock the hooks
 jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');

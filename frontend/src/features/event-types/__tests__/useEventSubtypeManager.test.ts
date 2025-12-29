@@ -8,10 +8,11 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useEventSubtypeManager } from '../hooks/useEventSubtypeManager'
-import * as eventSubtypeService from '../services/eventSubtype.service'
-import * as eventTypeService from '../services/eventType.service'
+
 import { useAuth } from '@/context/AuthContext'
+import { useEventSubtypeManager } from '@/features/event-types/hooks/useEventSubtypeManager'
+import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import type { EventType, EventSubtype, EventSubtypePagination } from '@/types/eventType.types'
 
 // Mock dependencies

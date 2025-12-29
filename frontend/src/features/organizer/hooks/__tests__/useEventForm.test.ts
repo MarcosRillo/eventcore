@@ -3,13 +3,14 @@
  * Updated for 3NF schema (Nov 30, 2025)
  */
 
-import type { FormEvent } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useEventForm } from '../useEventForm'
-import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
-import * as locationService from '@/features/locations/services/location.service'
-import * as eventTypeService from '@/features/event-types/services/eventType.service'
+import type { FormEvent } from 'react'
+
 import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
+import * as locationService from '@/features/locations/services/location.service'
+import { useEventForm } from '@/features/organizer/hooks/useEventForm'
+import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 
 jest.mock('@/features/organizer/services/organizer-event.service')
 jest.mock('@/features/locations/services/location.service')

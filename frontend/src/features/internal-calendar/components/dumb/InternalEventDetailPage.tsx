@@ -7,17 +7,24 @@
 
 'use client';
 
-import Image from 'next/image';
 import { format } from 'date-fns';
-import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
-import { InternalShareButtons } from '@/features/internal-calendar/components/dumb/InternalShareButtons';
+import Image from 'next/image';
+
 import { EventStatusBadge } from '@/features/internal-calendar/components/dumb/EventStatusBadge';
+import { InternalShareButtons } from '@/features/internal-calendar/components/dumb/InternalShareButtons';
+import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 export interface InternalEventDetailPageProps {
   event: InternalCalendarEvent;
   onBack: () => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.event
+ * @param root0.onBack
+ */
 export function InternalEventDetailPage({
   event,
   onBack,

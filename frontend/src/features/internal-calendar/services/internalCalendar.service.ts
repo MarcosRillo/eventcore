@@ -1,9 +1,9 @@
-import apiClient from '@/services/apiClient';
 import type {
   InternalCalendarEvent,
   InternalCalendarFilters,
   InternalCalendarStatusCode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
+import apiClient from '@/services/apiClient';
 
 /**
  * Internal Calendar Service

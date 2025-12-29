@@ -5,7 +5,8 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { EventInfoPanel } from '../EventInfoPanel';
+
+import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
 import type { Event } from '@/types/event.types';
 
 describe('EventInfoPanel', () => {

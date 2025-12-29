@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
+
 import { adminEventService } from '@/features/approval/services/admin-event.service'
 import { EventsResponse } from '@/features/approval/types/approval.types'
 

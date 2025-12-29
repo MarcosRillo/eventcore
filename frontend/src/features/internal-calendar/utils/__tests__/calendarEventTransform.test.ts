@@ -5,13 +5,13 @@
  * Tests written FIRST following TDD methodology.
  */
 
-import {
-  transformToBigCalendarEvent,
-  transformToBigCalendarEvents,
-} from '../calendarEventTransform'
 import type {
   InternalCalendarEvent,
 } from '@/features/internal-calendar/types/internal-calendar.types'
+import {
+  transformToBigCalendarEvent,
+  transformToBigCalendarEvents,
+} from '@/features/internal-calendar/utils/calendarEventTransform'
 
 describe('calendarEventTransform', () => {
   describe('transformToBigCalendarEvent', () => {

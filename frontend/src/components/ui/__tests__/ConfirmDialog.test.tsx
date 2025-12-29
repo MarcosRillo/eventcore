@@ -5,7 +5,8 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import ConfirmDialog from '../ConfirmDialog'
+
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 describe('ConfirmDialog', () => {
   const defaultProps = {

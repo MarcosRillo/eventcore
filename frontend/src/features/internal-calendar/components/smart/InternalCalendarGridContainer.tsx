@@ -9,14 +9,20 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
+
 import { InternalCalendar } from '@/features/internal-calendar/components/dumb/InternalCalendar';
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import type { InternalCalendarFilters } from '@/features/internal-calendar/types/internal-calendar.types';
 
 export interface InternalCalendarGridContainerProps {
   filters?: InternalCalendarFilters;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.filters
+ */
 export function InternalCalendarGridContainer({
   filters = {},
 }: InternalCalendarGridContainerProps) {

@@ -75,6 +75,9 @@ export const getTokenExpiresAt = (): string | null => {
 
 /**
  * Store all tokens in localStorage
+ * @param accessToken
+ * @param refreshToken
+ * @param expiresAt
  */
 export const storeTokens = (
   accessToken: string,

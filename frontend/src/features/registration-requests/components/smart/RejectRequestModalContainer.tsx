@@ -16,6 +16,15 @@ interface RejectRequestModalContainerProps {
   onConfirm: (reason: string) => void
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.requestName
+ * @param root0.onClose
+ * @param root0.onConfirm
+ */
 export function RejectRequestModalContainer({
   isOpen,
   loading,

@@ -3,6 +3,7 @@
  * Tests for permission-based, role-based, and resource-based access control
  */
 import { render, screen } from '@testing-library/react';
+
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePermissions } from '@/hooks/usePermissions';
 

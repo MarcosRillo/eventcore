@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
-import { useModal, useMultiModal, useModalWithData } from '../useModal'
+
+import { useModal, useMultiModal, useModalWithData } from '@/hooks/useModal'
 import { ModalId } from '@/types/modal.types'
 
 describe('useModal', () => {

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Invitation, AssignableRole, SendInvitationData } from '../types/invitation.types'
-import invitationService from '../services/invitation.service'
+
+import invitationService from '@/features/invitations/services/invitation.service'
+import { Invitation, AssignableRole, SendInvitationData } from '@/features/invitations/types/invitation.types'
 
 interface UseInvitationsReturn {
   invitations: Invitation[]

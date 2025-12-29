@@ -24,6 +24,10 @@ interface UseRejectRequestReturn {
 
 /**
  * Hook to manage reject request modal state and validation
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.onConfirm
+ * @param root0.onClose
  */
 export const useRejectRequest = ({
   isOpen,

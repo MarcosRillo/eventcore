@@ -7,8 +7,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { usePublicEvents } from '@/features/public-calendar/hooks/usePublicEvents'
+
 import { PublicCalendar } from '@/features/public-calendar/components/dumb/PublicCalendar'
+import { usePublicEvents } from '@/features/public-calendar/hooks/usePublicEvents'
 
 export const PublicCalendarContainer = () => {
   const router = useRouter()

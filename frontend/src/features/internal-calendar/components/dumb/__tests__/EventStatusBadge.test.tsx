@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { EventStatusBadge } from '@/features/internal-calendar/components/dumb/EventStatusBadge';
 
 describe('EventStatusBadge', () => {

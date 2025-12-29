@@ -10,10 +10,11 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../AuthContext';
+import { ReactNode } from 'react';
+
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiClient';
 import { getAccessToken, storeTokens, clearTokens } from '@/services/tokenUtils';
-import { ReactNode } from 'react';
 
 // Mock next/navigation
 const mockPush = jest.fn();

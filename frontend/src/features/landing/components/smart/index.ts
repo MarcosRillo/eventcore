@@ -2,4 +2,4 @@
  * Landing Smart Components - Barrel Export
  */
 
-export { LandingContainer } from './LandingContainer'
+export { LandingContainer } from '@/features/landing/components/smart/LandingContainer'

@@ -4,8 +4,8 @@
  * Displays events in a table format with organizer information.
  */
 
+import { ApprovalActionButtons } from '@/features/approval/components/dumb/ApprovalActionButtons'
 import { Event } from '@/features/approval/types/approval.types'
-import { ApprovalActionButtons } from './ApprovalActionButtons'
 
 interface AdminEventListProps {
   events: Event[]

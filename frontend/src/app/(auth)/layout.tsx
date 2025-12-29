@@ -4,8 +4,9 @@
  * Includes PublicHeader and Footer for consistent navigation
  */
 
-import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
+
 import { PublicHeader, Footer } from '@/features/landing/components/dumb'
 
 export const metadata: Metadata = {

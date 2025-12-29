@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+
+import userService from '@/features/users/services/user.service'
 import type {
   User,
   UserFilters,
   UpdateUserData,
   PaginationMeta,
-} from '../types/user.types'
-import userService from '../services/user.service'
+} from '@/features/users/types/user.types'
 
 interface UseUserManagerReturn {
   users: User[]

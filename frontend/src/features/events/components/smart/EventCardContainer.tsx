@@ -5,14 +5,15 @@
 
 'use client';
 
-import React from 'react';
-import { Event } from '@/types/event.types';
-import { EventCard } from '@/features/events/components/dumb/EventCard';
-import { Button } from '@/components/ui';
 import { ClockIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+
+import { Button } from '@/components/ui';
+import { EventCard } from '@/features/events/components/dumb/EventCard';
+import { useEventActions } from '@/features/events/hooks/useEventActions';
 import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic';
 import { useEventUrgency } from '@/features/events/hooks/useEventUrgency';
-import { useEventActions } from '@/features/events/hooks/useEventActions';
+import { Event } from '@/types/event.types';
 
 interface EventCardContainerProps {
   event: Event;

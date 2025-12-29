@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { InternalCalendarFilterBar } from '../InternalCalendarFilterBar';
+
+import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
 import type { EventType } from '@/types/eventType.types';
 
 describe('InternalCalendarFilterBar', () => {

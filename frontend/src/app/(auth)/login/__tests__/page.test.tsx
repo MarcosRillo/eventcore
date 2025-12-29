@@ -3,9 +3,11 @@
  * Tests for rendering, interactions, and error handling
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import LoginPage from '../page';
+
 import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/features/auth';
+
+import LoginPage from '../page';
 
 // Mock dependencies
 jest.mock('@/context/AuthContext');

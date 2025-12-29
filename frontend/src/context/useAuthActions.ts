@@ -3,9 +3,10 @@
  * All authentication business logic and side effects
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+
 import apiClient from '@/services/apiClient';
 import {
   getAccessToken,

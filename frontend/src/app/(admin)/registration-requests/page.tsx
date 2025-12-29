@@ -6,8 +6,12 @@
  */
 
 import { ClipboardList } from 'lucide-react'
+
 import { RegistrationRequestsContainer } from '@/features/registration-requests/components/smart/RegistrationRequestsContainer'
 
+/**
+ *
+ */
 export default function RegistrationRequestsPage() {
   return (
     <div className="min-h-screen bg-neutral-50">

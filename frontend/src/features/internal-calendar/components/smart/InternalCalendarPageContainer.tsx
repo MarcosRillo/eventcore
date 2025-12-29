@@ -10,18 +10,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+import { useAuth } from '@/context/AuthContext';
+import { getEventTypes } from '@/features/event-types/services/eventType.service';
+import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
 import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
-import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
+import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
 import type {
   ViewMode,
   InternalCalendarFilters,
 } from '@/features/internal-calendar/types/internal-calendar.types';
-import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
-import { useAuth } from '@/context/AuthContext';
-import { getEventTypes } from '@/features/event-types/services/eventType.service';
 import type { EventType } from '@/types/eventType.types';
 
+/**
+ *
+ */
 export function InternalCalendarPageContainer() {
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [filters, setFilters] = useState<InternalCalendarFilters>({});

@@ -6,13 +6,16 @@
 
 'use client';
 
-import { useAppearanceForm } from '@/features/appearance/hooks/useAppearanceForm';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { ColorPicker } from '@/components/ui/ColorPicker';
-import SafeImage from '@/components/ui/SafeImage';
 import { LoadingSpinner } from '@/components/ui';
+import Button from '@/components/ui/Button';
+import { ColorPicker } from '@/components/ui/ColorPicker';
+import Input from '@/components/ui/Input';
+import SafeImage from '@/components/ui/SafeImage';
+import { useAppearanceForm } from '@/features/appearance/hooks/useAppearanceForm';
 
+/**
+ *
+ */
 export default function AppearancePage() {
   const {
     data,

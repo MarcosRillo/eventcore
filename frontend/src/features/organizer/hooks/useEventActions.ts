@@ -7,11 +7,12 @@
 
 'use client';
 
-import { useState, useRef } from 'react'
 import { AxiosError } from 'axios'
+import { useState, useRef } from 'react'
+
+import { useToast } from '@/components/ui/Toast'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { SubmitEventError } from '@/features/organizer/types/event.types'
-import { useToast } from '@/components/ui/Toast'
 
 interface UseEventActionsReturn {
   loading: boolean

@@ -2,9 +2,10 @@
  * Reset Password Hook
  * Manages reset password form state, token validation, and submission
  */
-import { useState, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { AxiosError } from 'axios';
+import { useSearchParams } from 'next/navigation';
+import { useState, useCallback, useEffect } from 'react';
+
 import { validateResetToken, resetPassword } from '@/services/authService';
 
 interface PasswordErrors {
@@ -43,6 +44,7 @@ interface PasswordRequirement {
 
 /**
  * Password validation requirements
+ * @param password
  */
 const getPasswordRequirements = (password: string): PasswordRequirement[] => [
   { label: 'Mínimo 8 caracteres', met: password.length >= 8 },
@@ -53,6 +55,7 @@ const getPasswordRequirements = (password: string): PasswordRequirement[] => [
 
 /**
  * Validates password meets all requirements
+ * @param password
  */
 const isPasswordValid = (password: string): boolean => {
   return getPasswordRequirements(password).every(req => req.met);

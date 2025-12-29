@@ -4,6 +4,8 @@
  */
 
 import axios from 'axios';
+
+import { getRefreshToken } from '@/services/tokenUtils';
 import {
   User,
   LoginCredentials,
@@ -16,7 +18,6 @@ import {
   ValidateTokenResponse,
   ResetPasswordResponse,
 } from '@/types/auth.types';
-import { getRefreshToken } from '@/services/tokenUtils';
 
 // Base API URL - used for refresh endpoint (which doesn't need auth)
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -24,6 +25,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 /**
  * Login with email and password
  * Returns access_token, refresh_token, expires_at, and user
+ * @param credentials
  */
 export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
   // Import apiClient dynamically to avoid circular dependency
@@ -99,6 +101,7 @@ export const validateToken = async (): Promise<boolean> => {
 /**
  * Request password reset link
  * Always returns success to prevent email enumeration
+ * @param data
  */
 export const forgotPassword = async (data: ForgotPasswordData): Promise<PasswordResetResponse> => {
   const { default: apiClient } = await import('@/services/apiClient');
@@ -108,6 +111,7 @@ export const forgotPassword = async (data: ForgotPasswordData): Promise<Password
 
 /**
  * Validate reset token before showing reset form
+ * @param data
  */
 export const validateResetToken = async (data: ValidateResetTokenData): Promise<ValidateTokenResponse> => {
   const { default: apiClient } = await import('@/services/apiClient');
@@ -117,6 +121,7 @@ export const validateResetToken = async (data: ValidateResetTokenData): Promise<
 
 /**
  * Reset password with token
+ * @param data
  */
 export const resetPassword = async (data: ResetPasswordData): Promise<ResetPasswordResponse> => {
   const { default: apiClient } = await import('@/services/apiClient');

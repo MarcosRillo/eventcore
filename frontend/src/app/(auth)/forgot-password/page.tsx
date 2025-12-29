@@ -6,8 +6,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useForgotPassword } from '@/features/auth';
+
 import { Button, Input } from '@/components/ui';
+import { useForgotPassword } from '@/features/auth';
 
 const ForgotPasswordPage = () => {
   const {

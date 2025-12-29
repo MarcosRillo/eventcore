@@ -15,6 +15,7 @@ import {
   StarIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
+
 import type { Event } from '@/types/event.types';
 
 interface EventInfoPanelProps {
@@ -23,6 +24,7 @@ interface EventInfoPanelProps {
 
 /**
  * Format date for display
+ * @param dateString
  */
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -36,6 +38,7 @@ const formatDate = (dateString: string): string => {
 
 /**
  * Format time for display
+ * @param dateString
  */
 const formatTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -47,6 +50,8 @@ const formatTime = (dateString: string): string => {
 
 /**
  * Calculate duration in hours
+ * @param start
+ * @param end
  */
 const calculateDuration = (start: string, end: string): string => {
   const startDate = new Date(start);

@@ -11,7 +11,7 @@ import {
   getStatusColors,
   getStatusLabel,
   isValidInternalCalendarStatus,
-} from '../eventStatusHelpers';
+} from '@/features/internal-calendar/utils/eventStatusHelpers';
 
 describe('eventStatusHelpers', () => {
   describe('getStatusColors', () => {

@@ -6,8 +6,9 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { InternalShareButtons } from '../InternalShareButtons';
+
 import { useToast } from '@/components/ui';
+import { InternalShareButtons } from '@/features/internal-calendar/components/dumb/InternalShareButtons';
 
 // Mock useToast
 jest.mock('@/components/ui', () => ({

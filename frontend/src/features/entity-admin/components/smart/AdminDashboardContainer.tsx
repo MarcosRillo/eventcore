@@ -8,18 +8,19 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+
+import { Pagination } from '@/components/ui';
+import { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters';
+import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid';
+import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
+import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline';
+import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
+import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
+import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
+import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
 import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
-import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid';
-import { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters';
-import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
-import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
-import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
-import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
-import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
-import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline';
-import { Pagination } from '@/components/ui';
 import type { Event, EventStatusCode } from '@/types/event.types';
 
 export const AdminDashboardContainer = () => {

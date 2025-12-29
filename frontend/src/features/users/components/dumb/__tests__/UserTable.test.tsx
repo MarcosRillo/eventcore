@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import UserTable from '../UserTable';
-import type { User, PaginationMeta } from '../../../types/user.types';
+
+import UserTable from '@/features/users/components/dumb/UserTable';
+import type { User, PaginationMeta } from '@/features/users/types/user.types';
 
 // Mock GenericTable to test UserTable behavior
 jest.mock('@/shared/components/tables', () => ({

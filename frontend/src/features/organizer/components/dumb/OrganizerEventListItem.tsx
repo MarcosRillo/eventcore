@@ -1,7 +1,7 @@
-import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
+import { OrganizerEvent } from '@/features/organizer/types/event.types'
 
 interface OrganizerEventListItemProps {
   event: OrganizerEvent

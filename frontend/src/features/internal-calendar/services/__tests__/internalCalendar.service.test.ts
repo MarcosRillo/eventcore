@@ -1,6 +1,6 @@
 import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
-import apiClient from '@/services/apiClient';
 import type { InternalCalendarFilters } from '@/features/internal-calendar/types/internal-calendar.types';
+import apiClient from '@/services/apiClient';
 
 // Mock the API client
 jest.mock('@/services/apiClient');

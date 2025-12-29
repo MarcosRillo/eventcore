@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerEventListItem } from '../OrganizerEventListItem'
+
+import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 
 // Mock EventActionButtonsContainer to simplify testing

@@ -1,8 +1,8 @@
 'use client'
 
 import { EventFormData, EventFormErrors, AsynchronousDate } from '@/features/organizer/types/event.types'
-import { EventType, EventSubtype } from '@/types/eventType.types'
 import { AsyncSearchableMultiSelect, SelectOption } from '@/shared/components/form'
+import { EventType, EventSubtype } from '@/types/eventType.types'
 
 interface OrganizerEventFormProps {
   formData: EventFormData

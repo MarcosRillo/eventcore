@@ -4,7 +4,8 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { SearchableMultiSelect } from '../SearchableMultiSelect'
+
+import { SearchableMultiSelect } from '@/components/ui/SearchableMultiSelect'
 
 // Mock ResizeObserver for Headless UI
 global.ResizeObserver = class ResizeObserver {

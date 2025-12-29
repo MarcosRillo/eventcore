@@ -3,9 +3,10 @@
  * Dumb component that renders react-big-calendar with events
  */
 
-import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
+
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/features/public-calendar/styles/calendar.css'
 import { CalendarEvent, CalendarView as CalendarViewType } from '@/features/public-calendar/types/public-calendar.types'

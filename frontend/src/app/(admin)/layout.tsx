@@ -6,11 +6,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect } from 'react';
+
 import { Header, Sidebar } from '@/components/layout';
 import { LoadingSpinner } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

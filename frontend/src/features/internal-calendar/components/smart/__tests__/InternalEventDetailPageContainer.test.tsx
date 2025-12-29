@@ -5,9 +5,10 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { InternalEventDetailPageContainer } from '../InternalEventDetailPageContainer';
-import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
 import { useRouter } from 'next/navigation';
+
+import { InternalEventDetailPageContainer } from '@/features/internal-calendar/components/smart/InternalEventDetailPageContainer';
+import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 // Mock dependencies

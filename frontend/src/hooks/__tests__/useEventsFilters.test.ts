@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
-import { useEventsFilters } from '../useEventsFilters'
+
 import { DashboardTab } from '@/features/events/components/EventsFilterTabs'
+import { useEventsFilters } from '@/hooks/useEventsFilters'
 
 describe('useEventsFilters', () => {
   describe('Initialization', () => {

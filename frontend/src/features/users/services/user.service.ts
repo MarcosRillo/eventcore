@@ -3,7 +3,6 @@
  * API service functions for user management
  */
 
-import apiClient from '@/services/apiClient'
 import type {
   User,
   UserFilters,
@@ -11,10 +10,12 @@ import type {
   UserResponse,
   UpdateUserData,
   PaginationMeta,
-} from '../types/user.types'
+} from '@/features/users/types/user.types'
+import apiClient from '@/services/apiClient'
 
 /**
  * Fetch all entity_staff users with optional filters
+ * @param filters
  */
 export const getUsers = async (
   filters?: UserFilters
@@ -46,6 +47,7 @@ export const getUsers = async (
 
 /**
  * Fetch a single user by ID
+ * @param id
  */
 export const getUser = async (id: number): Promise<User> => {
   const response = await apiClient.get<UserResponse>(`/users/${id}`)
@@ -54,6 +56,8 @@ export const getUser = async (id: number): Promise<User> => {
 
 /**
  * Update user profile (name, email)
+ * @param id
+ * @param data
  */
 export const updateUser = async (
   id: number,
@@ -65,6 +69,7 @@ export const updateUser = async (
 
 /**
  * Suspend a user
+ * @param id
  */
 export const suspendUser = async (id: number): Promise<User> => {
   const response = await apiClient.patch<UserResponse>(`/users/${id}/suspend`)
@@ -73,6 +78,7 @@ export const suspendUser = async (id: number): Promise<User> => {
 
 /**
  * Unsuspend a user
+ * @param id
  */
 export const unsuspendUser = async (id: number): Promise<User> => {
   const response = await apiClient.patch<UserResponse>(`/users/${id}/unsuspend`)
@@ -81,6 +87,7 @@ export const unsuspendUser = async (id: number): Promise<User> => {
 
 /**
  * Delete a user (soft delete)
+ * @param id
  */
 export const deleteUser = async (id: number): Promise<void> => {
   await apiClient.delete(`/users/${id}`)

@@ -5,13 +5,13 @@
  * Tests written FIRST following TDD methodology.
  */
 
+import type { EventType } from '@/features/internal-calendar/types/internal-calendar.types'
 import {
   getEventTypeColor,
   isValidHexColor,
   getContrastTextColor,
   DEFAULT_EVENT_COLOR,
-} from '../eventTypeColorMapping'
-import type { EventType } from '@/features/internal-calendar/types/internal-calendar.types'
+} from '@/features/internal-calendar/utils/eventTypeColorMapping'
 
 describe('eventTypeColorMapping', () => {
   describe('getEventTypeColor', () => {

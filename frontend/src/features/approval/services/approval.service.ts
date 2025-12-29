@@ -5,8 +5,8 @@
  * Synchronized with backend ApprovalController (3NF schema)
  */
 
-import apiClient from '@/services/apiClient'
 import { Event } from '@/features/approval/types/approval.types'
+import apiClient from '@/services/apiClient'
 
 export interface ApproveOptions {
   comments?: string

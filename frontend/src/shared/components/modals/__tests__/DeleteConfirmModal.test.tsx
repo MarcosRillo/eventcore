@@ -1,6 +1,7 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { DeleteConfirmModal } from '../DeleteConfirmModal'
+import React from 'react'
+
+import { DeleteConfirmModal } from '@/shared/components/modals/DeleteConfirmModal'
 
 interface MockModalProps {
   isOpen: boolean

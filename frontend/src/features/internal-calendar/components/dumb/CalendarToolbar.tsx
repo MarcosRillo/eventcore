@@ -19,6 +19,11 @@ export type CalendarToolbarProps = ToolbarProps<object, object>
  * Custom toolbar for react-big-calendar with navigation and view switching.
  *
  * @param props - CalendarToolbar props
+ * @param props.label
+ * @param props.onNavigate
+ * @param props.onView
+ * @param props.view
+ * @param props.views
  * @returns React component
  */
 export function CalendarToolbar({

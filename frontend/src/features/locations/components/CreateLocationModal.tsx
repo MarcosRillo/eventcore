@@ -5,9 +5,9 @@
 
 'use client';
 
+import { FormModal, FormSubmitHandler, FormValidator, Input, Textarea } from '@/components/ui';
 import { createLocation } from '@/features/locations/services/location.service';
 import { LocationFormData, LocationPayload } from '@/types/location.types';
-import { FormModal, FormSubmitHandler, FormValidator, Input, Textarea } from '@/components/ui';
 
 interface CreateLocationModalProps {
   isOpen: boolean;
@@ -43,6 +43,14 @@ const locationValidator: FormValidator<LocationFormData> = (data): string[] => {
   return errors;
 };
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.onClose
+ * @param root0.onSuccess
+ * @param root0.onLocationCreated
+ */
 export function CreateLocationModal({
   isOpen,
   onClose,

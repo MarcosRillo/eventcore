@@ -1,5 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useCalendarEvents } from '../useCalendarEvents'
+
+import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   PublicEvent,

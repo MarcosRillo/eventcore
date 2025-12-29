@@ -6,12 +6,13 @@
  */
 
 import { useState, useCallback } from 'react'
-import { createRegistrationRequest } from '../services/registration-request.service'
+
+import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
   initialFormData,
-} from '../types/registration-request.types'
+} from '@/features/registration-requests/types/registration-request.types'
 
 interface UseRegistrationRequestReturn {
   // Form state
@@ -29,6 +30,7 @@ interface UseRegistrationRequestReturn {
 
 /**
  * Validate CUIT format (XX-XXXXXXXX-X)
+ * @param cuit
  */
 const isValidCuit = (cuit: string): boolean => {
   const cuitRegex = /^\d{2}-\d{8}-\d{1}$/
@@ -37,6 +39,7 @@ const isValidCuit = (cuit: string): boolean => {
 
 /**
  * Validate email format
+ * @param email
  */
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -45,6 +48,7 @@ const isValidEmail = (email: string): boolean => {
 
 /**
  * Validate file size (max 2MB)
+ * @param file
  */
 const isValidFileSize = (file: File | null): boolean => {
   if (!file) return true
@@ -53,6 +57,7 @@ const isValidFileSize = (file: File | null): boolean => {
 
 /**
  * Validate file type (image only)
+ * @param file
  */
 const isValidImageType = (file: File | null): boolean => {
   if (!file) return true

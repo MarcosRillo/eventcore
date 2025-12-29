@@ -6,16 +6,20 @@
 
 'use client';
 
-import { useState } from 'react';
 import { PlusIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon } from '@heroicons/react/24/solid';
-import { useLocationManager } from '@/features/locations/hooks/useLocationManager';
-import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer';
+import { useState } from 'react';
+
+import { Button, Input, LoadingSpinner } from '@/components/ui';
 import { CreateLocationModal } from '@/features/locations/components/CreateLocationModal';
 import { EditLocationModal } from '@/features/locations/components/EditLocationModal';
-import { Button, Input, LoadingSpinner } from '@/components/ui';
+import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer';
+import { useLocationManager } from '@/features/locations/hooks/useLocationManager';
 import { Location } from '@/types/location.types';
 
+/**
+ *
+ */
 export default function LocationsPage() {
   const {
     locations,

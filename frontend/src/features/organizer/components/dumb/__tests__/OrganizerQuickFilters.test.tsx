@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerQuickFilters } from '../OrganizerQuickFilters'
+
+import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
 
 describe('OrganizerQuickFilters', () => {
   const mockOnFilterChange = jest.fn()

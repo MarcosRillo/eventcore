@@ -9,5 +9,5 @@
  * Note: Services (approvalService, eventAdminService) are in @/features/events/services
  */
 
-export * from './components'
-export * from './hooks'
+export * from '@/features/entity-admin/components'
+export * from '@/features/entity-admin/hooks'

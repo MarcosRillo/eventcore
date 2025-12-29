@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
-import { useEventCardLogic } from '../useEventCardLogic'
+
+import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic'
 import { Event, EventStatus, EventStatusCode } from '@/types/event.types'
 
 // Base mock event structure

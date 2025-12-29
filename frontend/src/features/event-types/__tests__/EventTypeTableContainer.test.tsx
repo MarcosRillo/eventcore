@@ -7,11 +7,12 @@
  * Created: December 2, 2025
  */
 
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { EventTypeTableContainer } from '../components/smart/EventTypeTableContainer'
-import type { EventType } from '@/types/eventType.types'
+import React from 'react'
+
+import { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer'
 import type { PaginationMeta } from '@/types/api-response.types'
+import type { EventType } from '@/types/eventType.types'
 
 // Mock next/navigation
 const mockPush = jest.fn()

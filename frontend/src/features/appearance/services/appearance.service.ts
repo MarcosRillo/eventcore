@@ -21,6 +21,7 @@ export const getAppearanceSettings = async (): Promise<AppearanceResponse> => {
 
 /**
  * Updates appearance settings on the server
+ * @param data
  */
 export const updateAppearanceSettings = async (
   data: Partial<AppearanceFormData>

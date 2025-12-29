@@ -1,7 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useInvitations } from '../useInvitations'
-import invitationService from '../../services/invitation.service'
-import { Invitation } from '../../types/invitation.types'
+
+import { useInvitations } from '@/features/invitations/hooks/useInvitations'
+import invitationService from '@/features/invitations/services/invitation.service'
+import { Invitation } from '@/features/invitations/types/invitation.types'
 
 jest.mock('../../services/invitation.service')
 

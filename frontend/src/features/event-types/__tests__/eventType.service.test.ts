@@ -7,7 +7,6 @@
  * Created: December 2, 2025
  */
 
-import apiClient from '@/services/apiClient'
 import {
   getEventTypes,
   getEventType,
@@ -18,7 +17,8 @@ import {
   getActiveEventTypes,
   searchEventTypes,
   validateEventTypeData,
-} from '../services/eventType.service'
+} from '@/features/event-types/services/eventType.service'
+import apiClient from '@/services/apiClient'
 import type { EventType, EventTypePagination, CreateEventTypeData, UpdateEventTypeData } from '@/types/eventType.types'
 
 // Mock apiClient

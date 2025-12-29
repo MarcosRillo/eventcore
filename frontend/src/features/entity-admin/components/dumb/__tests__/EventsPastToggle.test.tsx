@@ -5,7 +5,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EventsPastToggle } from '../EventsPastToggle';
+
+import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
 
 describe('EventsPastToggle', () => {
   test('renders with unchecked state by default', () => {

@@ -1,10 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
 import { Button } from '@/components/ui'
 import UserTableContainer from '@/features/users/components/smart/UserTableContainer'
 
+/**
+ *
+ */
 export default function UsersPage() {
   const router = useRouter()
 

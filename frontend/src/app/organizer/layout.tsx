@@ -6,16 +6,22 @@
 
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
+
 import { OrganizerSidebar } from '@/components/organizer/OrganizerSidebar';
 import { LoadingSpinner } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
 
 interface OrganizerLayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.children
+ */
 export default function OrganizerLayout({ children }: OrganizerLayoutProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();

@@ -8,7 +8,8 @@
 'use client';
 
 import { render, screen } from '@testing-library/react';
-import { InternalCalendar } from '../InternalCalendar';
+
+import { InternalCalendar } from '@/features/internal-calendar/components/dumb/InternalCalendar';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 // Mock InternalEventCard

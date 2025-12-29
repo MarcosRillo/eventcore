@@ -8,16 +8,17 @@
 
 'use client';
 
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useMemo, useState, useCallback } from 'react';
-import { EventSubtype } from '@/types/eventType.types';
-import { PaginationMeta } from '@/types/api-response.types';
+
 import {
   GenericTable,
   TableColumnConfig,
   TableActionConfig,
   ConfirmDialogData,
 } from '@/shared/components/tables';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PaginationMeta } from '@/types/api-response.types';
+import { EventSubtype } from '@/types/eventType.types';
 
 // Re-export types for backward compatibility
 export type EventSubtypeColumnConfig = TableColumnConfig<EventSubtype>;

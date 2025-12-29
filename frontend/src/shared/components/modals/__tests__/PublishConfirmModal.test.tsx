@@ -1,6 +1,7 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { PublishConfirmModal } from '../PublishConfirmModal'
+import React from 'react'
+
+import { PublishConfirmModal } from '@/shared/components/modals/PublishConfirmModal'
 
 interface MockModalProps {
   isOpen: boolean

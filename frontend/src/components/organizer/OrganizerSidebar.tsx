@@ -5,13 +5,14 @@
 
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
   CalendarIcon,
   PlusCircleIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
 import { useAuth } from '@/context/AuthContext';
 
 const navigation = [
@@ -20,6 +21,9 @@ const navigation = [
   { name: 'Crear Evento', href: '/organizer/create', icon: PlusCircleIcon },
 ];
 
+/**
+ *
+ */
 export function OrganizerSidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();

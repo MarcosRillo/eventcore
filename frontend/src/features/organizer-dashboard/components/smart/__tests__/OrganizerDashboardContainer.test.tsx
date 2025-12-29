@@ -5,9 +5,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerDashboardContainer } from '../OrganizerDashboardContainer'
-import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
+
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
+import { OrganizerDashboardContainer } from '@/features/organizer-dashboard/components/smart/OrganizerDashboardContainer'
+import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
 
 jest.mock('@/features/organizer-dashboard/hooks/useOrganizerStats')
 jest.mock('@/features/organizer/hooks/useOrganizerEvents')

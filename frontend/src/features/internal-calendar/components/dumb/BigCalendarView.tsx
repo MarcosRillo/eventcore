@@ -8,14 +8,15 @@
 
 'use client'
 
-import { Calendar, dateFnsLocalizer, Views, type ToolbarProps } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Calendar, dateFnsLocalizer, Views, type ToolbarProps } from 'react-big-calendar'
+
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/features/internal-calendar/styles/calendar.css'
-import { CalendarToolbar } from './CalendarToolbar'
-import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
+import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
+import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 
 // Configure date-fns localizer with Spanish locale
 const localizer = dateFnsLocalizer({
@@ -41,6 +42,9 @@ export interface BigCalendarViewProps {
  * Renders a fully-featured calendar with event display and interaction.
  *
  * @param props - BigCalendarView props
+ * @param props.events
+ * @param props.loading
+ * @param props.onSelectEvent
  * @returns React component
  */
 export function BigCalendarView({

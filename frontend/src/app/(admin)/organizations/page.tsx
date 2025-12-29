@@ -1,6 +1,7 @@
 'use client'
 
 import { Building2 } from 'lucide-react'
+
 import OrganizationTableContainer from '@/features/organizations/components/smart/OrganizationTableContainer'
 
 const OrganizationsPage = () => {

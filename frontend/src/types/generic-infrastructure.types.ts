@@ -115,7 +115,7 @@ export type ApiResult<T> =
   | { success: false; error: string; details?: Record<string, string[]> };
 
 // Import required base type
-import type { PaginatedResponse } from './api-response.types';
+import type { PaginatedResponse } from '@/types/api-response.types';
 
 // Re-export for convenience
 export type { PaginatedResponse };

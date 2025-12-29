@@ -9,9 +9,9 @@
 
 'use client';
 
-import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
-import { InternalEventCard } from '@/features/internal-calendar/components/dumb/InternalEventCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { InternalEventCard } from '@/features/internal-calendar/components/dumb/InternalEventCard';
+import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 interface InternalCalendarProps {
   events: InternalCalendarEvent[];
@@ -20,6 +20,14 @@ interface InternalCalendarProps {
   onEventClick: (eventId: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.events
+ * @param root0.loading
+ * @param root0.error
+ * @param root0.onEventClick
+ */
 export function InternalCalendar({
   events,
   loading,

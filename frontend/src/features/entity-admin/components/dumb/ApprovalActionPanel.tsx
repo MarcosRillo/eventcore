@@ -6,9 +6,10 @@
  */
 
 import { CheckCircleIcon, XCircleIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+
 import type { ApprovalAction } from '@/features/entity-admin/types';
-import type { EventStatusCode } from '@/types/event.types';
 import { ACTION_CONFIG, MIN_COMMENT_LENGTH, MAX_COMMENT_LENGTH } from '@/features/entity-admin/types';
+import type { EventStatusCode } from '@/types/event.types';
 import { EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from '@/types/event.types';
 
 interface ApprovalActionPanelProps {

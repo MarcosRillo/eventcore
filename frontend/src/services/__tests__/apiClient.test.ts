@@ -4,7 +4,7 @@ import apiClient, {
   removeAuthToken,
   getAuthToken,
   isAuthenticated,
-} from '../apiClient'
+} from '@/services/apiClient'
 
 // Mock localStorage
 const localStorageMock = (() => {

@@ -4,8 +4,8 @@
  * Displays action buttons based on event status.
  */
 
-import { Event } from '@/features/approval/types/approval.types'
 import Button from '@/components/ui/Button'
+import { Event } from '@/features/approval/types/approval.types'
 
 interface ApprovalActionButtonsProps {
   event: Event

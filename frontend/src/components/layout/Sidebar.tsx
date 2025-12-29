@@ -1,8 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { usePermissions } from '@/hooks/usePermissions';
 import {
   HomeIcon,
   CalendarIcon,
@@ -17,6 +14,10 @@ import {
   PaintBrushIcon,
   ChevronDoubleLeftIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface SidebarItem {
   name: string;

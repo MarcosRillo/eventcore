@@ -12,7 +12,9 @@
  */
 
 import { AxiosResponse, AxiosError } from 'axios';
+
 import apiClient from '@/services/apiClient';
+import { ApiResponse, ApiError } from '@/types/api-response.types';
 import {
   EventSubtype,
   EventSubtypePagination,
@@ -20,11 +22,12 @@ import {
   UpdateEventSubtypeData,
   EventSubtypeQueryParams,
 } from '@/types/eventType.types';
-import { ApiResponse, ApiError } from '@/types/api-response.types';
 
 /**
  * Fetch paginated event subtypes for a specific event type
  * Returns Laravel Resource Collection with pagination metadata
+ * @param eventTypeId
+ * @param params
  */
 export const getEventSubtypes = async (
   eventTypeId: number,
@@ -47,6 +50,8 @@ export const getEventSubtypes = async (
 /**
  * Get a single event subtype by ID
  * Returns EventSubtype data directly
+ * @param eventTypeId
+ * @param id
  */
 export const getEventSubtype = async (
   eventTypeId: number,
@@ -61,6 +66,8 @@ export const getEventSubtype = async (
 /**
  * Create a new event subtype
  * Returns ApiResponse<EventSubtype> wrapper structure
+ * @param eventTypeId
+ * @param subtypeData
  */
 export const createEventSubtype = async (
   eventTypeId: number,
@@ -81,6 +88,9 @@ export const createEventSubtype = async (
 /**
  * Update an existing event subtype
  * Returns ApiResponse<EventSubtype> wrapper structure
+ * @param eventTypeId
+ * @param id
+ * @param subtypeData
  */
 export const updateEventSubtype = async (
   eventTypeId: number,
@@ -101,6 +111,8 @@ export const updateEventSubtype = async (
 /**
  * Delete an event subtype
  * Returns success message only
+ * @param eventTypeId
+ * @param id
  */
 export const deleteEventSubtype = async (
   eventTypeId: number,
@@ -135,6 +147,8 @@ export const deleteEventSubtype = async (
 /**
  * Toggle event subtype active status
  * Returns ApiResponse<EventSubtype> wrapper structure
+ * @param eventTypeId
+ * @param id
  */
 export const toggleEventSubtypeStatus = async (
   eventTypeId: number,
@@ -149,6 +163,7 @@ export const toggleEventSubtypeStatus = async (
 /**
  * Get active subtypes for a specific event type (useful for dropdowns/selects)
  * Returns array of EventSubtype
+ * @param eventTypeId
  */
 export const getActiveEventSubtypes = async (
   eventTypeId: number
@@ -167,6 +182,9 @@ export const getActiveEventSubtypes = async (
 /**
  * Search event subtypes by name within a specific event type
  * Convenience method using getEventSubtypes with search parameter
+ * @param eventTypeId
+ * @param query
+ * @param page
  */
 export const searchEventSubtypes = async (
   eventTypeId: number,
@@ -183,6 +201,7 @@ export const searchEventSubtypes = async (
 /**
  * Validate event subtype data before submission
  * Client-side validation to reduce server round trips
+ * @param data
  */
 export const validateEventSubtypeData = (
   data: CreateEventSubtypeData | UpdateEventSubtypeData

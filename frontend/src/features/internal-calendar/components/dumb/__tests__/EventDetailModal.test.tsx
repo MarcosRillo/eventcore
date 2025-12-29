@@ -6,7 +6,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { EventDetailModal } from '../EventDetailModal'
+
+import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 
 // Mock the base Modal component

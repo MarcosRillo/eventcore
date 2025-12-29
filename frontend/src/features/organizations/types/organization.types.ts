@@ -82,6 +82,7 @@ export interface OrganizationResponse {
 
 /**
  * Helper to check if organization is active
+ * @param org
  */
 export const isOrganizationActive = (org: Organization): boolean => {
   return org.status?.status_code === 'active'
@@ -89,6 +90,7 @@ export const isOrganizationActive = (org: Organization): boolean => {
 
 /**
  * Helper to get status badge color
+ * @param statusCode
  */
 export const getStatusColor = (statusCode: string): string => {
   switch (statusCode) {

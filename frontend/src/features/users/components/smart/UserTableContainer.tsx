@@ -5,15 +5,19 @@
  * Connects the hook with the presentational components
  */
 
-import { useState, useCallback } from 'react';
-import { UserTable } from '../dumb/UserTable';
-import { UserEditModalContainer } from './UserEditModalContainer';
-import { ConfirmDialogData } from '@/shared/components/tables';
-import { useUserManager } from '../../hooks/useUserManager';
-import { Input, Button } from '@/components/ui';
-import type { User } from '../../types/user.types';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState, useCallback } from 'react';
 
+import { Input, Button } from '@/components/ui';
+import { UserTable } from '@/features/users/components/dumb/UserTable';
+import { UserEditModalContainer } from '@/features/users/components/smart/UserEditModalContainer';
+import { useUserManager } from '@/features/users/hooks/useUserManager';
+import type { User } from '@/features/users/types/user.types';
+import { ConfirmDialogData } from '@/shared/components/tables';
+
+/**
+ *
+ */
 export function UserTableContainer() {
   const {
     users,

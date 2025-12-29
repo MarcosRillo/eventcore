@@ -7,9 +7,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerDashboard } from '../components/dumb/OrganizerDashboard'
-import { OrganizerEvent } from '@/features/organizer/types/event.types'
+
 import { ToastProvider } from '@/components/ui/Toast'
+import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

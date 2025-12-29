@@ -3,9 +3,9 @@
  */
 
 // Legacy containers (to be deprecated after refactor)
-export { ApprovalModalContainer } from './ApprovalModalContainer'
-export { EventTableContainer } from './EventTableContainer'
+export { ApprovalModalContainer } from '@/features/entity-admin/components/smart/ApprovalModalContainer'
+export { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer'
 
 // New approval workflow containers
-export { EventManagementModalContainer } from './EventManagementModalContainer'
-export { AdminDashboardContainer } from './AdminDashboardContainer'
+export { EventManagementModalContainer } from '@/features/entity-admin/components/smart/EventManagementModalContainer'
+export { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer'

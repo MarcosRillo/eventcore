@@ -5,9 +5,10 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import { AdminDashboardContainer } from '../AdminDashboardContainer'
-import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
+
+import { AdminDashboardContainer } from '@/features/approval/components/smart/AdminDashboardContainer'
 import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
+import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
 import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
 
 jest.mock('@/features/approval/hooks/useAdminStats')

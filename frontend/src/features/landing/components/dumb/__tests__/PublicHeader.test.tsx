@@ -5,8 +5,9 @@
  */
 
 import { render, screen, fireEvent, within } from '@testing-library/react'
-import { PublicHeader } from '../PublicHeader'
 import { usePathname } from 'next/navigation'
+
+import { PublicHeader } from '@/features/landing/components/dumb/PublicHeader'
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({

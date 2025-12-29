@@ -1,5 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { usePaginatedData, BaseFilters } from '../usePaginatedData'
+
+import { usePaginatedData, BaseFilters } from '@/hooks/usePaginatedData'
 
 // Mock useDebounce
 jest.mock('../useDebounce', () => ({

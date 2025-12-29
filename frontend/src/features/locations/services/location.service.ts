@@ -10,6 +10,7 @@
  */
 
 import { AxiosResponse } from 'axios';
+
 import apiClient from '@/services/apiClient';
 import {
   Location,
@@ -21,6 +22,7 @@ import {
 /**
  * Fetch paginated locations
  * Returns Laravel Resource Collection with pagination metadata
+ * @param params
  */
 export const getLocations = async (params: LocationFilters = {}): Promise<LocationPagination> => {
   try {
@@ -67,6 +69,7 @@ export const getActiveLocations = async (): Promise<Location[]> => {
 
 /**
  * Fetch a single location by ID
+ * @param id
  */
 export const getLocation = async (id: number): Promise<Location> => {
   try {
@@ -81,6 +84,7 @@ export const getLocation = async (id: number): Promise<Location> => {
 /**
  * Create a new location
  * Uses LocationPayload which includes required fields + defaults
+ * @param locationData
  */
 export const createLocation = async (locationData: LocationPayload): Promise<Location> => {
   try {
@@ -95,6 +99,8 @@ export const createLocation = async (locationData: LocationPayload): Promise<Loc
 /**
  * Update an existing location
  * Uses LocationPayload for consistent field structure
+ * @param id
+ * @param locationData
  */
 export const updateLocation = async (id: number, locationData: LocationPayload): Promise<Location> => {
   try {
@@ -108,6 +114,7 @@ export const updateLocation = async (id: number, locationData: LocationPayload):
 
 /**
  * Delete a location
+ * @param id
  */
 export const deleteLocation = async (id: number): Promise<void> => {
   try {
@@ -120,6 +127,7 @@ export const deleteLocation = async (id: number): Promise<void> => {
 /**
  * Search locations by name (for autocomplete)
  * Returns simplified options for select components
+ * @param query
  */
 export const searchLocations = async (query: string): Promise<{ id: number; name: string }[]> => {
   try {

@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+
 import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
 
 export const metadata: Metadata = {
@@ -37,6 +38,9 @@ export const metadata: Metadata = {
   }
 }
 
+/**
+ *
+ */
 export default function HomePage() {
   return <LandingContainer />
 }

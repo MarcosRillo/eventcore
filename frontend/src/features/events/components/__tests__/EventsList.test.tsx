@@ -5,7 +5,8 @@
  */
 
 import { render, screen } from '@testing-library/react'
-import { EventsList } from '../EventsList'
+
+import { EventsList } from '@/features/events/components/EventsList'
 import { Event, EventType, EventStatus } from '@/types/event.types'
 
 // Helper to create complete Event objects

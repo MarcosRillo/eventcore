@@ -6,8 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useEventManagement } from '../useEventManagement';
-import { useApprovalManager } from '../useApprovalManager';
+
+import { useApprovalManager } from '@/features/entity-admin/hooks/useApprovalManager';
+import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import type { Event } from '@/types/event.types';
 
 // Mock useApprovalManager
