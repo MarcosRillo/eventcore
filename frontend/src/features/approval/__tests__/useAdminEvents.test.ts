@@ -2,6 +2,7 @@
  * Tests for useAdminEvents hook
  *
  * Tests fetching and managing admin events with filtering.
+ * Uses URL searchParams for filter state.
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react'
@@ -10,6 +11,19 @@ import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
 import { adminEventService } from '@/features/approval/services/admin-event.service'
 
 jest.mock('@/features/approval/services/admin-event.service')
+
+// Mock next/navigation
+const mockPush = jest.fn()
+const mockSearchParams = new URLSearchParams()
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+    prefetch: jest.fn()
+  }),
+  useSearchParams: () => mockSearchParams
+}))
 
 describe('useAdminEvents', () => {
   const mockEventsResponse = {
@@ -22,6 +36,7 @@ describe('useAdminEvents', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSearchParams.delete('status')
     ;(adminEventService.getAll as jest.Mock).mockResolvedValue(mockEventsResponse)
   })
 
@@ -100,7 +115,7 @@ describe('useAdminEvents', () => {
   })
 
   describe('handleStatusFilter', () => {
-    test('should update status filter and refetch events', async () => {
+    test('should update URL and fetch events with new filter', async () => {
       const { result } = renderHook(() => useAdminEvents())
 
       await waitFor(() => {
@@ -110,53 +125,43 @@ describe('useAdminEvents', () => {
       // Clear mock to track new calls
       ;(adminEventService.getAll as jest.Mock).mockClear()
 
-      act(() => {
+      await act(async () => {
         result.current.handleStatusFilter('pending_approval')
       })
 
-      expect(result.current.statusFilter).toBe('pending_approval')
+      // Should update URL
+      expect(mockPush).toHaveBeenCalledWith('?status=pending_approval')
 
-      // Wait for refetch triggered by filter change
+      // Should fetch with new filter
       await waitFor(() => {
-        expect(result.current.loading).toBe(false)
+        expect(adminEventService.getAll).toHaveBeenCalledWith({ status: 'pending_approval' })
       })
-
-      expect(adminEventService.getAll).toHaveBeenCalledWith({ status: 'pending_approval' })
     })
 
-    test('should handle null status filter (show all)', async () => {
+    test('should remove status param when filter is null', async () => {
       const { result } = renderHook(() => useAdminEvents())
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
-      // Set a filter first
-      act(() => {
-        result.current.handleStatusFilter('approved_internal')
-      })
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Clear mock and reset filter to null
       ;(adminEventService.getAll as jest.Mock).mockClear()
+      mockPush.mockClear()
 
-      act(() => {
+      await act(async () => {
         result.current.handleStatusFilter(null)
       })
 
-      expect(result.current.statusFilter).toBeNull()
+      // Should update URL without status param
+      expect(mockPush).toHaveBeenCalledWith('?')
 
+      // Should fetch without filter
       await waitFor(() => {
-        expect(result.current.loading).toBe(false)
+        expect(adminEventService.getAll).toHaveBeenCalledWith({ status: null })
       })
-
-      expect(adminEventService.getAll).toHaveBeenCalledWith({ status: null })
     })
 
-    test('should support various status filter values', async () => {
+    test('should fetch events for each filter value', async () => {
       const { result } = renderHook(() => useAdminEvents())
 
       await waitFor(() => {
@@ -166,15 +171,15 @@ describe('useAdminEvents', () => {
       const statuses = ['pending_approval', 'approved_internal', 'published', 'rejected']
 
       for (const status of statuses) {
-        act(() => {
+        ;(adminEventService.getAll as jest.Mock).mockClear()
+
+        await act(async () => {
           result.current.handleStatusFilter(status)
         })
 
         await waitFor(() => {
-          expect(result.current.loading).toBe(false)
+          expect(adminEventService.getAll).toHaveBeenCalledWith({ status })
         })
-
-        expect(result.current.statusFilter).toBe(status)
       }
     })
   })
@@ -255,24 +260,56 @@ describe('useAdminEvents', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      // Rapid filter changes
-      act(() => {
+      // Rapid filter changes - all should trigger URL updates
+      await act(async () => {
         result.current.handleStatusFilter('pending_approval')
       })
-      act(() => {
+      await act(async () => {
         result.current.handleStatusFilter('approved_internal')
       })
-      act(() => {
+      await act(async () => {
         result.current.handleStatusFilter('published')
       })
 
-      // Final filter should be the last one set
-      expect(result.current.statusFilter).toBe('published')
+      // URL should be updated for each filter
+      expect(mockPush).toHaveBeenCalledTimes(3)
+      expect(mockPush).toHaveBeenLastCalledWith('?status=published')
 
       // Wait for all fetches to complete
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
+    })
+  })
+
+  describe('initial data', () => {
+    test('should use initial events when provided', async () => {
+      const initialEvents = {
+        data: [{ id: 99, title: 'Initial Event', status: 'draft' }],
+        meta: { current_page: 1, total: 1 }
+      }
+
+      const { result } = renderHook(() =>
+        useAdminEvents({ initialEvents, initialStatusFilter: 'draft' })
+      )
+
+      // Should not be loading when initial data provided
+      expect(result.current.loading).toBe(false)
+      expect(result.current.events).toEqual(initialEvents)
+      expect(result.current.events.data[0].title).toBe('Initial Event')
+    })
+
+    test('should fetch when no initial data provided', async () => {
+      const { result } = renderHook(() => useAdminEvents())
+
+      // Should start loading
+      expect(result.current.loading).toBe(true)
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(adminEventService.getAll).toHaveBeenCalled()
     })
   })
 })

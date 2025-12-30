@@ -2,6 +2,7 @@
  * Admin Dashboard Container (Smart)
  *
  * Connects dashboard with data hooks, manages state, and handles approval modals.
+ * Accepts initial data from server-side fetch to avoid waterfall.
  */
 
 'use client'
@@ -11,11 +12,22 @@ import { AdminDashboard } from '@/features/approval/components/dumb/AdminDashboa
 import { useAdminEvents } from '@/features/approval/hooks/useAdminEvents'
 import { useAdminStats } from '@/features/approval/hooks/useAdminStats'
 import { useApprovalActions } from '@/features/approval/hooks/useApprovalActions'
+import { AdminStats, EventsResponse } from '@/features/approval/types/approval.types'
 import { PublishConfirmModal } from '@/shared/components/modals'
 
-export const AdminDashboardContainer = () => {
-  // Fetch stats and events
-  const { stats, refetch: refetchStats } = useAdminStats()
+interface AdminDashboardContainerProps {
+  initialStats?: AdminStats | null
+  initialEvents?: EventsResponse
+  initialStatusFilter?: string | null
+}
+
+export const AdminDashboardContainer = ({
+  initialStats,
+  initialEvents,
+  initialStatusFilter
+}: AdminDashboardContainerProps) => {
+  // Fetch stats and events (uses initial data if provided)
+  const { stats, refetch: refetchStats } = useAdminStats(initialStats)
   const {
     events,
     loading: eventsLoading,
@@ -23,7 +35,7 @@ export const AdminDashboardContainer = () => {
     statusFilter,
     handleStatusFilter,
     retry
-  } = useAdminEvents()
+  } = useAdminEvents({ initialEvents, initialStatusFilter })
 
   // Approval actions and modal state
   const {

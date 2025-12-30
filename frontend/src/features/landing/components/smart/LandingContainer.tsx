@@ -1,6 +1,6 @@
 /**
  * Landing Container
- * Smart component that connects useLandingData hook with landing components
+ * Smart component that renders landing page with server-fetched data
  */
 
 'use client'
@@ -13,11 +13,18 @@ import {
   CategoriesSection,
   OrganizersSection
 } from '@/features/landing/components/dumb'
-import { useLandingData } from '@/features/landing/hooks/useLandingData'
+import { PublicEvent, EventType } from '@/features/public-calendar/types/public-calendar.types'
 
-export const LandingContainer = () => {
+interface LandingContainerProps {
+  initialFeaturedEvents: PublicEvent[]
+  initialEventTypes: EventType[]
+}
+
+export const LandingContainer = ({
+  initialFeaturedEvents,
+  initialEventTypes
+}: LandingContainerProps) => {
   const router = useRouter()
-  const { featuredEvents, eventTypes, loading, error } = useLandingData()
 
   const handleExploreClick = (): void => {
     router.push('/calendar')
@@ -40,27 +47,18 @@ export const LandingContainer = () => {
       {/* Hero Section */}
       <HeroSection onExploreClick={handleExploreClick} />
 
-      {/* Error State */}
-      {error && (
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        </div>
-      )}
-
       {/* Featured Events Section */}
       <FeaturedEventsSection
-        events={featuredEvents}
-        loading={loading}
+        events={initialFeaturedEvents}
+        loading={false}
         onEventClick={handleEventClick}
         onViewAllClick={handleViewAllClick}
       />
 
       {/* Categories Section */}
       <CategoriesSection
-        eventTypes={eventTypes}
-        loading={loading}
+        eventTypes={initialEventTypes}
+        loading={false}
         onCategoryClick={handleEventTypeClick}
       />
 

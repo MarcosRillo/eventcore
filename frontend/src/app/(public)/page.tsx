@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 
 import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
+import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 
 export const metadata: Metadata = {
   title: 'Eventos Tucumán - Turismo y Cultura',
@@ -38,9 +39,17 @@ export const metadata: Metadata = {
   }
 }
 
-/**
- *
- */
-export default function HomePage() {
-  return <LandingContainer />
+export default async function HomePage() {
+  // Fetch data server-side (parallel) for better SEO and performance
+  const [featuredResponse, eventTypesResponse] = await Promise.all([
+    publicEventsService.getFeatured().catch(() => ({ data: [] })),
+    publicEventsService.getEventTypes().catch(() => ({ data: [] }))
+  ])
+
+  return (
+    <LandingContainer
+      initialFeaturedEvents={featuredResponse.data}
+      initialEventTypes={eventTypesResponse.data}
+    />
+  )
 }

@@ -2,6 +2,7 @@
  * Custom hook for admin stats
  *
  * Fetches and manages approval statistics for admin dashboard.
+ * Accepts optional initialStats from server-side fetch to avoid waterfall.
  */
 
 import { useState, useEffect } from 'react'
@@ -16,9 +17,9 @@ interface UseAdminStatsReturn {
   refetch: () => void
 }
 
-export const useAdminStats = (): UseAdminStatsReturn => {
-  const [stats, setStats] = useState<AdminStats | null>(null)
-  const [loading, setLoading] = useState(true)
+export const useAdminStats = (initialStats?: AdminStats | null): UseAdminStatsReturn => {
+  const [stats, setStats] = useState<AdminStats | null>(initialStats ?? null)
+  const [loading, setLoading] = useState(!initialStats)
   const [error, setError] = useState<string | null>(null)
 
   const fetchStats = async (): Promise<void> => {
@@ -35,8 +36,11 @@ export const useAdminStats = (): UseAdminStatsReturn => {
   }
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    // Skip initial fetch if we have server-provided data
+    if (!initialStats) {
+      fetchStats()
+    }
+  }, [initialStats])
 
   return {
     stats,

@@ -5,14 +5,25 @@
  * Migrated from EventDetailModal to dedicated page.
  */
 
-import { InternalEventDetailPageContainer } from '@/features/internal-calendar/components/smart/InternalEventDetailPageContainer';
+import type { Metadata } from 'next'
 
-/**
- *
- * @param root0
- * @param root0.params
- */
-export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+import { InternalEventDetailPageContainer } from '@/features/internal-calendar/components/smart/InternalEventDetailPageContainer'
+
+type Props = {
+  params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+
+  return {
+    title: `Evento #${id} - Calendario Interno`,
+    description: 'Detalle del evento en el calendario interno',
+    robots: { index: false, follow: false }
+  }
+}
+
+export default async function EventDetailPage({ params }: Props) {
   const { id } = await params;
   const eventId = parseInt(id, 10);
 

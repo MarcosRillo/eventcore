@@ -3,6 +3,7 @@
  *
  * Composes the admin dashboard with stats and quick filters.
  * Uses useEventManager for events and useEventManagement for modal.
+ * Accepts optional initialStats from server-side fetch to avoid waterfall.
  */
 
 'use client';
@@ -20,14 +21,19 @@ import { EventsPastToggle } from '@/features/entity-admin/components/dumb/Events
 import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
 import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
+import type { AdminApprovalStats } from '@/features/entity-admin/types';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
 import type { Event, EventStatusCode } from '@/types/event.types';
 
-export const AdminDashboardContainer = () => {
+interface AdminDashboardContainerProps {
+  initialStats?: AdminApprovalStats | null;
+}
+
+export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContainerProps) => {
   const [activeFilter, setActiveFilter] = useState<EventStatusCode | null>(null);
   const [showPast, setShowPast] = useState(false);
 
-  const { cardData, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
+  const { cardData, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats(initialStats);
 
   // Use event manager for events list
   const {

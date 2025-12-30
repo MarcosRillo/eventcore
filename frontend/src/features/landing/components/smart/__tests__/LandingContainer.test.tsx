@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 
 import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
-import { useLandingData } from '@/features/landing/hooks/useLandingData'
+import type { PublicEvent, EventType } from '@/features/public-calendar/types/public-calendar.types'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -10,8 +10,7 @@ jest.mock('next/navigation', () => ({
   })
 }))
 
-// Mock hooks and components
-jest.mock('../../../hooks/useLandingData')
+// Mock dumb components
 jest.mock('@/features/landing/components/dumb', () => ({
   HeroSection: () => <div data-testid="hero-section">Hero Section</div>,
   FeaturedEventsSection: ({ loading, events }: { loading: boolean; events: unknown[] }) => (
@@ -28,57 +27,94 @@ jest.mock('@/features/landing/components/dumb', () => ({
   Footer: () => <div data-testid="footer">Footer</div>
 }))
 
+// Helper to create mock data
+const createMockEvent = (overrides: Partial<PublicEvent> = {}): PublicEvent => ({
+  id: 1,
+  title: 'Test Event',
+  description: 'Test description',
+  start_date: '2025-01-01',
+  end_date: '2025-01-02',
+  start_time: '10:00',
+  end_time: '18:00',
+  featured_image: null,
+  event_type: { id: 1, name: 'Cultural', slug: 'cultural', icon: 'star', color: '#000' },
+  event_subtype: null,
+  location: { id: 1, name: 'Test Location', address: 'Test Address' },
+  organization: { id: 1, name: 'Test Org' },
+  ...overrides
+})
+
+const createMockEventType = (overrides: Partial<EventType> = {}): EventType => ({
+  id: 1,
+  name: 'Cultural',
+  slug: 'cultural',
+  icon: 'star',
+  color: '#000',
+  is_active: true,
+  ...overrides
+})
+
 describe('LandingContainer', () => {
+  const defaultProps = {
+    initialFeaturedEvents: [] as PublicEvent[],
+    initialEventTypes: [] as EventType[]
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('renders all sections', () => {
-    ;(useLandingData as jest.Mock).mockReturnValue({
-      featuredEvents: [],
-      eventTypes: [],
-      loading: true,
-      error: null
-    })
-
-    render(<LandingContainer />)
+  it('renders all sections with empty data', () => {
+    render(<LandingContainer {...defaultProps} />)
 
     expect(screen.getByTestId('hero-section')).toBeInTheDocument()
     expect(screen.getByTestId('featured-section')).toBeInTheDocument()
     expect(screen.getByTestId('categories-section')).toBeInTheDocument()
     expect(screen.getByTestId('organizers-section')).toBeInTheDocument()
-    // Note: Footer is now rendered in the public layout, not in LandingContainer
   })
 
-  it('passes data to sections', () => {
-    const mockEvents = [{ id: 1 }]
-    const mockEventTypes = [{ id: 1, name: 'Cultural', is_active: true }]
+  it('passes server-fetched data to sections', () => {
+    const mockEvents = [createMockEvent()]
+    const mockEventTypes = [createMockEventType()]
 
-    ;(useLandingData as jest.Mock).mockReturnValue({
-      featuredEvents: mockEvents,
-      eventTypes: mockEventTypes,
-      loading: false,
-      error: null
-    })
-
-    render(<LandingContainer />)
+    render(
+      <LandingContainer
+        initialFeaturedEvents={mockEvents}
+        initialEventTypes={mockEventTypes}
+      />
+    )
 
     expect(screen.getByText('Featured: 1')).toBeInTheDocument()
     expect(screen.getByText('Event Types: 1')).toBeInTheDocument()
   })
 
-  it('renders error state', () => {
-    ;(useLandingData as jest.Mock).mockReturnValue({
-      featuredEvents: [],
-      eventTypes: [],
-      loading: false,
-      error: 'Failed to load'
-    })
+  it('renders with multiple events and event types', () => {
+    const mockEvents = [
+      createMockEvent({ id: 1, title: 'Event 1' }),
+      createMockEvent({ id: 2, title: 'Event 2' }),
+      createMockEvent({ id: 3, title: 'Event 3' })
+    ]
+    const mockEventTypes = [
+      createMockEventType({ id: 1, name: 'Cultural' }),
+      createMockEventType({ id: 2, name: 'Gastronómico' })
+    ]
 
-    render(<LandingContainer />)
-    // Assuming the container handles error, or at least renders sections with empty data
-    // If there's specific error handling UI, test for it here.
-    // For now, just ensuring it doesn't crash
-    expect(screen.getByTestId('hero-section')).toBeInTheDocument()
+    render(
+      <LandingContainer
+        initialFeaturedEvents={mockEvents}
+        initialEventTypes={mockEventTypes}
+      />
+    )
+
+    expect(screen.getByText('Featured: 3')).toBeInTheDocument()
+    expect(screen.getByText('Event Types: 2')).toBeInTheDocument()
+  })
+
+  it('always renders with loading=false (data is server-fetched)', () => {
+    render(<LandingContainer {...defaultProps} />)
+
+    // Both sections should show count (not "Loading")
+    expect(screen.getByText('Featured: 0')).toBeInTheDocument()
+    expect(screen.getByText('Event Types: 0')).toBeInTheDocument()
   })
 })
