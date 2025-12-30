@@ -9,8 +9,6 @@
  * - Event management modal with approval workflow
  */
 
-'use client';
-
 import { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer';
 
 /**

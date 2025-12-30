@@ -1,5 +1,3 @@
-'use client'
-
 /**
  * Registration Requests Page
  * Admin panel for managing organizer account requests
