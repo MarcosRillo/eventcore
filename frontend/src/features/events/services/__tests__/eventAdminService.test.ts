@@ -133,6 +133,8 @@ describe('eventAdminService', () => {
       mockApiClient.get.mockRejectedValueOnce(new Error('Unauthorized'))
 
       await expect(eventAdminService.getEvents()).rejects.toThrow('Unauthorized')
+      expect(mockApiClient.get).toHaveBeenCalledWith('/events?')
+      expect(mockApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -151,6 +153,8 @@ describe('eventAdminService', () => {
       mockApiClient.get.mockRejectedValueOnce(new Error('Not found'))
 
       await expect(eventAdminService.getEvent(999)).rejects.toThrow('Not found')
+      expect(mockApiClient.get).toHaveBeenCalledWith('/events/999')
+      expect(mockApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -213,6 +217,8 @@ describe('eventAdminService', () => {
       mockApiClient.post.mockRejectedValueOnce(new Error('Validation failed'))
 
       await expect(eventAdminService.createEvent(formData)).rejects.toThrow('Validation failed')
+      expect(mockApiClient.post).toHaveBeenCalledTimes(1)
+      expect(mockApiClient.post.mock.calls[0][0]).toBe('/events')
     })
   })
 
@@ -263,6 +269,8 @@ describe('eventAdminService', () => {
       mockApiClient.put.mockRejectedValueOnce(new Error('Event not found'))
 
       await expect(eventAdminService.updateEvent(999, { title: 'Test' })).rejects.toThrow('Event not found')
+      expect(mockApiClient.put).toHaveBeenCalledWith('/events/999', { title: 'Test' })
+      expect(mockApiClient.put).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -279,6 +287,8 @@ describe('eventAdminService', () => {
       mockApiClient.delete.mockRejectedValueOnce(new Error('Cannot delete published event'))
 
       await expect(eventAdminService.deleteEvent(1)).rejects.toThrow('Cannot delete published event')
+      expect(mockApiClient.delete).toHaveBeenCalledWith('/events/1')
+      expect(mockApiClient.delete).toHaveBeenCalledTimes(1)
     })
   })
 

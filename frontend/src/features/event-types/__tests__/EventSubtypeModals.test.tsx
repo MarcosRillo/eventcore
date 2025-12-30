@@ -58,12 +58,19 @@ describe('CreateEventSubtypeModal', () => {
       render(<CreateEventSubtypeModal {...defaultProps} isOpen={false} />)
 
       expect(screen.queryByText(/crear subtipo para/i)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /crear subtipo/i })).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/nombre del subtipo/i)).not.toBeInTheDocument()
+      expect(defaultProps.isOpen).toBe(true) // Default prop is true, we override with false
     })
 
     it('should show submit button with correct text', () => {
       render(<CreateEventSubtypeModal {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /crear subtipo/i })).toBeInTheDocument()
+      const submitButton = screen.getByRole('button', { name: /crear subtipo/i })
+      expect(submitButton).toBeInTheDocument()
+      expect(submitButton).toBeEnabled()
+      expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument()
+      expect(screen.getAllByRole('button').length).toBeGreaterThanOrEqual(2)
     })
 
     it('should have checkbox checked by default', () => {
@@ -71,6 +78,9 @@ describe('CreateEventSubtypeModal', () => {
 
       const checkbox = screen.getByLabelText(/subtipo activo/i)
       expect(checkbox).toBeChecked()
+      expect(checkbox).toBeEnabled()
+      expect(checkbox).toHaveAttribute('type', 'checkbox')
+      expect(screen.getByText(/subtipo activo/i)).toBeInTheDocument()
     })
 
     it('should have empty name input by default', () => {
@@ -78,12 +88,18 @@ describe('CreateEventSubtypeModal', () => {
 
       const nameInput = screen.getByLabelText(/nombre del subtipo/i)
       expect(nameInput).toHaveValue('')
+      expect(nameInput).toBeEnabled()
+      expect(nameInput).toHaveAttribute('type', 'text')
+      expect(screen.getByText(/nombre del subtipo/i)).toBeInTheDocument()
     })
 
     it('should display parent type name in title', () => {
       render(<CreateEventSubtypeModal {...defaultProps} eventTypeName="Taller" />)
 
       expect(screen.getByText(/crear subtipo para "taller"/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/nombre del subtipo/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /crear subtipo/i })).toBeInTheDocument()
+      expect(defaultProps.eventTypeName).toBe('Conferencia')
     })
   })
 
@@ -92,9 +108,12 @@ describe('CreateEventSubtypeModal', () => {
       render(<CreateEventSubtypeModal {...defaultProps} />)
 
       const nameInput = screen.getByLabelText(/nombre del subtipo/i)
+      expect(nameInput).toHaveValue('')
       fireEvent.change(nameInput, { target: { value: 'Congreso Internacional' } })
 
       expect(nameInput).toHaveValue('Congreso Internacional')
+      expect(nameInput).toBeEnabled()
+      expect(screen.getByRole('button', { name: /crear subtipo/i })).toBeInTheDocument()
     })
 
     it('should toggle checkbox', () => {
@@ -248,9 +267,12 @@ describe('CreateEventSubtypeModal', () => {
       render(<CreateEventSubtypeModal {...defaultProps} />)
 
       const cancelButton = screen.getByRole('button', { name: /cancelar/i })
+      expect(cancelButton).toBeInTheDocument()
+      expect(cancelButton).toBeEnabled()
       fireEvent.click(cancelButton)
 
       expect(defaultProps.onClose).toHaveBeenCalled()
+      expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -323,24 +345,36 @@ describe('EditEventSubtypeModal', () => {
 
       expect(screen.getByText('Editar Subtipo de Evento')).toBeInTheDocument()
       expect(screen.getByLabelText(/nombre del subtipo/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/subtipo activo/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /guardar cambios/i })).toBeInTheDocument()
     })
 
     it('should not render when eventSubtype is null', () => {
       render(<EditEventSubtypeModal {...defaultProps} eventSubtype={null} />)
 
       expect(screen.queryByText('Editar Subtipo de Evento')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/nombre del subtipo/i)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /guardar cambios/i })).not.toBeInTheDocument()
+      expect(defaultProps.eventSubtype).not.toBeNull()
     })
 
     it('should not render when closed', () => {
       render(<EditEventSubtypeModal {...defaultProps} isOpen={false} />)
 
       expect(screen.queryByText('Editar Subtipo de Evento')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/nombre del subtipo/i)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /guardar cambios/i })).not.toBeInTheDocument()
+      expect(defaultProps.isOpen).toBe(true)
     })
 
     it('should show submit button with correct text', () => {
       render(<EditEventSubtypeModal {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /guardar cambios/i })).toBeInTheDocument()
+      const submitButton = screen.getByRole('button', { name: /guardar cambios/i })
+      expect(submitButton).toBeInTheDocument()
+      expect(submitButton).toBeEnabled()
+      expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument()
+      expect(screen.getAllByRole('button').length).toBeGreaterThanOrEqual(2)
     })
 
     it('should populate form with eventSubtype data', async () => {

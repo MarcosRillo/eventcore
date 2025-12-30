@@ -111,47 +111,62 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       const nameInput = screen.getByPlaceholderText(/tu nombre/i)
+      expect(nameInput).toBeInTheDocument()
+      expect(nameInput).not.toBeDisabled()
       fireEvent.change(nameInput, { target: { name: 'first_name', value: 'Juan' } })
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('first_name', 'Juan')
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
     })
 
     test('calls onFieldChange when email is entered', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       const emailInput = screen.getByPlaceholderText(/tu@email/i)
+      expect(emailInput).toBeInTheDocument()
+      expect(emailInput).not.toBeDisabled()
       fireEvent.change(emailInput, { target: { name: 'email', value: 'test@example.com' } })
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('email', 'test@example.com')
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
     })
 
     test('calls onFieldChange when sector is selected', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       const sectorSelect = screen.getByRole('combobox')
+      expect(sectorSelect).toBeInTheDocument()
+      expect(sectorSelect).not.toBeDisabled()
       fireEvent.change(sectorSelect, { target: { name: 'organization_sector', value: 'hotel' } })
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('organization_sector', 'hotel')
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
     })
 
     test('calls onFieldChange when motivation textarea is filled', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       const motivationTextarea = screen.getByPlaceholderText(/describe brevemente/i)
+      expect(motivationTextarea).toBeInTheDocument()
       fireEvent.change(motivationTextarea, {
         target: { name: 'motivation', value: 'Test motivation' }
       })
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('motivation', 'Test motivation')
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
+      expect(motivationTextarea).not.toBeDisabled()
     })
 
     test('calls onFieldChange when terms checkbox is checked', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       const checkbox = screen.getByRole('checkbox')
+      expect(checkbox).toBeInTheDocument()
+      expect(checkbox).not.toBeChecked()
       fireEvent.click(checkbox)
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('accepted_terms', true)
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -172,7 +187,11 @@ describe('RegistrationRequestForm', () => {
     test('has default placeholder option', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
-      expect(screen.getByRole('option', { name: /seleccionar sector/i })).toBeInTheDocument()
+      const placeholderOption = screen.getByRole('option', { name: /seleccionar sector/i })
+      expect(placeholderOption).toBeInTheDocument()
+      expect(placeholderOption).toHaveValue('')
+      expect(screen.getByRole('combobox')).toBeInTheDocument()
+      expect(screen.getByRole('combobox')).toHaveValue('')
     })
   })
 
@@ -183,6 +202,8 @@ describe('RegistrationRequestForm', () => {
       expect(screen.getByText(/foto de perfil \(opcional\)/i)).toBeInTheDocument()
       const helperTexts = screen.getAllByText(/máximo 2mb/i)
       expect(helperTexts.length).toBeGreaterThan(0)
+      const fileInputs = document.querySelectorAll('input[type="file"]')
+      expect(fileInputs.length).toBeGreaterThan(0)
     })
 
     test('calls onFieldChange when profile photo is selected', () => {
@@ -190,11 +211,14 @@ describe('RegistrationRequestForm', () => {
 
       const fileInputs = document.querySelectorAll('input[type="file"]')
       const profilePhotoInput = fileInputs[0]
+      expect(profilePhotoInput).not.toBeDisabled()
 
       const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' })
       fireEvent.change(profilePhotoInput, { target: { files: [file] } })
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('profile_photo', file)
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
+      expect(file.name).toBe('photo.jpg')
     })
 
     test('shows preview when profile photo is selected', () => {
@@ -229,6 +253,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       expect(screen.getByText(/logo de la organización/i)).toBeInTheDocument()
+      const fileInputs = document.querySelectorAll('input[type="file"]')
+      expect(fileInputs.length).toBeGreaterThanOrEqual(2) // profile photo + logo
+      expect(screen.getByText(/datos de la organización/i)).toBeInTheDocument()
     })
 
     test('shows preview when organization logo is selected', () => {
@@ -239,7 +266,11 @@ describe('RegistrationRequestForm', () => {
 
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithLogo} />)
 
-      expect(screen.getByAltText(/vista previa del logo/i)).toBeInTheDocument()
+      const logoPreview = screen.getByAltText(/vista previa del logo/i)
+      expect(logoPreview).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument()
+      expect(global.URL.createObjectURL).toHaveBeenCalled()
+      expect(logoPreview).toHaveAttribute('src', 'blob:mock-url')
     })
 
     test('calls onFieldChange with null when logo is removed', () => {
@@ -251,9 +282,11 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithLogo} />)
 
       const removeButton = screen.getByRole('button', { name: /eliminar/i })
+      expect(removeButton).toBeInTheDocument()
       fireEvent.click(removeButton)
 
       expect(mockOnFieldChange).toHaveBeenCalledWith('organization_logo', null)
+      expect(mockOnFieldChange).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -263,6 +296,8 @@ describe('RegistrationRequestForm', () => {
 
       expect(screen.getByText(/0\/1000 caracteres/i)).toBeInTheDocument()
       expect(screen.getByText(/mínimo 50/i)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/describe brevemente/i)).toBeInTheDocument()
+      expect(screen.getByText('Motivación')).toBeInTheDocument()
     })
 
     test('updates character count when motivation changes', () => {
@@ -274,6 +309,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithMotivation} />)
 
       expect(screen.getByText(/100\/1000 caracteres/i)).toBeInTheDocument()
+      expect(screen.getByDisplayValue('A'.repeat(100))).toBeInTheDocument()
+      expect(formDataWithMotivation.motivation.length).toBe(100)
+      expect(screen.getByText(/mínimo 50/i)).toBeInTheDocument()
     })
 
     test('shows error styling when character count is below minimum', () => {
@@ -286,6 +324,9 @@ describe('RegistrationRequestForm', () => {
 
       const counter = screen.getByText(/5\/1000 caracteres/i)
       expect(counter).toHaveClass('text-error-500')
+      expect(formDataWithShortMotivation.motivation.length).toBe(5)
+      expect(formDataWithShortMotivation.motivation.length).toBeLessThan(50)
+      expect(screen.getByDisplayValue('Short')).toBeInTheDocument()
     })
 
     test('shows error styling when character count exceeds maximum', () => {
@@ -298,6 +339,8 @@ describe('RegistrationRequestForm', () => {
 
       const counter = screen.getByText(/1001\/1000 caracteres/i)
       expect(counter).toHaveClass('text-error-500')
+      expect(formDataWithLongMotivation.motivation.length).toBe(1001)
+      expect(formDataWithLongMotivation.motivation.length).toBeGreaterThan(1000)
     })
 
     test('shows neutral styling when character count is within range', () => {
@@ -310,6 +353,8 @@ describe('RegistrationRequestForm', () => {
 
       const counter = screen.getByText(/100\/1000 caracteres/i)
       expect(counter).toHaveClass('text-neutral-500')
+      expect(formDataWithValidMotivation.motivation.length).toBeGreaterThanOrEqual(50)
+      expect(formDataWithValidMotivation.motivation.length).toBeLessThanOrEqual(1000)
     })
   })
 
@@ -319,6 +364,9 @@ describe('RegistrationRequestForm', () => {
 
       const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
       expect(submitButton).toBeDisabled()
+      expect(submitButton).toBeInTheDocument()
+      expect(screen.getByRole('checkbox')).not.toBeChecked()
+      expect(defaultFormData.accepted_terms).toBe(false)
     })
 
     test('submit button is enabled when terms accepted', () => {
@@ -331,6 +379,9 @@ describe('RegistrationRequestForm', () => {
 
       const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
       expect(submitButton).toBeEnabled()
+      expect(submitButton).toBeInTheDocument()
+      expect(formDataWithTerms.accepted_terms).toBe(true)
+      expect(screen.getByRole('checkbox')).toBeChecked()
     })
 
     test('submit button is disabled while submitting', () => {
@@ -349,6 +400,9 @@ describe('RegistrationRequestForm', () => {
 
       const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
       expect(submitButton).toBeDisabled()
+      expect(submitButton).toBeInTheDocument()
+      expect(screen.getByRole('checkbox')).toBeDisabled()
+      expect(screen.getByPlaceholderText(/tu nombre/i)).toBeDisabled()
     })
   })
 
@@ -362,9 +416,11 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithTerms} />)
 
       const form = document.querySelector('form')
+      expect(form).toBeInTheDocument()
       fireEvent.submit(form!)
 
       expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      expect(screen.getByRole('button', { name: /enviar solicitud/i })).toBeEnabled()
     })
 
     test('prevents default form submission behavior', () => {
@@ -376,11 +432,13 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithTerms} />)
 
       const form = document.querySelector('form')
+      expect(form).toBeInTheDocument()
       fireEvent.submit(form!)
 
       // Verify onSubmit was called without page reload
       expect(mockOnSubmit).toHaveBeenCalled()
       expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      expect(screen.getByRole('button', { name: /enviar solicitud/i })).toBeInTheDocument()
     })
   })
 
@@ -393,6 +451,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithGeneral} />)
 
       expect(screen.getByText(/ocurrió un error/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /enviar solicitud/i })).toBeDisabled()
+      expect(document.querySelector('form')).toBeInTheDocument()
+      expect(formErrorsWithGeneral.general).toBeDefined()
     })
 
     test('displays field-specific error for first name', () => {
@@ -403,6 +464,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithField} />)
 
       expect(screen.getByText(/el nombre es requerido/i)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/tu nombre/i)).toBeInTheDocument()
+      expect(formErrorsWithField.first_name).toBe('El nombre es requerido')
+      expect(screen.getByText('Nombre')).toBeInTheDocument()
     })
 
     test('displays error for organization sector', () => {
@@ -413,6 +477,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithSector} />)
 
       expect(screen.getByText(/selecciona un sector/i)).toBeInTheDocument()
+      expect(screen.getByRole('combobox')).toBeInTheDocument()
+      expect(formErrorsWithSector.organization_sector).toBe('Selecciona un sector')
+      expect(screen.getByText(/datos de la organización/i)).toBeInTheDocument()
     })
 
     test('displays error for motivation', () => {
@@ -423,6 +490,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithMotivation} />)
 
       expect(screen.getByText(/al menos 50 caracteres/i)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/describe brevemente/i)).toBeInTheDocument()
+      expect(formErrorsWithMotivation.motivation).toContain('50')
+      expect(screen.getByText('Motivación')).toBeInTheDocument()
     })
 
     test('displays error for terms not accepted', () => {
@@ -433,6 +503,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} formErrors={formErrorsWithTerms} />)
 
       expect(screen.getByText(/debes aceptar los términos/i)).toBeInTheDocument()
+      expect(screen.getByRole('checkbox')).toBeInTheDocument()
+      expect(formErrorsWithTerms.accepted_terms).toBe('Debes aceptar los términos')
+      expect(screen.getByRole('checkbox')).not.toBeChecked()
     })
   })
 
@@ -478,6 +551,9 @@ describe('RegistrationRequestForm', () => {
 
       const removeButton = screen.getByRole('button', { name: /eliminar/i })
       expect(removeButton).toBeDisabled()
+      expect(screen.getByAltText(/vista previa de foto de perfil/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /enviar solicitud/i })).toBeDisabled()
+      expect(formDataWithFiles.profile_photo).not.toBeNull()
     })
   })
 
@@ -523,6 +599,9 @@ describe('RegistrationRequestForm', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
       expect(screen.getByText(/formato: xx-xxxxxxxx-x/i)).toBeInTheDocument()
+      expect(screen.getByText('CUIT')).toBeInTheDocument()
+      expect(screen.getByText(/datos de la organización/i)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/20-12345678-9/i)).toBeInTheDocument()
     })
 
     test('displays file size helper text for profile photo', () => {
@@ -530,6 +609,8 @@ describe('RegistrationRequestForm', () => {
 
       const helperTexts = screen.getAllByText(/máximo 2mb/i)
       expect(helperTexts.length).toBeGreaterThan(0)
+      expect(screen.getByText(/foto de perfil \(opcional\)/i)).toBeInTheDocument()
+      expect(screen.getByText(/logo de la organización/i)).toBeInTheDocument()
     })
   })
 

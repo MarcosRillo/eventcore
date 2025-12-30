@@ -31,11 +31,14 @@ describe('approvalService', () => {
       const event = { ...mockEvent, id: 123 }
       ;(apiClient.patch as jest.Mock).mockResolvedValue(event)
 
-      await approvalService.approve(123)
+      const result = await approvalService.approve(123)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/123/approve', {
         comments: undefined
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(event)
+      expect(result.id).toBe(123)
     })
 
     it('should propagate API errors', async () => {
@@ -43,26 +46,34 @@ describe('approvalService', () => {
       ;(apiClient.patch as jest.Mock).mockRejectedValue(error)
 
       await expect(approvalService.approve(1)).rejects.toThrow('API Error')
+      expect(apiClient.patch).toHaveBeenCalledWith('/events/1/approve', { comments: undefined })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
     })
 
     it('should send comments when provided', async () => {
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
 
-      await approvalService.approve(1, { comments: 'Looks good!' })
+      const result = await approvalService.approve(1, { comments: 'Looks good!' })
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/approve', {
         comments: 'Looks good!'
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(result.id).toBe(1)
     })
 
     it('should work without comments', async () => {
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
 
-      await approvalService.approve(1)
+      const result = await approvalService.approve(1)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/approve', {
         comments: undefined
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(result.status).toBe('pending_approval')
     })
 
     it('should throw error if comments exceed 1000 characters', async () => {
@@ -71,17 +82,22 @@ describe('approvalService', () => {
       await expect(
         approvalService.approve(1, { comments: longComments })
       ).rejects.toThrow('no pueden exceder 1000 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect(longComments.length).toBe(1001)
     })
 
     it('should accept exactly 1000 characters in comments', async () => {
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
       const maxComments = 'A'.repeat(1000)
 
-      await approvalService.approve(1, { comments: maxComments })
+      const result = await approvalService.approve(1, { comments: maxComments })
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/approve', {
         comments: maxComments
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(maxComments.length).toBe(1000)
     })
   })
 
@@ -102,11 +118,14 @@ describe('approvalService', () => {
       const longReason = 'A'.repeat(500)
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
 
-      await approvalService.reject(1, longReason)
+      const result = await approvalService.reject(1, longReason)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/reject', {
         reason: longReason,
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(longReason.length).toBe(500)
     })
 
     it('should propagate API errors', async () => {
@@ -116,18 +135,24 @@ describe('approvalService', () => {
       await expect(approvalService.reject(1, 'Valid reason here')).rejects.toThrow(
         'Rejection failed'
       )
+      expect(apiClient.patch).toHaveBeenCalledWith('/events/1/reject', { reason: 'Valid reason here' })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
     })
 
     it('should throw error if reason is less than 10 characters', async () => {
       await expect(
         approvalService.reject(1, 'Short')
       ).rejects.toThrow('al menos 10 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect('Short'.length).toBeLessThan(10)
     })
 
     it('should throw error if reason is empty', async () => {
       await expect(
         approvalService.reject(1, '')
       ).rejects.toThrow('al menos 10 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect(''.length).toBe(0)
     })
 
     it('should throw error if reason exceeds 1000 characters', async () => {
@@ -135,27 +160,36 @@ describe('approvalService', () => {
       await expect(
         approvalService.reject(1, longReason)
       ).rejects.toThrow('no puede exceder 1000 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect(longReason.length).toBe(1001)
     })
 
     it('should accept exactly 10 characters', async () => {
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
+      const minReason = 'A'.repeat(10)
 
-      await approvalService.reject(1, 'A'.repeat(10))
+      const result = await approvalService.reject(1, minReason)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/reject', {
-        reason: 'A'.repeat(10)
+        reason: minReason
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(minReason.length).toBe(10)
     })
 
     it('should accept exactly 1000 characters', async () => {
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
       const maxReason = 'A'.repeat(1000)
 
-      await approvalService.reject(1, maxReason)
+      const result = await approvalService.reject(1, maxReason)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/reject', {
         reason: maxReason
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(maxReason.length).toBe(1000)
     })
   })
 
@@ -176,11 +210,14 @@ describe('approvalService', () => {
       const multilineReason = 'Line 1 here\nLine 2 here\nLine 3 here'
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
 
-      await approvalService.requestChanges(1, multilineReason)
+      const result = await approvalService.requestChanges(1, multilineReason)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/1/request-changes', {
         reason: multilineReason,
       })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(multilineReason).toContain('\n')
     })
 
     it('should propagate API errors', async () => {
@@ -190,18 +227,24 @@ describe('approvalService', () => {
       await expect(approvalService.requestChanges(1, 'Valid reason here')).rejects.toThrow(
         'Request changes failed'
       )
+      expect(apiClient.patch).toHaveBeenCalledWith('/events/1/request-changes', { reason: 'Valid reason here' })
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
     })
 
     it('should throw error if reason is less than 10 characters', async () => {
       await expect(
         approvalService.requestChanges(1, 'Short')
       ).rejects.toThrow('al menos 10 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect('Short'.length).toBeLessThan(10)
     })
 
     it('should throw error if reason is empty', async () => {
       await expect(
         approvalService.requestChanges(1, '')
       ).rejects.toThrow('al menos 10 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect(''.length).toBe(0)
     })
 
     it('should throw error if reason exceeds 1000 characters', async () => {
@@ -209,6 +252,8 @@ describe('approvalService', () => {
       await expect(
         approvalService.requestChanges(1, longReason)
       ).rejects.toThrow('no puede exceder 1000 caracteres')
+      expect(apiClient.patch).not.toHaveBeenCalled()
+      expect(longReason.length).toBe(1001)
     })
 
     it('should accept exactly 10 characters', async () => {
@@ -263,9 +308,12 @@ describe('approvalService', () => {
     it('should handle different event IDs', async () => {
       ;(apiClient.patch as jest.Mock).mockResolvedValue(mockEvent)
 
-      await approvalService.requestPublicApproval(456)
+      const result = await approvalService.requestPublicApproval(456)
 
       expect(apiClient.patch).toHaveBeenCalledWith('/events/456/request-public')
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockEvent)
+      expect(result.id).toBe(1)
     })
 
     it('should propagate API errors', async () => {
@@ -275,6 +323,8 @@ describe('approvalService', () => {
       await expect(
         approvalService.requestPublicApproval(1)
       ).rejects.toThrow('Public approval failed')
+      expect(apiClient.patch).toHaveBeenCalledWith('/events/1/request-public')
+      expect(apiClient.patch).toHaveBeenCalledTimes(1)
     })
   })
 

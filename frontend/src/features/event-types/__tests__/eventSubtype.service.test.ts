@@ -82,27 +82,36 @@ describe('eventSubtype.service', () => {
         active: true,
       }
 
-      await getEventSubtypes(1, params)
+      const result = await getEventSubtypes(1, params)
 
       expect(mockedApiClient.get).toHaveBeenCalledWith(
         '/event-types/1/subtypes?page=2&per_page=20&search=nacional&active=true'
       )
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result.data).toHaveLength(2)
+      expect(result.current_page).toBe(1)
     })
 
     it('should handle inactive filter', async () => {
       mockedApiClient.get.mockResolvedValue({ data: mockPaginationResponse })
 
-      await getEventSubtypes(1, { active: false })
+      const result = await getEventSubtypes(1, { active: false })
 
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes?active=false')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockPaginationResponse)
+      expect(result.data).toBeDefined()
     })
 
     it('should handle different event type ids', async () => {
       mockedApiClient.get.mockResolvedValue({ data: mockPaginationResponse })
 
-      await getEventSubtypes(5)
+      const result = await getEventSubtypes(5)
 
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/5/subtypes?')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockPaginationResponse)
+      expect(result.total).toBe(15)
     })
 
     it('should handle empty results', async () => {
@@ -128,6 +137,8 @@ describe('eventSubtype.service', () => {
       mockedApiClient.get.mockRejectedValue(error)
 
       await expect(getEventSubtypes(1)).rejects.toThrow('Network error')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes?')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -158,6 +169,8 @@ describe('eventSubtype.service', () => {
       mockedApiClient.get.mockRejectedValue(error)
 
       await expect(getEventSubtype(1, 999)).rejects.toThrow('Event subtype not found')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes/999')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -219,6 +232,11 @@ describe('eventSubtype.service', () => {
       mockedApiClient.post.mockRejectedValue(error)
 
       await expect(createEventSubtype(1, { name: '' })).rejects.toThrow('Validation failed')
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types/1/subtypes', {
+        name: '',
+        is_active: true,
+      })
+      expect(mockedApiClient.post).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -280,6 +298,11 @@ describe('eventSubtype.service', () => {
       mockedApiClient.put.mockRejectedValue(error)
 
       await expect(updateEventSubtype(1, 1, { name: 'Test' })).rejects.toThrow('Update failed')
+      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-types/1/subtypes/1', {
+        name: 'Test',
+        is_active: undefined,
+      })
+      expect(mockedApiClient.put).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -378,6 +401,8 @@ describe('eventSubtype.service', () => {
       mockedApiClient.patch.mockRejectedValue(error)
 
       await expect(toggleEventSubtypeStatus(1, 1)).rejects.toThrow('Toggle failed')
+      expect(mockedApiClient.patch).toHaveBeenCalledWith('/event-types/1/subtypes/1/toggle-status')
+      expect(mockedApiClient.patch).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -414,9 +439,12 @@ describe('eventSubtype.service', () => {
         data: { data: [] },
       })
 
-      await getActiveEventSubtypes(5)
+      const result = await getActiveEventSubtypes(5)
 
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/5/subtypes/active')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result).toEqual([])
+      expect(Array.isArray(result)).toBe(true)
     })
 
     it('should return empty array when no active subtypes', async () => {
@@ -427,6 +455,9 @@ describe('eventSubtype.service', () => {
       const result = await getActiveEventSubtypes(1)
 
       expect(result).toHaveLength(0)
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes/active')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(Array.isArray(result)).toBe(true)
     })
 
     it('should handle API error', async () => {
@@ -434,6 +465,8 @@ describe('eventSubtype.service', () => {
       mockedApiClient.get.mockRejectedValue(error)
 
       await expect(getActiveEventSubtypes(1)).rejects.toThrow('Fetch failed')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes/active')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -452,21 +485,27 @@ describe('eventSubtype.service', () => {
     it('should search with custom page', async () => {
       mockedApiClient.get.mockResolvedValue({ data: mockPaginationResponse })
 
-      await searchEventSubtypes(1, 'internacional', 3)
+      const result = await searchEventSubtypes(1, 'internacional', 3)
 
       expect(mockedApiClient.get).toHaveBeenCalledWith(
         '/event-types/1/subtypes?page=3&per_page=15&search=internacional'
       )
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockPaginationResponse)
+      expect(result.data).toBeDefined()
     })
 
     it('should search in different parent type', async () => {
       mockedApiClient.get.mockResolvedValue({ data: mockPaginationResponse })
 
-      await searchEventSubtypes(5, 'test')
+      const result = await searchEventSubtypes(5, 'test')
 
       expect(mockedApiClient.get).toHaveBeenCalledWith(
         '/event-types/5/subtypes?page=1&per_page=15&search=test'
       )
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockPaginationResponse)
+      expect(result.total).toBe(15)
     })
 
     it('should handle empty search results', async () => {
@@ -495,6 +534,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(validData)
 
       expect(errors).toHaveLength(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors).not.toContain('El nombre del subtipo es obligatorio')
+      expect(errors).not.toContain('El nombre debe tener al menos 2 caracteres')
     })
 
     it('should return error for empty name', () => {
@@ -503,6 +545,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(invalidData)
 
       expect(errors).toContain('El nombre del subtipo es obligatorio')
+      expect(errors).toHaveLength(1)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors).not.toContain('El nombre debe tener al menos 2 caracteres')
     })
 
     it('should return error for whitespace-only name', () => {
@@ -511,6 +556,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(invalidData)
 
       expect(errors).toContain('El nombre del subtipo es obligatorio')
+      expect(errors.length).toBeGreaterThan(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors).not.toContain('El nombre no puede exceder 255 caracteres')
     })
 
     it('should return error for name too short', () => {
@@ -519,6 +567,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(invalidData)
 
       expect(errors).toContain('El nombre debe tener al menos 2 caracteres')
+      expect(errors.length).toBeGreaterThan(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors).not.toContain('El nombre del subtipo es obligatorio')
     })
 
     it('should return error for name too long', () => {
@@ -528,6 +579,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(invalidData)
 
       expect(errors).toContain('El nombre no puede exceder 255 caracteres')
+      expect(errors.length).toBeGreaterThan(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors).not.toContain('El nombre del subtipo es obligatorio')
     })
 
     it('should validate update data with name', () => {
@@ -536,6 +590,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(updateData)
 
       expect(errors).toHaveLength(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors).not.toContain('El nombre del subtipo es obligatorio')
+      expect(errors).not.toContain('El nombre debe tener al menos 2 caracteres')
     })
 
     it('should skip name validation if not provided in update', () => {
@@ -544,6 +601,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(updateData)
 
       expect(errors).toHaveLength(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(updateData.is_active).toBe(false)
+      expect(updateData.name).toBeUndefined()
     })
 
     it('should accept minimum valid name length', () => {
@@ -552,6 +612,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(validData)
 
       expect(errors).toHaveLength(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(validData.name.length).toBe(2)
+      expect(errors).not.toContain('El nombre debe tener al menos 2 caracteres')
     })
 
     it('should accept maximum valid name length', () => {
@@ -561,6 +624,9 @@ describe('eventSubtype.service', () => {
       const errors = validateEventSubtypeData(validData)
 
       expect(errors).toHaveLength(0)
+      expect(Array.isArray(errors)).toBe(true)
+      expect(validData.name.length).toBe(255)
+      expect(errors).not.toContain('El nombre no puede exceder 255 caracteres')
     })
   })
 

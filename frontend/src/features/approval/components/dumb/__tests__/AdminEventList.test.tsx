@@ -77,7 +77,11 @@ describe('AdminEventList', () => {
         />
       )
 
-      expect(screen.getByRole('table')).toBeInTheDocument()
+      const table = screen.getByRole('table')
+      expect(table).toBeInTheDocument()
+      expect(table.tagName).toBe('TABLE')
+      expect(table.querySelector('thead')).toBeInTheDocument()
+      expect(table.querySelector('tbody')).toBeInTheDocument()
     })
 
     it('should have 6 column headers', () => {
@@ -90,6 +94,9 @@ describe('AdminEventList', () => {
 
       const headers = screen.getAllByRole('columnheader')
       expect(headers).toHaveLength(6)
+      expect(headers[0]).toHaveTextContent('Title')
+      expect(headers[5]).toHaveTextContent('Actions')
+      expect(headers.every(h => h.tagName === 'TH')).toBe(true)
     })
 
     it('should render with scrollable container', () => {
@@ -102,6 +109,9 @@ describe('AdminEventList', () => {
 
       const scrollContainer = container.querySelector('.overflow-x-auto')
       expect(scrollContainer).toBeInTheDocument()
+      expect(scrollContainer?.querySelector('table')).toBeInTheDocument()
+      expect(container.firstChild).toHaveClass('overflow-x-auto')
+      expect(scrollContainer?.className).toContain('overflow-x-auto')
     })
   })
 
@@ -114,12 +124,16 @@ describe('AdminEventList', () => {
         />
       )
 
-      const tbody = screen.getByRole('table').querySelector('tbody')
+      const table = screen.getByRole('table')
+      const tbody = table.querySelector('tbody')
       expect(tbody?.children).toHaveLength(0)
+      expect(table).toBeInTheDocument()
+      expect(screen.queryByTestId('approval-action-buttons')).not.toBeInTheDocument()
+      expect(screen.getAllByRole('columnheader')).toHaveLength(6)
     })
 
     it('should render table structure even with empty events array', () => {
-      render(
+      const { container } = render(
         <AdminEventList
           events={[]}
           {...mockHandlers}
@@ -128,12 +142,14 @@ describe('AdminEventList', () => {
 
       expect(screen.getByRole('table')).toBeInTheDocument()
       expect(screen.getAllByRole('columnheader')).toHaveLength(6)
+      expect(container.querySelector('thead')).toBeInTheDocument()
+      expect(container.querySelector('tbody')).toBeInTheDocument()
     })
   })
 
   describe('Event Rendering', () => {
     it('should render single event', () => {
-      const event = createMockEvent({ title: 'Summer Festival' })
+      const event = createMockEvent({ title: 'Summer Festival', organizer: 'Test Org' })
 
       render(
         <AdminEventList
@@ -143,6 +159,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText('Summer Festival')).toBeInTheDocument()
+      expect(screen.getByText('Test Org')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2) // Header + 1 data row
     })
 
     it('should render multiple events', () => {
@@ -188,7 +207,7 @@ describe('AdminEventList', () => {
     })
 
     it('should render organizer name', () => {
-      const event = createMockEvent({ organizer: 'Jane Smith' })
+      const event = createMockEvent({ organizer: 'Jane Smith', title: 'Jane Event' })
 
       render(
         <AdminEventList
@@ -198,10 +217,13 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText('Jane Smith')).toBeInTheDocument()
+      expect(screen.getByText('Jane Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getAllByRole('cell')).toHaveLength(6)
     })
 
     it('should render category ID', () => {
-      const event = createMockEvent({ category_id: 42 })
+      const event = createMockEvent({ category_id: 42, title: 'Category Test Event' })
 
       render(
         <AdminEventList
@@ -211,12 +233,15 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText('Category 42')).toBeInTheDocument()
+      expect(screen.getByText('Category Test Event')).toBeInTheDocument()
+      expect(screen.getByRole('table')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
     })
   })
 
   describe('Date Formatting', () => {
     it('should format date correctly (Month Day, Year)', () => {
-      const event = createMockEvent({ start_date: '2025-12-15' })
+      const event = createMockEvent({ start_date: '2025-12-15', title: 'December Event' })
 
       render(
         <AdminEventList
@@ -226,10 +251,13 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText(/Dec \d+, 2025/)).toBeInTheDocument()
+      expect(screen.getByText('December Event')).toBeInTheDocument()
+      expect(screen.getByRole('table')).toBeInTheDocument()
+      expect(screen.getAllByRole('cell')).toHaveLength(6)
     })
 
     it('should format date with full month name abbreviation', () => {
-      const event = createMockEvent({ start_date: '2025-11-15' })
+      const event = createMockEvent({ start_date: '2025-11-15', title: 'November Event' })
 
       render(
         <AdminEventList
@@ -239,6 +267,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText(/Nov \d+, 2025/)).toBeInTheDocument()
+      expect(screen.getByText('November Event')).toBeInTheDocument()
+      expect(screen.getByRole('table')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
     })
 
     it('should format dates for different months', () => {
@@ -295,7 +326,7 @@ describe('AdminEventList', () => {
     })
 
     it('should display "Approved" status for approved_internal', () => {
-      const event = createMockEvent({ status: 'approved_internal' })
+      const event = createMockEvent({ status: 'approved_internal', title: 'Approved Event' })
 
       render(
         <AdminEventList
@@ -305,11 +336,14 @@ describe('AdminEventList', () => {
       )
 
       const statusBadge = screen.getByText('Approved')
+      expect(statusBadge).toBeInTheDocument()
       expect(statusBadge).toHaveClass('bg-green-100', 'text-green-800')
+      expect(screen.getByText('Approved Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
     })
 
     it('should display "Published" status for published', () => {
-      const event = createMockEvent({ status: 'published' })
+      const event = createMockEvent({ status: 'published', title: 'Published Event' })
 
       render(
         <AdminEventList
@@ -319,11 +353,14 @@ describe('AdminEventList', () => {
       )
 
       const statusBadge = screen.getByText('Published')
+      expect(statusBadge).toBeInTheDocument()
       expect(statusBadge).toHaveClass('bg-blue-100', 'text-blue-800')
+      expect(screen.getByText('Published Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
     })
 
     it('should display "Rejected" status for rejected', () => {
-      const event = createMockEvent({ status: 'rejected' })
+      const event = createMockEvent({ status: 'rejected', title: 'Rejected Event' })
 
       render(
         <AdminEventList
@@ -333,11 +370,14 @@ describe('AdminEventList', () => {
       )
 
       const statusBadge = screen.getByText('Rejected')
+      expect(statusBadge).toBeInTheDocument()
       expect(statusBadge).toHaveClass('bg-red-100', 'text-red-800')
+      expect(screen.getByText('Rejected Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
     })
 
     it('should display "Changes Needed" status for requires_changes', () => {
-      const event = createMockEvent({ status: 'requires_changes' })
+      const event = createMockEvent({ status: 'requires_changes', title: 'Changes Event' })
 
       render(
         <AdminEventList
@@ -347,11 +387,14 @@ describe('AdminEventList', () => {
       )
 
       const statusBadge = screen.getByText('Changes Needed')
+      expect(statusBadge).toBeInTheDocument()
       expect(statusBadge).toHaveClass('bg-orange-100', 'text-orange-800')
+      expect(screen.getByText('Changes Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
     })
 
     it('should display unknown status with default styling', () => {
-      const event = createMockEvent({ status: 'unknown_status' as EventStatus })
+      const event = createMockEvent({ status: 'unknown_status' as EventStatus, title: 'Unknown Event' })
 
       render(
         <AdminEventList
@@ -361,7 +404,10 @@ describe('AdminEventList', () => {
       )
 
       const statusBadge = screen.getByText('unknown_status')
+      expect(statusBadge).toBeInTheDocument()
       expect(statusBadge).toHaveClass('bg-gray-100', 'text-gray-800')
+      expect(screen.getByText('Unknown Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
     })
 
     it('should apply rounded pill styling to status badges', () => {
@@ -401,9 +447,9 @@ describe('AdminEventList', () => {
   describe('Action Buttons Integration', () => {
     it('should render ApprovalActionButtons for each event', () => {
       const events = [
-        createMockEvent({ id: 1 }),
-        createMockEvent({ id: 2 }),
-        createMockEvent({ id: 3 }),
+        createMockEvent({ id: 1, title: 'Event 1' }),
+        createMockEvent({ id: 2, title: 'Event 2' }),
+        createMockEvent({ id: 3, title: 'Event 3' }),
       ]
 
       render(
@@ -415,10 +461,13 @@ describe('AdminEventList', () => {
 
       const actionButtons = screen.getAllByTestId('approval-action-buttons')
       expect(actionButtons).toHaveLength(3)
+      expect(screen.getByText('Event 1')).toBeInTheDocument()
+      expect(screen.getByText('Event 2')).toBeInTheDocument()
+      expect(screen.getByText('Event 3')).toBeInTheDocument()
     })
 
     it('should pass correct event to ApprovalActionButtons', () => {
-      const event = createMockEvent({ id: 42, title: 'Test Event' })
+      const event = createMockEvent({ id: 42, title: 'Test Event 42' })
 
       render(
         <AdminEventList
@@ -428,6 +477,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByTestId('event-id')).toHaveTextContent('42')
+      expect(screen.getByText('Test Event 42')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
     })
 
     it('should pass all action handlers to ApprovalActionButtons', () => {
@@ -447,7 +499,7 @@ describe('AdminEventList', () => {
     })
 
     it('should pass loading state to ApprovalActionButtons', () => {
-      const event = createMockEvent()
+      const event = createMockEvent({ title: 'Loading Test Event' })
 
       render(
         <AdminEventList
@@ -458,10 +510,13 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByTestId('loading-state')).toHaveTextContent('loading')
+      expect(screen.getByText('Loading Test Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getByRole('table')).toBeInTheDocument()
     })
 
     it('should pass non-loading state by default', () => {
-      const event = createMockEvent()
+      const event = createMockEvent({ title: 'Non-Loading Event' })
 
       render(
         <AdminEventList
@@ -471,6 +526,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByTestId('loading-state')).toHaveTextContent('not-loading')
+      expect(screen.getByText('Non-Loading Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getAllByRole('cell')).toHaveLength(6)
     })
 
     it('should render action buttons for all events regardless of status', () => {
@@ -600,6 +658,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText(longTitle)).toBeInTheDocument()
+      expect(longTitle.length).toBe(200)
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
     })
 
     it('should handle special characters in event title', () => {
@@ -613,10 +674,13 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText('Event & "Special" <chars>')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getByRole('table')).toBeInTheDocument()
+      expect(screen.getAllByRole('cell')).toHaveLength(6)
     })
 
     it('should handle empty string as title', () => {
-      const event = createMockEvent({ title: '' })
+      const event = createMockEvent({ title: '', organizer: 'Test Organizer' })
 
       render(
         <AdminEventList
@@ -627,11 +691,14 @@ describe('AdminEventList', () => {
 
       // Should still render the row even with empty title
       expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getByText('Test Organizer')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
+      expect(screen.getAllByRole('cell')).toHaveLength(6)
     })
 
     it('should handle very long organizer names', () => {
       const longName = 'A'.repeat(100)
-      const event = createMockEvent({ organizer: longName })
+      const event = createMockEvent({ organizer: longName, title: 'Long Organizer Event' })
 
       render(
         <AdminEventList
@@ -641,10 +708,13 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText(longName)).toBeInTheDocument()
+      expect(longName.length).toBe(100)
+      expect(screen.getByText('Long Organizer Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
     })
 
     it('should handle large category IDs', () => {
-      const event = createMockEvent({ category_id: 999999 })
+      const event = createMockEvent({ category_id: 999999, title: 'Large Category Event' })
 
       render(
         <AdminEventList
@@ -654,10 +724,13 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText('Category 999999')).toBeInTheDocument()
+      expect(screen.getByText('Large Category Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getByRole('table')).toBeInTheDocument()
     })
 
     it('should handle category ID of 0', () => {
-      const event = createMockEvent({ category_id: 0 })
+      const event = createMockEvent({ category_id: 0, title: 'Zero Category Event' })
 
       render(
         <AdminEventList
@@ -667,6 +740,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByText('Category 0')).toBeInTheDocument()
+      expect(screen.getByText('Zero Category Event')).toBeInTheDocument()
+      expect(screen.getByTestId('approval-action-buttons')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
     })
   })
 
@@ -689,9 +765,9 @@ describe('AdminEventList', () => {
     })
 
     it('should use semantic HTML for table structure', () => {
-      const event = createMockEvent()
+      const event = createMockEvent({ title: 'Semantic HTML Event' })
 
-      render(
+      const { container } = render(
         <AdminEventList
           events={[event]}
           {...mockHandlers}
@@ -699,6 +775,9 @@ describe('AdminEventList', () => {
       )
 
       expect(screen.getByRole('table')).toBeInTheDocument()
+      expect(container.querySelector('thead')).toBeInTheDocument()
+      expect(container.querySelector('tbody')).toBeInTheDocument()
+      expect(screen.getAllByRole('row')).toHaveLength(2)
     })
 
     it('should have proper header cell styling', () => {
