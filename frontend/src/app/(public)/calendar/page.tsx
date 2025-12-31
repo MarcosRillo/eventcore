@@ -1,6 +1,8 @@
+import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { Metadata } from 'next'
 
 import { CalendarPageContainer } from '@/features/public-calendar/components/smart/CalendarPageContainer'
+import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 
 export const metadata: Metadata = {
   title: 'Eventos en Tucumán - Calendario Turístico',
@@ -24,8 +26,32 @@ export const metadata: Metadata = {
 }
 
 /**
- *
+ * Public Calendar Page
+ * Server Component - fetches data server-side for SEO and performance
  */
-export default function CalendarPage() {
-  return <CalendarPageContainer />
+export default async function CalendarPage() {
+  const now = new Date()
+
+  // Fetch all data server-side in parallel for better performance
+  const [statsResponse, eventsResponse, eventTypesResponse, locationsResponse] =
+    await Promise.all([
+      publicEventsService.getStats().catch(() => ({ data: null })),
+      publicEventsService
+        .getAll({
+          start_date: format(startOfMonth(now), 'yyyy-MM-dd'),
+          end_date: format(endOfMonth(now), 'yyyy-MM-dd'),
+        })
+        .catch(() => ({ data: [] })),
+      publicEventsService.getEventTypes().catch(() => ({ data: [] })),
+      publicEventsService.getLocations().catch(() => ({ data: [] })),
+    ])
+
+  return (
+    <CalendarPageContainer
+      initialStats={statsResponse.data}
+      initialEvents={eventsResponse.data}
+      initialEventTypes={eventTypesResponse.data}
+      initialLocations={locationsResponse.data}
+    />
+  )
 }

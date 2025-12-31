@@ -3,9 +3,10 @@
  *
  * Fetches and manages public events with filtering support.
  * Implements cascading filter logic for EventType → EventSubtype.
+ * Supports server-side initial data to avoid waterfall fetching.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
@@ -15,6 +16,16 @@ import {
   Location,
   EventFilters
 } from '@/features/public-calendar/types/public-calendar.types'
+
+/**
+ * Options for usePublicEvents hook
+ * All properties are optional for backward compatibility
+ */
+export interface UsePublicEventsOptions {
+  initialEvents?: PublicEvent[]
+  initialEventTypes?: EventType[]
+  initialLocations?: Location[]
+}
 
 interface UsePublicEventsReturn {
   events: PublicEvent[]
@@ -33,12 +44,21 @@ interface UsePublicEventsReturn {
   retry: () => void
 }
 
-export const usePublicEvents = (): UsePublicEventsReturn => {
-  const [events, setEvents] = useState<PublicEvent[]>([])
-  const [eventTypes, setEventTypes] = useState<EventType[]>([])
+export const usePublicEvents = (
+  options: UsePublicEventsOptions = {}
+): UsePublicEventsReturn => {
+  const { initialEvents, initialEventTypes, initialLocations } = options
+
+  // Track if this is the initial render (for skipping first fetch when we have initial data)
+  const isInitialRender = useRef(true)
+  const hasInitialEvents = useRef(!!initialEvents)
+
+  // Initialize state with server-side data if available
+  const [events, setEvents] = useState<PublicEvent[]>(initialEvents ?? [])
+  const [eventTypes, setEventTypes] = useState<EventType[]>(initialEventTypes ?? [])
   const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
-  const [locations, setLocations] = useState<Location[]>([])
-  const [loading, setLoading] = useState(true)
+  const [locations, setLocations] = useState<Location[]>(initialLocations ?? [])
+  const [loading, setLoading] = useState(!initialEvents)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<EventFilters>({
     event_type_id: null,
@@ -93,11 +113,23 @@ export const usePublicEvents = (): UsePublicEventsReturn => {
     }
   }
 
+  // Fetch event types and locations on mount (skip if initial data provided)
   useEffect(() => {
+    if (initialEventTypes && initialLocations) {
+      return
+    }
     fetchEventTypesAndLocations()
-  }, [])
+  }, [initialEventTypes, initialLocations])
 
+  // Fetch events when filters change (skip initial if we have server data)
   useEffect(() => {
+    // On first render, skip fetch if we have initial data from server
+    if (isInitialRender.current && hasInitialEvents.current) {
+      isInitialRender.current = false
+      return
+    }
+    isInitialRender.current = false
+
     fetchEvents()
   }, [fetchEvents])
 

@@ -2,6 +2,7 @@
  * Public Calendar Container
  *
  * Smart component that connects usePublicEvents hook with PublicCalendar component.
+ * Supports server-side initial data to avoid waterfall fetching.
  */
 
 'use client'
@@ -10,8 +11,23 @@ import { useRouter } from 'next/navigation'
 
 import { PublicCalendar } from '@/features/public-calendar/components/dumb/PublicCalendar'
 import { usePublicEvents } from '@/features/public-calendar/hooks/usePublicEvents'
+import {
+  PublicEvent,
+  EventType,
+  Location,
+} from '@/features/public-calendar/types/public-calendar.types'
 
-export const PublicCalendarContainer = () => {
+interface PublicCalendarContainerProps {
+  initialEvents?: PublicEvent[]
+  initialEventTypes?: EventType[]
+  initialLocations?: Location[]
+}
+
+export const PublicCalendarContainer = ({
+  initialEvents,
+  initialEventTypes,
+  initialLocations,
+}: PublicCalendarContainerProps) => {
   const router = useRouter()
   const {
     events,
@@ -25,7 +41,11 @@ export const PublicCalendarContainer = () => {
     handleEventSubtypeFilter,
     handleLocationFilter,
     clearFilters
-  } = usePublicEvents()
+  } = usePublicEvents({
+    initialEvents,
+    initialEventTypes,
+    initialLocations,
+  })
 
   const handleEventClick = (eventId: number): void => {
     router.push(`/calendar/${eventId}`)

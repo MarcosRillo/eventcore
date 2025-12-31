@@ -1,6 +1,7 @@
 /**
  * Calendar View Container
  * Smart component that connects useCalendarEvents hook with CalendarView component
+ * Supports server-side initial data to avoid waterfall fetching
  */
 
 'use client'
@@ -9,9 +10,24 @@ import { useRouter } from 'next/navigation'
 
 import { CalendarView } from '@/features/public-calendar/components/dumb/CalendarView'
 import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
-import { CalendarEvent } from '@/features/public-calendar/types/public-calendar.types'
+import {
+  CalendarEvent,
+  PublicEvent,
+  EventType,
+  Location,
+} from '@/features/public-calendar/types/public-calendar.types'
 
-export const CalendarViewContainer = () => {
+interface CalendarViewContainerProps {
+  initialEvents?: PublicEvent[]
+  initialEventTypes?: EventType[]
+  initialLocations?: Location[]
+}
+
+export const CalendarViewContainer = ({
+  initialEvents,
+  initialEventTypes,
+  initialLocations,
+}: CalendarViewContainerProps) => {
   const router = useRouter()
   const {
     calendarEvents,
@@ -21,7 +37,11 @@ export const CalendarViewContainer = () => {
     currentView,
     handleNavigate,
     handleViewChange,
-  } = useCalendarEvents()
+  } = useCalendarEvents({
+    initialEvents,
+    initialEventTypes,
+    initialLocations,
+  })
 
   // Handle event click - navigate to event detail page
   const handleSelectEvent = (event: CalendarEvent): void => {

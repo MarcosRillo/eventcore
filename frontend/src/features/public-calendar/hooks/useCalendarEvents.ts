@@ -1,10 +1,11 @@
 /**
  * Custom hook for calendar events
  * Fetches events for calendar view with date range filtering
+ * Supports server-side initial data to avoid waterfall fetching
  */
 
 import { startOfMonth, endOfMonth, format } from 'date-fns'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
@@ -14,6 +15,16 @@ import {
   EventType,
   Location,
 } from '@/features/public-calendar/types/public-calendar.types'
+
+/**
+ * Options for useCalendarEvents hook
+ * All properties are optional for backward compatibility
+ */
+export interface UseCalendarEventsOptions {
+  initialEvents?: PublicEvent[]
+  initialEventTypes?: EventType[]
+  initialLocations?: Location[]
+}
 
 interface UseCalendarEventsReturn {
   calendarEvents: CalendarEvent[]
@@ -45,19 +56,33 @@ const transformToCalendarEvent = (event: PublicEvent): CalendarEvent => {
   }
 }
 
-export const useCalendarEvents = (): UseCalendarEventsReturn => {
-  const [events, setEvents] = useState<PublicEvent[]>([])
-  const [eventTypes, setEventTypes] = useState<EventType[]>([])
-  const [locations, setLocations] = useState<Location[]>([])
-  const [loading, setLoading] = useState(true)
+export const useCalendarEvents = (
+  options: UseCalendarEventsOptions = {}
+): UseCalendarEventsReturn => {
+  const { initialEvents, initialEventTypes, initialLocations } = options
+
+  // Track if this is the initial render (for skipping first fetch when we have initial data)
+  const isInitialRender = useRef(true)
+  const hasInitialEvents = useRef(!!initialEvents)
+
+  // Initialize state with server-side data if available
+  const [events, setEvents] = useState<PublicEvent[]>(initialEvents ?? [])
+  const [eventTypes, setEventTypes] = useState<EventType[]>(initialEventTypes ?? [])
+  const [locations, setLocations] = useState<Location[]>(initialLocations ?? [])
+  const [loading, setLoading] = useState(!initialEvents)
   const [error, setError] = useState<string | null>(null)
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [currentView, setCurrentView] = useState<CalendarView>('month')
   const [selectedEventType, setSelectedEventType] = useState<number | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
 
-  // Fetch event types and locations on mount
+  // Fetch event types and locations on mount (skip if initial data provided)
   useEffect(() => {
+    // Skip if we already have initial data from server
+    if (initialEventTypes && initialLocations) {
+      return
+    }
+
     const fetchFilters = async (): Promise<void> => {
       try {
         const [eventTypesRes, locationsRes] = await Promise.all([
@@ -72,7 +97,7 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
     }
 
     fetchFilters()
-  }, [])
+  }, [initialEventTypes, initialLocations])
 
   // Fetch events based on current date and filters
   const fetchEvents = useCallback(async (): Promise<void> => {
@@ -101,8 +126,15 @@ export const useCalendarEvents = (): UseCalendarEventsReturn => {
     }
   }, [currentDate, selectedEventType, selectedLocation])
 
-  // Fetch events when dependencies change
+  // Fetch events when dependencies change (skip initial if we have server data)
   useEffect(() => {
+    // On first render, skip fetch if we have initial data from server
+    if (isInitialRender.current && hasInitialEvents.current) {
+      isInitialRender.current = false
+      return
+    }
+    isInitialRender.current = false
+
     fetchEvents()
   }, [fetchEvents])
 
