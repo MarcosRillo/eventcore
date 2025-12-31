@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventType;
 use App\Models\EventStatus;
 use App\Models\UserRole;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
@@ -157,32 +158,35 @@ class InternalCalendarStatsControllerTest extends TestCase
     #[Test]
     public function it_calculates_events_this_month_correctly()
     {
+        // Fix date to middle of month for deterministic test
+        Carbon::setTestNow(Carbon::create(2025, 6, 15, 12, 0, 0));
+
         // Arrange: Create events in current month and other months
-        // 2 events this month
+        // 2 events this month (June 2025)
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'event_type_id' => $this->eventType->id,
             'status_id' => $this->publishedStatus->id,
-            'start_date' => now()->startOfMonth()->addDays(5),
-            'end_date' => now()->startOfMonth()->addDays(6),
+            'start_date' => Carbon::create(2025, 6, 10),
+            'end_date' => Carbon::create(2025, 6, 11),
         ]);
 
-        // 1 event next month (should NOT be counted)
+        // 1 event next month (July - should NOT be counted)
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'event_type_id' => $this->eventType->id,
             'status_id' => $this->publishedStatus->id,
-            'start_date' => now()->addMonth()->startOfMonth(),
-            'end_date' => now()->addMonth()->startOfMonth()->addDay(),
+            'start_date' => Carbon::create(2025, 7, 1),
+            'end_date' => Carbon::create(2025, 7, 2),
         ]);
 
-        // 1 event last month (should NOT be counted)
+        // 1 event last month (May - should NOT be counted)
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'event_type_id' => $this->eventType->id,
             'status_id' => $this->publishedStatus->id,
-            'start_date' => now()->subMonth()->startOfMonth(),
-            'end_date' => now()->subMonth()->startOfMonth()->addDay(),
+            'start_date' => Carbon::create(2025, 5, 1),
+            'end_date' => Carbon::create(2025, 5, 2),
         ]);
 
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
@@ -194,7 +198,10 @@ class InternalCalendarStatsControllerTest extends TestCase
         // Assert
         $response->assertOk();
         $data = $response->json('data');
-        $this->assertEquals(2, $data['events_this_month']); // Only current month
+        $this->assertEquals(2, $data['events_this_month']); // Only current month (June)
+
+        // Reset Carbon time
+        Carbon::setTestNow();
     }
 
     #[Test]
