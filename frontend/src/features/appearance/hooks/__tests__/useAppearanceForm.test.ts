@@ -275,19 +275,20 @@ describe('useAppearanceForm', () => {
         result.current.updateField('color_primary', '#FF0000')
       })
 
-      // Verify that handleSubmit throws error
-      let errorThrown = false
-      try {
-        await act(async () => {
-          if (result.current.handleSubmit) {
-            await result.current.handleSubmit()
-          }
-        })
-      } catch {
-        errorThrown = true
-      }
+      // Call handleSubmit - with React 19 useTransition, errors are handled via state
+      await act(async () => {
+        if (result.current.handleSubmit) {
+          await result.current.handleSubmit()
+        }
+      })
 
-      expect(errorThrown).toBe(true)
+      // Wait for async operation to complete
+      await waitFor(() => {
+        expect(result.current.isSaving).toBe(false)
+      })
+
+      // Verify error state is set (React 19 pattern: errors handled via state)
+      expect(result.current.error).toBeTruthy()
       // Verify saving state is reset (from finally block)
       expect(result.current.isSaving).toBe(false)
     })

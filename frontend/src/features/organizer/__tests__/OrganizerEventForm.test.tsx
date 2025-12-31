@@ -434,7 +434,10 @@ describe('OrganizerEventForm', () => {
         expect(screen.getByText(/error creating event/i)).toBeInTheDocument()
       })
 
-      expect(titleInput).not.toBeDisabled()
+      // Wait for the form to be re-enabled after the transition completes
+      await waitFor(() => {
+        expect(titleInput).not.toBeDisabled()
+      })
     })
   })
 

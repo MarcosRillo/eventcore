@@ -1,7 +1,14 @@
 'use client';
 
+/**
+ * useEventForm Hook
+ *
+ * Custom React hook for managing event form state and operations.
+ * Uses React 19 useTransition for loading states during create/update operations.
+ */
+
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useTransition } from 'react'
 
 import { getActiveEventSubtypes } from '@/features/event-types/services/eventSubtype.service'
 import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
@@ -76,8 +83,9 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
   })
 
   const [errors, setErrors] = useState<EventFormErrors>({})
-  const [loading, setLoading] = useState(false)
-  const [initialLoading, setInitialLoading] = useState(isEditMode)
+  const [isSubmitting, startSubmitTransition] = useTransition()
+  const [isInitialLoading, startInitialTransition] = useTransition()
+  const [initialLoadStarted, setInitialLoadStarted] = useState(false)
   const [eventTypes, setEventTypes] = useState<EventType[]>([])
   const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
   const [selectedLocations, setSelectedLocations] = useState<{ id: number; name: string }[]>([])
@@ -119,10 +127,10 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
 
   // Load event data in edit mode
   useEffect(() => {
-    if (!eventId) return
+    if (!eventId || initialLoadStarted) return
 
-    const loadEvent = async () => {
-      setInitialLoading(true)
+    setInitialLoadStarted(true)
+    startInitialTransition(async () => {
       try {
         const event = await getEvent(eventId)
 
@@ -189,13 +197,9 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
         }
       } catch {
         setErrors({ general: 'Error loading event data' })
-      } finally {
-        setInitialLoading(false)
       }
-    }
-
-    loadEvent()
-  }, [eventId])
+    })
+  }, [eventId, initialLoadStarted])
 
   const handleChange = (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -289,87 +293,86 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
       return
     }
 
-    setLoading(true)
     setErrors({})
 
-    try {
-      // Prepare async dates if they exist
-      const asyncDates = formData.async_dates.length > 0
-        ? formData.async_dates.map(d => ({
-            date: d.date,
-            notes: d.notes
-          }))
-        : undefined
+    startSubmitTransition(async () => {
+      try {
+        // Prepare async dates if they exist
+        const asyncDates = formData.async_dates.length > 0
+          ? formData.async_dates.map(d => ({
+              date: d.date,
+              notes: d.notes
+            }))
+          : undefined
 
-      const payload = {
-        // Required fields
-        title: formData.title,
-        description: formData.description,
-        start_date: formData.start_date,
-        end_date: formData.end_date || undefined,
-        location_ids: formData.location_ids,
+        const payload = {
+          // Required fields
+          title: formData.title,
+          description: formData.description,
+          start_date: formData.start_date,
+          end_date: formData.end_date || undefined,
+          location_ids: formData.location_ids,
 
-        // Event Type/Subtype (hierarchical categorization - Dec 2, 2025) - REQUIRED
-        event_type_id: formData.event_type_id!,
-        event_subtype_id: formData.event_subtype_id!,
+          // Event Type/Subtype (hierarchical categorization - Dec 2, 2025) - REQUIRED
+          event_type_id: formData.event_type_id!,
+          event_subtype_id: formData.event_subtype_id!,
 
-        // FK references (IDs)
-        type_id: formData.type_id || undefined,
-        edition_number: formData.edition_number || undefined,
-        subtype_id: formData.subtype_id || undefined,
-        origin_id: formData.origin_id || undefined,
-        theme_id: formData.theme_id || undefined,
-        frequency_id: formData.frequency_id || undefined,
-        rotation_type_id: formData.rotation_type_id || undefined,
-        producer_id: formData.producer_id || undefined,
+          // FK references (IDs)
+          type_id: formData.type_id || undefined,
+          edition_number: formData.edition_number || undefined,
+          subtype_id: formData.subtype_id || undefined,
+          origin_id: formData.origin_id || undefined,
+          theme_id: formData.theme_id || undefined,
+          frequency_id: formData.frequency_id || undefined,
+          rotation_type_id: formData.rotation_type_id || undefined,
+          producer_id: formData.producer_id || undefined,
 
-        // Services and Rooms
-        service_ids: formData.service_ids.length > 0 ? formData.service_ids : undefined,
-        room_ids: formData.room_ids.length > 0 ? formData.room_ids : undefined,
+          // Services and Rooms
+          service_ids: formData.service_ids.length > 0 ? formData.service_ids : undefined,
+          room_ids: formData.room_ids.length > 0 ? formData.room_ids : undefined,
 
-        // Location info
-        custom_location_name: formData.has_custom_location ? formData.custom_location_name || undefined : undefined,
-        maps_url: formData.has_custom_location ? formData.maps_url || undefined : undefined,
-        previous_venue: formData.previous_venue || undefined,
-        next_venue: formData.next_venue || undefined,
+          // Location info
+          custom_location_name: formData.has_custom_location ? formData.custom_location_name || undefined : undefined,
+          maps_url: formData.has_custom_location ? formData.maps_url || undefined : undefined,
+          previous_venue: formData.previous_venue || undefined,
+          next_venue: formData.next_venue || undefined,
 
-        // Async dates
-        async_dates: asyncDates,
+          // Async dates
+          async_dates: asyncDates,
 
-        // Attendance
-        local_attendance: formData.local_attendance ? parseInt(formData.local_attendance) : undefined,
-        national_attendance: formData.national_attendance ? parseInt(formData.national_attendance) : undefined,
-        international_attendance: formData.international_attendance ? parseInt(formData.international_attendance) : undefined,
-        virtual_transmission: formData.virtual_transmission,
+          // Attendance
+          local_attendance: formData.local_attendance ? parseInt(formData.local_attendance) : undefined,
+          national_attendance: formData.national_attendance ? parseInt(formData.national_attendance) : undefined,
+          international_attendance: formData.international_attendance ? parseInt(formData.international_attendance) : undefined,
+          virtual_transmission: formData.virtual_transmission,
 
-        // Additional info
-        event_website: formData.event_website || undefined,
+          // Additional info
+          event_website: formData.event_website || undefined,
 
-        // Images
-        logo_url: formData.logo_url || undefined,
-        featured_image: formData.featured_image || undefined,
-        responsive_image_url: formData.responsive_image_url || undefined,
+          // Images
+          logo_url: formData.logo_url || undefined,
+          featured_image: formData.featured_image || undefined,
+          responsive_image_url: formData.responsive_image_url || undefined,
+        }
+
+        if (isEditMode) {
+          await updateEvent(eventId, { ...payload, id: eventId })
+        } else {
+          await createEvent(payload)
+        }
+
+        // Call onSuccess callback or navigate
+        if (onSuccess) {
+          onSuccess()
+        } else {
+          router.push('/organizer/events')
+        }
+      } catch {
+        setErrors({
+          general: isEditMode ? 'Error updating event' : 'Error creating event'
+        })
       }
-
-      if (isEditMode) {
-        await updateEvent(eventId, { ...payload, id: eventId })
-      } else {
-        await createEvent(payload)
-      }
-
-      // Call onSuccess callback or navigate
-      if (onSuccess) {
-        onSuccess()
-      } else {
-        router.push('/organizer/events')
-      }
-    } catch {
-      setErrors({
-        general: isEditMode ? 'Error updating event' : 'Error creating event'
-      })
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const handleCancel = () => {
@@ -379,6 +382,10 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
       router.back()
     }
   }
+
+  // Backward compatibility: compute loading states
+  const loading = isSubmitting
+  const initialLoading = isEditMode && (isInitialLoading || !initialLoadStarted)
 
   return {
     formData,

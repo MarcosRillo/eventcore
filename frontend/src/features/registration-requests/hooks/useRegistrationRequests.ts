@@ -2,10 +2,12 @@
 
 /**
  * useRegistrationRequests Hook
- * Manages state and actions for registration requests admin panel
+ *
+ * Manages state and actions for registration requests admin panel.
+ * Uses React 19 useTransition for loading states and useOptimistic for instant UI updates.
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useTransition, useOptimistic } from 'react'
 
 import registrationRequestService from '@/features/registration-requests/services/registration-request.service'
 import {
@@ -41,15 +43,63 @@ interface UseRegistrationRequestsReturn {
   clearError: () => void
 }
 
+type OptimisticAction =
+  | { type: 'approve'; id: number }
+  | { type: 'reject'; id: number; reason: string }
+  | { type: 'suspend'; id: number }
+  | { type: 'unsuspend'; id: number }
+  | { type: 'delete'; id: number }
+
+function optimisticReducer(
+  requests: RegistrationRequest[],
+  action: OptimisticAction
+): RegistrationRequest[] {
+  switch (action.type) {
+    case 'approve':
+      return requests.map((req) =>
+        req.id === action.id
+          ? { ...req, status: 'approved' as RegistrationRequestStatus }
+          : req
+      )
+    case 'reject':
+      return requests.map((req) =>
+        req.id === action.id
+          ? { ...req, status: 'rejected' as RegistrationRequestStatus, rejection_reason: action.reason }
+          : req
+      )
+    case 'suspend':
+      return requests.map((req) =>
+        req.id === action.id
+          ? { ...req, user_status: 'suspended', organization_status: 'suspended' }
+          : req
+      )
+    case 'unsuspend':
+      return requests.map((req) =>
+        req.id === action.id
+          ? { ...req, user_status: 'active', organization_status: 'active' }
+          : req
+      )
+    case 'delete':
+      return requests.map((req) =>
+        req.id === action.id
+          ? { ...req, is_deleted: true }
+          : req
+      )
+    default:
+      return requests
+  }
+}
+
 export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
   // Data state
   const [requests, setRequests] = useState<RegistrationRequest[]>([])
+  const [optimisticRequests, addOptimisticAction] = useOptimistic(requests, optimisticReducer)
   const [selectedRequest, setSelectedRequest] = useState<RegistrationRequestDetail | null>(null)
 
-  // UI state
-  const [loading, setLoading] = useState(true)
-  const [detailLoading, setDetailLoading] = useState(false)
-  const [actionLoading, setActionLoading] = useState(false)
+  // React 19 transitions for loading states
+  const [isLoadingPending, startLoadingTransition] = useTransition()
+  const [isDetailPending, startDetailTransition] = useTransition()
+  const [isActionPending, startActionTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
   // Filter state (filtering happens on frontend)
@@ -59,18 +109,15 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
    * Fetch all registration requests (no backend filtering)
    */
   const fetchRequests = useCallback(async (): Promise<void> => {
-    setLoading(true)
     setError(null)
-
-    try {
-      // Fetch all requests - filtering happens on frontend
-      const data = await registrationRequestService.getAll({})
-      setRequests(data)
-    } catch {
-      setError('Error al cargar las solicitudes')
-    } finally {
-      setLoading(false)
-    }
+    startLoadingTransition(async () => {
+      try {
+        const data = await registrationRequestService.getAll({})
+        setRequests(data)
+      } catch {
+        setError('Error al cargar las solicitudes')
+      }
+    })
   }, [])
 
   /**
@@ -82,187 +129,195 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
       return
     }
 
-    setDetailLoading(true)
     setError(null)
-
-    try {
-      const detail = await registrationRequestService.getById(id)
-      setSelectedRequest(detail)
-    } catch {
-      setError('Error al cargar el detalle de la solicitud')
-      setSelectedRequest(null)
-    } finally {
-      setDetailLoading(false)
-    }
+    startDetailTransition(async () => {
+      try {
+        const detail = await registrationRequestService.getById(id)
+        setSelectedRequest(detail)
+      } catch {
+        setError('Error al cargar el detalle de la solicitud')
+        setSelectedRequest(null)
+      }
+    })
   }, [])
 
   /**
    * Approve a registration request
    */
   const approveRequest = useCallback(async (id: number): Promise<boolean> => {
-    setActionLoading(true)
     setError(null)
 
-    try {
-      const result = await registrationRequestService.approve(id)
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        addOptimisticAction({ type: 'approve', id })
+        try {
+          const result = await registrationRequestService.approve(id)
 
-      // Update local state with new user_id, organization_id and active status
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id
-            ? {
-                ...req,
-                status: 'approved' as RegistrationRequestStatus,
-                user_id: result.user_id,
-                organization_id: result.organization_id,
-                user_status: 'active',
-                organization_status: 'active',
-              }
-            : req
-        )
-      )
+          // Update local state with new user_id, organization_id and active status
+          setRequests((prev) =>
+            prev.map((req) =>
+              req.id === id
+                ? {
+                    ...req,
+                    status: 'approved' as RegistrationRequestStatus,
+                    user_id: result.user_id,
+                    organization_id: result.organization_id,
+                    user_status: 'active',
+                    organization_status: 'active',
+                  }
+                : req
+            )
+          )
 
-      // Clear selection if this was the selected request
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(null)
-      }
+          // Clear selection if this was the selected request
+          if (selectedRequest?.id === id) {
+            setSelectedRequest(null)
+          }
 
-      return true
-    } catch {
-      setError('Error al aprobar la solicitud')
-      return false
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedRequest?.id])
+          resolve(true)
+        } catch {
+          setError('Error al aprobar la solicitud')
+          resolve(false)
+        }
+      })
+    })
+  }, [selectedRequest?.id, addOptimisticAction])
 
   /**
    * Reject a registration request
    */
   const rejectRequest = useCallback(async (id: number, reason: string): Promise<boolean> => {
-    setActionLoading(true)
     setError(null)
 
-    try {
-      await registrationRequestService.reject(id, reason)
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        addOptimisticAction({ type: 'reject', id, reason })
+        try {
+          await registrationRequestService.reject(id, reason)
 
-      // Update local state
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id
-            ? { ...req, status: 'rejected' as RegistrationRequestStatus, rejection_reason: reason }
-            : req
-        )
-      )
+          // Update local state
+          setRequests((prev) =>
+            prev.map((req) =>
+              req.id === id
+                ? { ...req, status: 'rejected' as RegistrationRequestStatus, rejection_reason: reason }
+                : req
+            )
+          )
 
-      // Clear selection if this was the selected request
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(null)
-      }
+          // Clear selection if this was the selected request
+          if (selectedRequest?.id === id) {
+            setSelectedRequest(null)
+          }
 
-      return true
-    } catch {
-      setError('Error al rechazar la solicitud')
-      return false
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedRequest?.id])
+          resolve(true)
+        } catch {
+          setError('Error al rechazar la solicitud')
+          resolve(false)
+        }
+      })
+    })
+  }, [selectedRequest?.id, addOptimisticAction])
 
   /**
    * Suspend an approved registration request
    */
   const suspendRequest = useCallback(async (id: number): Promise<boolean> => {
-    setActionLoading(true)
     setError(null)
 
-    try {
-      const updated = await registrationRequestService.suspend(id)
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        addOptimisticAction({ type: 'suspend', id })
+        try {
+          const updated = await registrationRequestService.suspend(id)
 
-      // Update local state with new user_status
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id ? { ...req, user_status: updated.user_status, organization_status: updated.organization_status } : req
-        )
-      )
+          // Update local state with new user_status
+          setRequests((prev) =>
+            prev.map((req) =>
+              req.id === id ? { ...req, user_status: updated.user_status, organization_status: updated.organization_status } : req
+            )
+          )
 
-      // Clear selection if this was the selected request
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(null)
-      }
+          // Clear selection if this was the selected request
+          if (selectedRequest?.id === id) {
+            setSelectedRequest(null)
+          }
 
-      return true
-    } catch {
-      setError('Error al suspender la solicitud')
-      return false
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedRequest?.id])
+          resolve(true)
+        } catch {
+          setError('Error al suspender la solicitud')
+          resolve(false)
+        }
+      })
+    })
+  }, [selectedRequest?.id, addOptimisticAction])
 
   /**
    * Unsuspend (reactivate) a suspended registration request
    */
   const unsuspendRequest = useCallback(async (id: number): Promise<boolean> => {
-    setActionLoading(true)
     setError(null)
 
-    try {
-      const updated = await registrationRequestService.unsuspend(id)
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        addOptimisticAction({ type: 'unsuspend', id })
+        try {
+          const updated = await registrationRequestService.unsuspend(id)
 
-      // Update local state with new user_status
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id ? { ...req, user_status: updated.user_status, organization_status: updated.organization_status } : req
-        )
-      )
+          // Update local state with new user_status
+          setRequests((prev) =>
+            prev.map((req) =>
+              req.id === id ? { ...req, user_status: updated.user_status, organization_status: updated.organization_status } : req
+            )
+          )
 
-      // Clear selection if this was the selected request
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(null)
-      }
+          // Clear selection if this was the selected request
+          if (selectedRequest?.id === id) {
+            setSelectedRequest(null)
+          }
 
-      return true
-    } catch {
-      setError('Error al reactivar la solicitud')
-      return false
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedRequest?.id])
+          resolve(true)
+        } catch {
+          setError('Error al reactivar la solicitud')
+          resolve(false)
+        }
+      })
+    })
+  }, [selectedRequest?.id, addOptimisticAction])
 
   /**
    * Delete a suspended registration request (soft delete user + organization)
    */
   const deleteRequest = useCallback(async (id: number): Promise<boolean> => {
-    setActionLoading(true)
     setError(null)
 
-    try {
-      await registrationRequestService.delete(id)
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        addOptimisticAction({ type: 'delete', id })
+        try {
+          await registrationRequestService.delete(id)
 
-      // Update local state - mark as deleted (soft delete)
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id
-            ? { ...req, is_deleted: true }
-            : req
-        )
-      )
+          // Update local state - mark as deleted (soft delete)
+          setRequests((prev) =>
+            prev.map((req) =>
+              req.id === id
+                ? { ...req, is_deleted: true }
+                : req
+            )
+          )
 
-      // Clear selection if this was the selected request
-      if (selectedRequest?.id === id) {
-        setSelectedRequest(null)
-      }
+          // Clear selection if this was the selected request
+          if (selectedRequest?.id === id) {
+            setSelectedRequest(null)
+          }
 
-      return true
-    } catch {
-      setError('Error al eliminar el usuario y organización')
-      return false
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedRequest?.id])
+          resolve(true)
+        } catch {
+          setError('Error al eliminar el usuario y organización')
+          resolve(false)
+        }
+      })
+    })
+  }, [selectedRequest?.id, addOptimisticAction])
 
   /**
    * Refresh the requests list
@@ -283,8 +338,13 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
     fetchRequests()
   }, [fetchRequests])
 
+  // Backward compatibility: map transition states to original names
+  const loading = isLoadingPending
+  const detailLoading = isDetailPending
+  const actionLoading = isActionPending
+
   return {
-    requests,
+    requests: optimisticRequests,
     selectedRequest,
     loading,
     detailLoading,
@@ -293,11 +353,11 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
     displayFilter,
     setDisplayFilter,
     selectRequest,
-    approveRequest,
-    rejectRequest,
-    suspendRequest,
-    unsuspendRequest,
-    deleteRequest,
+    approveRequest: approveRequest,
+    rejectRequest: rejectRequest,
+    suspendRequest: suspendRequest,
+    unsuspendRequest: unsuspendRequest,
+    deleteRequest: deleteRequest,
     refresh,
     clearError,
   }

@@ -8,7 +8,7 @@
 'use client';
 
 import { AxiosError } from 'axios'
-import { useState, useRef } from 'react'
+import { useState, useRef, useTransition } from 'react'
 
 import { useToast } from '@/components/ui/Toast'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
@@ -32,7 +32,10 @@ interface UseEventActionsReturn {
 export const useEventActions = (
   onSuccess?: () => void
 ): UseEventActionsReturn => {
-  const [loading, setLoading] = useState(false)
+  // React 19 transition for non-blocking UI
+  const [, startTransition] = useTransition()
+  const [isLoading, setIsLoading] = useState(false)
+
   const [submitModalOpen, setSubmitModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
@@ -66,115 +69,124 @@ export const useEventActions = (
   }
 
   const submitForReview = async (eventId: number): Promise<void> => {
-    setLoading(true)
+    setIsLoading(true)
     setValidationErrors(null)
-    try {
-      await organizerEventService.submitForReview(eventId)
-      addToast({
-        message: 'Evento enviado a revisión exitosamente',
-        type: 'success'
-      })
-      closeSubmitModal()
-      onSuccessRef.current?.()
-    } catch (error) {
-      const axiosError = error as AxiosError<SubmitEventError>
-      if (axiosError.response?.status === 422) {
-        // Validation errors - show which fields are missing
-        const errors = axiosError.response.data?.errors
-        setValidationErrors(errors || null)
+    startTransition(async () => {
+      try {
+        await organizerEventService.submitForReview(eventId)
         addToast({
-          message: 'Faltan campos requeridos para enviar a revisión',
-          type: 'error'
+          message: 'Evento enviado a revisión exitosamente',
+          type: 'success'
         })
-      } else if (axiosError.response?.status === 403) {
-        addToast({
-          message: 'Solo eventos en borrador pueden ser enviados a revisión',
-          type: 'error'
-        })
-      } else {
-        addToast({
-          message: 'Error al enviar evento a revisión',
-          type: 'error'
-        })
+        closeSubmitModal()
+        onSuccessRef.current?.()
+      } catch (error) {
+        const axiosError = error as AxiosError<SubmitEventError>
+        if (axiosError.response?.status === 422) {
+          // Validation errors - show which fields are missing
+          const errors = axiosError.response.data?.errors
+          setValidationErrors(errors || null)
+          addToast({
+            message: 'Faltan campos requeridos para enviar a revisión',
+            type: 'error'
+          })
+        } else if (axiosError.response?.status === 403) {
+          addToast({
+            message: 'Solo eventos en borrador pueden ser enviados a revisión',
+            type: 'error'
+          })
+        } else {
+          addToast({
+            message: 'Error al enviar evento a revisión',
+            type: 'error'
+          })
+        }
+      } finally {
+        setIsLoading(false)
       }
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const duplicateEvent = async (eventId: number): Promise<void> => {
-    setLoading(true)
-    try {
-      const originalEvent = await organizerEventService.getEvent(eventId)
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        const originalEvent = await organizerEventService.getEvent(eventId)
 
-      if (!originalEvent.start_date) {
-        throw new Error('No date available for duplication')
+        if (!originalEvent.start_date) {
+          throw new Error('No date available for duplication')
+        }
+
+        // Extract location IDs from locations array
+        const locationIds = originalEvent.locations?.map((l: { id: number }) => l.id) || []
+
+        if (locationIds.length === 0) {
+          throw new Error('No location available for duplication')
+        }
+
+        await organizerEventService.createEvent({
+          title: `${originalEvent.title} (Copia)`,
+          description: originalEvent.description || '',
+          start_date: originalEvent.start_date,
+          end_date: originalEvent.end_date,
+          location_ids: locationIds,
+          // Event Type/Subtype (required - Dec 2, 2025)
+          event_type_id: originalEvent.event_type_id || originalEvent.event_type?.id || 0,
+          event_subtype_id: originalEvent.event_subtype_id || originalEvent.event_subtype?.id || 0,
+          // Copy optional FK fields
+          type_id: originalEvent.type_id,
+          edition_number: originalEvent.edition_number,
+          subtype_id: originalEvent.subtype_id,
+          origin_id: originalEvent.origin_id,
+          theme_id: originalEvent.theme_id,
+          frequency_id: originalEvent.frequency_id,
+          rotation_type_id: originalEvent.rotation_type_id,
+          // Copy images
+          logo_url: originalEvent.logo_url,
+          featured_image: originalEvent.featured_image,
+          responsive_image_url: originalEvent.responsive_image_url
+        })
+
+        addToast({
+          message: 'Evento duplicado exitosamente',
+          type: 'success'
+        })
+        onSuccessRef.current?.()
+      } catch {
+        addToast({
+          message: 'Error al duplicar evento',
+          type: 'error'
+        })
+      } finally {
+        setIsLoading(false)
       }
-
-      // Extract location IDs from locations array
-      const locationIds = originalEvent.locations?.map((l: { id: number }) => l.id) || []
-
-      if (locationIds.length === 0) {
-        throw new Error('No location available for duplication')
-      }
-
-      await organizerEventService.createEvent({
-        title: `${originalEvent.title} (Copia)`,
-        description: originalEvent.description || '',
-        start_date: originalEvent.start_date,
-        end_date: originalEvent.end_date,
-        location_ids: locationIds,
-        // Event Type/Subtype (required - Dec 2, 2025)
-        event_type_id: originalEvent.event_type_id || originalEvent.event_type?.id || 0,
-        event_subtype_id: originalEvent.event_subtype_id || originalEvent.event_subtype?.id || 0,
-        // Copy optional FK fields
-        type_id: originalEvent.type_id,
-        edition_number: originalEvent.edition_number,
-        subtype_id: originalEvent.subtype_id,
-        origin_id: originalEvent.origin_id,
-        theme_id: originalEvent.theme_id,
-        frequency_id: originalEvent.frequency_id,
-        rotation_type_id: originalEvent.rotation_type_id,
-        // Copy images
-        logo_url: originalEvent.logo_url,
-        featured_image: originalEvent.featured_image,
-        responsive_image_url: originalEvent.responsive_image_url
-      })
-
-      addToast({
-        message: 'Evento duplicado exitosamente',
-        type: 'success'
-      })
-      onSuccessRef.current?.()
-    } catch {
-      addToast({
-        message: 'Error al duplicar evento',
-        type: 'error'
-      })
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const deleteEvent = async (eventId: number): Promise<void> => {
-    setLoading(true)
-    try {
-      await organizerEventService.deleteEvent(eventId)
-      addToast({
-        message: 'Evento eliminado exitosamente',
-        type: 'success'
-      })
-      closeDeleteModal()
-      onSuccessRef.current?.()
-    } catch {
-      addToast({
-        message: 'Error al eliminar evento',
-        type: 'error'
-      })
-    } finally {
-      setLoading(false)
-    }
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        await organizerEventService.deleteEvent(eventId)
+        addToast({
+          message: 'Evento eliminado exitosamente',
+          type: 'success'
+        })
+        closeDeleteModal()
+        onSuccessRef.current?.()
+      } catch {
+        addToast({
+          message: 'Error al eliminar evento',
+          type: 'error'
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    })
   }
+
+  // Backward compatibility
+  const loading = isLoading
 
   return {
     loading,

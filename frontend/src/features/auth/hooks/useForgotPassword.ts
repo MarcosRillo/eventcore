@@ -1,8 +1,9 @@
 /**
  * Forgot Password Hook
  * Manages forgot password form state and submission
+ * Uses React 19 useTransition for non-blocking UI
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 
 import { forgotPassword } from '@/services/authService';
 
@@ -27,8 +28,11 @@ const isValidEmail = (email: string): boolean => {
 };
 
 export const useForgotPassword = (): UseForgotPasswordReturn => {
+  // React 19 transition for non-blocking UI
+  const [, startTransition] = useTransition();
+  const [isLoadingState, setIsLoadingState] = useState(false);
+
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -42,31 +46,36 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoadingState(true);
     setError(null);
 
-    try {
-      await forgotPassword({ email: email.trim() });
-      setSuccess(true);
-    } catch (err) {
-      // Backend always returns success for security (email enumeration prevention)
-      // But network errors can still occur
-      if (err instanceof Error) {
-        setError('Error de conexión. Por favor intenta de nuevo.');
-      } else {
-        setError('Error inesperado. Por favor intenta de nuevo.');
+    startTransition(async () => {
+      try {
+        await forgotPassword({ email: email.trim() });
+        setSuccess(true);
+      } catch (err) {
+        // Backend always returns success for security (email enumeration prevention)
+        // But network errors can still occur
+        if (err instanceof Error) {
+          setError('Error de conexión. Por favor intenta de nuevo.');
+        } else {
+          setError('Error inesperado. Por favor intenta de nuevo.');
+        }
+      } finally {
+        setIsLoadingState(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [email, isValid]);
+    });
+  }, [email, isValid, startTransition]);
 
   const reset = useCallback(() => {
     setEmail('');
     setError(null);
     setSuccess(false);
-    setIsLoading(false);
+    setIsLoadingState(false);
   }, []);
+
+  // Backward compatibility
+  const isLoading = isLoadingState;
 
   return {
     email,

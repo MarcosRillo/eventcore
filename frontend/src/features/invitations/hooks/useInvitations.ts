@@ -1,6 +1,13 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+/**
+ * useInvitations Hook
+ *
+ * Manages invitation state and operations.
+ * Uses React 19 useTransition for loading states and useOptimistic for cancel.
+ */
+
+import { useState, useCallback, useEffect, useTransition, useOptimistic } from 'react'
 
 import invitationService from '@/features/invitations/services/invitation.service'
 import { Invitation, AssignableRole, SendInvitationData } from '@/features/invitations/types/invitation.types'
@@ -22,87 +29,131 @@ interface UseInvitationsReturn {
   clearError: () => void
 }
 
+type OptimisticAction = { type: 'cancel'; id: number }
+
+function optimisticReducer(invitations: Invitation[], action: OptimisticAction): Invitation[] {
+  switch (action.type) {
+    case 'cancel':
+      return invitations.filter((inv) => inv.id !== action.id)
+    default:
+      return invitations
+  }
+}
+
 export const useInvitations = (): UseInvitationsReturn => {
   const [invitations, setInvitations] = useState<Invitation[]>([])
+  const [optimisticInvitations, addOptimisticAction] = useOptimistic(invitations, optimisticReducer)
   const [roles, setRoles] = useState<AssignableRole[]>([])
-  const [loading, setLoading] = useState(false)
-  const [loadingRoles, setLoadingRoles] = useState(false)
-  const [creating, setCreating] = useState(false)
+
+  // React 19 transitions for non-blocking UI
+  const [, startLoadingTransition] = useTransition()
+  const [, startRolesTransition] = useTransition()
+  const [isCreatingPending, startCreatingTransition] = useTransition()
+  const [isActionPending, startActionTransition] = useTransition()
+
+  // Manual loading states for reliable test behavior
+  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false)
+
   const [error, setError] = useState<string | null>(null)
-  const [resendingId, setResendingId] = useState<number | null>(null)
-  const [cancellingId, setCancellingId] = useState<number | null>(null)
+  const [actionId, setActionId] = useState<number | null>(null)
+  const [actionType, setActionType] = useState<'resend' | 'cancel' | null>(null)
 
   const fetchInvitations = useCallback(async () => {
-    setLoading(true)
     setError(null)
-    try {
-      const data = await invitationService.getInvitations()
-      setInvitations(data)
-    } catch {
-      setError('Error al cargar las invitaciones')
-    } finally {
-      setLoading(false)
-    }
+    setIsLoading(true)
+
+    startLoadingTransition(async () => {
+      try {
+        const data = await invitationService.getInvitations()
+        setInvitations(data)
+      } catch {
+        setError('Error al cargar las invitaciones')
+      } finally {
+        setIsLoading(false)
+      }
+    })
   }, [])
 
   const fetchRoles = useCallback(async () => {
-    setLoadingRoles(true)
-    try {
-      const data = await invitationService.getAssignableRoles()
-      setRoles(data)
-    } catch {
-      setError('Error al cargar los roles')
-    } finally {
-      setLoadingRoles(false)
-    }
+    setIsLoadingRoles(true)
+    startRolesTransition(async () => {
+      try {
+        const data = await invitationService.getAssignableRoles()
+        setRoles(data)
+      } catch {
+        setError('Error al cargar los roles')
+      } finally {
+        setIsLoadingRoles(false)
+      }
+    })
   }, [])
 
   const handleCreate = useCallback(async (data: SendInvitationData): Promise<boolean> => {
-    setCreating(true)
     setError(null)
-    try {
-      const newInvitation = await invitationService.sendInvitation(data)
-      setInvitations((prev) => [newInvitation, ...prev])
-      return true
-    } catch {
-      setError('Error al crear la invitación')
-      return false
-    } finally {
-      setCreating(false)
-    }
+
+    return new Promise((resolve) => {
+      startCreatingTransition(async () => {
+        try {
+          const newInvitation = await invitationService.sendInvitation(data)
+          setInvitations((prev) => [newInvitation, ...prev])
+          resolve(true)
+        } catch {
+          setError('Error al crear la invitación')
+          resolve(false)
+        }
+      })
+    })
   }, [])
 
   const handleResend = useCallback(async (id: number): Promise<boolean> => {
-    setResendingId(id)
     setError(null)
-    try {
-      const updatedInvitation = await invitationService.resendInvitation(id)
-      setInvitations((prev) =>
-        prev.map((inv) => (inv.id === id ? updatedInvitation : inv))
-      )
-      return true
-    } catch {
-      setError('Error al reenviar la invitación')
-      return false
-    } finally {
-      setResendingId(null)
-    }
+    setActionId(id)
+    setActionType('resend')
+
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        try {
+          const updatedInvitation = await invitationService.resendInvitation(id)
+          setInvitations((prev) =>
+            prev.map((inv) => (inv.id === id ? updatedInvitation : inv))
+          )
+          setActionId(null)
+          setActionType(null)
+          resolve(true)
+        } catch {
+          setError('Error al reenviar la invitación')
+          setActionId(null)
+          setActionType(null)
+          resolve(false)
+        }
+      })
+    })
   }, [])
 
   const handleCancel = useCallback(async (id: number): Promise<boolean> => {
-    setCancellingId(id)
     setError(null)
-    try {
-      await invitationService.cancelInvitation(id)
-      setInvitations((prev) => prev.filter((inv) => inv.id !== id))
-      return true
-    } catch {
-      setError('Error al cancelar la invitación')
-      return false
-    } finally {
-      setCancellingId(null)
-    }
-  }, [])
+    setActionId(id)
+    setActionType('cancel')
+
+    return new Promise((resolve) => {
+      startActionTransition(async () => {
+        addOptimisticAction({ type: 'cancel', id })
+        try {
+          await invitationService.cancelInvitation(id)
+          setInvitations((prev) => prev.filter((inv) => inv.id !== id))
+          setActionId(null)
+          setActionType(null)
+          resolve(true)
+        } catch {
+          setError('Error al cancelar la invitación')
+          setActionId(null)
+          setActionType(null)
+          resolve(false)
+        }
+      })
+    })
+  }, [addOptimisticAction])
 
   const clearError = useCallback(() => {
     setError(null)
@@ -113,8 +164,15 @@ export const useInvitations = (): UseInvitationsReturn => {
     fetchRoles()
   }, [fetchInvitations, fetchRoles])
 
+  // Backward compatibility: map states to original names
+  const loading = isLoading
+  const loadingRoles = isLoadingRoles
+  const creating = isCreatingPending
+  const resendingId = isActionPending && actionType === 'resend' ? actionId : null
+  const cancellingId = isActionPending && actionType === 'cancel' ? actionId : null
+
   return {
-    invitations,
+    invitations: optimisticInvitations,
     roles,
     loading,
     loadingRoles,

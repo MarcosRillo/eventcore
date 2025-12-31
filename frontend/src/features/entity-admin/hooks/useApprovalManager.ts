@@ -2,11 +2,11 @@
  * useApprovalManager Hook
  *
  * Custom React hook for managing event approval workflow operations.
- * Provides functions to handle event state transitions with loading states,
- * error handling, and UI updates.
+ * Uses React 19 useTransition for loading states.
+ * Provides functions to handle event state transitions with error handling.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 
 import { approvalService, approvalValidation } from '@/features/events/services/approvalService';
 import { ApiError } from '@/types/api-response.types';
@@ -18,7 +18,7 @@ interface ApprovalError {
 }
 
 interface UseApprovalManagerReturn {
-  // State
+  // State - isPending from useTransition replaces isLoading
   isLoading: boolean;
   error: ApprovalError | null;
 
@@ -51,9 +51,10 @@ interface UseApprovalManagerReturn {
 
 /**
  * Hook for managing event approval workflow
+ * Uses React 19 useTransition for automatic loading state management
  */
 export const useApprovalManager = (): UseApprovalManagerReturn => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<ApprovalError | null>(null);
 
   /**
@@ -80,26 +81,27 @@ export const useApprovalManager = (): UseApprovalManagerReturn => {
   }, []);
 
   /**
-   * Generic approval operation wrapper
+   * Generic approval operation wrapper using useTransition
    */
   const executeApprovalOperation = useCallback(async <T extends unknown[]>(
     operation: (...args: T) => Promise<Event>,
     ...args: T
   ): Promise<Event | null> => {
-    setIsLoading(true);
     setError(null);
 
-    try {
-      const updatedEvent = await operation(...args);
-      return updatedEvent;
-    } catch (err) {
-      const approvalError = handleError(err);
-      setError(approvalError);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [handleError]);
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        try {
+          const updatedEvent = await operation(...args);
+          resolve(updatedEvent);
+        } catch (err) {
+          const approvalError = handleError(err);
+          setError(approvalError);
+          resolve(null);
+        }
+      });
+    });
+  }, [handleError, startTransition]);
 
   /**
    * Approve event internally (pending_internal_approval → approved_internal)
@@ -190,8 +192,8 @@ export const useApprovalManager = (): UseApprovalManagerReturn => {
   }, [approveInternal]);
 
   return {
-    // State
-    isLoading,
+    // State - isPending from useTransition replaces manual isLoading
+    isLoading: isPending,
     error,
 
     // Double-Level Workflow Actions

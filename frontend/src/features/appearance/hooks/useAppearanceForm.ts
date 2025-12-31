@@ -4,7 +4,7 @@
  * Components that use this hook should ONLY handle presentation
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useTransition } from 'react';
 
 import { getAppearanceSettings, updateAppearanceSettings } from '@/features/appearance/services/appearance.service';
 import { 
@@ -14,11 +14,15 @@ import {
 } from '@/types/appearance.types';
 
 export const useAppearanceForm = (): UseAppearanceFormReturn => {
+  // React 19 transitions for non-blocking UI
+  const [, startLoadTransition] = useTransition();
+  const [, startSaveTransition] = useTransition();
+
   // Form state
   const [data, setData] = useState<AppearanceFormData>(DEFAULT_THEME);
   const [originalData, setOriginalData] = useState<AppearanceFormData>(DEFAULT_THEME);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingState, setIsLoadingState] = useState(true);
+  const [isSavingState, setIsSavingState] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate if there are unsaved changes
@@ -28,24 +32,26 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
    * Load current appearance settings from server
    */
   const loadAppearanceSettings = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const settingsData = await getAppearanceSettings();
+    setIsLoadingState(true);
+    setError(null);
 
-      setData(settingsData);
-      setOriginalData(settingsData);
-    } catch {
-      setError('Error al cargar la configuración de apariencia');
-      
-      // Use default values if loading fails
-      setData(DEFAULT_THEME);
-      setOriginalData(DEFAULT_THEME);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    startLoadTransition(async () => {
+      try {
+        const settingsData = await getAppearanceSettings();
+
+        setData(settingsData);
+        setOriginalData(settingsData);
+      } catch {
+        setError('Error al cargar la configuración de apariencia');
+
+        // Use default values if loading fails
+        setData(DEFAULT_THEME);
+        setOriginalData(DEFAULT_THEME);
+      } finally {
+        setIsLoadingState(false);
+      }
+    });
+  }, [startLoadTransition]);
 
   /**
    * Update a specific field in the form
@@ -69,40 +75,42 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
    * Submit form data to server
    */
   const handleSubmit = useCallback(async () => {
-    try {
-      setIsSaving(true);
-      setError(null);
-
-      // Only send changed fields
-      const changedFields: Partial<AppearanceFormData> = {};
-      (Object.keys(data) as Array<keyof AppearanceFormData>).forEach(key => {
-        if (data[key] !== originalData[key]) {
-          const value = data[key];
-          if (value !== undefined) {
-            (changedFields as Record<string, string | null>)[key] = value;
-          }
+    // Only send changed fields
+    const changedFields: Partial<AppearanceFormData> = {};
+    (Object.keys(data) as Array<keyof AppearanceFormData>).forEach(key => {
+      if (data[key] !== originalData[key]) {
+        const value = data[key];
+        if (value !== undefined) {
+          (changedFields as Record<string, string | null>)[key] = value;
         }
-      });
-
-      // If no changes, don't make API call
-      if (Object.keys(changedFields).length === 0) {
-        return;
       }
+    });
 
-      const updatedData = await updateAppearanceSettings(changedFields);
-
-      // Update both current and original data
-      setData(updatedData);
-      setOriginalData(updatedData);
-      
-      // Success feedback could be handled by the component if needed
-    } catch {
-      setError('Error al actualizar la configuración de apariencia');
-      throw new Error('Error al actualizar la configuración de apariencia');
-    } finally {
-      setIsSaving(false);
+    // If no changes, don't make API call
+    if (Object.keys(changedFields).length === 0) {
+      return;
     }
-  }, [data, originalData]);
+
+    setIsSavingState(true);
+    setError(null);
+
+    startSaveTransition(async () => {
+      try {
+        const updatedData = await updateAppearanceSettings(changedFields);
+
+        // Update both current and original data
+        setData(updatedData);
+        setOriginalData(updatedData);
+
+        // Success feedback could be handled by the component if needed
+      } catch {
+        setError('Error al actualizar la configuración de apariencia');
+        // Error state is set - components can react to this
+      } finally {
+        setIsSavingState(false);
+      }
+    });
+  }, [data, originalData, startSaveTransition]);
 
   /**
    * Reset form to original loaded values
@@ -124,6 +132,10 @@ export const useAppearanceForm = (): UseAppearanceFormReturn => {
   useEffect(() => {
     loadAppearanceSettings();
   }, [loadAppearanceSettings]);
+
+  // Backward compatibility
+  const isLoading = isLoadingState;
+  const isSaving = isSavingState;
 
   return {
     // State

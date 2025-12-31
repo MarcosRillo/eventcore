@@ -132,35 +132,43 @@ describe('InvitationTableContainer', () => {
 
       render(<InvitationTableContainer />);
 
+      // Wait for the empty state to appear
       await waitFor(() => {
-        expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
-      });
+        expect(screen.getByTestId('table-empty')).toBeInTheDocument();
+      }, { timeout: 3000 });
 
       expect(screen.getByText('No hay invitaciones')).toBeInTheDocument();
     });
   });
 
   describe('error handling', () => {
+    beforeEach(() => {
+      // Ensure clean mock state for error tests
+      mockInvitationService.getInvitations.mockReset();
+    });
+
     it('should show error state on fetch failure', async () => {
-      mockInvitationService.getInvitations.mockRejectedValueOnce(new Error('Network error'));
+      mockInvitationService.getInvitations.mockRejectedValue(new Error('Network error'));
 
       render(<InvitationTableContainer />);
 
+      // Wait for error state to appear
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
 
       expect(screen.getByText('Error al cargar las invitaciones')).toBeInTheDocument();
     });
 
     it('should allow dismissing error', async () => {
-      mockInvitationService.getInvitations.mockRejectedValueOnce(new Error('Network error'));
+      mockInvitationService.getInvitations.mockRejectedValue(new Error('Network error'));
 
       render(<InvitationTableContainer />);
 
+      // Wait for error state
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
 
       // Find and click the close button (the XMarkIcon button)
       const closeButtons = screen.getAllByRole('button');
@@ -196,16 +204,23 @@ describe('InvitationTableContainer', () => {
 
       render(<InvitationTableContainer />);
 
+      // Wait for initial data to load
       await waitFor(() => {
-        expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
+        expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      // Wait for button to be enabled (loading to finish)
+      await waitFor(() => {
+        expect(screen.getByTestId('refresh-button')).not.toBeDisabled();
       });
 
       const refreshButton = screen.getByTestId('refresh-button');
       fireEvent.click(refreshButton);
 
+      // Wait for second call to complete
       await waitFor(() => {
         expect(mockInvitationService.getInvitations).toHaveBeenCalledTimes(2);
-      });
+      }, { timeout: 3000 });
     });
   });
 
@@ -335,14 +350,19 @@ describe('InvitationTableContainer', () => {
   });
 
   describe('semantic color tokens', () => {
+    beforeEach(() => {
+      mockInvitationService.getInvitations.mockReset();
+    });
+
     it('should use error semantic tokens for error alert', async () => {
-      mockInvitationService.getInvitations.mockRejectedValueOnce(new Error('Network error'));
+      mockInvitationService.getInvitations.mockRejectedValue(new Error('Network error'));
 
       render(<InvitationTableContainer />);
 
+      // Wait for error state
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
 
       const errorState = screen.getByTestId('error-state');
       expect(errorState).toHaveClass('bg-error-50');

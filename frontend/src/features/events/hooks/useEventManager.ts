@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useTransition } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -199,10 +199,15 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   const [statistics, setStatistics] = useState<EventStatistics | null>(null);
   const [approvalStatistics, setApprovalStatistics] = useState<ApprovalStatistics | null>(null);
 
-  // UI state
-  const [isCreating, setIsCreating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  // React 19 transitions for non-blocking UI
+  const [, startCreateTransition] = useTransition();
+  const [, startUpdateTransition] = useTransition();
+  const [, startDeleteTransition] = useTransition();
+
+  // UI state (manual for reliable test behavior)
+  const [isCreatingState, setIsCreatingState] = useState(false);
+  const [isUpdatingState, setIsUpdatingState] = useState(false);
+  const [isDeletingState, setIsDeletingState] = useState(false);
 
   // Modal state management via useGenericModals
   const {
@@ -227,57 +232,69 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
 
   // Event-specific actions
   const createEvent = useCallback(async (data: EventFormData) => {
-    try {
-      setIsCreating(true);
-      if (!eventServiceInstance.createEvent) {
-        throw new Error('Create event not available in current context');
-      }
-      const newEvent = await eventServiceInstance.createEvent(data);
-      addEvent(newEvent);
-      closeAllModals();
-      refreshData(); // Refresh to get updated pagination
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsCreating(false);
+    if (!eventServiceInstance.createEvent) {
+      throw new Error('Create event not available in current context');
     }
-  }, [addEvent, refreshData, eventServiceInstance, closeAllModals]);
+
+    setIsCreatingState(true);
+
+    startCreateTransition(async () => {
+      try {
+        const newEvent = await eventServiceInstance.createEvent!(data);
+        addEvent(newEvent);
+        closeAllModals();
+        refreshData(); // Refresh to get updated pagination
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsCreatingState(false);
+      }
+    });
+  }, [addEvent, refreshData, eventServiceInstance, closeAllModals, startCreateTransition]);
 
   const updateEvent = useCallback(async (id: number, data: Partial<EventFormData>) => {
-    try {
-      setIsUpdating(true);
-      if (!eventServiceInstance.updateEvent) {
-        throw new Error('Update event not available in current context');
-      }
-      const updatedEvent = await eventServiceInstance.updateEvent(id, data);
-      updateEventInList(id, updatedEvent);
-      closeAllModals();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsUpdating(false);
+    if (!eventServiceInstance.updateEvent) {
+      throw new Error('Update event not available in current context');
     }
-  }, [updateEventInList, eventServiceInstance, closeAllModals]);
+
+    setIsUpdatingState(true);
+
+    startUpdateTransition(async () => {
+      try {
+        const updatedEvent = await eventServiceInstance.updateEvent!(id, data);
+        updateEventInList(id, updatedEvent);
+        closeAllModals();
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsUpdatingState(false);
+      }
+    });
+  }, [updateEventInList, eventServiceInstance, closeAllModals, startUpdateTransition]);
 
   const deleteEvent = useCallback(async (id: number) => {
-    try {
-      setIsDeleting(true);
-      if (!eventServiceInstance.deleteEvent) {
-        throw new Error('Delete event not available in current context');
-      }
-      // Optimistic update
-      removeEvent(id);
-      await eventServiceInstance.deleteEvent(id);
-      closeAllModals();
-      refreshData(); // Refresh to get updated pagination
-    } catch (error) {
-      // Revert optimistic update
-      refreshData();
-      throw error;
-    } finally {
-      setIsDeleting(false);
+    if (!eventServiceInstance.deleteEvent) {
+      throw new Error('Delete event not available in current context');
     }
-  }, [removeEvent, refreshData, eventServiceInstance, closeAllModals]);
+
+    setIsDeletingState(true);
+    // Optimistic update
+    removeEvent(id);
+
+    startDeleteTransition(async () => {
+      try {
+        await eventServiceInstance.deleteEvent!(id);
+        closeAllModals();
+        refreshData(); // Refresh to get updated pagination
+      } catch (error) {
+        // Revert optimistic update
+        refreshData();
+        throw error;
+      } finally {
+        setIsDeletingState(false);
+      }
+    });
+  }, [removeEvent, refreshData, eventServiceInstance, closeAllModals, startDeleteTransition]);
 
   const duplicateEvent = useCallback(async (id: number, overrides?: Partial<EventFormData>) => {
     try {
@@ -412,19 +429,24 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     // This would be handled by the generic hook if needed
   }, []);
 
+  // Backward compatibility
+  const isCreating = isCreatingState;
+  const isUpdating = isUpdatingState;
+  const isDeleting = isDeletingState;
+
   return {
     // Data state
     events,
     pagination,
     isLoading,
     error,
-    
+
     // Event-specific state
     currentEvent,
     statistics,
     approvalStatistics,
     filters: filters as EventFilters,
-    
+
     // UI state
     isCreating,
     isUpdating,

@@ -6,7 +6,7 @@
  */
 
 import { useRouter } from 'next/navigation'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useTransition } from 'react'
 
 import { validateInvitationToken, acceptInvitation } from '@/features/invitations/services/invitation.service'
 import type { AcceptInvitationData } from '@/features/invitations/types/invitation.types'
@@ -62,8 +62,15 @@ const initialFormData: FormData = {
 export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
   const router = useRouter()
 
+  // React 19 transitions for non-blocking UI
+  const [, startValidatingTransition] = useTransition()
+  const [, startSubmitTransition] = useTransition()
+
+  // Manual loading states for reliable test behavior
+  const [isValidating, setIsValidating] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   // Token validation state
-  const [validating, setValidating] = useState(false)
   const [tokenValid, setTokenValid] = useState(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [invitationInfo, setInvitationInfo] = useState<InvitationInfo | null>(null)
@@ -71,7 +78,6 @@ export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
   // Form state
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [formErrors, setFormErrors] = useState<FormErrors>({})
-  const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
 
   /**
@@ -83,25 +89,27 @@ export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
       return
     }
 
-    setValidating(true)
+    setIsValidating(true)
     setTokenError(null)
 
-    try {
-      const data = await validateInvitationToken(token)
+    startValidatingTransition(async () => {
+      try {
+        const data = await validateInvitationToken(token)
 
-      // If we get data back, the token is valid
-      setTokenValid(true)
-      setInvitationInfo({
-        email: data.email,
-        role: data.role,
-        expires_at: data.expires_at,
-      })
-    } catch {
-      setTokenError('El token de invitación no es válido o ha expirado.')
-    } finally {
-      setValidating(false)
-    }
-  }, [])
+        // If we get data back, the token is valid
+        setTokenValid(true)
+        setInvitationInfo({
+          email: data.email,
+          role: data.role,
+          expires_at: data.expires_at,
+        })
+      } catch {
+        setTokenError('El token de invitación no es válido o ha expirado.')
+      } finally {
+        setIsValidating(false)
+      }
+    })
+  }, [startValidatingTransition])
 
   /**
    * Update form data
@@ -165,49 +173,51 @@ export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
         return
       }
 
-      setSubmitting(true)
+      setIsSubmitting(true)
       setFormErrors({})
 
-      try {
-        const acceptData: AcceptInvitationData = {
-          token,
-          name: formData.name.trim(),
-          dni: formData.dni.trim(),
-          password: formData.password,
-          password_confirmation: formData.password_confirmation,
+      startSubmitTransition(async () => {
+        try {
+          const acceptData: AcceptInvitationData = {
+            token,
+            name: formData.name.trim(),
+            dni: formData.dni.trim(),
+            password: formData.password,
+            password_confirmation: formData.password_confirmation,
+          }
+
+          await acceptInvitation(acceptData)
+          setSuccess(true)
+
+          // Redirect to login after short delay
+          setTimeout(() => {
+            router.push('/login?registered=true')
+          }, 2000)
+        } catch (error: unknown) {
+          // Handle API errors
+          const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } }
+
+          if (err.response?.data?.errors) {
+            const apiErrors = err.response.data.errors
+            const newErrors: FormErrors = {}
+
+            if (apiErrors.name) newErrors.name = apiErrors.name[0]
+            if (apiErrors.dni) newErrors.dni = apiErrors.dni[0]
+            if (apiErrors.password) newErrors.password = apiErrors.password[0]
+            if (apiErrors.token) newErrors.general = apiErrors.token[0]
+
+            setFormErrors(newErrors)
+          } else if (err.response?.data?.message) {
+            setFormErrors({ general: err.response.data.message })
+          } else {
+            setFormErrors({ general: 'Error al crear la cuenta. Por favor, intenta nuevamente.' })
+          }
+        } finally {
+          setIsSubmitting(false)
         }
-
-        await acceptInvitation(acceptData)
-        setSuccess(true)
-
-        // Redirect to login after short delay
-        setTimeout(() => {
-          router.push('/login?registered=true')
-        }, 2000)
-      } catch (error: unknown) {
-        // Handle API errors
-        const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } }
-
-        if (err.response?.data?.errors) {
-          const apiErrors = err.response.data.errors
-          const newErrors: FormErrors = {}
-
-          if (apiErrors.name) newErrors.name = apiErrors.name[0]
-          if (apiErrors.dni) newErrors.dni = apiErrors.dni[0]
-          if (apiErrors.password) newErrors.password = apiErrors.password[0]
-          if (apiErrors.token) newErrors.general = apiErrors.token[0]
-
-          setFormErrors(newErrors)
-        } else if (err.response?.data?.message) {
-          setFormErrors({ general: err.response.data.message })
-        } else {
-          setFormErrors({ general: 'Error al crear la cuenta. Por favor, intenta nuevamente.' })
-        }
-      } finally {
-        setSubmitting(false)
-      }
+      })
     },
-    [formData, validateForm, router]
+    [formData, validateForm, router, startSubmitTransition]
   )
 
   /**
@@ -217,6 +227,10 @@ export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
     setFormErrors({})
     setTokenError(null)
   }, [])
+
+  // Backward compatibility: map states to original names
+  const validating = isValidating
+  const submitting = isSubmitting
 
   return {
     validating,

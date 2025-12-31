@@ -2,9 +2,10 @@
  * Custom hook for approval actions
  *
  * Provides methods to approve, reject, request changes, and publish events.
+ * Uses React 19 useTransition for loading states.
  */
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 
 import { useToast } from '@/components/ui/Toast'
 import { approvalService } from '@/features/approval/services/approval.service'
@@ -34,7 +35,7 @@ export const useApprovalActions = (
   onSuccess?: () => void
 ): UseApprovalActionsReturn => {
   const { addToast } = useToast()
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [approveModalOpen, setApproveModalOpen] = useState(false)
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
   const [requestChangesModalOpen, setRequestChangesModalOpen] = useState(false)
@@ -82,60 +83,59 @@ export const useApprovalActions = (
   }
 
   const approveEvent = async (eventId: number): Promise<void> => {
-    setLoading(true)
-    try {
-      await approvalService.approve(eventId)
-      addToast({ message: 'Event approved successfully', type: 'success' })
-      closeApproveModal()
-      onSuccess?.()
-    } catch {
-      addToast({ message: 'Failed to approve event', type: 'error' })
-    } finally {
-      setLoading(false)
-    }
+    startTransition(async () => {
+      try {
+        await approvalService.approve(eventId)
+        addToast({ message: 'Event approved successfully', type: 'success' })
+        closeApproveModal()
+        onSuccess?.()
+      } catch {
+        addToast({ message: 'Failed to approve event', type: 'error' })
+      }
+    })
   }
 
   const rejectEvent = async (eventId: number, reason: string): Promise<void> => {
-    setLoading(true)
-    try {
-      await approvalService.reject(eventId, reason)
-      addToast({ message: 'Event rejected', type: 'success' })
-      closeRejectModal()
-      onSuccess?.()
-    } catch {
-      addToast({ message: 'Failed to reject event', type: 'error' })
-    } finally {
-      setLoading(false)
-    }
+    startTransition(async () => {
+      try {
+        await approvalService.reject(eventId, reason)
+        addToast({ message: 'Event rejected', type: 'success' })
+        closeRejectModal()
+        onSuccess?.()
+      } catch {
+        addToast({ message: 'Failed to reject event', type: 'error' })
+      }
+    })
   }
 
   const requestChanges = async (eventId: number, comments: string): Promise<void> => {
-    setLoading(true)
-    try {
-      await approvalService.requestChanges(eventId, comments)
-      addToast({ message: 'Changes requested successfully', type: 'success' })
-      closeRequestChangesModal()
-      onSuccess?.()
-    } catch {
-      addToast({ message: 'Failed to request changes', type: 'error' })
-    } finally {
-      setLoading(false)
-    }
+    startTransition(async () => {
+      try {
+        await approvalService.requestChanges(eventId, comments)
+        addToast({ message: 'Changes requested successfully', type: 'success' })
+        closeRequestChangesModal()
+        onSuccess?.()
+      } catch {
+        addToast({ message: 'Failed to request changes', type: 'error' })
+      }
+    })
   }
 
   const publishEvent = async (eventId: number): Promise<void> => {
-    setLoading(true)
-    try {
-      await approvalService.publish(eventId)
-      addToast({ message: 'Event published to public calendar', type: 'success' })
-      closePublishModal()
-      onSuccess?.()
-    } catch {
-      addToast({ message: 'Failed to publish event', type: 'error' })
-    } finally {
-      setLoading(false)
-    }
+    startTransition(async () => {
+      try {
+        await approvalService.publish(eventId)
+        addToast({ message: 'Event published to public calendar', type: 'success' })
+        closePublishModal()
+        onSuccess?.()
+      } catch {
+        addToast({ message: 'Failed to publish event', type: 'error' })
+      }
+    })
   }
+
+  // Backward compatibility
+  const loading = isPending
 
   return {
     loading,
