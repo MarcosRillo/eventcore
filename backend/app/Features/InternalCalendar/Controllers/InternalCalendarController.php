@@ -52,6 +52,30 @@ class InternalCalendarController extends Controller
     }
 
     /**
+     * Get a single internal calendar event by ID.
+     *
+     * Returns event details if the event exists and user has access.
+     * Applies same role-based scoping as index method.
+     *
+     * @param int $id Event ID
+     * @return JsonResponse Returns EventResource or 404
+     */
+    public function show(int $id): JsonResponse
+    {
+        $event = $this->internalCalendarService->getEventById($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => new EventResource($event),
+        ]);
+    }
+
+    /**
      * Get available event statuses for filtering.
      *
      * Returns the list of status codes visible in the internal calendar.

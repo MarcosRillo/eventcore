@@ -214,6 +214,11 @@ Route::prefix('v1')->group(function () {
                 Route::get('events', [InternalCalendarController::class, 'index'])
                     ->middleware('throttle:60,1');
 
+                // Single event detail - moderate limit
+                Route::get('events/{id}', [InternalCalendarController::class, 'show'])
+                    ->middleware('throttle:60,1')
+                    ->where('id', '[0-9]+');
+
                 // Event statuses - low limit (consultado ocasionalmente)
                 Route::get('event-statuses', [InternalCalendarController::class, 'eventStatuses'])
                     ->middleware('throttle:30,1');

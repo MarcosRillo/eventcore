@@ -7,7 +7,9 @@
 
 'use client';
 
+import { ExportCalendarButton } from '@/features/internal-calendar/components/dumb/ExportCalendarButton';
 import type {
+  InternalCalendarEvent,
   InternalCalendarFilters,
   InternalCalendarStatusCode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
@@ -22,6 +24,8 @@ export interface InternalCalendarFilterBarProps {
   eventTypes: EventType[];
   /** Loading state for event types */
   eventTypesLoading?: boolean;
+  /** Events for export (optional) */
+  events?: InternalCalendarEvent[];
 }
 
 const STATUS_OPTIONS: { value: InternalCalendarStatusCode; label: string }[] = [
@@ -37,12 +41,14 @@ const STATUS_OPTIONS: { value: InternalCalendarStatusCode; label: string }[] = [
  * @param root0.onFiltersChange
  * @param root0.eventTypes
  * @param root0.eventTypesLoading
+ * @param root0.events
  */
 export function InternalCalendarFilterBar({
   filters,
   onFiltersChange,
   eventTypes,
   eventTypesLoading = false,
+  events = [],
 }: InternalCalendarFilterBarProps) {
   const handleEventTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -173,17 +179,21 @@ export function InternalCalendarFilterBar({
         </div>
       </div>
 
-      {/* Clear Filters Button */}
-      {hasActiveFilters && (
-        <div className="mt-4 flex justify-end">
+      {/* Actions Row */}
+      <div className="mt-4 flex justify-between items-center">
+        {/* Export Button */}
+        <ExportCalendarButton events={events} />
+
+        {/* Clear Filters Button */}
+        {hasActiveFilters && (
           <button
             onClick={handleClearFilters}
             className="px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors"
           >
             Limpiar filtros
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

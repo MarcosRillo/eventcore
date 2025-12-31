@@ -25,7 +25,7 @@ jest.mock('@/features/internal-calendar/components/dumb/InternalEventDetailPage'
 
 describe('InternalEventDetailPageContainer', () => {
   const mockRouterBack = jest.fn();
-  const mockGetEvents = internalCalendarService.getEvents as jest.MockedFunction<typeof internalCalendarService.getEvents>;
+  const mockGetEventById = internalCalendarService.getEventById as jest.MockedFunction<typeof internalCalendarService.getEventById>;
 
   const mockEvent: InternalCalendarEvent = {
     id: 1,
@@ -62,7 +62,7 @@ describe('InternalEventDetailPageContainer', () => {
   });
 
   test('shows loading state initially', () => {
-    mockGetEvents.mockImplementation(() => new Promise(() => {})); // Never resolves
+    mockGetEventById.mockImplementation(() => new Promise(() => {})); // Never resolves
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 
@@ -71,7 +71,7 @@ describe('InternalEventDetailPageContainer', () => {
   });
 
   test('fetches event by ID on mount and renders detail page', async () => {
-    mockGetEvents.mockResolvedValue([mockEvent]);
+    mockGetEventById.mockResolvedValue(mockEvent);
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 
@@ -80,23 +80,17 @@ describe('InternalEventDetailPageContainer', () => {
       expect(screen.getByTestId('event-detail-page')).toBeInTheDocument();
     });
 
-    // Should fetch events
-    expect(mockGetEvents).toHaveBeenCalledTimes(1);
-    expect(mockGetEvents).toHaveBeenCalledWith({});
+    // Should fetch event by ID
+    expect(mockGetEventById).toHaveBeenCalledTimes(1);
+    expect(mockGetEventById).toHaveBeenCalledWith(1);
 
     // Should render event detail page with correct event
     expect(screen.getByText('Test Event')).toBeInTheDocument();
   });
 
   test('shows error when event not found (404)', async () => {
-    // Return events array without the requested event
-    mockGetEvents.mockResolvedValue([
-      {
-        ...mockEvent,
-        id: 2, // Different ID
-        title: 'Other Event',
-      },
-    ]);
+    // Return null when event not found
+    mockGetEventById.mockResolvedValue(null);
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 
@@ -113,7 +107,7 @@ describe('InternalEventDetailPageContainer', () => {
   });
 
   test('shows error when network fails', async () => {
-    mockGetEvents.mockRejectedValue(new Error('Network error'));
+    mockGetEventById.mockRejectedValue(new Error('Network error'));
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 
@@ -130,7 +124,7 @@ describe('InternalEventDetailPageContainer', () => {
   });
 
   test('renders InternalEventDetailPage when loaded successfully', async () => {
-    mockGetEvents.mockResolvedValue([mockEvent]);
+    mockGetEventById.mockResolvedValue(mockEvent);
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 
@@ -147,7 +141,7 @@ describe('InternalEventDetailPageContainer', () => {
   });
 
   test('calls router.back() when back button clicked', async () => {
-    mockGetEvents.mockResolvedValue([mockEvent]);
+    mockGetEventById.mockResolvedValue(mockEvent);
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 
@@ -165,7 +159,7 @@ describe('InternalEventDetailPageContainer', () => {
   });
 
   test('calls router.back() when back button clicked from error state', async () => {
-    mockGetEvents.mockRejectedValue(new Error('Network error'));
+    mockGetEventById.mockRejectedValue(new Error('Network error'));
 
     render(<InternalEventDetailPageContainer eventId={1} />);
 

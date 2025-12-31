@@ -43,6 +43,36 @@ export const internalCalendarService = {
   },
 
   /**
+   * Fetch a single event by ID
+   *
+   * @param id - Event ID to fetch
+   * @returns Promise resolving to the event or null if not found
+   * @throws Error if API call fails (except 404)
+   */
+  async getEventById(id: number): Promise<InternalCalendarEvent | null> {
+    try {
+      const response = await apiClient.get<{ data: InternalCalendarEvent }>(
+        `/internal-calendar/events/${id}`
+      );
+
+      if (!response.data || !response.data.data) {
+        return null;
+      }
+
+      return response.data.data;
+    } catch (error) {
+      // Return null for 404 (not found)
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          return null;
+        }
+      }
+      throw error;
+    }
+  },
+
+  /**
    * Fetch available status codes for filtering
    *
    * Returns the list of status codes that are visible in the internal calendar.

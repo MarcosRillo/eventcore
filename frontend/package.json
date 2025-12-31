@@ -21,6 +21,7 @@
     "lucide-react": "^0.562.0",
     "moment": "^2.30.1",
     "next": "^15.5.9",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.3",
     "react-big-calendar": "^1.19.4",
     "react-dom": "^19.2.3"

@@ -60,6 +60,34 @@ class InternalCalendarService
     }
 
     /**
+     * Get a single event by ID with role-based access control.
+     *
+     * Applies same tenant scoping as getInternalCalendarEvents:
+     * - entity_admin/entity_staff/platform_admin: Can view any event
+     * - organizer_admin: Can only view their organization's events
+     *
+     * @param int $id Event ID
+     * @return Event|null Event if found and accessible, null otherwise
+     */
+    public function getEventById(int $id): ?Event
+    {
+        $user = Auth::user();
+
+        $query = Event::internalCalendar()
+            ->with(['status', 'eventType', 'eventSubtype', 'locations', 'organization'])
+            ->where('id', $id);
+
+        // For entity_admin and entity_staff: show all events (disable tenant scope)
+        // For organizers: TenantScope automatically filters to their organization
+        $userRoleCode = $user?->role?->role_code;
+        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff'])) {
+            $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
+        }
+
+        return $query->first();
+    }
+
+    /**
      * Get event statuses available for internal calendar filtering.
      *
      * Returns the list of status codes that are visible in the internal calendar.

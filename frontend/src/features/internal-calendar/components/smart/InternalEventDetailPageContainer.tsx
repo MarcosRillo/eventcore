@@ -38,10 +38,7 @@ export function InternalEventDetailPageContainer({
       setError(null);
 
       try {
-        // Fetch all events and find by ID
-        // (Alternative: create a dedicated getEventById endpoint)
-        const events = await internalCalendarService.getEvents({});
-        const foundEvent = events.find((e) => e.id === eventId);
+        const foundEvent = await internalCalendarService.getEventById(eventId);
 
         if (foundEvent) {
           setEvent(foundEvent);
