@@ -13,6 +13,26 @@ import type { Organization, PaginationMeta } from '@/features/organizations/type
 jest.mock('@/features/organizations/services/organization.service')
 const mockService = organizationService as jest.Mocked<typeof organizationService>
 
+// Suppress React 19 useTransition act() warnings in tests
+// This is a known issue with React 19's useTransition and testing-library
+const originalConsoleError = console.error
+beforeAll(() => {
+  console.error = (...args: unknown[]) => {
+    const message = args[0]
+    if (
+      typeof message === 'string' &&
+      message.includes('A suspended resource finished loading inside a test')
+    ) {
+      return // Suppress this specific warning
+    }
+    originalConsoleError(...args)
+  }
+})
+
+afterAll(() => {
+  console.error = originalConsoleError
+})
+
 // Helper to create mock organization
 const createMockOrganization = (overrides: Partial<Organization> = {}): Organization => ({
   id: 1,
