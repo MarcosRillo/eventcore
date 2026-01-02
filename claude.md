@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Plataforma Multi-Tenant de Eventos Turísticos
 
 **Project Status:** MVP 95% completo
-**Tests:** 305/305 passing (36 backend + 269 frontend) ✅
-**Last Updated:** Noviembre 25, 2025
+**Tests:** 3,123+ passing (36 backend + 3,087 frontend) ✅
+**Last Updated:** Diciembre 31, 2025
 
 ---
 
@@ -641,17 +641,17 @@ export const hasErrors = (errors: EventFormErrors): boolean => {
 - ✅ Panel Organizador: 100% (Sprints 1-3)
 - ✅ Panel Entity Admin: 100%
 - ✅ Architecture refactoring: 100%
+- ✅ Internal calendar feature: 100%
+- ✅ React 19 Migration: 100% (Sprints 6-9, 17 hooks)
 
 **Next Priorities:**
 - [ ] Sistema Notificaciones (in-app + email)
 - [ ] Dashboard Analytics (admin metrics)
 - [ ] Public calendar enhancements
-- [ ] Internal calendar feature
 
 **Current Work:**
-- Internal calendar implementation with dual view (public/internal)
-- Stats tracking for internal calendar
-- Share functionality with QR codes
+- Planning next sprint priorities
+- Potential: Notifications system or analytics dashboard
 
 ---
 
@@ -695,6 +695,13 @@ export const hasErrors = (errors: EventFormErrors): boolean => {
 **Reason:** Reusabilidad, testabilidad, separación de concerns
 **Impact:** Validación client-side más mantenible y testeable
 **Example:** `eventFormValidation.ts` con 7 reglas de validación extraídas
+
+### ADR-007: React 19 useTransition Migration
+**Date:** Diciembre 31, 2025
+**Decision:** Migrar todos los hooks a useTransition con patrón híbrido
+**Reason:** UI no-bloqueante, mejor UX, preparación para React Server Components
+**Pattern:** Manual useState + startTransition (para compatibilidad con Jest tests)
+**Impact:** 17 hooks migrados, 0 regresiones, 3,123 tests passing
 
 ---
 
@@ -823,12 +830,12 @@ If you encounter these situations, STOP and ask the human:
 
 ---
 
-## 📊 PROJECT METRICS (Updated Nov 25, 2025)
+## 📊 PROJECT METRICS (Updated Dec 31, 2025)
 
 **Code Quality:**
 - Backend Tests: 36/36 passing (100%) ✅
-- Frontend Tests: 269/271 passing (99.3%) ← +141 since Oct 28
-- Total Tests: 305 ← +141 since Oct 28 (+86% increase)
+- Frontend Tests: 3,087/3,087 passing (100%) ✅
+- Total Tests: 3,123 ← +2,818 since Nov 25 (+923% increase)
 - Backend Coverage: ~70%
 - Frontend Coverage: ~85%
 - TypeScript Errors: 0
@@ -844,6 +851,7 @@ If you encounter these situations, STOP and ask the human:
 - **Frontend Features:** 10 (entity-admin, organizer-dashboard added)
 - **Circular Dependencies:** 0 ✅ (resolved Nov 25)
 - **Shared Components:** /shared/components/modals/ (reusable)
+- **React 19 Migration:** 100% ✅ (17 hooks with useTransition)
 
 **Technical Debt:**
 - Critical Items: 0
@@ -853,23 +861,20 @@ If you encounter these situations, STOP and ask the human:
 - Score: 9.5/10 (Excellent)
 
 **Progress:**
-- MVP Completion: 95% ← +3% desde Oct 28
+- MVP Completion: 95%
 - Panel Organizador: 100% ✅ (Sprints 1-3 completados)
-  - Stats Widget: 100% ✅
-  - Event List: 100% ✅
-  - Event Form: 100% ✅
-  - Action Buttons: 100% ✅
-  - Dashboard Integration: 100% ✅
 - Panel Entity Admin: 100% ✅
+- Internal Calendar: 100% ✅ (Sprint 5)
+- React 19 Migration: 100% ✅ (Sprints 6-9)
 - Sistema Notificaciones: 0%
 - Dashboard Analytics: 0%
 
-**Architecture Refactoring (Nov 25):**
-- Sprints completed: 3 (Shared, Entity-Admin, Organizer-Dashboard)
-- Files refactored: 49 files
-- Features extracted: 3 (entity-admin, organizer-dashboard, shared)
-- LOC reduced in oversized features: -2,057 LOC
-- Circular dependencies resolved: 1 → 0
+**React 19 Migration (Dec 31):**
+- Sprints completed: 4 (Sprints 6-9)
+- Hooks migrated: 17
+- Pattern: Hybrid (manual useState + startTransition)
+- Tests maintained: 3,123 passing
+- Build: 0 TypeScript errors
 
 ---
 
@@ -932,6 +937,38 @@ If you encounter these situations, STOP and ask the human:
 
 ---
 
+### React 19 Migration (Dec 31, 2025)
+
+**Sprints 6-9: useTransition Migration** ✅
+- 17 hooks migrated to React 19 useTransition
+- Hybrid pattern: manual useState + startTransition
+- Backward compatibility maintained
+- Tests: 3,123 passing (0 regressions)
+- Quality: 10/10
+
+**Hooks Migrated:**
+- **Sprint 6:** useApprovalManager, useUserManager, useEventForm, useApprovalActions
+- **Sprint 7:** useRegistrationRequests, useInvitations
+- **Sprint 8:** useOrganizerEvents, useEventActions, useAcceptInvitation
+- **Sprint 9:** useForgotPassword, useRegistrationForm, useRegistrationRequest, useResetPassword, useAppearanceForm, useOrganizations, useEventManager
+
+**Pattern Applied:**
+```typescript
+// Hybrid pattern for test compatibility
+const [, startTransition] = useTransition()
+const [isLoading, setIsLoading] = useState(false)
+
+const handleAction = async () => {
+  setIsLoading(true)
+  startTransition(async () => {
+    try { await api.action() }
+    finally { setIsLoading(false) }
+  })
+}
+```
+
+---
+
 ### TDD Cards (Oct 27-28, 2025)
 
 **CARD-001: Backend Stats API** ✅
@@ -973,13 +1010,13 @@ If you encounter these situations, STOP and ask the human:
 
 ---
 
-Last Human Review: Noviembre 25, 2025
-Next Review: Before Sprint 4 or MVP 100% completion
+Last Human Review: Diciembre 31, 2025
+Next Review: Enero 2026
 Project Score: 9.5/10 - Production Ready ✅
 
-**Recent Updates (Nov 25):**
-- ✅ Architecture refactoring completed (Sprints 1-3)
-- ✅ Circular dependency resolved
-- ✅ Frontend features: 8 → 10 (entity-admin, organizer-dashboard added)
-- ✅ Tests: 164 → 305 (+86% increase)
-- ✅ MVP Progress: 90% → 95%
+**Recent Updates (Dec 31):**
+- ✅ React 19 migration completed (Sprints 6-9)
+- ✅ 17 hooks migrated to useTransition
+- ✅ Tests: 305 → 3,123 (+923% increase)
+- ✅ Internal calendar feature completed (Sprint 5)
+- ✅ All features using React 19 patterns
