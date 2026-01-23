@@ -1,108 +1,102 @@
 /**
  * API Client
- * Axios configuration for API calls with authentication and auto-refresh
+ * Axios configuration for authenticated API calls
+ *
+ * SECURITY: Uses httpOnly cookies for authentication (XSS protection)
+ * - Cookies are set by the backend on login/refresh
+ * - Browser sends cookies automatically with withCredentials: true
+ * - Backend CookieTokenMiddleware extracts token from cookie
+ * - NO tokens stored in localStorage (XSS safe)
  */
 
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-import { clearTokens, getAccessToken, getRefreshToken,storeTokens } from '@/services/tokenUtils';
-import { ApiErrorResponse,ApiResponse } from '@/types/api-response.types';
+import { ApiErrorResponse, ApiResponse } from '@/types/api-response.types';
 
-// Base API URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+/**
+ * API Base URL
+ *
+ * In development: Uses Next.js proxy (/api/v1) to avoid CORS issues
+ * In production: Direct API calls (same domain via nginx proxy)
+ */
+const getBaseUrl = (): string => {
+  // In browser (client-side), use relative URL to leverage Next.js proxy
+  if (typeof window !== 'undefined') {
+    return '';  // Relative URL, uses Next.js rewrites proxy
+  }
+
+  // In server-side (SSR), call backend directly
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+};
 
 // Token refresh state management (handles race conditions)
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value: string) => void;
+  resolve: (value: unknown) => void;
   reject: (error: Error) => void;
 }> = [];
 
 /**
  * Process queued requests after refresh completes
- * @param error
- * @param token
  */
-const processQueue = (error: Error | null, token: string | null = null): void => {
+const processQueue = (error: Error | null): void => {
   failedQueue.forEach((promise) => {
     if (error) {
       promise.reject(error);
-    } else if (token) {
-      promise.resolve(token);
+    } else {
+      promise.resolve(undefined);
     }
   });
   failedQueue = [];
 };
 
 /**
- * Perform token refresh using refresh_token
- * Uses standalone axios call to avoid interceptor loops
- * Token is sent via httpOnly cookie automatically (withCredentials: true)
+ * Perform token refresh using httpOnly cookie
+ * Cookie is sent automatically by browser
  */
-const performTokenRefresh = async (): Promise<string> => {
-  const response = await axios.post<{
-    success: boolean;
-    data: { access_token: string; refresh_token: string; expires_at: string };
-  }>(
-    `${API_BASE_URL}/api/v1/auth/refresh`,
-    {}, // Empty body - refresh_token comes from httpOnly cookie
+const performTokenRefresh = async (): Promise<void> => {
+  // Use relative URL to go through Next.js proxy
+  await axios.post(
+    '/api/v1/auth/refresh',
+    {},  // Empty body - refresh_token comes from httpOnly cookie
     {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      withCredentials: true, // Send httpOnly cookies with request
+      withCredentials: true,  // Send cookies
     }
   );
-
-  if (!response.data.success || !response.data.data) {
-    throw new Error('Invalid refresh response');
-  }
-
-  const { access_token, refresh_token: newRefreshToken, expires_at } = response.data.data;
-
-  // Store new tokens
-  storeTokens(access_token, newRefreshToken, expires_at);
-
-  return access_token;
+  // New tokens are set as cookies by backend response
 };
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Send httpOnly cookies with requests
-  timeout: 10000, // 10 second timeout
+  withCredentials: true,  // CRITICAL: Send httpOnly cookies with requests
+  timeout: 10000,
 });
 
-// Request interceptor to add authentication token and API prefix
+// Request interceptor - only add API prefix
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add /api/v1 prefix to all requests that don't already have it
-    // More specific check to prevent any potential duplication
+    // Add /api/v1 prefix if not present
     if (config.url && !config.url.startsWith('/api/v1')) {
       config.url = `/api/v1${config.url}`;
     }
 
-    // Add authentication token
-    const token = getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
+    // NO manual token injection - cookies are sent automatically
     return config;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
+  (error: AxiosError) => Promise.reject(error)
 );
 
 /**
  * Public API routes that should not trigger redirect on 401
- * These routes are accessible without authentication
  */
 const PUBLIC_API_ROUTES = [
   '/public/events',
@@ -111,10 +105,6 @@ const PUBLIC_API_ROUTES = [
   '/public/event-types',
 ];
 
-/**
- * Check if a URL is a public API route
- * @param url
- */
 const isPublicApiRoute = (url: string | undefined): boolean => {
   if (!url) return false;
   return PUBLIC_API_ROUTES.some(route => url.includes(route));
@@ -122,9 +112,7 @@ const isPublicApiRoute = (url: string | undefined): boolean => {
 
 // Response interceptor with auto-refresh on 401
 apiClient.interceptors.response.use(
-  <T>(response: AxiosResponse<ApiResponse<T>>) => {
-    return response;
-  },
+  <T>(response: AxiosResponse<ApiResponse<T>>) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -138,36 +126,18 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // For public routes with 401: clear invalid token but do NOT redirect
-      // This happens when there's an expired token stored locally
+      // For public routes with 401: just reject (no auth needed)
       if (isPublicApiRoute(originalRequest.url)) {
-        clearTokens();  // Clear invalid/expired token
-        return Promise.reject(error);  // Let component handle error (will retry without token)
-      }
-
-      // Check if we have a refresh token (only for protected routes)
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        // No refresh token - clear state and redirect (protected routes only)
-        clearTokens();
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
         return Promise.reject(error);
       }
 
       // If already refreshing, queue this request
       if (isRefreshing) {
-        return new Promise<string>((resolve, reject) => {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return apiClient(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .then(() => apiClient(originalRequest))
+          .catch((err) => Promise.reject(err));
       }
 
       // Mark as refreshing and attempt refresh
@@ -175,18 +145,16 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const newToken = await performTokenRefresh();
+        await performTokenRefresh();
 
-        // Process queued requests with new token
-        processQueue(null, newToken);
+        // Process queued requests
+        processQueue(null);
 
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        // Retry original request (new cookie is already set)
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - clear state and redirect
-        processQueue(refreshError as Error, null);
-        clearTokens();
+        // Refresh failed - redirect to login
+        processQueue(refreshError as Error);
 
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
           window.location.href = '/login';
@@ -198,66 +166,34 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle other error scenarios
-    if (error.response) {
-      const status = error.response.status;
-
-      switch (status) {
-        case 403:
-          // Forbidden - user doesn't have permission
-          break;
-
-        case 404:
-          // Not found
-          break;
-
-        case 422:
-          // Validation errors
-          break;
-
-        case 500:
-          // Server error
-          break;
-
-        default:
-          // Unknown error
-          break;
-      }
-    }
-
     return Promise.reject(error);
   }
 );
 
-// Generic API request wrapper with better typing
+// Generic API request wrapper
 export const makeApiRequest = async <T>(
   method: 'get' | 'post' | 'put' | 'patch' | 'delete',
   url: string,
   data?: Record<string, unknown>,
   config?: Record<string, unknown>
 ): Promise<T> => {
-  try {
-    const response: AxiosResponse<ApiResponse<T>> = await apiClient[method](url, data, config);
-    return response.data.data;
-  } catch (error: unknown) {
-    // Re-throw the error to be handled by the calling function
-    throw error;
-  }
+  const response: AxiosResponse<ApiResponse<T>> = await apiClient[method](url, data, config);
+  return response.data.data;
 };
 
-// Re-export token utilities for backward compatibility
-export {
-  clearTokens,
-  getAccessToken,
-  getAccessToken as getAuthToken,
-  getRefreshToken,
-  clearTokens as removeAuthToken,
-  storeTokens as setAuthToken,
-  storeTokens} from '@/services/tokenUtils';
-
-// Check if user is authenticated
+/**
+ * Check if user appears to be authenticated
+ * Note: This is a client-side check only. Actual auth is validated by backend.
+ *
+ * For middleware/SSR: check cookies directly
+ * For client: we can't read httpOnly cookies, so check if we got a successful /me response
+ */
 export const isAuthenticated = (): boolean => {
-  return getAccessToken() !== null;
+  // Can't check httpOnly cookies from JS - this is by design (XSS protection)
+  // The actual authentication state should be managed by AuthContext
+  // This function is kept for backward compatibility but always returns false
+  // Real auth state comes from successful API calls
+  return false;
 };
 
 export default apiClient;

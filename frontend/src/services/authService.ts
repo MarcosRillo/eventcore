@@ -1,11 +1,14 @@
 /**
  * Authentication Service
- * Service functions for authentication-related API calls
+ *
+ * SECURITY: Uses httpOnly cookies for authentication (XSS protection)
+ * - Tokens are stored in httpOnly cookies by backend
+ * - Browser sends cookies automatically with withCredentials: true
+ * - NO tokens stored in localStorage
  */
 
 import axios from 'axios';
 
-import { getRefreshToken } from '@/services/tokenUtils';
 import {
   ForgotPasswordData,
   LoginCredentials,
@@ -19,16 +22,11 @@ import {
   ValidateTokenResponse,
 } from '@/types/auth.types';
 
-// Base API URL - used for refresh endpoint (which doesn't need auth)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
 /**
  * Login with email and password
- * Returns access_token, refresh_token, expires_at, and user
- * @param credentials
+ * Backend sets httpOnly cookies automatically
  */
 export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
-  // Import apiClient dynamically to avoid circular dependency
   const { default: apiClient } = await import('@/services/apiClient');
   const response = await apiClient.post<{ data: LoginResponse }>('/auth/login', credentials);
   return response.data.data;
@@ -36,6 +34,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
 
 /**
  * Get current authenticated user
+ * Uses httpOnly cookie sent automatically by browser
  */
 export const getCurrentUser = async (): Promise<User> => {
   const { default: apiClient } = await import('@/services/apiClient');
@@ -44,7 +43,7 @@ export const getCurrentUser = async (): Promise<User> => {
 };
 
 /**
- * Logout user - revokes all tokens (access + refresh)
+ * Logout user - backend clears httpOnly cookies
  */
 export const logoutUser = async (): Promise<void> => {
   const { default: apiClient } = await import('@/services/apiClient');
@@ -52,26 +51,21 @@ export const logoutUser = async (): Promise<void> => {
 };
 
 /**
- * Refresh tokens using refresh_token
- * This endpoint is called WITHOUT the apiClient interceptors to avoid infinite loops
- * Uses a standalone axios instance
+ * Refresh tokens using httpOnly cookie
+ * Cookie is sent automatically by browser
+ * Backend sets new cookies in response
  */
 export const refreshTokens = async (): Promise<RefreshTokenResponse> => {
-  const refreshToken = getRefreshToken();
-
-  if (!refreshToken) {
-    throw new Error('No refresh token available');
-  }
-
-  // Use standalone axios call to avoid interceptor loops
+  // Use relative URL to go through Next.js proxy
   const response = await axios.post<{ success: boolean; data: RefreshTokenResponse }>(
-    `${API_BASE_URL}/api/v1/auth/refresh`,
-    { refresh_token: refreshToken },
+    '/api/v1/auth/refresh',
+    {},  // Empty body - refresh_token comes from httpOnly cookie
     {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      withCredentials: true,  // Send cookies
     }
   );
 
@@ -83,7 +77,7 @@ export const refreshTokens = async (): Promise<RefreshTokenResponse> => {
 };
 
 /**
- * Validate current token by calling /auth/me
+ * Validate current session by calling /auth/me
  */
 export const validateToken = async (): Promise<boolean> => {
   try {
@@ -100,8 +94,6 @@ export const validateToken = async (): Promise<boolean> => {
 
 /**
  * Request password reset link
- * Always returns success to prevent email enumeration
- * @param data
  */
 export const forgotPassword = async (data: ForgotPasswordData): Promise<PasswordResetResponse> => {
   const { default: apiClient } = await import('@/services/apiClient');
@@ -111,7 +103,6 @@ export const forgotPassword = async (data: ForgotPasswordData): Promise<Password
 
 /**
  * Validate reset token before showing reset form
- * @param data
  */
 export const validateResetToken = async (data: ValidateResetTokenData): Promise<ValidateTokenResponse> => {
   const { default: apiClient } = await import('@/services/apiClient');
@@ -121,7 +112,6 @@ export const validateResetToken = async (data: ValidateResetTokenData): Promise<
 
 /**
  * Reset password with token
- * @param data
  */
 export const resetPassword = async (data: ResetPasswordData): Promise<ResetPasswordResponse> => {
   const { default: apiClient } = await import('@/services/apiClient');

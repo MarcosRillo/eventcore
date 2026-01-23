@@ -6,7 +6,7 @@
  */
 
 import { PublicEventService } from '@/features/events/services/types';
-import apiClient from '@/services/apiClient';
+import publicApiClient from '@/services/publicApiClient';
 import {
   Event,
   EventPagination,
@@ -32,7 +32,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/public/events?${params.toString()}`);
+    const response = await publicApiClient.get(`/public/events?${params.toString()}`);
     return response.data;
   },
 
@@ -41,7 +41,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * @param id
    */
   async getEvent(id: number): Promise<Event> {
-    const response = await apiClient.get(`/public/events/${id}`);
+    const response = await publicApiClient.get(`/public/events/${id}`);
     return response.data.data;
   },
 
@@ -60,7 +60,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/public/events?${params.toString()}`);
+    const response = await publicApiClient.get(`/public/events?${params.toString()}`);
     return response.data;
   },
 
@@ -69,7 +69,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * @param identifier
    */
   async getPublicEvent(identifier: number | string): Promise<Event> {
-    const response = await apiClient.get(`/public/events/${identifier}`);
+    const response = await publicApiClient.get(`/public/events/${identifier}`);
     return response.data.data;
   },
 
@@ -88,7 +88,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/public/events/search?${params.toString()}`);
+    const response = await publicApiClient.get(`/public/events/search?${params.toString()}`);
     return response.data;
   },
 
@@ -97,7 +97,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * @param limit
    */
   async getFeaturedEvents(limit: number = 6): Promise<Event[]> {
-    const response = await apiClient.get(`/public/events/featured?limit=${limit}`);
+    const response = await publicApiClient.get(`/public/events/featured?limit=${limit}`);
     return response.data.data;
   },
 
@@ -111,7 +111,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * @param limit
    */
   async getUpcomingEvents(limit: number = 10): Promise<Event[]> {
-    const response = await apiClient.get(`/public/events/upcoming?limit=${limit}`);
+    const response = await publicApiClient.get(`/public/events/upcoming?limit=${limit}`);
     return response.data.data;
   },
 
@@ -178,10 +178,10 @@ export const eventPublicExportService = {
       }
     });
 
-    const response = await apiClient.get(`/public/events/ical?${params.toString()}`, {
+    const response = await publicApiClient.get(`/public/events/ical?${params.toString()}`, {
       responseType: 'blob',
     });
-    
+
     return response.data;
   },
 

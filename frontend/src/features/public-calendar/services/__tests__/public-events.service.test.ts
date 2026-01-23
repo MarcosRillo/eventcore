@@ -2,13 +2,13 @@ import { AxiosResponse } from 'axios'
 
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import { EventsResponse, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
-import apiClient from '@/services/apiClient'
+import publicApiClient from '@/services/publicApiClient'
 
 
-// Mock apiClient
-jest.mock('@/services/apiClient')
+// Mock publicApiClient (used for public routes - no auth)
+jest.mock('@/services/publicApiClient')
 
-const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
+const mockPublicApiClient = publicApiClient as jest.Mocked<typeof publicApiClient>
 
 // Helper to create mock axios response
 const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
@@ -58,65 +58,65 @@ describe('publicEventsService', () => {
 
   describe('getAll', () => {
     it('should fetch all public events without params', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       const result = await publicEventsService.getAll()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events')
       expect(result).toEqual(mockEventsResponse)
       expect(result.data).toHaveLength(1)
     })
 
     it('should fetch events with event_type_id filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ event_type_id: 1 })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?event_type_id=1')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?event_type_id=1')
     })
 
     it('should fetch events with event_subtype_id filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ event_subtype_id: 2 })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?event_subtype_id=2')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?event_subtype_id=2')
     })
 
     it('should fetch events with location_id filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ location_id: 2 })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?location_id=2')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?location_id=2')
     })
 
     it('should fetch events with start_date filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ start_date: '2025-12-01' })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?start_date=2025-12-01')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?start_date=2025-12-01')
     })
 
     it('should fetch events with end_date filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ end_date: '2025-12-31' })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?end_date=2025-12-31')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?end_date=2025-12-31')
     })
 
     it('should fetch events with page filter', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({ page: 2 })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?page=2')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?page=2')
     })
 
     it('should fetch events with multiple filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
         event_type_id: 1,
@@ -127,7 +127,7 @@ describe('publicEventsService', () => {
         page: 2,
       })
 
-      const callUrl = mockApiClient.get.mock.calls[0][0]
+      const callUrl = mockPublicApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('event_type_id=1')
       expect(callUrl).toContain('event_subtype_id=2')
       expect(callUrl).toContain('location_id=3')
@@ -137,7 +137,7 @@ describe('publicEventsService', () => {
     })
 
     it('should skip null filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
         event_type_id: null,
@@ -147,11 +147,11 @@ describe('publicEventsService', () => {
         end_date: null,
       })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events')
     })
 
     it('should skip undefined filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockEventsResponse))
 
       await publicEventsService.getAll({
         event_type_id: undefined,
@@ -159,7 +159,7 @@ describe('publicEventsService', () => {
         location_id: undefined,
       })
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events')
     })
 
     it('should handle empty response', async () => {
@@ -172,7 +172,7 @@ describe('publicEventsService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
 
       const result = await publicEventsService.getAll()
 
@@ -181,7 +181,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle API errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(publicEventsService.getAll()).rejects.toThrow('Network error')
     })
@@ -189,33 +189,33 @@ describe('publicEventsService', () => {
 
   describe('getById', () => {
     it('should fetch event by ID successfully', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockPublicEvent }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockPublicEvent }))
 
       const result = await publicEventsService.getById(1)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/1')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/1')
       expect(result.data).toEqual(mockPublicEvent)
       expect(result.data.id).toBe(1)
     })
 
     it('should fetch different event IDs', async () => {
       const mockEvent2 = { ...mockPublicEvent, id: 123 }
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent2 }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent2 }))
 
       const result = await publicEventsService.getById(123)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/123')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/123')
       expect(result.data.id).toBe(123)
     })
 
     it('should handle not found errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Event not found'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Event not found'))
 
       await expect(publicEventsService.getById(999)).rejects.toThrow('Event not found')
     })
 
     it('should handle server errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Internal server error'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Internal server error'))
 
       await expect(publicEventsService.getById(1)).rejects.toThrow('Internal server error')
     })
@@ -232,11 +232,11 @@ describe('publicEventsService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(upcomingEvents))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(upcomingEvents))
 
       const result = await publicEventsService.getUpcoming()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/upcoming')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/upcoming')
       expect(result.data).toHaveLength(2)
       expect(result.meta.total).toBe(2)
     })
@@ -251,7 +251,7 @@ describe('publicEventsService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
 
       const result = await publicEventsService.getUpcoming()
 
@@ -259,7 +259,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle API errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch'))
 
       await expect(publicEventsService.getUpcoming()).rejects.toThrow('Failed to fetch')
     })
@@ -280,11 +280,11 @@ describe('publicEventsService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(featuredEvents))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(featuredEvents))
 
       const result = await publicEventsService.getFeatured()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/featured')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/featured')
       expect(result.data).toHaveLength(3)
       expect(result.data.every((e) => e.is_featured)).toBe(true)
     })
@@ -299,7 +299,7 @@ describe('publicEventsService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(emptyResponse))
 
       const result = await publicEventsService.getFeatured()
 
@@ -307,7 +307,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle API errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch'))
 
       await expect(publicEventsService.getFeatured()).rejects.toThrow('Failed to fetch')
     })
@@ -321,11 +321,11 @@ describe('publicEventsService', () => {
         { id: 3, name: 'Deportivo', is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
 
       const result = await publicEventsService.getEventTypes()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/event-types')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/event-types')
       expect(result.data).toHaveLength(3)
       expect(result.data[0].name).toBe('Cultural')
       expect(result.data[1].name).toBe('Business')
@@ -333,7 +333,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle empty event types list', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await publicEventsService.getEventTypes()
 
@@ -341,7 +341,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle errors when fetching event types', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(publicEventsService.getEventTypes()).rejects.toThrow('Network error')
     })
@@ -351,7 +351,7 @@ describe('publicEventsService', () => {
         { id: 1, name: 'Cultural', is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
 
       const result = await publicEventsService.getEventTypes()
 
@@ -366,7 +366,7 @@ describe('publicEventsService', () => {
         { id: 1, name: 'Active Type', is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEventTypes }))
 
       const result = await publicEventsService.getEventTypes()
 
@@ -382,18 +382,18 @@ describe('publicEventsService', () => {
         { id: 2, name: 'Theatre Performance', event_type_id: 1, is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockSubtypes }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockSubtypes }))
 
       const result = await publicEventsService.getEventSubtypes(1)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/event-types/1/subtypes')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/event-types/1/subtypes')
       expect(result.data).toHaveLength(2)
       expect(result.data[0].name).toBe('Music Festival')
       expect(result.data[0].event_type_id).toBe(1)
     })
 
     it('should handle empty subtypes list', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await publicEventsService.getEventSubtypes(1)
 
@@ -401,7 +401,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle errors when fetching subtypes', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(publicEventsService.getEventSubtypes(1)).rejects.toThrow('Network error')
     })
@@ -411,7 +411,7 @@ describe('publicEventsService', () => {
         { id: 1, name: 'Music Festival', event_type_id: 1, is_active: true },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockSubtypes }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockSubtypes }))
 
       const result = await publicEventsService.getEventSubtypes(1)
 
@@ -422,11 +422,11 @@ describe('publicEventsService', () => {
     })
 
     it('should call correct endpoint for different event type ids', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       await publicEventsService.getEventSubtypes(5)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/event-types/5/subtypes')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/event-types/5/subtypes')
     })
   })
 
@@ -438,18 +438,18 @@ describe('publicEventsService', () => {
         { id: 3, name: 'Luna Park', city: 'CABA' },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
 
       const result = await publicEventsService.getLocations()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/locations/active')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/locations/active')
       expect(result.data).toHaveLength(3)
       expect(result.data[0].name).toBe('Teatro San Martín')
       expect(result.data[1].name).toBe('Centro Cultural Kirchner')
     })
 
     it('should handle empty locations list', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await publicEventsService.getLocations()
 
@@ -457,7 +457,7 @@ describe('publicEventsService', () => {
     })
 
     it('should handle API errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch locations'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Failed to fetch locations'))
 
       await expect(publicEventsService.getLocations()).rejects.toThrow('Failed to fetch locations')
     })
@@ -467,7 +467,7 @@ describe('publicEventsService', () => {
         { id: 1, name: 'Teatro San Martín', city: 'CABA' },
       ]
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
 
       const result = await publicEventsService.getLocations()
 
@@ -479,7 +479,7 @@ describe('publicEventsService', () => {
 
   describe('Error Handling', () => {
     it('should handle 404 errors across all methods', async () => {
-      mockApiClient.get.mockRejectedValue(new Error('Not found'))
+      mockPublicApiClient.get.mockRejectedValue(new Error('Not found'))
 
       await expect(publicEventsService.getAll()).rejects.toThrow('Not found')
       await expect(publicEventsService.getById(1)).rejects.toThrow('Not found')
@@ -490,13 +490,13 @@ describe('publicEventsService', () => {
     })
 
     it('should handle timeout errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Request timeout'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Request timeout'))
 
       await expect(publicEventsService.getAll()).rejects.toThrow('Request timeout')
     })
 
     it('should handle network errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(publicEventsService.getUpcoming()).rejects.toThrow('Network error')
     })

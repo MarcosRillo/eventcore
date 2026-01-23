@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage';
-import apiClient from '@/services/apiClient';
+import publicApiClient from '@/services/publicApiClient';
 import { Event } from '@/types/event.types';
 
 interface EventPageProps {
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     // Try to get the event by ID
     const { id } = await params;
     const eventId = parseInt(id) || id;
-    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
+    const response = await publicApiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data.data;
 
     const eventUrl = `/calendar/${id}`;
@@ -85,7 +85,7 @@ export default async function EventPage({ params }: EventPageProps) {
     // Try to get the event by ID
     const { id } = await params;
     const eventId = parseInt(id) || id;
-    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
+    const response = await publicApiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data.data;
 
     return <EventDetailPage event={event} />;

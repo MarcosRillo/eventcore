@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // State
       user: authState.user,
       token: authState.token,
-      isAuthenticated: Boolean(authState.user && authState.token),
+      isAuthenticated: Boolean(authState.user),
       isLoading: authState.isLoading,
       error: authState.error,
 

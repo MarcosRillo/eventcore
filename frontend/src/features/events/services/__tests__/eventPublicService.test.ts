@@ -1,15 +1,15 @@
 import { AxiosResponse } from 'axios'
 
 import { combinedEventPublicService,eventPublicExportService, eventPublicService } from '@/features/events/services/eventPublicService'
-import apiClient from '@/services/apiClient'
+import publicApiClient from '@/services/publicApiClient'
 import { Event, EVENT_STATUS, EVENT_TYPE,EventPagination } from '@/types/event.types'
 import { PublicEventFilters } from '@/types/filter.types'
 import { Location } from '@/types/location.types'
 
-// Mock apiClient
-jest.mock('@/services/apiClient')
+// Mock publicApiClient (used for public routes - no auth)
+jest.mock('@/services/publicApiClient')
 
-const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
+const mockPublicApiClient = publicApiClient as jest.Mocked<typeof publicApiClient>
 
 // Helper to create mock axios response
 const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
@@ -90,17 +90,17 @@ describe('eventPublicService', () => {
 
   describe('getEvents', () => {
     it('should get events without filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventPublicService.getEvents()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?')
       expect(result).toEqual(mockPagination)
       expect(result.data).toHaveLength(1)
     })
 
     it('should get events with filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -110,16 +110,16 @@ describe('eventPublicService', () => {
 
       await eventPublicService.getEvents(filters)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/public/events?')
       )
-      expect(mockApiClient.get).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('category_id=1')
       )
     })
 
     it('should skip null and undefined filter values', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         featured: true,
@@ -127,14 +127,14 @@ describe('eventPublicService', () => {
 
       await eventPublicService.getEvents(filters)
 
-      const callUrl = mockApiClient.get.mock.calls[0][0]
+      const callUrl = mockPublicApiClient.get.mock.calls[0][0]
       expect(callUrl).not.toContain('category_id')
       expect(callUrl).not.toContain('start_date')
       expect(callUrl).toContain('featured=true')
     })
 
     it('should handle API errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Network error'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(eventPublicService.getEvents()).rejects.toThrow('Network error')
     })
@@ -142,17 +142,17 @@ describe('eventPublicService', () => {
 
   describe('getEvent', () => {
     it('should get single event by ID', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       const result = await eventPublicService.getEvent(1)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/1')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/1')
       expect(result).toEqual(mockEvent)
       expect(result.id).toBe(1)
     })
 
     it('should handle 404 errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Not found'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Not found'))
 
       await expect(eventPublicService.getEvent(999)).rejects.toThrow('Not found')
     })
@@ -160,16 +160,16 @@ describe('eventPublicService', () => {
 
   describe('getPublicEvents', () => {
     it('should get public events without filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventPublicService.getPublicEvents?.()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events?')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events?')
       expect(result).toEqual(mockPagination)
     })
 
     it('should get public events with multiple filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -183,7 +183,7 @@ describe('eventPublicService', () => {
 
       await eventPublicService.getPublicEvents?.(filters)
 
-      const callUrl = mockApiClient.get.mock.calls[0][0]
+      const callUrl = mockPublicApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('category_id=1')
       expect(callUrl).toContain('location_id=2')
       expect(callUrl).toContain('start_date=2025-12-01')
@@ -205,7 +205,7 @@ describe('eventPublicService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(emptyPagination))
 
       const result = await eventPublicService.getPublicEvents?.()
 
@@ -216,25 +216,25 @@ describe('eventPublicService', () => {
 
   describe('getPublicEvent', () => {
     it('should get public event by ID', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       const result = await eventPublicService.getPublicEvent?.(1)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/1')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/1')
       expect(result).toEqual(mockEvent)
     })
 
     it('should get public event by slug', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockEvent }))
 
       const result = await eventPublicService.getPublicEvent?.('public-event-slug')
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/public-event-slug')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/public-event-slug')
       expect(result).toEqual(mockEvent)
     })
 
     it('should handle not found errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Event not found'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Event not found'))
 
       await expect(eventPublicService.getPublicEvent?.('invalid-slug')).rejects.toThrow('Event not found')
     })
@@ -242,21 +242,21 @@ describe('eventPublicService', () => {
 
   describe('searchEvents', () => {
     it('should search events with query', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const result = await eventPublicService.searchEvents?.('music')
 
-      expect(mockApiClient.get).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/public/events/search?')
       )
-      expect(mockApiClient.get).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('q=music')
       )
       expect(result).toEqual(mockPagination)
     })
 
     it('should search events with query and filters', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -265,7 +265,7 @@ describe('eventPublicService', () => {
 
       await eventPublicService.searchEvents?.('concert', filters)
 
-      const callUrl = mockApiClient.get.mock.calls[0][0]
+      const callUrl = mockPublicApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('q=concert')
       expect(callUrl).toContain('category_id=1')
       expect(callUrl).toContain('featured=true')
@@ -283,7 +283,7 @@ describe('eventPublicService', () => {
         },
       }
 
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(emptyPagination))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(emptyPagination))
 
       const result = await eventPublicService.searchEvents?.('nonexistent')
 
@@ -296,27 +296,27 @@ describe('eventPublicService', () => {
     it('should get featured events with default limit', async () => {
       const mockEvent2 = createMockEvent({ id: 2, title: 'Public Event 2' })
       const mockFeaturedEvents = [mockEvent, mockEvent2]
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockFeaturedEvents }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockFeaturedEvents }))
 
       const result = await eventPublicService.getFeaturedEvents?.()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/featured?limit=6')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/featured?limit=6')
       expect(result).toEqual(mockFeaturedEvents)
       expect(result).toHaveLength(2)
     })
 
     it('should get featured events with custom limit', async () => {
       const mockFeaturedEvents = [mockEvent]
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockFeaturedEvents }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockFeaturedEvents }))
 
       const result = await eventPublicService.getFeaturedEvents?.(3)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/featured?limit=3')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/featured?limit=3')
       expect(result).toHaveLength(1)
     })
 
     it('should handle empty featured events', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await eventPublicService.getFeaturedEvents?.()
 
@@ -328,27 +328,27 @@ describe('eventPublicService', () => {
     it('should get upcoming events with default limit', async () => {
       const mockEvent2 = createMockEvent({ id: 2, title: 'Public Event 2' })
       const mockUpcomingEvents = [mockEvent, mockEvent2]
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockUpcomingEvents }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockUpcomingEvents }))
 
       const result = await eventPublicService.getUpcomingEvents?.()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/upcoming?limit=10')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/upcoming?limit=10')
       expect(result).toEqual(mockUpcomingEvents)
       expect(result).toHaveLength(2)
     })
 
     it('should get upcoming events with custom limit', async () => {
       const mockUpcomingEvents = [mockEvent]
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockUpcomingEvents }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockUpcomingEvents }))
 
       const result = await eventPublicService.getUpcomingEvents?.(5)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/upcoming?limit=5')
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/upcoming?limit=5')
       expect(result).toHaveLength(1)
     })
 
     it('should handle empty upcoming events', async () => {
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse({ data: [] }))
 
       const result = await eventPublicService.getUpcomingEvents?.()
 
@@ -456,11 +456,11 @@ describe('eventPublicExportService', () => {
   describe('downloadICalFile', () => {
     it('should download iCal file without filters', async () => {
       const mockBlob = new Blob(['mock ical data'], { type: 'text/calendar' })
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
       const result = await eventPublicExportService.downloadICalFile()
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/public/events/ical?', {
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith('/public/events/ical?', {
         responseType: 'blob',
       })
       expect(result).toEqual(mockBlob)
@@ -468,7 +468,7 @@ describe('eventPublicExportService', () => {
 
     it('should download iCal file with filters', async () => {
       const mockBlob = new Blob(['mock ical data'], { type: 'text/calendar' })
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
+      mockPublicApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
       const filters: PublicEventFilters = {
         category_id: 1,
@@ -476,18 +476,18 @@ describe('eventPublicExportService', () => {
 
       await eventPublicExportService.downloadICalFile(filters)
 
-      expect(mockApiClient.get).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/public/events/ical?'),
         { responseType: 'blob' }
       )
-      expect(mockApiClient.get).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('category_id=1'),
         { responseType: 'blob' }
       )
     })
 
     it('should handle download errors', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Download failed'))
+      mockPublicApiClient.get.mockRejectedValueOnce(new Error('Download failed'))
 
       await expect(eventPublicExportService.downloadICalFile()).rejects.toThrow('Download failed')
     })
