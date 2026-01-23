@@ -2,41 +2,31 @@
 
 namespace App\Features\Dashboard\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Features\Dashboard\Requests\EventDetailRequest;
+use App\Features\Dashboard\Requests\EventsSummaryRequest;
+use App\Features\Dashboard\Requests\IndexDashboardEventsRequest;
 use App\Features\Dashboard\Services\DashboardService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
  * Dashboard Controller
- * 
+ *
  * Provides endpoints for entity admin/staff dashboard functionality
  * Handles events summary, filtered lists, and detailed views
  */
 class DashboardController extends Controller
 {
     public function __construct(
-        private DashboardService $dashboardService
+        private DashboardService $dashboardService,
     ) {}
 
     /**
      * Get dashboard summary with event counters for each tab
-     * 
-     * @return JsonResponse
      */
-    public function eventsSummary(Request $request): JsonResponse
+    public function eventsSummary(EventsSummaryRequest $request): JsonResponse
     {
         try {
-            $user = $request->user();
-            
-            // Verify user has required role
-            if (!$this->canAccessDashboard($user)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Access denied. Dashboard is only available for entity admin and entity staff users.',
-                ], 403);
-            }
-
             $summary = $this->dashboardService->getEventsSummary();
 
             return response()->json([
@@ -55,27 +45,14 @@ class DashboardController extends Controller
 
     /**
      * Get filtered and paginated events for dashboard tabs
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
-    public function events(Request $request): JsonResponse
+    public function events(IndexDashboardEventsRequest $request): JsonResponse
     {
         try {
-            $user = $request->user();
-            
-            // Verify user has required role
-            if (!$this->canAccessDashboard($user)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Access denied. Dashboard is only available for entity admin and entity staff users.',
-                ], 403);
-            }
-
-            $tab = $request->get('tab', 'requires-action');
-            $page = $request->get('page', 1);
-            $search = $request->get('search', '');
-            $perPage = 20;
+            $tab = $request->getTab();
+            $page = $request->validated('page', 1) ?? 1;
+            $search = $request->getSearch();
+            $perPage = $request->getPerPage();
 
             $result = $this->dashboardService->getFilteredEvents($tab, $page, $search, $perPage);
 
@@ -96,27 +73,13 @@ class DashboardController extends Controller
 
     /**
      * Get detailed event information for modal view
-     * 
-     * @param Request $request
-     * @param int $eventId
-     * @return JsonResponse
      */
-    public function eventDetail(Request $request, int $eventId): JsonResponse
+    public function eventDetail(EventDetailRequest $request, int $eventId): JsonResponse
     {
         try {
-            $user = $request->user();
-            
-            // Verify user has required role
-            if (!$this->canAccessDashboard($user)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Access denied. Dashboard is only available for entity admin and entity staff users.',
-                ], 403);
-            }
-
             $eventDetail = $this->dashboardService->getEventDetail($eventId);
 
-            if (!$eventDetail) {
+            if (! $eventDetail) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Event not found',
@@ -135,19 +98,5 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Check if user can access dashboard functionality
-     * 
-     * @param mixed $user
-     * @return bool
-     */
-    private function canAccessDashboard($user): bool
-    {
-        return $user && (
-            $user->isEntityAdmin() || 
-            $user->isEntityStaff()
-        );
     }
 }

@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantScope;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Scopes\TenantScope;
-use Carbon\Carbon;
 
 /**
  * Event Model
@@ -189,12 +189,12 @@ class Event extends Model
     public function locations(): BelongsToMany
     {
         return $this->belongsToMany(Location::class, 'event_location')
-                    ->withPivot([
-                        'location_specific_notes',
-                        'max_attendees_for_location',
-                        'location_metadata'
-                    ])
-                    ->withTimestamps();
+            ->withPivot([
+                'location_specific_notes',
+                'max_attendees_for_location',
+                'location_metadata',
+            ])
+            ->withTimestamps();
     }
 
     // =====================================================
@@ -255,8 +255,8 @@ class Event extends Model
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(EventService::class, 'event_service', 'event_id', 'service_id')
-                    ->withPivot(['is_included', 'notes'])
-                    ->withTimestamps();
+            ->withPivot(['is_included', 'notes'])
+            ->withTimestamps();
     }
 
     /**
@@ -265,7 +265,7 @@ class Event extends Model
     public function rooms(): BelongsToMany
     {
         return $this->belongsToMany(EventRoom::class, 'event_room', 'event_id', 'room_id')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     /**
@@ -292,8 +292,7 @@ class Event extends Model
     /**
      * Get the last approval action of a specific type.
      *
-     * @param string $action Action constant from EventApproval
-     * @return EventApproval|null
+     * @param  string  $action  Action constant from EventApproval
      */
     public function getLastApproval(string $action): ?EventApproval
     {
@@ -302,8 +301,6 @@ class Event extends Model
 
     /**
      * Check if this event has been published.
-     *
-     * @return bool
      */
     public function isPublished(): bool
     {
@@ -321,7 +318,7 @@ class Event extends Model
      */
     public function scopePublished($query)
     {
-        return $query->whereHas('status', fn($q) => $q->where('status_code', 'published'));
+        return $query->whereHas('status', fn ($q) => $q->where('status_code', 'published'));
     }
 
     /**
@@ -335,16 +332,16 @@ class Event extends Model
      *
      * Excludes: draft, requires_changes, rejected, cancelled
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeInternalCalendar($query)
     {
-        return $query->whereHas('status', function($q) {
+        return $query->whereHas('status', function ($q) {
             $q->whereIn('status_code', [
                 'approved_internal',
                 'pending_public_approval',
-                'published'
+                'published',
             ]);
         });
     }
@@ -364,7 +361,7 @@ class Event extends Model
     {
         return $query->where(function ($query) use ($search) {
             $query->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
         });
     }
 
@@ -375,11 +372,11 @@ class Event extends Model
     {
         return $query->where(function ($query) use ($startDate, $endDate) {
             $query->whereBetween('start_date', [$startDate, $endDate])
-                  ->orWhereBetween('end_date', [$startDate, $endDate])
-                  ->orWhere(function ($query) use ($startDate, $endDate) {
-                      $query->where('start_date', '<=', $startDate)
-                            ->where('end_date', '>=', $endDate);
-                  });
+                ->orWhereBetween('end_date', [$startDate, $endDate])
+                ->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $endDate);
+                });
         });
     }
 
@@ -388,7 +385,7 @@ class Event extends Model
      */
     public function scopeByFormat($query, $formatCode)
     {
-        return $query->whereHas('format', fn($q) => $q->where('format_code', $formatCode));
+        return $query->whereHas('format', fn ($q) => $q->where('format_code', $formatCode));
     }
 
     /**
@@ -412,7 +409,7 @@ class Event extends Model
      */
     public function scopeByOrigin($query, $originCode)
     {
-        return $query->whereHas('origin', fn($q) => $q->where('code', $originCode));
+        return $query->whereHas('origin', fn ($q) => $q->where('code', $originCode));
     }
 
     /**
@@ -420,7 +417,7 @@ class Event extends Model
      */
     public function scopeByTheme($query, $themeCode)
     {
-        return $query->whereHas('theme', fn($q) => $q->where('code', $themeCode));
+        return $query->whereHas('theme', fn ($q) => $q->where('code', $themeCode));
     }
 
     /**
@@ -471,6 +468,7 @@ class Event extends Model
     public function isHappening(): bool
     {
         $now = Carbon::now();
+
         return $now->between($this->start_date, $this->end_date);
     }
 
@@ -523,12 +521,21 @@ class Event extends Model
     public function isInApprovalWorkflow(): bool
     {
         $statusCode = $this->status?->status_code;
+
         return in_array($statusCode, [
             'pending_internal_approval',
             'approved_internal',
             'pending_public_approval',
             'requires_changes',
         ]);
+    }
+
+    /**
+     * Check if the event has a Call-To-Action (CTA) link configured.
+     */
+    public function hasCTA(): bool
+    {
+        return ! empty($this->cta_link);
     }
 
     /**

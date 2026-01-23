@@ -2,11 +2,10 @@
 
 namespace Tests\Feature\PublicEvents;
 
-use App\Models\Entity;
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,6 +23,7 @@ class PublicEventControllerTest extends TestCase
     use RefreshDatabase;
 
     private Organization $organization;
+
     private EventStatus $publishedStatus;
 
     protected function setUp(): void
@@ -51,19 +51,19 @@ class PublicEventControllerTest extends TestCase
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Cultural',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Business',
-            'is_active' => false  // Inactive - should NOT appear
+            'is_active' => false,  // Inactive - should NOT appear
         ]);
 
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Deportivo',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act: Call the public event-types endpoint
@@ -84,7 +84,7 @@ class PublicEventControllerTest extends TestCase
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Inactive Type',
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         // Act
@@ -102,19 +102,19 @@ class PublicEventControllerTest extends TestCase
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Zebra Event',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Apple Event',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Banana Event',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act
@@ -135,28 +135,28 @@ class PublicEventControllerTest extends TestCase
         $eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Cultural',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Music Festival',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Art Exhibition',
-            'is_active' => false  // Inactive - should NOT appear
+            'is_active' => false,  // Inactive - should NOT appear
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Theatre Performance',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act: Call the subtypes endpoint
@@ -177,14 +177,14 @@ class PublicEventControllerTest extends TestCase
         $eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Cultural',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Inactive Subtype',
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         // Act
@@ -202,21 +202,21 @@ class PublicEventControllerTest extends TestCase
         $eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Cultural',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Zebra Show',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Apple Concert',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act
@@ -246,27 +246,27 @@ class PublicEventControllerTest extends TestCase
         $culturalType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Cultural',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $businessType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Business',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $culturalType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Music Festival',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $businessType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Conference',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act: Request subtypes for Cultural type only
@@ -286,7 +286,7 @@ class PublicEventControllerTest extends TestCase
         EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Test Type',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act
@@ -296,8 +296,8 @@ class PublicEventControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'name']
-            ]
+                '*' => ['id', 'name'],
+            ],
         ]);
     }
 
@@ -307,14 +307,14 @@ class PublicEventControllerTest extends TestCase
         // Arrange
         $eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
             'name' => 'Test Subtype',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Act
@@ -324,8 +324,8 @@ class PublicEventControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'name', 'event_type_id']
-            ]
+                '*' => ['id', 'name', 'event_type_id'],
+            ],
         ]);
     }
 
@@ -361,9 +361,9 @@ class PublicEventControllerTest extends TestCase
         // Act: Request with limit exceeding max (25 > 20 max)
         $responseCapped = $this->getJson('/api/v1/public/events/featured?limit=25');
 
-        // Assert: Returns max 10 events (all available)
-        $responseCapped->assertOk();
-        $this->assertLessThanOrEqual(20, count($responseCapped->json('data')));
+        // Assert: Returns 422 with validation error for exceeding max
+        $responseCapped->assertUnprocessable();
+        $responseCapped->assertJsonValidationErrors(['limit']);
     }
 
     #[Test]
@@ -863,7 +863,7 @@ class PublicEventControllerTest extends TestCase
                 'start_date',
                 'end_date',
                 'status_id',
-            ]
+            ],
         ]);
         $response->assertJsonFragment([
             'id' => $event->id,
@@ -924,7 +924,7 @@ class PublicEventControllerTest extends TestCase
         $response->assertJsonStructure([
             'events',
             'calendar',
-            'month_info'
+            'month_info',
         ]);
         $this->assertIsArray($response->json('events'));
         $this->assertEquals(2, count($response->json('events')));
@@ -982,6 +982,32 @@ class PublicEventControllerTest extends TestCase
     }
 
     #[Test]
+    public function test_upcoming_respects_limit_parameter()
+    {
+        // Arrange: Create multiple upcoming events
+        Event::factory()->count(15)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->publishedStatus->id,
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(2),
+        ]);
+
+        // Act: Request with custom limit
+        $responseCustom = $this->getJson('/api/v1/public/events/upcoming?limit=5');
+
+        // Assert: Returns exactly 5 events
+        $responseCustom->assertOk();
+        $responseCustom->assertJsonCount(5, 'data');
+
+        // Act: Request with limit exceeding max (55 > 50 max)
+        $responseCapped = $this->getJson('/api/v1/public/events/upcoming?limit=55');
+
+        // Assert: Returns 422 with validation error for exceeding max
+        $responseCapped->assertUnprocessable();
+        $responseCapped->assertJsonValidationErrors(['limit']);
+    }
+
+    #[Test]
     public function test_search_returns_matching_events()
     {
         // Arrange: Create events with searchable content
@@ -1020,7 +1046,7 @@ class PublicEventControllerTest extends TestCase
         $response->assertJsonStructure([
             'data',
             'search_query',
-            'total_results'
+            'total_results',
         ]);
         $this->assertEquals('Festival', $response->json('search_query'));
         $this->assertEquals(2, $response->json('total_results'));
@@ -1095,8 +1121,8 @@ class PublicEventControllerTest extends TestCase
             'data' => [
                 'total_events',
                 'total_event_types',
-                'events_this_month'
-            ]
+                'events_this_month',
+            ],
         ]);
     }
 
