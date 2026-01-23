@@ -1,0 +1,19 @@
+{
+  "name": "plataforma-calendario",
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.0"
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx}": [
+      "npm run lint:fix --prefix frontend"
+    ],
+    "backend/**/*.php": [
+      "docker compose exec -T backend php vendor/bin/pint"
+    ]
+  }
+}

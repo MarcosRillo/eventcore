@@ -1,6 +1,7 @@
 # ===========================================
 # GENERAL
 # ===========================================
+node_modules/
 .DS_Store
 .DS_Store?
 ._*
@@ -147,3 +148,4 @@ docs/**/.DS_Store
 docs/**/Thumbs.db
 docs/**/*.tmp
 docs/**/*.bak
+.env

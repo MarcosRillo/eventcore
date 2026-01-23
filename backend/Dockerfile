@@ -33,9 +33,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Configuración de PCOV para coverage
-# - pcov.enabled=1 siempre activo (solo genera overhead con --coverage)
-# - PCOV no afecta rendimiento si no se usa --coverage
-# - Excluye vendor y directorios no relevantes
 RUN { \
     echo '[pcov]'; \
     echo 'pcov.enabled=1'; \
@@ -44,31 +41,33 @@ RUN { \
     } > /usr/local/etc/php/conf.d/pcov.ini
 
 # Configuración PHP personalizada
-# - Aumentar memory_limit a 512M para tests con HTMLPurifier (Sprint 3)
-# - 128M default no era suficiente para ejecutar 481 tests
 RUN { \
     echo 'memory_limit = 512M'; \
+    echo 'upload_max_filesize = 64M'; \
+    echo 'post_max_size = 64M'; \
     } > /usr/local/etc/php/conf.d/custom.ini
+
+# Configurar PHP-FPM para escuchar en todas las interfaces
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
 
 # Instalar Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # Crear usuario del sistema para ejecutar comandos de Composer y Artisan
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
+RUN groupadd -g 1000 www \
+    && useradd -u 1000 -ms /bin/bash -g www www
 
 # Establecer directorio de trabajo
 WORKDIR /var/www
 
 # Copiar archivos de la aplicación
-COPY . /var/www
-
-# Cambiar propietario de los archivos
-RUN chown -R www:www /var/www
+COPY --chown=www:www . /var/www
 
 # Cambiar al usuario www
 USER www
 
-# Exponer puerto 9000 y iniciar servidor built-in de PHP para desarrollo
+# Exponer puerto 9000 (FastCGI)
 EXPOSE 9000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=9000"]
+
+# PHP-FPM como proceso principal (NO artisan serve)
+CMD ["php-fpm"]
