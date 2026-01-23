@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: plataforma_calendario
       POSTGRES_USER: plataforma_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD environment variable is required}
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
@@ -37,7 +37,7 @@ services:
       DB_PORT: 5432
       DB_DATABASE: plataforma_calendario
       DB_USERNAME: plataforma_user
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD environment variable is required}
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://localhost:8000
@@ -47,6 +47,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x php-fpm > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     # NO exponer puertos - Nginx hace el proxy
 
   # Nginx - Servidor web para Backend API
