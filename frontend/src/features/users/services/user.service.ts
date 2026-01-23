@@ -4,12 +4,12 @@
  */
 
 import type {
+  PaginationMeta,
+  UpdateUserData,
   User,
   UserFilters,
-  UsersResponse,
   UserResponse,
-  UpdateUserData,
-  PaginationMeta,
+  UsersResponse,
 } from '@/features/users/types/user.types'
 import apiClient from '@/services/apiClient'
 

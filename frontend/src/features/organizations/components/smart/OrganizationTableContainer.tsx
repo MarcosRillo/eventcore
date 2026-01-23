@@ -5,9 +5,9 @@
  * Connects the hook with the presentational components
  */
 
-import React, { useState, useCallback } from 'react'
+import React, { useCallback,useState } from 'react'
 
-import { Input, Button } from '@/components/ui'
+import { Button,Input } from '@/components/ui'
 import { OrganizationDetailModal } from '@/features/organizations/components/dumb/OrganizationDetailModal'
 import { OrganizationTable } from '@/features/organizations/components/dumb/OrganizationTable'
 import { useOrganizations } from '@/features/organizations/hooks/useOrganizations'

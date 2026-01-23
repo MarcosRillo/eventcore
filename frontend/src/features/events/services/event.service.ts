@@ -11,12 +11,12 @@ import { combinedEventOrganizerService } from '@/features/events/services/eventO
 import { combinedEventPublicService } from '@/features/events/services/eventPublicService';
 import { EventServiceContext } from '@/features/events/services/types';
 import {
+  ApprovalStatistics,
   Event,
-  EventFormData,
   EventFilters,
+  EventFormData,
   EventPagination,
   EventStatistics,
-  ApprovalStatistics,
   EventStatus
 } from '@/types/event.types';
 export type { EventServiceContext } from '@/features/events/services/types';

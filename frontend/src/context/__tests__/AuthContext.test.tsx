@@ -9,12 +9,12 @@
  * 5. Error Handling
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiClient';
-import { getAccessToken, storeTokens, clearTokens } from '@/services/tokenUtils';
+import { clearTokens,getAccessToken, storeTokens } from '@/services/tokenUtils';
 
 // Mock next/navigation
 const mockPush = jest.fn();

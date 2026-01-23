@@ -5,10 +5,10 @@
  * Slide-over panel showing full details of a registration request
  */
 
-import { X, User, Building2, FileText, Check, XCircle } from 'lucide-react'
+import { Building2, Check, FileText, User, X, XCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import { Button, LoadingSpinner, Badge } from '@/components/ui'
+import { Badge,Button, LoadingSpinner } from '@/components/ui'
 import { RegistrationRequestDetail as RequestDetail } from '@/features/registration-requests/types/registration-request.types'
 
 interface RegistrationRequestDetailProps {

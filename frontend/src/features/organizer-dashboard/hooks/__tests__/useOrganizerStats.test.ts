@@ -1,4 +1,4 @@
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { act,renderHook, waitFor } from '@testing-library/react';
 
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats';
 import { organizerStatsService } from '@/features/organizer-dashboard/services/organizerStatsService';

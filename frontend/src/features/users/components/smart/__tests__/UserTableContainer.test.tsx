@@ -1,8 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import UserTableContainer from '@/features/users/components/smart/UserTableContainer';
 import { useUserManager } from '@/features/users/hooks/useUserManager';
-import type { User, PaginationMeta } from '@/features/users/types/user.types';
+import type { PaginationMeta,User } from '@/features/users/types/user.types';
 
 jest.mock('../../../hooks/useUserManager');
 

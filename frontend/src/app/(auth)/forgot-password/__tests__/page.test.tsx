@@ -2,7 +2,7 @@
  * Forgot Password Page Tests
  * Tests for rendering, interactions, success state, and error handling
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { useForgotPassword } from '@/features/auth';
 

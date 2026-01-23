@@ -6,8 +6,8 @@
 import type {
   Organization,
   OrganizationFilters,
-  OrganizationsResponse,
   OrganizationResponse,
+  OrganizationsResponse,
   PaginationMeta,
 } from '@/features/organizations/types/organization.types'
 import apiClient from '@/services/apiClient'

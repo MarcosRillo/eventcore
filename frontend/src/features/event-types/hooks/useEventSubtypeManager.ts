@@ -6,20 +6,20 @@
  * Created: December 2, 2025
  */
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useEffect,useMemo, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import {
-  getEventSubtypes,
   deleteEventSubtype,
+  getEventSubtypes,
 } from '@/features/event-types/services/eventSubtype.service';
 import { getEventType } from '@/features/event-types/services/eventType.service';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+import { PaginationMeta,usePaginatedData } from '@/hooks/usePaginatedData';
 import {
-  EventType,
   EventSubtype,
-  EventTypeFilterStatus,
   EventSubtypeQueryParams,
+  EventType,
+  EventTypeFilterStatus,
 } from '@/types/eventType.types';
 
 // Define the filters interface for event subtypes

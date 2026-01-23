@@ -6,10 +6,10 @@
 
 'use client';
 
-import { PencilIcon, TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { useState, useCallback, useMemo } from 'react';
+import { MapPinIcon,PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { useCallback, useMemo,useState } from 'react';
 
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
+import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
 import { PaginationMeta } from '@/types/api-response.types';
 import { Location } from '@/types/location.types';
 

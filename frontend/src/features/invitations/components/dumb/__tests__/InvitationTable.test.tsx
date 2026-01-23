@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import InvitationTable from '@/features/invitations/components/dumb/InvitationTable';
 import { Invitation } from '@/features/invitations/types/invitation.types';

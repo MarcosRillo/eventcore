@@ -7,7 +7,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 
 import { Header, Sidebar } from '@/components/layout';
 import { LoadingSpinner } from '@/components/ui';

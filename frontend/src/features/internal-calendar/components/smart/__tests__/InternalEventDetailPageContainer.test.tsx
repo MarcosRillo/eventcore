@@ -4,7 +4,7 @@
  * Tests for event detail page container with loading, error, and success states.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 
 import { InternalEventDetailPageContainer } from '@/features/internal-calendar/components/smart/InternalEventDetailPageContainer';

@@ -9,10 +9,10 @@ import { useCallback, useMemo } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import {
-  getEventTypes,
   deleteEventType,
+  getEventTypes,
 } from '@/features/event-types/services/eventType.service';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+import { PaginationMeta,usePaginatedData } from '@/hooks/usePaginatedData';
 import {
   EventType,
   EventTypeFilterStatus,

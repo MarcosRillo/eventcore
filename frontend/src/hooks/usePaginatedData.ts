@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo,useState } from "react";
 
 import { useDebounce } from "@/hooks/useDebounce";
 import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
@@ -63,8 +63,8 @@ export function usePaginatedData<T extends { id: number | string }, F extends Ba
   // When search changes, only debouncedSearch should trigger the effect (after delay)
   // Other filters (page, status, etc.) trigger immediately
   const filtersWithoutSearch = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { search, ...rest } = filters;
+     
+    const { search: _search, ...rest } = filters;
     return rest;
   }, [filters]);
 

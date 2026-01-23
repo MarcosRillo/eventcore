@@ -6,7 +6,7 @@
  * Updated for 3NF schema (Nov 30, 2025).
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { OrganizerEventForm } from '@/features/organizer/components/dumb/OrganizerEventForm'
 import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'

@@ -2,6 +2,9 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import jsdoc from "eslint-plugin-jsdoc";
+import checkFile from "eslint-plugin-check-file";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import unusedImports from "eslint-plugin-unused-imports";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,18 +14,33 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Global ignores
+  {
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "coverage/**",
+      "dist/**",
+      "build/**",
+      "*.config.js",
+      "*.config.mjs",
+      "next-env.d.ts",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     files: ["**/*.ts", "**/*.tsx"],
     plugins: {
       jsdoc,
+      "check-file": checkFile,
+      "simple-import-sort": simpleImportSort,
+      "unused-imports": unusedImports,
     },
     rules: {
-      // Console statements: ERROR (Fase 3 completada)
-      // NO permite ningún console.* (ni log, ni warn, ni error)
+      // Console statements: ERROR (CLAUDE.md compliance)
       "no-console": "error",
 
-      // Relative imports: ERROR (Fase 3 completada)
+      // Relative imports: ERROR (CLAUDE.md compliance)
       "no-restricted-imports": [
         "error",
         {
@@ -35,37 +53,27 @@ const eslintConfig = [
         }
       ],
 
-      // Import ordering (organización de imports): ERROR (Fase 3 completada)
-      "import/order": [
+      // Replace import/order with simple-import-sort for auto-fix
+      "import/order": "off",
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
+
+      // Auto-remove unused imports (replaces @typescript-eslint/no-unused-vars for imports)
+      "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-vars": [
         "error",
         {
-          groups: [
-            "builtin",   // Node.js built-ins
-            "external",  // npm packages
-            "internal",  // @/* aliases
-            "parent",    // ../
-            "sibling",   // ./
-            "index"      // ./index
-          ],
-          pathGroups: [
-            {
-              pattern: "@/**",
-              group: "internal",
-              position: "before"
-            }
-          ],
-          pathGroupsExcludedImportTypes: ["builtin"],
-          "newlines-between": "always",
-          alphabetize: {
-            order: "asc",
-            caseInsensitive: true
-          }
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_"
         }
       ],
 
-      // JSDoc documentation - DESHABILITADO temporalmente
-      // Next.js 15 trata warnings como errores en build
-      // TODO: Habilitar cuando se documente el codebase
+      // JSDoc documentation - DISABLED temporarily
+      // Next.js 15 treats warnings as errors in build
+      // TODO: Enable when codebase is documented
       "jsdoc/require-jsdoc": "off",
       "jsdoc/require-param": "off",
       "jsdoc/require-returns": "off",
@@ -81,29 +89,51 @@ const eslintConfig = [
       }
     }
   },
-  // Excepciones legítimas para relative imports
+  // Component files: PascalCase naming convention
+  {
+    files: ["src/features/**/components/**/*.tsx"],
+    rules: {
+      "check-file/filename-naming-convention": [
+        "error",
+        { "**/*.tsx": "PASCAL_CASE" },
+        { ignoreMiddleExtensions: true }
+      ],
+    },
+  },
+  // Feature folders: kebab-case naming convention (excluding __tests__ folders)
+  {
+    files: ["src/features/**/*"],
+    ignores: ["**/__tests__/**"],
+    rules: {
+      "check-file/folder-naming-convention": [
+        "error",
+        { "src/features/**/!(__tests__)/": "KEBAB_CASE" }
+      ],
+    },
+  },
+  // Exceptions for relative imports
   {
     files: ["**/index.ts", "**/index.tsx"],
     rules: {
-      "no-restricted-imports": "off" // Barrel exports pueden usar ./*
+      "no-restricted-imports": "off" // Barrel exports can use ./*
     }
   },
   {
     files: ["**/__tests__/page.test.tsx"],
     rules: {
-      "no-restricted-imports": "off" // Page tests pueden importar ../page
+      "no-restricted-imports": "off" // Page tests can import ../page
     }
   },
   {
     files: ["src/app/layout.tsx"],
     rules: {
-      "no-restricted-imports": "off" // Layout puede importar ./globals.css
+      "no-restricted-imports": "off" // Layout can import ./globals.css
     }
   },
   {
     files: ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
     rules: {
-      "no-console": "off" // Tests pueden usar console para debugging
+      "no-console": "off" // Tests can use console for debugging
     }
   }
 ];

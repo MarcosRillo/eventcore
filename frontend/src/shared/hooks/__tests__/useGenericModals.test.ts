@@ -3,7 +3,7 @@
  * Generic modal state management hook - reusable for any entity type
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { act,renderHook } from '@testing-library/react';
 
 import { useGenericModals } from '@/shared/hooks/useGenericModals';
 

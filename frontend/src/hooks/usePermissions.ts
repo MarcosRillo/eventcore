@@ -4,7 +4,7 @@
  */
 
 import { useAuth } from '@/context/AuthContext';
-import { UserRoleCode, Permission } from '@/types/auth.types';
+import { Permission,UserRoleCode } from '@/types/auth.types';
 
 export const usePermissions = () => {
   const {

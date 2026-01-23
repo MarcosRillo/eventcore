@@ -4,7 +4,7 @@
  * Dumb component that renders a checkbox for toggling between upcoming and past events.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
 

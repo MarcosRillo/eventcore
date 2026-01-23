@@ -3,8 +3,8 @@
  * Reusable mock factory functions for common types used in tests
  */
 
-import { PaginationMeta, PaginationLinks } from '@/types/api-response.types'
-import { Event, EventStatusCode, EventTypeCode, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
+import { PaginationLinks,PaginationMeta } from '@/types/api-response.types'
+import { Event, EVENT_STATUS, EVENT_TYPE,EventStatusCode, EventTypeCode } from '@/types/event.types'
 import { Location } from '@/types/location.types'
 
 /**

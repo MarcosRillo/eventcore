@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/services/apiClient';
-import { AppearanceResponse, AppearanceFormData } from '@/types/appearance.types';
+import { AppearanceFormData,AppearanceResponse } from '@/types/appearance.types';
 
 const APPEARANCE_ENDPOINTS = {
   base: '/admin/appearance',

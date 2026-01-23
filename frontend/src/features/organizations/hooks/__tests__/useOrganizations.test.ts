@@ -3,7 +3,7 @@
  * Tests for organization management hook
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useOrganizations } from '@/features/organizations/hooks/useOrganizations'
 import organizationService from '@/features/organizations/services/organization.service'

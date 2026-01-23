@@ -8,11 +8,11 @@
 import { useEffect, useState } from 'react';
 
 import {
+  Checkbox,
   FormModal,
   FormSubmitHandler,
   FormValidator,
   Input,
-  Checkbox,
 } from '@/components/ui';
 import {
   updateEventType,

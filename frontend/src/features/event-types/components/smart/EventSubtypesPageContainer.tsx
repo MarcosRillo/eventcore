@@ -7,14 +7,14 @@
  */
 
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
   ArrowLeftIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
-  TagIcon,
   CheckCircleIcon,
+  TagIcon,
   XCircleIcon,
 } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
@@ -22,9 +22,9 @@ import { useState } from 'react';
 
 import { Button, Input, LoadingSpinner, Select } from '@/components/ui';
 import {
-  EventSubtypeTableContainer,
   CreateEventSubtypeModal,
   EditEventSubtypeModal,
+  EventSubtypeTableContainer,
   useEventSubtypeManager,
 } from '@/features/event-types';
 import { EventSubtype, EventTypeFilterStatus } from '@/types/eventType.types';

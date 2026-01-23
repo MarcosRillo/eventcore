@@ -6,7 +6,7 @@
  * Provides functions to handle event state transitions with error handling.
  */
 
-import { useState, useCallback, useTransition } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 
 import { approvalService, approvalValidation } from '@/features/events/services/approvalService';
 import { ApiError } from '@/types/api-response.types';

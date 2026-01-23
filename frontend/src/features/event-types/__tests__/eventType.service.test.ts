@@ -8,18 +8,18 @@
  */
 
 import {
-  getEventTypes,
-  getEventType,
   createEventType,
-  updateEventType,
   deleteEventType,
-  toggleEventTypeStatus,
   getActiveEventTypes,
+  getEventType,
+  getEventTypes,
   searchEventTypes,
+  toggleEventTypeStatus,
+  updateEventType,
   validateEventTypeData,
 } from '@/features/event-types/services/eventType.service'
 import apiClient from '@/services/apiClient'
-import type { EventType, EventTypePagination, CreateEventTypeData, UpdateEventTypeData } from '@/types/eventType.types'
+import type { CreateEventTypeData, EventType, EventTypePagination, UpdateEventTypeData } from '@/types/eventType.types'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')

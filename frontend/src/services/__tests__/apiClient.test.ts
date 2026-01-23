@@ -1,9 +1,9 @@
 import apiClient, {
-  makeApiRequest,
-  setAuthToken,
-  removeAuthToken,
   getAuthToken,
   isAuthenticated,
+  makeApiRequest,
+  removeAuthToken,
+  setAuthToken,
 } from '@/services/apiClient'
 
 // Mock localStorage
@@ -155,7 +155,7 @@ describe('apiClient', () => {
       expect(result.url).toBe('/api/v1/test-endpoint')
     })
 
-    it('should not add prefix if URL already starts with /api', async () => {
+    it('should not add prefix if URL already starts with /api/v1', async () => {
       const requestConfig = {
         url: '/api/v1/existing',
         headers: {},

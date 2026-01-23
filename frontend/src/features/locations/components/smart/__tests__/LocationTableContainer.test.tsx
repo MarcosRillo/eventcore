@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer'
 import { PaginationMeta } from '@/types/api-response.types'

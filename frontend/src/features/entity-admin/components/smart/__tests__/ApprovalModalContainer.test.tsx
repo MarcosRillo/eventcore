@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { ApprovalModalContainer } from '@/features/entity-admin/components/smart/ApprovalModalContainer'
-import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types'
+import { Event, EVENT_STATUS,EventStatus } from '@/types/event.types'
 
 interface ApprovalActionOption {
   value: string

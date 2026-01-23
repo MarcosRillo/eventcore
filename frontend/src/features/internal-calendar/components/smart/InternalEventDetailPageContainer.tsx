@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { InternalEventDetailPage } from '@/features/internal-calendar/components/dumb/InternalEventDetailPage';

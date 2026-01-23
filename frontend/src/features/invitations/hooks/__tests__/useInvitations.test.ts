@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useInvitations } from '@/features/invitations/hooks/useInvitations'
 import invitationService from '@/features/invitations/services/invitation.service'

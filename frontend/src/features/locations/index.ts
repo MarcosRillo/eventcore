@@ -18,11 +18,11 @@ export { EditLocationModal } from '@/features/locations/components/EditLocationM
 
 // Services
 export {
-  getLocations,
+  createLocation,
+  deleteLocation,
   getActiveLocations,
   getLocation,
-  createLocation,
-  updateLocation,
-  deleteLocation,
+  getLocations,
   locationService,
+  updateLocation,
 } from '@/features/locations/services/location.service';

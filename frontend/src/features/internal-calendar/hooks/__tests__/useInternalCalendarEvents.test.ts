@@ -1,4 +1,4 @@
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { act,renderHook, waitFor } from '@testing-library/react';
 
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';

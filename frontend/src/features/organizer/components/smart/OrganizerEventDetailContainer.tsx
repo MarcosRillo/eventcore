@@ -10,7 +10,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback,useEffect, useState } from 'react'
 
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'

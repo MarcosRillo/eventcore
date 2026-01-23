@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback,useEffect, useState } from 'react'
 
-import type { User, UpdateUserData } from '@/features/users/types/user.types'
+import type { UpdateUserData,User } from '@/features/users/types/user.types'
 
 interface UserEditErrors {
   name?: string

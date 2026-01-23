@@ -8,12 +8,12 @@
 import { AdminEventService } from '@/features/events/services/types';
 import apiClient from '@/services/apiClient';
 import {
+  ApprovalStatistics,
   Event,
-  EventFormData,
   EventFilters,
+  EventFormData,
   EventPagination,
   EventStatistics,
-  ApprovalStatistics,
   EventStatus
 } from '@/types/event.types';
 

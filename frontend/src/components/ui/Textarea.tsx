@@ -3,7 +3,7 @@
  * Clean textarea with elegant focus states
  */
 
-import { TextareaHTMLAttributes, forwardRef, useId } from 'react'
+import { forwardRef, TextareaHTMLAttributes, useId } from 'react'
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string

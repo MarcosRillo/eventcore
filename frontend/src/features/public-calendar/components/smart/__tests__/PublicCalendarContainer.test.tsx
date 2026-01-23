@@ -4,7 +4,7 @@
  * Tests integration with usePublicEvents hook and navigation.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 
 import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'

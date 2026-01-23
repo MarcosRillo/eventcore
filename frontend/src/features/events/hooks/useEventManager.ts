@@ -6,23 +6,21 @@
 
 'use client';
 
-import { useState, useCallback, useMemo, useTransition } from 'react';
+import { useCallback, useMemo, useState, useTransition } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import {
-  getEventServiceForContext,
-  type EventServiceContext
-} from '@/features/events/services/event.service';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+  type EventServiceContext,
+  getEventServiceForContext} from '@/features/events/services/event.service';
+import { PaginationMeta,usePaginatedData } from '@/hooks/usePaginatedData';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useGenericModals } from '@/shared/hooks/useGenericModals';
 import {
+  ApprovalStatistics,
   Event,
-  EventFormData,
   EventFilters,
-  EventStatistics,
-  ApprovalStatistics
-} from '@/types/event.types';
+  EventFormData,
+  EventStatistics} from '@/types/event.types';
 
 // Extend base filters for events
 interface EventFiltersExtended extends EventFilters {

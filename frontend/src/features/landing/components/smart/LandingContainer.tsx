@@ -8,12 +8,12 @@
 import { useRouter } from 'next/navigation'
 
 import {
-  HeroSection,
-  FeaturedEventsSection,
   CategoriesSection,
+  FeaturedEventsSection,
+  HeroSection,
   OrganizersSection
 } from '@/features/landing/components/dumb'
-import { PublicEvent, EventType } from '@/features/public-calendar/types/public-calendar.types'
+import { EventType,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 interface LandingContainerProps {
   initialFeaturedEvents: PublicEvent[]

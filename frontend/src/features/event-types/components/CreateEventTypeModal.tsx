@@ -6,11 +6,11 @@
  */
 
 import {
+  Checkbox,
   FormModal,
   FormSubmitHandler,
   FormValidator,
   Input,
-  Checkbox,
 } from '@/components/ui';
 import {
   createEventType,

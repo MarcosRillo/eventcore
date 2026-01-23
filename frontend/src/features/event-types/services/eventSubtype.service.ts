@@ -11,16 +11,16 @@
  * Created: December 2, 2025
  */
 
-import { AxiosResponse, AxiosError } from 'axios';
+import { AxiosError,AxiosResponse } from 'axios';
 
 import apiClient from '@/services/apiClient';
-import { ApiResponse, ApiError } from '@/types/api-response.types';
+import { ApiError,ApiResponse } from '@/types/api-response.types';
 import {
+  CreateEventSubtypeData,
   EventSubtype,
   EventSubtypePagination,
-  CreateEventSubtypeData,
-  UpdateEventSubtypeData,
   EventSubtypeQueryParams,
+  UpdateEventSubtypeData,
 } from '@/types/eventType.types';
 
 /**

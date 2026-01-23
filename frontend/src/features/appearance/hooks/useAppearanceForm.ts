@@ -4,14 +4,13 @@
  * Components that use this hook should ONLY handle presentation
  */
 
-import { useState, useEffect, useCallback, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 
 import { getAppearanceSettings, updateAppearanceSettings } from '@/features/appearance/services/appearance.service';
 import { 
-  UseAppearanceFormReturn, 
   AppearanceFormData, 
-  DEFAULT_THEME
-} from '@/types/appearance.types';
+  DEFAULT_THEME,
+  UseAppearanceFormReturn} from '@/types/appearance.types';
 
 export const useAppearanceForm = (): UseAppearanceFormReturn => {
   // React 19 transitions for non-blocking UI

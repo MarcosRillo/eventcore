@@ -5,25 +5,24 @@
 
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef,useState } from 'react';
 
 import apiClient from '@/services/apiClient';
 import {
+  clearTokens,
   getAccessToken,
   storeTokens,
-  clearTokens,
 } from '@/services/tokenUtils';
 import {
-  User,
+  AuthContextType,
   LoginCredentials,
   LoginResponse,
-  AuthContextType,
-  UserRoleCode,
   Permission,
-  ROLE_PERMISSIONS,
   RESOURCE_PERMISSIONS,
-  TOKEN_KEYS
-} from '@/types/auth.types';
+  ROLE_PERMISSIONS,
+  TOKEN_KEYS,
+  User,
+  UserRoleCode} from '@/types/auth.types';
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);

@@ -3,11 +3,10 @@
 import {
   ArrowLeft,
   Calendar,
-  MapPin,
-  Phone,
+  ExternalLink,
   Mail,
-  ExternalLink
-} from 'lucide-react';
+  MapPin,
+  Phone} from 'lucide-react';
 import moment from 'moment';
 import Image from 'next/image';
 import Link from 'next/link';

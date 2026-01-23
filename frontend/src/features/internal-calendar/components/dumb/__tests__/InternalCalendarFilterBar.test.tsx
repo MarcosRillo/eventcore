@@ -4,7 +4,7 @@
  * Tests for filter bar with event type, status, and date filters.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
 import type { EventType } from '@/types/eventType.types';

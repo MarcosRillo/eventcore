@@ -6,10 +6,10 @@
 
 import {
   EventsResponse,
-  PublicEvent,
-  EventType,
   EventSubtype,
+  EventType,
   Location,
+  PublicEvent,
   PublicStats
 } from '@/features/public-calendar/types/public-calendar.types'
 import apiClient from '@/services/apiClient'

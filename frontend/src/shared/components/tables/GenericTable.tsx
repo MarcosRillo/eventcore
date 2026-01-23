@@ -12,8 +12,8 @@ import { Button, ConfirmDialog } from '@/components/ui';
 import Pagination from '@/components/ui/Pagination';
 import type {
   GenericTableProps,
-  TableColumnConfig,
   TableActionConfig,
+  TableColumnConfig,
 } from '@/shared/components/tables/types';
 
 /**

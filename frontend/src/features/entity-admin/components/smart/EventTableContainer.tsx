@@ -7,27 +7,26 @@
 'use client';
 
 import {
-  EyeIcon,
-  PencilIcon,
-  StarIcon,
-  DocumentDuplicateIcon,
-  TrashIcon,
-  PaperAirplaneIcon,
-  ChatBubbleLeftIcon,
-  ShareIcon,
   CalendarIcon,
+  ChatBubbleLeftIcon,
+  DocumentDuplicateIcon,
+  EyeIcon,
+  PaperAirplaneIcon,
+  PencilIcon,
+  ShareIcon,
+  StarIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback,useMemo, useState } from 'react';
 
 import {
-  getStatusConfig,
-  BADGE_BASE_CLASSES
-} from '@/features/events/constants';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
-import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types';
+  BADGE_BASE_CLASSES,
+  getStatusConfig} from '@/features/events/constants';
+import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
+import { Event, EVENT_STATUS,EventStatus } from '@/types/event.types';
 
 
 

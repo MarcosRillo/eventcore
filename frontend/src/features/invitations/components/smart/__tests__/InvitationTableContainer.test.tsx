@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen, waitFor } from '@testing-library/react';
 
 import InvitationTableContainer from '@/features/invitations/components/smart/InvitationTableContainer';
 import invitationService from '@/features/invitations/services/invitation.service';

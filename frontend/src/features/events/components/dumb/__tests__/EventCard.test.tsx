@@ -4,10 +4,10 @@
  * Tests rendering of event card with title, status, date, organization, and actions.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { EventCard } from '@/features/events/components/dumb/EventCard'
-import { Event, EventType, EventStatus } from '@/types/event.types'
+import { Event, EventStatus,EventType } from '@/types/event.types'
 
 // Mock UI components
 jest.mock('@/components/ui', () => ({

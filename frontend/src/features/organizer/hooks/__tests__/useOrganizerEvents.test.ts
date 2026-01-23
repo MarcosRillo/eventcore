@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'

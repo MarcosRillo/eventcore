@@ -4,7 +4,7 @@
  */
 
 import { Listbox, Transition } from '@headlessui/react'
-import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { CheckIcon,ChevronUpDownIcon } from '@heroicons/react/24/outline'
 import { Fragment } from 'react'
 
 export interface SelectOption {

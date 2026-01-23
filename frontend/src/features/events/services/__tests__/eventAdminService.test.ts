@@ -1,8 +1,8 @@
 import { AxiosResponse } from 'axios'
 
-import { eventAdminService, eventAdminApprovalService, combinedEventAdminService } from '@/features/events/services/eventAdminService'
+import { combinedEventAdminService,eventAdminApprovalService, eventAdminService } from '@/features/events/services/eventAdminService'
 import apiClient from '@/services/apiClient'
-import { Event, EventFormData, EventPagination, EventFilters, EventStatistics, ApprovalStatistics, EventStatus, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import { ApprovalStatistics, Event, EVENT_STATUS, EVENT_TYPE, EventFilters, EventFormData, EventPagination, EventStatistics, EventStatus, EventStatusCode, EventTypeCode } from '@/types/event.types'
 
 
 // Mock apiClient

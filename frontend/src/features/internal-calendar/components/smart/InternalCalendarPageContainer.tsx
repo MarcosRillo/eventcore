@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { getEventTypes } from '@/features/event-types/services/eventType.service';
@@ -18,8 +18,8 @@ import { InternalCalendarGridContainer } from '@/features/internal-calendar/comp
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
 import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
 import type {
-  ViewMode,
   InternalCalendarFilters,
+  ViewMode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
 import type { EventType } from '@/types/eventType.types';
 

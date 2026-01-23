@@ -1,12 +1,12 @@
 import { AxiosResponse } from 'axios'
 
 import {
-  getLocations,
+  createLocation,
+  deleteLocation,
   getActiveLocations,
   getLocation,
-  createLocation,
+  getLocations,
   updateLocation,
-  deleteLocation,
 } from '@/features/locations/services/location.service'
 import apiClient from '@/services/apiClient'
 import { Location, LocationPagination } from '@/types/location.types'

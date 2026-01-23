@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 
-import { getEvents, deleteEvent } from '@/features/organizer/services/organizer-event.service'
-import { OrganizerEvent, EventListParams } from '@/features/organizer/types/event.types'
+import { deleteEvent,getEvents } from '@/features/organizer/services/organizer-event.service'
+import { EventListParams,OrganizerEvent } from '@/features/organizer/types/event.types'
 
 export const useOrganizerEvents = () => {
   const [events, setEvents] = useState<OrganizerEvent[]>([])

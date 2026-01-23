@@ -6,7 +6,7 @@
  * Simplified for Tucumán Tourism - all locations are active by default
  */
 
-import { PlusIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import { useState } from 'react';
 

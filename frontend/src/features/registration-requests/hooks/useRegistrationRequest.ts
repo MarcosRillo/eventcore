@@ -5,13 +5,13 @@
  * Manages the state and logic for the public registration request form
  */
 
-import { useState, useCallback, useTransition } from 'react'
+import { useCallback, useState, useTransition } from 'react'
 
 import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
 import {
+  initialFormData,
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
-  initialFormData,
 } from '@/features/registration-requests/types/registration-request.types'
 
 interface UseRegistrationRequestReturn {

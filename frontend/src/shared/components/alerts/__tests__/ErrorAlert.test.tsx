@@ -2,7 +2,7 @@
  * Tests for ErrorAlert Component
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { ErrorAlert } from '@/shared/components/alerts/ErrorAlert';
 

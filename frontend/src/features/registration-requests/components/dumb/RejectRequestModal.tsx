@@ -7,7 +7,7 @@
 import { AlertCircle } from 'lucide-react'
 import { type ChangeEvent } from 'react'
 
-import { Modal, Button, Textarea } from '@/components/ui'
+import { Button, Modal, Textarea } from '@/components/ui'
 
 interface RejectRequestModalProps {
   isOpen: boolean

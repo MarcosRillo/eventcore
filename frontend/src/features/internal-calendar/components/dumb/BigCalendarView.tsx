@@ -8,12 +8,13 @@
 
 'use client'
 
-import { format, parse, startOfWeek, getDay } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { Calendar, dateFnsLocalizer, Views, type ToolbarProps } from 'react-big-calendar'
-
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/features/internal-calendar/styles/calendar.css'
+
+import { format, getDay,parse, startOfWeek } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { Calendar, dateFnsLocalizer, type ToolbarProps,Views } from 'react-big-calendar'
+
 import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'

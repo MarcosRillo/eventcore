@@ -6,17 +6,17 @@
 'use client';
 
 import {
-  MagnifyingGlassIcon,
-  BellIcon,
-  ChevronDownIcon,
-  UserIcon,
-  Cog6ToothIcon,
-  QuestionMarkCircleIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
+  BellIcon,
+  ChevronDownIcon,
+  Cog6ToothIcon,
+  MagnifyingGlassIcon,
+  QuestionMarkCircleIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 
 import { User } from '@/types/auth.types';
 

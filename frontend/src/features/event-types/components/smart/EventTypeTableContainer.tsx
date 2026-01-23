@@ -8,15 +8,15 @@
 
 'use client';
 
-import { PencilIcon, TrashIcon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { ListBulletIcon,PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback,useMemo, useState } from 'react';
 
 import {
-  GenericTable,
-  TableColumnConfig,
-  TableActionConfig,
   ConfirmDialogData,
+  GenericTable,
+  TableActionConfig,
+  TableColumnConfig,
 } from '@/shared/components/tables';
 import { PaginationMeta } from '@/types/api-response.types';
 import { EventType } from '@/types/eventType.types';

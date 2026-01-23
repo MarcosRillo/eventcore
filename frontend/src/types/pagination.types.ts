@@ -5,7 +5,7 @@
  */
 
 // Re-export core pagination types from api-response.types.ts
-export type { PaginationMeta, PaginationLinks } from '@/types/api-response.types';
+export type { PaginationLinks,PaginationMeta } from '@/types/api-response.types';
 
 /**
  * Simple pagination props for basic pagination without per-page selector

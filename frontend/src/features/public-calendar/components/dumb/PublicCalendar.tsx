@@ -10,7 +10,7 @@ import { useState } from 'react'
 
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
-import { PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
+import { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 interface PublicCalendarProps {
   events: PublicEvent[]

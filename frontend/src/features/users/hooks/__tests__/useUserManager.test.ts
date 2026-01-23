@@ -1,8 +1,8 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useUserManager } from '@/features/users/hooks/useUserManager'
 import userService from '@/features/users/services/user.service'
-import type { User, PaginationMeta } from '@/features/users/types/user.types'
+import type { PaginationMeta,User } from '@/features/users/types/user.types'
 
 jest.mock('../../services/user.service')
 

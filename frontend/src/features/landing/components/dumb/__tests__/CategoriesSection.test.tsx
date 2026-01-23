@@ -4,7 +4,7 @@
  * Tests category grid rendering, icon mapping, interactions, and accessibility.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { CategoriesSection } from '@/features/landing/components/dumb/CategoriesSection'
 import type { EventType } from '@/features/landing/types/landing.types'

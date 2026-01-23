@@ -4,7 +4,7 @@
  * Tests for the main page container with view toggle and stats bar.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { useAuth } from '@/context/AuthContext';
 import { InternalCalendarPageContainer } from '@/features/internal-calendar/components/smart/InternalCalendarPageContainer';

@@ -6,16 +6,16 @@
 'use client';
 
 import {
+  ArrowPathIcon,
+  NoSymbolIcon,
   PencilIcon,
   TrashIcon,
-  NoSymbolIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { useMemo, useCallback } from 'react';
+import { useCallback,useMemo } from 'react';
 
-import type { User, PaginationMeta } from '@/features/users/types/user.types';
+import type { PaginationMeta,User } from '@/features/users/types/user.types';
 import { getUserStatusLabel } from '@/features/users/types/user.types';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
+import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
 import type { PaginationMeta as GenericPaginationMeta } from '@/types/api-response.types';
 
 interface UserTableProps {

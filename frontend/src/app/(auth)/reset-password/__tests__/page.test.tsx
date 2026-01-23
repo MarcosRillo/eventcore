@@ -2,7 +2,7 @@
  * Reset Password Page Tests
  * Tests for token validation, form rendering, success state, and error handling
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { useResetPassword } from '@/features/auth';
 

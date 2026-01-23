@@ -7,16 +7,16 @@ import axios from 'axios';
 
 import { getRefreshToken } from '@/services/tokenUtils';
 import {
-  User,
+  ForgotPasswordData,
   LoginCredentials,
   LoginResponse,
-  RefreshTokenResponse,
-  ForgotPasswordData,
-  ResetPasswordData,
-  ValidateResetTokenData,
   PasswordResetResponse,
-  ValidateTokenResponse,
+  RefreshTokenResponse,
+  ResetPasswordData,
   ResetPasswordResponse,
+  User,
+  ValidateResetTokenData,
+  ValidateTokenResponse,
 } from '@/types/auth.types';
 
 // Base API URL - used for refresh endpoint (which doesn't need auth)

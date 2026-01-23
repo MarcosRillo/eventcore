@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react'
+import { act,renderHook } from '@testing-library/react'
 
 import { useUserEdit } from '@/features/users/hooks/useUserEdit'
 import type { User } from '@/features/users/types/user.types'

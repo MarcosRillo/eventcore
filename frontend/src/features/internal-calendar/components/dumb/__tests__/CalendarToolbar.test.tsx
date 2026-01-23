@@ -5,7 +5,7 @@
  * Tests written FIRST following TDD methodology.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 import type { View } from 'react-big-calendar'
 
 import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'

@@ -3,13 +3,13 @@
  * Comprehensive tests for the reusable table component
  */
 
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import { GenericTable } from '@/shared/components/tables/GenericTable';
 import type {
-  TableColumnConfig,
-  TableActionConfig,
   ConfirmDialogData,
+  TableActionConfig,
+  TableColumnConfig,
 } from '@/shared/components/tables/types';
 import { PaginationMeta } from '@/types/api-response.types';
 

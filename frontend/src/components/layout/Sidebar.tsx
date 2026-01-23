@@ -1,18 +1,18 @@
 'use client';
 
 import {
-  HomeIcon,
-  CalendarIcon,
-  TicketIcon,
-  SquaresPlusIcon,
-  RectangleStackIcon,
-  MapPinIcon,
   BuildingStorefrontIcon,
-  UserGroupIcon,
-  EnvelopeIcon,
-  ClipboardDocumentListIcon,
-  PaintBrushIcon,
+  CalendarIcon,
   ChevronDoubleLeftIcon,
+  ClipboardDocumentListIcon,
+  EnvelopeIcon,
+  HomeIcon,
+  MapPinIcon,
+  PaintBrushIcon,
+  RectangleStackIcon,
+  SquaresPlusIcon,
+  TicketIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

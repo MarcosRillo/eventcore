@@ -5,7 +5,7 @@
  * Following TDD: RED phase - these tests should fail initially.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { act,renderHook } from '@testing-library/react';
 
 import { useApprovalManager } from '@/features/entity-admin/hooks/useApprovalManager';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';

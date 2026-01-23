@@ -5,7 +5,7 @@
  * Updated to test useToast instead of alert (Dec 10, 2025).
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { useToast } from '@/components/ui';
 import { InternalShareButtons } from '@/features/internal-calendar/components/dumb/InternalShareButtons';

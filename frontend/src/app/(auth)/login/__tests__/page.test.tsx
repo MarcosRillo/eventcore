@@ -2,7 +2,7 @@
  * Login Page Tests
  * Tests for rendering, interactions, and error handling
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/features/auth';

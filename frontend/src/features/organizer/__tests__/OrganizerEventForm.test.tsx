@@ -4,9 +4,10 @@
  * Updated for 3NF schema (Nov 30, 2025)
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-
 import '@testing-library/jest-dom'
+
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+
 import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
 import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import * as locationService from '@/features/locations/services/location.service'

@@ -9,7 +9,7 @@
 
 import Modal from '@/components/ui/Modal';
 import type { Event } from '@/types/event.types';
-import { EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from '@/types/event.types';
+import { EVENT_STATUS_COLORS,EVENT_STATUS_LABELS } from '@/types/event.types';
 
 interface EventManagementModalProps {
   isOpen: boolean;

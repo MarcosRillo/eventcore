@@ -5,8 +5,8 @@
 
 export { GenericTable } from '@/shared/components/tables/GenericTable';
 export type {
-  GenericTableProps,
-  TableColumnConfig,
-  TableActionConfig,
   ConfirmDialogData,
+  GenericTableProps,
+  TableActionConfig,
+  TableColumnConfig,
 } from '@/shared/components/tables/types';

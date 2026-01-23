@@ -4,10 +4,10 @@
  * Tests tab navigation, role-based visibility, counters, and loading states.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { useAuth } from '@/context/AuthContext'
-import { EventsFilterTabs, DashboardTab } from '@/features/events/components/EventsFilterTabs'
+import { DashboardTab,EventsFilterTabs } from '@/features/events/components/EventsFilterTabs'
 
 // Mock useAuth hook
 jest.mock('@/context/AuthContext', () => ({

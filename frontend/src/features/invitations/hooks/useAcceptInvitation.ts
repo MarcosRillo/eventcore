@@ -6,9 +6,9 @@
  */
 
 import { useRouter } from 'next/navigation'
-import { useState, useCallback, useTransition } from 'react'
+import { useCallback, useState, useTransition } from 'react'
 
-import { validateInvitationToken, acceptInvitation } from '@/features/invitations/services/invitation.service'
+import { acceptInvitation,validateInvitationToken } from '@/features/invitations/services/invitation.service'
 import type { AcceptInvitationData } from '@/features/invitations/types/invitation.types'
 
 interface InvitationInfo {

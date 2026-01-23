@@ -7,7 +7,7 @@
  */
 
 import type { PaginatedResponse } from '@/types/api-response.types';
-import type { TableProps, ModalProps, EntityFilters } from '@/types/generic-infrastructure.types';
+import type { EntityFilters,ModalProps, TableProps } from '@/types/generic-infrastructure.types';
 
 // ==========================================
 // BASE INTERFACES

@@ -7,22 +7,22 @@
  */
 
 import {
-  PlusIcon,
   MagnifyingGlassIcon,
+  PlusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import {
-  TagIcon,
   CheckCircleIcon,
+  TagIcon,
   XCircleIcon,
 } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 
 import { Button, Input, LoadingSpinner, Select } from '@/components/ui'
 import {
-  EventTypeTableContainer,
   CreateEventTypeModal,
   EditEventTypeModal,
+  EventTypeTableContainer,
   useEventTypeManager,
 } from '@/features/event-types'
 import { EventType, EventTypeFilterStatus } from '@/types/eventType.types'

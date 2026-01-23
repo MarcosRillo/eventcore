@@ -7,7 +7,7 @@
  * Created: December 2, 2025
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import CreateEventSubtypeModal from '@/features/event-types/components/CreateEventSubtypeModal'

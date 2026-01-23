@@ -6,8 +6,8 @@
  */
 
 import type {
-  InternalCalendarEvent,
   BigCalendarEvent,
+  InternalCalendarEvent,
 } from '@/features/internal-calendar/types/internal-calendar.types'
 
 /**

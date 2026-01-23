@@ -5,7 +5,7 @@
  * file uploads, terms checkbox, and form submission.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
 import {

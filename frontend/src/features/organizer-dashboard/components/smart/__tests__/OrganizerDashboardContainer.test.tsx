@@ -4,7 +4,7 @@
  * Tests integration of dashboard with data hooks and state management.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 import { OrganizerDashboardContainer } from '@/features/organizer-dashboard/components/smart/OrganizerDashboardContainer'

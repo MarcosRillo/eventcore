@@ -8,7 +8,7 @@
 'use client';
 
 import { AxiosError } from 'axios'
-import { useState, useRef, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 
 import { useToast } from '@/components/ui/Toast'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'

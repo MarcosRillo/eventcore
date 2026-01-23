@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
-import { Button, LoadingSpinner, ConfirmDialog } from '@/components/ui';
+import { Button, ConfirmDialog,LoadingSpinner } from '@/components/ui';
 import { Permission } from '@/types/auth.types';
 import { Event, EventStatus, EventType } from '@/types/event.types';
 

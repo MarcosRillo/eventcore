@@ -7,5 +7,5 @@ export { ApprovalModalContainer } from '@/features/entity-admin/components/smart
 export { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer'
 
 // New approval workflow containers
-export { EventManagementModalContainer } from '@/features/entity-admin/components/smart/EventManagementModalContainer'
 export { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer'
+export { EventManagementModalContainer } from '@/features/entity-admin/components/smart/EventManagementModalContainer'

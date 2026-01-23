@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, type ChangeEvent } from 'react'
+import { type ChangeEvent,useCallback, useEffect, useState } from 'react'
 
 const MIN_REASON_LENGTH = 10
 const MAX_REASON_LENGTH = 500

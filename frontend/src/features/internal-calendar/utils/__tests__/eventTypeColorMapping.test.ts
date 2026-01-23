@@ -7,10 +7,10 @@
 
 import type { EventType } from '@/features/internal-calendar/types/internal-calendar.types'
 import {
+  DEFAULT_EVENT_COLOR,
+  getContrastTextColor,
   getEventTypeColor,
   isValidHexColor,
-  getContrastTextColor,
-  DEFAULT_EVENT_COLOR,
 } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 
 describe('eventTypeColorMapping', () => {

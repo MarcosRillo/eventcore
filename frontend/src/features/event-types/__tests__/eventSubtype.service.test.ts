@@ -8,18 +8,18 @@
  */
 
 import {
-  getEventSubtypes,
-  getEventSubtype,
   createEventSubtype,
-  updateEventSubtype,
   deleteEventSubtype,
-  toggleEventSubtypeStatus,
   getActiveEventSubtypes,
+  getEventSubtype,
+  getEventSubtypes,
   searchEventSubtypes,
+  toggleEventSubtypeStatus,
+  updateEventSubtype,
   validateEventSubtypeData,
 } from '@/features/event-types/services/eventSubtype.service'
 import apiClient from '@/services/apiClient'
-import type { EventSubtype, EventSubtypePagination, CreateEventSubtypeData, UpdateEventSubtypeData } from '@/types/eventType.types'
+import type { CreateEventSubtypeData, EventSubtype, EventSubtypePagination, UpdateEventSubtypeData } from '@/types/eventType.types'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')

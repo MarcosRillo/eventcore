@@ -6,8 +6,8 @@
  * Optimized for Next.js 15 Edge Runtime
  */
 
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * User role codes - MUST match backend user_roles.role_code

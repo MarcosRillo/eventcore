@@ -3,14 +3,13 @@
  * Manages dashboard summary and events data with caching and error handling
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo,useState } from 'react';
 
 import { 
-  dashboardService, 
-  DashboardSummary, 
+  DashboardEventsParams, 
   DashboardEventsResponse,
-  DashboardEventsParams 
-} from '@/services/dashboardService';
+  dashboardService, 
+  DashboardSummary} from '@/services/dashboardService';
 
 interface UseDashboardDataReturn {
   summary: DashboardSummary | null;

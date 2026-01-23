@@ -3,7 +3,7 @@
  * Updated for 3NF schema (Nov 30, 2025)
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { FormEvent } from 'react'
 
 import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'

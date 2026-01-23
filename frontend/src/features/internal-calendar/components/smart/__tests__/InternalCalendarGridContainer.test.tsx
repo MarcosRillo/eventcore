@@ -4,7 +4,7 @@
  * Tests for the grid view container component with navigation functionality.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 
 import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';

@@ -4,7 +4,7 @@
  * Tests integration with useOrganizerStats hook and rendering states.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { OrganizerStatsWidget } from '@/features/organizer-dashboard/components/smart/OrganizerStatsWidget'
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'

@@ -2,7 +2,7 @@
  * Password Reset Service Tests
  * Tests for forgotPassword, validateResetToken, and resetPassword functions
  */
-import { forgotPassword, validateResetToken, resetPassword } from '@/services/authService';
+import { forgotPassword, resetPassword,validateResetToken } from '@/services/authService';
 
 // Mock apiClient
 jest.mock('@/services/apiClient', () => ({

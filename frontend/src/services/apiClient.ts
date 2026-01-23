@@ -3,10 +3,10 @@
  * Axios configuration for API calls with authentication and auto-refresh
  */
 
-import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-import { getAccessToken, storeTokens, clearTokens, getRefreshToken } from '@/services/tokenUtils';
-import { ApiResponse, ApiErrorResponse } from '@/types/api-response.types';
+import { clearTokens, getAccessToken, getRefreshToken,storeTokens } from '@/services/tokenUtils';
+import { ApiErrorResponse,ApiResponse } from '@/types/api-response.types';
 
 // Base API URL from environment variables
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -81,8 +81,9 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor to add authentication token and API prefix
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add /api/v1 prefix to all requests
-    if (config.url && !config.url.startsWith('/api')) {
+    // Add /api/v1 prefix to all requests that don't already have it
+    // More specific check to prevent any potential duplication
+    if (config.url && !config.url.startsWith('/api/v1')) {
       config.url = `/api/v1${config.url}`;
     }
 
@@ -246,14 +247,13 @@ export const makeApiRequest = async <T>(
 
 // Re-export token utilities for backward compatibility
 export {
-  getAccessToken as getAuthToken,
-  storeTokens as setAuthToken,
-  clearTokens as removeAuthToken,
+  clearTokens,
   getAccessToken,
+  getAccessToken as getAuthToken,
   getRefreshToken,
-  storeTokens,
-  clearTokens
-} from '@/services/tokenUtils';
+  clearTokens as removeAuthToken,
+  storeTokens as setAuthToken,
+  storeTokens} from '@/services/tokenUtils';
 
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {

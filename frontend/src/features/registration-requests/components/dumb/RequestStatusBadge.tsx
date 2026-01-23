@@ -13,11 +13,11 @@
  */
 
 import {
-  RegistrationRequest,
-  isRequestPending,
   isRequestApproved,
+  isRequestPending,
   isRequestRejected,
   isRequestSuspended,
+  RegistrationRequest,
 } from '@/features/registration-requests/types/registration-request.types'
 
 interface RequestStatusBadgeProps {

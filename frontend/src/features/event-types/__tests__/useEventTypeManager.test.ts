@@ -7,7 +7,7 @@
  * Created: December 2, 2025
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useAuth } from '@/context/AuthContext'
 import { useEventTypeManager } from '@/features/event-types/hooks/useEventTypeManager'

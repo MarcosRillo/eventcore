@@ -1,4 +1,4 @@
-import { EventListParams, EventListResponse, CreateEventDto, UpdateEventDto, OrganizerEvent, SubmitEventResponse } from '@/features/organizer/types/event.types'
+import { CreateEventDto, EventListParams, EventListResponse, OrganizerEvent, SubmitEventResponse,UpdateEventDto } from '@/features/organizer/types/event.types'
 import apiClient from '@/services/apiClient'
 
 export const getEvents = async (params: EventListParams): Promise<EventListResponse> => {

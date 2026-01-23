@@ -6,7 +6,7 @@
 
 'use client';
 
-import { createContext, useContext, ReactNode, useMemo, useRef } from 'react';
+import { createContext, ReactNode, useContext, useMemo, useRef } from 'react';
 
 import { useAuthActions } from '@/context/useAuthActions';
 import { AuthContextType } from '@/types/auth.types';

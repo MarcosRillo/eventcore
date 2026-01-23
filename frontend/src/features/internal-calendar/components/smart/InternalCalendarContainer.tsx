@@ -14,8 +14,8 @@ import { BigCalendarView } from '@/features/internal-calendar/components/dumb/Bi
 import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal'
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents'
 import type {
-  InternalCalendarFilters,
   BigCalendarEvent,
+  InternalCalendarFilters,
 } from '@/features/internal-calendar/types/internal-calendar.types'
 import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform'
 

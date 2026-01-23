@@ -4,16 +4,16 @@
  * Supports server-side initial data to avoid waterfall fetching
  */
 
-import { startOfMonth, endOfMonth, format } from 'date-fns'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { endOfMonth, format,startOfMonth } from 'date-fns'
+import { useCallback, useEffect, useRef,useState } from 'react'
 
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
-  PublicEvent,
   CalendarEvent,
   CalendarView,
   EventType,
   Location,
+  PublicEvent,
 } from '@/features/public-calendar/types/public-calendar.types'
 
 /**

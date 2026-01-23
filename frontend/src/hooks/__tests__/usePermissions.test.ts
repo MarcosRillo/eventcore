@@ -14,7 +14,7 @@ import { renderHook } from '@testing-library/react';
 
 import { useAuth } from '@/context/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { User, UserRoleCode, Permission, AuthContextType } from '@/types/auth.types';
+import { AuthContextType,Permission, User, UserRoleCode } from '@/types/auth.types';
 
 // Mock AuthContext
 jest.mock('@/context/AuthContext');

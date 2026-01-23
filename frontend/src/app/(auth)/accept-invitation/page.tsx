@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, Suspense } from 'react'
+import { Suspense,useEffect } from 'react'
 
 import { LoadingSpinner } from '@/components/ui'
 import { AcceptInvitationForm } from '@/features/invitations/components/dumb/AcceptInvitationForm'

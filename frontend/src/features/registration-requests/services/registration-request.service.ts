@@ -4,18 +4,18 @@
  */
 
 import {
-  RegistrationRequest,
-  RegistrationRequestDetail,
-  RegistrationRequestFilters,
   ApprovalResult,
-  RegistrationRequestsResponse,
-  RegistrationRequestDetailResponse,
   ApprovalResultResponse,
-  RejectResultResponse,
-  SuspendResultResponse,
-  DeleteResultResponse,
   CreateRegistrationRequestData,
   CreateRequestResponse,
+  DeleteResultResponse,
+  RegistrationRequest,
+  RegistrationRequestDetail,
+  RegistrationRequestDetailResponse,
+  RegistrationRequestFilters,
+  RegistrationRequestsResponse,
+  RejectResultResponse,
+  SuspendResultResponse,
 } from '@/features/registration-requests/types/registration-request.types'
 import apiClient from '@/services/apiClient'
 

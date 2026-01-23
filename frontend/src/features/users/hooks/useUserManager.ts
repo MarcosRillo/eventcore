@@ -7,14 +7,14 @@
  * Uses React 19 useTransition for loading states and useOptimistic for instant UI feedback.
  */
 
-import { useState, useCallback, useEffect, useTransition, useOptimistic } from 'react'
+import { useCallback, useEffect, useOptimistic,useState, useTransition } from 'react'
 
 import userService from '@/features/users/services/user.service'
 import type {
+  PaginationMeta,
+  UpdateUserData,
   User,
   UserFilters,
-  UpdateUserData,
-  PaginationMeta,
 } from '@/features/users/types/user.types'
 
 interface UseUserManagerReturn {

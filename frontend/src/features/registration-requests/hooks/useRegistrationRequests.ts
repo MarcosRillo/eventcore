@@ -7,14 +7,14 @@
  * Uses React 19 useTransition for loading states and useOptimistic for instant UI updates.
  */
 
-import { useState, useCallback, useEffect, useTransition, useOptimistic } from 'react'
+import { useCallback, useEffect, useOptimistic,useState, useTransition } from 'react'
 
 import registrationRequestService from '@/features/registration-requests/services/registration-request.service'
 import {
+  DisplayStatusFilter,
   RegistrationRequest,
   RegistrationRequestDetail,
   RegistrationRequestStatus,
-  DisplayStatusFilter,
 } from '@/features/registration-requests/types/registration-request.types'
 
 interface UseRegistrationRequestsReturn {

@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useCallback, useTransition } from 'react'
+import { useCallback, useState, useTransition } from 'react'
 
 import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
 import {
+  initialFormData,
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
-  initialFormData,
 } from '@/features/registration-requests/types/registration-request.types'
 
 // Type aliases for simpler usage in this hook

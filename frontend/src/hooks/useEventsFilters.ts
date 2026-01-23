@@ -3,7 +3,7 @@
  * Manages dashboard tab and search state
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
 
 import { DashboardTab } from '@/features/events/components/EventsFilterTabs';
 

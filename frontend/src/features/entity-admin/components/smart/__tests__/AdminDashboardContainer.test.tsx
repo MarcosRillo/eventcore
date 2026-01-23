@@ -4,7 +4,7 @@
  * Smart component that composes the admin dashboard with stats, filters, and event table.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer';
 import * as useAdminStatsModule from '@/features/entity-admin/hooks/useAdminStats';

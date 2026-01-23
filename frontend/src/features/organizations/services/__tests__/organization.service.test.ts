@@ -4,8 +4,8 @@
  */
 
 import {
-  getOrganizations,
   getOrganization,
+  getOrganizations,
   toggleOrganizationStatus,
 } from '@/features/organizations/services/organization.service'
 import type { Organization, PaginationMeta } from '@/features/organizations/types/organization.types'

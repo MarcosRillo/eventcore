@@ -6,9 +6,9 @@
  */
 
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
 
-import { Input, Button } from '@/components/ui';
+import { Button,Input } from '@/components/ui';
 import { UserTable } from '@/features/users/components/dumb/UserTable';
 import { UserEditModalContainer } from '@/features/users/components/smart/UserEditModalContainer';
 import { useUserManager } from '@/features/users/hooks/useUserManager';

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { LocationTable } from '@/features/locations/components/dumb/LocationTable'
 import { Location } from '@/types/location.types'

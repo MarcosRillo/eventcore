@@ -5,8 +5,8 @@
 import axios from 'axios';
 
 import {
-  loginUser,
   getCurrentUser,
+  loginUser,
   logoutUser,
   refreshTokens,
   validateToken,

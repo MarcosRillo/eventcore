@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import UserEditModal from '@/features/users/components/dumb/UserEditModal'
 import type { User } from '@/features/users/types/user.types'

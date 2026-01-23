@@ -4,12 +4,12 @@
  * Tests for calendar view container with BigCalendar and navigation functionality.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
-import type { InternalCalendarEvent, BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
+import type { BigCalendarEvent,InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 // Mock dependencies
 jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');

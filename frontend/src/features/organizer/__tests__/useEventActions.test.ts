@@ -5,7 +5,7 @@
  * Includes API calls, error handling, and state management.
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useToast } from '@/components/ui/Toast'
 import { useEventActions } from '@/features/organizer/hooks/useEventActions'

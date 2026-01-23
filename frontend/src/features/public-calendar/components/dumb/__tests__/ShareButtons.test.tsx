@@ -5,7 +5,7 @@
  * window.open calls, clipboard copy, and accessibility attributes.
  */
 
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { act,fireEvent, render, screen } from '@testing-library/react'
 
 import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons'
 

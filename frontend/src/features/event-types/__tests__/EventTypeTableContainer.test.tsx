@@ -7,7 +7,7 @@
  * Created: December 2, 2025
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 import React from 'react'
 
 import { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer'

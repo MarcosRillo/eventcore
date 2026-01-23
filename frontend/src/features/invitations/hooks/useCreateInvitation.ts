@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, FormEvent } from 'react'
+import { FormEvent,useCallback, useState } from 'react'
 
 import { SendInvitationData } from '@/features/invitations/types/invitation.types'
 

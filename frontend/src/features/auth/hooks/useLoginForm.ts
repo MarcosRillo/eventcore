@@ -3,7 +3,7 @@
  * Manages login form state and submission logic
  */
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { LoginCredentials, UseLoginFormReturn } from '@/types/auth.types';

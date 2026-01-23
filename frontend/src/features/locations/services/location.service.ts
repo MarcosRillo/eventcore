@@ -14,8 +14,8 @@ import { AxiosResponse } from 'axios';
 import apiClient from '@/services/apiClient';
 import {
   Location,
-  LocationPagination,
   LocationFilters,
+  LocationPagination,
   LocationPayload,
 } from '@/types/location.types';
 

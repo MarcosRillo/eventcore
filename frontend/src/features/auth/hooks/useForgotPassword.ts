@@ -3,7 +3,7 @@
  * Manages forgot password form state and submission
  * Uses React 19 useTransition for non-blocking UI
  */
-import { useState, useCallback, useTransition } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 
 import { forgotPassword } from '@/services/authService';
 

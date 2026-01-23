@@ -5,7 +5,7 @@
 
 import type { Metadata } from 'next'
 
-import { PublicHeader, Footer } from '@/features/landing/components/dumb'
+import { Footer,PublicHeader } from '@/features/landing/components/dumb'
 
 export const metadata: Metadata = {
   title: {

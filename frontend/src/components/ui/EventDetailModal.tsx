@@ -8,12 +8,11 @@
 
 import { Dialog, Transition } from '@headlessui/react';
 import {
-  XMarkIcon,
-  CalendarIcon,
+  ArrowTopRightOnSquareIcon,
   BuildingOffice2Icon,
+  CalendarIcon,
   MapPinIcon,
-  ArrowTopRightOnSquareIcon
-} from '@heroicons/react/24/outline';
+  XMarkIcon} from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import moment from 'moment';
 import { Fragment, useState } from 'react';

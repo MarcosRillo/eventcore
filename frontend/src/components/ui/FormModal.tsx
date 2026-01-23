@@ -6,11 +6,11 @@
 
 'use client';
 
-import { useState, useEffect, FormEvent, ReactNode } from 'react';
+import { FormEvent, ReactNode,useEffect, useState } from 'react';
 
-import { Modal, Button } from '@/components/ui';
+import { Button,Modal } from '@/components/ui';
 import { EventFormData } from '@/types/event.types';
-import { EventType, EventSubtype } from '@/types/eventType.types';
+import { EventSubtype,EventType } from '@/types/eventType.types';
 
 // Form data types supported by FormModal - specific domain types only
 interface ApprovalFormData {

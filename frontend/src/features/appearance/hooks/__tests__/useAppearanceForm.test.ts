@@ -1,8 +1,8 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useAppearanceForm } from '@/features/appearance/hooks/useAppearanceForm'
 import * as appearanceService from '@/features/appearance/services/appearance.service'
-import { ThemeSettings, DEFAULT_THEME } from '@/types/appearance.types'
+import { DEFAULT_THEME,ThemeSettings } from '@/types/appearance.types'
 
 // Mock appearance service
 jest.mock('@/features/appearance/services/appearance.service')

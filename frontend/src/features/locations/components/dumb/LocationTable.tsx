@@ -5,7 +5,7 @@
 
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-import { Button, Pagination, ConfirmDialog } from '@/components/ui';
+import { Button, ConfirmDialog,Pagination } from '@/components/ui';
 import { PaginationMeta } from '@/hooks/usePaginatedData';
 import { Location } from '@/types/location.types';
 

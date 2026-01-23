@@ -5,7 +5,7 @@
  * Following TDD: RED phase - these tests should fail initially.
  */
 
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { act,renderHook, waitFor } from '@testing-library/react';
 
 import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { adminStatsService } from '@/features/entity-admin/services';

@@ -5,14 +5,14 @@
 import { AxiosResponse } from 'axios'
 
 import registrationRequestService, {
-  createRegistrationRequest,
-  getRegistrationRequests,
-  getRegistrationRequestById,
   approveRegistrationRequest,
+  createRegistrationRequest,
+  deleteRegistrationRequest,
+  getRegistrationRequestById,
+  getRegistrationRequests,
   rejectRegistrationRequest,
   suspendRegistrationRequest,
   unsuspendRegistrationRequest,
-  deleteRegistrationRequest,
 } from '@/features/registration-requests/services/registration-request.service'
 import { RegistrationRequest, RegistrationRequestDetail } from '@/features/registration-requests/types/registration-request.types'
 import apiClient from '@/services/apiClient'

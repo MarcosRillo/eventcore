@@ -1,8 +1,8 @@
 import { AxiosResponse } from 'axios'
 
-import { eventPublicService, eventPublicExportService, combinedEventPublicService } from '@/features/events/services/eventPublicService'
+import { combinedEventPublicService,eventPublicExportService, eventPublicService } from '@/features/events/services/eventPublicService'
 import apiClient from '@/services/apiClient'
-import { Event, EventPagination, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
+import { Event, EVENT_STATUS, EVENT_TYPE,EventPagination } from '@/types/event.types'
 import { PublicEventFilters } from '@/types/filter.types'
 import { Location } from '@/types/location.types'
 

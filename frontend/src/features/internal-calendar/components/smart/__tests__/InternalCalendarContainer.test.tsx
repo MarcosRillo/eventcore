@@ -5,7 +5,7 @@
  * Tests written following TDD methodology.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { InternalCalendarContainer } from '@/features/internal-calendar/components/smart/InternalCalendarContainer'
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents'

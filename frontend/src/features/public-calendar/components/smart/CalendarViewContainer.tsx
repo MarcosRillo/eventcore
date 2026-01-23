@@ -12,9 +12,9 @@ import { CalendarView } from '@/features/public-calendar/components/dumb/Calenda
 import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 import {
   CalendarEvent,
-  PublicEvent,
   EventType,
   Location,
+  PublicEvent,
 } from '@/features/public-calendar/types/public-calendar.types'
 
 interface CalendarViewContainerProps {

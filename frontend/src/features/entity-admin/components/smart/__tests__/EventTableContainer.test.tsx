@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent,render, screen } from '@testing-library/react';
 
 import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
 import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types';

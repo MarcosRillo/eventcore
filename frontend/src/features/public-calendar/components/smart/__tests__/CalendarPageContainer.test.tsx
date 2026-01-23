@@ -4,7 +4,7 @@
  * Tests view toggle, stats fetching, conditional rendering, and accessibility.
  */
 
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { act,fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { CalendarPageContainer } from '@/features/public-calendar/components/smart/CalendarPageContainer'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'

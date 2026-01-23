@@ -8,10 +8,9 @@ import { useCallback, useMemo } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import {
-  getLocations,
-  deleteLocation
-} from '@/features/locations/services/location.service';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+  deleteLocation,
+  getLocations} from '@/features/locations/services/location.service';
+import { PaginationMeta,usePaginatedData } from '@/hooks/usePaginatedData';
 import {
   Location,
   LocationFilters,

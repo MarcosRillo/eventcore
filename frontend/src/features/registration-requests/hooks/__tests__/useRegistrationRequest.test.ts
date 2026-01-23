@@ -2,7 +2,7 @@
  * useRegistrationRequest Hook Tests
  * Tests for public registration form submission
  */
-import { renderHook, act } from '@testing-library/react'
+import { act,renderHook } from '@testing-library/react'
 
 import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
 import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'

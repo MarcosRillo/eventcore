@@ -3,7 +3,7 @@
  * Tests for the confirmation dialog component
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import ConfirmDialog from '@/components/ui/ConfirmDialog'

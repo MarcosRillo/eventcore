@@ -5,7 +5,7 @@
  * Tests written FIRST following TDD methodology.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'

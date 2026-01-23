@@ -5,12 +5,12 @@
  * Displays a table of registration requests with filters and actions
  */
 
-import { Eye, Check, X, Pause, Play, Trash2 } from 'lucide-react'
+import { Check, Eye, Pause, Play, Trash2,X } from 'lucide-react'
 
-import { Button, LoadingSpinner, Badge } from '@/components/ui'
+import { Badge,Button, LoadingSpinner } from '@/components/ui'
 import {
-  RegistrationRequest,
   DisplayStatusFilter,
+  RegistrationRequest,
 } from '@/features/registration-requests/types/registration-request.types'
 
 interface RegistrationRequestTableProps {

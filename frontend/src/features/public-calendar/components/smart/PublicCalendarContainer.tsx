@@ -12,9 +12,9 @@ import { useRouter } from 'next/navigation'
 import { PublicCalendar } from '@/features/public-calendar/components/dumb/PublicCalendar'
 import { usePublicEvents } from '@/features/public-calendar/hooks/usePublicEvents'
 import {
-  PublicEvent,
   EventType,
   Location,
+  PublicEvent,
 } from '@/features/public-calendar/types/public-calendar.types'
 
 interface PublicCalendarContainerProps {

@@ -1,4 +1,4 @@
-import { format, startOfMonth, endOfMonth } from 'date-fns'
+import { endOfMonth,format, startOfMonth } from 'date-fns'
 import { Metadata } from 'next'
 
 import { CalendarPageContainer } from '@/features/public-calendar/components/smart/CalendarPageContainer'

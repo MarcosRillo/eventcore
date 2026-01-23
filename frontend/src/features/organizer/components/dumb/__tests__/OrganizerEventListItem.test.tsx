@@ -4,7 +4,7 @@
  * Tests rendering of event item with status, date, location, and action buttons.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen } from '@testing-library/react'
 
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'

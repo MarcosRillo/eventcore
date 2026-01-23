@@ -6,16 +6,15 @@
  * Supports server-side initial data to avoid waterfall fetching.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef,useState } from 'react'
 
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
-  PublicEvent,
-  EventType,
+  EventFilters,
   EventSubtype,
+  EventType,
   Location,
-  EventFilters
-} from '@/features/public-calendar/types/public-calendar.types'
+  PublicEvent} from '@/features/public-calendar/types/public-calendar.types'
 
 /**
  * Options for usePublicEvents hook

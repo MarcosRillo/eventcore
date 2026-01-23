@@ -7,7 +7,7 @@
  * - All async operations are wrapped in act()
  * - waitFor is used to wait for state transitions
  */
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
 import registrationRequestService from '@/features/registration-requests/services/registration-request.service'

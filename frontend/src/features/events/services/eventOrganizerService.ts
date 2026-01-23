@@ -10,10 +10,9 @@ import apiClient from '@/services/apiClient';
 import {
   Event,
   EventFormData,
+  EventMessage,
   EventPagination,
-  EventTemplate,
-  EventMessage
-} from '@/types/event.types';
+  EventTemplate} from '@/types/event.types';
 import { OrganizerEventFilters } from '@/types/filter.types';
 
 // ExtendedOrganizerEventFilters eliminated - consolidated into OrganizerEventFilters

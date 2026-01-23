@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect,useState } from 'react'
 
 import { StatsBar } from '@/features/internal-calendar/components/dumb/StatsBar'
 import { getInternalStats } from '@/features/internal-calendar/services/internal-calendar-stats.service'

@@ -3,7 +3,7 @@
  * Tests for the admin dashboard view with tab-based event filtering
  */
 
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { fireEvent,render, screen, waitFor } from '@testing-library/react'
 
 import { DashboardModeView } from '@/features/entity-admin/components/DashboardModeView'
 import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'

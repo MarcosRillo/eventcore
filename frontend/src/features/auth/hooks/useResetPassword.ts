@@ -4,9 +4,9 @@
  */
 import { AxiosError } from 'axios';
 import { useSearchParams } from 'next/navigation';
-import { useState, useCallback, useEffect, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 
-import { validateResetToken, resetPassword } from '@/services/authService';
+import { resetPassword,validateResetToken } from '@/services/authService';
 
 interface PasswordErrors {
   password?: string;

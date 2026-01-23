@@ -7,13 +7,13 @@
 
 import {
   CalendarIcon,
-  MapPinIcon,
   EnvelopeIcon,
-  PhoneIcon,
   GlobeAltIcon,
-  UserIcon,
+  MapPinIcon,
+  PhoneIcon,
   StarIcon,
   TagIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 import type { Event } from '@/types/event.types';

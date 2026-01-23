@@ -1,5 +1,5 @@
 import { EventFormData } from '@/features/organizer/types/event.types'
-import { validateEventForm, hasErrors } from '@/features/organizer/utils/eventFormValidation'
+import { hasErrors,validateEventForm } from '@/features/organizer/utils/eventFormValidation'
 
 describe('eventFormValidation', () => {
   const getValidFormData = (): EventFormData => ({

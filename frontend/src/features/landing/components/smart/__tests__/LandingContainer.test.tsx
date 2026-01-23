@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 
 import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
-import type { PublicEvent, EventType } from '@/features/public-calendar/types/public-calendar.types'
+import type { EventType,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

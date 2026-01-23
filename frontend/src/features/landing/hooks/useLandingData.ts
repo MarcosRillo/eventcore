@@ -3,7 +3,7 @@
  * Fetches featured events and event types
  */
 
-import { useState, useEffect } from 'react'
+import { useEffect,useState } from 'react'
 
 import { LandingData } from '@/features/landing/types/landing.types'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'

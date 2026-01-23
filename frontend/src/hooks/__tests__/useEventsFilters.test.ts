@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react'
+import { act,renderHook } from '@testing-library/react'
 
 import { DashboardTab } from '@/features/events/components/EventsFilterTabs'
 import { useEventsFilters } from '@/hooks/useEventsFilters'
