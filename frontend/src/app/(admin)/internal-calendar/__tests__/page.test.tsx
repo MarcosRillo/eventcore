@@ -1,6 +1,8 @@
 /**
  * Admin Calendar Page Tests
- * Tests page rendering and integration with InternalCalendarContainer
+ *
+ * Tests basic page rendering and initial layout.
+ * Detailed event rendering is tested in container tests.
  */
 import { render, screen } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
@@ -15,6 +17,16 @@ import CalendarPage from '../page';
 jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
 jest.mock('@/context/AuthContext');
 jest.mock('next/navigation');
+
+// Mock the event types service
+jest.mock('@/features/event-types/services/eventType.service', () => ({
+  getEventTypes: jest.fn().mockResolvedValue({ data: [] }),
+}));
+
+// Mock the internal calendar stats service
+jest.mock('@/features/internal-calendar/services/internalCalendar.service', () => ({
+  getInternalCalendarStats: jest.fn().mockResolvedValue({ data: { approved: 0, pending: 0, published: 0 } }),
+}));
 
 describe('Admin Calendar Page', () => {
   beforeEach(() => {
@@ -42,35 +54,21 @@ describe('Admin Calendar Page', () => {
     expect(screen.getByText('Vista Calendario')).toBeInTheDocument();
   });
 
-  test('should render InternalCalendarContainer', () => {
-    const mockEvents = [
-      {
-        id: 1,
-        title: 'Test Event',
-        start_date: '2025-12-15',
-        end_date: '2025-12-16',
-        status: {
-          id: 1,
-          status_code: 'approved_internal',
-          name: 'Approved Internal',
-        },
-        organization: {
-          id: 1,
-          name: 'Test Org',
-        },
-      },
-    ];
-
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: mockEvents,
-      loading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
-
+  test('should render filter bar with correct labels', () => {
     render(<CalendarPage />);
 
-    // Should render events from container
-    expect(screen.getByText('Test Event')).toBeInTheDocument();
+    // Filter labels
+    expect(screen.getByText('Tipo de Evento')).toBeInTheDocument();
+    expect(screen.getByText('Estado')).toBeInTheDocument();
+    expect(screen.getByText('Desde')).toBeInTheDocument();
+    expect(screen.getByText('Hasta')).toBeInTheDocument();
+  });
+
+  test('should render calendar view by default', () => {
+    render(<CalendarPage />);
+
+    // Calendar view button should be active (pressed)
+    const calendarButton = screen.getByText('Vista Calendario').closest('button');
+    expect(calendarButton).toHaveAttribute('aria-pressed', 'true');
   });
 });

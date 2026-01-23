@@ -1,6 +1,12 @@
 /**
  * Auth Service Tests
+ *
  * Tests for loginUser, getCurrentUser, logoutUser, refreshTokens, validateToken
+ *
+ * Note: Authentication now uses httpOnly cookies (XSS protection).
+ * - Tokens are set by backend via Set-Cookie headers
+ * - Browser sends cookies automatically with withCredentials: true
+ * - No manual token handling in frontend
  */
 import axios from 'axios';
 
@@ -11,7 +17,6 @@ import {
   refreshTokens,
   validateToken,
 } from '@/services/authService';
-import * as tokenUtils from '@/services/tokenUtils';
 
 // Mock apiClient
 jest.mock('@/services/apiClient', () => ({
@@ -25,11 +30,6 @@ jest.mock('@/services/apiClient', () => ({
 // Mock axios for refreshTokens
 jest.mock('axios');
 const mockAxios = axios as jest.Mocked<typeof axios>;
-
-// Mock tokenUtils
-jest.mock('@/services/tokenUtils', () => ({
-  getRefreshToken: jest.fn(),
-}));
 
 describe('Auth Service', () => {
   let mockApiClient: jest.Mocked<{ post: jest.Mock; get: jest.Mock }>;
@@ -171,12 +171,7 @@ describe('Auth Service', () => {
   });
 
   describe('refreshTokens', () => {
-    const mockGetRefreshToken = tokenUtils.getRefreshToken as jest.MockedFunction<
-      typeof tokenUtils.getRefreshToken
-    >;
-
-    it('should refresh tokens successfully', async () => {
-      mockGetRefreshToken.mockReturnValue('valid-refresh-token');
+    it('should refresh tokens successfully using httpOnly cookie', async () => {
       mockAxios.post.mockResolvedValueOnce({
         data: {
           success: true,
@@ -190,13 +185,15 @@ describe('Auth Service', () => {
 
       const result = await refreshTokens();
 
+      // With httpOnly cookies, we send empty body - cookie is sent automatically
       expect(mockAxios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/auth/refresh'),
-        { refresh_token: 'valid-refresh-token' },
+        '/api/v1/auth/refresh',
+        {},  // Empty body - refresh_token comes from httpOnly cookie
         expect.objectContaining({
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
           }),
+          withCredentials: true,  // Sends cookies
         })
       );
       expect(result.access_token).toBe('new-access-token');
@@ -204,15 +201,7 @@ describe('Auth Service', () => {
       expect(result.expires_at).toBe('2025-12-31T23:59:59Z');
     });
 
-    it('should throw error when no refresh token available', async () => {
-      mockGetRefreshToken.mockReturnValue(null);
-
-      await expect(refreshTokens()).rejects.toThrow('No refresh token available');
-      expect(mockAxios.post).not.toHaveBeenCalled();
-    });
-
     it('should throw error for invalid refresh response', async () => {
-      mockGetRefreshToken.mockReturnValue('valid-refresh-token');
       mockAxios.post.mockResolvedValueOnce({
         data: {
           success: false,
@@ -224,7 +213,6 @@ describe('Auth Service', () => {
     });
 
     it('should handle network errors during refresh', async () => {
-      mockGetRefreshToken.mockReturnValue('valid-refresh-token');
       mockAxios.post.mockRejectedValueOnce(new Error('Network Error'));
 
       await expect(refreshTokens()).rejects.toThrow('Network Error');
