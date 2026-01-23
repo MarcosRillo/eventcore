@@ -11,6 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class PaginationRequest extends FormRequest
 {
     public const DEFAULT_PER_PAGE = 15;
+
     public const MAX_PER_PAGE = 100;
 
     /**
@@ -30,7 +31,7 @@ class PaginationRequest extends FormRequest
     {
         return [
             'page' => 'sometimes|integer|min:1',
-            'per_page' => 'sometimes|integer|min:1|max:' . self::MAX_PER_PAGE,
+            'per_page' => 'sometimes|integer|min:1|max:'.self::MAX_PER_PAGE,
             'search' => 'sometimes|string|max:255',
         ];
     }
@@ -53,7 +54,7 @@ class PaginationRequest extends FormRequest
         return [
             'page.min' => 'La página debe ser mayor o igual a 1',
             'per_page.min' => 'Los elementos por página deben ser al menos 1',
-            'per_page.max' => 'Los elementos por página no pueden exceder ' . self::MAX_PER_PAGE,
+            'per_page.max' => 'Los elementos por página no pueden exceder '.self::MAX_PER_PAGE,
             'search.max' => 'El término de búsqueda no puede exceder 255 caracteres',
         ];
     }

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 class EventTypeService
 {
     private const DEFAULT_PER_PAGE = 15;
+
     private const MAX_PER_PAGE = 100;
 
     /**
@@ -22,7 +23,7 @@ class EventTypeService
     {
         $query = EventType::query();
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -54,7 +55,7 @@ class EventTypeService
             return DB::transaction(function () use ($data, $user) {
                 $organization = $user->organizations()->first();
 
-                if (!$organization) {
+                if (! $organization) {
                     throw new \Exception('User is not associated with any organization');
                 }
 
@@ -69,7 +70,7 @@ class EventTypeService
                 Log::info('EventType created', [
                     'event_type_id' => $eventType->id,
                     'event_type_name' => $eventType->name,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
                 ]);
 
                 return $eventType;
@@ -78,7 +79,7 @@ class EventTypeService
             Log::error('Failed to create event type', [
                 'error' => $e->getMessage(),
                 'user_id' => $user->id,
-                'data' => $data
+                'data' => $data,
             ]);
             throw $e;
         }
@@ -98,7 +99,7 @@ class EventTypeService
                 Log::info('EventType updated', [
                     'event_type_id' => $eventType->id,
                     'event_type_name' => $eventType->name,
-                    'changes' => array_diff_assoc($data, $originalData)
+                    'changes' => array_diff_assoc($data, $originalData),
                 ]);
 
                 return $eventType->fresh();
@@ -107,7 +108,7 @@ class EventTypeService
             Log::error('Failed to update event type', [
                 'error' => $e->getMessage(),
                 'event_type_id' => $eventType->id,
-                'data' => $data
+                'data' => $data,
             ]);
             throw $e;
         }
@@ -132,7 +133,7 @@ class EventTypeService
 
                 Log::info('EventType deleted', [
                     'event_type_id' => $eventTypeId,
-                    'event_type_name' => $eventTypeName
+                    'event_type_name' => $eventTypeName,
                 ]);
 
                 return "Event type '{$eventTypeName}' deleted successfully";
@@ -141,7 +142,7 @@ class EventTypeService
             Log::error('Failed to delete event type', [
                 'error' => $e->getMessage(),
                 'event_type_id' => $eventType->id,
-                'event_type_name' => $eventType->name
+                'event_type_name' => $eventType->name,
             ]);
             throw $e;
         }
@@ -154,7 +155,7 @@ class EventTypeService
     {
         return DB::transaction(function () use ($eventType) {
             $eventType->update([
-                'is_active' => !$eventType->is_active
+                'is_active' => ! $eventType->is_active,
             ]);
 
             return $eventType->fresh();
@@ -182,7 +183,7 @@ class EventTypeService
     private function applySearchFilter(Builder $query, string $search): void
     {
         $searchLower = strtolower(trim($search));
-        if (!empty($searchLower)) {
+        if (! empty($searchLower)) {
             $query->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"]);
         }
     }
@@ -209,6 +210,7 @@ class EventTypeService
     private function getPerPageValue(array $filters): int
     {
         $perPage = (int) ($filters['per_page'] ?? self::DEFAULT_PER_PAGE);
+
         return max(1, min($perPage, self::MAX_PER_PAGE));
     }
 }

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Organization;
 use App\Models\OrganizationStatus;
 use App\Models\OrganizationType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

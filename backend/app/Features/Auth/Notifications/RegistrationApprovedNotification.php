@@ -15,7 +15,7 @@ class RegistrationApprovedNotification extends Notification
     public function __construct(
         private RegistrationRequest $request,
         private User $user,
-        private string $temporaryPassword
+        private string $temporaryPassword,
     ) {}
 
     public function via(object $notifiable): array
@@ -32,7 +32,7 @@ class RegistrationApprovedNotification extends Notification
             ->subject('¡Solicitud Aprobada! - Plataforma Calendario')
             ->greeting("¡Felicitaciones {$this->request->first_name}!")
             ->line('Tu solicitud de registro ha sido aprobada.')
-            ->line("Ya puedes acceder a la plataforma con las siguientes credenciales:")
+            ->line('Ya puedes acceder a la plataforma con las siguientes credenciales:')
             ->line("**Email:** {$this->user->email}")
             ->line("**Contraseña temporal:** {$this->temporaryPassword}")
             ->action('Iniciar Sesión', $loginUrl)

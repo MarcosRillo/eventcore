@@ -2,13 +2,13 @@
 
 namespace App\Features\Auth\Services;
 
+use App\Features\Auth\Notifications\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Features\Auth\Notifications\PasswordResetNotification;
 
 class PasswordResetService
 {
@@ -24,7 +24,7 @@ class PasswordResetService
     {
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             // Return true even if user doesn't exist (security best practice)
             // This prevents email enumeration attacks
             return true;
@@ -62,7 +62,7 @@ class PasswordResetService
             ->where('email', $email)
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             throw ValidationException::withMessages([
                 'email' => ['No existe una solicitud de restablecimiento para este email.'],
             ]);
@@ -80,7 +80,7 @@ class PasswordResetService
         }
 
         // Verify token
-        if (!Hash::check($token, $record->token)) {
+        if (! Hash::check($token, $record->token)) {
             throw ValidationException::withMessages([
                 'token' => ['El token de restablecimiento no es válido.'],
             ]);
@@ -88,7 +88,7 @@ class PasswordResetService
 
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             throw ValidationException::withMessages([
                 'email' => ['No se encontró un usuario con este email.'],
             ]);
@@ -125,7 +125,7 @@ class PasswordResetService
             ->where('email', $email)
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             return false;
         }
 

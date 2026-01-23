@@ -19,7 +19,7 @@ class ApprovalStateMachineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->stateMachine = new ApprovalStateMachine();
+        $this->stateMachine = new ApprovalStateMachine;
         $this->seed([
             \Database\Seeders\UserRolesSeeder::class,
             \Database\Seeders\EventStatusesSeeder::class,

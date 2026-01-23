@@ -5,8 +5,8 @@ namespace Tests\Feature\PublicEvents;
 use App\Features\PublicEvents\Services\PublicEventService;
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -21,12 +21,19 @@ class PublicEventServiceTest extends TestCase
     use RefreshDatabase;
 
     private PublicEventService $service;
+
     private Organization $organization;
+
     private EventType $eventType;
+
     private EventSubtype $eventSubtype;
+
     private Location $location;
+
     private EventStatus $publishedStatus;
+
     private EventStatus $draftStatus;
+
     private User $user;
 
     protected function setUp(): void
@@ -549,5 +556,4 @@ class PublicEventServiceTest extends TestCase
         $this->assertEquals(0, $stats['total_event_types']);
         $this->assertEquals(0, $stats['events_this_month']);
     }
-
 }

@@ -4,11 +4,10 @@ namespace Tests\Feature\Organizer;
 
 use App\Features\Organizer\Services\EventValidator;
 use App\Features\Organizer\Services\OrganizerService;
-
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -23,13 +22,21 @@ class OrganizerServiceTest extends TestCase
     use RefreshDatabase;
 
     private OrganizerService $service;
+
     private EventValidator $validator;
+
     private User $user;
+
     private Organization $organization;
+
     private Location $location;
+
     private EventStatus $draftStatus;
+
     private EventStatus $publishedStatus;
+
     private EventType $eventType;
+
     private EventSubtype $eventSubtype;
 
     protected function setUp(): void
@@ -41,7 +48,7 @@ class OrganizerServiceTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
         $this->seed(\Database\Seeders\EventStatusesSeeder::class);
 
-        $this->validator = new EventValidator();
+        $this->validator = new EventValidator;
         $this->service = new OrganizerService($this->validator);
 
         // Create organization
@@ -67,7 +74,7 @@ class OrganizerServiceTest extends TestCase
             'description' => 'Event held at a single location',
             'allows_multiple_locations' => false,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         // Create event types for testing

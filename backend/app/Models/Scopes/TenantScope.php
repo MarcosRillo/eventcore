@@ -19,7 +19,7 @@ class TenantScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         // Check if there's an authenticated user
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return;
         }
 
@@ -57,12 +57,14 @@ class TenantScope implements Scope
             if (in_array($modelClass, $entityOwnedModels)) {
                 // Organizadores ven TODOS los recursos del ente (entity_id = 1)
                 $builder->where('entity_id', 1);
+
                 return;
             }
 
             // Modelos que pertenecen a ORGANIZACIONES (eventos)
             if ($modelClass === \App\Models\Event::class && $organizationId) {
                 $builder->where('organization_id', $organizationId);
+
                 return;
             }
         }
@@ -70,19 +72,18 @@ class TenantScope implements Scope
 
     /**
      * Get the user's primary organization ID.
-     * 
+     *
      * For now, we'll get the first organization the user belongs to.
      * In the future, this could be enhanced to support multiple organizations
      * or a "current selected organization" concept.
-     * 
-     * @param User $user
-     * @return int|null
+     *
+     * @param  User  $user
      */
     private function getUserOrganizationId($user): ?int
     {
         // Get the first organization the user belongs to
         $organization = $user->organizations()->first();
-        
+
         return $organization ? $organization->id : null;
     }
 

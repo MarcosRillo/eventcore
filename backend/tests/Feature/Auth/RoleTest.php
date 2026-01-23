@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -27,6 +27,7 @@ class RoleTest extends TestCase
         $user = User::factory()->create(['role_id' => $role->id]);
         $organization = Organization::factory()->create();
         $user->organizations()->attach($organization->id);
+
         return $user;
     }
 

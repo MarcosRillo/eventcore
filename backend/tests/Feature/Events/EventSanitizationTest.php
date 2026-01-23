@@ -2,20 +2,16 @@
 
 namespace Tests\Feature\Events;
 
-use Tests\TestCase;
-use App\Models\User;
+use App\Features\Events\Services\EventService;
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventFormat;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
-use App\Models\OrganizationStatus;
-use App\Models\OrganizationType;
-use App\Models\UserRole;
-use App\Features\Events\Services\EventService;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * EventSanitizationTest
@@ -32,10 +28,15 @@ class EventSanitizationTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private EventStatus $draftStatus;
+
     private object $format;  // stdClass from DB table
+
     private EventType $eventType;
+
     private EventSubtype $eventSubtype;
+
     private Location $location;
 
     protected function setUp(): void

@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ Database seeding completed successfully!');
         $this->command->info('📊 Complete dataset created with consistent relationships');
         $this->command->newLine();
-        
+
         $this->command->info('🔑 LOGIN CREDENTIALS:');
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         $this->command->info('Platform Admin: marcos@plataforma.com / password123');

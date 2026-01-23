@@ -3,10 +3,9 @@
 namespace Tests\Feature\Events;
 
 use App\Models\Event;
+use App\Models\EventStatus;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Models\EventStatus;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -21,9 +20,10 @@ abstract class EventTestCase extends TestCase
     protected function authenticateUser(string $role = 'entity_admin'): User
     {
         $user = User::factory()->create([
-            'role_id' => UserRole::where('role_code', $role)->first()->id
+            'role_id' => UserRole::where('role_code', $role)->first()->id,
         ]);
         $this->actingAs($user, 'sanctum');
+
         return $user;
     }
 
@@ -34,9 +34,9 @@ abstract class EventTestCase extends TestCase
     {
         $status = EventStatus::where('status_code', $statusCode)->first();
 
-        if (!$status) {
+        if (! $status) {
             throw new \RuntimeException(
-                "EventStatus '{$statusCode}' not found. Did you seed EventStatusesSeeder?"
+                "EventStatus '{$statusCode}' not found. Did you seed EventStatusesSeeder?",
             );
         }
 
@@ -49,7 +49,7 @@ abstract class EventTestCase extends TestCase
     protected function createEventWithStatus(string $statusCode, array $attributes = []): Event
     {
         return Event::factory()->create(array_merge([
-            'status_id' => $this->getStatusId($statusCode)
+            'status_id' => $this->getStatusId($statusCode),
         ], $attributes));
     }
 }

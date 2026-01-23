@@ -29,9 +29,9 @@ class CookieTokenMiddleware
     {
         // Only inject cookie token if no Bearer token already present
         // This maintains backward compatibility with existing token-based auth
-        if (!$request->bearerToken() && $request->hasCookie('access_token')) {
+        if (! $request->bearerToken() && $request->hasCookie('access_token')) {
             $token = $request->cookie('access_token');
-            $request->headers->set('Authorization', 'Bearer ' . $token);
+            $request->headers->set('Authorization', 'Bearer '.$token);
         }
 
         return $next($request);

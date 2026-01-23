@@ -5,8 +5,8 @@ namespace Tests\Feature\Approval;
 use App\Models\Event;
 use App\Models\EventApproval;
 use App\Models\EventStatus;
-use App\Models\User;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -16,16 +16,27 @@ class ApprovalAuditTest extends TestCase
     use RefreshDatabase;
 
     private User $entityAdmin;
+
     private User $entityStaff;
+
     private User $organizer;
+
     private Organization $organization;
+
     private EventStatus $draftStatus;
+
     private EventStatus $pendingInternalStatus;
+
     private EventStatus $approvedInternalStatus;
+
     private EventStatus $pendingPublicStatus;
+
     private EventStatus $publishedStatus;
+
     private EventStatus $rejectedStatus;
+
     private EventStatus $requiresChangesStatus;
+
     private Event $event;
 
     protected function setUp(): void
@@ -184,7 +195,7 @@ class ApprovalAuditTest extends TestCase
         // Compare dates without microseconds (Carbon stores with microseconds)
         $this->assertEquals(
             date('Y-m-d H:i:s', strtotime($scheduledDate)),
-            $approval->scheduled_publish_at->format('Y-m-d H:i:s')
+            $approval->scheduled_publish_at->format('Y-m-d H:i:s'),
         );
     }
 

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\InternalCalendar;
 
-use App\Models\User;
-use App\Models\Organization;
 use App\Models\Event;
-use App\Models\EventType;
 use App\Models\EventStatus;
+use App\Models\EventType;
+use App\Models\Organization;
+use App\Models\User;
 use App\Models\UserRole;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,10 +19,15 @@ class InternalCalendarStatsControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $entityAdmin;
+
     private Organization $organization;
+
     private EventType $eventType;
+
     private EventStatus $approvedInternalStatus;
+
     private EventStatus $publishedStatus;
+
     private EventStatus $draftStatus;
 
     protected function setUp(): void
@@ -96,7 +101,7 @@ class InternalCalendarStatsControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/stats');
 
         // Assert
@@ -146,7 +151,7 @@ class InternalCalendarStatsControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/stats');
 
         // Assert
@@ -192,7 +197,7 @@ class InternalCalendarStatsControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/stats');
 
         // Assert
@@ -221,7 +226,7 @@ class InternalCalendarStatsControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/stats');
 
         // Assert

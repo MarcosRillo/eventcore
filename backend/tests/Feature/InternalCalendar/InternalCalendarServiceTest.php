@@ -22,11 +22,17 @@ class InternalCalendarServiceTest extends TestCase
     use RefreshDatabase;
 
     private Organization $organization;
+
     private EventStatus $approvedInternalStatus;
+
     private EventStatus $pendingPublicApprovalStatus;
+
     private EventStatus $publishedStatus;
+
     private EventStatus $draftStatus;
+
     private EventStatus $rejectedStatus;
+
     private EventType $eventType;
 
     protected function setUp(): void
@@ -53,7 +59,7 @@ class InternalCalendarServiceTest extends TestCase
         // Create event type
         $this->eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 

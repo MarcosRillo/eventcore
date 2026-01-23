@@ -3,12 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
-use App\Models\EventStatus;
 use App\Models\EventFormat;
+use App\Models\EventStatus;
 use App\Models\EventType;
-use App\Models\EventSubtype;
-use App\Models\Organization;
 use App\Models\Location;
+use App\Models\Organization;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -49,8 +48,9 @@ class LandingTestSeeder extends Seeder
         // Get event types and subtypes for deterministic assignment
         $eventTypes = EventType::with('subtypes')->where('is_active', true)->get();
 
-        if (!$publishedStatus || !$enteDeturismo || $locations->isEmpty() || $eventTypes->isEmpty()) {
+        if (! $publishedStatus || ! $enteDeturismo || $locations->isEmpty() || $eventTypes->isEmpty()) {
             $this->command->error('❌ Missing required data. Run DatabaseSeeder first.');
+
             return;
         }
 
@@ -88,7 +88,7 @@ class LandingTestSeeder extends Seeder
             // Attach random location
             $event->locations()->attach(
                 $locations->random()->id,
-                ['location_specific_notes' => 'Sede principal del evento']
+                ['location_specific_notes' => 'Sede principal del evento'],
             );
         }
 
@@ -129,7 +129,7 @@ class LandingTestSeeder extends Seeder
             foreach ($selectedLocations as $location) {
                 $event->locations()->attach(
                     $location->id,
-                    ['location_specific_notes' => null]
+                    ['location_specific_notes' => null],
                 );
             }
         }

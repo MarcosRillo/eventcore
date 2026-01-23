@@ -7,9 +7,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Location Resource
- * 
+ *
  * Transforms Location model data for API responses.
- * 
+ *
  * @property-read \App\Models\Location $resource
  */
 class LocationResource extends JsonResource
@@ -36,11 +36,11 @@ class LocationResource extends JsonResource
             'email' => $this->email,
             'additional_info' => $this->additional_info,
             'is_active' => $this->is_active,
-            
+
             // Computed properties
             'full_address' => $this->full_address,
             'has_coordinates' => $this->hasCoordinates(),
-            
+
             // Pivot data (when accessed through event relationship)
             'pivot' => $this->whenPivotLoaded('event_location', function () {
                 return [
@@ -49,7 +49,7 @@ class LocationResource extends JsonResource
                     'location_metadata' => $this->pivot->location_metadata,
                 ];
             }),
-            
+
             // Timestamps
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),

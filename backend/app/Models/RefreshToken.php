@@ -53,7 +53,7 @@ class RefreshToken extends Model
      */
     public function isValid(): bool
     {
-        return !$this->isExpired() && !$this->isRevoked();
+        return ! $this->isExpired() && ! $this->isRevoked();
     }
 
     /**

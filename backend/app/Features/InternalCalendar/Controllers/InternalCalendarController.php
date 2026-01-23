@@ -24,7 +24,7 @@ use Illuminate\Http\JsonResponse;
 class InternalCalendarController extends Controller
 {
     public function __construct(
-        private InternalCalendarService $internalCalendarService
+        private InternalCalendarService $internalCalendarService,
     ) {}
 
     /**
@@ -36,7 +36,6 @@ class InternalCalendarController extends Controller
      * - end_date (optional): Filter by end date (requires start_date)
      * - event_type_id (optional): Filter by event type ID
      *
-     * @param IndexInternalCalendarRequest $request
      * @return JsonResponse Returns EventResource collection
      */
     public function index(IndexInternalCalendarRequest $request): JsonResponse
@@ -57,14 +56,14 @@ class InternalCalendarController extends Controller
      * Returns event details if the event exists and user has access.
      * Applies same role-based scoping as index method.
      *
-     * @param int $id Event ID
+     * @param  int  $id  Event ID
      * @return JsonResponse Returns EventResource or 404
      */
     public function show(int $id): JsonResponse
     {
         $event = $this->internalCalendarService->getEventById($id);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'message' => 'Event not found',
             ], 404);

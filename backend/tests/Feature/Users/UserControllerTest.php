@@ -13,10 +13,15 @@ use Tests\TestCase;
 class UserControllerTest extends TestCase
 {
     use RefreshDatabase;
+
     private User $entityAdmin;
+
     private User $entityStaff;
+
     private User $anotherEntityStaff;
+
     private Organization $entity;
+
     private Organization $otherEntity;
 
     protected function setUp(): void
@@ -72,7 +77,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/users');
 
         $response->assertStatus(200)
@@ -92,7 +97,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/users');
 
         $response->assertStatus(200);
@@ -116,7 +121,7 @@ class UserControllerTest extends TestCase
 
         $token = $platformAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/users');
 
         $response->assertStatus(200);
@@ -131,14 +136,14 @@ class UserControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Search by name
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/users?search=Staff');
 
         $response->assertStatus(200);
         $this->assertGreaterThanOrEqual(1, $response->json('meta.total'));
 
         // Search by email
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/users?search=staff@entity');
 
         $response->assertStatus(200);
@@ -152,7 +157,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->putJson("/api/v1/users/{$this->entityStaff->id}", [
                 'name' => 'Updated Name',
                 'email' => 'updated@entity.com',
@@ -175,7 +180,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->putJson("/api/v1/users/{$this->entityAdmin->id}", [
                 'name' => 'New Name',
                 'email' => 'new@entity.com',
@@ -201,7 +206,7 @@ class UserControllerTest extends TestCase
 
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->putJson("/api/v1/users/{$anotherAdmin->id}", [
                 'name' => 'New Name',
                 'email' => 'new@entity.com',
@@ -221,7 +226,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->patchJson("/api/v1/users/{$this->entityStaff->id}/suspend");
 
         $response->assertStatus(200)
@@ -243,7 +248,7 @@ class UserControllerTest extends TestCase
 
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->patchJson("/api/v1/users/{$this->entityStaff->id}/unsuspend");
 
         $response->assertStatus(200)
@@ -264,7 +269,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->deleteJson("/api/v1/users/{$this->entityStaff->id}");
 
         $response->assertStatus(200)
@@ -282,7 +287,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->deleteJson("/api/v1/users/{$this->anotherEntityStaff->id}");
 
         $response->assertStatus(403)
@@ -302,7 +307,7 @@ class UserControllerTest extends TestCase
     {
         $token = $this->entityStaff->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/users');
 
         $response->assertStatus(403);

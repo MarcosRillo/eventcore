@@ -21,7 +21,7 @@ class OrganizerService
     use EventDataPreparation;
 
     public function __construct(
-        private EventValidator $validator
+        private EventValidator $validator,
     ) {}
 
     /**
@@ -32,12 +32,12 @@ class OrganizerService
         $this->validator->validateUserHasOrganization($user);
 
         $draftStatus = EventStatus::where('status_code', 'draft')->first();
-        if (!$draftStatus) {
+        if (! $draftStatus) {
             throw new \RuntimeException('Draft status not found in database');
         }
 
         $formatId = $data['format_id'] ?? DB::table('event_formats')->first()?->id;
-        if (!$formatId) {
+        if (! $formatId) {
             throw new \RuntimeException('No event formats found in database');
         }
 
@@ -45,7 +45,7 @@ class OrganizerService
             $eventData = $this->prepareEventData($data, $user, $draftStatus->id, $formatId);
             $event = Event::create($eventData);
 
-            if (!empty($data['location_ids']) && is_array($data['location_ids'])) {
+            if (! empty($data['location_ids']) && is_array($data['location_ids'])) {
                 $event->locations()->sync($data['location_ids']);
             }
 
@@ -84,7 +84,7 @@ class OrganizerService
 
             $event->update($updateData);
 
-            if (!empty($data['location_ids']) && is_array($data['location_ids'])) {
+            if (! empty($data['location_ids']) && is_array($data['location_ids'])) {
                 $event->locations()->sync($data['location_ids']);
             }
 
@@ -98,7 +98,7 @@ class OrganizerService
                 'user_id' => $user->id,
                 'organization_id' => $user->organization_id,
                 'status_changed' => $newStatusId !== null,
-                'new_status' => $newStatusId ? 'pending_internal_approval' : $currentStatusCode
+                'new_status' => $newStatusId ? 'pending_internal_approval' : $currentStatusCode,
             ]);
 
             return $event->fresh(['eventType', 'eventSubtype', 'locations', 'status', 'format', 'asyncDates']);
@@ -110,7 +110,7 @@ class OrganizerService
      *
      * Published or approved events must be re-approved after editing.
      *
-     * @param string $currentStatusCode Current event status code
+     * @param  string  $currentStatusCode  Current event status code
      * @return int|null New status ID or null to keep current status
      */
     private function determineStatusAfterUpdate(string $currentStatusCode): ?int
@@ -158,12 +158,12 @@ class OrganizerService
             ->where('organization_id', $user->organization_id);
 
         // Apply search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->where('title', 'ILIKE', "%{$filters['search']}%");
         }
 
         // Apply status filter
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->whereHas('status', function ($q) use ($filters) {
                 $q->where('status_code', $filters['status']);
             });
@@ -173,11 +173,13 @@ class OrganizerService
         if (isset($filters['show_past']) && $filters['show_past'] === '1') {
             // Show only past events
             $query->past();
+
             // Order past events by most recent first
             return $query->orderBy('end_date', 'desc')->paginate($perPage);
         } else {
             // Default: Show only upcoming/ongoing events
             $query->upcoming();
+
             // Order upcoming events chronologically
             return $query->orderBy('start_date', 'asc')->paginate($perPage);
         }
@@ -199,8 +201,8 @@ class OrganizerService
     /**
      * Sync async dates for an event.
      *
-     * @param Event $event The event to sync dates for
-     * @param array $asyncDates Array of async date data
+     * @param  Event  $event  The event to sync dates for
+     * @param  array  $asyncDates  Array of async date data
      */
     private function syncAsyncDates(Event $event, array $asyncDates): void
     {
@@ -219,7 +221,7 @@ class OrganizerService
     /**
      * Get dashboard statistics for an organization.
      *
-     * @param int $organizationId The organization ID
+     * @param  int  $organizationId  The organization ID
      * @return array<string, int> Statistics array with counts per status
      */
     public function getDashboardStats(int $organizationId): array
@@ -229,25 +231,25 @@ class OrganizerService
         return [
             'total_events' => (clone $baseQuery)->count(),
             'draft' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'draft'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'draft'))
                 ->count(),
             'pending_approval' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'pending_internal_approval'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'pending_internal_approval'))
                 ->count(),
             'approved_internal' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'approved_internal'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'approved_internal'))
                 ->count(),
             'published' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'published'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'published'))
                 ->count(),
             'requires_changes' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'requires_changes'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'requires_changes'))
                 ->count(),
             'rejected' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'rejected'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'rejected'))
                 ->count(),
             'archived' => (clone $baseQuery)
-                ->whereHas('status', fn($q) => $q->where('status_code', 'cancelled'))
+                ->whereHas('status', fn ($q) => $q->where('status_code', 'cancelled'))
                 ->count(),
         ];
     }

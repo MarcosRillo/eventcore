@@ -2,8 +2,8 @@
 
 namespace App\Features\Organizations\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\Organizations\Services\OrganizationService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 class OrganizationController extends Controller
 {
     public function __construct(
-        private OrganizationService $organizationService
+        private OrganizationService $organizationService,
     ) {}
 
     /**
@@ -29,7 +29,7 @@ class OrganizationController extends Controller
             $filters = $request->only(['search', 'status', 'per_page', 'page']);
             $organizations = $this->organizationService->getLinkedOrganizations(
                 $request->user(),
-                $filters
+                $filters,
             );
 
             return response()->json([
@@ -59,7 +59,7 @@ class OrganizationController extends Controller
         try {
             $organization = $this->organizationService->getOrganizationDetail(
                 $id,
-                $request->user()
+                $request->user(),
             );
 
             return response()->json([
@@ -83,7 +83,7 @@ class OrganizationController extends Controller
         try {
             $organization = $this->organizationService->toggleOrganizationStatus(
                 $id,
-                $request->user()
+                $request->user(),
             );
 
             $statusName = $organization->status?->status_name ?? 'Unknown';
@@ -101,7 +101,7 @@ class OrganizationController extends Controller
         } catch (\Exception $e) {
             Log::error('Error toggling organization status', [
                 'organization_id' => $id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([

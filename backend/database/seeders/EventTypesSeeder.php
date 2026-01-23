@@ -30,7 +30,7 @@ class EventTypesSeeder extends Seeder
                 'description' => 'Event held at a single location',
                 'allows_multiple_locations' => false,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'format_code' => 'multi_sede',
@@ -38,8 +38,8 @@ class EventTypesSeeder extends Seeder
                 'description' => 'Event held across multiple locations',
                 'allows_multiple_locations' => true,
                 'created_at' => now(),
-                'updated_at' => now()
-            ]
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('event_formats')->insert($formats);

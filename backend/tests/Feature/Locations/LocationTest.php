@@ -34,6 +34,7 @@ class LocationTest extends EventTestCase
         $user = parent::authenticateUser($role);
         $this->organization = \App\Models\Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
+
         return $user;
     }
 
@@ -55,11 +56,11 @@ class LocationTest extends EventTestCase
 
         // Assert: Verify Laravel Resource Collection pagination structure
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data',
-                     'meta' => ['current_page', 'last_page', 'per_page', 'total'],
-                     'links'
-                 ]);
+            ->assertJsonStructure([
+                'data',
+                'meta' => ['current_page', 'last_page', 'per_page', 'total'],
+                'links',
+            ]);
 
         // Assert: At least some locations exist
         $this->assertGreaterThan(0, count($response->json('data')));
@@ -101,7 +102,7 @@ class LocationTest extends EventTestCase
         $this->authenticateUser();
         $location = Location::factory()->create([
             'entity_id' => $this->organization->id,
-            'name' => 'Original Location'
+            'name' => 'Original Location',
         ]);
 
         // Act: Update location
@@ -125,7 +126,7 @@ class LocationTest extends EventTestCase
         // Arrange: Authenticate and create location
         $this->authenticateUser();
         $location = Location::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act: Delete location
@@ -151,13 +152,13 @@ class LocationTest extends EventTestCase
         // Create active locations
         Location::factory()->count(3)->create([
             'entity_id' => $organization->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Create inactive locations (should not be returned)
         Location::factory()->count(2)->create([
             'entity_id' => $organization->id,
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         // Act: Get active locations
@@ -165,7 +166,7 @@ class LocationTest extends EventTestCase
 
         // Assert: Only active locations returned
         $response->assertStatus(200)
-                 ->assertJsonStructure(['success', 'message', 'data']);
+            ->assertJsonStructure(['success', 'message', 'data']);
 
         // Assert: At least some active locations exist
         $this->assertGreaterThan(0, count($response->json('data')));
@@ -380,7 +381,7 @@ class LocationTest extends EventTestCase
 
         // Assert: Validation error
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['name']);
+            ->assertJsonValidationErrors(['name']);
     }
 
     /**
@@ -399,7 +400,7 @@ class LocationTest extends EventTestCase
 
         // Assert: Validation error
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['address']);
+            ->assertJsonValidationErrors(['address']);
     }
 
     /**
@@ -418,7 +419,7 @@ class LocationTest extends EventTestCase
 
         // Assert: Validation error
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['city']);
+            ->assertJsonValidationErrors(['city']);
     }
 
     /**
@@ -453,7 +454,7 @@ class LocationTest extends EventTestCase
         // Arrange: Authenticate and create location
         $this->authenticateUser();
         $location = Location::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act: Update with valid data

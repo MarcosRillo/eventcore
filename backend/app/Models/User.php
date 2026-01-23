@@ -14,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -60,7 +60,7 @@ class User extends Authenticatable
     public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'organization_user')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     /**
@@ -157,7 +157,7 @@ class User extends Authenticatable
      */
     public function scopePlatformAdmins($query)
     {
-        return $query->whereHas('role', fn($q) => $q->where('role_code', 'platform_admin'));
+        return $query->whereHas('role', fn ($q) => $q->where('role_code', 'platform_admin'));
     }
 
     /**
@@ -165,7 +165,7 @@ class User extends Authenticatable
      */
     public function scopeEntityAdmins($query)
     {
-        return $query->whereHas('role', fn($q) => $q->where('role_code', 'entity_admin'));
+        return $query->whereHas('role', fn ($q) => $q->where('role_code', 'entity_admin'));
     }
 
     /**
@@ -173,6 +173,6 @@ class User extends Authenticatable
      */
     public function scopeOrganizerAdmins($query)
     {
-        return $query->whereHas('role', fn($q) => $q->where('role_code', 'organizer_admin'));
+        return $query->whereHas('role', fn ($q) => $q->where('role_code', 'organizer_admin'));
     }
 }

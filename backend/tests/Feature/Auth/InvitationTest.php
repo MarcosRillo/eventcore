@@ -2,16 +2,15 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Features\Auth\Notifications\InvitationNotification;
 use App\Models\Invitation;
+use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use App\Features\Auth\Notifications\InvitationNotification;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -33,6 +32,7 @@ class InvitationTest extends TestCase
         $user = User::factory()->create(['role_id' => $role->id]);
         $organization = Organization::factory()->create();
         $user->organizations()->attach($organization->id);
+
         return $user;
     }
 
@@ -49,7 +49,7 @@ class InvitationTest extends TestCase
     {
         $selector = Str::random(32);
         $validator = Str::random(32);
-        $plainToken = $selector . $validator;
+        $plainToken = $selector.$validator;
 
         $invitation = Invitation::create(array_merge([
             'selector' => $selector,
@@ -84,7 +84,7 @@ class InvitationTest extends TestCase
 
         Notification::assertSentTo(
             Invitation::where('email', 'newadmin@example.com')->first(),
-            InvitationNotification::class
+            InvitationNotification::class,
         );
     }
 
@@ -403,7 +403,7 @@ class InvitationTest extends TestCase
 
         // Use correct selector but wrong validator
         $selector = substr($plainToken, 0, 32);
-        $wrongToken = $selector . Str::random(32);
+        $wrongToken = $selector.Str::random(32);
 
         $response = $this->getJson("/api/v1/auth/invitations/validate/{$wrongToken}");
 
@@ -518,7 +518,7 @@ class InvitationTest extends TestCase
         // Verify notification was sent
         Notification::assertSentTo(
             $invitation->fresh(),
-            InvitationNotification::class
+            InvitationNotification::class,
         );
     }
 

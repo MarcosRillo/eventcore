@@ -78,7 +78,7 @@ class Organization extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'organization_user')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     /**
@@ -134,7 +134,7 @@ class Organization extends Model
      */
     public function scopePrimaryEntities($query)
     {
-        return $query->whereHas('type', fn($q) => $q->where('type_code', 'primary_entity'));
+        return $query->whereHas('type', fn ($q) => $q->where('type_code', 'primary_entity'));
     }
 
     /**
@@ -142,7 +142,7 @@ class Organization extends Model
      */
     public function scopeEventOrganizers($query)
     {
-        return $query->whereHas('type', fn($q) => $q->where('type_code', 'event_organizer'));
+        return $query->whereHas('type', fn ($q) => $q->where('type_code', 'event_organizer'));
     }
 
     /**
@@ -150,7 +150,7 @@ class Organization extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereHas('status', fn($q) => $q->where('status_code', 'active'));
+        return $query->whereHas('status', fn ($q) => $q->where('status_code', 'active'));
     }
 
     /**

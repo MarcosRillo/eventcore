@@ -2,13 +2,13 @@
 
 namespace App\Features\Auth\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Features\Auth\Services\RegistrationRequestService;
-use App\Features\Auth\Requests\SubmitRegistrationRequest;
-use App\Features\Auth\Requests\RejectRegistrationRequest;
-use App\Features\Auth\Notifications\RegistrationRequestReceivedNotification;
 use App\Features\Auth\Notifications\RegistrationApprovedNotification;
 use App\Features\Auth\Notifications\RegistrationRejectedNotification;
+use App\Features\Auth\Notifications\RegistrationRequestReceivedNotification;
+use App\Features\Auth\Requests\RejectRegistrationRequest;
+use App\Features\Auth\Requests\SubmitRegistrationRequest;
+use App\Features\Auth\Services\RegistrationRequestService;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\RegistrationRequestResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 class RegistrationRequestController extends Controller
 {
     public function __construct(
-        private RegistrationRequestService $service
+        private RegistrationRequestService $service,
     ) {}
 
     /**
@@ -82,7 +82,7 @@ class RegistrationRequestController extends Controller
         $result['request']->notify(new RegistrationApprovedNotification(
             $result['request'],
             $result['user'],
-            $result['temporary_password']
+            $result['temporary_password'],
         ));
 
         return response()->json([
@@ -103,7 +103,7 @@ class RegistrationRequestController extends Controller
         $registrationRequest = $this->service->rejectRequest(
             $id,
             $request->user(),
-            $request->input('reason')
+            $request->input('reason'),
         );
 
         $registrationRequest->notify(new RegistrationRejectedNotification($registrationRequest));

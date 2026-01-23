@@ -2,8 +2,8 @@
 
 namespace App\Features\Appearance\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\Appearance\Requests\UpdateAppearanceRequest;
+use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,13 +16,13 @@ class AppearanceController extends Controller
     public function show(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Get the user's organization
         $organization = $user->organization;
-        
-        if (!$organization) {
+
+        if (! $organization) {
             return response()->json([
-                'message' => 'No se encontró la organización del usuario.'
+                'message' => 'No se encontró la organización del usuario.',
             ], 404);
         }
 
@@ -38,7 +38,7 @@ class AppearanceController extends Controller
 
         return response()->json([
             'data' => $appearanceSettings,
-            'message' => 'Configuración de apariencia obtenida exitosamente.'
+            'message' => 'Configuración de apariencia obtenida exitosamente.',
         ]);
     }
 
@@ -48,19 +48,19 @@ class AppearanceController extends Controller
     public function update(UpdateAppearanceRequest $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Get the user's organization
         $organization = $user->organization;
-        
-        if (!$organization) {
+
+        if (! $organization) {
             return response()->json([
-                'message' => 'No se encontró la organización del usuario.'
+                'message' => 'No se encontró la organización del usuario.',
             ], 404);
         }
 
         // Update only the provided fields
         $validatedData = $request->validated();
-        
+
         $organization->update(array_filter($validatedData, function ($value) {
             return $value !== null;
         }));
@@ -77,7 +77,7 @@ class AppearanceController extends Controller
 
         return response()->json([
             'data' => $appearanceSettings,
-            'message' => 'Configuración de apariencia actualizada exitosamente.'
+            'message' => 'Configuración de apariencia actualizada exitosamente.',
         ]);
     }
 }

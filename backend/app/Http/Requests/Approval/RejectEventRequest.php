@@ -13,6 +13,7 @@ class RejectEventRequest extends FormRequest
     {
         // Only entity_admin and entity_staff can reject events
         $userRole = $this->user()?->role?->role_code;
+
         return in_array($userRole, ['entity_admin', 'entity_staff']);
     }
 

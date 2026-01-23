@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Features\Auth\Notifications\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use App\Features\Auth\Notifications\PasswordResetNotification;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 

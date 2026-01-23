@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\EventTypes;
 
-use Tests\TestCase;
-use App\Models\EventType;
-use App\Models\EventSubtype;
 use App\Models\Event;
-use App\Models\User;
+use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 /**
  * EventSubtype Controller Tests
@@ -31,6 +31,7 @@ class EventSubtypeTest extends TestCase
     use RefreshDatabase;
 
     private Organization $organization;
+
     private EventType $eventType;
 
     /**
@@ -57,10 +58,11 @@ class EventSubtypeTest extends TestCase
 
         $this->eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
-            'name' => 'Conferencia'
+            'name' => 'Conferencia',
         ]);
 
         $this->actingAs($user);
+
         return $user;
     }
 
@@ -76,7 +78,7 @@ class EventSubtypeTest extends TestCase
 
         EventSubtype::factory()->count(5)->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
@@ -87,7 +89,7 @@ class EventSubtypeTest extends TestCase
             ->assertJsonStructure([
                 'data',
                 'links',
-                'meta'
+                'meta',
             ]);
 
         $this->assertCount(5, $response->json('data'));
@@ -103,19 +105,19 @@ class EventSubtypeTest extends TestCase
 
         // Create another event type with subtypes
         $otherEventType = EventType::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Create subtypes for our event type
         EventSubtype::factory()->count(3)->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Create subtypes for other event type
         EventSubtype::factory()->count(2)->create([
             'event_type_id' => $otherEventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
@@ -142,12 +144,12 @@ class EventSubtypeTest extends TestCase
         EventSubtype::factory()->create([
             'event_type_id' => $this->eventType->id,
             'entity_id' => $this->organization->id,
-            'name' => 'Congreso Nacional'
+            'name' => 'Congreso Nacional',
         ]);
         EventSubtype::factory()->create([
             'event_type_id' => $this->eventType->id,
             'entity_id' => $this->organization->id,
-            'name' => 'Seminario Internacional'
+            'name' => 'Seminario Internacional',
         ]);
 
         // Act
@@ -170,11 +172,11 @@ class EventSubtypeTest extends TestCase
 
         EventSubtype::factory()->count(3)->active()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
         EventSubtype::factory()->count(2)->inactive()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act - Get only active
@@ -206,7 +208,7 @@ class EventSubtypeTest extends TestCase
         // Act
         $response = $this->postJson(
             "/api/v1/event-types/{$this->eventType->id}/subtypes",
-            $subtypeData
+            $subtypeData,
         );
 
         // Assert
@@ -232,7 +234,7 @@ class EventSubtypeTest extends TestCase
         // Act
         $response = $this->postJson(
             "/api/v1/event-types/{$this->eventType->id}/subtypes",
-            []
+            [],
         );
 
         // Assert
@@ -251,7 +253,7 @@ class EventSubtypeTest extends TestCase
         // Act
         $response = $this->postJson(
             "/api/v1/event-types/{$eventType->id}/subtypes",
-            ['name' => 'Test Subtype']
+            ['name' => 'Test Subtype'],
         );
 
         // Assert
@@ -269,7 +271,7 @@ class EventSubtypeTest extends TestCase
         // Act
         $response = $this->postJson(
             "/api/v1/event-types/{$this->eventType->id}/subtypes",
-            ['name' => 'Test Subtype']
+            ['name' => 'Test Subtype'],
         );
 
         // Assert
@@ -313,12 +315,12 @@ class EventSubtypeTest extends TestCase
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $this->eventType->id,
             'entity_id' => $this->organization->id,
-            'name' => 'Seminario Especial'
+            'name' => 'Seminario Especial',
         ]);
 
         // Act
         $response = $this->getJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}",
         );
 
         // Assert
@@ -337,16 +339,16 @@ class EventSubtypeTest extends TestCase
 
         // Create subtype for a different event type
         $otherEventType = EventType::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $otherEventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act - Try to access subtype through wrong event type
         $response = $this->getJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}",
         );
 
         // Assert
@@ -366,13 +368,13 @@ class EventSubtypeTest extends TestCase
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $this->eventType->id,
             'entity_id' => $this->organization->id,
-            'name' => 'Original Name'
+            'name' => 'Original Name',
         ]);
 
         // Act
         $response = $this->putJson(
             "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}",
-            ['name' => 'Updated Name']
+            ['name' => 'Updated Name'],
         );
 
         // Assert
@@ -395,17 +397,17 @@ class EventSubtypeTest extends TestCase
         $this->authenticateAndSetup();
 
         $otherEventType = EventType::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $otherEventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act - Try to update through wrong event type
         $response = $this->putJson(
             "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}",
-            ['name' => 'Updated Name']
+            ['name' => 'Updated Name'],
         );
 
         // Assert
@@ -424,12 +426,12 @@ class EventSubtypeTest extends TestCase
         $this->authenticateAndSetup();
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
         $response = $this->deleteJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}",
         );
 
         // Assert
@@ -450,16 +452,16 @@ class EventSubtypeTest extends TestCase
         $this->authenticateAndSetup();
 
         $otherEventType = EventType::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $otherEventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act - Try to delete through wrong event type
         $response = $this->deleteJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}",
         );
 
         // Assert
@@ -483,12 +485,12 @@ class EventSubtypeTest extends TestCase
         $this->authenticateAndSetup();
         $subtype = EventSubtype::factory()->active()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
         $response = $this->patchJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}/toggle-status"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}/toggle-status",
         );
 
         // Assert
@@ -506,12 +508,12 @@ class EventSubtypeTest extends TestCase
         $this->authenticateAndSetup();
         $subtype = EventSubtype::factory()->inactive()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
         $response = $this->patchJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}/toggle-status"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}/toggle-status",
         );
 
         // Assert
@@ -529,16 +531,16 @@ class EventSubtypeTest extends TestCase
         $this->authenticateAndSetup();
 
         $otherEventType = EventType::factory()->create([
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $otherEventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
         $response = $this->patchJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}/toggle-status"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes/{$subtype->id}/toggle-status",
         );
 
         // Assert
@@ -559,13 +561,13 @@ class EventSubtypeTest extends TestCase
         // Create active subtypes
         EventSubtype::factory()->count(3)->active()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Create inactive subtypes
         EventSubtype::factory()->count(2)->inactive()->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
@@ -595,12 +597,12 @@ class EventSubtypeTest extends TestCase
 
         EventSubtype::factory()->count(20)->create([
             'event_type_id' => $this->eventType->id,
-            'entity_id' => $this->organization->id
+            'entity_id' => $this->organization->id,
         ]);
 
         // Act
         $response = $this->getJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes?per_page=5&page=1"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes?per_page=5&page=1",
         );
 
         // Assert
@@ -620,12 +622,12 @@ class EventSubtypeTest extends TestCase
         EventSubtype::factory()->create([
             'event_type_id' => $this->eventType->id,
             'entity_id' => $this->organization->id,
-            'name' => 'SEMINARIO MAYÚSCULAS'
+            'name' => 'SEMINARIO MAYÚSCULAS',
         ]);
 
         // Act
         $response = $this->getJson(
-            "/api/v1/event-types/{$this->eventType->id}/subtypes?search=seminario"
+            "/api/v1/event-types/{$this->eventType->id}/subtypes?search=seminario",
         );
 
         // Assert
@@ -660,7 +662,7 @@ class EventSubtypeTest extends TestCase
         // Act - Create without specifying is_active
         $response = $this->postJson(
             "/api/v1/event-types/{$this->eventType->id}/subtypes",
-            ['name' => 'Default Active Subtype']
+            ['name' => 'Default Active Subtype'],
         );
 
         // Assert
@@ -716,8 +718,8 @@ class EventSubtypeTest extends TestCase
                         'name',
                         'event_type_id',
                         'is_active',
-                    ]
-                ]
+                    ],
+                ],
             ])
             ->assertJsonCount(2, 'data')  // Only 2 active subtypes
             ->assertJsonFragment(['name' => 'Active Subtype 1'])

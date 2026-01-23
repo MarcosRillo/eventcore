@@ -17,17 +17,17 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('start_date');
             $table->dateTime('end_date');
-            
+
             $table->foreignId('status_id')->constrained('event_statuses');
             $table->foreignId('type_id')->constrained('event_types');
-            
+
             // Virtual event support
             $table->string('virtual_link')->nullable();
-            
+
             // Call-to-action configuration
             $table->string('cta_link')->nullable();
             $table->string('cta_text')->nullable();
-            
+
             // Additional approval workflow metadata
             $table->text('approval_comments')->nullable(); // Comments from approvers/rejectors
             $table->json('approval_history')->nullable(); // Track approval workflow history
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('featured_image')->nullable();
             $table->boolean('is_featured')->default(false);
             $table->integer('max_attendees')->nullable();
-            
+
             // Relationships
             $table->unsignedBigInteger('category_id')->nullable();
 
@@ -46,16 +46,16 @@ return new class extends Migration
 
             // Multi-tenant field - for events supervised by government entities
             $table->unsignedBigInteger('entity_id');
-            
+
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index(['entity_id', 'status_id']);
             $table->index(['entity_id', 'start_date']);
             $table->index(['entity_id', 'type_id']);
             $table->index(['start_date', 'end_date']);
             $table->index(['category_id']);
-            
+
             // Foreign key constraints
             $table->foreign('entity_id')->references('id')->on('organizations')->onDelete('cascade');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +26,7 @@ class OrganizationTypesSeeder extends Seeder
                 'description' => 'Government entity or municipality with approval authority',
                 'hierarchy_level' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'type_code' => 'event_organizer',
@@ -35,8 +34,8 @@ class OrganizationTypesSeeder extends Seeder
                 'description' => 'External organization that creates and manages events',
                 'hierarchy_level' => 2,
                 'created_at' => now(),
-                'updated_at' => now()
-            ]
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('organization_types')->insert($types);

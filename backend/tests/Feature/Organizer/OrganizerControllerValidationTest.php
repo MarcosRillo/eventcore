@@ -2,11 +2,10 @@
 
 namespace Tests\Feature\Organizer;
 
-
 use App\Models\Event;
 use App\Models\EventOrigin;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -57,6 +56,7 @@ class OrganizerControllerValidationTest extends TestCase
         $user->refresh();
         $user->organization_id = $organization->id; // Add as property for easy access
         $this->actingAs($user, 'sanctum');
+
         return $user;
     }
 
@@ -438,7 +438,7 @@ class OrganizerControllerValidationTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
         $payload['async_dates'] = [
-            ['notes' => 'Some notes'] // Missing 'date'
+            ['notes' => 'Some notes'], // Missing 'date'
         ];
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
@@ -454,7 +454,7 @@ class OrganizerControllerValidationTest extends TestCase
         $payload = $this->getMinimalPayload($user);
         $payload['async_dates'] = [
             ['date' => '2025-12-01', 'notes' => 'Day 1 notes'],
-            ['date' => '2025-12-03', 'notes' => 'Day 2 notes']
+            ['date' => '2025-12-03', 'notes' => 'Day 2 notes'],
         ];
         $payload['format_id'] = $this->getValidFormatId();
 

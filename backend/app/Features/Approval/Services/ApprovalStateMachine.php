@@ -2,8 +2,8 @@
 
 namespace App\Features\Approval\Services;
 
-use App\Models\Event;
 use App\Features\Approval\Exceptions\InvalidStateTransitionException;
+use App\Models\Event;
 
 /**
  * State Machine for Event Approval Workflow
@@ -60,9 +60,8 @@ class ApprovalStateMachine
     /**
      * Check if a transition is valid.
      *
-     * @param string $currentStatus Current status code
-     * @param string $targetStatus Target status code
-     * @return bool
+     * @param  string  $currentStatus  Current status code
+     * @param  string  $targetStatus  Target status code
      */
     public function canTransition(string $currentStatus, string $targetStatus): bool
     {
@@ -79,19 +78,17 @@ class ApprovalStateMachine
     /**
      * Validate a transition and throw exception if invalid.
      *
-     * @param Event $event
-     * @param string $targetStatus
      * @throws InvalidStateTransitionException
      */
     public function validateTransition(Event $event, string $targetStatus): void
     {
         $currentStatus = $event->status?->status_code ?? 'draft';
 
-        if (!$this->canTransition($currentStatus, $targetStatus)) {
+        if (! $this->canTransition($currentStatus, $targetStatus)) {
             throw new InvalidStateTransitionException(
                 $currentStatus,
                 $targetStatus,
-                $this->getAllowedTransitions($currentStatus)
+                $this->getAllowedTransitions($currentStatus),
             );
         }
     }
@@ -99,7 +96,6 @@ class ApprovalStateMachine
     /**
      * Get all allowed transitions from a given state.
      *
-     * @param string $currentStatus
      * @return array<string>
      */
     public function getAllowedTransitions(string $currentStatus): array
@@ -119,9 +115,6 @@ class ApprovalStateMachine
 
     /**
      * Check if a status is a terminal state (no outgoing transitions).
-     *
-     * @param string $status
-     * @return bool
      */
     public function isTerminalState(string $status): bool
     {

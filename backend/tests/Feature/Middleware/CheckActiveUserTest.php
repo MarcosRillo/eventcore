@@ -42,7 +42,7 @@ class CheckActiveUserTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $this->actingAs($user, 'sanctum');
 
-        $middleware = new CheckActiveUser();
+        $middleware = new CheckActiveUser;
         $request = Request::create('/api/v1/events', 'GET');
 
         $called = false;
@@ -50,6 +50,7 @@ class CheckActiveUserTest extends TestCase
         // Act
         $response = $middleware->handle($request, function ($req) use (&$called) {
             $called = true;
+
             return new Response('OK', 200);
         });
 
@@ -66,7 +67,7 @@ class CheckActiveUserTest extends TestCase
         // Arrange
         $user = User::factory()->create(['status' => 'suspended']);
 
-        $middleware = new CheckActiveUser();
+        $middleware = new CheckActiveUser;
         $request = Request::create('/api/v1/events', 'GET');
         $request->setUserResolver(function () use ($user) {
             return $user;
@@ -77,6 +78,7 @@ class CheckActiveUserTest extends TestCase
         // Act
         $response = $middleware->handle($request, function ($req) use (&$called) {
             $called = true;
+
             return new Response('OK', 200);
         });
 
@@ -94,7 +96,7 @@ class CheckActiveUserTest extends TestCase
     public function test_allows_unauthenticated_requests_to_proceed(): void
     {
         // Arrange (no authentication)
-        $middleware = new CheckActiveUser();
+        $middleware = new CheckActiveUser;
         $request = Request::create('/api/v1/public/events', 'GET');
 
         $called = false;
@@ -102,6 +104,7 @@ class CheckActiveUserTest extends TestCase
         // Act
         $response = $middleware->handle($request, function ($req) use (&$called) {
             $called = true;
+
             return new Response('OK', 200);
         });
 
@@ -120,7 +123,7 @@ class CheckActiveUserTest extends TestCase
         // Suspend user AFTER authentication (simulate admin action)
         $user->update(['status' => 'suspended']);
 
-        $middleware = new CheckActiveUser();
+        $middleware = new CheckActiveUser;
         $request = Request::create('/api/v1/events', 'GET');
         $request->setUserResolver(function () use ($user) {
             return $user;
@@ -131,6 +134,7 @@ class CheckActiveUserTest extends TestCase
         // Act
         $response = $middleware->handle($request, function ($req) use (&$called) {
             $called = true;
+
             return new Response('OK', 200);
         });
 
@@ -140,7 +144,7 @@ class CheckActiveUserTest extends TestCase
         $this->assertTrue($user->fresh()->isSuspended()); // 3: Verify DB state
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'status' => 'suspended'
+            'status' => 'suspended',
         ]); // 4
         $this->assertEquals('Tu cuenta ha sido suspendida. Contacta al administrador.',
             json_decode($response->getContent(), true)['message']); // 5
@@ -152,7 +156,7 @@ class CheckActiveUserTest extends TestCase
         // Arrange
         $user = User::factory()->create(['status' => 'suspended']);
 
-        $middleware = new CheckActiveUser();
+        $middleware = new CheckActiveUser;
         $request = Request::create('/api/v1/events', 'GET');
         $request->setUserResolver(function () use ($user) {
             return $user;

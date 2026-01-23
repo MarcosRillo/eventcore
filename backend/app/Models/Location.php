@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Scopes\TenantScope;
 
 /**
  * Location Model
- * 
+ *
  * Represents physical locations where events can take place.
  * Each location belongs to an organization (multi-tenant).
- * 
+ *
  * @property int $id
  * @property string $name
  * @property string|null $address
@@ -32,7 +32,6 @@ use App\Models\Scopes\TenantScope;
  * @property int $entity_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- * 
  * @property-read Organization $entity
  * @property-read \Illuminate\Database\Eloquent\Collection|Event[] $events
  */
@@ -98,12 +97,12 @@ class Location extends Model
     public function events(): BelongsToMany
     {
         return $this->belongsToMany(Event::class, 'event_location')
-                    ->withPivot([
-                        'location_specific_notes',
-                        'max_attendees_for_location',
-                        'location_metadata'
-                    ])
-                    ->withTimestamps();
+            ->withPivot([
+                'location_specific_notes',
+                'max_attendees_for_location',
+                'location_metadata',
+            ])
+            ->withTimestamps();
     }
 
     /**
@@ -121,8 +120,8 @@ class Location extends Model
     {
         return $query->where(function ($query) use ($search) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%")
-                  ->orWhere('city', 'like', "%{$search}%");
+                ->orWhere('address', 'like', "%{$search}%")
+                ->orWhere('city', 'like', "%{$search}%");
         });
     }
 
@@ -139,7 +138,7 @@ class Location extends Model
             $this->country,
         ]);
 
-        return !empty($parts) ? implode(', ', $parts) : null;
+        return ! empty($parts) ? implode(', ', $parts) : null;
     }
 
     /**
@@ -147,6 +146,6 @@ class Location extends Model
      */
     public function hasCoordinates(): bool
     {
-        return !is_null($this->latitude) && !is_null($this->longitude);
+        return ! is_null($this->latitude) && ! is_null($this->longitude);
     }
 }

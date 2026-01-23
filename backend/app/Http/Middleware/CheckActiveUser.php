@@ -11,10 +11,6 @@ class CheckActiveUser
     /**
      * Handle an incoming request.
      * Blocks suspended users from accessing protected routes.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -28,7 +24,7 @@ class CheckActiveUser
             if ($user->isSuspended()) {
                 return response()->json([
                     'error' => 'Account suspended',
-                    'message' => 'Tu cuenta ha sido suspendida. Contacta al administrador.'
+                    'message' => 'Tu cuenta ha sido suspendida. Contacta al administrador.',
                 ], 403);
             }
         }

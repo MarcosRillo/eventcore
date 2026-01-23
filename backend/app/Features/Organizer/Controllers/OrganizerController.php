@@ -17,7 +17,7 @@ class OrganizerController extends Controller
 {
     public function __construct(
         private OrganizerService $organizerService,
-        private EventValidationService $validationService
+        private EventValidationService $validationService,
     ) {}
 
     /**
@@ -41,7 +41,7 @@ class OrganizerController extends Controller
         $events = $this->organizerService->getPaginatedEvents(
             $request->user(),
             $filters,
-            $validated['per_page'] ?? 10
+            $validated['per_page'] ?? 10,
         );
 
         return response()->json($events);
@@ -53,6 +53,7 @@ class OrganizerController extends Controller
     public function show(Request $request, int $id): JsonResponse
     {
         $event = $this->organizerService->getEventById($id, $request->user());
+
         return response()->json($event);
     }
 
@@ -65,7 +66,7 @@ class OrganizerController extends Controller
 
         return response()->json([
             'message' => 'Event created successfully',
-            'event' => $event
+            'event' => $event,
         ], 201);
     }
 
@@ -81,7 +82,7 @@ class OrganizerController extends Controller
 
         return response()->json([
             'message' => 'Event updated successfully',
-            'event' => $updatedEvent
+            'event' => $updatedEvent,
         ]);
     }
 
@@ -96,7 +97,7 @@ class OrganizerController extends Controller
         if ($event->status->status_code !== 'draft') {
             return response()->json([
                 'error' => 'Can only delete draft events',
-                'current_status' => $event->status->status_code
+                'current_status' => $event->status->status_code,
             ], 403);
         }
 
@@ -112,7 +113,7 @@ class OrganizerController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->organization_id) {
+        if (! $user->organization_id) {
             return response()->json(['error' => 'No organization assigned'], 403);
         }
 
@@ -130,15 +131,15 @@ class OrganizerController extends Controller
         $event = $this->getOrganizerEvent($id, $user, ['status', 'locations']);
 
         $submittableStatuses = ['draft', 'requires_changes'];
-        if (!in_array($event->status->status_code, $submittableStatuses)) {
+        if (! in_array($event->status->status_code, $submittableStatuses)) {
             return response()->json(['error' => 'Only draft events can be submitted'], 403);
         }
 
         $validationResult = $this->validationService->validateForInternalApproval($event);
-        if (!$validationResult->isValid()) {
+        if (! $validationResult->isValid()) {
             return response()->json([
                 'error' => 'Event is missing required fields',
-                'errors' => $validationResult->getErrors()
+                'errors' => $validationResult->getErrors(),
             ], 422);
         }
 
@@ -151,7 +152,7 @@ class OrganizerController extends Controller
             return response()->json([
                 'message' => 'Event submitted for review',
                 'status' => 'pending_internal_approval',
-                'event' => $event
+                'event' => $event,
             ]);
         });
     }

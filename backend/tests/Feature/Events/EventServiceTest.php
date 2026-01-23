@@ -3,11 +3,10 @@
 namespace Tests\Feature\Events;
 
 use App\Features\Events\Services\EventService;
-
 use App\Models\Event;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
@@ -20,12 +19,19 @@ class EventServiceTest extends TestCase
     use RefreshDatabase;
 
     private EventService $service;
+
     private User $user;
+
     private Organization $organization;
+
     private EventType $eventType;
+
     private EventSubtype $eventSubtype;
+
     private Location $location;
+
     private EventStatus $draftStatus;
+
     private EventStatus $publishedStatus;
 
     protected function setUp(): void
@@ -38,7 +44,7 @@ class EventServiceTest extends TestCase
         $this->seed(\Database\Seeders\EventStatusesSeeder::class);
         $this->seed(\Database\Seeders\EventTypesSeeder::class);
 
-        $this->service = new EventService();
+        $this->service = new EventService;
 
         // Create organization
         $this->organization = Organization::factory()->create();

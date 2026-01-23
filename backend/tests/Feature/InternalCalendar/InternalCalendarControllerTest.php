@@ -2,12 +2,9 @@
 
 namespace Tests\Feature\InternalCalendar;
 
-use App\Models\Entity;
 use App\Models\Event;
 use App\Models\EventStatus;
 use App\Models\EventType;
-use App\Models\EventSubtype;
-use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
@@ -27,16 +24,27 @@ class InternalCalendarControllerTest extends TestCase
     use RefreshDatabase;
 
     private Organization $organization;
+
     private Organization $otherOrganization;
+
     private User $entityAdmin;
+
     private User $entityStaff;
+
     private User $organizerAdmin;
+
     private EventStatus $approvedInternalStatus;
+
     private EventStatus $pendingPublicApprovalStatus;
+
     private EventStatus $publishedStatus;
+
     private EventStatus $draftStatus;
+
     private EventStatus $rejectedStatus;
+
     private EventStatus $requiresChangesStatus;
+
     private EventType $eventType;
 
     protected function setUp(): void
@@ -92,7 +100,7 @@ class InternalCalendarControllerTest extends TestCase
         // Create event type
         $this->eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -111,15 +119,15 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Returns 200 with events data
         $response->assertOk();
         $response->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'title', 'start_date', 'end_date', 'status_id']
-            ]
+                '*' => ['id', 'title', 'start_date', 'end_date', 'status_id'],
+            ],
         ]);
         $this->assertGreaterThanOrEqual(1, count($response->json('data')));
     }
@@ -139,7 +147,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityStaff->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Returns 200 with events data
@@ -164,7 +172,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->organizerAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Returns 200 with events data
@@ -218,7 +226,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Filter by approved_internal status
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events?status=approved_internal');
 
         // Assert: Only approved_internal events returned
@@ -254,7 +262,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Filter by date range (January 2026)
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events?start_date=2026-01-01&end_date=2026-01-31');
 
         // Assert: Only January events returned
@@ -276,7 +284,7 @@ class InternalCalendarControllerTest extends TestCase
         $otherEventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Other Type',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Create events with different types
@@ -301,7 +309,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Filter by first event type
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson("/api/v1/internal-calendar/events?event_type_id={$this->eventType->id}");
 
         // Assert: Only events of first type returned
@@ -328,7 +336,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Approved internal event is included
@@ -356,7 +364,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events (without status filter)
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Pending public approval event is NOT included by default (public calendar view)
@@ -392,7 +400,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Draft event is NOT included
@@ -432,7 +440,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Rejected event is NOT included
@@ -472,7 +480,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Requires changes event is NOT included
@@ -503,7 +511,7 @@ class InternalCalendarControllerTest extends TestCase
         // Create event in other organization (should NOT appear for organizer)
         $otherEventType = EventType::factory()->create([
             'entity_id' => $this->otherOrganization->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         Event::factory()->create([
@@ -519,7 +527,7 @@ class InternalCalendarControllerTest extends TestCase
         $token = $this->organizerAdmin->createToken('test-token')->plainTextToken;
 
         // Act: Request internal calendar events as organizer
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
         // Assert: Only own organization events returned

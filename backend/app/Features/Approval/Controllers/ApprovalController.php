@@ -2,21 +2,21 @@
 
 namespace App\Features\Approval\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\Approval\Services\ApprovalService;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Approval\ApproveEventRequest;
 use App\Http\Requests\Approval\PublishEventRequest;
-use App\Http\Requests\Approval\RequestChangesRequest;
 use App\Http\Requests\Approval\RejectEventRequest;
-use App\Models\Event;
+use App\Http\Requests\Approval\RequestChangesRequest;
 use App\Http\Resources\EventResource;
-use Illuminate\Http\Request;
+use App\Models\Event;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ApprovalController extends Controller
 {
     public function __construct(
-        private ApprovalService $approvalService
+        private ApprovalService $approvalService,
     ) {}
 
     /**
@@ -29,12 +29,12 @@ class ApprovalController extends Controller
         $this->approvalService->approveInternal(
             $event,
             $request->user(),
-            $request->input('comments')
+            $request->input('comments'),
         );
 
         return response()->json([
             'message' => 'Evento aprobado internamente',
-            'data' => new EventResource($event->fresh()->load('status'))
+            'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }
 
@@ -48,12 +48,12 @@ class ApprovalController extends Controller
 
         $this->approvalService->requestPublicApproval(
             $event,
-            $request->user()
+            $request->user(),
         );
 
         return response()->json([
             'message' => 'Aprobación pública solicitada',
-            'data' => new EventResource($event->fresh()->load('status'))
+            'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }
 
@@ -67,12 +67,12 @@ class ApprovalController extends Controller
         $this->approvalService->publishEvent(
             $event,
             $request->user(),
-            $request->input('scheduled_at')
+            $request->input('scheduled_at'),
         );
 
         return response()->json([
             'message' => 'Evento publicado exitosamente',
-            'data' => new EventResource($event->fresh()->load('status'))
+            'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }
 
@@ -86,12 +86,12 @@ class ApprovalController extends Controller
         $this->approvalService->requestChanges(
             $event,
             $request->input('reason'),
-            $request->user()
+            $request->user(),
         );
 
         return response()->json([
             'message' => 'Cambios solicitados',
-            'data' => new EventResource($event->fresh()->load('status'))
+            'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }
 
@@ -105,12 +105,12 @@ class ApprovalController extends Controller
         $this->approvalService->reject(
             $event,
             $request->input('reason'),
-            $request->user()
+            $request->user(),
         );
 
         return response()->json([
             'message' => 'Evento rechazado',
-            'data' => new EventResource($event->fresh()->load('status'))
+            'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }
 

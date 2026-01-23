@@ -8,12 +8,12 @@ use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRotationType;
 use App\Models\EventStatus;
+use App\Models\EventSubtype;
 use App\Models\EventTheme;
+use App\Models\EventType;
+use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
-use App\Models\EventType;
-use App\Models\EventSubtype;
-use App\Models\Location;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -147,7 +147,7 @@ class EventSeeder extends Seeder
         // Associate location with the second tourism event
         if ($ubicacionesTurismo->count() > 2) {
             $eventoTurismo2->locations()->attach([
-                $ubicacionesTurismo->skip(2)->first()->id => ['location_specific_notes' => 'Punto de encuentro']
+                $ubicacionesTurismo->skip(2)->first()->id => ['location_specific_notes' => 'Punto de encuentro'],
             ]);
         }
 
@@ -176,7 +176,7 @@ class EventSeeder extends Seeder
         // Associate location with the third tourism event
         if ($ubicacionesTurismo->count() > 0) {
             $eventoTurismo3->locations()->attach([
-                $ubicacionesTurismo->first()->id => ['location_specific_notes' => 'Punto de salida del tour']
+                $ubicacionesTurismo->first()->id => ['location_specific_notes' => 'Punto de salida del tour'],
             ]);
         }
 
@@ -206,7 +206,7 @@ class EventSeeder extends Seeder
         // Associate location with the first culture event
         if ($ubicacionesCultura->count() > 0) {
             $eventoCultura1->locations()->attach([
-                $ubicacionesCultura->first()->id => ['location_specific_notes' => 'Salón principal']
+                $ubicacionesCultura->first()->id => ['location_specific_notes' => 'Salón principal'],
             ]);
         }
 
@@ -235,7 +235,7 @@ class EventSeeder extends Seeder
         // Associate location with the second culture event
         if ($ubicacionesCultura->count() > 1) {
             $eventoCultura2->locations()->attach([
-                $ubicacionesCultura->skip(1)->first()->id => ['location_specific_notes' => 'Salas 1, 2 y 3']
+                $ubicacionesCultura->skip(1)->first()->id => ['location_specific_notes' => 'Salas 1, 2 y 3'],
             ]);
         }
 
@@ -274,7 +274,7 @@ class EventSeeder extends Seeder
                     $ubicacionesTurismo->first()->id => [
                         'location_specific_notes' => 'Evento en salón principal del hotel',
                         'max_attendees_for_location' => 150,
-                    ]
+                    ],
                 ]);
             }
         }
@@ -309,7 +309,7 @@ class EventSeeder extends Seeder
                     $ubicacionesTurismo->first()->id => [
                         'location_specific_notes' => 'Uso completo del predio ferial',
                         'max_attendees_for_location' => 5000,
-                    ]
+                    ],
                 ]);
             }
         }
@@ -344,7 +344,7 @@ class EventSeeder extends Seeder
                     $ubicacionesCultura->first()->id => [
                         'location_specific_notes' => 'Galería principal',
                         'max_attendees_for_location' => 200,
-                    ]
+                    ],
                 ]);
             }
         }
@@ -387,7 +387,7 @@ class EventSeeder extends Seeder
                     $ubicacionesTurismo->first()->id => [
                         'location_specific_notes' => 'Sala de conferencias nivel 2',
                         'max_attendees_for_location' => 80,
-                    ]
+                    ],
                 ]);
             }
         }
@@ -422,7 +422,7 @@ class EventSeeder extends Seeder
                     $ubicacionesTurismo->first()->id => [
                         'location_specific_notes' => 'Pabellón de degustaciones',
                         'max_attendees_for_location' => 120,
-                    ]
+                    ],
                 ]);
             }
         }

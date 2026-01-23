@@ -24,9 +24,10 @@ class PublicCalendarService
      * Get calendar view data for a specific month.
      * Results are cached for performance.
      *
-     * @param int $year Year (2020-2030)
-     * @param int $month Month (1-12)
+     * @param  int  $year  Year (2020-2030)
+     * @param  int  $month  Month (1-12)
      * @return array Calendar data with events and month info
+     *
      * @throws \InvalidArgumentException When year/month out of range
      */
     public function getCalendarMonth(int $year, int $month): array
@@ -64,17 +65,16 @@ class PublicCalendarService
     /**
      * Get events within a date range.
      *
-     * @param string $startDate Start date (Y-m-d format)
-     * @param string $endDate End date (Y-m-d format)
-     * @return Collection
+     * @param  string  $startDate  Start date (Y-m-d format)
+     * @param  string  $endDate  End date (Y-m-d format)
      */
     public function getEventsByDateRange(string $startDate, string $endDate): Collection
     {
         return Event::published()
             ->with(['eventType', 'eventSubtype', 'locations'])
             ->whereBetween('start_date', [
-                $startDate . ' 00:00:00',
-                $endDate . ' 23:59:59',
+                $startDate.' 00:00:00',
+                $endDate.' 23:59:59',
             ])
             ->orderBy('start_date')
             ->get();
@@ -82,9 +82,6 @@ class PublicCalendarService
 
     /**
      * Clear calendar cache for a specific month.
-     *
-     * @param int $year
-     * @param int $month
      */
     public function clearMonthCache(int $year, int $month): void
     {
@@ -93,11 +90,6 @@ class PublicCalendarService
 
     /**
      * Build calendar days array from events.
-     *
-     * @param Collection $events
-     * @param Carbon $startDate
-     * @param int $month
-     * @return array
      */
     private function buildCalendarDays(Collection $events, Carbon $startDate, int $month): array
     {
@@ -125,8 +117,6 @@ class PublicCalendarService
     /**
      * Validate year and month are within acceptable range.
      *
-     * @param int $year
-     * @param int $month
      * @throws \InvalidArgumentException
      */
     private function validateYearMonth(int $year, int $month): void

@@ -32,7 +32,7 @@ class OrganizerStatsService
     /**
      * Get statistics for organizer's events.
      *
-     * @param int $userId User ID (created_by)
+     * @param  int  $userId  User ID (created_by)
      * @return array Statistics including counts by status
      */
     public function getStats(int $userId): array
@@ -72,14 +72,14 @@ class OrganizerStatsService
                 'user_id' => $userId,
                 'total_events' => $stats['total_events'],
                 'upcoming_events' => $stats['upcoming_events'],
-                'past_events' => $stats['past_events']
+                'past_events' => $stats['past_events'],
             ]);
 
             return $stats;
         } catch (\Exception $e) {
             Log::error('Failed to fetch organizer stats', [
                 'user_id' => $userId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -88,7 +88,7 @@ class OrganizerStatsService
     /**
      * Map database status codes to short API keys.
      *
-     * @param array<string, int> $allStatusIds Map of status_code => id from trait
+     * @param  array<string, int>  $allStatusIds  Map of status_code => id from trait
      * @return array<string, int> Map of short_key => id
      */
     private function mapStatusKeys(array $allStatusIds): array
@@ -99,6 +99,7 @@ class OrganizerStatsService
                 $mapped[$apiKey] = $allStatusIds[$dbCode];
             }
         }
+
         return $mapped;
     }
 }

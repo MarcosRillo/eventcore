@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 class EventSubtypeService
 {
     private const DEFAULT_PER_PAGE = 15;
+
     private const MAX_PER_PAGE = 100;
 
     /**
@@ -23,7 +24,7 @@ class EventSubtypeService
     {
         $query = EventSubtype::where('event_type_id', $eventType->id);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -67,7 +68,7 @@ class EventSubtypeService
                     'event_subtype_id' => $subtype->id,
                     'event_subtype_name' => $subtype->name,
                     'event_type_id' => $eventType->id,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
                 ]);
 
                 return $subtype;
@@ -77,7 +78,7 @@ class EventSubtypeService
                 'error' => $e->getMessage(),
                 'event_type_id' => $eventType->id,
                 'user_id' => $user->id,
-                'data' => $data
+                'data' => $data,
             ]);
             throw $e;
         }
@@ -97,7 +98,7 @@ class EventSubtypeService
                 Log::info('EventSubtype updated', [
                     'event_subtype_id' => $subtype->id,
                     'event_subtype_name' => $subtype->name,
-                    'changes' => array_diff_assoc($data, $originalData)
+                    'changes' => array_diff_assoc($data, $originalData),
                 ]);
 
                 return $subtype->fresh();
@@ -106,7 +107,7 @@ class EventSubtypeService
             Log::error('Failed to update event subtype', [
                 'error' => $e->getMessage(),
                 'event_subtype_id' => $subtype->id,
-                'data' => $data
+                'data' => $data,
             ]);
             throw $e;
         }
@@ -131,7 +132,7 @@ class EventSubtypeService
 
                 Log::info('EventSubtype deleted', [
                     'event_subtype_id' => $subtypeId,
-                    'event_subtype_name' => $subtypeName
+                    'event_subtype_name' => $subtypeName,
                 ]);
 
                 return "Event subtype '{$subtypeName}' deleted successfully";
@@ -140,7 +141,7 @@ class EventSubtypeService
             Log::error('Failed to delete event subtype', [
                 'error' => $e->getMessage(),
                 'event_subtype_id' => $subtype->id,
-                'event_subtype_name' => $subtype->name
+                'event_subtype_name' => $subtype->name,
             ]);
             throw $e;
         }
@@ -153,7 +154,7 @@ class EventSubtypeService
     {
         return DB::transaction(function () use ($subtype) {
             $subtype->update([
-                'is_active' => !$subtype->is_active
+                'is_active' => ! $subtype->is_active,
             ]);
 
             return $subtype->fresh();
@@ -166,7 +167,7 @@ class EventSubtypeService
     private function applySearchFilter(Builder $query, string $search): void
     {
         $searchLower = strtolower(trim($search));
-        if (!empty($searchLower)) {
+        if (! empty($searchLower)) {
             $query->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"]);
         }
     }
@@ -193,6 +194,7 @@ class EventSubtypeService
     private function getPerPageValue(array $filters): int
     {
         $perPage = (int) ($filters['per_page'] ?? self::DEFAULT_PER_PAGE);
+
         return max(1, min($perPage, self::MAX_PER_PAGE));
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Features\Auth\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\Auth\Requests\LoginRequest;
 use App\Features\Auth\Requests\RefreshTokenRequest;
-use App\Http\Resources\UserResource;
 use App\Features\Auth\Services\AuthService;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     public function __construct(
-        private AuthService $authService
+        private AuthService $authService,
     ) {}
 
     /**
@@ -47,8 +47,8 @@ class AuthController extends Controller
                 ],
                 'message' => 'Login successful',
             ])
-            ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
-            ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
+                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
+                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
         } catch (AuthenticationException $e) {
             // Return specific message for suspended users
             $message = str_contains($e->getMessage(), 'suspendida')
@@ -78,13 +78,13 @@ class AuthController extends Controller
             // Accept token from cookie (httpOnly) or body (backward compatibility)
             $refreshToken = $request->cookie('refresh_token') ?? $request->input('refresh_token');
 
-            if (!$refreshToken) {
+            if (! $refreshToken) {
                 return response()->json([
                     'success' => false,
                     'message' => 'The refresh token field is required.',
                     'errors' => [
-                        'refresh_token' => ['The refresh token field is required.']
-                    ]
+                        'refresh_token' => ['The refresh token field is required.'],
+                    ],
                 ], 422);
             }
 
@@ -105,8 +105,8 @@ class AuthController extends Controller
                 ],
                 'message' => 'Token refreshed successfully',
             ])
-            ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
-            ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
+                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
+                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
         } catch (\Exception) {
             return response()->json([
                 'success' => false,
@@ -128,8 +128,8 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Logout successful',
             ])
-            ->cookie('access_token', '', -1, '/', null, config('session.secure'), true, false, 'strict')
-            ->cookie('refresh_token', '', -1, '/', null, config('session.secure'), true, false, 'strict');
+                ->cookie('access_token', '', -1, '/', null, config('session.secure'), true, false, 'strict')
+                ->cookie('refresh_token', '', -1, '/', null, config('session.secure'), true, false, 'strict');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

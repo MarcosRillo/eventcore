@@ -62,7 +62,7 @@ class AuthService
         // Find the refresh token by checking hash (outside transaction for security checks)
         $refreshToken = $this->findValidRefreshToken($refreshTokenPlain);
 
-        if (!$refreshToken) {
+        if (! $refreshToken) {
             throw new AuthenticationException('Invalid or expired refresh token');
         }
 
@@ -135,8 +135,8 @@ class AuthService
     /**
      * Create a new refresh token for a user.
      *
-     * @param User $user The user to create token for
-     * @param string|null $familyId Optional family ID (null creates new family)
+     * @param  User  $user  The user to create token for
+     * @param  string|null  $familyId  Optional family ID (null creates new family)
      * @return string The plaintext refresh token
      */
     private function createRefreshToken(User $user, ?string $familyId = null): string
@@ -172,7 +172,7 @@ class AuthService
             ->first();
 
         // Fallback for legacy tokens without token_hash (backward compatibility)
-        if (!$token) {
+        if (! $token) {
             $token = RefreshToken::where('token', $tokenHash)
                 ->where('expires_at', '>', now())
                 ->first();

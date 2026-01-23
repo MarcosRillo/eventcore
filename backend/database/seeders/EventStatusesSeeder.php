@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +27,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'pending_internal_approval',
@@ -37,7 +36,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => 2,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'approved_internal',
@@ -46,7 +45,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'pending_public_approval',
@@ -55,7 +54,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => 4,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'published',
@@ -64,7 +63,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => true,
                 'workflow_order' => 5,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'requires_changes',
@@ -73,7 +72,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => null,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'rejected',
@@ -82,7 +81,7 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => null,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'cancelled',
@@ -91,11 +90,10 @@ class EventStatusesSeeder extends Seeder
                 'is_public' => false,
                 'workflow_order' => null,
                 'created_at' => now(),
-                'updated_at' => now()
-            ]
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('event_statuses')->insert($statuses);
     }
 }
-

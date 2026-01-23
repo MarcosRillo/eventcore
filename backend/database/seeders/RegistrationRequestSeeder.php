@@ -32,8 +32,8 @@ class RegistrationRequestSeeder extends Seeder
         $entityAdminRole = UserRole::where('role_code', 'entity_admin')->first();
 
         // Get or create an entity admin for reviewing requests
-        $entityAdmin = User::whereHas('role', fn($q) => $q->where('role_code', 'entity_admin'))->first();
-        if (!$entityAdmin && $entityAdminRole) {
+        $entityAdmin = User::whereHas('role', fn ($q) => $q->where('role_code', 'entity_admin'))->first();
+        if (! $entityAdmin && $entityAdminRole) {
             $entityAdmin = User::create([
                 'name' => 'Admin Revisor',
                 'email' => 'admin.revisor@enteturismo.gov.ar',

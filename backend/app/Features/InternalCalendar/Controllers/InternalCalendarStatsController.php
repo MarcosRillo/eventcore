@@ -11,10 +11,10 @@ class InternalCalendarStatsController extends Controller
     /**
      * Inject Internal Calendar Stats Service
      *
-     * @param InternalCalendarStatsService $statsService Service for calculating stats
+     * @param  InternalCalendarStatsService  $statsService  Service for calculating stats
      */
     public function __construct(
-        private InternalCalendarStatsService $statsService
+        private InternalCalendarStatsService $statsService,
     ) {}
 
     /**
@@ -26,8 +26,6 @@ class InternalCalendarStatsController extends Controller
      * - Events count for current month
      *
      * Delegates all business logic to InternalCalendarStatsService.
-     *
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {

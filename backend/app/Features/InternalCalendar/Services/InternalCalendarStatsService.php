@@ -12,8 +12,6 @@ use App\Models\EventType;
  * Provides aggregated metrics for events with approved_internal or published status.
  *
  * Created: December 10, 2025 (Refactored from InternalCalendarStatsController)
- *
- * @package App\Features\InternalCalendar\Services
  */
 class InternalCalendarStatsService
 {
@@ -67,8 +65,8 @@ class InternalCalendarStatsService
         return Event::whereHas('status', function ($query) {
             $query->whereIn('status_code', self::STATS_STATUS_CODES);
         })
-        ->whereBetween('start_date', [now()->startOfMonth(), now()->endOfMonth()])
-        ->count();
+            ->whereBetween('start_date', [now()->startOfMonth(), now()->endOfMonth()])
+            ->count();
     }
 
     /**

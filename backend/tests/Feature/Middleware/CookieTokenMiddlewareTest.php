@@ -27,7 +27,7 @@ class CookieTokenMiddlewareTest extends TestCase
     public function test_injects_token_from_cookie_when_no_bearer_token(): void
     {
         // Arrange
-        $middleware = new CookieTokenMiddleware();
+        $middleware = new CookieTokenMiddleware;
         $request = Request::create('/api/v1/auth/me', 'GET');
         $request->cookies->set('access_token', 'test-token-123');
 
@@ -38,6 +38,7 @@ class CookieTokenMiddlewareTest extends TestCase
         $middleware->handle($request, function ($req) use (&$called, &$capturedAuth) {
             $called = true;
             $capturedAuth = $req->header('Authorization');
+
             return new Response('OK', 200);
         });
 
@@ -53,7 +54,7 @@ class CookieTokenMiddlewareTest extends TestCase
     public function test_does_not_override_existing_bearer_token(): void
     {
         // Arrange
-        $middleware = new CookieTokenMiddleware();
+        $middleware = new CookieTokenMiddleware;
         $request = Request::create('/api/v1/auth/me', 'GET');
         $request->headers->set('Authorization', 'Bearer existing-token');
         $request->cookies->set('access_token', 'cookie-token');
@@ -63,6 +64,7 @@ class CookieTokenMiddlewareTest extends TestCase
         // Act
         $middleware->handle($request, function ($req) use (&$capturedAuth) {
             $capturedAuth = $req->header('Authorization');
+
             return new Response('OK', 200);
         });
 
@@ -77,7 +79,7 @@ class CookieTokenMiddlewareTest extends TestCase
     public function test_does_nothing_when_no_cookie_and_no_bearer(): void
     {
         // Arrange
-        $middleware = new CookieTokenMiddleware();
+        $middleware = new CookieTokenMiddleware;
         $request = Request::create('/api/v1/auth/me', 'GET');
 
         $capturedAuth = null;
@@ -85,6 +87,7 @@ class CookieTokenMiddlewareTest extends TestCase
         // Act
         $middleware->handle($request, function ($req) use (&$capturedAuth) {
             $capturedAuth = $req->header('Authorization');
+
             return new Response('OK', 200);
         });
 
@@ -98,7 +101,7 @@ class CookieTokenMiddlewareTest extends TestCase
     public function test_handles_empty_cookie_value(): void
     {
         // Arrange
-        $middleware = new CookieTokenMiddleware();
+        $middleware = new CookieTokenMiddleware;
         $request = Request::create('/api/v1/auth/me', 'GET');
         $request->cookies->set('access_token', '');
 
@@ -107,6 +110,7 @@ class CookieTokenMiddlewareTest extends TestCase
         // Act
         $middleware->handle($request, function ($req) use (&$capturedAuth) {
             $capturedAuth = $req->header('Authorization');
+
             return new Response('OK', 200);
         });
 
@@ -122,7 +126,7 @@ class CookieTokenMiddlewareTest extends TestCase
     public function test_preserves_cookie_value_after_injection(): void
     {
         // Arrange
-        $middleware = new CookieTokenMiddleware();
+        $middleware = new CookieTokenMiddleware;
         $request = Request::create('/api/v1/auth/me', 'GET');
         $request->cookies->set('access_token', 'persistent-token');
 
@@ -141,7 +145,7 @@ class CookieTokenMiddlewareTest extends TestCase
     public function test_works_with_different_api_endpoints(): void
     {
         // Arrange
-        $middleware = new CookieTokenMiddleware();
+        $middleware = new CookieTokenMiddleware;
         $endpoints = [
             '/api/v1/events',
             '/api/v1/categories',
@@ -157,6 +161,7 @@ class CookieTokenMiddlewareTest extends TestCase
             // Act
             $middleware->handle($request, function ($req) use (&$capturedAuth) {
                 $capturedAuth = $req->header('Authorization');
+
                 return new Response('OK', 200);
             });
 

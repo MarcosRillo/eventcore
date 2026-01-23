@@ -19,27 +19,25 @@ class UserService
     public function getUsers(User $currentUser, array $filters = []): LengthAwarePaginator
     {
         $query = User::with('role')
-            ->whereHas('role', fn($q) => $q->where('role_code', 'entity_staff'));
+            ->whereHas('role', fn ($q) => $q->where('role_code', 'entity_staff'));
 
         // entity_admin only sees their entity's users
         if ($currentUser->isEntityAdmin()) {
             $organizationIds = $currentUser->organizations->pluck('id');
-            $query->whereHas('organizations', fn($q) =>
-                $q->whereIn('organizations.id', $organizationIds)
+            $query->whereHas('organizations', fn ($q) => $q->whereIn('organizations.id', $organizationIds),
             );
         }
 
         // Apply search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(fn($q) =>
-                $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%")
+            $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
+                ->orWhere('email', 'ilike', "%{$search}%"),
             );
         }
 
         // Apply status filter
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
@@ -149,7 +147,7 @@ class UserService
         }
 
         // entity_admin can only manage entity_staff
-        if ($currentUser->isEntityAdmin() && !$targetUser->isEntityStaff()) {
+        if ($currentUser->isEntityAdmin() && ! $targetUser->isEntityStaff()) {
             throw new \InvalidArgumentException('Solo puedes gestionar usuarios entity_staff.');
         }
 

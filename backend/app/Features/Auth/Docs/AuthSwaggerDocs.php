@@ -9,19 +9,25 @@ namespace App\Features\Auth\Docs;
  *     description="Authenticate user credentials and return access token",
  *     operationId="loginUser",
  *     tags={"Authentication"},
+ *
  *     @OA\RequestBody(
  *         required=true,
  *         description="User credentials",
+ *
  *         @OA\JsonContent(
  *             required={"email", "password"},
+ *
  *             @OA\Property(property="email", type="string", format="email", example="admin@example.com"),
  *             @OA\Property(property="password", type="string", format="password", example="password123")
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=200,
  *         description="Login successful",
+ *
  *         @OA\JsonContent(
+ *
  *             @OA\Property(property="success", type="boolean", example=true),
  *             @OA\Property(property="message", type="string", example="Login successful"),
  *             @OA\Property(property="data", type="object",
@@ -30,6 +36,7 @@ namespace App\Features\Auth\Docs;
  *             )
  *         )
  *     ),
+ *
  *     @OA\Response(response=401, ref="#/components/responses/Unauthorized"),
  *     @OA\Response(response=422, ref="#/components/responses/ValidationError")
  * )
@@ -41,14 +48,18 @@ namespace App\Features\Auth\Docs;
  *     operationId="logoutUser",
  *     tags={"Authentication"},
  *     security={{"bearerAuth":{}}},
+ *
  *     @OA\Response(
  *         response=200,
  *         description="Logout successful",
+ *
  *         @OA\JsonContent(
+ *
  *             @OA\Property(property="success", type="boolean", example=true),
  *             @OA\Property(property="message", type="string", example="Logout successful")
  *         )
  *     ),
+ *
  *     @OA\Response(response=401, ref="#/components/responses/Unauthenticated"),
  *     @OA\Response(response=500, ref="#/components/responses/ServerError")
  * )
@@ -60,15 +71,19 @@ namespace App\Features\Auth\Docs;
  *     operationId="getUserProfile",
  *     tags={"Authentication"},
  *     security={{"bearerAuth":{}}},
+ *
  *     @OA\Response(
  *         response=200,
  *         description="User profile retrieved successfully",
+ *
  *         @OA\JsonContent(
+ *
  *             @OA\Property(property="success", type="boolean", example=true),
  *             @OA\Property(property="message", type="string", example="User profile retrieved successfully"),
  *             @OA\Property(property="data", ref="#/components/schemas/UserResource")
  *         )
  *     ),
+ *
  *     @OA\Response(response=401, ref="#/components/responses/Unauthenticated"),
  *     @OA\Response(response=500, ref="#/components/responses/ServerError")
  * )

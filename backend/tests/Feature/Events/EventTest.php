@@ -3,13 +3,13 @@
 namespace Tests\Feature\Events;
 
 use App\Models\Event;
-use App\Models\User;
-
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+
 class EventTest extends EventTestCase
 {
     use RefreshDatabase;
@@ -36,6 +36,7 @@ class EventTest extends EventTestCase
         $user = parent::authenticateUser($role);
         $this->organization = \App\Models\Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
+
         return $user;
     }
 
@@ -63,12 +64,12 @@ class EventTest extends EventTestCase
         $event1 = Event::factory()->create([
             'entity_id' => $this->organization->id,
             'title' => 'Event A',
-            'created_at' => now()->subDays(2)
+            'created_at' => now()->subDays(2),
         ]);
         $event2 = Event::factory()->create([
             'entity_id' => $this->organization->id,
             'title' => 'Event B',
-            'created_at' => now()->subDay()
+            'created_at' => now()->subDay(),
         ]);
 
         // Act
@@ -111,15 +112,15 @@ class EventTest extends EventTestCase
             'status_id' => $this->getStatusId('draft'),
             'entity_id' => $organization->id,
             'is_featured' => false,
-            'max_attendees' => 100
+            'max_attendees' => 100,
         ];
 
         $response = $this->postJson('/api/v1/events', $eventData);
 
         $response->assertStatus(201)
-                 ->assertJsonFragment([
-                     'title' => 'Test Event Creation'
-                 ]);
+            ->assertJsonFragment([
+                'title' => 'Test Event Creation',
+            ]);
 
         // Verify event was created (description is sanitized with <p> tags by HTMLPurifier)
         $this->assertDatabaseHas('events', [
@@ -138,12 +139,12 @@ class EventTest extends EventTestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'title' => 'Original Event Title'
+            'title' => 'Original Event Title',
         ]);
 
         $updateData = [
             'title' => 'Updated Event Title',
-            'description' => 'Updated event description'
+            'description' => 'Updated event description',
         ];
 
         $response = $this->putJson("/api/v1/events/{$event->id}", $updateData);
@@ -152,7 +153,7 @@ class EventTest extends EventTestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'title' => 'Updated Event Title'
+            'title' => 'Updated Event Title',
         ]);
     }
 
@@ -163,7 +164,7 @@ class EventTest extends EventTestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('draft')
+            'status_id' => $this->getStatusId('draft'),
         ]);
 
         $response = $this->deleteJson("/api/v1/events/{$event->id}");
@@ -172,7 +173,7 @@ class EventTest extends EventTestCase
 
         // With SoftDeletes, the record exists but has deleted_at set
         $this->assertSoftDeleted('events', [
-            'id' => $event->id
+            'id' => $event->id,
         ]);
     }
 
@@ -184,15 +185,15 @@ class EventTest extends EventTestCase
         // Arrange: Create events with specific statuses
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('published')
+            'status_id' => $this->getStatusId('published'),
         ]);
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
         Event::factory()->count(1)->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('draft')
+            'status_id' => $this->getStatusId('draft'),
         ]);
 
         // Act
@@ -204,7 +205,7 @@ class EventTest extends EventTestCase
             'total',
             'published',
             'pending',
-            'draft'
+            'draft',
         ]]);                                                   // 2
 
         // Verify exact counts
@@ -226,7 +227,7 @@ class EventTest extends EventTestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'title' => 'Original Event for Duplication'
+            'title' => 'Original Event for Duplication',
         ]);
 
         $response = $this->postJson("/api/v1/events/{$event->id}/duplicate");
@@ -235,7 +236,7 @@ class EventTest extends EventTestCase
 
         // Verify duplicate was created with (Copia) suffix
         $this->assertDatabaseHas('events', [
-            'title' => 'Original Event for Duplication (Copia)'
+            'title' => 'Original Event for Duplication (Copia)',
         ]);
     }
 
@@ -246,7 +247,7 @@ class EventTest extends EventTestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'is_featured' => false
+            'is_featured' => false,
         ]);
 
         // Toggle to true
@@ -256,7 +257,7 @@ class EventTest extends EventTestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'is_featured' => true
+            'is_featured' => true,
         ]);
 
         // Toggle back to false
@@ -266,7 +267,7 @@ class EventTest extends EventTestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'is_featured' => false
+            'is_featured' => false,
         ]);
     }
 
@@ -277,24 +278,24 @@ class EventTest extends EventTestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'title' => 'Detailed Event Test'
+            'title' => 'Detailed Event Test',
         ]);
 
         $response = $this->getJson("/api/v1/events/{$event->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonFragment([
-                     'title' => 'Detailed Event Test'
-                 ])
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id',
-                         'title',
-                         'description',
-                         'start_date',
-                         'end_date'
-                     ]
-                 ]);
+            ->assertJsonFragment([
+                'title' => 'Detailed Event Test',
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'title',
+                    'description',
+                    'start_date',
+                    'end_date',
+                ],
+            ]);
     }
 
     #[Test]

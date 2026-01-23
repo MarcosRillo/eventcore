@@ -4,7 +4,6 @@ namespace Tests\Feature\Dashboard;
 
 use App\Models\Event;
 use App\Models\User;
-use App\Models\Location;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Feature\Events\EventTestCase;
@@ -35,6 +34,7 @@ class OrganizerStatsTest extends EventTestCase
         $user = parent::authenticateUser($role);
         $this->organization = \App\Models\Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
+
         return $user;
     }
 
@@ -48,42 +48,42 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         // 3 approved_internal
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('approved_internal')
+            'status_id' => $this->getStatusId('approved_internal'),
         ]);
 
         // 1 pending_public
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_public_approval')
+            'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         // 4 published
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('published')
+            'status_id' => $this->getStatusId('published'),
         ]);
 
         // 1 requires_changes
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('requires_changes')
+            'status_id' => $this->getStatusId('requires_changes'),
         ]);
 
         // 1 rejected
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('rejected')
+            'status_id' => $this->getStatusId('rejected'),
         ]);
 
         // Act
@@ -129,14 +129,14 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizerA->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         // Organizer B: 3 events (should not be counted)
         Event::factory()->count(3)->create([
             'entity_id' => $organizationB->id,
             'created_by' => $organizerB->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         // Act: Get stats for Organizer A
@@ -148,10 +148,10 @@ class OrganizerStatsTest extends EventTestCase
         $this->assertEquals(5, Event::where('created_by', $organizerA->id)->count()); // Assertion 3
         $this->assertEquals(3, Event::withoutGlobalScopes()->where('created_by', $organizerB->id)->count()); // Assertion 4
         $this->assertDatabaseHas('events', [                          // Assertion 5
-            'created_by' => $organizerA->id
+            'created_by' => $organizerA->id,
         ]);
         $this->assertDatabaseHas('events', [                          // Assertion 6
-            'created_by' => $organizerB->id
+            'created_by' => $organizerB->id,
         ]);
     }
 
@@ -174,7 +174,7 @@ class OrganizerStatsTest extends EventTestCase
         $response->assertJsonPath('data.requires_changes', 0);           // Assertion 7
         $response->assertJsonPath('data.rejected', 0);                   // Assertion 8
         $this->assertDatabaseMissing('events', [                    // Assertion 9
-            'created_by' => $organizer->id
+            'created_by' => $organizer->id,
         ]);
     }
 
@@ -187,19 +187,19 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_public_approval')
+            'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('published')
+            'status_id' => $this->getStatusId('published'),
         ]);
 
         // Act
@@ -224,19 +224,19 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('approved_internal')
+            'status_id' => $this->getStatusId('approved_internal'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('published')
+            'status_id' => $this->getStatusId('published'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         // Act
@@ -261,19 +261,19 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_public_approval')
+            'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('published')
+            'status_id' => $this->getStatusId('published'),
         ]);
 
         // Act
@@ -298,19 +298,19 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(6)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('published')
+            'status_id' => $this->getStatusId('published'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('approved_internal')
+            'status_id' => $this->getStatusId('approved_internal'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_public_approval')
+            'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         // Act
@@ -337,19 +337,19 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('requires_changes')
+            'status_id' => $this->getStatusId('requires_changes'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('rejected')
+            'status_id' => $this->getStatusId('rejected'),
         ]);
 
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         // Act
@@ -374,19 +374,19 @@ class OrganizerStatsTest extends EventTestCase
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('rejected')
+            'status_id' => $this->getStatusId('rejected'),
         ]);
 
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
             'created_by' => $organizer->id,
-            'status_id' => $this->getStatusId('requires_changes')
+            'status_id' => $this->getStatusId('requires_changes'),
         ]);
 
         // Act

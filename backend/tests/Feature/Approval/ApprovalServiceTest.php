@@ -19,10 +19,15 @@ class ApprovalServiceTest extends TestCase
     use RefreshDatabase;
 
     private ApprovalService $service;
+
     private ApprovalStateMachine $stateMachine;
+
     private Event $event;
+
     private User $approver;
+
     private EventStatus $pendingInternalStatus;
+
     private EventStatus $approvedInternalStatus;
 
     protected function setUp(): void

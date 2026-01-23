@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Auth;
  * Shows approved_internal, pending_public_approval, and published events.
  *
  * Created: December 4, 2025 (Internal Calendar feature)
- *
- * @package App\Features\InternalCalendar\Services
  */
 class InternalCalendarService
 {
@@ -25,7 +23,7 @@ class InternalCalendarService
     public const INTERNAL_CALENDAR_STATUSES = [
         'approved_internal',
         'pending_public_approval',
-        'published'
+        'published',
     ];
 
     /**
@@ -35,7 +33,7 @@ class InternalCalendarService
      * - entity_admin/entity_staff: See all events (tenant scope disabled)
      * - organizer_admin: See only their organization's events (tenant scope active)
      *
-     * @param array $filters Available filters: status, start_date, end_date, event_type_id
+     * @param  array  $filters  Available filters: status, start_date, end_date, event_type_id
      * @return Collection<int, Event> Collection of events with eager-loaded relationships
      */
     public function getInternalCalendarEvents(array $filters = []): Collection
@@ -66,7 +64,7 @@ class InternalCalendarService
      * - entity_admin/entity_staff/platform_admin: Can view any event
      * - organizer_admin: Can only view their organization's events
      *
-     * @param int $id Event ID
+     * @param  int  $id  Event ID
      * @return Event|null Event if found and accessible, null otherwise
      */
     public function getEventById(int $id): ?Event
@@ -108,14 +106,13 @@ class InternalCalendarService
      * - start_date + end_date: Filter by date range (both required)
      * - event_type_id: Filter by event type
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query The query builder to modify
-     * @param array $filters Associative array of filter key-value pairs
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder  $query  The query builder to modify
+     * @param  array  $filters  Associative array of filter key-value pairs
      */
     private function applyFilters($query, array $filters): void
     {
         // Filter by specific status code
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             // Explicit status filter (backwards compatible with admin views)
             $query->whereHas('status', function ($q) use ($filters) {
                 $q->where('status_code', $filters['status']);
@@ -128,15 +125,15 @@ class InternalCalendarService
         }
 
         // Filter by date range
-        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+        if (! empty($filters['start_date']) && ! empty($filters['end_date'])) {
             $query->whereBetween('start_date', [
                 $filters['start_date'],
-                $filters['end_date']
+                $filters['end_date'],
             ]);
         }
 
         // Filter by event type
-        if (!empty($filters['event_type_id'])) {
+        if (! empty($filters['event_type_id'])) {
             $query->where('event_type_id', $filters['event_type_id']);
         }
     }

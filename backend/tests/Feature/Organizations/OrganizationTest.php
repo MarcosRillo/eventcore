@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Organizations;
 
-use Tests\TestCase;
 use App\Models\Organization;
 use App\Models\OrganizationStatus;
 use App\Models\User;
 use App\Models\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class OrganizationTest extends TestCase
 {

@@ -11,22 +11,20 @@ use Illuminate\Http\JsonResponse;
 class InvalidStateTransitionException extends Exception
 {
     /**
-     * @param string $currentStatus
-     * @param string $targetStatus
-     * @param array<string> $allowedTransitions
+     * @param  array<string>  $allowedTransitions
      */
     public function __construct(
         public readonly string $currentStatus,
         public readonly string $targetStatus,
-        public readonly array $allowedTransitions
+        public readonly array $allowedTransitions,
     ) {
         $allowed = empty($allowedTransitions)
             ? 'none (terminal state)'
             : implode(', ', $allowedTransitions);
 
         parent::__construct(
-            "Invalid state transition from '{$currentStatus}' to '{$targetStatus}'. " .
-            "Allowed transitions: {$allowed}"
+            "Invalid state transition from '{$currentStatus}' to '{$targetStatus}'. ".
+            "Allowed transitions: {$allowed}",
         );
     }
 

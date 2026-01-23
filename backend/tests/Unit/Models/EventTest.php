@@ -3,12 +3,12 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Event;
-use App\Models\Location;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\EventSubtype;
-use App\Models\User;
+use App\Models\EventType;
+use App\Models\Location;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -57,7 +57,7 @@ class EventTest extends TestCase
         $this->assertEquals($status->name, $eventStatus->name);          // 4
         $this->assertDatabaseHas('event_statuses', [
             'id' => $status->id,
-            'status_code' => 'published'
+            'status_code' => 'published',
         ]); // 5
     }
 
@@ -68,11 +68,11 @@ class EventTest extends TestCase
         $org = Organization::factory()->create();
         $type = EventType::factory()->create([
             'entity_id' => $org->id,
-            'name' => 'Concert'
+            'name' => 'Concert',
         ]);
         $event = Event::factory()->create([
             'entity_id' => $org->id,
-            'event_type_id' => $type->id
+            'event_type_id' => $type->id,
         ]);
 
         // Act
@@ -94,11 +94,11 @@ class EventTest extends TestCase
         $subtype = EventSubtype::factory()->create([
             'event_type_id' => $type->id,
             'entity_id' => $org->id,
-            'name' => 'Rock Concert'
+            'name' => 'Rock Concert',
         ]);
         $event = Event::factory()->create([
             'entity_id' => $org->id,
-            'event_subtype_id' => $subtype->id
+            'event_subtype_id' => $subtype->id,
         ]);
 
         // Act
@@ -136,7 +136,7 @@ class EventTest extends TestCase
         $org = Organization::factory()->create(['name' => 'Test Org']);
         $event = Event::factory()->create([
             'entity_id' => $org->id,
-            'organization_id' => $org->id
+            'organization_id' => $org->id,
         ]);
 
         // Act
@@ -157,11 +157,11 @@ class EventTest extends TestCase
         $event = Event::factory()->create(['entity_id' => $org->id]);
         $location1 = Location::factory()->create([
             'entity_id' => $org->id,
-            'name' => 'Venue A'
+            'name' => 'Venue A',
         ]);
         $location2 = Location::factory()->create([
             'entity_id' => $org->id,
-            'name' => 'Venue B'
+            'name' => 'Venue B',
         ]);
 
         $event->locations()->attach([$location1->id, $location2->id]);
@@ -176,11 +176,11 @@ class EventTest extends TestCase
         $this->assertTrue($locations->contains($location2));             // 4
         $this->assertDatabaseHas('event_location', [
             'event_id' => $event->id,
-            'location_id' => $location1->id
+            'location_id' => $location1->id,
         ]); // 5
         $this->assertDatabaseHas('event_location', [
             'event_id' => $event->id,
-            'location_id' => $location2->id
+            'location_id' => $location2->id,
         ]); // 6
     }
 
@@ -211,7 +211,7 @@ class EventTest extends TestCase
         // Verify attachment
         $this->assertDatabaseHas('event_location', [
             'event_id' => $event->id,
-            'location_id' => $location->id
+            'location_id' => $location->id,
         ]);
 
         // Act
@@ -222,7 +222,7 @@ class EventTest extends TestCase
         // Soft delete preserves pivot records (allows restoration with relationships intact)
         $this->assertDatabaseHas('event_location', [
             'event_id' => $event->id,
-            'location_id' => $location->id
+            'location_id' => $location->id,
         ]); // 2: Pivot record preserved
         $this->assertDatabaseHas('locations', ['id' => $location->id]);  // 3: Location still exists
         $this->assertEquals(1, Event::withTrashed()->find($event->id)->locations()->count()); // 4: Relationship preserved

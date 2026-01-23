@@ -8,14 +8,13 @@ use App\Models\Event;
 use App\Models\EventApproval;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ApprovalService
 {
     use StatusResolvable;
 
     public function __construct(
-        private ApprovalStateMachine $stateMachine
+        private ApprovalStateMachine $stateMachine,
     ) {}
 
     /**
