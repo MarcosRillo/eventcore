@@ -17,6 +17,10 @@ Thumbs.db
 .temp
 .claude/
 
+# Root level files that should never be committed
+.env
+node_modules/
+
 # IDEs
 .vscode/
 .idea/
