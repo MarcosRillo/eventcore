@@ -72,9 +72,12 @@ interface RouteConfig {
  * @returns Normalized pathname without trailing slashes
  */
 function normalizePath(pathname: string): string {
-  return pathname
+  const normalized = pathname
     .replace(/\/+/g, '/') // Replace multiple slashes with single
     .replace(/\/+$/, '');  // Remove trailing slashes
+
+  // Handle root path edge case: '/' becomes '' after removing trailing slash
+  return normalized || '/';
 }
 
 /**
