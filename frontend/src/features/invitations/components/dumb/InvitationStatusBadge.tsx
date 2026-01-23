@@ -1,5 +1,3 @@
-'use client'
-
 import { getInvitationStatus, Invitation, InvitationStatus } from '@/features/invitations/types/invitation.types'
 
 interface InvitationStatusBadgeProps {

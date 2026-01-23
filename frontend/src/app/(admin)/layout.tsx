@@ -1,13 +1,12 @@
 /**
  * Admin Layout
  * Main layout wrapper for all admin pages with sidebar and header
- * Protected route - redirects to login if user is not authenticated
+ * Route protection handled by middleware.ts
  */
 
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect,useState } from 'react';
+import { useState } from 'react';
 
 import { Header, Sidebar } from '@/components/layout';
 import { LoadingSpinner } from '@/components/ui';
@@ -19,15 +18,7 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
-  const router = useRouter();
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
+  const { user, isLoading, logout } = useAuth();
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -37,18 +28,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     logout();
   };
 
-  // Show loading while checking authentication
-  if (isLoading) {
+  // Show loading while fetching user data
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Verificando autenticación..." />
+        <LoadingSpinner size="lg" text="Cargando..." />
       </div>
     );
-  }
-
-  // Don't render anything if not authenticated (will redirect)
-  if (!isAuthenticated || !user) {
-    return null;
   }
 
   return (

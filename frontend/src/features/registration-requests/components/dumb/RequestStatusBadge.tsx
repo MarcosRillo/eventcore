@@ -1,5 +1,3 @@
-'use client'
-
 /**
  * RequestStatusBadge - Dumb Component
  * Displays the status of a registration request with appropriate styling
