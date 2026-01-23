@@ -1,42 +1,77 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextPlugin from "@next/eslint-plugin-next";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import reactHooks from "eslint-plugin-react-hooks";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import jsdoc from "eslint-plugin-jsdoc";
 import checkFile from "eslint-plugin-check-file";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
 
 const eslintConfig = [
   // Global ignores
   {
     ignores: [
       ".next/**",
+      "out/**",
+      "build/**",
       "node_modules/**",
       "coverage/**",
       "dist/**",
-      "build/**",
-      "*.config.js",
-      "*.config.mjs",
       "next-env.d.ts",
     ],
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+
+  // Next.js plugin - global registration (no files pattern = applies to all)
+  // This is required for Next.js build to detect the plugin via calculateConfigForFile
+  {
+    plugins: {
+      "@next/next": nextPlugin,
+    },
+  },
+
+  // Next.js rules for JS/JSX/TS/TSX files only
+  {
+    files: ["**/*.{js,jsx,ts,tsx,mjs,cjs}"],
+    rules: {
+      ...nextPlugin.flatConfig.coreWebVitals.rules,
+    },
+  },
+
+  // TypeScript/TSX files configuration
   {
     files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
     plugins: {
+      "@typescript-eslint": tsPlugin,
+      "react-hooks": reactHooks,
+      "jsx-a11y": jsxA11y,
       jsdoc,
       "check-file": checkFile,
       "simple-import-sort": simpleImportSort,
       "unused-imports": unusedImports,
     },
     rules: {
+      // TypeScript recommended rules
+      ...tsPlugin.configs.recommended.rules,
+
+      // React hooks rules
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+
+      // Accessibility rules (jsx-a11y)
+      "jsx-a11y/alt-text": "warn",
+      "jsx-a11y/anchor-is-valid": "warn",
+
       // Console statements: ERROR (CLAUDE.md compliance)
       "no-console": "error",
 
@@ -54,7 +89,6 @@ const eslintConfig = [
       ],
 
       // Replace import/order with simple-import-sort for auto-fix
-      "import/order": "off",
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
 
@@ -89,6 +123,7 @@ const eslintConfig = [
       }
     }
   },
+
   // Component files: PascalCase naming convention
   {
     files: ["src/features/**/components/**/*.tsx"],
@@ -100,6 +135,7 @@ const eslintConfig = [
       ],
     },
   },
+
   // Feature folders: kebab-case naming convention (excluding __tests__ folders)
   {
     files: ["src/features/**/*"],
@@ -111,6 +147,7 @@ const eslintConfig = [
       ],
     },
   },
+
   // Exceptions for relative imports
   {
     files: ["**/index.ts", "**/index.tsx"],
