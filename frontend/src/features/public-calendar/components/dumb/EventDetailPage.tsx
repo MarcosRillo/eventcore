@@ -1,5 +1,7 @@
 'use client';
 
+import { format, isSameDay, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
   ArrowLeft,
   Calendar,
@@ -7,7 +9,6 @@ import {
   Mail,
   MapPin,
   Phone} from 'lucide-react';
-import moment from 'moment';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -33,18 +34,18 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
   const sanitizedDescription = useSanitizedHTML(event.description || '');
 
   const formatDate = (dateString: string) => {
-    return moment(dateString).format('dddd, DD [de] MMMM [de] YYYY');
+    return format(parseISO(dateString), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es });
   };
 
   const formatTime = (dateString: string) => {
-    return moment(dateString).format('HH:mm');
+    return format(parseISO(dateString), 'HH:mm', { locale: es });
   };
 
   const formatDateRange = (startDate: string, endDate?: string) => {
-    const start = moment(startDate);
-    const end = endDate ? moment(endDate) : start;
+    const start = parseISO(startDate);
+    const end = endDate ? parseISO(endDate) : start;
 
-    if (start.isSame(end, 'day')) {
+    if (isSameDay(start, end)) {
       return `${formatDate(startDate)} de ${formatTime(startDate)} a ${formatTime(endDate || startDate)}`;
     } else {
       return `${formatDate(startDate)} ${formatTime(startDate)} - ${formatDate(endDate || startDate)} ${formatTime(endDate || startDate)}`;

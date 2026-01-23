@@ -6,8 +6,7 @@
  * Simplified for Tucumán Tourism - all locations are active by default
  */
 
-import { MagnifyingGlassIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { MapPinIcon } from '@heroicons/react/24/solid';
+import { MapPin, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button, Input, LoadingSpinner } from '@/components/ui';
@@ -86,7 +85,7 @@ export function LocationsPageContainer() {
             </div>
             <Button
               onClick={() => setIsCreateModalOpen(true)}
-              leftIcon={<PlusIcon className="w-5 h-5" />}
+              leftIcon={<Plus className="w-5 h-5" />}
             >
               Nueva Ubicación
             </Button>
@@ -96,7 +95,7 @@ export function LocationsPageContainer() {
           <div className="mt-6" role="region" aria-label="Estadísticas de ubicaciones">
             <div className="bg-white rounded-lg shadow px-5 py-4 inline-flex items-center gap-4" aria-label={`Total: ${stats.total} ubicaciones`}>
               <div className="p-3 bg-primary-100 rounded-full">
-                <MapPinIcon className="w-6 h-6 text-primary-600" aria-hidden="true" />
+                <MapPin className="w-6 h-6 text-primary-600" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-neutral-600">Total de ubicaciones</p>
@@ -113,7 +112,7 @@ export function LocationsPageContainer() {
             placeholder="Buscar por nombre o ciudad..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
+            leftIcon={<Search className="w-5 h-5" />}
             fullWidth
           />
         </div>
@@ -136,7 +135,7 @@ export function LocationsPageContainer() {
                 className="ml-3 text-error-400 hover:text-error-600"
                 aria-label="Reintentar carga de datos"
               >
-                <XMarkIcon className="w-4 h-4" aria-hidden="true" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -155,7 +154,7 @@ export function LocationsPageContainer() {
         {/* Empty State */}
         {!isLoading && locations.length === 0 && !error && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <MapPinIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+            <MapPin className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-neutral-900 mb-2">No hay ubicaciones</h3>
             <p className="text-neutral-500 mb-6">Crea tu primera ubicación para comenzar a organizar tus eventos</p>
             <Button onClick={() => setIsCreateModalOpen(true)}>

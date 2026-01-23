@@ -7,14 +7,15 @@
 'use client';
 
 import { Dialog, Transition } from '@headlessui/react';
+import { format, isSameDay, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
-  ArrowTopRightOnSquareIcon,
-  BuildingOffice2Icon,
-  CalendarIcon,
-  MapPinIcon,
-  XMarkIcon} from '@heroicons/react/24/outline';
-import { StarIcon } from '@heroicons/react/24/solid';
-import moment from 'moment';
+  Building2,
+  Calendar,
+  ExternalLink,
+  MapPin,
+  Star,
+  X} from 'lucide-react';
 import { Fragment, useState } from 'react';
 
 import { Button, ConfirmDialog } from '@/components/ui';
@@ -142,18 +143,18 @@ export const EventDetailModal = ({
 
   // Date formatting (unified for all contexts)
   const formatDate = (dateString: string) => {
-    return moment(dateString).format('dddd, DD [de] MMMM [de] YYYY');
+    return format(parseISO(dateString), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es });
   };
 
   const formatTime = (dateString: string) => {
-    return moment(dateString).format('HH:mm');
+    return format(parseISO(dateString), 'HH:mm', { locale: es });
   };
 
   const formatDateRange = (startDate: string, endDate?: string) => {
-    const start = moment(startDate);
-    const end = endDate ? moment(endDate) : start;
+    const start = parseISO(startDate);
+    const end = endDate ? parseISO(endDate) : start;
 
-    if (start.isSame(end, 'day')) {
+    if (isSameDay(start, end)) {
       return `${formatDate(startDate)} de ${formatTime(startDate)} a ${formatTime(endDate || startDate)}`;
     } else {
       return `${formatDate(startDate)} ${formatTime(startDate)} - ${formatDate(endDate || startDate)} ${formatTime(endDate || startDate)}`;
@@ -268,7 +269,7 @@ export const EventDetailModal = ({
                 variant="outline"
                 size="sm"
                 onClick={handleAddToGoogleCalendar}
-                leftIcon={<CalendarIcon className="w-4 h-4" />}
+                leftIcon={<Calendar className="w-4 h-4" />}
               >
                 Google Calendar
               </Button>
@@ -276,7 +277,7 @@ export const EventDetailModal = ({
                 variant="outline"
                 size="sm"
                 onClick={handleAddToOutlookCalendar}
-                leftIcon={<CalendarIcon className="w-4 h-4" />}
+                leftIcon={<Calendar className="w-4 h-4" />}
               >
                 Outlook
               </Button>
@@ -420,7 +421,7 @@ export const EventDetailModal = ({
                             {event.title}
                           </Dialog.Title>
                           {event.is_featured && (
-                            <StarIcon className="w-6 h-6 text-yellow-500 flex-shrink-0" />
+                            <Star className="w-6 h-6 text-yellow-500 flex-shrink-0 fill-yellow-500" />
                           )}
                         </div>
 
@@ -434,7 +435,7 @@ export const EventDetailModal = ({
                         {/* Organization info for admin context */}
                         {context === 'admin' && event.organizer && (
                           <div className="mt-2 flex items-center gap-2">
-                            <BuildingOffice2Icon className="w-4 h-4 text-gray-500" />
+                            <Building2 className="w-4 h-4 text-gray-500" />
                             <span className="text-sm text-gray-600">{event.organizer.organization || event.organizer.name}</span>
                             <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
                               isEnteEvent
@@ -452,7 +453,7 @@ export const EventDetailModal = ({
                         className="rounded-lg p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onClick={onClose}
                       >
-                        <XMarkIcon className="w-6 h-6" />
+                        <X className="w-6 h-6" />
                       </button>
                     </div>
                   </div>
@@ -482,7 +483,7 @@ export const EventDetailModal = ({
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
                             >
-                              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                              <ExternalLink className="w-4 h-4" />
                               Unirse al evento virtual
                             </a>
                           </div>
@@ -499,7 +500,7 @@ export const EventDetailModal = ({
                         {/* Date and time */}
                         <div className="bg-gray-50 rounded-lg p-4">
                           <div className="flex items-center gap-3 mb-3">
-                            <CalendarIcon className="w-5 h-5 text-gray-500" />
+                            <Calendar className="w-5 h-5 text-gray-500" />
                             <h4 className="font-medium text-gray-900">Fecha y hora</h4>
                           </div>
                           <p className="text-gray-700 text-sm leading-relaxed">
@@ -515,7 +516,7 @@ export const EventDetailModal = ({
                         {/* Location */}
                         <div className="bg-gray-50 rounded-lg p-4">
                           <div className="flex items-center gap-3 mb-3">
-                            <MapPinIcon className="w-5 h-5 text-gray-500" />
+                            <MapPin className="w-5 h-5 text-gray-500" />
                             <h4 className="font-medium text-gray-900">Ubicación</h4>
                           </div>
                           <p className="text-gray-700 text-sm">

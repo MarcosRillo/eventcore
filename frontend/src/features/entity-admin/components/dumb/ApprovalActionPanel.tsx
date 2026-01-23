@@ -5,7 +5,7 @@
  * Dumb component - receives action state via props.
  */
 
-import { CheckCircleIcon, PencilSquareIcon,XCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircle, PenSquare,XCircle } from 'lucide-react';
 
 import type { ApprovalAction } from '@/features/entity-admin/types';
 import { ACTION_CONFIG, MAX_COMMENT_LENGTH,MIN_COMMENT_LENGTH } from '@/features/entity-admin/types';
@@ -29,11 +29,11 @@ interface ApprovalActionPanelProps {
  * Icon mapping for actions
  */
 const actionIcons: Record<ApprovalAction, React.ReactNode> = {
-  approve_internal: <CheckCircleIcon className="w-5 h-5" />,
-  request_public: <CheckCircleIcon className="w-5 h-5" />,
-  publish: <CheckCircleIcon className="w-5 h-5" />,
-  request_changes: <PencilSquareIcon className="w-5 h-5" />,
-  reject: <XCircleIcon className="w-5 h-5" />,
+  approve_internal: <CheckCircle className="w-5 h-5" />,
+  request_public: <CheckCircle className="w-5 h-5" />,
+  publish: <CheckCircle className="w-5 h-5" />,
+  request_changes: <PenSquare className="w-5 h-5" />,
+  reject: <XCircle className="w-5 h-5" />,
 };
 
 /**

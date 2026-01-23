@@ -7,16 +7,14 @@
  */
 
 import {
-  ArrowLeftIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
-import {
-  CheckCircleIcon,
-  TagIcon,
-  XCircleIcon,
-} from '@heroicons/react/24/solid';
+  ArrowLeft,
+  CheckCircle,
+  Plus,
+  Search,
+  Tag,
+  X,
+  XCircle,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -115,7 +113,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow p-12 text-center max-w-md">
-          <TagIcon className="w-16 h-16 text-error-300 mx-auto mb-4" />
+          <Tag className="w-16 h-16 text-error-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-neutral-900 mb-2">
             Tipo de evento no encontrado
           </h3>
@@ -137,7 +135,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
             variant="ghost"
             size="sm"
             onClick={handleGoBack}
-            leftIcon={<ArrowLeftIcon className="w-4 h-4" />}
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
           >
             Volver a Tipos de Evento
           </Button>
@@ -156,7 +154,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
             </div>
             <Button
               onClick={() => setIsCreateModalOpen(true)}
-              leftIcon={<PlusIcon className="w-5 h-5" />}
+              leftIcon={<Plus className="w-5 h-5" />}
             >
               Nuevo Subtipo
             </Button>
@@ -173,7 +171,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
                   </p>
                 </div>
                 <div className="p-3 bg-primary-100 rounded-full">
-                  <TagIcon className="w-6 h-6 text-primary-600" />
+                  <Tag className="w-6 h-6 text-primary-600" />
                 </div>
               </div>
             </div>
@@ -187,7 +185,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
                   </p>
                 </div>
                 <div className="p-3 bg-success-100 rounded-full">
-                  <CheckCircleIcon className="w-6 h-6 text-success-600" />
+                  <CheckCircle className="w-6 h-6 text-success-600" />
                 </div>
               </div>
             </div>
@@ -203,7 +201,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
                   </p>
                 </div>
                 <div className="p-3 bg-error-100 rounded-full">
-                  <XCircleIcon className="w-6 h-6 text-error-600" />
+                  <XCircle className="w-6 h-6 text-error-600" />
                 </div>
               </div>
             </div>
@@ -219,7 +217,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
                 placeholder="Buscar por nombre..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
+                leftIcon={<Search className="w-5 h-5" />}
                 fullWidth
               />
             </div>
@@ -269,7 +267,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
                 className="ml-3 text-error-400 hover:text-error-600"
                 title="Cerrar mensaje de error"
               >
-                <XMarkIcon className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -290,7 +288,7 @@ export function EventSubtypesPageContainer({ eventTypeId }: EventSubtypesPageCon
         {/* Empty State */}
         {!isLoading && eventSubtypes.length === 0 && !error && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <TagIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+            <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-neutral-900 mb-2">
               No hay subtipos
             </h3>

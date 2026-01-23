@@ -19,15 +19,12 @@ jest.mock('@/components/ui', () => ({
   )
 }))
 
-// Mock heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  CalendarIcon: () => <span data-testid="calendar-icon" />,
-  ClockIcon: () => <span data-testid="clock-icon" />,
-  BuildingOffice2Icon: () => <span data-testid="building-icon" />
-}))
-
-jest.mock('@heroicons/react/24/solid', () => ({
-  StarIcon: () => <span data-testid="star-icon" />
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Calendar: () => <span data-testid="calendar-icon" />,
+  Clock: () => <span data-testid="clock-icon" />,
+  Building2: () => <span data-testid="building-icon" />,
+  Star: () => <span data-testid="star-icon" />
 }))
 
 describe('EventCard', () => {

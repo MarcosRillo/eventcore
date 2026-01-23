@@ -6,15 +6,15 @@
 'use client';
 
 import {
-  ArrowRightOnRectangleIcon,
-  Bars3Icon,
-  BellIcon,
-  ChevronDownIcon,
-  Cog6ToothIcon,
-  MagnifyingGlassIcon,
-  QuestionMarkCircleIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
+  Bell,
+  ChevronDown,
+  HelpCircle,
+  LogOut,
+  Menu,
+  Search,
+  Settings,
+  User as UserIcon,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useEffect,useState } from 'react';
 
@@ -101,7 +101,7 @@ const Header = ({
               className="p-2 text-muted hover:text-foreground hover:bg-surface rounded-lg transition-all duration-200 lg:hidden group"
               title="Abrir menú de navegación"
             >
-              <Bars3Icon className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+              <Menu className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
             </button>
 
             <div>
@@ -123,7 +123,7 @@ const Header = ({
                 className="p-2.5 text-muted hover:text-foreground hover:bg-surface rounded-lg transition-all duration-200 group shadow-sm hover:shadow-md"
                 title="Buscar eventos y contenido"
               >
-                <MagnifyingGlassIcon className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                <Search className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
               </button>
 
               {/* Notifications */}
@@ -131,7 +131,7 @@ const Header = ({
                 className="p-2.5 text-muted hover:text-foreground hover:bg-surface rounded-lg transition-all duration-200 relative group shadow-sm hover:shadow-md"
                 title="Ver notificaciones"
               >
-                <BellIcon className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                <Bell className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                 {/* Notification badge */}
                 <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-accent border-2 border-background rounded-full animate-pulse shadow-sm"></span>
               </button>
@@ -156,7 +156,7 @@ const Header = ({
                       {user.role?.role_code === 'entity_admin' ? 'Administrador' : user.role?.role_name || 'Usuario'}
                     </p>
                   </div>
-                  <ChevronDownIcon
+                  <ChevronDown
                     className={`w-4 h-4 text-muted group-hover:text-foreground transition-all duration-200 ${
                       isUserMenuOpen ? 'rotate-180' : ''
                     }`}
@@ -188,12 +188,12 @@ const Header = ({
                         </button>
                         
                         <button className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-surface transition-all duration-200 group">
-                          <Cog6ToothIcon className="w-4 h-4 mr-3 text-muted group-hover:text-primary transition-colors duration-200" />
+                          <Settings className="w-4 h-4 mr-3 text-muted group-hover:text-primary transition-colors duration-200" />
                           <span className="font-medium">Configuración</span>
                         </button>
 
                         <button className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-surface transition-all duration-200 group">
-                          <QuestionMarkCircleIcon className="w-4 h-4 mr-3 text-muted group-hover:text-primary transition-colors duration-200" />
+                          <HelpCircle className="w-4 h-4 mr-3 text-muted group-hover:text-primary transition-colors duration-200" />
                           <span className="font-medium">Ayuda y Soporte</span>
                         </button>
                       </div>
@@ -204,7 +204,7 @@ const Header = ({
                           onClick={handleLogout}
                           className="w-full flex items-center px-4 py-3 text-sm text-danger hover:bg-danger-light/10 transition-all duration-200 group"
                         >
-                          <ArrowRightOnRectangleIcon className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-200" />
+                          <LogOut className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-200" />
                           <span className="font-semibold">Cerrar Sesión</span>
                         </button>
                       </div>

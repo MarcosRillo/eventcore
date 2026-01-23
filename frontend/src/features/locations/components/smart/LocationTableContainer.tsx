@@ -6,7 +6,7 @@
 
 'use client';
 
-import { MapPinIcon,PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { MapPin,Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useMemo,useState } from 'react';
 
 import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
@@ -75,7 +75,7 @@ export function LocationTableContainer({
       render: (location) => (
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <MapPinIcon className="w-4 h-4 text-neutral-400" aria-hidden="true" />
+            <MapPin className="w-4 h-4 text-neutral-400" aria-hidden="true" />
             <span className="font-medium text-neutral-900">{location.name}</span>
           </div>
           {location.description && (
@@ -106,14 +106,14 @@ export function LocationTableContainer({
     {
       key: 'edit',
       label: 'Editar',
-      icon: <PencilIcon className="w-5 h-5" />,
+      icon: <Pencil className="w-5 h-5" />,
       variant: 'secondary',
       onClick: onEdit,
     },
     {
       key: 'delete',
       label: 'Eliminar',
-      icon: <TrashIcon className="w-5 h-5" />,
+      icon: <Trash2 className="w-5 h-5" />,
       variant: 'danger',
       onClick: handleDeleteClick,
     },

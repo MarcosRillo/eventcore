@@ -90,11 +90,11 @@ jest.mock('@/shared/components/tables', () => ({
   },
 }))
 
-// Mock heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  PencilIcon: () => <span data-testid="pencil-icon" />,
-  TrashIcon: () => <span data-testid="trash-icon" />,
-  MapPinIcon: () => <span data-testid="map-pin-icon" />,
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Pencil: () => <span data-testid="pencil-icon" />,
+  Trash2: () => <span data-testid="trash-icon" />,
+  MapPin: () => <span data-testid="map-pin-icon" />,
 }))
 
 

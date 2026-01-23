@@ -5,7 +5,7 @@
 
 'use client';
 
-import { ClockIcon } from '@heroicons/react/24/outline';
+import { Clock } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/components/ui';
@@ -72,7 +72,7 @@ export const EventCardContainer: React.FC<EventCardContainerProps> = ({
   // Create JSX components from hook data
   const urgencyIndicator = urgencyData ? (
     <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgencyData.className}`}>
-      {urgencyData.showIcon && <ClockIcon className="w-3 h-3 mr-1" />}
+      {urgencyData.showIcon && <Clock className="w-3 h-3 mr-1" />}
       {urgencyData.showPulse && <div className="w-2 h-2 bg-blue-600 rounded-full mr-1 animate-pulse" />}
       {urgencyData.text}
     </div>

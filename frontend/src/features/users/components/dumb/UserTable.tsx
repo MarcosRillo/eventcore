@@ -6,11 +6,11 @@
 'use client';
 
 import {
-  ArrowPathIcon,
-  NoSymbolIcon,
-  PencilIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+  Ban,
+  Pencil,
+  RefreshCw,
+  Trash2,
+} from 'lucide-react';
 import { useCallback,useMemo } from 'react';
 
 import type { PaginationMeta,User } from '@/features/users/types/user.types';
@@ -157,14 +157,14 @@ export function UserTable({
     {
       key: 'edit',
       label: 'Editar',
-      icon: <PencilIcon className="w-5 h-5" />,
+      icon: <Pencil className="w-5 h-5" />,
       variant: 'secondary',
       onClick: onEdit,
     },
     {
       key: 'suspend',
       label: 'Suspender',
-      icon: <NoSymbolIcon className="w-5 h-5" />,
+      icon: <Ban className="w-5 h-5" />,
       variant: 'danger',
       condition: (user) => user.status === 'active',
       onClick: onSuspend,
@@ -172,7 +172,7 @@ export function UserTable({
     {
       key: 'reactivate',
       label: 'Reactivar',
-      icon: <ArrowPathIcon className="w-5 h-5" />,
+      icon: <RefreshCw className="w-5 h-5" />,
       variant: 'primary',
       condition: (user) => user.status === 'suspended',
       onClick: onUnsuspend,
@@ -180,7 +180,7 @@ export function UserTable({
     {
       key: 'delete',
       label: 'Eliminar',
-      icon: <TrashIcon className="w-5 h-5" />,
+      icon: <Trash2 className="w-5 h-5" />,
       variant: 'danger',
       onClick: onDelete,
     },

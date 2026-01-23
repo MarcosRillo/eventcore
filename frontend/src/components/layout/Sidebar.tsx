@@ -1,19 +1,19 @@
 'use client';
 
 import {
-  BuildingStorefrontIcon,
-  CalendarIcon,
-  ChevronDoubleLeftIcon,
-  ClipboardDocumentListIcon,
-  EnvelopeIcon,
-  HomeIcon,
-  MapPinIcon,
-  PaintBrushIcon,
-  RectangleStackIcon,
-  SquaresPlusIcon,
-  TicketIcon,
-  UserGroupIcon,
-} from '@heroicons/react/24/outline';
+  Calendar,
+  ChevronsLeft,
+  ClipboardList,
+  Home,
+  Layers,
+  LayoutGrid,
+  Mail,
+  MapPin,
+  Paintbrush,
+  Store,
+  Ticket,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -56,12 +56,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         {
           name: 'Dashboard',
           href: '/',
-          icon: <HomeIcon className="w-5 h-5" />,
+          icon: <Home className="w-5 h-5" />,
         },
         {
           name: 'Calendario Interno',
           href: '/internal-calendar',
-          icon: <CalendarIcon className="w-5 h-5" />,
+          icon: <Calendar className="w-5 h-5" />,
         },
       ],
     },
@@ -71,23 +71,23 @@ const Sidebar: React.FC<SidebarProps> = ({
         {
           name: 'Eventos',
           href: '/events',
-          icon: <TicketIcon className="w-5 h-5" />,
+          icon: <Ticket className="w-5 h-5" />,
           ...(canAccessEntityDashboard && { badge: '5' }),
         },
         {
           name: 'Tipos de Evento',
           href: '/event-types',
-          icon: <SquaresPlusIcon className="w-5 h-5" />,
+          icon: <LayoutGrid className="w-5 h-5" />,
         },
         {
           name: 'Subtipos de Evento',
           href: '/event-types/subtypes',
-          icon: <RectangleStackIcon className="w-5 h-5" />,
+          icon: <Layers className="w-5 h-5" />,
         },
         {
           name: 'Ubicaciones',
           href: '/locations',
-          icon: <MapPinIcon className="w-5 h-5" />,
+          icon: <MapPin className="w-5 h-5" />,
         },
       ],
     },
@@ -97,22 +97,22 @@ const Sidebar: React.FC<SidebarProps> = ({
         {
           name: 'Organizaciones',
           href: '/organizations',
-          icon: <BuildingStorefrontIcon className="w-5 h-5" />,
+          icon: <Store className="w-5 h-5" />,
         },
         ...(canManageUsers ? [{
           name: 'Usuarios',
           href: '/users',
-          icon: <UserGroupIcon className="w-5 h-5" />,
+          icon: <Users className="w-5 h-5" />,
         }] : []),
         {
           name: 'Invitaciones',
           href: '/invitations',
-          icon: <EnvelopeIcon className="w-5 h-5" />,
+          icon: <Mail className="w-5 h-5" />,
         },
         {
           name: 'Solicitudes',
           href: '/registration-requests',
-          icon: <ClipboardDocumentListIcon className="w-5 h-5" />,
+          icon: <ClipboardList className="w-5 h-5" />,
         },
       ],
     },
@@ -122,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {
           name: 'Apariencia',
           href: '/appearance',
-          icon: <PaintBrushIcon className="w-5 h-5" />,
+          icon: <Paintbrush className="w-5 h-5" />,
         },
       ],
     },
@@ -141,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-200">
         {!isCollapsed && (
           <div className="flex items-center gap-3">
-            <CalendarIcon className="w-10 h-10 text-primary-500" />
+            <Calendar className="w-10 h-10 text-primary-500" />
             <div className="flex flex-col">
               <span className="text-lg font-bold text-neutral-900 leading-tight">Tucumán</span>
               <span className="text-xs text-neutral-500 leading-tight">Turismo</span>
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition-all duration-150 group focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             title={isCollapsed ? 'Expandir sidebar' : 'Contraer sidebar'}
           >
-            <ChevronDoubleLeftIcon
+            <ChevronsLeft
               className={`w-5 h-5 transition-transform duration-150 ${isCollapsed ? 'rotate-180' : ''}`}
             />
           </button>

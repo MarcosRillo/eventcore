@@ -5,7 +5,7 @@
 
 'use client';
 
-import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { RefreshCw, Trash2 } from 'lucide-react';
 import { useCallback,useMemo } from 'react';
 
 import InvitationStatusBadge from '@/features/invitations/components/dumb/InvitationStatusBadge';
@@ -92,14 +92,14 @@ export const InvitationTable = ({
     {
       key: 'resend',
       label: 'Reenviar',
-      icon: <ArrowPathIcon className="w-5 h-5" />,
+      icon: <RefreshCw className="w-5 h-5" />,
       variant: 'primary',
       onClick: onResend,
     },
     {
       key: 'cancel',
       label: 'Revocar',
-      icon: <TrashIcon className="w-5 h-5" />,
+      icon: <Trash2 className="w-5 h-5" />,
       variant: 'danger',
       onClick: onCancel,
     },

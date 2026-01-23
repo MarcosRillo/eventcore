@@ -3,7 +3,7 @@
  * Simplified table for displaying locations
  */
 
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Pencil, Trash2 } from 'lucide-react';
 
 import { Button, ConfirmDialog,Pagination } from '@/components/ui';
 import { PaginationMeta } from '@/hooks/usePaginatedData';
@@ -125,7 +125,7 @@ export function LocationTable({
                         title="Editar"
                         aria-label={`Editar ${location.name}`}
                       >
-                        <PencilIcon className="w-4 h-4" aria-hidden="true" />
+                        <Pencil className="w-4 h-4" aria-hidden="true" />
                       </Button>
                       <Button
                         variant="danger"
@@ -134,7 +134,7 @@ export function LocationTable({
                         title="Eliminar"
                         aria-label={`Eliminar ${location.name}`}
                       >
-                        <TrashIcon className="w-4 h-4" aria-hidden="true" />
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </td>

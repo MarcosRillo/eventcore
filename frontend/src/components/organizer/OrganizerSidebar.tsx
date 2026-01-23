@@ -6,19 +6,19 @@
 'use client';
 
 import {
-  CalendarIcon,
-  HomeIcon,
-  PlusCircleIcon,
-} from '@heroicons/react/24/outline';
+  Calendar,
+  Home,
+  PlusCircle,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/context/AuthContext';
 
 const navigation = [
-  { name: 'Dashboard', href: '/organizer/dashboard', icon: HomeIcon },
-  { name: 'Mi Calendario', href: '/organizer/calendar', icon: CalendarIcon },
-  { name: 'Crear Evento', href: '/organizer/create', icon: PlusCircleIcon },
+  { name: 'Dashboard', href: '/organizer/dashboard', icon: Home },
+  { name: 'Mi Calendario', href: '/organizer/calendar', icon: Calendar },
+  { name: 'Crear Evento', href: '/organizer/create', icon: PlusCircle },
 ];
 
 /**

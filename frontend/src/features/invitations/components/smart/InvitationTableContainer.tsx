@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowPathIcon, UserPlusIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { RefreshCw, UserPlus, X, XCircle } from 'lucide-react';
 import { useCallback,useState } from 'react';
 
 import { Button } from '@/components/ui';
@@ -66,7 +66,7 @@ export const InvitationTableContainer = () => {
           data-testid="error-state"
         >
           <div className="flex items-center">
-            <XCircleIcon className="h-5 w-5 text-error-400 mr-2" aria-hidden="true" />
+            <XCircle className="h-5 w-5 text-error-400 mr-2" aria-hidden="true" />
             <span className="text-sm text-error-700">{error}</span>
           </div>
           <button
@@ -74,7 +74,7 @@ export const InvitationTableContainer = () => {
             className="text-error-600 hover:text-error-800"
             type="button"
           >
-            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -88,7 +88,7 @@ export const InvitationTableContainer = () => {
           disabled={loading}
           data-testid="refresh-button"
         >
-          <ArrowPathIcon className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
         <Button
@@ -97,7 +97,7 @@ export const InvitationTableContainer = () => {
           onClick={() => setIsCreateModalOpen(true)}
           data-testid="create-invitation-button"
         >
-          <UserPlusIcon className="h-4 w-4 mr-1" />
+          <UserPlus className="h-4 w-4 mr-1" />
           Nueva invitación
         </Button>
       </div>

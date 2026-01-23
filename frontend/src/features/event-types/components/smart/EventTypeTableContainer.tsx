@@ -8,7 +8,7 @@
 
 'use client';
 
-import { ListBulletIcon,PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { List,Pencil, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback,useMemo, useState } from 'react';
 
@@ -166,21 +166,21 @@ export const EventTypeTableContainer = ({
       {
         key: 'subtypes',
         label: 'Subtipos',
-        icon: <ListBulletIcon className="w-5 h-5" />,
+        icon: <List className="w-5 h-5" />,
         variant: 'secondary',
         onClick: handleViewSubtypes,
       },
       {
         key: 'edit',
         label: 'Editar',
-        icon: <PencilIcon className="w-5 h-5" />,
+        icon: <Pencil className="w-5 h-5" />,
         variant: 'secondary',
         onClick: onEdit,
       },
       {
         key: 'delete',
         label: 'Eliminar',
-        icon: <TrashIcon className="w-5 h-5" />,
+        icon: <Trash2 className="w-5 h-5" />,
         variant: 'danger',
         onClick: handleDeleteEventType,
       },

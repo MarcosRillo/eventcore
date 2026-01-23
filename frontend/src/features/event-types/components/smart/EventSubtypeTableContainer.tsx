@@ -8,7 +8,7 @@
 
 'use client';
 
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useCallback,useMemo, useState } from 'react';
 
 import {
@@ -131,14 +131,14 @@ export const EventSubtypeTableContainer = ({
       {
         key: 'edit',
         label: 'Editar',
-        icon: <PencilIcon className="w-5 h-5" />,
+        icon: <Pencil className="w-5 h-5" />,
         variant: 'secondary',
         onClick: onEdit,
       },
       {
         key: 'delete',
         label: 'Eliminar',
-        icon: <TrashIcon className="w-5 h-5" />,
+        icon: <Trash2 className="w-5 h-5" />,
         variant: 'danger',
         onClick: handleDeleteEventSubtype,
       },

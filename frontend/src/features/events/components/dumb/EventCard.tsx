@@ -6,8 +6,7 @@
 
 'use client';
 
-import { BuildingOffice2Icon,CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { StarIcon } from '@heroicons/react/24/solid';
+import { Building2,Calendar, Clock, Star } from 'lucide-react';
 import React from 'react';
 
 import { Badge,Card } from '@/components/ui';
@@ -42,7 +41,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       {/* Featured indicator */}
       {event.is_featured && (
         <div className="absolute top-3 right-3">
-          <StarIcon className="w-5 h-5 text-yellow-500" />
+          <Star className="w-5 h-5 text-yellow-500" />
         </div>
       )}
 
@@ -69,19 +68,19 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="space-y-2 mb-4">
         {/* Date and Time */}
         <div className="flex items-center text-sm text-gray-600">
-          <CalendarIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+          <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
           <span className="font-medium">{formattedDate.date}</span>
         </div>
 
         <div className="flex items-center text-sm text-gray-600">
-          <ClockIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+          <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
           <span>{formattedDate.time}</span>
         </div>
 
         {/* Organization */}
         {event.organizer && (
           <div className="flex items-center text-sm text-gray-600">
-            <BuildingOffice2Icon className="w-4 h-4 mr-2 flex-shrink-0" />
+            <Building2 className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="truncate">{event.organizer.name}</span>
           </div>
         )}

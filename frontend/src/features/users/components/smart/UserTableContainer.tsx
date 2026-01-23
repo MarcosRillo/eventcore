@@ -5,7 +5,7 @@
  * Connects the hook with the presentational components
  */
 
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { X, XCircle } from 'lucide-react';
 import { useCallback,useState } from 'react';
 
 import { Button,Input } from '@/components/ui';
@@ -114,7 +114,7 @@ export function UserTableContainer() {
         <div className="bg-error-50 border border-error-200 rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <XCircleIcon className="h-5 w-5 text-error-400" aria-hidden="true" />
+              <XCircle className="h-5 w-5 text-error-400" aria-hidden="true" />
             </div>
             <div className="ml-3">
               <p className="text-sm text-error-700">{error}</p>
@@ -125,7 +125,7 @@ export function UserTableContainer() {
                 className="text-error-500 hover:text-error-600"
                 type="button"
               >
-                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           </div>

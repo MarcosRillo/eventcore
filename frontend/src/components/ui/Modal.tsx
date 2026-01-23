@@ -6,7 +6,7 @@
 'use client'
 
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { X } from 'lucide-react'
 import { Fragment } from 'react'
 
 interface ModalProps {
@@ -119,7 +119,7 @@ const Modal: React.FC<ModalProps> = ({
                         onClick={onClose}
                         aria-label="Cerrar"
                       >
-                        <XMarkIcon className="h-5 w-5" />
+                        <X className="h-5 w-5" />
                       </button>
                     )}
                   </div>

@@ -60,9 +60,9 @@ jest.mock('@/components/ui', () => ({
   )
 }))
 
-// Mock heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  ClockIcon: () => <span data-testid="clock-icon" />
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Clock: () => <span data-testid="clock-icon" />
 }))
 
 describe('EventCardContainer', () => {

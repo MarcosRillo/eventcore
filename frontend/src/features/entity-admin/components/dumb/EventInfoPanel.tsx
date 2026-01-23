@@ -6,15 +6,15 @@
  */
 
 import {
-  CalendarIcon,
-  EnvelopeIcon,
-  GlobeAltIcon,
-  MapPinIcon,
-  PhoneIcon,
-  StarIcon,
-  TagIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
+  Calendar,
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  Star,
+  Tag,
+  User,
+} from 'lucide-react';
 
 import type { Event } from '@/types/event.types';
 
@@ -71,7 +71,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
           </h3>
           {event.is_featured && (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-700">
-              <StarIcon className="w-3 h-3" />
+              <Star className="w-3 h-3" />
               Destacado
             </span>
           )}
@@ -91,7 +91,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
       {/* Date and Time */}
       <div>
         <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4" />
+          <Calendar className="w-4 h-4" />
           Fecha y Hora
         </h4>
         <div className="text-neutral-700 text-sm">
@@ -115,7 +115,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
       {event.locations && event.locations.length > 0 && (
         <div>
           <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
-            <MapPinIcon className="w-4 h-4" />
+            <MapPin className="w-4 h-4" />
             Ubicación{event.locations.length > 1 ? 'es' : ''}
           </h4>
           <div className="space-y-2">
@@ -138,7 +138,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
       {(event.event_type || event.event_subtype) && (
         <div>
           <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
-            <TagIcon className="w-4 h-4" />
+            <Tag className="w-4 h-4" />
             Tipo de Evento
           </h4>
           <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
           <div className="space-y-1">
             {event.contact_email && (
               <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <EnvelopeIcon className="w-4 h-4 text-neutral-400" />
+                <Mail className="w-4 h-4 text-neutral-400" />
                 <a
                   href={`mailto:${event.contact_email}`}
                   className="hover:text-primary-600 transition-colors"
@@ -177,7 +177,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
             )}
             {event.contact_phone && (
               <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <PhoneIcon className="w-4 h-4 text-neutral-400" />
+                <Phone className="w-4 h-4 text-neutral-400" />
                 <a
                   href={`tel:${event.contact_phone}`}
                   className="hover:text-primary-600 transition-colors"
@@ -188,7 +188,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
             )}
             {event.website_url && (
               <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <GlobeAltIcon className="w-4 h-4 text-neutral-400" />
+                <Globe className="w-4 h-4 text-neutral-400" />
                 <a
                   href={event.website_url}
                   target="_blank"
@@ -207,7 +207,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
       {event.organizer && (
         <div>
           <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
-            <UserIcon className="w-4 h-4" />
+            <User className="w-4 h-4" />
             Organizador
           </h4>
           <div className="text-sm">
