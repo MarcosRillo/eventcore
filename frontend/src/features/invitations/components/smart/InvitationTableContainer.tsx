@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useInvitations } from '../../hooks/useInvitations';
-import InvitationTable from '../dumb/InvitationTable';
-import { CreateInvitationModalContainer } from './CreateInvitationModalContainer';
-import { ConfirmDialogData } from '@/shared/components/tables';
-import type { Invitation } from '../../types/invitation.types';
-import { ArrowPathIcon, UserPlusIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { RefreshCw, UserPlus, X, XCircle } from 'lucide-react';
+import { useCallback,useState } from 'react';
+
 import { Button } from '@/components/ui';
+import InvitationTable from '@/features/invitations/components/dumb/InvitationTable';
+import { CreateInvitationModalContainer } from '@/features/invitations/components/smart/CreateInvitationModalContainer';
+import { useInvitations } from '@/features/invitations/hooks/useInvitations';
+import type { Invitation } from '@/features/invitations/types/invitation.types';
+import { ConfirmDialogData } from '@/shared/components/tables';
 
 export const InvitationTableContainer = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -65,7 +66,7 @@ export const InvitationTableContainer = () => {
           data-testid="error-state"
         >
           <div className="flex items-center">
-            <XCircleIcon className="h-5 w-5 text-error-400 mr-2" aria-hidden="true" />
+            <XCircle className="h-5 w-5 text-error-400 mr-2" aria-hidden="true" />
             <span className="text-sm text-error-700">{error}</span>
           </div>
           <button
@@ -73,7 +74,7 @@ export const InvitationTableContainer = () => {
             className="text-error-600 hover:text-error-800"
             type="button"
           >
-            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -87,7 +88,7 @@ export const InvitationTableContainer = () => {
           disabled={loading}
           data-testid="refresh-button"
         >
-          <ArrowPathIcon className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
         <Button
@@ -96,7 +97,7 @@ export const InvitationTableContainer = () => {
           onClick={() => setIsCreateModalOpen(true)}
           data-testid="create-invitation-button"
         >
-          <UserPlusIcon className="h-4 w-4 mr-1" />
+          <UserPlus className="h-4 w-4 mr-1" />
           Nueva invitación
         </Button>
       </div>

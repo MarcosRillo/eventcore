@@ -6,27 +6,28 @@
 
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
-import { Event, EventStatus, EVENT_STATUS } from '@/types/event.types';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
 import {
-  getStatusConfig,
-  BADGE_BASE_CLASSES
-} from '@/features/events/constants';
+  Calendar,
+  Copy,
+  Eye,
+  MessageCircle,
+  Pencil,
+  Send,
+  Share2,
+  Star,
+  Trash2,
+} from 'lucide-react';
+import { useCallback,useMemo, useState } from 'react';
+
 import {
-  EyeIcon,
-  PencilIcon,
-  StarIcon,
-  DocumentDuplicateIcon,
-  TrashIcon,
-  PaperAirplaneIcon,
-  ChatBubbleLeftIcon,
-  ShareIcon,
-  CalendarIcon,
-} from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+  BADGE_BASE_CLASSES,
+  getStatusConfig} from '@/features/events/constants';
+import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
+import { Event, EVENT_STATUS,EventStatus } from '@/types/event.types';
+
+
 
 // View mode types
 export type EventTableViewMode = 'admin' | 'organizer' | 'public';
@@ -115,7 +116,7 @@ export const EventTableContainer = ({
             <div className="flex items-center gap-2">
               <span className="font-medium text-neutral-900">{event.title}</span>
               {event.is_featured && (
-                <StarIconSolid className="w-4 h-4 text-warning-500" aria-label="Destacado" />
+                <Star className="w-4 h-4 text-warning-500 fill-warning-500" aria-label="Destacado" />
               )}
             </div>
           </div>
@@ -195,7 +196,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'view',
             label: 'Ver Detalle',
-            icon: <EyeIcon className="w-5 h-5" />,
+            icon: <Eye className="w-5 h-5" />,
             variant: 'secondary',
             onClick: onSelectEvent,
           });
@@ -205,7 +206,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'edit',
             label: 'Editar',
-            icon: <PencilIcon className="w-5 h-5" />,
+            icon: <Pencil className="w-5 h-5" />,
             variant: 'secondary',
             onClick: onEditEvent,
           });
@@ -215,7 +216,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'approve',
             label: 'Gestionar Aprobación',
-            icon: <EyeIcon className="w-5 h-5" />,
+            icon: <Eye className="w-5 h-5" />,
             variant: 'primary',
             // No condition - entity_admin/entity_staff can manage ALL events regardless of status
             onClick: onApprovalAction,
@@ -226,7 +227,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'featured',
             label: 'Destacar/Quitar',
-            icon: <StarIcon className="w-5 h-5" />,
+            icon: <Star className="w-5 h-5" />,
             variant: 'secondary',
             onClick: onToggleFeatured,
           });
@@ -236,7 +237,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'duplicate',
             label: 'Duplicar',
-            icon: <DocumentDuplicateIcon className="w-5 h-5" />,
+            icon: <Copy className="w-5 h-5" />,
             variant: 'secondary',
             onClick: onDuplicateEvent,
           });
@@ -246,7 +247,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'delete',
             label: 'Eliminar',
-            icon: <TrashIcon className="w-5 h-5" />,
+            icon: <Trash2 className="w-5 h-5" />,
             variant: 'danger',
             onClick: handleDeleteEvent,
           });
@@ -258,7 +259,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'view',
             label: 'Ver Detalle',
-            icon: <EyeIcon className="w-5 h-5" />,
+            icon: <Eye className="w-5 h-5" />,
             variant: 'secondary',
             onClick: onSelectEvent,
           });
@@ -268,7 +269,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'edit',
             label: 'Editar',
-            icon: <PencilIcon className="w-5 h-5" />,
+            icon: <Pencil className="w-5 h-5" />,
             variant: 'secondary',
             condition: (event) => {
               const status = getEventStatusCode(event.status);
@@ -282,7 +283,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'request_approval',
             label: 'Solicitar Aprobación',
-            icon: <PaperAirplaneIcon className="w-5 h-5" />,
+            icon: <Send className="w-5 h-5" />,
             variant: 'primary',
             condition: (event) => {
               const status = getEventStatusCode(event.status);
@@ -296,7 +297,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'comments',
             label: 'Ver Comentarios',
-            icon: <ChatBubbleLeftIcon className="w-5 h-5" />,
+            icon: <MessageCircle className="w-5 h-5" />,
             variant: 'secondary',
             condition: (event) => !!(event.approval_comments && event.approval_comments.trim()),
             onClick: onViewComments,
@@ -309,7 +310,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'share',
             label: 'Compartir',
-            icon: <ShareIcon className="w-5 h-5" />,
+            icon: <Share2 className="w-5 h-5" />,
             variant: 'secondary',
             onClick: onShareEvent,
           });
@@ -319,7 +320,7 @@ export const EventTableContainer = ({
           baseActions.push({
             key: 'calendar',
             label: 'Agregar a Calendario',
-            icon: <CalendarIcon className="w-5 h-5" />,
+            icon: <Calendar className="w-5 h-5" />,
             variant: 'primary',
             onClick: onExportToCalendar,
           });

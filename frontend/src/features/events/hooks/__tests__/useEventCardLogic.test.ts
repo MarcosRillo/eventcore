@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
-import { useEventCardLogic } from '../useEventCardLogic'
+
+import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic'
 import { Event, EventStatus, EventStatusCode } from '@/types/event.types'
 
 // Base mock event structure
@@ -108,6 +109,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-red-100 text-red-800 border-red-200')
+      expect(result.current.statusColor).toContain('red')
+      expect(result.current.getEventStatus()).toBe('pending_internal_approval')
+      expect(result.current.canApproveInternal()).toBe(true)
     })
 
     it('should return red color for pending_public_approval', () => {
@@ -116,6 +120,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-red-100 text-red-800 border-red-200')
+      expect(result.current.statusColor).toContain('red')
+      expect(result.current.getEventStatus()).toBe('pending_public_approval')
+      expect(result.current.canPublish()).toBe(true)
     })
 
     it('should return red color for requires_changes', () => {
@@ -124,6 +131,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-red-100 text-red-800 border-red-200')
+      expect(result.current.statusColor).toContain('red')
+      expect(result.current.getEventStatus()).toBe('requires_changes')
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return yellow color for approved_internal', () => {
@@ -132,6 +142,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-yellow-100 text-yellow-800 border-yellow-200')
+      expect(result.current.statusColor).toContain('yellow')
+      expect(result.current.getEventStatus()).toBe('approved_internal')
+      expect(result.current.canRequestPublicApproval()).toBe(true)
     })
 
     it('should return yellow color for draft', () => {
@@ -140,6 +153,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-yellow-100 text-yellow-800 border-yellow-200')
+      expect(result.current.statusColor).toContain('yellow')
+      expect(result.current.getEventStatus()).toBe('draft')
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return green color for published', () => {
@@ -148,6 +164,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-green-100 text-green-800 border-green-200')
+      expect(result.current.statusColor).toContain('green')
+      expect(result.current.getEventStatus()).toBe('published')
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return gray color for rejected', () => {
@@ -156,6 +175,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-gray-100 text-gray-800 border-gray-200')
+      expect(result.current.statusColor).toContain('gray')
+      expect(result.current.getEventStatus()).toBe('rejected')
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return gray color for cancelled', () => {
@@ -164,6 +186,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-gray-100 text-gray-800 border-gray-200')
+      expect(result.current.statusColor).toContain('gray')
+      expect(result.current.getEventStatus()).toBe('cancelled')
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return gray color for unknown status', () => {
@@ -172,6 +197,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-gray-100 text-gray-800 border-gray-200')
+      expect(result.current.statusColor).toContain('gray')
+      expect(result.current.getEventStatus()).toBe('unknown_status')
+      expect(typeof result.current.statusColor).toBe('string')
     })
 
     it('should handle status as object', () => {
@@ -180,6 +208,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.statusColor).toBe('bg-green-100 text-green-800 border-green-200')
+      expect(result.current.getEventStatus()).toBe('published')
+      expect(typeof event.status).toBe('object')
+      expect(result.current.canPublish()).toBe(false)
     })
   })
 
@@ -190,6 +221,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.getEventStatus()).toBe('draft')
+      expect(typeof result.current.getEventStatus()).toBe('string')
+      expect(typeof event.status).toBe('string')
+      expect(result.current.statusColor).toContain('yellow')
     })
 
     it('should return status_code when status is an object', () => {
@@ -198,6 +232,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.getEventStatus()).toBe('published')
+      expect(typeof result.current.getEventStatus()).toBe('string')
+      expect(typeof event.status).toBe('object')
+      expect(result.current.statusColor).toContain('green')
     })
 
     it('should handle different status codes', () => {
@@ -218,6 +255,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canApproveInternal()).toBe(true)
+      expect(result.current.getEventStatus()).toBe('pending_internal_approval')
+      expect(result.current.canRequestChanges()).toBe(true)
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return false for other statuses', () => {
@@ -227,6 +267,7 @@ describe('useEventCardLogic', () => {
         const event = createEvent(status, '2025-12-15T10:00:00Z', '2025-12-15T18:00:00Z')
         const { result } = renderHook(() => useEventCardLogic(event))
         expect(result.current.canApproveInternal()).toBe(false)
+        expect(result.current.getEventStatus()).toBe(status)
       })
     })
 
@@ -236,6 +277,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canApproveInternal()).toBe(true)
+      expect(typeof event.status).toBe('object')
+      expect(result.current.getEventStatus()).toBe('pending_internal_approval')
+      expect(result.current.statusColor).toContain('red')
     })
   })
 
@@ -246,6 +290,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canRequestPublicApproval()).toBe(true)
+      expect(result.current.getEventStatus()).toBe('approved_internal')
+      expect(result.current.canApproveInternal()).toBe(false)
+      expect(result.current.statusColor).toContain('yellow')
     })
 
     it('should return false for other statuses', () => {
@@ -255,6 +302,7 @@ describe('useEventCardLogic', () => {
         const event = createEvent(status, '2025-12-15T10:00:00Z', '2025-12-15T18:00:00Z')
         const { result } = renderHook(() => useEventCardLogic(event))
         expect(result.current.canRequestPublicApproval()).toBe(false)
+        expect(result.current.getEventStatus()).toBe(status)
       })
     })
 
@@ -264,6 +312,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canRequestPublicApproval()).toBe(true)
+      expect(typeof event.status).toBe('object')
+      expect(result.current.getEventStatus()).toBe('approved_internal')
+      expect(result.current.statusColor).toContain('yellow')
     })
   })
 
@@ -274,6 +325,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canPublish()).toBe(true)
+      expect(result.current.getEventStatus()).toBe('pending_public_approval')
+      expect(result.current.canRequestChanges()).toBe(true)
+      expect(result.current.statusColor).toContain('red')
     })
 
     it('should return false for other statuses', () => {
@@ -283,6 +337,7 @@ describe('useEventCardLogic', () => {
         const event = createEvent(status, '2025-12-15T10:00:00Z', '2025-12-15T18:00:00Z')
         const { result } = renderHook(() => useEventCardLogic(event))
         expect(result.current.canPublish()).toBe(false)
+        expect(result.current.getEventStatus()).toBe(status)
       })
     })
 
@@ -292,6 +347,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canPublish()).toBe(true)
+      expect(typeof event.status).toBe('object')
+      expect(result.current.getEventStatus()).toBe('pending_public_approval')
+      expect(result.current.statusColor).toContain('red')
     })
   })
 
@@ -302,6 +360,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canRequestChanges()).toBe(true)
+      expect(result.current.getEventStatus()).toBe('pending_internal_approval')
+      expect(result.current.canApproveInternal()).toBe(true)
+      expect(result.current.canPublish()).toBe(false)
     })
 
     it('should return true for pending_public_approval', () => {
@@ -310,6 +371,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canRequestChanges()).toBe(true)
+      expect(result.current.getEventStatus()).toBe('pending_public_approval')
+      expect(result.current.canPublish()).toBe(true)
+      expect(result.current.canApproveInternal()).toBe(false)
     })
 
     it('should return false for other statuses', () => {
@@ -319,6 +383,7 @@ describe('useEventCardLogic', () => {
         const event = createEvent(status, '2025-12-15T10:00:00Z', '2025-12-15T18:00:00Z')
         const { result } = renderHook(() => useEventCardLogic(event))
         expect(result.current.canRequestChanges()).toBe(false)
+        expect(result.current.getEventStatus()).toBe(status)
       })
     })
 
@@ -328,6 +393,9 @@ describe('useEventCardLogic', () => {
       const { result } = renderHook(() => useEventCardLogic(event))
 
       expect(result.current.canRequestChanges()).toBe(true)
+      expect(typeof event.status).toBe('object')
+      expect(result.current.getEventStatus()).toBe('pending_internal_approval')
+      expect(result.current.canApproveInternal()).toBe(true)
     })
   })
 

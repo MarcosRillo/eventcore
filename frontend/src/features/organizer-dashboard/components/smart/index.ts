@@ -2,5 +2,5 @@
  * Organizer Dashboard Smart Components
  */
 
-export { OrganizerDashboardContainer } from './OrganizerDashboardContainer';
-export { OrganizerStatsWidget } from './OrganizerStatsWidget';
+export { OrganizerDashboardContainer } from '@/features/organizer-dashboard/components/smart/OrganizerDashboardContainer';
+export { OrganizerStatsWidget } from '@/features/organizer-dashboard/components/smart/OrganizerStatsWidget';

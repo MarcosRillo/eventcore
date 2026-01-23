@@ -7,9 +7,10 @@
 
 import type { ChangeEvent } from 'react'
 import { useState } from 'react'
-import { PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
-import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
+import { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 interface PublicCalendarProps {
   events: PublicEvent[]

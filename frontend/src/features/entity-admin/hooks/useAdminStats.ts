@@ -3,11 +3,13 @@
  *
  * Custom hook for fetching and managing admin approval statistics.
  * Provides stats data, card data for dashboard, loading states, and refetch capability.
+ * Accepts optional initialStats from server-side fetch to avoid waterfall.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback,useEffect, useState } from 'react';
+
 import { adminStatsService } from '@/features/entity-admin/services';
 import type { AdminApprovalStats, AdminStatCardData } from '@/features/entity-admin/types';
 
@@ -22,10 +24,12 @@ interface UseAdminStatsReturn {
 /**
  * Hook for managing admin approval statistics
  */
-export const useAdminStats = (): UseAdminStatsReturn => {
-  const [stats, setStats] = useState<AdminApprovalStats | null>(null);
-  const [cardData, setCardData] = useState<AdminStatCardData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const useAdminStats = (initialStats?: AdminApprovalStats | null): UseAdminStatsReturn => {
+  const [stats, setStats] = useState<AdminApprovalStats | null>(initialStats ?? null);
+  const [cardData, setCardData] = useState<AdminStatCardData[]>(
+    initialStats ? adminStatsService.transformStatsToCardData(initialStats) : []
+  );
+  const [isLoading, setIsLoading] = useState(!initialStats);
   const [error, setError] = useState<string | null>(null);
 
   const fetchStats = useCallback(async () => {
@@ -47,8 +51,11 @@ export const useAdminStats = (): UseAdminStatsReturn => {
   }, []);
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    // Skip initial fetch if we have server-provided data
+    if (!initialStats) {
+      fetchStats();
+    }
+  }, [fetchStats, initialStats]);
 
   return {
     stats,

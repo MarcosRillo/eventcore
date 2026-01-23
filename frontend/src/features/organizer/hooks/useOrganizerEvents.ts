@@ -1,18 +1,25 @@
-import { useState, useEffect, useRef } from 'react'
-import { getEvents, deleteEvent } from '@/features/organizer/services/organizer-event.service'
-import { OrganizerEvent, EventListParams } from '@/features/organizer/types/event.types'
+import { useEffect, useRef, useState, useTransition } from 'react'
+
+import { deleteEvent,getEvents } from '@/features/organizer/services/organizer-event.service'
+import { EventListParams,OrganizerEvent } from '@/features/organizer/types/event.types'
 
 export const useOrganizerEvents = () => {
   const [events, setEvents] = useState<OrganizerEvent[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [showPast, setShowPast] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+
+  // React 19 transitions for non-blocking UI
+  const [, startLoadingTransition] = useTransition()
+  const [, startDeleteTransition] = useTransition()
+
+  // Manual loading states for reliable test behavior
+  const [isLoading, setIsLoading] = useState(true)
+  const [isDeletingState, setIsDeletingState] = useState(false)
 
   // Use refs to access current state values in refetch
   const currentPageRef = useRef(currentPage)
@@ -25,27 +32,29 @@ export const useOrganizerEvents = () => {
   const perPage = 10
 
   const fetchEvents = async (page = currentPage, status = statusFilter, isPast = showPast) => {
-    setLoading(true)
+    setIsLoading(true)
     setError(null)
 
-    try {
-      const params: EventListParams = {
-        page,
-        per_page: perPage,
-        status,
-        show_past: isPast ? '1' : undefined
-      }
+    startLoadingTransition(async () => {
+      try {
+        const params: EventListParams = {
+          page,
+          per_page: perPage,
+          status,
+          show_past: isPast ? '1' : undefined
+        }
 
-      const response = await getEvents(params)
-      setEvents(response.data)
-      setCurrentPage(response.current_page)
-      setTotalPages(response.last_page || 1)
-      setTotal(response.total)
-    } catch {
-      setError('Error loading events')
-    } finally {
-      setLoading(false)
-    }
+        const response = await getEvents(params)
+        setEvents(response.data)
+        setCurrentPage(response.current_page)
+        setTotalPages(response.last_page || 1)
+        setTotal(response.total)
+      } catch {
+        setError('Error loading events')
+      } finally {
+        setIsLoading(false)
+      }
+    })
   }
 
   useEffect(() => {
@@ -88,16 +97,22 @@ export const useOrganizerEvents = () => {
       return
     }
 
-    setIsDeleting(true)
-    try {
-      await deleteEvent(id)
-      fetchEvents(currentPage, statusFilter, showPast) // Refresh list
-    } catch {
-      setError('Error deleting event')
-    } finally {
-      setIsDeleting(false)
-    }
+    setIsDeletingState(true)
+    startDeleteTransition(async () => {
+      try {
+        await deleteEvent(id)
+        fetchEvents(currentPage, statusFilter, showPast) // Refresh list
+      } catch {
+        setError('Error deleting event')
+      } finally {
+        setIsDeletingState(false)
+      }
+    })
   }
+
+  // Backward compatibility: map states to original names
+  const loading = isLoading
+  const isDeleting = isDeletingState
 
   return {
     events,

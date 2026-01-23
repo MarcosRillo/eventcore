@@ -6,8 +6,9 @@
  */
 
 import React from 'react'
-import { Modal, Button } from '@/components/ui'
-import type { Organization } from '../../types/organization.types'
+
+import { Button,Modal } from '@/components/ui'
+import type { Organization } from '@/features/organizations/types/organization.types'
 
 interface OrganizationDetailModalProps {
   organization: Organization | null

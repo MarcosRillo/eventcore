@@ -2,10 +2,10 @@
 
 namespace App\Features\Auth\Services;
 
+use App\Features\Auth\Notifications\InvitationNotification;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Features\Auth\Notifications\InvitationNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -63,7 +63,7 @@ class InvitationService
             ]);
 
             // Store plain token temporarily for email (selector + validator)
-            $invitation->plain_token = $selector . $validator;
+            $invitation->plain_token = $selector.$validator;
 
             Log::info('Invitation sent', [
                 'invitation_id' => $invitation->id,
@@ -83,7 +83,7 @@ class InvitationService
     {
         $invitation = $this->validateToken($token);
 
-        if (!$invitation) {
+        if (! $invitation) {
             throw ValidationException::withMessages([
                 'token' => ['Token de invitación inválido o expirado.'],
             ]);
@@ -140,12 +140,12 @@ class InvitationService
         // Find invitation by selector (fast indexed lookup)
         $invitation = Invitation::where('selector', $selector)->first();
 
-        if (!$invitation || !$invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             return null;
         }
 
         // Verify validator against stored hash (timing-safe comparison)
-        if (!Hash::check($validator, $invitation->token)) {
+        if (! Hash::check($validator, $invitation->token)) {
             return null;
         }
 
@@ -160,7 +160,7 @@ class InvitationService
         $invitation = Invitation::findOrFail($invitationId);
 
         // Only the inviter or a platform admin can cancel
-        if ($invitation->invited_by !== $cancelledBy->id && !$cancelledBy->isPlatformAdmin()) {
+        if ($invitation->invited_by !== $cancelledBy->id && ! $cancelledBy->isPlatformAdmin()) {
             throw ValidationException::withMessages([
                 'invitation' => ['You do not have permission to cancel this invitation.'],
             ]);
@@ -186,7 +186,7 @@ class InvitationService
         $invitation = Invitation::findOrFail($invitationId);
 
         // Only the inviter or a platform admin can resend
-        if ($invitation->invited_by !== $requestedBy->id && !$requestedBy->isPlatformAdmin()) {
+        if ($invitation->invited_by !== $requestedBy->id && ! $requestedBy->isPlatformAdmin()) {
             throw new AccessDeniedHttpException('You do not have permission to resend this invitation.');
         }
 
@@ -208,7 +208,7 @@ class InvitationService
             ]);
 
             // Send notification with new token
-            $plainToken = $selector . $validator;
+            $plainToken = $selector.$validator;
             $invitation->notify(new InvitationNotification($plainToken));
 
             Log::info('Invitation resent', [
@@ -229,7 +229,7 @@ class InvitationService
         $query = Invitation::valid()->with(['role', 'inviter']);
 
         // Platform admins see all, others see only their own
-        if (!$user->isPlatformAdmin()) {
+        if (! $user->isPlatformAdmin()) {
             $query->where('invited_by', $user->id);
         }
 
@@ -254,7 +254,7 @@ class InvitationService
         $inviterRole = $inviter->role?->role_code;
         $targetRole = UserRole::find($roleId)?->role_code;
 
-        if (!$inviterRole || !$targetRole) {
+        if (! $inviterRole || ! $targetRole) {
             throw ValidationException::withMessages([
                 'role_id' => ['Invalid role specified.'],
             ]);
@@ -262,7 +262,7 @@ class InvitationService
 
         $allowedRoles = self::INVITATION_PERMISSIONS[$inviterRole] ?? [];
 
-        if (!in_array($targetRole, $allowedRoles)) {
+        if (! in_array($targetRole, $allowedRoles)) {
             throw ValidationException::withMessages([
                 'role_id' => ["You do not have permission to invite users with the '{$targetRole}' role."],
             ]);

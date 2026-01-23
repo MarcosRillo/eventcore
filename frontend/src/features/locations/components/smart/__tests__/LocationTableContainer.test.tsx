@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { LocationTableContainer } from '../LocationTableContainer'
-import { Location } from '@/types/location.types'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+
+import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer'
 import { PaginationMeta } from '@/types/api-response.types'
+import { Location } from '@/types/location.types'
 
 // Mock GenericTable
 jest.mock('@/shared/components/tables', () => ({
@@ -89,14 +90,13 @@ jest.mock('@/shared/components/tables', () => ({
   },
 }))
 
-// Mock heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  PencilIcon: () => <span data-testid="pencil-icon" />,
-  TrashIcon: () => <span data-testid="trash-icon" />,
-  MapPinIcon: () => <span data-testid="map-pin-icon" />,
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Pencil: () => <span data-testid="pencil-icon" />,
+  Trash2: () => <span data-testid="trash-icon" />,
+  MapPin: () => <span data-testid="map-pin-icon" />,
 }))
 
-import React from 'react'
 
 // Helper to create mock location
 const createMockLocation = (overrides: Partial<Location> = {}): Location => ({

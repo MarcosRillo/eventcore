@@ -3,11 +3,11 @@
  * Type definitions for event-related data structures
  */
 
-import type { Location } from '@/types/location.types';
+import type { PaginatedResponse } from '@/types/api-response.types';
 import type { User } from '@/types/auth.types';
 import type { EntityStats } from '@/types/generic-infrastructure.types';
+import type { Location } from '@/types/location.types';
 import type { EventOperation } from '@/types/operations.types';
-
 /**
  * Event status constants - matching backend Event model
  */
@@ -97,7 +97,8 @@ export interface EventSubtypeInfo {
 export interface EventStatusInfo {
   id: number;
   status_code: EventStatusCode;
-  name: string;
+  status_name: string;
+  description: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -249,7 +250,6 @@ export interface EventFilters {
 /**
  * Event pagination - DEPRECATED: Use PaginatedResponse<Event> directly
  */
-import type { PaginatedResponse } from './api-response.types';
 export type EventPagination = PaginatedResponse<Event>;
 
 /**

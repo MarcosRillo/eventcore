@@ -2,10 +2,11 @@
  * Reset Password Hook
  * Manages reset password form state, token validation, and submission
  */
-import { useState, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { AxiosError } from 'axios';
-import { validateResetToken, resetPassword } from '@/services/authService';
+import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+
+import { resetPassword,validateResetToken } from '@/services/authService';
 
 interface PasswordErrors {
   password?: string;
@@ -43,6 +44,7 @@ interface PasswordRequirement {
 
 /**
  * Password validation requirements
+ * @param password
  */
 const getPasswordRequirements = (password: string): PasswordRequirement[] => [
   { label: 'Mínimo 8 caracteres', met: password.length >= 8 },
@@ -53,6 +55,7 @@ const getPasswordRequirements = (password: string): PasswordRequirement[] => [
 
 /**
  * Validates password meets all requirements
+ * @param password
  */
 const isPasswordValid = (password: string): boolean => {
   return getPasswordRequirements(password).every(req => req.met);
@@ -63,13 +66,17 @@ export const useResetPassword = (): UseResetPasswordReturn => {
   const token = searchParams.get('token') || '';
   const email = searchParams.get('email') || '';
 
+  // React 19 transitions for non-blocking UI
+  const [, startValidateTransition] = useTransition();
+  const [, startResetTransition] = useTransition();
+
   // Form state
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Status state
-  const [isLoading, setIsLoading] = useState(false);
-  const [isValidating, setIsValidating] = useState(true);
+  // Status state (manual for reliable test behavior)
+  const [isLoadingState, setIsLoadingState] = useState(false);
+  const [isValidatingState, setIsValidatingState] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<PasswordErrors>({});
   const [success, setSuccess] = useState(false);
@@ -77,30 +84,32 @@ export const useResetPassword = (): UseResetPasswordReturn => {
 
   // Validate token on mount
   useEffect(() => {
-    const checkToken = async () => {
+    const checkToken = () => {
       if (!token || !email) {
         setTokenValid(false);
-        setIsValidating(false);
+        setIsValidatingState(false);
         setError('El enlace de recuperación es inválido. Por favor solicita uno nuevo.');
         return;
       }
 
-      try {
-        const response = await validateResetToken({ email, token });
-        setTokenValid(response.data.valid);
-        if (!response.data.valid) {
-          setError('El enlace ha expirado o ya fue utilizado. Por favor solicita uno nuevo.');
+      startValidateTransition(async () => {
+        try {
+          const response = await validateResetToken({ email, token });
+          setTokenValid(response.data.valid);
+          if (!response.data.valid) {
+            setError('El enlace ha expirado o ya fue utilizado. Por favor solicita uno nuevo.');
+          }
+        } catch {
+          setTokenValid(false);
+          setError('Error al validar el enlace. Por favor intenta de nuevo.');
+        } finally {
+          setIsValidatingState(false);
         }
-      } catch {
-        setTokenValid(false);
-        setError('Error al validar el enlace. Por favor intenta de nuevo.');
-      } finally {
-        setIsValidating(false);
-      }
+      });
     };
 
     checkToken();
-  }, [token, email]);
+  }, [token, email, startValidateTransition]);
 
   // Computed values
   const passwordRequirements = getPasswordRequirements(password);
@@ -138,35 +147,37 @@ export const useResetPassword = (): UseResetPasswordReturn => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoadingState(true);
     setError(null);
 
-    try {
-      await resetPassword({
-        email,
-        token,
-        password,
-        password_confirmation: confirmPassword,
-      });
-      setSuccess(true);
-    } catch (err) {
-      const axiosError = err as AxiosError<{ message?: string }>;
+    startResetTransition(async () => {
+      try {
+        await resetPassword({
+          email,
+          token,
+          password,
+          password_confirmation: confirmPassword,
+        });
+        setSuccess(true);
+      } catch (err) {
+        const axiosError = err as AxiosError<{ message?: string }>;
 
-      // Use HTTP status codes for reliable error detection
-      if (axiosError.response?.status === 400 || axiosError.response?.status === 422) {
-        // Token expired, invalid, or already used
-        setError('El enlace ha expirado. Por favor solicita uno nuevo.');
-        setTokenValid(false);
-      } else if (axiosError.response?.data?.message) {
-        // Backend provided a specific error message
-        setError(axiosError.response.data.message);
-      } else {
-        setError('Error al restablecer la contraseña. Por favor intenta de nuevo.');
+        // Use HTTP status codes for reliable error detection
+        if (axiosError.response?.status === 400 || axiosError.response?.status === 422) {
+          // Token expired, invalid, or already used
+          setError('El enlace ha expirado. Por favor solicita uno nuevo.');
+          setTokenValid(false);
+        } else if (axiosError.response?.data?.message) {
+          // Backend provided a specific error message
+          setError(axiosError.response.data.message);
+        } else {
+          setError('Error al restablecer la contraseña. Por favor intenta de nuevo.');
+        }
+      } finally {
+        setIsLoadingState(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [email, token, password, confirmPassword, tokenValid, validateForm]);
+    });
+  }, [email, token, password, confirmPassword, tokenValid, validateForm, startResetTransition]);
 
   const reset = useCallback(() => {
     setPassword('');
@@ -174,8 +185,12 @@ export const useResetPassword = (): UseResetPasswordReturn => {
     setError(null);
     setFieldErrors({});
     setSuccess(false);
-    setIsLoading(false);
+    setIsLoadingState(false);
   }, []);
+
+  // Backward compatibility
+  const isLoading = isLoadingState;
+  const isValidating = isValidatingState;
 
   return {
     password,

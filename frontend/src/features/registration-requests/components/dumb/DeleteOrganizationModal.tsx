@@ -5,9 +5,10 @@
  * Modal for confirming deletion of user + organization (only when suspended)
  */
 
-import { useCallback } from 'react'
 import { AlertCircle, Trash2 } from 'lucide-react'
-import { Modal, Button } from '@/components/ui'
+import { useCallback } from 'react'
+
+import { Button,Modal } from '@/components/ui'
 
 interface DeleteOrganizationModalProps {
   isOpen: boolean
@@ -17,6 +18,15 @@ interface DeleteOrganizationModalProps {
   onConfirm: () => void
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.organizationName
+ * @param root0.onClose
+ * @param root0.onConfirm
+ */
 export function DeleteOrganizationModal({
   isOpen,
   loading,

@@ -5,16 +5,20 @@
  * Orchestrates hook and dumb components for registration request management
  */
 
-import { useState, useCallback, useEffect } from 'react'
-import { useToast } from '@/components/ui'
-import { useRegistrationRequests } from '../../hooks/useRegistrationRequests'
-import { RegistrationRequestTable } from '../dumb/RegistrationRequestTable'
-import { RegistrationRequestDetailPanel } from '../dumb/RegistrationRequestDetail'
-import { RejectRequestModalContainer } from './RejectRequestModalContainer'
-import { SuspendConfirmModal } from '../dumb/SuspendConfirmModal'
-import { DeleteOrganizationModal } from '../dumb/DeleteOrganizationModal'
-import type { RegistrationRequest } from '../../types/registration-request.types'
+import { useCallback, useEffect,useState } from 'react'
 
+import { useToast } from '@/components/ui'
+import { DeleteOrganizationModal } from '@/features/registration-requests/components/dumb/DeleteOrganizationModal'
+import { RegistrationRequestDetailPanel } from '@/features/registration-requests/components/dumb/RegistrationRequestDetail'
+import { RegistrationRequestTable } from '@/features/registration-requests/components/dumb/RegistrationRequestTable'
+import { SuspendConfirmModal } from '@/features/registration-requests/components/dumb/SuspendConfirmModal'
+import { RejectRequestModalContainer } from '@/features/registration-requests/components/smart/RejectRequestModalContainer'
+import { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
+import type { RegistrationRequest } from '@/features/registration-requests/types/registration-request.types'
+
+/**
+ *
+ */
 export function RegistrationRequestsContainer() {
   const { addToast } = useToast()
 

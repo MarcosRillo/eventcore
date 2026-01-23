@@ -6,18 +6,19 @@
  */
 
 import { useEffect, useState } from 'react';
+
+import {
+  Checkbox,
+  FormModal,
+  FormSubmitHandler,
+  FormValidator,
+  Input,
+} from '@/components/ui';
 import {
   updateEventSubtype,
   validateEventSubtypeData,
 } from '@/features/event-types/services/eventSubtype.service';
 import { EventSubtype, UpdateEventSubtypeData } from '@/types/eventType.types';
-import {
-  FormModal,
-  FormSubmitHandler,
-  FormValidator,
-  Input,
-  Checkbox,
-} from '@/components/ui';
 
 interface EditEventSubtypeModalProps {
   isOpen: boolean;

@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import CreateInvitationModal from '../CreateInvitationModal'
-import { AssignableRole } from '../../../types/invitation.types'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import CreateInvitationModal from '@/features/invitations/components/dumb/CreateInvitationModal'
+import { AssignableRole } from '@/features/invitations/types/invitation.types'
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({

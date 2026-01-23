@@ -26,6 +26,9 @@ const customJestConfig = {
   maxWorkers: process.env.CI ? 2 : '50%', // Use fewer workers in CI, 50% of cores locally
   testTimeout: 10000, // 10 second timeout per test
   workerIdleMemoryLimit: '512MB', // Restart workers if they exceed this memory
+  // Force exit after tests to avoid worker hang from external libs (react-big-calendar, HeadlessUI)
+  // Note: This is expected and safe since all tests pass
+  forceExit: true,
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

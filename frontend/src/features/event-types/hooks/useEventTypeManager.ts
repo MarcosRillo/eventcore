@@ -6,12 +6,13 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { usePaginatedData, PaginationMeta } from '@/hooks/usePaginatedData';
+
 import { useAuth } from '@/context/AuthContext';
 import {
-  getEventTypes,
   deleteEventType,
+  getEventTypes,
 } from '@/features/event-types/services/eventType.service';
+import { PaginationMeta,usePaginatedData } from '@/hooks/usePaginatedData';
 import {
   EventType,
   EventTypeFilterStatus,
@@ -64,6 +65,9 @@ interface UseEventTypeManagerReturn {
   };
 }
 
+/**
+ *
+ */
 export function useEventTypeManager(): UseEventTypeManagerReturn {
   // Initial filters
   const initialFilters: EventTypeFilters = {

@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+
+import { ToastProvider } from '@/components/ui/Toast'
 import { OrganizerEventListContainer } from '@/features/organizer/components/smart/OrganizerEventListContainer'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
-import { ToastProvider } from '@/components/ui/Toast'
 
 jest.mock('../services/organizer-event.service')
 

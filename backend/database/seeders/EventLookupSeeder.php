@@ -44,7 +44,7 @@ class EventLookupSeeder extends Seeder
         foreach ($origins as $origin) {
             EventOrigin::updateOrCreate(
                 ['code' => $origin['code']],
-                $origin
+                $origin,
             );
         }
     }
@@ -68,7 +68,7 @@ class EventLookupSeeder extends Seeder
         foreach ($themes as $theme) {
             EventTheme::updateOrCreate(
                 ['code' => $theme['code']],
-                $theme
+                $theme,
             );
         }
     }
@@ -91,7 +91,7 @@ class EventLookupSeeder extends Seeder
         foreach ($frequencies as $frequency) {
             EventFrequency::updateOrCreate(
                 ['code' => $frequency['code']],
-                $frequency
+                $frequency,
             );
         }
     }
@@ -110,7 +110,7 @@ class EventLookupSeeder extends Seeder
         foreach ($rotationTypes as $rotationType) {
             EventRotationType::updateOrCreate(
                 ['code' => $rotationType['code']],
-                $rotationType
+                $rotationType,
             );
         }
     }
@@ -132,7 +132,7 @@ class EventLookupSeeder extends Seeder
         foreach ($services as $service) {
             EventService::updateOrCreate(
                 ['code' => $service['code']],
-                $service
+                $service,
             );
         }
     }
@@ -177,7 +177,7 @@ class EventLookupSeeder extends Seeder
 
         foreach ($subtypesByType as $typeName => $subtypes) {
             $eventType = $eventTypes->get($typeName);
-            if (!$eventType) {
+            if (! $eventType) {
                 continue;
             }
 
@@ -187,7 +187,7 @@ class EventLookupSeeder extends Seeder
                         'event_type_id' => $eventType->id,
                         'code' => $subtype['code'],
                     ],
-                    array_merge($subtype, ['event_type_id' => $eventType->id])
+                    array_merge($subtype, ['event_type_id' => $eventType->id]),
                 );
             }
         }

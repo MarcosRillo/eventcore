@@ -1,5 +1,6 @@
-import { renderHook, act } from '@testing-library/react'
-import { useRejectRequest } from '../useRejectRequest'
+import { act,renderHook } from '@testing-library/react'
+
+import { useRejectRequest } from '@/features/registration-requests/hooks/useRejectRequest'
 
 describe('useRejectRequest', () => {
   const defaultProps = {

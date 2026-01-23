@@ -4,9 +4,10 @@
  * Receives all state via props (no hooks)
  */
 
+import { Loader2,Mail, UserPlus } from 'lucide-react'
 import { FormEvent } from 'react'
-import { AssignableRole } from '../../types/invitation.types'
-import { Mail, UserPlus, Loader2 } from 'lucide-react'
+
+import { AssignableRole } from '@/features/invitations/types/invitation.types'
 
 interface FormErrors {
   email?: string

@@ -5,10 +5,11 @@
 
 'use client';
 
-import { Suspense } from 'react';
 import Link from 'next/link';
-import { useResetPassword } from '@/features/auth';
+import { Suspense } from 'react';
+
 import { Button, Input, LoadingSpinner } from '@/components/ui';
+import { useResetPassword } from '@/features/auth';
 
 const ResetPasswordContent = () => {
   const {

@@ -2,17 +2,16 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Features\Auth\Notifications\RegistrationApprovedNotification;
+use App\Features\Auth\Notifications\RegistrationRejectedNotification;
+use App\Features\Auth\Notifications\RegistrationRequestReceivedNotification;
+use App\Models\Organization;
 use App\Models\RegistrationRequest;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
-use App\Features\Auth\Notifications\RegistrationRequestReceivedNotification;
-use App\Features\Auth\Notifications\RegistrationApprovedNotification;
-use App\Features\Auth\Notifications\RegistrationRejectedNotification;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -35,6 +34,7 @@ class RegistrationRequestTest extends TestCase
         $user = User::factory()->create(['role_id' => $role->id]);
         $organization = Organization::factory()->create();
         $user->organizations()->attach($organization->id);
+
         return $user;
     }
 
@@ -72,7 +72,7 @@ class RegistrationRequestTest extends TestCase
 
         Notification::assertSentTo(
             RegistrationRequest::where('email', 'organizer@example.com')->first(),
-            RegistrationRequestReceivedNotification::class
+            RegistrationRequestReceivedNotification::class,
         );
     }
 
@@ -84,7 +84,7 @@ class RegistrationRequestTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'dni', 'first_name', 'last_name', 'email',
-            'whatsapp', 'organization_name', 'organization_cuit', 'organization_sector', 'motivation'
+            'whatsapp', 'organization_name', 'organization_cuit', 'organization_sector', 'motivation',
         ]);
     }
 

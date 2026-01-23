@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { EventTableContainer } from '../EventTableContainer';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
 import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types';
 
 // Mock GenericTable to simplify testing the container logic
@@ -50,22 +51,18 @@ jest.mock('@/shared/components/tables', () => ({
   )),
 }));
 
-// Mock Heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  EyeIcon: () => <span>EyeIcon</span>,
-  PencilIcon: () => <span>PencilIcon</span>,
-  CheckCircleIcon: () => <span>CheckCircleIcon</span>,
-  StarIcon: () => <span>StarIcon</span>,
-  DocumentDuplicateIcon: () => <span>DocumentDuplicateIcon</span>,
-  TrashIcon: () => <span>TrashIcon</span>,
-  PaperAirplaneIcon: () => <span>PaperAirplaneIcon</span>,
-  ChatBubbleLeftIcon: () => <span>ChatBubbleLeftIcon</span>,
-  ShareIcon: () => <span>ShareIcon</span>,
-  CalendarIcon: () => <span>CalendarIcon</span>,
-}));
-
-jest.mock('@heroicons/react/24/solid', () => ({
-  StarIcon: () => <span>StarIconSolid</span>,
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Eye: () => <span>Eye</span>,
+  Pencil: () => <span>Pencil</span>,
+  CheckCircle: () => <span>CheckCircle</span>,
+  Star: () => <span>Star</span>,
+  Copy: () => <span>Copy</span>,
+  Trash2: () => <span>Trash2</span>,
+  Send: () => <span>Send</span>,
+  MessageCircle: () => <span>MessageCircle</span>,
+  Share2: () => <span>Share2</span>,
+  Calendar: () => <span>Calendar</span>,
 }));
 
 const createMockEvent = (overrides?: Partial<Event>): Event => ({

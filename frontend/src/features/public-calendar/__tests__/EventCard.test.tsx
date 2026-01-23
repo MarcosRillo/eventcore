@@ -4,9 +4,10 @@
  * Tests event card display, featured badge, and click handling.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import { EventCard } from '../components/dumb/EventCard'
-import { PublicEvent } from '../types/public-calendar.types'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
+import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 describe('EventCard', () => {
   const mockEvent: PublicEvent = {

@@ -7,11 +7,12 @@
 
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { useApprovalManager } from './useApprovalManager';
-import type { Event, EventStatusCode } from '@/types/event.types';
+import { useCallback, useMemo,useState } from 'react';
+
+import { useApprovalManager } from '@/features/entity-admin/hooks/useApprovalManager';
 import type { ApprovalAction } from '@/features/entity-admin/types';
 import { MIN_COMMENT_LENGTH, STATUS_ACTIONS_MAP } from '@/features/entity-admin/types';
+import type { Event, EventStatusCode } from '@/types/event.types';
 
 interface UseEventManagementOptions {
   onSuccess?: () => void;
@@ -45,6 +46,7 @@ interface UseEventManagementReturn {
 
 /**
  * Hook for managing event approval modal and actions
+ * @param options
  */
 export const useEventManagement = (
   options: UseEventManagementOptions = {}

@@ -7,7 +7,7 @@
 
 import { UserEditModal } from '@/features/users/components/dumb/UserEditModal'
 import { useUserEdit } from '@/features/users/hooks/useUserEdit'
-import type { User, UpdateUserData } from '@/features/users/types/user.types'
+import type { UpdateUserData,User } from '@/features/users/types/user.types'
 
 interface UserEditModalContainerProps {
   user: User | null
@@ -17,6 +17,15 @@ interface UserEditModalContainerProps {
   onSave: (id: number, data: UpdateUserData) => Promise<boolean>
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.user
+ * @param root0.isOpen
+ * @param root0.loading
+ * @param root0.onClose
+ * @param root0.onSave
+ */
 export function UserEditModalContainer({
   user,
   isOpen,

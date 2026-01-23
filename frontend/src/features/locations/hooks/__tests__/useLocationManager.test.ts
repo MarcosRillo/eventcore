@@ -1,5 +1,6 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useLocationManager } from '../useLocationManager'
+import { act, renderHook, waitFor } from '@testing-library/react'
+
+import { useLocationManager } from '@/features/locations/hooks/useLocationManager'
 import * as locationService from '@/features/locations/services/location.service'
 
 // Mock the service

@@ -24,8 +24,8 @@ class RoleController extends Controller
             $roles = $query->orderBy('role_name')->get();
         } else {
             $roles = $query->whereIn('role_code', ['entity_staff', 'organizer_admin'])
-                          ->orderBy('role_name')
-                          ->get();
+                ->orderBy('role_name')
+                ->get();
         }
 
         return response()->json([

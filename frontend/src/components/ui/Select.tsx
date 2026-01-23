@@ -3,9 +3,9 @@
  * Clean dropdown using Headless UI for accessibility
  */
 
-import { Fragment } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
-import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { Fragment } from 'react'
 
 export interface SelectOption {
   value: string | number
@@ -90,7 +90,7 @@ const Select = ({
               {displayValue}
             </span>
             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <ChevronUpDownIcon className={`${iconSize[size]} text-neutral-400`} aria-hidden="true" />
+              <ChevronsUpDown className={`${iconSize[size]} text-neutral-400`} aria-hidden="true" />
             </span>
           </Listbox.Button>
 
@@ -119,7 +119,7 @@ const Select = ({
                       </span>
                       {selected && (
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-600">
-                          <CheckIcon className="h-4 w-4" aria-hidden="true" />
+                          <Check className="h-4 w-4" aria-hidden="true" />
                         </span>
                       )}
                     </>

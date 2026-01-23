@@ -6,8 +6,9 @@
 
 'use client';
 
-import { createContext, useContext, ReactNode, useMemo, useRef } from 'react';
-import { useAuthActions } from './useAuthActions';
+import { createContext, ReactNode, useContext, useMemo, useRef } from 'react';
+
+import { useAuthActions } from '@/context/useAuthActions';
 import { AuthContextType } from '@/types/auth.types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +29,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // State
       user: authState.user,
       token: authState.token,
-      isAuthenticated: Boolean(authState.user && authState.token),
+      isAuthenticated: Boolean(authState.user),
       isLoading: authState.isLoading,
       error: authState.error,
 

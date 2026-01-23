@@ -12,10 +12,10 @@ class InvitationNotification extends Notification
     use Queueable;
 
     /**
-     * @param string $plainToken The plain token (selector + validator) for the invitation URL
+     * @param  string  $plainToken  The plain token (selector + validator) for the invitation URL
      */
     public function __construct(
-        private string $plainToken
+        private string $plainToken,
     ) {}
 
     /**

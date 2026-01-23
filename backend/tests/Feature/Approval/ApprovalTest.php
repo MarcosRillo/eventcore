@@ -6,9 +6,9 @@ use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
+use Tests\Feature\Events\EventTestCase;
 
-class ApprovalTest extends TestCase
+class ApprovalTest extends EventTestCase
 {
     use RefreshDatabase;
 
@@ -26,29 +26,16 @@ class ApprovalTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
-    private function authenticateUser(): User
+    /**
+     * Override to add organization attachment for approval tests
+     */
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        // Specify entity_admin role explicitly (FormRequests only allow entity_admin and entity_staff)
-        $entityAdminRole = \App\Models\UserRole::where('role_code', 'entity_admin')->first();
-
-        $user = User::factory()->create([
-            'role_id' => $entityAdminRole->id
-        ]);
-
+        $user = parent::authenticateUser($role);
         $this->organization = \App\Models\Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
-        $this->actingAs($user, 'sanctum');
-        return $user;
-    }
 
-    /**
-     * Get event status ID by status code
-     */
-    private function getStatusId(string $statusCode): int
-    {
-        return \DB::table('event_statuses')
-            ->where('status_code', $statusCode)
-            ->value('id') ?? 1;
+        return $user;
     }
 
     #[Test]
@@ -58,18 +45,32 @@ class ApprovalTest extends TestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/approve", [
-            'comments' => 'Event approved for publication'
+            'comments' => 'Event approved for publication',
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description'],
+            ],
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'approved_internal');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be approved
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('approved_internal'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('approved_internal'),
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -79,18 +80,32 @@ class ApprovalTest extends TestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/reject", [
-            'reason' => 'Event does not meet quality standards'
+            'reason' => 'Event does not meet quality standards',
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description'],
+            ],
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'rejected');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be rejected
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('rejected'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('rejected'),
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -100,18 +115,32 @@ class ApprovalTest extends TestCase
 
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('pending_internal_approval')
+            'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/request-changes", [
-            'reason' => 'Please improve the event description and add more details'
+            'reason' => 'Please improve the event description and add more details',
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description'],
+            ],
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'requires_changes');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should have changes requested
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('requires_changes'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('requires_changes'),
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -122,18 +151,32 @@ class ApprovalTest extends TestCase
         // Must start from pending_public_approval state (valid transition to published)
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('pending_public_approval')
+            'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/publish", [
-            'publish_immediately' => true
+            'publish_immediately' => true,
         ]);
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description'],
+            ],
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'published');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be published
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('published'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('published'),
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]
@@ -144,16 +187,30 @@ class ApprovalTest extends TestCase
         // Must start from approved_internal state (valid transition path)
         $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
-            'status_id' => $this->getStatusId('approved_internal')
+            'status_id' => $this->getStatusId('approved_internal'),
         ]);
 
         $response = $this->patchJson("/api/v1/events/{$event->id}/request-public");
 
+        // Assert response (4 assertions)
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'status' => ['id', 'status_code', 'status_name', 'description'],
+            ],
+        ]);
+        $response->assertJsonPath('data.status.status_code', 'pending_public_approval');
+        $this->assertNotNull($response->json('data'));
 
-        // Event should be pending public approval
+        // Assert database state (3+ assertions)
         $event->refresh();
         $this->assertEquals($this->getStatusId('pending_public_approval'), $event->status_id);
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'status_id' => $this->getStatusId('pending_public_approval'),
+        ]);
+        $this->assertNotNull($event->updated_at);
     }
 
     #[Test]

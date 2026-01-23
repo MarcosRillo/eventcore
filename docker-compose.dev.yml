@@ -1,14 +1,10 @@
 services:
   # Base de datos PostgreSQL
   db:
-    image: postgres:15
+    image: postgres:15.13
     container_name: plataforma-calendario-db
     restart: unless-stopped
-    environment:
-      POSTGRES_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
-      POSTGRES_DB: ${DB_DATABASE:-eventos_tucuman}
-      POSTGRES_USER: ${DB_USERNAME:-eventos_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-eventos_pass}
+    env_file: .env.docker
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -16,7 +12,7 @@ services:
     networks:
       - plataforma-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-eventos_user} -d ${DB_DATABASE:-eventos_tucuman}"]
+      test: ["CMD-SHELL", "pg_isready -U plataforma_user -d plataforma_calendario"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -35,6 +31,7 @@ services:
     volumes:
       - ./backend:/var/www
       - composer_cache:/home/www/.composer
+    env_file: .env.docker
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -42,9 +39,6 @@ services:
       - DB_CONNECTION=pgsql
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_DATABASE=${DB_DATABASE:-eventos_tucuman}
-      - DB_USERNAME=${DB_USERNAME:-eventos_user}
-      - DB_PASSWORD=${DB_PASSWORD:-eventos_pass}
       - XDEBUG_MODE=${XDEBUG_MODE:-off}
       - XDEBUG_CONFIG=client_host=host.docker.internal
     networks:

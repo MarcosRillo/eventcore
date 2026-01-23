@@ -6,7 +6,6 @@ use App\Models\Event;
 use App\Models\EventAsyncDate;
 use App\Models\Organization;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Event Data Preparation Trait
@@ -19,25 +18,25 @@ trait EventDataPreparation
     /**
      * Prepare event data for creation.
      *
-     * @param array $data Input data from request
-     * @param User $user The user creating the event
-     * @param int $statusId Status ID (draft)
-     * @param int $formatId Event format ID
+     * @param  array  $data  Input data from request
+     * @param  User  $user  The user creating the event
+     * @param  int  $statusId  Status ID (draft)
+     * @param  int  $formatId  Event format ID
      * @return array Prepared data for Event::create()
      */
     protected function prepareEventData(array $data, User $user, int $statusId, int $formatId): array
     {
         return array_merge(
             $this->getSystemFields($data, $user, $statusId, $formatId),
-            $this->getEventFields($data)
+            $this->getEventFields($data),
         );
     }
 
     /**
      * Prepare event data for update.
      *
-     * @param array $data Input data from request
-     * @param Event $event The event being updated
+     * @param  array  $data  Input data from request
+     * @param  Event  $event  The event being updated
      * @return array Prepared data for Event::update()
      */
     protected function prepareUpdateData(array $data, Event $event): array
@@ -128,14 +127,14 @@ trait EventDataPreparation
     /**
      * Sync event services (pivot table).
      *
-     * @param Event $event The event
-     * @param array $serviceIds Array of service IDs
+     * @param  Event  $event  The event
+     * @param  array  $serviceIds  Array of service IDs
      */
     protected function syncEventServices(Event $event, array $serviceIds): void
     {
         // Sync services with is_included = true
         $services = collect($serviceIds)->mapWithKeys(fn ($id) => [
-            $id => ['is_included' => true]
+            $id => ['is_included' => true],
         ])->toArray();
 
         $event->services()->sync($services);
@@ -144,8 +143,8 @@ trait EventDataPreparation
     /**
      * Sync event rooms (pivot table).
      *
-     * @param Event $event The event
-     * @param array $roomIds Array of room IDs
+     * @param  Event  $event  The event
+     * @param  array  $roomIds  Array of room IDs
      */
     protected function syncEventRooms(Event $event, array $roomIds): void
     {
@@ -155,8 +154,8 @@ trait EventDataPreparation
     /**
      * Sync async dates (separate table).
      *
-     * @param Event $event The event
-     * @param array $asyncDates Array of async date data
+     * @param  Event  $event  The event
+     * @param  array  $asyncDates  Array of async date data
      */
     protected function syncAsyncDates(Event $event, array $asyncDates): void
     {
@@ -176,8 +175,8 @@ trait EventDataPreparation
     /**
      * Handle all event relations after create/update.
      *
-     * @param Event $event The event
-     * @param array $data Request data
+     * @param  Event  $event  The event
+     * @param  array  $data  Request data
      */
     protected function syncEventRelations(Event $event, array $data): void
     {

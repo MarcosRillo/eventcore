@@ -4,8 +4,9 @@
  * Tests the timeline display of approval history.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ApprovalHistoryTimeline } from '../ApprovalHistoryTimeline';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline';
 import type { ApprovalHistoryEntry } from '@/types/event.types';
 
 describe('ApprovalHistoryTimeline', () => {

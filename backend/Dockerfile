@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2.29-fpm
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libonig-dev \
     libpq-dev \
+    procps \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install pdo_mysql \
@@ -33,9 +34,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Configuración de PCOV para coverage
-# - pcov.enabled=1 siempre activo (solo genera overhead con --coverage)
-# - PCOV no afecta rendimiento si no se usa --coverage
-# - Excluye vendor y directorios no relevantes
 RUN { \
     echo '[pcov]'; \
     echo 'pcov.enabled=1'; \
@@ -43,25 +41,34 @@ RUN { \
     echo 'pcov.exclude="~vendor|tests|database|bootstrap|storage~"'; \
     } > /usr/local/etc/php/conf.d/pcov.ini
 
+# Configuración PHP personalizada
+RUN { \
+    echo 'memory_limit = 512M'; \
+    echo 'upload_max_filesize = 64M'; \
+    echo 'post_max_size = 64M'; \
+    } > /usr/local/etc/php/conf.d/custom.ini
+
+# Configurar PHP-FPM para escuchar en todas las interfaces
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
+
 # Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # Crear usuario del sistema para ejecutar comandos de Composer y Artisan
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
+RUN groupadd -g 1000 www \
+    && useradd -u 1000 -ms /bin/bash -g www www
 
 # Establecer directorio de trabajo
 WORKDIR /var/www
 
 # Copiar archivos de la aplicación
-COPY . /var/www
-
-# Cambiar propietario de los archivos
-RUN chown -R www:www /var/www
+COPY --chown=www:www . /var/www
 
 # Cambiar al usuario www
 USER www
 
-# Exponer puerto 9000 y iniciar servidor built-in de PHP para desarrollo
+# Exponer puerto 9000 (FastCGI)
 EXPOSE 9000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=9000"]
+
+# PHP-FPM como proceso principal (NO artisan serve)
+CMD ["php-fpm"]

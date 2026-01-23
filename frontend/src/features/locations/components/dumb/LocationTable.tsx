@@ -3,10 +3,12 @@
  * Simplified table for displaying locations
  */
 
-import { Location } from '@/types/location.types';
+import { Pencil, Trash2 } from 'lucide-react';
+
+import { Button, ConfirmDialog,Pagination } from '@/components/ui';
 import { PaginationMeta } from '@/hooks/usePaginatedData';
-import { Button, Pagination, ConfirmDialog } from '@/components/ui';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Location } from '@/types/location.types';
+
 
 interface LocationTableProps {
   locations: Location[];
@@ -24,6 +26,18 @@ interface LocationTableProps {
   onCloseConfirmDialog: () => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.locations
+ * @param root0.pagination
+ * @param root0.loading
+ * @param root0.onEdit
+ * @param root0.onDelete
+ * @param root0.onPageChange
+ * @param root0.confirmDialog
+ * @param root0.onCloseConfirmDialog
+ */
 export function LocationTable({
   locations,
   pagination,
@@ -111,7 +125,7 @@ export function LocationTable({
                         title="Editar"
                         aria-label={`Editar ${location.name}`}
                       >
-                        <PencilIcon className="w-4 h-4" aria-hidden="true" />
+                        <Pencil className="w-4 h-4" aria-hidden="true" />
                       </Button>
                       <Button
                         variant="danger"
@@ -120,7 +134,7 @@ export function LocationTable({
                         title="Eliminar"
                         aria-label={`Eliminar ${location.name}`}
                       >
-                        <TrashIcon className="w-4 h-4" aria-hidden="true" />
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </td>

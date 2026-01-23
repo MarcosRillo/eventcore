@@ -3,15 +3,15 @@
  */
 
 // Legacy components (to be deprecated after refactor)
-export { ApprovalModal } from './ApprovalModal'
-export { EventTable } from './EventTable'
-export type { ApprovalActionOption, ApprovalFormData, ApprovalFormErrors } from './ApprovalModal'
-export type { EventTableViewMode, ColumnConfig, ActionConfig, ConfirmDialogData } from './EventTable'
+export type { ApprovalActionOption, ApprovalFormData, ApprovalFormErrors } from '@/features/entity-admin/components/dumb/ApprovalModal'
+export { ApprovalModal } from '@/features/entity-admin/components/dumb/ApprovalModal'
+export type { ActionConfig, ColumnConfig, ConfirmDialogData,EventTableViewMode } from '@/features/entity-admin/components/dumb/EventTable'
+export { EventTable } from '@/features/entity-admin/components/dumb/EventTable'
 
 // New approval workflow components
-export { AdminStatsGrid } from './AdminStatsGrid'
-export { AdminQuickFilters } from './AdminQuickFilters'
-export { EventInfoPanel } from './EventInfoPanel'
-export { ApprovalActionPanel } from './ApprovalActionPanel'
-export { ApprovalHistoryTimeline } from './ApprovalHistoryTimeline'
-export { EventManagementModal } from './EventManagementModal'
+export { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters'
+export { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid'
+export { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel'
+export { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline'
+export { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel'
+export { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal'

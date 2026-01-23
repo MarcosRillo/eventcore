@@ -2,8 +2,8 @@
 
 namespace App\Features\Dashboard\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\Dashboard\Services\OrganizerStatsService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 class OrganizerStatsController extends Controller
 {
     public function __construct(
-        private OrganizerStatsService $statsService
+        private OrganizerStatsService $statsService,
     ) {}
 
     /**
@@ -30,9 +30,6 @@ class OrganizerStatsController extends Controller
      * - published: Events published to public calendar (status_id 5)
      * - requires_changes: Events requiring changes (status_id 6)
      * - rejected: Events rejected (status_id 7)
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -44,7 +41,7 @@ class OrganizerStatsController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error fetching stats',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { FeaturedEventsSection } from '../FeaturedEventsSection'
+
+import { FeaturedEventsSection } from '@/features/landing/components/dumb/FeaturedEventsSection'
 
 // Mock EventCard
 jest.mock('@/features/public-calendar/components/dumb/EventCard', () => ({

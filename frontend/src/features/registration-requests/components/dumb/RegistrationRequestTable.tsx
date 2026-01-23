@@ -5,12 +5,13 @@
  * Displays a table of registration requests with filters and actions
  */
 
-import { Eye, Check, X, Pause, Play, Trash2 } from 'lucide-react'
-import { Button, LoadingSpinner, Badge } from '@/components/ui'
+import { Check, Eye, Pause, Play, Trash2,X } from 'lucide-react'
+
+import { Badge,Button, LoadingSpinner } from '@/components/ui'
 import {
-  RegistrationRequest,
   DisplayStatusFilter,
-} from '../../types/registration-request.types'
+  RegistrationRequest,
+} from '@/features/registration-requests/types/registration-request.types'
 
 interface RegistrationRequestTableProps {
   requests: RegistrationRequest[]
@@ -28,6 +29,7 @@ interface RegistrationRequestTableProps {
 /**
  * Determines the consolidated display status for a registration request.
  * Shows a single status that represents the current state of the request.
+ * @param request
  */
 const getDisplayStatus = (
   request: RegistrationRequest
@@ -70,6 +72,8 @@ const STATUS_PRIORITY: Record<string, number> = {
 
 /**
  * Filters requests based on the selected display filter.
+ * @param requests
+ * @param filter
  */
 const filterRequests = (
   requests: RegistrationRequest[],
@@ -99,6 +103,7 @@ const filterRequests = (
 
 /**
  * Sorts requests by status priority, then by date (newest first).
+ * @param requests
  */
 const sortRequests = (requests: RegistrationRequest[]): RegistrationRequest[] => {
   return [...requests].sort((a, b) => {
@@ -122,6 +127,20 @@ const formatDate = (dateString: string): string => {
   })
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.requests
+ * @param root0.loading
+ * @param root0.displayFilter
+ * @param root0.onDisplayFilterChange
+ * @param root0.onViewDetail
+ * @param root0.onApprove
+ * @param root0.onReject
+ * @param root0.onSuspend
+ * @param root0.onUnsuspend
+ * @param root0.onDelete
+ */
 export function RegistrationRequestTable({
   requests,
   loading,

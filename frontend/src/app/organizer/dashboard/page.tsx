@@ -7,6 +7,9 @@
 
 import { OrganizerDashboardContainer } from '@/features/organizer-dashboard'
 
+/**
+ *
+ */
 export default function OrganizerDashboardPage() {
   return <OrganizerDashboardContainer />
 }

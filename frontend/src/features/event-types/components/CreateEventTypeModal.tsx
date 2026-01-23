@@ -6,17 +6,17 @@
  */
 
 import {
-  createEventType,
-  validateEventTypeData,
-} from '@/features/event-types/services/eventType.service';
-import { CreateEventTypeData } from '@/types/eventType.types';
-import {
+  Checkbox,
   FormModal,
   FormSubmitHandler,
   FormValidator,
   Input,
-  Checkbox,
 } from '@/components/ui';
+import {
+  createEventType,
+  validateEventTypeData,
+} from '@/features/event-types/services/eventType.service';
+import { CreateEventTypeData } from '@/types/eventType.types';
 
 interface CreateEventTypeModalProps {
   isOpen: boolean;

@@ -8,9 +8,9 @@
  * 4. Error Handling (API failures, network errors)
  */
 
-import { eventService, eventApprovalService } from '../event.service';
+import { eventApprovalService,eventService } from '@/features/events/services/event.service';
 import apiClient from '@/services/apiClient';
-import { Event, EventFormData, EventFilters } from '@/types/event.types';
+import { Event, EventFilters,EventFormData } from '@/types/event.types';
 
 // Mock the API client
 jest.mock('@/services/apiClient');

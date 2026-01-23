@@ -5,10 +5,11 @@
  * Slide-over panel showing full details of a registration request
  */
 
+import { Building2, Check, FileText, User, X, XCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { X, User, Building2, FileText, Check, XCircle } from 'lucide-react'
-import { Button, LoadingSpinner, Badge } from '@/components/ui'
-import { RegistrationRequestDetail as RequestDetail } from '../../types/registration-request.types'
+
+import { Badge,Button, LoadingSpinner } from '@/components/ui'
+import { RegistrationRequestDetail as RequestDetail } from '@/features/registration-requests/types/registration-request.types'
 
 interface RegistrationRequestDetailProps {
   request: RequestDetail | null
@@ -36,6 +37,17 @@ const STATUS_CONFIG = {
   rejected: { label: 'Rechazada', variant: 'danger' as const },
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.request
+ * @param root0.loading
+ * @param root0.actionLoading
+ * @param root0.isOpen
+ * @param root0.onClose
+ * @param root0.onApprove
+ * @param root0.onReject
+ */
 export function RegistrationRequestDetailPanel({
   request,
   loading,

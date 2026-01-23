@@ -4,9 +4,10 @@
  * Tests global navigation, mobile menu, active link detection, and accessibility.
  */
 
-import { render, screen, fireEvent, within } from '@testing-library/react'
-import { PublicHeader } from '../PublicHeader'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
+
+import { PublicHeader } from '@/features/landing/components/dumb/PublicHeader'
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({

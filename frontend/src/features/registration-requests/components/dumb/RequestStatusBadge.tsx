@@ -1,5 +1,3 @@
-'use client'
-
 /**
  * RequestStatusBadge - Dumb Component
  * Displays the status of a registration request with appropriate styling
@@ -13,12 +11,12 @@
  */
 
 import {
-  RegistrationRequest,
-  isRequestPending,
   isRequestApproved,
+  isRequestPending,
   isRequestRejected,
   isRequestSuspended,
-} from '../../types/registration-request.types'
+  RegistrationRequest,
+} from '@/features/registration-requests/types/registration-request.types'
 
 interface RequestStatusBadgeProps {
   request: RegistrationRequest
@@ -57,6 +55,7 @@ const statusConfig: Record<DisplayStatus, StatusConfig> = {
 /**
  * Get the display status for a registration request
  * Consolidates request status + user status into a single display status
+ * @param request
  */
 const getDisplayStatus = (request: RegistrationRequest): DisplayStatus => {
   // Check for deleted first (highest priority)

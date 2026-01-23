@@ -7,19 +7,19 @@
  * Created: December 2, 2025
  */
 
-import apiClient from '@/services/apiClient'
 import {
-  getEventTypes,
-  getEventType,
   createEventType,
-  updateEventType,
   deleteEventType,
-  toggleEventTypeStatus,
   getActiveEventTypes,
+  getEventType,
+  getEventTypes,
   searchEventTypes,
+  toggleEventTypeStatus,
+  updateEventType,
   validateEventTypeData,
-} from '../services/eventType.service'
-import type { EventType, EventTypePagination, CreateEventTypeData, UpdateEventTypeData } from '@/types/eventType.types'
+} from '@/features/event-types/services/eventType.service'
+import apiClient from '@/services/apiClient'
+import type { CreateEventTypeData, EventType, EventTypePagination, UpdateEventTypeData } from '@/types/eventType.types'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')
@@ -82,19 +82,25 @@ describe('eventType.service', () => {
         active: true,
       }
 
-      await getEventTypes(params)
+      const result = await getEventTypes(params)
 
       expect(mockedApiClient.get).toHaveBeenCalledWith(
         '/event-types?page=2&per_page=20&search=conf&active=true'
       )
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result.data).toHaveLength(2)
+      expect(result.current_page).toBe(1)
     })
 
     it('should handle inactive filter', async () => {
       mockedApiClient.get.mockResolvedValue({ data: mockPaginationResponse })
 
-      await getEventTypes({ active: false })
+      const result = await getEventTypes({ active: false })
 
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types?active=false')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(mockPaginationResponse)
+      expect(result.data).toBeDefined()
     })
 
     it('should handle empty results', async () => {
@@ -120,6 +126,8 @@ describe('eventType.service', () => {
       mockedApiClient.get.mockRejectedValue(error)
 
       await expect(getEventTypes()).rejects.toThrow('Network error')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types?')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -150,6 +158,8 @@ describe('eventType.service', () => {
       mockedApiClient.get.mockRejectedValue(error)
 
       await expect(getEventType(999)).rejects.toThrow('Event type not found')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/999')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -211,6 +221,11 @@ describe('eventType.service', () => {
       mockedApiClient.post.mockRejectedValue(error)
 
       await expect(createEventType({ name: '' })).rejects.toThrow('Validation failed')
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types', {
+        name: '',
+        is_active: true,
+      })
+      expect(mockedApiClient.post).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -272,6 +287,11 @@ describe('eventType.service', () => {
       mockedApiClient.put.mockRejectedValue(error)
 
       await expect(updateEventType(1, { name: 'Test' })).rejects.toThrow('Update failed')
+      expect(mockedApiClient.put).toHaveBeenCalledWith('/event-types/1', {
+        name: 'Test',
+        is_active: undefined,
+      })
+      expect(mockedApiClient.put).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -370,6 +390,8 @@ describe('eventType.service', () => {
       mockedApiClient.patch.mockRejectedValue(error)
 
       await expect(toggleEventTypeStatus(1)).rejects.toThrow('Toggle failed')
+      expect(mockedApiClient.patch).toHaveBeenCalledWith('/event-types/1/toggle-status')
+      expect(mockedApiClient.patch).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -409,6 +431,9 @@ describe('eventType.service', () => {
       const result = await getActiveEventTypes()
 
       expect(result).toHaveLength(0)
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/active')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
+      expect(Array.isArray(result)).toBe(true)
     })
 
     it('should handle API error', async () => {
@@ -416,6 +441,8 @@ describe('eventType.service', () => {
       mockedApiClient.get.mockRejectedValue(error)
 
       await expect(getActiveEventTypes()).rejects.toThrow('Fetch failed')
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/active')
+      expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
     })
   })
 

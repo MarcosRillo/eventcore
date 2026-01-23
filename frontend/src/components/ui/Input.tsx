@@ -3,7 +3,7 @@
  * Clean and subtle input field with elegant focus states
  */
 
-import { InputHTMLAttributes, ReactNode, forwardRef, useId } from 'react'
+import { forwardRef, InputHTMLAttributes, ReactNode, useId } from 'react'
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string

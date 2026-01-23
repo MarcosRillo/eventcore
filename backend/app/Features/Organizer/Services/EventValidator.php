@@ -22,16 +22,15 @@ class EventValidator
     /**
      * Validate that an event can be edited.
      *
-     * @param Event $event
      * @throws ValidationException
      */
     public function validateEditable(Event $event): void
     {
         $event->loadMissing('status');
 
-        if (!in_array($event->status->status_code, self::EDITABLE_STATUSES)) {
+        if (! in_array($event->status->status_code, self::EDITABLE_STATUSES)) {
             throw ValidationException::withMessages([
-                'status' => ['Cannot edit event in current status: ' . $event->status->status_code],
+                'status' => ['Cannot edit event in current status: '.$event->status->status_code],
             ]);
         }
     }
@@ -39,7 +38,6 @@ class EventValidator
     /**
      * Validate that an event can be deleted.
      *
-     * @param Event $event
      * @throws ValidationException
      */
     public function validateDeletable(Event $event): void
@@ -48,7 +46,7 @@ class EventValidator
 
         if ($event->status->status_code !== 'draft') {
             throw ValidationException::withMessages([
-                'status' => ['Can only delete draft events. Current status: ' . $event->status->status_code],
+                'status' => ['Can only delete draft events. Current status: '.$event->status->status_code],
             ]);
         }
     }
@@ -56,8 +54,6 @@ class EventValidator
     /**
      * Validate event ownership by user's organization.
      *
-     * @param Event $event
-     * @param User $user
      * @throws ValidationException
      */
     public function validateOwnership(Event $event, User $user): void
@@ -72,12 +68,11 @@ class EventValidator
     /**
      * Validate user has an associated organization.
      *
-     * @param User $user
      * @throws \RuntimeException
      */
     public function validateUserHasOrganization(User $user): void
     {
-        if (!$user->organization_id) {
+        if (! $user->organization_id) {
             throw new \RuntimeException('User not associated with organization');
         }
     }
@@ -89,8 +84,6 @@ class EventValidator
      * Published or approved events will automatically change to pending_internal_approval
      * after update (handled in OrganizerService).
      *
-     * @param Event $event
-     * @param User $user
      * @throws ValidationException|\RuntimeException
      */
     public function validateForUpdate(Event $event, User $user): void
@@ -103,8 +96,6 @@ class EventValidator
     /**
      * Validate all preconditions for event deletion.
      *
-     * @param Event $event
-     * @param User $user
      * @throws ValidationException|\RuntimeException
      */
     public function validateForDelete(Event $event, User $user): void

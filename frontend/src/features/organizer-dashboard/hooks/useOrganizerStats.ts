@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+
 import { organizerStatsService } from '@/features/organizer-dashboard/services/organizerStatsService';
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types';
 

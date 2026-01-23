@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Organizer;
 
-use App\Models\User;
 use App\Models\Event;
 use App\Models\EventOrigin;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -71,6 +71,7 @@ class OrganizerControllerStoreTest extends TestCase
 
         $user->refresh();
         $this->actingAs($user, 'sanctum');
+
         return $user;
     }
 
@@ -133,7 +134,7 @@ class OrganizerControllerStoreTest extends TestCase
             // Async dates (normalized to table)
             'async_dates' => [
                 ['date' => '2025-12-01', 'notes' => 'Day 1'],
-                ['date' => '2025-12-03', 'notes' => 'Day 2']
+                ['date' => '2025-12-03', 'notes' => 'Day 2'],
             ],
 
             // Attendance
@@ -158,7 +159,7 @@ class OrganizerControllerStoreTest extends TestCase
         $response->assertStatus(201);
         $response->assertJsonStructure([
             'message',
-            'event' => ['id', 'title', 'description', 'start_date', 'end_date']
+            'event' => ['id', 'title', 'description', 'start_date', 'end_date'],
         ]);
         $response->assertJsonPath('event.title', 'Congreso Internacional de Turismo 2025');
 
@@ -376,7 +377,7 @@ class OrganizerControllerStoreTest extends TestCase
         // Verify pivot table entries
         $this->assertDatabaseHas('event_location', [
             'event_id' => $eventId,
-            'location_id' => $location1->id
+            'location_id' => $location1->id,
         ]);
     }
 

@@ -3,21 +3,21 @@
  * API calls for managing registration requests (admin)
  */
 
-import apiClient from '@/services/apiClient'
 import {
-  RegistrationRequest,
-  RegistrationRequestDetail,
-  RegistrationRequestFilters,
   ApprovalResult,
-  RegistrationRequestsResponse,
-  RegistrationRequestDetailResponse,
   ApprovalResultResponse,
-  RejectResultResponse,
-  SuspendResultResponse,
-  DeleteResultResponse,
   CreateRegistrationRequestData,
   CreateRequestResponse,
-} from '../types/registration-request.types'
+  DeleteResultResponse,
+  RegistrationRequest,
+  RegistrationRequestDetail,
+  RegistrationRequestDetailResponse,
+  RegistrationRequestFilters,
+  RegistrationRequestsResponse,
+  RejectResultResponse,
+  SuspendResultResponse,
+} from '@/features/registration-requests/types/registration-request.types'
+import apiClient from '@/services/apiClient'
 
 // ============================================
 // Public Endpoints (No Auth Required)
@@ -26,6 +26,7 @@ import {
 /**
  * Submit a new registration request (public form)
  * Uses FormData to handle file uploads
+ * @param data
  */
 export const createRegistrationRequest = async (
   data: CreateRegistrationRequestData
@@ -74,6 +75,7 @@ export const createRegistrationRequest = async (
 
 /**
  * Get all registration requests with optional status filter
+ * @param filters
  */
 export const getRegistrationRequests = async (
   filters?: RegistrationRequestFilters
@@ -93,6 +95,7 @@ export const getRegistrationRequests = async (
 
 /**
  * Get a single registration request by ID
+ * @param id
  */
 export const getRegistrationRequestById = async (
   id: number
@@ -105,6 +108,7 @@ export const getRegistrationRequestById = async (
 
 /**
  * Approve a registration request (creates User + Organization)
+ * @param id
  */
 export const approveRegistrationRequest = async (
   id: number
@@ -117,6 +121,8 @@ export const approveRegistrationRequest = async (
 
 /**
  * Reject a registration request with a reason
+ * @param id
+ * @param reason
  */
 export const rejectRegistrationRequest = async (
   id: number,
@@ -130,6 +136,7 @@ export const rejectRegistrationRequest = async (
 
 /**
  * Suspend an approved registration request (user + organization)
+ * @param id
  */
 export const suspendRegistrationRequest = async (
   id: number
@@ -142,6 +149,7 @@ export const suspendRegistrationRequest = async (
 
 /**
  * Unsuspend (reactivate) a suspended registration request
+ * @param id
  */
 export const unsuspendRegistrationRequest = async (
   id: number
@@ -154,6 +162,7 @@ export const unsuspendRegistrationRequest = async (
 
 /**
  * Delete a suspended registration request (user + organization)
+ * @param id
  */
 export const deleteRegistrationRequest = async (
   id: number

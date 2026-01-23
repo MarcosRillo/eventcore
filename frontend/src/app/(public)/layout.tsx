@@ -4,7 +4,8 @@
  */
 
 import type { Metadata } from 'next'
-import { PublicHeader, Footer } from '@/features/landing/components/dumb'
+
+import { Footer,PublicHeader } from '@/features/landing/components/dumb'
 
 export const metadata: Metadata = {
   title: {
@@ -18,6 +19,11 @@ interface PublicLayoutProps {
   children: React.ReactNode
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.children
+ */
 export default function PublicLayout({ children }: PublicLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">

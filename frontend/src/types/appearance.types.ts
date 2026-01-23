@@ -3,7 +3,7 @@
  * Theme and appearance configuration
  */
 
-import type { FormHook } from './generic-infrastructure.types';
+import type { FormHook } from '@/types/generic-infrastructure.types';
 
 /**
  * Core theme settings - essential interface that cannot be reduced

@@ -122,9 +122,13 @@ export interface ApprovalResponse {
   };
 }
 
+/**
+ *
+ */
 class EventApprovalService {
   /**
    * Get complete event details for approval review
+   * @param eventId
    */
   async getEventDetail(eventId: number): Promise<EventDetailResponse> {
     try {
@@ -141,6 +145,8 @@ class EventApprovalService {
 
   /**
    * Approve an event
+   * @param eventId
+   * @param comments
    */
   async approveEvent(eventId: number, comments?: string): Promise<ApprovalResponse> {
     try {
@@ -158,6 +164,9 @@ class EventApprovalService {
 
   /**
    * Reject an event
+   * @param eventId
+   * @param reason
+   * @param comments
    */
   async rejectEvent(eventId: number, reason: string, comments?: string): Promise<ApprovalResponse> {
     try {
@@ -176,6 +185,9 @@ class EventApprovalService {
 
   /**
    * Request changes to an event
+   * @param eventId
+   * @param reason
+   * @param comments
    */
   async requestChanges(eventId: number, reason: string, comments?: string): Promise<ApprovalResponse> {
     try {
@@ -194,6 +206,8 @@ class EventApprovalService {
 
   /**
    * Generic approval action handler
+   * @param eventId
+   * @param request
    */
   async performAction(eventId: number, request: ApprovalRequest): Promise<ApprovalResponse> {
     switch (request.action) {
@@ -219,6 +233,8 @@ class EventApprovalService {
 
   /**
    * Validate approval request based on business rules
+   * @param action
+   * @param reason
    */
   validateApprovalRequest(action: ApprovalAction, reason?: string): string[] {
     const errors: string[] = [];
@@ -249,6 +265,10 @@ class EventApprovalService {
 
   /**
    * Get formatted status duration text
+   * @param duration
+   * @param duration.days
+   * @param duration.hours
+   * @param duration.minutes
    */
   getStatusDurationText(duration: { days: number; hours: number; minutes: number }): string {
     if (duration.days > 0) {
@@ -262,6 +282,7 @@ class EventApprovalService {
 
   /**
    * Get action button configuration based on event status and permissions
+   * @param event
    */
   getAvailableActions(event: EventDetailResponse): Array<{
     action: ApprovalAction;

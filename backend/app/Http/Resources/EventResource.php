@@ -60,29 +60,31 @@ class EventResource extends JsonResource
             'has_multiple_locations' => $this->hasMultipleLocations(),
 
             // Core relationships
-            'status' => $this->whenLoaded('status', fn() => [
+            'status' => $this->whenLoaded('status', fn () => [
                 'id' => $this->status->id,
-                'code' => $this->status->status_code,
-                'name' => $this->status->status_name,
+                'status_code' => $this->status->status_code,
+                'status_name' => $this->status->status_name,
+                'description' => $this->status->description,
             ]),
 
-            'format' => $this->whenLoaded('format', fn() => [
+            'format' => $this->whenLoaded('format', fn () => [
                 'id' => $this->format->id,
                 'code' => $this->format->format_code,
                 'name' => $this->format->format_name,
             ]),
 
-            'event_type' => $this->whenLoaded('eventType', fn() => [
+            'event_type' => $this->whenLoaded('eventType', fn () => [
                 'id' => $this->eventType->id,
                 'name' => $this->eventType->name,
+                'color' => $this->eventType->color,
             ]),
 
-            'event_subtype' => $this->whenLoaded('eventSubtype', fn() => [
+            'event_subtype' => $this->whenLoaded('eventSubtype', fn () => [
                 'id' => $this->eventSubtype->id,
                 'name' => $this->eventSubtype->name,
             ]),
 
-            'locations' => $this->whenLoaded('locations', fn() => $this->locations->map(fn($location) => [
+            'locations' => $this->whenLoaded('locations', fn () => $this->locations->map(fn ($location) => [
                 'id' => $location->id,
                 'name' => $location->name,
                 'address' => $location->address,
@@ -91,53 +93,53 @@ class EventResource extends JsonResource
                 'country' => $location->country,
             ])),
 
-            'entity' => $this->whenLoaded('entity', fn() => [
+            'entity' => $this->whenLoaded('entity', fn () => [
                 'id' => $this->entity->id,
                 'name' => $this->entity->name,
             ]),
 
-            'organization' => $this->whenLoaded('organization', fn() => [
+            'organization' => $this->whenLoaded('organization', fn () => [
                 'id' => $this->organization->id,
                 'name' => $this->organization->name,
             ]),
 
             // Normalized relationships (Nov 30, 2025)
-            'subtype' => $this->whenLoaded('subtype', fn() => [
+            'subtype' => $this->whenLoaded('subtype', fn () => [
                 'id' => $this->subtype->id,
                 'code' => $this->subtype->code,
                 'name' => $this->subtype->name,
             ]),
 
-            'origin' => $this->whenLoaded('origin', fn() => [
+            'origin' => $this->whenLoaded('origin', fn () => [
                 'id' => $this->origin->id,
                 'code' => $this->origin->code,
                 'name' => $this->origin->name,
             ]),
 
-            'theme' => $this->whenLoaded('theme', fn() => [
+            'theme' => $this->whenLoaded('theme', fn () => [
                 'id' => $this->theme->id,
                 'code' => $this->theme->code,
                 'name' => $this->theme->name,
             ]),
 
-            'frequency' => $this->whenLoaded('frequency', fn() => [
+            'frequency' => $this->whenLoaded('frequency', fn () => [
                 'id' => $this->frequency->id,
                 'code' => $this->frequency->code,
                 'name' => $this->frequency->name,
             ]),
 
-            'rotation_type' => $this->whenLoaded('rotationType', fn() => [
+            'rotation_type' => $this->whenLoaded('rotationType', fn () => [
                 'id' => $this->rotationType->id,
                 'code' => $this->rotationType->code,
                 'name' => $this->rotationType->name,
             ]),
 
-            'producer' => $this->whenLoaded('producer', fn() => [
+            'producer' => $this->whenLoaded('producer', fn () => [
                 'id' => $this->producer->id,
                 'name' => $this->producer->name,
             ]),
 
-            'services' => $this->whenLoaded('services', fn() => $this->services->map(fn($service) => [
+            'services' => $this->whenLoaded('services', fn () => $this->services->map(fn ($service) => [
                 'id' => $service->id,
                 'code' => $service->code,
                 'name' => $service->name,
@@ -145,14 +147,14 @@ class EventResource extends JsonResource
                 'notes' => $service->pivot->notes,
             ])),
 
-            'rooms' => $this->whenLoaded('rooms', fn() => $this->rooms->map(fn($room) => [
+            'rooms' => $this->whenLoaded('rooms', fn () => $this->rooms->map(fn ($room) => [
                 'id' => $room->id,
                 'code' => $room->code,
                 'name' => $room->name,
                 'capacity' => $room->capacity,
             ])),
 
-            'async_dates' => $this->whenLoaded('asyncDates', fn() => $this->asyncDates->map(fn($date) => [
+            'async_dates' => $this->whenLoaded('asyncDates', fn () => $this->asyncDates->map(fn ($date) => [
                 'id' => $date->id,
                 'date' => $date->date_value->toDateString(),
                 'notes' => $date->notes,

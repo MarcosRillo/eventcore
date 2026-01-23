@@ -6,41 +6,41 @@
  */
 
 // Services
-export { default as eventTypeService } from './services/eventType.service';
-export { default as eventSubtypeService } from './services/eventSubtype.service';
+export { default as eventSubtypeService } from '@/features/event-types/services/eventSubtype.service';
 export {
-  getEventTypes,
-  getEventType,
-  createEventType,
-  updateEventType,
-  deleteEventType,
-  toggleEventTypeStatus,
-  getActiveEventTypes,
-  searchEventTypes,
-  validateEventTypeData,
-} from './services/eventType.service';
-export {
-  getEventSubtypes,
-  getEventSubtype,
   createEventSubtype,
-  updateEventSubtype,
   deleteEventSubtype,
-  toggleEventSubtypeStatus,
   getActiveEventSubtypes,
+  getEventSubtype,
+  getEventSubtypes,
   searchEventSubtypes,
+  toggleEventSubtypeStatus,
+  updateEventSubtype,
   validateEventSubtypeData,
-} from './services/eventSubtype.service';
+} from '@/features/event-types/services/eventSubtype.service';
+export { default as eventTypeService } from '@/features/event-types/services/eventType.service';
+export {
+  createEventType,
+  deleteEventType,
+  getActiveEventTypes,
+  getEventType,
+  getEventTypes,
+  searchEventTypes,
+  toggleEventTypeStatus,
+  updateEventType,
+  validateEventTypeData,
+} from '@/features/event-types/services/eventType.service';
 
 // Hooks
-export { useEventTypeManager } from './hooks/useEventTypeManager';
-export { useEventSubtypeManager } from './hooks/useEventSubtypeManager';
+export { useEventSubtypeManager } from '@/features/event-types/hooks/useEventSubtypeManager';
+export { useEventTypeManager } from '@/features/event-types/hooks/useEventTypeManager';
 
 // Components - Smart
-export { EventTypeTableContainer } from './components/smart/EventTypeTableContainer';
-export { EventSubtypeTableContainer } from './components/smart/EventSubtypeTableContainer';
+export { EventSubtypeTableContainer } from '@/features/event-types/components/smart/EventSubtypeTableContainer';
+export { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer';
 
 // Components - Modals
-export { default as CreateEventTypeModal } from './components/CreateEventTypeModal';
-export { default as EditEventTypeModal } from './components/EditEventTypeModal';
-export { default as CreateEventSubtypeModal } from './components/CreateEventSubtypeModal';
-export { default as EditEventSubtypeModal } from './components/EditEventSubtypeModal';
+export { default as CreateEventSubtypeModal } from '@/features/event-types/components/CreateEventSubtypeModal';
+export { default as CreateEventTypeModal } from '@/features/event-types/components/CreateEventTypeModal';
+export { default as EditEventSubtypeModal } from '@/features/event-types/components/EditEventSubtypeModal';
+export { default as EditEventTypeModal } from '@/features/event-types/components/EditEventTypeModal';

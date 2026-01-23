@@ -3,7 +3,8 @@
  * Manages fetching and caching of complete event details for approval review
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback,useEffect, useState } from 'react';
+
 import { 
   eventApprovalService, 
   EventDetailResponse 

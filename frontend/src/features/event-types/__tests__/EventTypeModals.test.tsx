@@ -7,11 +7,12 @@
  * Created: December 2, 2025
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import CreateEventTypeModal from '../components/CreateEventTypeModal'
-import EditEventTypeModal from '../components/EditEventTypeModal'
-import * as eventTypeService from '../services/eventType.service'
+
+import CreateEventTypeModal from '@/features/event-types/components/CreateEventTypeModal'
+import EditEventTypeModal from '@/features/event-types/components/EditEventTypeModal'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import type { EventType } from '@/types/eventType.types'
 
 // Mock service

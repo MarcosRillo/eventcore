@@ -2,14 +2,13 @@
 
 namespace Tests\Feature\Organizer;
 
-use App\Models\User;
 use App\Models\Event;
-
 use App\Models\EventOrigin;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -72,6 +71,7 @@ class OrganizerControllerUpdateTest extends TestCase
 
         $user->refresh();
         $this->actingAs($user, 'sanctum');
+
         return $user;
     }
 
@@ -187,7 +187,7 @@ class OrganizerControllerUpdateTest extends TestCase
             // Async dates (normalized to table)
             'async_dates' => [
                 ['date' => '2025-12-10', 'notes' => 'Morning session'],
-                ['date' => '2025-12-12', 'notes' => 'Afternoon session']
+                ['date' => '2025-12-12', 'notes' => 'Afternoon session'],
             ],
 
             // Attendance
@@ -212,7 +212,7 @@ class OrganizerControllerUpdateTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'message',
-            'event' => ['id', 'title', 'description']
+            'event' => ['id', 'title', 'description'],
         ]);
         $response->assertJsonPath('event.title', 'Updated: Congreso Internacional de Turismo 2025');
 
@@ -338,7 +338,7 @@ class OrganizerControllerUpdateTest extends TestCase
 
         $this->assertDatabaseMissing('events', [
             'id' => $event->id,
-            'title' => 'Malicious Update'
+            'title' => 'Malicious Update',
         ]);
     }
 
@@ -385,7 +385,7 @@ class OrganizerControllerUpdateTest extends TestCase
         $this->assertEquals(
             'pending_internal_approval',
             $event->status->status_code,
-            'Published event should change to pending_internal_approval after edit'
+            'Published event should change to pending_internal_approval after edit',
         );
     }
 
@@ -432,7 +432,7 @@ class OrganizerControllerUpdateTest extends TestCase
         $this->assertEquals(
             'pending_internal_approval',
             $event->status->status_code,
-            'Approved event should change to pending_internal_approval after edit'
+            'Approved event should change to pending_internal_approval after edit',
         );
     }
 
@@ -469,7 +469,7 @@ class OrganizerControllerUpdateTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'title' => 'Updated Draft'
+            'title' => 'Updated Draft',
         ]);
 
         // Verify status remains draft (does not change to pending)
@@ -510,7 +510,7 @@ class OrganizerControllerUpdateTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'title' => 'Fixed Event'
+            'title' => 'Fixed Event',
         ]);
     }
 
@@ -613,7 +613,7 @@ class OrganizerControllerUpdateTest extends TestCase
         // Create initial async date
         $event->asyncDates()->create([
             'date_value' => '2025-11-01',
-            'notes' => 'Initial session'
+            'notes' => 'Initial session',
         ]);
 
         $location = Location::factory()->create(['entity_id' => 1]);
@@ -629,8 +629,8 @@ class OrganizerControllerUpdateTest extends TestCase
             'async_dates' => [
                 ['date' => '2025-12-05', 'notes' => 'Morning session'],
                 ['date' => '2025-12-07', 'notes' => 'Afternoon session'],
-                ['date' => '2025-12-09', 'notes' => 'Closing session']
-            ]
+                ['date' => '2025-12-09', 'notes' => 'Closing session'],
+            ],
         ];
 
         // Act

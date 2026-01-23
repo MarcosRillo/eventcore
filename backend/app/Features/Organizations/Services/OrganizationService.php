@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 class OrganizationService
 {
     private const DEFAULT_PER_PAGE = 15;
+
     private const MAX_PER_PAGE = 100;
 
     /**
@@ -23,7 +24,7 @@ class OrganizationService
         // Get the user's primary organization (the entity)
         $entity = $user->organizations()->first();
 
-        if (!$entity) {
+        if (! $entity) {
             throw new \RuntimeException('User is not associated with any organization');
         }
 
@@ -35,24 +36,24 @@ class OrganizationService
         $query->withCount([
             'events as events_total',
             'events as events_published' => function (Builder $q) {
-                $q->whereHas('status', fn($sq) => $sq->where('status_code', 'published'));
+                $q->whereHas('status', fn ($sq) => $sq->where('status_code', 'published'));
             },
             'events as events_pending' => function (Builder $q) {
-                $q->whereHas('status', fn($sq) => $sq->whereIn('status_code', [
+                $q->whereHas('status', fn ($sq) => $sq->whereIn('status_code', [
                     'pending_internal_approval',
-                    'pending_public_approval'
+                    'pending_public_approval',
                 ]));
             },
             'events as events_rejected' => function (Builder $q) {
-                $q->whereHas('status', fn($sq) => $sq->where('status_code', 'rejected'));
+                $q->whereHas('status', fn ($sq) => $sq->where('status_code', 'rejected'));
             },
         ]);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $this->applyStatusFilter($query, $filters['status']);
         }
 
@@ -69,7 +70,7 @@ class OrganizationService
         // Verify the organization belongs to the user's entity
         $entity = $user->organizations()->first();
 
-        if (!$entity) {
+        if (! $entity) {
             throw new \RuntimeException('User is not associated with any organization');
         }
 
@@ -79,21 +80,21 @@ class OrganizationService
             ->withCount([
                 'events as events_total',
                 'events as events_published' => function (Builder $q) {
-                    $q->whereHas('status', fn($sq) => $sq->where('status_code', 'published'));
+                    $q->whereHas('status', fn ($sq) => $sq->where('status_code', 'published'));
                 },
                 'events as events_pending' => function (Builder $q) {
-                    $q->whereHas('status', fn($sq) => $sq->whereIn('status_code', [
+                    $q->whereHas('status', fn ($sq) => $sq->whereIn('status_code', [
                         'pending_internal_approval',
-                        'pending_public_approval'
+                        'pending_public_approval',
                     ]));
                 },
                 'events as events_rejected' => function (Builder $q) {
-                    $q->whereHas('status', fn($sq) => $sq->where('status_code', 'rejected'));
+                    $q->whereHas('status', fn ($sq) => $sq->where('status_code', 'rejected'));
                 },
             ])
             ->first();
 
-        if (!$organization) {
+        if (! $organization) {
             throw new \RuntimeException('Organization not found or access denied');
         }
 
@@ -109,7 +110,7 @@ class OrganizationService
             // Verify the organization belongs to the user's entity
             $entity = $user->organizations()->first();
 
-            if (!$entity) {
+            if (! $entity) {
                 throw new \RuntimeException('User is not associated with any organization');
             }
 
@@ -118,7 +119,7 @@ class OrganizationService
                 ->with('status')
                 ->first();
 
-            if (!$organization) {
+            if (! $organization) {
                 throw new \RuntimeException('Organization not found or access denied');
             }
 
@@ -128,7 +129,7 @@ class OrganizationService
 
             $newStatus = OrganizationStatus::where('status_code', $newStatusCode)->first();
 
-            if (!$newStatus) {
+            if (! $newStatus) {
                 throw new \RuntimeException("Status '{$newStatusCode}' not found");
             }
 
@@ -139,7 +140,7 @@ class OrganizationService
                 'organization_name' => $organization->name,
                 'old_status' => $currentStatusCode,
                 'new_status' => $newStatusCode,
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
 
             return $organization->fresh(['status', 'type']);
@@ -153,11 +154,11 @@ class OrganizationService
     {
         $search = trim($search);
 
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('cuit', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('cuit', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
     }
@@ -168,7 +169,7 @@ class OrganizationService
     private function applyStatusFilter(Builder $query, string $status): void
     {
         if ($status !== 'all') {
-            $query->whereHas('status', fn($q) => $q->where('status_code', $status));
+            $query->whereHas('status', fn ($q) => $q->where('status_code', $status));
         }
     }
 
@@ -178,7 +179,7 @@ class OrganizationService
     private function applyDefaultOrdering(Builder $query): void
     {
         $query->orderBy('name', 'asc')
-              ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -187,6 +188,7 @@ class OrganizationService
     private function getPerPageValue(array $filters): int
     {
         $perPage = (int) ($filters['per_page'] ?? self::DEFAULT_PER_PAGE);
+
         return max(1, min($perPage, self::MAX_PER_PAGE));
     }
 }

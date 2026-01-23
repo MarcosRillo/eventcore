@@ -3,18 +3,18 @@
 namespace Tests\Feature\Events;
 
 use App\Models\Event;
-use App\Models\User;
-
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class EventTest extends TestCase
+class EventTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     protected function setUp(): void
     {
@@ -28,23 +28,16 @@ class EventTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
     }
 
-    private function authenticateUser(): User
-    {
-        $user = User::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
-        $this->actingAs($user, 'sanctum');
-        return $user;
-    }
-
     /**
-     * Get event status ID by status code
+     * Override to add organization attachment for event tests
      */
-    private function getStatusId(string $statusCode): int
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        return \DB::table('event_statuses')
-            ->where('status_code', $statusCode)
-            ->value('id') ?? 1;
+        $user = parent::authenticateUser($role);
+        $this->organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
+
+        return $user;
     }
 
     /**
@@ -63,21 +56,39 @@ class EventTest extends TestCase
     }
 
     #[Test]
-    public function test_can_list_events(): void
+    public function test_can_list_events_with_pagination_and_content(): void
     {
-        $this->authenticateUser();
+        $user = $this->authenticateUser();
 
-        $response = $this->getJson('/api/v1/events');
+        // Arrange: Create known events
+        $event1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
+            'title' => 'Event A',
+            'created_at' => now()->subDays(2),
+        ]);
+        $event2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
+            'title' => 'Event B',
+            'created_at' => now()->subDay(),
+        ]);
 
-        $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data',
-                     'links',
-                     'meta'
-                 ]);
+        // Act
+        $response = $this->getJson('/api/v1/events?page=1&per_page=10');
 
-        // Verify data is array
-        $this->assertTrue(is_array($response->json('data')));
+        // Assert (8+ assertions)
+        $response->assertStatus(200);                          // 1
+        $response->assertJsonStructure(['data', 'meta', 'links']); // 2
+        $this->assertCount(2, $response->json('data'));       // 3
+        $response->assertJsonPath('meta.total', 2);           // 4
+        $response->assertJsonPath('meta.current_page', 1);    // 5
+
+        // Verify actual content
+        $titles = array_column($response->json('data'), 'title');
+        $this->assertContains('Event A', $titles);            // 6
+        $this->assertContains('Event B', $titles);            // 7
+
+        // Verify DB state
+        $this->assertEquals(2, Event::where('entity_id', $this->organization->id)->count()); // 8
     }
 
     #[Test]
@@ -101,20 +112,24 @@ class EventTest extends TestCase
             'status_id' => $this->getStatusId('draft'),
             'entity_id' => $organization->id,
             'is_featured' => false,
-            'max_attendees' => 100
+            'max_attendees' => 100,
         ];
 
         $response = $this->postJson('/api/v1/events', $eventData);
 
         $response->assertStatus(201)
-                 ->assertJsonFragment([
-                     'title' => 'Test Event Creation'
-                 ]);
+            ->assertJsonFragment([
+                'title' => 'Test Event Creation',
+            ]);
 
+        // Verify event was created (description is sanitized with <p> tags by HTMLPurifier)
         $this->assertDatabaseHas('events', [
             'title' => 'Test Event Creation',
-            'description' => 'Test event description for automated testing'
         ]);
+
+        // Verify description contains the expected text (sanitized)
+        $event = Event::where('title', 'Test Event Creation')->first();
+        $this->assertStringContainsString('Test event description for automated testing', $event->description);
     }
 
     #[Test]
@@ -123,12 +138,13 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'title' => 'Original Event Title'
+            'entity_id' => $this->organization->id,
+            'title' => 'Original Event Title',
         ]);
 
         $updateData = [
             'title' => 'Updated Event Title',
-            'description' => 'Updated event description'
+            'description' => 'Updated event description',
         ];
 
         $response = $this->putJson("/api/v1/events/{$event->id}", $updateData);
@@ -137,7 +153,7 @@ class EventTest extends TestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'title' => 'Updated Event Title'
+            'title' => 'Updated Event Title',
         ]);
     }
 
@@ -147,7 +163,8 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'status_id' => $this->getStatusId('draft')
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('draft'),
         ]);
 
         $response = $this->deleteJson("/api/v1/events/{$event->id}");
@@ -156,30 +173,51 @@ class EventTest extends TestCase
 
         // With SoftDeletes, the record exists but has deleted_at set
         $this->assertSoftDeleted('events', [
-            'id' => $event->id
+            'id' => $event->id,
         ]);
     }
 
     #[Test]
-    public function test_can_get_event_statistics(): void
+    public function test_can_get_event_statistics_with_accurate_counts(): void
     {
-        $this->authenticateUser();
+        $user = $this->authenticateUser();
 
+        // Arrange: Create events with specific statuses
+        Event::factory()->count(3)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('published'),
+        ]);
+        Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('pending_internal_approval'),
+        ]);
+        Event::factory()->count(1)->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('draft'),
+        ]);
+
+        // Act
         $response = $this->getJson('/api/v1/events/statistics');
 
-        $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data' => [
-                         'total',
-                         'published',
-                         'pending',
-                         'draft'
-                     ]
-                 ]);
+        // Assert (8+ assertions)
+        $response->assertStatus(200);                         // 1
+        $response->assertJsonStructure(['data' => [
+            'total',
+            'published',
+            'pending',
+            'draft',
+        ]]);                                                   // 2
 
-        // Verify statistics structure
-        $data = $response->json('data');
-        $this->assertIsArray($data);
+        // Verify exact counts
+        $response->assertJsonPath('data.total', 6);           // 3
+        $response->assertJsonPath('data.published', 3);       // 4
+        $response->assertJsonPath('data.pending', 2);         // 5
+        $response->assertJsonPath('data.draft', 1);           // 6
+
+        // Verify DB state
+        $this->assertEquals(6, Event::where('entity_id', $this->organization->id)->count()); // 7
+        $this->assertEquals(3, Event::where('entity_id', $this->organization->id)
+            ->where('status_id', $this->getStatusId('published'))->count()); // 8
     }
 
     #[Test]
@@ -188,7 +226,8 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'title' => 'Original Event for Duplication'
+            'entity_id' => $this->organization->id,
+            'title' => 'Original Event for Duplication',
         ]);
 
         $response = $this->postJson("/api/v1/events/{$event->id}/duplicate");
@@ -197,7 +236,7 @@ class EventTest extends TestCase
 
         // Verify duplicate was created with (Copia) suffix
         $this->assertDatabaseHas('events', [
-            'title' => 'Original Event for Duplication (Copia)'
+            'title' => 'Original Event for Duplication (Copia)',
         ]);
     }
 
@@ -207,7 +246,8 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'is_featured' => false
+            'entity_id' => $this->organization->id,
+            'is_featured' => false,
         ]);
 
         // Toggle to true
@@ -217,7 +257,7 @@ class EventTest extends TestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'is_featured' => true
+            'is_featured' => true,
         ]);
 
         // Toggle back to false
@@ -227,7 +267,7 @@ class EventTest extends TestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'is_featured' => false
+            'is_featured' => false,
         ]);
     }
 
@@ -237,24 +277,25 @@ class EventTest extends TestCase
         $this->authenticateUser();
 
         $event = Event::factory()->create([
-            'title' => 'Detailed Event Test'
+            'entity_id' => $this->organization->id,
+            'title' => 'Detailed Event Test',
         ]);
 
         $response = $this->getJson("/api/v1/events/{$event->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonFragment([
-                     'title' => 'Detailed Event Test'
-                 ])
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id',
-                         'title',
-                         'description',
-                         'start_date',
-                         'end_date'
-                     ]
-                 ]);
+            ->assertJsonFragment([
+                'title' => 'Detailed Event Test',
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'title',
+                    'description',
+                    'start_date',
+                    'end_date',
+                ],
+            ]);
     }
 
     #[Test]
@@ -264,18 +305,21 @@ class EventTest extends TestCase
 
         // Create events with different dates
         $pastEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event',
             'start_date' => now()->subDays(5),
             'end_date' => now()->subDays(4),
         ]);
 
         $ongoingEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Ongoing Event',
             'start_date' => now()->subDay(),
             'end_date' => now()->addDay(),
         ]);
 
         $futureEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Future Event',
             'start_date' => now()->addDays(3),
             'end_date' => now()->addDays(4),
@@ -298,12 +342,14 @@ class EventTest extends TestCase
 
         // Create only past events
         $pastEvent1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 1',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(9),
         ]);
 
         $pastEvent2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 2',
             'start_date' => now()->subDays(3),
             'end_date' => now()->subDay(),
@@ -325,18 +371,21 @@ class EventTest extends TestCase
 
         // Create events with different dates
         $pastEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event',
             'start_date' => now()->subDays(5),
             'end_date' => now()->subDays(4),
         ]);
 
         $ongoingEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Ongoing Event',
             'start_date' => now()->subDay(),
             'end_date' => now()->addDay(),
         ]);
 
         $futureEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Future Event',
             'start_date' => now()->addDays(3),
             'end_date' => now()->addDays(4),
@@ -359,12 +408,14 @@ class EventTest extends TestCase
 
         // Create only future/ongoing events
         $ongoingEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Ongoing Event',
             'start_date' => now()->subDay(),
             'end_date' => now()->addDay(),
         ]);
 
         $futureEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Future Event',
             'start_date' => now()->addDays(2),
             'end_date' => now()->addDays(3),
@@ -390,16 +441,19 @@ class EventTest extends TestCase
 
         // Create 3 upcoming events with different start dates
         $upcoming1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 1',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
         ]);
         $upcoming2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 2',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
         ]);
         $upcoming3 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 3',
             'start_date' => now()->addDays(15),
             'end_date' => now()->addDays(16),
@@ -407,11 +461,13 @@ class EventTest extends TestCase
 
         // Create 2 past events (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 1',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(9),
         ]);
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 2',
             'start_date' => now()->subDays(5),
             'end_date' => now()->subDays(4),
@@ -448,16 +504,19 @@ class EventTest extends TestCase
 
         // Create 3 past events with different end dates
         $past1 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 1',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(5),  // More recent
         ]);
         $past2 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 2',
             'start_date' => now()->subDays(20),
             'end_date' => now()->subDays(15),  // Oldest
         ]);
         $past3 = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Event 3',
             'start_date' => now()->subDays(8),
             'end_date' => now()->subDays(2),  // Most recent
@@ -465,11 +524,13 @@ class EventTest extends TestCase
 
         // Create 2 upcoming events (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 1',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
         ]);
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Event 2',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(11),
@@ -506,14 +567,17 @@ class EventTest extends TestCase
 
         // Create upcoming events in random order
         $eventFar = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->addDays(30),
             'end_date' => now()->addDays(31),
         ]);
         $eventNear = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->addDays(2),
             'end_date' => now()->addDays(3),
         ]);
         $eventMid = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->addDays(15),
             'end_date' => now()->addDays(16),
         ]);
@@ -535,14 +599,17 @@ class EventTest extends TestCase
 
         // Create past events in random order
         $eventOldest = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->subDays(30),
             'end_date' => now()->subDays(29),
         ]);
         $eventRecent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->subDays(3),
             'end_date' => now()->subDays(2),
         ]);
         $eventMid = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'start_date' => now()->subDays(15),
             'end_date' => now()->subDays(14),
         ]);
@@ -567,6 +634,7 @@ class EventTest extends TestCase
 
         // Create upcoming events with different statuses
         $publishedEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Published Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
@@ -574,6 +642,7 @@ class EventTest extends TestCase
         ]);
 
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Draft Event',
             'start_date' => now()->addDays(7),
             'end_date' => now()->addDays(8),
@@ -601,6 +670,7 @@ class EventTest extends TestCase
 
         // Create upcoming events with different statuses
         $publishedEvent = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Published Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),
@@ -608,6 +678,7 @@ class EventTest extends TestCase
         ]);
 
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Draft Event',
             'start_date' => now()->addDays(7),
             'end_date' => now()->addDays(8),
@@ -634,6 +705,7 @@ class EventTest extends TestCase
 
         // Create past published event
         $pastPublished = Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Published Event',
             'start_date' => now()->subDays(10),
             'end_date' => now()->subDays(9),
@@ -642,6 +714,7 @@ class EventTest extends TestCase
 
         // Create past draft event (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Past Draft Event',
             'start_date' => now()->subDays(8),
             'end_date' => now()->subDays(7),
@@ -650,6 +723,7 @@ class EventTest extends TestCase
 
         // Create upcoming published event (should not be returned)
         Event::factory()->create([
+            'entity_id' => $this->organization->id,
             'title' => 'Upcoming Published Event',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(6),

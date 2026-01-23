@@ -5,11 +5,12 @@
 
 'use client';
 
-import { useMemo, useCallback } from 'react';
-import { Invitation } from '../../types/invitation.types';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
-import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
-import InvitationStatusBadge from './InvitationStatusBadge';
+import { RefreshCw, Trash2 } from 'lucide-react';
+import { useCallback,useMemo } from 'react';
+
+import InvitationStatusBadge from '@/features/invitations/components/dumb/InvitationStatusBadge';
+import { Invitation } from '@/features/invitations/types/invitation.types';
+import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
 
 interface InvitationTableProps {
   invitations: Invitation[];
@@ -91,14 +92,14 @@ export const InvitationTable = ({
     {
       key: 'resend',
       label: 'Reenviar',
-      icon: <ArrowPathIcon className="w-5 h-5" />,
+      icon: <RefreshCw className="w-5 h-5" />,
       variant: 'primary',
       onClick: onResend,
     },
     {
       key: 'cancel',
       label: 'Revocar',
-      icon: <TrashIcon className="w-5 h-5" />,
+      icon: <Trash2 className="w-5 h-5" />,
       variant: 'danger',
       onClick: onCancel,
     },

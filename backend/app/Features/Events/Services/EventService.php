@@ -6,9 +6,9 @@ use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Mews\Purifier\Facades\Purifier;
 
 class EventService
 {
@@ -26,31 +26,31 @@ class EventService
         $this->applyScopeFilter($query);
 
         // Apply search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
         // Apply status filter
-        if (!empty($filters['status_id'])) {
+        if (! empty($filters['status_id'])) {
             $query->where('status_id', $filters['status_id']);
         }
 
         // Apply format filter
-        if (!empty($filters['format_id'])) {
+        if (! empty($filters['format_id'])) {
             $query->where('format_id', $filters['format_id']);
         }
 
         // Apply event type filter
-        if (!empty($filters['event_type_id'])) {
+        if (! empty($filters['event_type_id'])) {
             $query->where('event_type_id', $filters['event_type_id']);
         }
 
         // Apply date range filter
-        if (!empty($filters['start_date'])) {
+        if (! empty($filters['start_date'])) {
             $query->where('start_date', '>=', $filters['start_date']);
         }
 
-        if (!empty($filters['end_date'])) {
+        if (! empty($filters['end_date'])) {
             $query->where('end_date', '<=', $filters['end_date']);
         }
 
@@ -70,10 +70,16 @@ class EventService
     public function createEvent(array $data, User $user): Event
     {
         return DB::transaction(function () use ($data, $user) {
+            // CAPA 2: Sanitize description in Service layer (defense in depth layer 2)
+            // This provides protection even if FormRequest layer is bypassed
+            if (isset($data['description'])) {
+                $data['description'] = $this->sanitizeDescription($data['description']);
+            }
+
             // Get the user's primary organization for entity_id if not provided
-            if (!isset($data['entity_id'])) {
+            if (! isset($data['entity_id'])) {
                 $organization = $user->organizations()->first();
-                if (!$organization) {
+                if (! $organization) {
                     throw new \Exception('User must belong to an organization to create events.');
                 }
                 $data['entity_id'] = $organization->id;
@@ -83,7 +89,7 @@ class EventService
             $data['created_by'] = $user->id;
 
             // Ensure default status_id if not provided
-            if (!isset($data['status_id'])) {
+            if (! isset($data['status_id'])) {
                 $data['status_id'] = $this->getStatusId('draft');
             }
 
@@ -95,7 +101,7 @@ class EventService
             $event = Event::create($data);
 
             // Handle location relationships if provided
-            if (!empty($locationIds) && is_array($locationIds)) {
+            if (! empty($locationIds) && is_array($locationIds)) {
                 $event->locations()->sync($locationIds);
             }
 
@@ -112,6 +118,12 @@ class EventService
     public function updateEvent(Event $event, array $data, User $user): Event
     {
         return DB::transaction(function () use ($event, $data, $user) {
+            // CAPA 2: Sanitize description in Service layer (defense in depth layer 2)
+            // This provides protection even if FormRequest layer is bypassed
+            if (isset($data['description'])) {
+                $data['description'] = $this->sanitizeDescription($data['description']);
+            }
+
             // Track who updated the event
             $data['updated_by'] = $user->id;
 
@@ -139,7 +151,9 @@ class EventService
      */
     public function deleteEvent(Event $event): bool
     {
-        return $event->delete();
+        return DB::transaction(function () use ($event) {
+            return $event->delete();
+        });
     }
 
     /**
@@ -158,7 +172,7 @@ class EventService
         });
 
         // Apply search filter if provided
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -183,10 +197,10 @@ class EventService
 
         // Filter for upcoming events
         $query->where('start_date', '>=', now()->startOfDay())
-              ->orderBy('start_date', 'asc');
+            ->orderBy('start_date', 'asc');
 
         // Apply search filter if provided
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -208,7 +222,7 @@ class EventService
 
         // Filter for featured events
         $query->where('is_featured', true)
-              ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc');
 
         // Apply pagination
         $perPage = $this->getPerPageValue($filters);
@@ -220,14 +234,14 @@ class EventService
      * Duplicate event.
      * Creates a copy of the event with draft status and copies location relationships.
      *
-     * @param Event $event The event to duplicate
+     * @param  Event  $event  The event to duplicate
      * @return Event The duplicated event
      */
     public function duplicate(Event $event): Event
     {
         return DB::transaction(function () use ($event) {
             $replica = $event->replicate();
-            $replica->title = $event->title . ' (Copia)';
+            $replica->title = $event->title.' (Copia)';
             $replica->status_id = $this->getStatusId('draft');
             $replica->is_featured = false;
             $replica->approved_at = null;
@@ -263,7 +277,7 @@ class EventService
     {
         $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
-              ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
         });
     }
 
@@ -280,5 +294,20 @@ class EventService
         }
 
         return $perPage;
+    }
+
+    /**
+     * CAPA 2: Sanitize HTML description (allows safe tags, removes scripts/onclick/etc).
+     *
+     * This method is the second layer of defense in our triple-layer XSS protection.
+     * It runs in the Service layer, providing protection even if the FormRequest
+     * layer is bypassed.
+     *
+     * @param  string  $description  Raw HTML description
+     * @return string Sanitized HTML description
+     */
+    private function sanitizeDescription(string $description): string
+    {
+        return Purifier::clean($description);
     }
 }

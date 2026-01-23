@@ -5,8 +5,9 @@
  * Following TDD: RED phase.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { AdminStatsGrid } from '../AdminStatsGrid';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid';
 import type { AdminStatCardData } from '@/features/entity-admin/types';
 
 describe('AdminStatsGrid', () => {

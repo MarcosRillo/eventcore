@@ -4,10 +4,11 @@
  * Smart component that composes the event management modal with all panels.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { EventManagementModalContainer } from '../EventManagementModalContainer';
-import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { EventManagementModalContainer } from '@/features/entity-admin/components/smart/EventManagementModalContainer';
 import * as useApprovalManagerModule from '@/features/entity-admin/hooks/useApprovalManager';
+import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
 import type { Event } from '@/types/event.types';
 
 jest.mock('@/features/entity-admin/hooks/useEventManagement');

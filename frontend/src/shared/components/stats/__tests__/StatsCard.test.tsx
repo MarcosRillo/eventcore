@@ -3,7 +3,8 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { StatsCard } from '../StatsCard';
+
+import { StatsCard } from '@/shared/components/stats/StatsCard';
 
 describe('StatsCard', () => {
   const mockIcon = <svg data-testid="mock-icon" />;

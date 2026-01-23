@@ -50,7 +50,7 @@ class EventValidationService
      */
     public function validateForInternalApproval(Event $event): ValidationResult
     {
-        $result = new ValidationResult();
+        $result = new ValidationResult;
 
         // Validate basic required fields
         foreach (self::INTERNAL_REQUIRED_FIELDS as $field) {
@@ -60,7 +60,7 @@ class EventValidationService
         }
 
         // Location validation: requires at least one location relation
-        if (!$this->hasLocation($event)) {
+        if (! $this->hasLocation($event)) {
             $result->addError('location', 'Se requiere al menos una ubicación del evento');
         }
 
@@ -86,12 +86,12 @@ class EventValidationService
         }
 
         // Location must have city for public events
-        if (!$this->locationHasCity($event)) {
+        if (! $this->locationHasCity($event)) {
             $result->addError('location_city', 'La ubicación debe tener ciudad para publicación');
         }
 
         // Attendance validation: at least one attendance field must be filled
-        if (!$this->hasAttendance($event)) {
+        if (! $this->hasAttendance($event)) {
             $result->addError('attendance', 'Se requiere al menos un tipo de asistencia');
         }
 
@@ -101,8 +101,8 @@ class EventValidationService
     /**
      * Get missing fields for a target status
      *
-     * @param Event $event The event to validate
-     * @param string $targetStatus The target status code
+     * @param  Event  $event  The event to validate
+     * @param  string  $targetStatus  The target status code
      * @return array<string, string> Missing fields with error messages
      */
     public function getMissingFields(Event $event, string $targetStatus): array
@@ -110,7 +110,7 @@ class EventValidationService
         $result = match ($targetStatus) {
             'approved_internal', 'pending_internal_approval' => $this->validateForInternalApproval($event),
             'published', 'pending_public_approval' => $this->validateForPublicApproval($event),
-            default => new ValidationResult(),
+            default => new ValidationResult,
         };
 
         return $result->getErrors();
@@ -142,17 +142,17 @@ class EventValidationService
      */
     private function locationHasCity(Event $event): bool
     {
-        if (!$this->hasLocation($event)) {
+        if (! $this->hasLocation($event)) {
             return false;
         }
 
         // Load locations if not loaded
-        if (!$event->relationLoaded('locations')) {
+        if (! $event->relationLoaded('locations')) {
             $event->load('locations');
         }
 
         // Check if at least one location has a city
-        return $event->locations->contains(fn ($location) => !$this->isEmpty($location->city));
+        return $event->locations->contains(fn ($location) => ! $this->isEmpty($location->city));
     }
 
     /**
@@ -160,8 +160,8 @@ class EventValidationService
      */
     private function hasAttendance(Event $event): bool
     {
-        return !$this->isEmpty($event->local_attendance)
-            || !$this->isEmpty($event->national_attendance)
-            || !$this->isEmpty($event->international_attendance);
+        return ! $this->isEmpty($event->local_attendance)
+            || ! $this->isEmpty($event->national_attendance)
+            || ! $this->isEmpty($event->international_attendance);
     }
 }

@@ -5,13 +5,14 @@
  * Manages the state and logic for the public registration request form
  */
 
-import { useState, useCallback } from 'react'
-import { createRegistrationRequest } from '../services/registration-request.service'
+import { useCallback, useState, useTransition } from 'react'
+
+import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
 import {
+  initialFormData,
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
-  initialFormData,
-} from '../types/registration-request.types'
+} from '@/features/registration-requests/types/registration-request.types'
 
 interface UseRegistrationRequestReturn {
   // Form state
@@ -29,6 +30,7 @@ interface UseRegistrationRequestReturn {
 
 /**
  * Validate CUIT format (XX-XXXXXXXX-X)
+ * @param cuit
  */
 const isValidCuit = (cuit: string): boolean => {
   const cuitRegex = /^\d{2}-\d{8}-\d{1}$/
@@ -37,6 +39,7 @@ const isValidCuit = (cuit: string): boolean => {
 
 /**
  * Validate email format
+ * @param email
  */
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -45,6 +48,7 @@ const isValidEmail = (email: string): boolean => {
 
 /**
  * Validate file size (max 2MB)
+ * @param file
  */
 const isValidFileSize = (file: File | null): boolean => {
   if (!file) return true
@@ -53,6 +57,7 @@ const isValidFileSize = (file: File | null): boolean => {
 
 /**
  * Validate file type (image only)
+ * @param file
  */
 const isValidImageType = (file: File | null): boolean => {
   if (!file) return true
@@ -60,9 +65,12 @@ const isValidImageType = (file: File | null): boolean => {
 }
 
 export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
+  // React 19 transition for non-blocking UI
+  const [, startTransition] = useTransition()
+
   const [formData, setFormData] = useState<RegistrationRequestFormData>(initialFormData)
   const [formErrors, setFormErrors] = useState<RegistrationRequestFormErrors>({})
-  const [submitting, setSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
 
   /**
@@ -183,56 +191,58 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
       return
     }
 
-    setSubmitting(true)
+    setIsSubmitting(true)
     setFormErrors({})
 
-    try {
-      // Build the request data
-      const requestData = {
-        dni: formData.dni.trim(),
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
-        email: formData.email.trim(),
-        whatsapp: formData.whatsapp.trim(),
-        organization_name: formData.organization_name.trim(),
-        organization_cuit: formData.organization_cuit.trim(),
-        organization_sector: formData.organization_sector.trim(),
-        motivation: formData.motivation.trim(),
-        website: formData.website.trim() || undefined,
-        profile_photo: formData.profile_photo || undefined,
-        organization_logo: formData.organization_logo || undefined,
+    startTransition(async () => {
+      try {
+        // Build the request data
+        const requestData = {
+          dni: formData.dni.trim(),
+          first_name: formData.first_name.trim(),
+          last_name: formData.last_name.trim(),
+          email: formData.email.trim(),
+          whatsapp: formData.whatsapp.trim(),
+          organization_name: formData.organization_name.trim(),
+          organization_cuit: formData.organization_cuit.trim(),
+          organization_sector: formData.organization_sector.trim(),
+          motivation: formData.motivation.trim(),
+          website: formData.website.trim() || undefined,
+          profile_photo: formData.profile_photo || undefined,
+          organization_logo: formData.organization_logo || undefined,
+        }
+
+        await createRegistrationRequest(requestData)
+        setSuccess(true)
+      } catch (error: unknown) {
+        // Handle API errors
+        const err = error as {
+          response?: { data?: { message?: string; errors?: Record<string, string[]> } }
+        }
+
+        if (err.response?.data?.errors) {
+          const apiErrors = err.response.data.errors
+          const newErrors: RegistrationRequestFormErrors = {}
+
+          // Map API errors to form fields
+          Object.keys(apiErrors).forEach((key) => {
+            const formKey = key as keyof RegistrationRequestFormErrors
+            if (formKey in initialFormData || formKey === 'general') {
+              newErrors[formKey] = apiErrors[key][0]
+            }
+          })
+
+          setFormErrors(newErrors)
+        } else if (err.response?.data?.message) {
+          setFormErrors({ general: err.response.data.message })
+        } else {
+          setFormErrors({ general: 'Error al enviar la solicitud. Por favor, intenta nuevamente.' })
+        }
+      } finally {
+        setIsSubmitting(false)
       }
-
-      await createRegistrationRequest(requestData)
-      setSuccess(true)
-    } catch (error: unknown) {
-      // Handle API errors
-      const err = error as {
-        response?: { data?: { message?: string; errors?: Record<string, string[]> } }
-      }
-
-      if (err.response?.data?.errors) {
-        const apiErrors = err.response.data.errors
-        const newErrors: RegistrationRequestFormErrors = {}
-
-        // Map API errors to form fields
-        Object.keys(apiErrors).forEach((key) => {
-          const formKey = key as keyof RegistrationRequestFormErrors
-          if (formKey in initialFormData || formKey === 'general') {
-            newErrors[formKey] = apiErrors[key][0]
-          }
-        })
-
-        setFormErrors(newErrors)
-      } else if (err.response?.data?.message) {
-        setFormErrors({ general: err.response.data.message })
-      } else {
-        setFormErrors({ general: 'Error al enviar la solicitud. Por favor, intenta nuevamente.' })
-      }
-    } finally {
-      setSubmitting(false)
-    }
-  }, [formData, validateForm])
+    })
+  }, [formData, validateForm, startTransition])
 
   /**
    * Reset form to initial state
@@ -249,6 +259,9 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
   const clearErrors = useCallback((): void => {
     setFormErrors({})
   }, [])
+
+  // Backward compatibility
+  const submitting = isSubmitting
 
   return {
     formData,

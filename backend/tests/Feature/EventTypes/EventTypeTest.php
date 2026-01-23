@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\EventTypes;
 
-use Tests\TestCase;
-use App\Models\EventType;
 use App\Models\EventSubtype;
-use App\Models\User;
+use App\Models\EventType;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Events\EventTestCase;
 
 /**
  * EventType Controller Tests
@@ -24,9 +24,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  *
  * Created: December 2, 2025
  */
-class EventTypeTest extends TestCase
+class EventTypeTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     /**
      * Setup the test environment.
@@ -42,15 +44,14 @@ class EventTypeTest extends TestCase
     }
 
     /**
-     * Authenticate a user for testing protected endpoints.
+     * Override to add organization attachment for event type tests
      */
-    protected function authenticateUser(): User
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        $user = User::factory()->create();
-        $organization = Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
+        $user = parent::authenticateUser($role);
+        $this->organization = Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
 
-        $this->actingAs($user);
         return $user;
     }
 
@@ -66,7 +67,7 @@ class EventTypeTest extends TestCase
         $organization = $user->organizations()->first();
 
         EventType::factory()->count(5)->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Act
@@ -77,7 +78,7 @@ class EventTypeTest extends TestCase
             ->assertJsonStructure([
                 'data',
                 'links',
-                'meta'
+                'meta',
             ]);
 
         $this->assertGreaterThanOrEqual(5, count($response->json('data')));
@@ -94,11 +95,11 @@ class EventTypeTest extends TestCase
 
         EventType::factory()->create([
             'entity_id' => $organization->id,
-            'name' => 'Conferencia Internacional'
+            'name' => 'Conferencia Internacional',
         ]);
         EventType::factory()->create([
             'entity_id' => $organization->id,
-            'name' => 'Taller Práctico'
+            'name' => 'Taller Práctico',
         ]);
 
         // Act
@@ -121,10 +122,10 @@ class EventTypeTest extends TestCase
         $organization = $user->organizations()->first();
 
         EventType::factory()->count(3)->active()->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
         EventType::factory()->count(2)->inactive()->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Act - Get only active
@@ -148,7 +149,7 @@ class EventTypeTest extends TestCase
         $organization = $user->organizations()->first();
 
         EventType::factory()->count(20)->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Act - Get first page with 5 items
@@ -247,7 +248,8 @@ class EventTypeTest extends TestCase
         // Arrange
         $this->authenticateUser();
         $eventType = EventType::factory()->create([
-            'name' => 'Festival Cultural'
+            'entity_id' => $this->organization->id,
+            'name' => 'Festival Cultural',
         ]);
 
         // Act
@@ -284,7 +286,8 @@ class EventTypeTest extends TestCase
         // Arrange
         $this->authenticateUser();
         $eventType = EventType::factory()->create([
-            'name' => 'Original Name'
+            'entity_id' => $this->organization->id,
+            'name' => 'Original Name',
         ]);
 
         // Act
@@ -310,7 +313,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->active()->create();
+        $eventType = EventType::factory()->active()->create([
+            'entity_id' => $this->organization->id,
+        ]);
 
         // Act
         $response = $this->putJson("/api/v1/event-types/{$eventType->id}", [
@@ -354,7 +359,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->create();
+        $eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id,
+        ]);
 
         // Act
         $response = $this->deleteJson("/api/v1/event-types/{$eventType->id}");
@@ -375,7 +382,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->create();
+        $eventType = EventType::factory()->create([
+            'entity_id' => $this->organization->id,
+        ]);
         EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $eventType->entity_id,
@@ -418,7 +427,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->active()->create();
+        $eventType = EventType::factory()->active()->create([
+            'entity_id' => $this->organization->id,
+        ]);
 
         // Act
         $response = $this->patchJson("/api/v1/event-types/{$eventType->id}/toggle-status");
@@ -436,7 +447,9 @@ class EventTypeTest extends TestCase
     {
         // Arrange
         $this->authenticateUser();
-        $eventType = EventType::factory()->inactive()->create();
+        $eventType = EventType::factory()->inactive()->create([
+            'entity_id' => $this->organization->id,
+        ]);
 
         // Act
         $response = $this->patchJson("/api/v1/event-types/{$eventType->id}/toggle-status");
@@ -460,12 +473,12 @@ class EventTypeTest extends TestCase
 
         // Create active event types
         EventType::factory()->count(3)->active()->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Create inactive event types (should not be returned)
         EventType::factory()->count(2)->inactive()->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Act
@@ -497,10 +510,10 @@ class EventTypeTest extends TestCase
 
         // Create known number of event types
         EventType::factory()->count(3)->active()->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
         EventType::factory()->count(2)->inactive()->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Act
@@ -510,7 +523,7 @@ class EventTypeTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'success',
-                'data' => ['total', 'active', 'inactive']
+                'data' => ['total', 'active', 'inactive'],
             ]);
 
         $stats = $response->json('data');
@@ -568,7 +581,7 @@ class EventTypeTest extends TestCase
 
         EventType::factory()->create([
             'entity_id' => $organization->id,
-            'name' => 'CONFERENCIA MAYÚSCULAS'
+            'name' => 'CONFERENCIA MAYÚSCULAS',
         ]);
 
         // Act - Search with lowercase
@@ -590,7 +603,7 @@ class EventTypeTest extends TestCase
         $organization = $user->organizations()->first();
 
         EventType::factory()->count(150)->create([
-            'entity_id' => $organization->id
+            'entity_id' => $organization->id,
         ]);
 
         // Act - Request more than max

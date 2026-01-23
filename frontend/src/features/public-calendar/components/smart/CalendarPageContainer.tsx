@@ -1,25 +1,49 @@
 /**
  * Calendar Page Container
  * Manages view toggle between Grid and Calendar views
+ * Supports server-side initial data to avoid waterfall fetching
  */
 
 'use client'
 
-import { useState, useEffect } from 'react'
-import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
-import { CalendarViewContainer } from '@/features/public-calendar/components/smart/CalendarViewContainer'
+import { useEffect,useState } from 'react'
+
 import { StatsBar } from '@/features/public-calendar/components/dumb/StatsBar'
+import { CalendarViewContainer } from '@/features/public-calendar/components/smart/CalendarViewContainer'
+import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
-import { PublicStats } from '@/features/public-calendar/types/public-calendar.types'
+import {
+  EventType,
+  Location,
+  PublicEvent,
+  PublicStats,
+} from '@/features/public-calendar/types/public-calendar.types'
 
 type ViewMode = 'grid' | 'calendar'
 
-export const CalendarPageContainer = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar')
-  const [stats, setStats] = useState<PublicStats | null>(null)
-  const [statsLoading, setStatsLoading] = useState(true)
+interface CalendarPageContainerProps {
+  initialStats?: PublicStats | null
+  initialEvents?: PublicEvent[]
+  initialEventTypes?: EventType[]
+  initialLocations?: Location[]
+}
 
+export const CalendarPageContainer = ({
+  initialStats,
+  initialEvents,
+  initialEventTypes,
+  initialLocations,
+}: CalendarPageContainerProps) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('calendar')
+  const [stats, setStats] = useState<PublicStats | null>(initialStats ?? null)
+  const [statsLoading, setStatsLoading] = useState(initialStats === undefined)
+
+  // Fetch stats only if not provided from server
   useEffect(() => {
+    if (initialStats !== undefined) {
+      return
+    }
+
     const fetchStats = async () => {
       try {
         const response = await publicEventsService.getStats()
@@ -31,7 +55,7 @@ export const CalendarPageContainer = () => {
       }
     }
     fetchStats()
-  }, [])
+  }, [initialStats])
 
   return (
     <div className="bg-neutral-50">
@@ -110,9 +134,17 @@ export const CalendarPageContainer = () => {
       {/* Content */}
       <div className="container mx-auto px-4 py-6">
         {viewMode === 'calendar' ? (
-          <CalendarViewContainer />
+          <CalendarViewContainer
+            initialEvents={initialEvents}
+            initialEventTypes={initialEventTypes}
+            initialLocations={initialLocations}
+          />
         ) : (
-          <PublicCalendarContainer />
+          <PublicCalendarContainer
+            initialEvents={initialEvents}
+            initialEventTypes={initialEventTypes}
+            initialLocations={initialLocations}
+          />
         )}
       </div>
     </div>

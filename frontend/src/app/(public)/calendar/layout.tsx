@@ -9,6 +9,11 @@ interface PublicCalendarLayoutProps {
   children: ReactNode;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.children
+ */
 export default function PublicCalendarLayout({ children }: PublicCalendarLayoutProps) {
   return (
     <div className="min-h-screen bg-neutral-50">

@@ -4,8 +4,9 @@
  * Tests the approval action buttons and comment input.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ApprovalActionPanel } from '../ApprovalActionPanel';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
 import type { ApprovalAction } from '@/features/entity-admin/types';
 
 describe('ApprovalActionPanel', () => {

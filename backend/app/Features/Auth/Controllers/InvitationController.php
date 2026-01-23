@@ -2,18 +2,18 @@
 
 namespace App\Features\Auth\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Features\Auth\Services\InvitationService;
-use App\Features\Auth\Requests\SendInvitationRequest;
-use App\Features\Auth\Requests\AcceptInvitationRequest;
 use App\Features\Auth\Notifications\InvitationNotification;
+use App\Features\Auth\Requests\AcceptInvitationRequest;
+use App\Features\Auth\Requests\SendInvitationRequest;
+use App\Features\Auth\Services\InvitationService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class InvitationController extends Controller
 {
     public function __construct(
-        private InvitationService $invitationService
+        private InvitationService $invitationService,
     ) {}
 
     /**
@@ -24,7 +24,7 @@ class InvitationController extends Controller
         try {
             $invitation = $this->invitationService->sendInvitation(
                 $request->validated(),
-                $request->user()
+                $request->user(),
             );
 
             // Send notification email with plain token (selector + validator)
@@ -58,7 +58,7 @@ class InvitationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $invitations->map(fn($inv) => [
+            'data' => $invitations->map(fn ($inv) => [
                 'id' => $inv->id,
                 'email' => $inv->email,
                 'role' => $inv->role->role_name,
@@ -139,7 +139,7 @@ class InvitationController extends Controller
     {
         $invitation = $this->invitationService->validateToken($token);
 
-        if (!$invitation) {
+        if (! $invitation) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token de invitación inválido o expirado.',
@@ -165,7 +165,7 @@ class InvitationController extends Controller
         try {
             $user = $this->invitationService->acceptInvitation(
                 $request->input('token'),
-                $request->validated()
+                $request->validated(),
             );
 
             // Generate auth token for the new user

@@ -4,7 +4,7 @@
  */
 
 import { useAuth } from '@/context/AuthContext';
-import { UserRoleCode, Permission } from '@/types/auth.types';
+import { Permission,UserRoleCode } from '@/types/auth.types';
 
 export const usePermissions = () => {
   const {
@@ -22,6 +22,7 @@ export const usePermissions = () => {
 
   /**
    * Check if current user can perform a specific action
+   * @param permission
    */
   const can = (permission: Permission): boolean => {
     const userPermissions = getUserPermissions();
@@ -30,6 +31,7 @@ export const usePermissions = () => {
 
   /**
    * Check if current user has any of the specified roles
+   * @param roles
    */
   const hasAnyRole = (roles: UserRoleCode[]): boolean => {
     return roles.some(role => hasRole(role));
@@ -79,6 +81,7 @@ export const usePermissions = () => {
 
   /**
    * Check if user belongs to a specific organization
+   * @param organizationId
    */
   const belongsToOrganization = (organizationId: number): boolean => {
     return user?.organization?.id === organizationId;

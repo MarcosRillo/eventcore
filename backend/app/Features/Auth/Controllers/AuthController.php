@@ -2,11 +2,11 @@
 
 namespace App\Features\Auth\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\Auth\Requests\LoginRequest;
 use App\Features\Auth\Requests\RefreshTokenRequest;
-use App\Http\Resources\UserResource;
 use App\Features\Auth\Services\AuthService;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     public function __construct(
-        private AuthService $authService
+        private AuthService $authService,
     ) {}
 
     /**
@@ -31,6 +31,12 @@ class AuthController extends Controller
         try {
             $result = $this->authService->login($request->validated());
 
+            // Calculate cookie expiration in minutes
+            // expires_at is ISO string, convert to timestamp first
+            $expiresAtTimestamp = strtotime($result['expires_at']);
+            $accessTokenMinutes = (int) (($expiresAtTimestamp - time()) / 60);
+            $refreshTokenMinutes = 10080; // 7 days
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -40,7 +46,9 @@ class AuthController extends Controller
                     'expires_at' => $result['expires_at'],
                 ],
                 'message' => 'Login successful',
-            ]);
+            ])
+                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
+                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
         } catch (AuthenticationException $e) {
             // Return specific message for suspended users
             $message = str_contains($e->getMessage(), 'suspendida')
@@ -62,11 +70,31 @@ class AuthController extends Controller
     /**
      * Refresh access token using refresh token.
      * Implements token rotation for security.
+     * Accepts refresh token from cookie (preferred) or request body (backward compatibility).
      */
     public function refresh(RefreshTokenRequest $request): JsonResponse
     {
         try {
-            $result = $this->authService->refresh($request->validated()['refresh_token']);
+            // Accept token from cookie (httpOnly) or body (backward compatibility)
+            $refreshToken = $request->cookie('refresh_token') ?? $request->input('refresh_token');
+
+            if (! $refreshToken) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The refresh token field is required.',
+                    'errors' => [
+                        'refresh_token' => ['The refresh token field is required.'],
+                    ],
+                ], 422);
+            }
+
+            $result = $this->authService->refresh($refreshToken);
+
+            // Calculate cookie expiration in minutes
+            // expires_at is ISO string, convert to timestamp first
+            $expiresAtTimestamp = strtotime($result['expires_at']);
+            $accessTokenMinutes = (int) (($expiresAtTimestamp - time()) / 60);
+            $refreshTokenMinutes = 10080; // 7 days
 
             return response()->json([
                 'success' => true,
@@ -76,7 +104,9 @@ class AuthController extends Controller
                     'expires_at' => $result['expires_at'],
                 ],
                 'message' => 'Token refreshed successfully',
-            ]);
+            ])
+                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
+                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
         } catch (\Exception) {
             return response()->json([
                 'success' => false,
@@ -87,6 +117,7 @@ class AuthController extends Controller
 
     /**
      * Logout user and revoke all tokens (access + refresh).
+     * Clears httpOnly cookies.
      */
     public function logout(Request $request): JsonResponse
     {
@@ -96,7 +127,9 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Logout successful',
-            ]);
+            ])
+                ->cookie('access_token', '', -1, '/', null, config('session.secure'), true, false, 'strict')
+                ->cookie('refresh_token', '', -1, '/', null, config('session.secure'), true, false, 'strict');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

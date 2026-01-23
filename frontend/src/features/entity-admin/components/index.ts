@@ -2,6 +2,6 @@
  * Entity Admin Components - Barrel Export
  */
 
-export { DashboardModeView } from './DashboardModeView'
-export * from './dumb'
-export * from './smart'
+export { DashboardModeView } from '@/features/entity-admin/components/DashboardModeView'
+export * from '@/features/entity-admin/components/dumb'
+export * from '@/features/entity-admin/components/smart'

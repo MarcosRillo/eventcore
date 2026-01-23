@@ -2,11 +2,11 @@
 
 namespace App\Features\Locations\Controllers;
 
+use App\Features\Locations\Requests\IndexLocationsRequest;
+use App\Features\Locations\Services\LocationService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationResource;
 use App\Models\Location;
-use App\Features\Locations\Services\LocationService;
-use App\Features\Locations\Requests\IndexLocationsRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 class LocationController extends Controller
 {
     public function __construct(
-        private LocationService $locationService
+        private LocationService $locationService,
     ) {}
 
     /**

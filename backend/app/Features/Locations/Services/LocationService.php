@@ -23,7 +23,7 @@ class LocationService
         $this->applyScopeFilter($query);
 
         // Apply search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -54,8 +54,8 @@ class LocationService
         $this->applyScopeFilter($query);
 
         return $query->where('is_active', true)
-                    ->orderBy('name', 'asc')
-                    ->get();
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     /**
@@ -68,7 +68,7 @@ class LocationService
                 // Get the user's primary organization
                 $organization = $user->organizations()->first();
 
-                if (!$organization) {
+                if (! $organization) {
                     throw new \Exception('User is not associated with any organization');
                 }
 
@@ -92,19 +92,13 @@ class LocationService
 
                 $location = Location::create($locationData);
 
-                Log::info('Location created', [
-                    'location_id' => $location->id,
-                    'location_name' => $location->name,
-                    'user_id' => $user->id
-                ]);
-
                 return $location;
             });
         } catch (\Exception $e) {
             Log::error('Failed to create location', [
                 'error' => $e->getMessage(),
                 'user_id' => $user->id,
-                'data' => $data
+                'data' => $data,
             ]);
             throw $e;
         }
@@ -117,15 +111,7 @@ class LocationService
     {
         try {
             return DB::transaction(function () use ($location, $data) {
-                $originalData = $location->toArray();
-
                 $location->update($data);
-
-                Log::info('Location updated', [
-                    'location_id' => $location->id,
-                    'location_name' => $location->name,
-                    'changes' => array_diff_assoc($data, $originalData)
-                ]);
 
                 return $location->fresh();
             });
@@ -133,7 +119,7 @@ class LocationService
             Log::error('Failed to update location', [
                 'error' => $e->getMessage(),
                 'location_id' => $location->id,
-                'data' => $data
+                'data' => $data,
             ]);
             throw $e;
         }
@@ -146,15 +132,9 @@ class LocationService
     {
         try {
             return DB::transaction(function () use ($location) {
-                $locationId = $location->id;
                 $locationName = $location->name;
 
                 $location->delete();
-
-                Log::info('Location deleted', [
-                    'location_id' => $locationId,
-                    'location_name' => $locationName
-                ]);
 
                 return "Location '{$locationName}' deleted successfully";
             });
@@ -162,7 +142,7 @@ class LocationService
             Log::error('Failed to delete location', [
                 'error' => $e->getMessage(),
                 'location_id' => $location->id,
-                'location_name' => $location->name
+                'location_name' => $location->name,
             ]);
             throw $e;
         }
@@ -194,7 +174,7 @@ class LocationService
     {
         return DB::transaction(function () use ($location) {
             $location->update([
-                'is_active' => !$location->is_active
+                'is_active' => ! $location->is_active,
             ]);
 
             return $location->fresh();
@@ -219,9 +199,9 @@ class LocationService
         $searchLower = strtolower($search);
         $query->where(function ($q) use ($searchLower) {
             $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
-              ->orWhereRaw('LOWER(address) LIKE ?', ["%{$searchLower}%"])
-              ->orWhereRaw('LOWER(city) LIKE ?', ["%{$searchLower}%"])
-              ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"]);
+                ->orWhereRaw('LOWER(address) LIKE ?', ["%{$searchLower}%"])
+                ->orWhereRaw('LOWER(city) LIKE ?', ["%{$searchLower}%"])
+                ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"]);
         });
     }
 

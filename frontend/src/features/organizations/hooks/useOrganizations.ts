@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
+
+import organizationService from '@/features/organizations/services/organization.service'
 import type {
   Organization,
   OrganizationFilters,
   PaginationMeta,
-} from '../types/organization.types'
-import organizationService from '../services/organization.service'
+} from '@/features/organizations/types/organization.types'
 
 interface UseOrganizationsReturn {
   organizations: Organization[]
@@ -26,74 +27,90 @@ interface UseOrganizationsReturn {
 }
 
 export const useOrganizations = (): UseOrganizationsReturn => {
+  // React 19 transitions for non-blocking UI
+  const [, startLoadTransition] = useTransition()
+  const [, startDetailTransition] = useTransition()
+  const [, startToggleTransition] = useTransition()
+
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [pagination, setPagination] = useState<PaginationMeta | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFiltersState] = useState<OrganizationFilters>({
     status: 'all',
     per_page: 15,
     page: 1,
   })
-  const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [togglingIdState, setTogglingIdState] = useState<number | null>(null)
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null)
-  const [loadingDetail, setLoadingDetail] = useState(false)
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
 
   const fetchOrganizations = useCallback(
     async (newFilters?: OrganizationFilters) => {
-      setLoading(true)
+      setIsLoading(true)
       setError(null)
-      try {
-        const result = await organizationService.getOrganizations(newFilters)
-        setOrganizations(result.data)
-        setPagination(result.pagination)
-      } catch {
-        setError('Error al cargar las organizaciones')
-      } finally {
-        setLoading(false)
-      }
+
+      startLoadTransition(async () => {
+        try {
+          const result = await organizationService.getOrganizations(newFilters)
+          setOrganizations(result.data)
+          setPagination(result.pagination)
+        } catch {
+          setError('Error al cargar las organizaciones')
+        } finally {
+          setIsLoading(false)
+        }
+      })
     },
-    []
+    [startLoadTransition]
   )
 
   const handleToggleStatus = useCallback(
     async (id: number): Promise<boolean> => {
-      setTogglingId(id)
+      setTogglingIdState(id)
       setError(null)
-      try {
-        const updatedOrg =
-          await organizationService.toggleOrganizationStatus(id)
-        setOrganizations((prev) =>
-          prev.map((org) => (org.id === id ? updatedOrg : org))
-        )
-        // Also update selected organization if it's the same
-        if (selectedOrganization?.id === id) {
-          setSelectedOrganization(updatedOrg)
-        }
-        return true
-      } catch {
-        setError('Error al cambiar el estado de la organización')
-        return false
-      } finally {
-        setTogglingId(null)
-      }
+
+      return new Promise((resolve) => {
+        startToggleTransition(async () => {
+          try {
+            const updatedOrg =
+              await organizationService.toggleOrganizationStatus(id)
+            setOrganizations((prev) =>
+              prev.map((org) => (org.id === id ? updatedOrg : org))
+            )
+            // Also update selected organization if it's the same
+            if (selectedOrganization?.id === id) {
+              setSelectedOrganization(updatedOrg)
+            }
+            setTogglingIdState(null)
+            resolve(true)
+          } catch {
+            setError('Error al cambiar el estado de la organización')
+            setTogglingIdState(null)
+            resolve(false)
+          }
+        })
+      })
     },
-    [selectedOrganization]
+    [selectedOrganization, startToggleTransition]
   )
 
   const handleViewDetail = useCallback(async (id: number) => {
-    setLoadingDetail(true)
+    setIsLoadingDetail(true)
     setError(null)
-    try {
-      const org = await organizationService.getOrganization(id)
-      setSelectedOrganization(org)
-    } catch {
-      setError('Error al cargar el detalle de la organización')
-    } finally {
-      setLoadingDetail(false)
-    }
-  }, [])
+
+    startDetailTransition(async () => {
+      try {
+        const org = await organizationService.getOrganization(id)
+        setSelectedOrganization(org)
+      } catch {
+        setError('Error al cargar el detalle de la organización')
+      } finally {
+        setIsLoadingDetail(false)
+      }
+    })
+  }, [startDetailTransition])
 
   const handleCloseDetail = useCallback(() => {
     setSelectedOrganization(null)
@@ -111,6 +128,11 @@ export const useOrganizations = (): UseOrganizationsReturn => {
   useEffect(() => {
     fetchOrganizations(filters)
   }, [fetchOrganizations, filters])
+
+  // Backward compatibility
+  const loading = isLoading
+  const loadingDetail = isLoadingDetail
+  const togglingId = togglingIdState
 
   return {
     organizations,

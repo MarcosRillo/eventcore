@@ -6,11 +6,12 @@
 
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { Location } from '@/types/location.types';
+import { MapPin,Pencil, Trash2 } from 'lucide-react';
+import { useCallback, useMemo,useState } from 'react';
+
+import { ConfirmDialogData,GenericTable, TableActionConfig, TableColumnConfig } from '@/shared/components/tables';
 import { PaginationMeta } from '@/types/api-response.types';
-import { GenericTable, TableColumnConfig, TableActionConfig, ConfirmDialogData } from '@/shared/components/tables';
-import { PencilIcon, TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { Location } from '@/types/location.types';
 
 interface LocationTableContainerProps {
   locations: Location[];
@@ -21,6 +22,16 @@ interface LocationTableContainerProps {
   onPageChange: (page: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.locations
+ * @param root0.pagination
+ * @param root0.loading
+ * @param root0.onEdit
+ * @param root0.onDelete
+ * @param root0.onPageChange
+ */
 export function LocationTableContainer({
   locations,
   pagination,
@@ -64,7 +75,7 @@ export function LocationTableContainer({
       render: (location) => (
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <MapPinIcon className="w-4 h-4 text-neutral-400" aria-hidden="true" />
+            <MapPin className="w-4 h-4 text-neutral-400" aria-hidden="true" />
             <span className="font-medium text-neutral-900">{location.name}</span>
           </div>
           {location.description && (
@@ -95,14 +106,14 @@ export function LocationTableContainer({
     {
       key: 'edit',
       label: 'Editar',
-      icon: <PencilIcon className="w-5 h-5" />,
+      icon: <Pencil className="w-5 h-5" />,
       variant: 'secondary',
       onClick: onEdit,
     },
     {
       key: 'delete',
       label: 'Eliminar',
-      icon: <TrashIcon className="w-5 h-5" />,
+      icon: <Trash2 className="w-5 h-5" />,
       variant: 'danger',
       onClick: handleDeleteClick,
     },

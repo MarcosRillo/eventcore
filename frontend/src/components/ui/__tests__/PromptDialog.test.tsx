@@ -3,9 +3,10 @@
  * Tests for the prompt dialog component with input/textarea
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import PromptDialog from '../PromptDialog'
+
+import PromptDialog from '@/components/ui/PromptDialog'
 
 describe('PromptDialog', () => {
   const defaultProps = {

@@ -6,8 +6,9 @@
  * Updated for 3NF schema (Nov 30, 2025).
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerEventForm } from '../OrganizerEventForm'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { OrganizerEventForm } from '@/features/organizer/components/dumb/OrganizerEventForm'
 import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
 
 describe('OrganizerEventForm', () => {
@@ -136,6 +137,9 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventForm {...defaultProps} initialLoading={true} />)
 
       expect(screen.getByText('Cargando evento...')).toBeInTheDocument()
+      expect(screen.queryByRole('form')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/nombre del evento/i)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /guardar/i })).not.toBeInTheDocument()
     })
 
     test('should not render form when initialLoading is true', () => {
@@ -143,6 +147,8 @@ describe('OrganizerEventForm', () => {
 
       expect(screen.queryByRole('form')).not.toBeInTheDocument()
       expect(screen.queryByLabelText(/nombre del evento/i)).not.toBeInTheDocument()
+      expect(screen.getByText('Cargando evento...')).toBeInTheDocument()
+      expect(screen.queryByText('1. Información Básica')).not.toBeInTheDocument()
     })
 
     test('should render form when initialLoading is false', () => {
@@ -150,6 +156,8 @@ describe('OrganizerEventForm', () => {
 
       expect(screen.queryByText('Cargando evento...')).not.toBeInTheDocument()
       expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
+      expect(screen.getByText('1. Información Básica')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /crear evento/i })).toBeInTheDocument()
     })
   })
 
@@ -304,6 +312,8 @@ describe('OrganizerEventForm', () => {
       fireEvent.click(otroCheckbox)
 
       expect(mockHandleCustomLocationToggle).toHaveBeenCalledWith(true)
+      expect(mockHandleCustomLocationToggle).toHaveBeenCalledTimes(1)
+      expect(otroCheckbox).toBeInTheDocument()
     })
 
     test('should call handleChange when custom_location_name input changes', () => {
@@ -313,6 +323,8 @@ describe('OrganizerEventForm', () => {
       fireEvent.change(customNameInput, { target: { value: 'Salón El Jardín' } })
 
       expect(mockHandleChange).toHaveBeenCalledWith('custom_location_name', 'Salón El Jardín')
+      expect(mockHandleChange).toHaveBeenCalledTimes(1)
+      expect(customNameInput).toBeInTheDocument()
     })
 
     test('should call handleChange when maps_url input changes', () => {
@@ -322,6 +334,8 @@ describe('OrganizerEventForm', () => {
       fireEvent.change(mapsInput, { target: { value: 'https://maps.google.com/test' } })
 
       expect(mockHandleChange).toHaveBeenCalledWith('maps_url', 'https://maps.google.com/test')
+      expect(mockHandleChange).toHaveBeenCalledTimes(1)
+      expect(mapsInput).toBeInTheDocument()
     })
 
     test('should call handleChange when previous_venue input changes', () => {
@@ -331,6 +345,8 @@ describe('OrganizerEventForm', () => {
       fireEvent.change(previousVenueInput, { target: { value: 'Córdoba 2023' } })
 
       expect(mockHandleChange).toHaveBeenCalledWith('previous_venue', 'Córdoba 2023')
+      expect(mockHandleChange).toHaveBeenCalledTimes(1)
+      expect(previousVenueInput).toBeInTheDocument()
     })
 
     test('should call handleChange when next_venue input changes', () => {
@@ -340,6 +356,8 @@ describe('OrganizerEventForm', () => {
       fireEvent.change(nextVenueInput, { target: { value: 'Mendoza 2026' } })
 
       expect(mockHandleChange).toHaveBeenCalledWith('next_venue', 'Mendoza 2026')
+      expect(mockHandleChange).toHaveBeenCalledTimes(1)
+      expect(nextVenueInput).toBeInTheDocument()
     })
   })
 

@@ -97,7 +97,7 @@ class RefreshTokenTest extends TestCase
         $expectedExpiration = Carbon::now()->addMinutes(config('tokens.refresh_token_expiration', 10080));
         $this->assertEquals(
             $expectedExpiration->format('Y-m-d H:i'),
-            Carbon::parse($refreshToken->expires_at)->format('Y-m-d H:i')
+            Carbon::parse($refreshToken->expires_at)->format('Y-m-d H:i'),
         );
 
         Carbon::setTestNow(); // Reset
@@ -422,7 +422,7 @@ class RefreshTokenTest extends TestCase
         $expectedExpiration = Carbon::now()->addMinutes(config('tokens.access_token_expiration', 15));
         $this->assertEquals(
             $expectedExpiration->toISOString(),
-            $expiresAt
+            $expiresAt,
         );
 
         Carbon::setTestNow();

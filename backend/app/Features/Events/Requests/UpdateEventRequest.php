@@ -2,10 +2,10 @@
 
 namespace App\Features\Events\Requests;
 
+use App\Models\Event;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Event;
-use App\Models\EventStatus;
+use Mews\Purifier\Facades\Purifier;
 
 /**
  * Update Event Request
@@ -21,6 +21,21 @@ class UpdateEventRequest extends FormRequest
     public function authorize(): bool
     {
         return true; // Authorization handled by middleware/policies
+    }
+
+    /**
+     * CAPA 1: Sanitize description before validation (defense in depth layer 1).
+     *
+     * This method runs BEFORE validation, removing malicious HTML/JavaScript
+     * from the description field. This is the first layer of defense.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('description') && ! empty($this->input('description'))) {
+            $this->merge([
+                'description' => Purifier::clean($this->input('description')),
+            ]);
+        }
     }
 
     /**
@@ -208,7 +223,7 @@ class UpdateEventRequest extends FormRequest
             if ($diffInHours > (7 * 24)) {
                 $validator->errors()->add(
                     'end_date',
-                    'Los eventos no pueden durar más de 7 días.'
+                    'Los eventos no pueden durar más de 7 días.',
                 );
             }
 
@@ -216,7 +231,7 @@ class UpdateEventRequest extends FormRequest
             if ($diffInHours < 0.5) {
                 $validator->errors()->add(
                     'end_date',
-                    'Los eventos deben durar al menos 30 minutos.'
+                    'Los eventos deben durar al menos 30 minutos.',
                 );
             }
         }
@@ -237,10 +252,10 @@ class UpdateEventRequest extends FormRequest
 
                 $restrictedChanges = array_diff($changedFields, $allowedFields);
 
-                if (!empty($restrictedChanges)) {
+                if (! empty($restrictedChanges)) {
                     $validator->errors()->add(
                         'status',
-                        'No se pueden modificar eventos publicados que ya han finalizado, excepto la descripción.'
+                        'No se pueden modificar eventos publicados que ya han finalizado, excepto la descripción.',
                     );
                 }
             }

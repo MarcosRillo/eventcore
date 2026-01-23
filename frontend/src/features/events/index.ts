@@ -4,13 +4,13 @@
  */
 
 // Components
-export * from './components';
+export * from '@/features/events/components';
 
 // Hooks
-export * from './hooks';
+export * from '@/features/events/hooks';
 
 // Services
-export * from './services';
+export * from '@/features/events/services';
 
 // Types (when created)
-// export * from './types';
+// export * from '@/features/events/types';

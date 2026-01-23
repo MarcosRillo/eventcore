@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
-import { useEventActions } from '../useEventActions'
+
+import { useEventActions } from '@/features/events/hooks/useEventActions'
 import { Event, EventStatus } from '@/types/event.types'
 
 const mockEvent: Event = {

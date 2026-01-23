@@ -2,13 +2,17 @@
 
 namespace App\Features\PublicEvents\Controllers;
 
+use App\Features\PublicEvents\Requests\DateRangeRequest;
+use App\Features\PublicEvents\Requests\FeaturedEventsRequest;
+use App\Features\PublicEvents\Requests\IndexPublicEventsRequest;
+use App\Features\PublicEvents\Requests\SearchPublicEventsRequest;
+use App\Features\PublicEvents\Requests\UpcomingEventsRequest;
 use App\Features\PublicEvents\Services\PublicEventService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\EventType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
  * Public Event Controller
@@ -19,27 +23,16 @@ use Illuminate\Http\Request;
 class PublicEventController extends Controller
 {
     public function __construct(
-        private PublicEventService $publicEventService
+        private PublicEventService $publicEventService,
     ) {}
 
     /**
      * Get paginated list of published events for public consumption.
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexPublicEventsRequest $request): JsonResponse
     {
-        $request->validate([
-            'event_type_id' => 'sometimes|exists:event_types,id',
-            'event_subtype_id' => 'sometimes|exists:event_subtypes,id',
-            'location_id' => 'sometimes|exists:locations,id',
-            'start_date' => 'sometimes|date',
-            'end_date' => 'sometimes|date|after_or_equal:start_date',
-            'search' => 'sometimes|string|max:255',
-            'page' => 'sometimes|integer|min:1',
-            'per_page' => 'sometimes|integer|min:1|max:50',
-        ]);
-
-        $filters = $request->only(['event_type_id', 'event_subtype_id', 'location_id', 'start_date', 'end_date', 'search']);
-        $perPage = $request->get('per_page', 15);
+        $filters = $request->getFilters();
+        $perPage = $request->getPerPage();
 
         $events = $this->publicEventService->getPublishedEvents($filters, $perPage);
 
@@ -87,16 +80,11 @@ class PublicEventController extends Controller
     /**
      * Get events by date range.
      */
-    public function dateRange(Request $request): JsonResponse
+    public function dateRange(DateRangeRequest $request): JsonResponse
     {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date|after_or_equal:start',
-        ]);
-
         $events = $this->publicEventService->getEventsByDateRange(
-            $request->start,
-            $request->end
+            $request->validated('start'),
+            $request->validated('end'),
         );
 
         return response()->json([
@@ -107,11 +95,9 @@ class PublicEventController extends Controller
     /**
      * Get upcoming published events.
      */
-    public function upcoming(Request $request): JsonResponse
+    public function upcoming(UpcomingEventsRequest $request): JsonResponse
     {
-        $limit = $request->get('limit', 10);
-
-        $events = $this->publicEventService->getUpcomingEvents($limit);
+        $events = $this->publicEventService->getUpcomingEvents($request->getLimit());
 
         return response()->json([
             'data' => EventResource::collection($events),
@@ -121,11 +107,9 @@ class PublicEventController extends Controller
     /**
      * Get featured published events.
      */
-    public function featured(Request $request): JsonResponse
+    public function featured(FeaturedEventsRequest $request): JsonResponse
     {
-        $limit = $request->get('limit', 6);
-
-        $events = $this->publicEventService->getFeaturedEvents($limit);
+        $events = $this->publicEventService->getFeaturedEvents($request->getLimit());
 
         return response()->json([
             'data' => EventResource::collection($events),
@@ -135,18 +119,12 @@ class PublicEventController extends Controller
     /**
      * Search published events.
      */
-    public function search(Request $request): JsonResponse
+    public function search(SearchPublicEventsRequest $request): JsonResponse
     {
-        $request->validate([
-            'q' => 'required|string|max:255',
-            'event_type_id' => 'sometimes|exists:event_types,id',
-            'limit' => 'sometimes|integer|min:1|max:50',
-        ]);
-
         $result = $this->publicEventService->searchEvents(
-            $request->q,
-            $request->event_type_id,
-            $request->get('limit', 15)
+            $request->validated('q'),
+            $request->validated('event_type_id'),
+            $request->getLimit(),
         );
 
         return response()->json([
@@ -171,8 +149,6 @@ class PublicEventController extends Controller
     /**
      * Get all active event types
      * GET /api/v1/public/event-types
-     *
-     * @return JsonResponse
      */
     public function eventTypes(): JsonResponse
     {
@@ -181,16 +157,13 @@ class PublicEventController extends Controller
             ->get(['id', 'name', 'color', 'is_active']);
 
         return response()->json([
-            'data' => $eventTypes
+            'data' => $eventTypes,
         ]);
     }
 
     /**
      * Get all active subtypes for a specific event type
      * GET /api/v1/public/event-types/{eventType}/subtypes
-     *
-     * @param EventType $eventType
-     * @return JsonResponse
      */
     public function eventSubtypes(EventType $eventType): JsonResponse
     {
@@ -200,7 +173,7 @@ class PublicEventController extends Controller
             ->get(['id', 'name', 'event_type_id', 'is_active']);
 
         return response()->json([
-            'data' => $subtypes
+            'data' => $subtypes,
         ]);
     }
 }

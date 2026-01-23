@@ -5,8 +5,8 @@
  * Used by entity_admin and entity_staff to view approval workflow metrics.
  */
 
-import apiClient from '@/services/apiClient';
 import type { AdminApprovalStats, AdminStatCardData } from '@/features/entity-admin/types';
+import apiClient from '@/services/apiClient';
 
 interface StatsResponse {
   data: AdminApprovalStats;

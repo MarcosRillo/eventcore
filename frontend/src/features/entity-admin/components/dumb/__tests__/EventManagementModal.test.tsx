@@ -5,7 +5,8 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { EventManagementModal } from '../EventManagementModal';
+
+import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
 import type { Event } from '@/types/event.types';
 
 describe('EventManagementModal', () => {

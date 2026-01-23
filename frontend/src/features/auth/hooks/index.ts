@@ -2,6 +2,6 @@
  * Auth Hooks Export Index
  */
 
-export { useLoginForm } from './useLoginForm';
-export { useForgotPassword } from './useForgotPassword';
-export { useResetPassword } from './useResetPassword';
+export { useForgotPassword } from '@/features/auth/hooks/useForgotPassword';
+export { useLoginForm } from '@/features/auth/hooks/useLoginForm';
+export { useResetPassword } from '@/features/auth/hooks/useResetPassword';

@@ -2,17 +2,17 @@
 
 namespace App\Features\Auth\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Features\Auth\Services\PasswordResetService;
 use App\Features\Auth\Requests\ForgotPasswordRequest;
 use App\Features\Auth\Requests\ResetPasswordRequest;
+use App\Features\Auth\Services\PasswordResetService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PasswordResetController extends Controller
 {
     public function __construct(
-        private PasswordResetService $passwordResetService
+        private PasswordResetService $passwordResetService,
     ) {}
 
     /**
@@ -41,7 +41,7 @@ class PasswordResetController extends Controller
 
         $valid = $this->passwordResetService->validateToken(
             $request->email,
-            $request->token
+            $request->token,
         );
 
         return response()->json([
@@ -60,7 +60,7 @@ class PasswordResetController extends Controller
         $user = $this->passwordResetService->resetPassword(
             $request->email,
             $request->token,
-            $request->password
+            $request->password,
         );
 
         return response()->json([

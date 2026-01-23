@@ -4,12 +4,13 @@
  * Tests integration with hooks and event card rendering.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import { EventCardContainer } from '../EventCardContainer'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { EventCardContainer } from '@/features/events/components/smart/EventCardContainer'
+import { useEventActions } from '@/features/events/hooks/useEventActions'
 import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic'
 import { useEventUrgency } from '@/features/events/hooks/useEventUrgency'
-import { useEventActions } from '@/features/events/hooks/useEventActions'
-import { Event, EventType, EventStatus } from '@/types/event.types'
+import { Event, EventStatus,EventType } from '@/types/event.types'
 
 // Mock hooks
 jest.mock('@/features/events/hooks/useEventCardLogic')
@@ -59,9 +60,9 @@ jest.mock('@/components/ui', () => ({
   )
 }))
 
-// Mock heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  ClockIcon: () => <span data-testid="clock-icon" />
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Clock: () => <span data-testid="clock-icon" />
 }))
 
 describe('EventCardContainer', () => {

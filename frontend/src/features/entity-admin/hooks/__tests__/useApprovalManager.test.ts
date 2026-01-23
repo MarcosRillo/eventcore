@@ -1,5 +1,6 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useApprovalManager } from '../useApprovalManager'
+import { act, renderHook, waitFor } from '@testing-library/react'
+
+import { useApprovalManager } from '@/features/entity-admin/hooks/useApprovalManager'
 import { approvalService, approvalValidation } from '@/features/events/services/approvalService'
 import { Event } from '@/types/event.types'
 

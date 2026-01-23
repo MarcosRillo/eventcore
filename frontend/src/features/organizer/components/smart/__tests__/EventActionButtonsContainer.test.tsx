@@ -1,6 +1,8 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { EventActionButtonsContainer } from '../EventActionButtonsContainer'
+
+import { act,fireEvent, render, screen, waitFor } from '@testing-library/react'
+
+import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
 import * as useEventActionsModule from '@/features/organizer/hooks/useEventActions'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 

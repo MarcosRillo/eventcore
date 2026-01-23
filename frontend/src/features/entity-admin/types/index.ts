@@ -2,4 +2,4 @@
  * Entity Admin Types - Barrel Export
  */
 
-export * from './adminPanel.types';
+export * from '@/features/entity-admin/types/adminPanel.types';

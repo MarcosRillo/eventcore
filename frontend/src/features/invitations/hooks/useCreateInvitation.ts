@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback, FormEvent } from 'react'
-import { SendInvitationData } from '../types/invitation.types'
+import { FormEvent,useCallback, useState } from 'react'
+
+import { SendInvitationData } from '@/features/invitations/types/invitation.types'
 
 interface FormErrors {
   email?: string
@@ -33,6 +34,10 @@ const validateEmail = (email: string): boolean => {
 
 /**
  * Hook to manage create invitation form state and validation
+ * @param root0
+ * @param root0.onSubmit
+ * @param root0.onClose
+ * @param root0.isLoading
  */
 export const useCreateInvitation = ({
   onSubmit,

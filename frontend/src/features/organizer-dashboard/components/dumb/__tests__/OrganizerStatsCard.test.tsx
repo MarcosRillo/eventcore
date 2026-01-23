@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { OrganizerStatsCard } from '@/features/organizer-dashboard/components/dumb/OrganizerStatsCard';
 import { StatCardData } from '@/features/organizer-dashboard/types/organizerStats.types';
 

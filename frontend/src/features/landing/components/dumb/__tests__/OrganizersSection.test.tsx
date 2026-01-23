@@ -5,7 +5,8 @@
  */
 
 import { render, screen } from '@testing-library/react'
-import { OrganizersSection } from '../OrganizersSection'
+
+import { OrganizersSection } from '@/features/landing/components/dumb/OrganizersSection'
 
 // Mock Next.js Link component
 jest.mock('next/link', () => {

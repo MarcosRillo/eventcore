@@ -3,7 +3,7 @@
  * Type definitions for landing page components
  */
 
-import { PublicEvent, EventType } from '@/features/public-calendar/types/public-calendar.types'
+import { EventType,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 export interface LandingData {
   featuredEvents: PublicEvent[]

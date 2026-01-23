@@ -4,15 +4,15 @@
  * Handles API calls for public calendar (no auth required).
  */
 
-import apiClient from '@/services/apiClient'
 import {
   EventsResponse,
-  PublicEvent,
-  EventType,
   EventSubtype,
+  EventType,
   Location,
+  PublicEvent,
   PublicStats
 } from '@/features/public-calendar/types/public-calendar.types'
+import publicApiClient from '@/services/publicApiClient'
 
 interface FetchEventsParams {
   event_type_id?: number | null
@@ -26,6 +26,7 @@ interface FetchEventsParams {
 export const publicEventsService = {
   /**
    * Get all published events
+   * @param params
    */
   getAll: async (params: FetchEventsParams = {}): Promise<EventsResponse> => {
     const queryParams = new URLSearchParams()
@@ -54,15 +55,16 @@ export const publicEventsService = {
       ? `/public/events?${queryString}`
       : '/public/events'
 
-    const response = await apiClient.get(url)
+    const response = await publicApiClient.get(url)
     return response.data
   },
 
   /**
    * Get event by ID
+   * @param id
    */
   getById: async (id: number): Promise<{ data: PublicEvent }> => {
-    const response = await apiClient.get(`/public/events/${id}`)
+    const response = await publicApiClient.get(`/public/events/${id}`)
     return response.data
   },
 
@@ -70,7 +72,7 @@ export const publicEventsService = {
    * Get upcoming events
    */
   getUpcoming: async (): Promise<EventsResponse> => {
-    const response = await apiClient.get('/public/events/upcoming')
+    const response = await publicApiClient.get('/public/events/upcoming')
     return response.data
   },
 
@@ -78,7 +80,7 @@ export const publicEventsService = {
    * Get featured events
    */
   getFeatured: async (): Promise<EventsResponse> => {
-    const response = await apiClient.get('/public/events/featured')
+    const response = await publicApiClient.get('/public/events/featured')
     return response.data
   },
 
@@ -86,15 +88,16 @@ export const publicEventsService = {
    * Get active event types
    */
   getEventTypes: async (): Promise<{ data: EventType[] }> => {
-    const response = await apiClient.get('/public/event-types')
+    const response = await publicApiClient.get('/public/event-types')
     return response.data
   },
 
   /**
    * Get active event subtypes for a specific event type
+   * @param eventTypeId
    */
   getEventSubtypes: async (eventTypeId: number): Promise<{ data: EventSubtype[] }> => {
-    const response = await apiClient.get(`/public/event-types/${eventTypeId}/subtypes`)
+    const response = await publicApiClient.get(`/public/event-types/${eventTypeId}/subtypes`)
     return response.data
   },
 
@@ -102,7 +105,7 @@ export const publicEventsService = {
    * Get active locations
    */
   getLocations: async (): Promise<{ data: Location[] }> => {
-    const response = await apiClient.get('/public/locations/active')
+    const response = await publicApiClient.get('/public/locations/active')
     return response.data
   },
 
@@ -110,7 +113,7 @@ export const publicEventsService = {
    * Get public stats (total events, categories, events this month)
    */
   getStats: async (): Promise<{ data: PublicStats }> => {
-    const response = await apiClient.get('/public/stats')
+    const response = await publicApiClient.get('/public/stats')
     return response.data
   }
 }

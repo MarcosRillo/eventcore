@@ -1,14 +1,14 @@
-import apiClient from '@/services/apiClient'
 import {
-  getEvents,
-  getEvent,
   createEvent,
-  updateEvent,
   deleteEvent,
-  submitForReview,
   duplicateEvent,
-} from '../organizer-event.service'
+  getEvent,
+  getEvents,
+  submitForReview,
+  updateEvent,
+} from '@/features/organizer/services/organizer-event.service'
 import type { CreateEventDto, UpdateEventDto } from '@/features/organizer/types/event.types'
+import apiClient from '@/services/apiClient'
 
 jest.mock('@/services/apiClient')
 

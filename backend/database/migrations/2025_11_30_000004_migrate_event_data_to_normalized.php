@@ -47,7 +47,7 @@ return new class extends Migration
                     $updates = [];
 
                     // Map origin string to FK
-                    if (!empty($event->origin)) {
+                    if (! empty($event->origin)) {
                         $originCode = $this->normalizeCode($event->origin);
                         if (isset($origins[$originCode])) {
                             $updates['origin_id'] = $origins[$originCode];
@@ -55,7 +55,7 @@ return new class extends Migration
                     }
 
                     // Map theme string to FK
-                    if (!empty($event->theme)) {
+                    if (! empty($event->theme)) {
                         $themeCode = $this->normalizeCode($event->theme);
                         if (isset($themes[$themeCode])) {
                             $updates['theme_id'] = $themes[$themeCode];
@@ -63,7 +63,7 @@ return new class extends Migration
                     }
 
                     // Map frequency string to FK
-                    if (!empty($event->frequency)) {
+                    if (! empty($event->frequency)) {
                         $frequencyCode = $this->normalizeCode($event->frequency);
                         if (isset($frequencies[$frequencyCode])) {
                             $updates['frequency_id'] = $frequencies[$frequencyCode];
@@ -71,7 +71,7 @@ return new class extends Migration
                     }
 
                     // Map rotation_type string to FK
-                    if (!empty($event->rotation_type)) {
+                    if (! empty($event->rotation_type)) {
                         $rotationCode = $this->normalizeCode($event->rotation_type);
                         if (isset($rotationTypes[$rotationCode])) {
                             $updates['rotation_type_id'] = $rotationTypes[$rotationCode];
@@ -79,14 +79,14 @@ return new class extends Migration
                     }
 
                     // Map producer string to organization FK
-                    if (!empty($event->producer)) {
+                    if (! empty($event->producer)) {
                         // Try exact match first
                         if (isset($organizations[$event->producer])) {
                             $updates['producer_id'] = $organizations[$event->producer];
                         }
                     }
 
-                    if (!empty($updates)) {
+                    if (! empty($updates)) {
                         Event::where('id', $event->id)->update($updates);
                     }
                 }
@@ -131,13 +131,13 @@ return new class extends Migration
                         }
                     }
 
-                    if (!empty($servicesToAttach)) {
+                    if (! empty($servicesToAttach)) {
                         // Use sync without detaching to avoid duplicates
                         DB::table('event_service')->insertOrIgnore(
                             array_map(fn ($serviceId, $pivot) => array_merge(
                                 ['event_id' => $event->id, 'service_id' => $serviceId],
-                                $pivot
-                            ), array_keys($servicesToAttach), $servicesToAttach)
+                                $pivot,
+                            ), array_keys($servicesToAttach), $servicesToAttach),
                         );
                     }
                 }
@@ -160,7 +160,7 @@ return new class extends Migration
                         $dates = json_decode($dates, true);
                     }
 
-                    if (is_array($dates) && !empty($dates)) {
+                    if (is_array($dates) && ! empty($dates)) {
                         foreach ($dates as $date) {
                             try {
                                 EventAsyncDate::firstOrCreate(
@@ -170,7 +170,7 @@ return new class extends Migration
                                     ],
                                     [
                                         'notes' => null,
-                                    ]
+                                    ],
                                 );
                             } catch (\Exception $e) {
                                 Log::warning('Failed to migrate async date', [

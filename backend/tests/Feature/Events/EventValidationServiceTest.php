@@ -6,8 +6,8 @@ use App\Features\Events\Services\EventValidationService;
 use App\Models\Event;
 use App\Models\EventOrigin;
 use App\Models\EventStatus;
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use PHPUnit\Framework\Attributes\Test;
@@ -23,16 +23,24 @@ use Tests\TestCase;
  */
 class EventValidationServiceTest extends TestCase
 {
-
     private EventValidationService $service;
+
     private Organization $organization;
+
     private Organization $producerOrg;
+
     private EventType $eventType;
+
     private EventSubtype $eventSubtype;
+
     private Location $location;
+
     private Location $locationWithCity;
+
     private EventStatus $draftStatus;
+
     private int $formatId;
+
     private ?EventOrigin $origin;
 
     protected function setUp(): void
@@ -46,7 +54,7 @@ class EventValidationServiceTest extends TestCase
         $this->seed(\Database\Seeders\EventTypesSeeder::class);
         $this->seed(\Database\Seeders\EventLookupSeeder::class);
 
-        $this->service = new EventValidationService();
+        $this->service = new EventValidationService;
 
         $this->organization = Organization::factory()->create();
         $this->producerOrg = Organization::factory()->create(['name' => 'Test Producer Org']);

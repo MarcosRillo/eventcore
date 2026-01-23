@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState, useTransition } from 'react'
+
+import { createRegistrationRequest } from '@/features/registration-requests/services/registration-request.service'
 import {
+  initialFormData,
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
-  initialFormData,
-} from '../types/registration-request.types'
-import { createRegistrationRequest } from '../services/registration-request.service'
+} from '@/features/registration-requests/types/registration-request.types'
 
 // Type aliases for simpler usage in this hook
 type RegistrationFormData = Omit<RegistrationRequestFormData, 'profile_photo' | 'organization_logo'> & {
@@ -101,10 +102,13 @@ const validateAllFields = (data: RegistrationFormData): RegistrationFormErrors =
 }
 
 export const useRegistrationForm = (): UseRegistrationFormReturn => {
+  // React 19 transition for non-blocking UI
+  const [, startTransition] = useTransition()
+
   const [formData, setFormData] = useState<RegistrationFormData>(initialFormData)
   const [errors, setErrors] = useState<RegistrationFormErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
   const handleChange = useCallback(
@@ -135,52 +139,58 @@ export const useRegistrationForm = (): UseRegistrationFormReturn => {
       return
     }
 
-    setLoading(true)
+    setIsLoading(true)
 
-    try {
-      // Transform null to undefined for File fields
-      const submitData = {
-        ...formData,
-        profile_photo: formData.profile_photo ?? undefined,
-        organization_logo: formData.organization_logo ?? undefined,
-      }
-      await createRegistrationRequest(submitData)
-      setSuccess(true)
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } }
-
-        // Handle validation errors from backend
-        if (axiosError.response?.data?.errors) {
-          const backendErrors: RegistrationFormErrors = {}
-          const errorData = axiosError.response.data.errors
-
-          for (const [field, messages] of Object.entries(errorData)) {
-            if (field in formData && Array.isArray(messages)) {
-              backendErrors[field as keyof RegistrationFormErrors] = messages[0]
-            }
-          }
-
-          setErrors(backendErrors)
-        } else if (axiosError.response?.data?.message) {
-          setServerError(axiosError.response.data.message)
-        } else {
-          setServerError('Error al enviar la solicitud. Intente nuevamente.')
+    startTransition(async () => {
+      try {
+        // Transform null to undefined for File fields
+        const submitData = {
+          ...formData,
+          profile_photo: formData.profile_photo ?? undefined,
+          organization_logo: formData.organization_logo ?? undefined,
         }
-      } else {
-        setServerError('Error de conexión. Verifique su internet e intente nuevamente.')
+        await createRegistrationRequest(submitData)
+        setSuccess(true)
+      } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } }
+
+          // Handle validation errors from backend
+          if (axiosError.response?.data?.errors) {
+            const backendErrors: RegistrationFormErrors = {}
+            const errorData = axiosError.response.data.errors
+
+            for (const [field, messages] of Object.entries(errorData)) {
+              if (field in formData && Array.isArray(messages)) {
+                backendErrors[field as keyof RegistrationFormErrors] = messages[0]
+              }
+            }
+
+            setErrors(backendErrors)
+          } else if (axiosError.response?.data?.message) {
+            setServerError(axiosError.response.data.message)
+          } else {
+            setServerError('Error al enviar la solicitud. Intente nuevamente.')
+          }
+        } else {
+          setServerError('Error de conexión. Verifique su internet e intente nuevamente.')
+        }
+      } finally {
+        setIsLoading(false)
       }
-    } finally {
-      setLoading(false)
-    }
-  }, [formData])
+    })
+  }, [formData, startTransition])
 
   const resetForm = useCallback(() => {
     setFormData(initialFormData)
     setErrors({})
     setServerError(null)
     setSuccess(false)
+    setIsLoading(false)
   }, [])
+
+  // Backward compatibility
+  const loading = isLoading
 
   return {
     formData,

@@ -155,6 +155,7 @@ class DashboardService {
 
   /**
    * Get filtered and paginated events for dashboard
+   * @param params
    */
   async getEvents(params: DashboardEventsParams = {}): Promise<DashboardEventsResponse> {
     const searchParams = new URLSearchParams();
@@ -182,6 +183,7 @@ class DashboardService {
 
   /**
    * Get detailed event information
+   * @param eventId
    */
   async getEventDetail(eventId: number): Promise<EventDetail> {
     const response = await apiClient.get<{

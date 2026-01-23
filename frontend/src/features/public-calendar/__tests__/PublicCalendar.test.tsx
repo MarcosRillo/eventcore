@@ -5,9 +5,10 @@
  * filtering, and responsive layout.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import { PublicCalendar } from '../components/dumb/PublicCalendar'
-import { PublicEvent, EventType, EventSubtype, Location } from '../types/public-calendar.types'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { PublicCalendar } from '@/features/public-calendar/components/dumb/PublicCalendar'
+import { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 describe('PublicCalendar', () => {
   const mockEvents: PublicEvent[] = [

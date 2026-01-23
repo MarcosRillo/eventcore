@@ -2,12 +2,12 @@
 
 namespace App\Features\EventTypes\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\EventTypes\Requests\StoreEventTypeRequest;
 use App\Features\EventTypes\Requests\UpdateEventTypeRequest;
+use App\Features\EventTypes\Services\EventTypeService;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\EventTypeResource;
 use App\Models\EventType;
-use App\Features\EventTypes\Services\EventTypeService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 class EventTypeController extends Controller
 {
     public function __construct(
-        private EventTypeService $eventTypeService
+        private EventTypeService $eventTypeService,
     ) {}
 
     /**
@@ -36,7 +36,7 @@ class EventTypeController extends Controller
             'page' => $request->input('page', 1),
         ];
 
-        $eventTypes = $this->eventTypeService->getAllEventTypes(array_filter($filters, fn($v) => $v !== null));
+        $eventTypes = $this->eventTypeService->getAllEventTypes(array_filter($filters, fn ($v) => $v !== null));
 
         return EventTypeResource::collection($eventTypes);
     }
@@ -49,7 +49,7 @@ class EventTypeController extends Controller
         try {
             $eventType = $this->eventTypeService->createEventType(
                 $request->validated(),
-                $request->user()
+                $request->user(),
             );
 
             return response()->json([
@@ -59,6 +59,7 @@ class EventTypeController extends Controller
             ], 201);
         } catch (QueryException $e) {
             Log::error('Database error creating event type', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create event type due to database error',
@@ -91,7 +92,7 @@ class EventTypeController extends Controller
         try {
             $updatedEventType = $this->eventTypeService->updateEventType(
                 $eventType,
-                $request->validated()
+                $request->validated(),
             );
 
             return response()->json([
@@ -101,6 +102,7 @@ class EventTypeController extends Controller
             ]);
         } catch (QueryException $e) {
             Log::error('Database error updating event type', ['id' => $eventType->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update event type due to database error',
@@ -127,6 +129,7 @@ class EventTypeController extends Controller
             ]);
         } catch (QueryException $e) {
             Log::error('Database error deleting event type', ['id' => $eventType->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete event type. It may have associated subtypes.',

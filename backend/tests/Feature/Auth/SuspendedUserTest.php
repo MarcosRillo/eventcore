@@ -11,6 +11,7 @@ use Tests\TestCase;
 class SuspendedUserTest extends TestCase
 {
     private User $activeUser;
+
     private User $suspendedUser;
 
     protected function setUp(): void
@@ -80,7 +81,7 @@ class SuspendedUserTest extends TestCase
         // (simulating a user who was suspended after logging in)
         $token = $this->suspendedUser->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/events');
 
         $response->assertStatus(403);
@@ -95,7 +96,7 @@ class SuspendedUserTest extends TestCase
     {
         $token = $this->activeUser->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/events');
 
         // Should return 200 (or data), not 403
@@ -107,7 +108,7 @@ class SuspendedUserTest extends TestCase
     {
         $token = $this->suspendedUser->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/dashboard/events/summary');
 
         $response->assertStatus(403);
@@ -125,7 +126,7 @@ class SuspendedUserTest extends TestCase
         $token = $this->activeUser->createToken('test-token')->plainTextToken;
 
         // Verify user can access routes
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/events');
         $response->assertStatus(200);
 
@@ -133,7 +134,7 @@ class SuspendedUserTest extends TestCase
         $this->activeUser->update(['status' => 'suspended']);
 
         // User should now be blocked
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/events');
 
         $response->assertStatus(403);
@@ -174,7 +175,7 @@ class SuspendedUserTest extends TestCase
         $this->activeUser->update(['status' => 'suspended']);
 
         // Verify blocked
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/events');
         $response->assertStatus(403);
 
@@ -182,7 +183,7 @@ class SuspendedUserTest extends TestCase
         $this->activeUser->update(['status' => 'active']);
 
         // Now should have access
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/events');
         $response->assertStatus(200);
     }

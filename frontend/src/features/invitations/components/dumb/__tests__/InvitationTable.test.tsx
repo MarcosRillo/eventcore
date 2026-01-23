@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import InvitationTable from '../InvitationTable';
-import { Invitation } from '../../../types/invitation.types';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import InvitationTable from '@/features/invitations/components/dumb/InvitationTable';
+import { Invitation } from '@/features/invitations/types/invitation.types';
 
 // Mock GenericTable to test InvitationTable behavior
 jest.mock('@/shared/components/tables', () => ({

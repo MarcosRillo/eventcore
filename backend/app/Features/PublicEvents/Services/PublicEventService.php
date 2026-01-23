@@ -16,8 +16,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
  *
  * Updated for 3NF normalized schema (Nov 30, 2025).
  * Categories removed - now using EventType/EventSubtype (Dec 2, 2025).
- *
- * @package App\Features\PublicEvents\Services
  */
 class PublicEventService
 {
@@ -32,15 +30,14 @@ class PublicEventService
     private const DEFAULT_PER_PAGE = 15;
 
     public function __construct(
-        private PublicCalendarService $calendarService
+        private PublicCalendarService $calendarService,
     ) {}
 
     /**
      * Get paginated list of published events with optional filters.
      *
-     * @param array $filters Available filters: event_type_id, date_from, date_to, search
-     * @param int $perPage Items per page (max 50)
-     * @return LengthAwarePaginator
+     * @param  array  $filters  Available filters: event_type_id, date_from, date_to, search
+     * @param  int  $perPage  Items per page (max 50)
      */
     public function getPublishedEvents(array $filters = [], int $perPage = self::DEFAULT_PER_PAGE): LengthAwarePaginator
     {
@@ -58,8 +55,8 @@ class PublicEventService
     /**
      * Get a single published event by ID.
      *
-     * @param int $id Event ID
-     * @return Event
+     * @param  int  $id  Event ID
+     *
      * @throws ModelNotFoundException When event not found or not published
      */
     public function getPublishedEventById(int $id): Event
@@ -68,7 +65,7 @@ class PublicEventService
             ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'theme', 'frequency', 'rotationType', 'services'])
             ->find($id);
 
-        if (!$event) {
+        if (! $event) {
             throw new ModelNotFoundException('Event not found or not published');
         }
 
@@ -78,8 +75,6 @@ class PublicEventService
     /**
      * @deprecated Categories removed - use event types instead (Dec 2, 2025)
      * Returns empty collection for backward compatibility
-     *
-     * @return \Illuminate\Support\Collection
      */
     public function getPublicCategories(): \Illuminate\Support\Collection
     {
@@ -90,9 +85,10 @@ class PublicEventService
      * Get calendar view data for a specific month.
      * Delegates to PublicCalendarService.
      *
-     * @param int $year Year (2020-2030)
-     * @param int $month Month (1-12)
+     * @param  int  $year  Year (2020-2030)
+     * @param  int  $month  Month (1-12)
      * @return array Calendar data with events and month info
+     *
      * @throws \InvalidArgumentException When year/month out of range
      */
     public function getCalendarMonth(int $year, int $month): array
@@ -104,9 +100,8 @@ class PublicEventService
      * Get events within a date range.
      * Delegates to PublicCalendarService.
      *
-     * @param string $startDate Start date (Y-m-d format)
-     * @param string $endDate End date (Y-m-d format)
-     * @return Collection
+     * @param  string  $startDate  Start date (Y-m-d format)
+     * @param  string  $endDate  End date (Y-m-d format)
      */
     public function getEventsByDateRange(string $startDate, string $endDate): Collection
     {
@@ -116,8 +111,7 @@ class PublicEventService
     /**
      * Get upcoming published events.
      *
-     * @param int $limit Maximum events to return (max 50)
-     * @return Collection
+     * @param  int  $limit  Maximum events to return (max 50)
      */
     public function getUpcomingEvents(int $limit = 10): Collection
     {
@@ -134,8 +128,7 @@ class PublicEventService
     /**
      * Get featured published events.
      *
-     * @param int $limit Maximum events to return (max 20)
-     * @return Collection
+     * @param  int  $limit  Maximum events to return (max 20)
      */
     public function getFeaturedEvents(int $limit = 6): Collection
     {
@@ -154,9 +147,9 @@ class PublicEventService
      * Search published events by query string.
      * Searches in title, description, and related locations.
      *
-     * @param string $query Search query
-     * @param int|null $eventTypeId Optional event type filter
-     * @param int $limit Maximum results (max 50)
+     * @param  string  $query  Search query
+     * @param  int|null  $eventTypeId  Optional event type filter
+     * @param  int  $limit  Maximum results (max 50)
      * @return array Search results with metadata
      */
     public function searchEvents(string $query, ?int $eventTypeId = null, int $limit = 15): array
@@ -182,13 +175,13 @@ class PublicEventService
         }
 
         // Order by relevance: title matches first, then description
-        $events = $builder->orderByRaw("
+        $events = $builder->orderByRaw('
             CASE
                 WHEN title ILIKE ? THEN 1
                 WHEN description ILIKE ? THEN 2
                 ELSE 3
             END
-        ", ["%{$searchTerm}%", "%{$searchTerm}%"])
+        ', ["%{$searchTerm}%", "%{$searchTerm}%"])
             ->take($limit)
             ->get();
 
@@ -198,7 +191,6 @@ class PublicEventService
             'total_results' => $events->count(),
         ];
     }
-
 
     /**
      * Get public statistics for the calendar.
@@ -224,25 +216,23 @@ class PublicEventService
     /**
      * Apply filters to the event query.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $filters
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      */
     private function applyFilters($query, array $filters): void
     {
-        if (!empty($filters['event_type_id'])) {
+        if (! empty($filters['event_type_id'])) {
             $query->where('event_type_id', $filters['event_type_id']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('start_date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
-            $query->where('start_date', '<=', $filters['date_to'] . ' 23:59:59');
+        if (! empty($filters['date_to'])) {
+            $query->where('start_date', '<=', $filters['date_to'].' 23:59:59');
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'ilike', "%{$search}%")
@@ -255,21 +245,18 @@ class PublicEventService
         }
 
         // Filter by origin
-        if (!empty($filters['origin_id'])) {
+        if (! empty($filters['origin_id'])) {
             $query->where('origin_id', $filters['origin_id']);
         }
 
         // Filter by theme
-        if (!empty($filters['theme_id'])) {
+        if (! empty($filters['theme_id'])) {
             $query->where('theme_id', $filters['theme_id']);
         }
     }
 
     /**
      * Normalize per_page value within bounds.
-     *
-     * @param int $perPage
-     * @return int
      */
     private function normalizePerPage(int $perPage): int
     {

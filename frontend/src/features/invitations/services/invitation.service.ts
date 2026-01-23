@@ -3,18 +3,18 @@
  * API service functions for invitation management
  */
 
-import apiClient from '@/services/apiClient'
 import {
-  Invitation,
-  InvitationsListResponse,
-  InvitationActionResponse,
-  SendInvitationData,
-  AssignableRole,
-  RolesListResponse,
-  ValidateInvitationResponse,
   AcceptInvitationData,
   AcceptInvitationResponse,
-} from '../types/invitation.types'
+  AssignableRole,
+  Invitation,
+  InvitationActionResponse,
+  InvitationsListResponse,
+  RolesListResponse,
+  SendInvitationData,
+  ValidateInvitationResponse,
+} from '@/features/invitations/types/invitation.types'
+import apiClient from '@/services/apiClient'
 
 /**
  * Fetch all pending invitations
@@ -26,6 +26,7 @@ export const getInvitations = async (): Promise<Invitation[]> => {
 
 /**
  * Send a new invitation
+ * @param data
  */
 export const sendInvitation = async (
   data: SendInvitationData
@@ -39,6 +40,7 @@ export const sendInvitation = async (
 
 /**
  * Resend an invitation with a new token
+ * @param id
  */
 export const resendInvitation = async (id: number): Promise<Invitation> => {
   const response = await apiClient.post<InvitationActionResponse>(
@@ -49,6 +51,7 @@ export const resendInvitation = async (id: number): Promise<Invitation> => {
 
 /**
  * Cancel/revoke an invitation
+ * @param id
  */
 export const cancelInvitation = async (id: number): Promise<void> => {
   await apiClient.delete(`/invitations/${id}`)
@@ -64,6 +67,7 @@ export const getAssignableRoles = async (): Promise<AssignableRole[]> => {
 
 /**
  * Validate an invitation token (public endpoint)
+ * @param token
  */
 export const validateInvitationToken = async (
   token: string
@@ -76,6 +80,7 @@ export const validateInvitationToken = async (
 
 /**
  * Accept an invitation and create account (public endpoint)
+ * @param data
  */
 export const acceptInvitation = async (
   data: AcceptInvitationData

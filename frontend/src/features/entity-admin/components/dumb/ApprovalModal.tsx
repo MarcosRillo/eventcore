@@ -6,8 +6,9 @@
 'use client';
 
 import React from 'react';
+
+import { Button,Modal, RadioGroup, Textarea } from '@/components/ui';
 import { Event } from '@/types/event.types';
-import { Modal, Textarea, RadioGroup, Button } from '@/components/ui';
 
 // Action option interface
 export interface ApprovalActionOption {

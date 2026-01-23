@@ -5,8 +5,9 @@
  * Updated Dec 2, 2025 for Spanish labels and all status filters.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import { OrganizerQuickFilters } from '../OrganizerQuickFilters'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
 
 describe('OrganizerQuickFilters', () => {
   const mockOnFilterChange = jest.fn()

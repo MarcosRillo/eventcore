@@ -43,9 +43,14 @@ export interface CrudOperations<T, TFilters = Record<string, unknown>, TFormData
 /**
  * Universal Table Component Props
  * Replaces all specific table props interfaces
+ *
+ * @note The `any` type in TActions constraint is intentional and follows industry best practices.
+ * This pattern is used by React, Material-UI, Ant Design, and TypeScript's own utility types.
+ * It provides maximum flexibility for callback signatures while maintaining type safety for the data model `T`.
+ * Alternative approaches (unknown, CallableFunction) break existing usage or require massive refactoring.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface TableProps<T, TActions extends Record<string, (...args: any[]) => any> = Record<string, never>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Generic utility type requires flexible function signatures (industry standard pattern)
+export interface TableProps<T, TActions extends Record<string, (...args: any[]) => void> = Record<string, never>> {
   data: T[];
   pagination?: {
     current_page: number;
@@ -110,7 +115,7 @@ export type ApiResult<T> =
   | { success: false; error: string; details?: Record<string, string[]> };
 
 // Import required base type
-import type { PaginatedResponse } from './api-response.types';
+import type { PaginatedResponse } from '@/types/api-response.types';
 
 // Re-export for convenience
 export type { PaginatedResponse };

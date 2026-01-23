@@ -8,17 +8,19 @@
 
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { List,Pencil, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { EventType } from '@/types/eventType.types';
-import { PaginationMeta } from '@/types/api-response.types';
+import { useCallback,useMemo, useState } from 'react';
+
 import {
-  GenericTable,
-  TableColumnConfig,
-  TableActionConfig,
   ConfirmDialogData,
+  GenericTable,
+  TableActionConfig,
+  TableColumnConfig,
 } from '@/shared/components/tables';
-import { PencilIcon, TrashIcon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { PaginationMeta } from '@/types/api-response.types';
+import { EventType } from '@/types/eventType.types';
+
 
 // Re-export types for backward compatibility
 export type EventTypeColumnConfig = TableColumnConfig<EventType>;
@@ -164,21 +166,21 @@ export const EventTypeTableContainer = ({
       {
         key: 'subtypes',
         label: 'Subtipos',
-        icon: <ListBulletIcon className="w-5 h-5" />,
+        icon: <List className="w-5 h-5" />,
         variant: 'secondary',
         onClick: handleViewSubtypes,
       },
       {
         key: 'edit',
         label: 'Editar',
-        icon: <PencilIcon className="w-5 h-5" />,
+        icon: <Pencil className="w-5 h-5" />,
         variant: 'secondary',
         onClick: onEdit,
       },
       {
         key: 'delete',
         label: 'Eliminar',
-        icon: <TrashIcon className="w-5 h-5" />,
+        icon: <Trash2 className="w-5 h-5" />,
         variant: 'danger',
         onClick: handleDeleteEventType,
       },

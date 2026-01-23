@@ -26,9 +26,13 @@ class EventApproval extends Model
 {
     // Action type constants
     public const ACTION_APPROVE_INTERNAL = 'approve_internal';
+
     public const ACTION_REQUEST_PUBLIC = 'request_public';
+
     public const ACTION_PUBLISH = 'publish';
+
     public const ACTION_REQUEST_CHANGES = 'request_changes';
+
     public const ACTION_REJECT = 'reject';
 
     /**

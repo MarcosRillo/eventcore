@@ -2,16 +2,15 @@
 
 namespace App\Features\Auth\Services;
 
+use App\Models\Organization;
 use App\Models\RegistrationRequest;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Models\Organization;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\Collection;
 
 class RegistrationRequestService
 {
@@ -58,7 +57,7 @@ class RegistrationRequestService
     {
         $request = RegistrationRequest::findOrFail($id);
 
-        if (!$request->isPending()) {
+        if (! $request->isPending()) {
             throw ValidationException::withMessages([
                 'request' => ['Esta solicitud ya fue procesada.'],
             ]);
@@ -130,7 +129,7 @@ class RegistrationRequestService
     {
         $request = RegistrationRequest::findOrFail($id);
 
-        if (!$request->isPending()) {
+        if (! $request->isPending()) {
             throw ValidationException::withMessages([
                 'request' => ['Esta solicitud ya fue procesada.'],
             ]);
@@ -160,6 +159,7 @@ class RegistrationRequestService
     public function getPendingRequests(): Collection
     {
         return RegistrationRequest::pending()
+            ->with(['reviewer'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -171,10 +171,10 @@ class RegistrationRequestService
     public function getRequests(?string $status = null): Collection
     {
         $query = RegistrationRequest::with([
-                'reviewer',
-                'user' => fn($q) => $q->withTrashed(),
-                'organization' => fn($q) => $q->withTrashed()->with('status'),
-            ])
+            'reviewer',
+            'user' => fn ($q) => $q->withTrashed(),
+            'organization' => fn ($q) => $q->withTrashed()->with('status'),
+        ])
             ->orderBy('created_at', 'desc');
 
         if ($status) {
@@ -192,8 +192,8 @@ class RegistrationRequestService
     {
         return RegistrationRequest::with([
             'reviewer',
-            'user' => fn($q) => $q->withTrashed(),
-            'organization' => fn($q) => $q->withTrashed()->with('status'),
+            'user' => fn ($q) => $q->withTrashed(),
+            'organization' => fn ($q) => $q->withTrashed()->with('status'),
         ])->findOrFail($id);
     }
 
@@ -204,13 +204,13 @@ class RegistrationRequestService
     {
         $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
 
-        if (!$request->isApproved()) {
+        if (! $request->isApproved()) {
             throw ValidationException::withMessages([
                 'request' => ['Solo se pueden suspender solicitudes aprobadas.'],
             ]);
         }
 
-        if (!$request->user || !$request->organization) {
+        if (! $request->user || ! $request->organization) {
             throw ValidationException::withMessages([
                 'request' => ['Esta solicitud no tiene usuario u organización asociados.'],
             ]);
@@ -248,13 +248,13 @@ class RegistrationRequestService
     {
         $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
 
-        if (!$request->isApproved()) {
+        if (! $request->isApproved()) {
             throw ValidationException::withMessages([
                 'request' => ['Solo se pueden reactivar solicitudes aprobadas.'],
             ]);
         }
 
-        if (!$request->user || !$request->organization) {
+        if (! $request->user || ! $request->organization) {
             throw ValidationException::withMessages([
                 'request' => ['Esta solicitud no tiene usuario u organización asociados.'],
             ]);
@@ -293,19 +293,19 @@ class RegistrationRequestService
     {
         $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
 
-        if (!$request->isApproved()) {
+        if (! $request->isApproved()) {
             throw ValidationException::withMessages([
                 'request' => ['Solo se pueden eliminar solicitudes aprobadas.'],
             ]);
         }
 
-        if (!$request->user || !$request->organization) {
+        if (! $request->user || ! $request->organization) {
             throw ValidationException::withMessages([
                 'request' => ['Esta solicitud no tiene usuario u organización asociados.'],
             ]);
         }
 
-        if (!$request->user->isSuspended()) {
+        if (! $request->user->isSuspended()) {
             throw ValidationException::withMessages([
                 'request' => ['Solo se pueden eliminar solicitudes suspendidas. Primero debe suspender la solicitud.'],
             ]);

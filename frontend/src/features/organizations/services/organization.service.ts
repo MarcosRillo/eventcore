@@ -3,17 +3,18 @@
  * API service functions for organization management
  */
 
-import apiClient from '@/services/apiClient'
 import type {
   Organization,
   OrganizationFilters,
-  OrganizationsResponse,
   OrganizationResponse,
+  OrganizationsResponse,
   PaginationMeta,
-} from '../types/organization.types'
+} from '@/features/organizations/types/organization.types'
+import apiClient from '@/services/apiClient'
 
 /**
  * Fetch all linked organizations with optional filters
+ * @param filters
  */
 export const getOrganizations = async (
   filters?: OrganizationFilters
@@ -45,6 +46,7 @@ export const getOrganizations = async (
 
 /**
  * Fetch a single organization by ID
+ * @param id
  */
 export const getOrganization = async (id: number): Promise<Organization> => {
   const response = await apiClient.get<OrganizationResponse>(
@@ -55,6 +57,7 @@ export const getOrganization = async (id: number): Promise<Organization> => {
 
 /**
  * Toggle organization status (active/suspended)
+ * @param id
  */
 export const toggleOrganizationStatus = async (
   id: number

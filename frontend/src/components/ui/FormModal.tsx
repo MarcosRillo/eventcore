@@ -6,10 +6,11 @@
 
 'use client';
 
-import { useState, useEffect, FormEvent, ReactNode } from 'react';
-import { Modal, Button } from '@/components/ui';
+import { FormEvent, ReactNode,useEffect, useState } from 'react';
+
+import { Button,Modal } from '@/components/ui';
 import { EventFormData } from '@/types/event.types';
-import { EventType, EventSubtype } from '@/types/eventType.types';
+import { EventSubtype,EventType } from '@/types/eventType.types';
 
 // Form data types supported by FormModal - specific domain types only
 interface ApprovalFormData {
@@ -105,6 +106,24 @@ const ErrorAlert = ({ message }: { message: string }) => (
   </div>
 );
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.onClose
+ * @param root0.onSuccess
+ * @param root0.title
+ * @param root0.submitButtonText
+ * @param root0.initialData
+ * @param root0.originalData
+ * @param root0.validator
+ * @param root0.submitHandler
+ * @param root0.children
+ * @param root0.size
+ * @param root0.resetOnSuccess
+ * @param root0.closeOnSuccess
+ * @param root0.preventCloseWhileLoading
+ */
 export function FormModal<T extends FormDataType>({
   isOpen,
   onClose,

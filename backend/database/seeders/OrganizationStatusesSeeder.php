@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +26,7 @@ class OrganizationStatusesSeeder extends Seeder
                 'description' => 'Organization is active and can create events',
                 'can_create_events' => true,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'suspended',
@@ -35,7 +34,7 @@ class OrganizationStatusesSeeder extends Seeder
                 'description' => 'Organization is suspended and cannot create events',
                 'can_create_events' => false,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'status_code' => 'pending',
@@ -43,8 +42,8 @@ class OrganizationStatusesSeeder extends Seeder
                 'description' => 'Organization awaiting approval to join platform',
                 'can_create_events' => false,
                 'created_at' => now(),
-                'updated_at' => now()
-            ]
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('organization_statuses')->insert($statuses);

@@ -28,6 +28,7 @@ export const isApiError = (error: unknown): error is ApiErrorResponse => {
 
 /**
  * Type guard for standard Error objects
+ * @param error
  */
 export const isError = (error: unknown): error is Error => {
   return error instanceof Error;
@@ -35,6 +36,7 @@ export const isError = (error: unknown): error is Error => {
 
 /**
  * Type guard for objects with a message property
+ * @param error
  */
 export const hasMessage = (error: unknown): error is { message: string } => {
   return (
@@ -47,6 +49,7 @@ export const hasMessage = (error: unknown): error is { message: string } => {
 
 /**
  * Get error message from unknown error safely
+ * @param error
  */
 export const getErrorMessage = (error: unknown): string => {
   if (isApiError(error) && error.response?.data?.message) {

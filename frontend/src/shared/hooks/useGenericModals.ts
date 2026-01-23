@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
 
 interface UseGenericModalsOptions {
   /** Enable approval modal state (default: false) */
@@ -34,6 +34,10 @@ interface UseGenericModalsReturn<T> {
   setCurrentItem: (item: T | null) => void;
 }
 
+/**
+ *
+ * @param options
+ */
 export function useGenericModals<T>(
   options: UseGenericModalsOptions = {}
 ): UseGenericModalsReturn<T> {

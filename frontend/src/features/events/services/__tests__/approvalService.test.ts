@@ -1,7 +1,9 @@
-import apiClient from '@/services/apiClient'
-import { approvalService, approvalValidation } from '../approvalService'
-import { Event, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
 import { AxiosResponse } from 'axios'
+
+import { approvalService, approvalValidation } from '@/features/events/services/approvalService'
+import apiClient from '@/services/apiClient'
+import { Event, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode } from '@/types/event.types'
+
 
 // Mock apiClient
 jest.mock('@/services/apiClient')

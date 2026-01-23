@@ -1,32 +1,31 @@
 /**
  * Authentication Actions Hook
- * All authentication business logic and side effects
+ *
+ * SECURITY: Uses httpOnly cookies for authentication (XSS protection)
+ * - NO tokens stored in localStorage
+ * - Cookies are set/cleared by backend automatically
+ * - Authentication state is validated by calling /auth/me
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
+import { useCallback,useEffect, useRef, useState } from 'react';
+
 import apiClient from '@/services/apiClient';
+import { clearTokens } from '@/services/tokenUtils';
 import {
-  getAccessToken,
-  storeTokens,
-  clearTokens,
-} from '@/services/tokenUtils';
-import {
-  User,
+  AuthContextType,
   LoginCredentials,
   LoginResponse,
-  AuthContextType,
-  UserRoleCode,
   Permission,
-  ROLE_PERMISSIONS,
   RESOURCE_PERMISSIONS,
-  TOKEN_KEYS
+  ROLE_PERMISSIONS,
+  User,
+  UserRoleCode,
 } from '@/types/auth.types';
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -34,39 +33,39 @@ export const useAuthActions = (): AuthContextType => {
   // Prevent multiple initialization attempts (React Strict Mode)
   const hasInitialized = useRef(false);
 
-  // Initialize authentication state on app load
-  useEffect(() => {
-    // CRITICAL FIX: Prevent multiple executions
-    if (hasInitialized.current) {
-      return;
-    }
+  /**
+   * Clear all authentication state
+   */
+  const handleLogout = useCallback(() => {
+    // Clear any legacy localStorage items
+    clearTokens();
+    setUser(null);
+    setError(null);
 
+    // Clear non-httpOnly user cookie used by middleware
+    document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'token_expires_at=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  }, []);
+
+  /**
+   * Initialize auth state by checking if user is authenticated
+   * Uses httpOnly cookie (sent automatically by browser)
+   */
+  useEffect(() => {
+    if (hasInitialized.current) return;
     hasInitialized.current = true;
 
     const initializeAuth = async () => {
       try {
-        const storedToken = getAccessToken();
-        const storedUser = localStorage.getItem(TOKEN_KEYS.USER);
+        // Try to get current user (cookie is sent automatically)
+        const response = await apiClient.get<{ data: User }>('/auth/me');
 
-        if (storedToken && storedUser && storedUser !== 'undefined') {
-          try {
-            const parsedUser = JSON.parse(storedUser);
-            setTokenState(storedToken);
-            setUser(parsedUser);
-
-            // Validate token by making a test request
-            // If 401, apiClient interceptor will auto-refresh
-            try {
-              await apiClient.get('/auth/me');
-            } catch {
-              // Token is invalid and refresh failed, clear auth state
-              handleLogout();
-            }
-          } catch {
-            handleLogout();
-          }
+        if (response.data?.data) {
+          setUser(response.data.data);
         }
       } catch {
+        // Not authenticated or session expired
+        // This is normal for unauthenticated users
         handleLogout();
       } finally {
         setIsLoading(false);
@@ -74,22 +73,12 @@ export const useAuthActions = (): AuthContextType => {
     };
 
     initializeAuth();
-  }, []);
+  }, [handleLogout]);
 
-  // Internal logout helper
-  const handleLogout = () => {
-    clearTokens();
-    setTokenState(null);
-    setUser(null);
-    setError(null);
-
-    // Clear cookies (including new token_expires_at cookie)
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'token_expires_at=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-  };
-
-  // Login function
+  /**
+   * Login with credentials
+   * Backend sets httpOnly cookies automatically
+   */
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -97,38 +86,27 @@ export const useAuthActions = (): AuthContextType => {
 
       const response = await apiClient.post<{ data: LoginResponse }>('/auth/login', credentials);
 
-      // Handle nested response structure: response.data.data
       if (!response.data?.data) {
         throw new Error('Invalid response structure from login API');
       }
 
-      const { access_token, refresh_token, expires_at, user: userData } = response.data.data;
+      const { user: userData, expires_at } = response.data.data;
 
-      // Validate that we have the required data
-      if (!access_token || !refresh_token || !userData) {
-        throw new Error('Missing token or user data in login response');
+      if (!userData) {
+        throw new Error('Missing user data in login response');
       }
 
-      // Store all tokens in localStorage
-      storeTokens(access_token, refresh_token, expires_at);
-      localStorage.setItem(TOKEN_KEYS.USER, JSON.stringify(userData));
-
-      // Calculate cookie max-age based on token expiry (sync with backend)
+      // Set non-httpOnly user cookie for Next.js middleware (role checks)
+      // This cookie only contains non-sensitive user info
       const expiresAtTime = new Date(expires_at).getTime();
       const maxAgeSeconds = Math.max(0, Math.floor((expiresAtTime - Date.now()) / 1000));
-
-      // Determine if we're in production (HTTPS) for secure cookie flag
-      const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
-      const secureFlag = isProduction ? '; secure' : '';
-
-      // Store in cookies for middleware access (access token for API, user for role checks)
-      document.cookie = `token=${access_token}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
-      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=strict${secureFlag}`;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
+      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
 
       // Update state
-      setTokenState(access_token);
       setUser(userData);
+
+      // Note: access_token and refresh_token are set as httpOnly cookies by backend
 
       return true;
     } catch (error) {
@@ -155,35 +133,44 @@ export const useAuthActions = (): AuthContextType => {
     }
   };
 
-  // Public logout function
-  const logout = () => {
-    handleLogout();
-    router.push('/login');
+  /**
+   * Logout user
+   * Backend clears httpOnly cookies
+   */
+  const logout = async () => {
+    try {
+      // Call backend to clear httpOnly cookies
+      await apiClient.post('/auth/logout');
+    } catch {
+      // Even if logout endpoint fails, clear local state
+    } finally {
+      handleLogout();
+      router.push('/login');
+    }
   };
 
-  // Clear error function
   const clearError = () => {
     setError(null);
   };
 
-  // Refresh user data
+  /**
+   * Refresh user data from server
+   */
   const refreshUser = async () => {
     try {
-      if (!token) return;
+      const response = await apiClient.get<{ data: User }>('/auth/me');
 
-      const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
+      if (response.data?.data) {
+        const userData = response.data.data;
+        setUser(userData);
 
-      // Handle nested response structure
-      if (!response.data?.data?.user) {
-        throw new Error('Invalid response structure from user API');
+        // Update user cookie for middleware
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+        const maxAgeSeconds = 7 * 24 * 60 * 60;
+        document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
       }
-
-      const userData = response.data.data.user;
-
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
     } catch {
-      // Token is invalid or expired - clear auth state and redirect to login
       handleLogout();
       router.push('/login');
     }
@@ -196,29 +183,23 @@ export const useAuthActions = (): AuthContextType => {
 
   const getUserPermissions = (): Permission[] => {
     if (!user?.role?.role_code) return [];
-    
-    // If user has explicit permissions, use those; otherwise use role-based permissions
+
     if (user.permissions && user.permissions.length > 0) {
       return user.permissions;
     }
-    
+
     return ROLE_PERMISSIONS[user.role.role_code] || [];
   };
 
   const canAccess = (resource: string): boolean => {
     const userPermissions = getUserPermissions();
     const requiredPermissions = RESOURCE_PERMISSIONS[resource] || [];
-    
-    // Check if user has any of the required permissions
-    return requiredPermissions.some(permission => 
+
+    return requiredPermissions.some(permission =>
       userPermissions.includes(permission)
     );
   };
 
-  /**
-   * Check if user can manage events (create, edit, delete)
-   * Includes: manage_entity_events, manage_own_events, create_events
-   */
   const canManageEvents = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.some(p =>
@@ -226,19 +207,11 @@ export const useAuthActions = (): AuthContextType => {
     );
   };
 
-  /**
-   * Check if user can approve/reject events
-   * Only entity_admin has this permission
-   */
   const canApproveEvents = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.includes('approve_events');
   };
 
-  /**
-   * Check if user can access admin panel
-   * platform_admin and entity_admin can access
-   */
   const canAccessAdmin = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.some(p =>
@@ -246,11 +219,6 @@ export const useAuthActions = (): AuthContextType => {
     );
   };
 
-  /**
-   * Check if user can manage users
-   * platform_admin: manage_users (all users)
-   * entity_admin: manage_entity_users (users in their entity)
-   */
   const canManageUsers = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.some(p =>
@@ -258,20 +226,11 @@ export const useAuthActions = (): AuthContextType => {
     );
   };
 
-  /**
-   * Check if user can manage organizations
-   * Only platform_admin has this permission
-   */
   const canManageOrganization = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.includes('manage_organizations');
   };
 
-  /**
-   * Check if user can view analytics
-   * entity_admin: view_analytics (entity-wide)
-   * organizer_admin: view_own_analytics (own events only)
-   */
   const canViewAnalytics = (): boolean => {
     const userPermissions = getUserPermissions();
     return userPermissions.some(p =>
@@ -282,10 +241,10 @@ export const useAuthActions = (): AuthContextType => {
   return {
     // State
     user,
-    token,
+    token: null,  // Deprecated: tokens are in httpOnly cookies
     isLoading,
     error,
-    isAuthenticated: Boolean(user && token),
+    isAuthenticated: Boolean(user),
 
     // Actions
     login,

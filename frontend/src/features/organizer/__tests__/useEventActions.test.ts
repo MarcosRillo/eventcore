@@ -5,10 +5,11 @@
  * Includes API calls, error handling, and state management.
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useEventActions } from '../hooks/useEventActions'
-import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
+import { act, renderHook, waitFor } from '@testing-library/react'
+
 import { useToast } from '@/components/ui/Toast'
+import { useEventActions } from '@/features/organizer/hooks/useEventActions'
+import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 
 // Mock dependencies
 jest.mock('@/features/organizer/services/organizer-event.service')

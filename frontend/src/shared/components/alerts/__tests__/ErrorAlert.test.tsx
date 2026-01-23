@@ -2,8 +2,9 @@
  * Tests for ErrorAlert Component
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ErrorAlert } from '../ErrorAlert';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { ErrorAlert } from '@/shared/components/alerts/ErrorAlert';
 
 describe('ErrorAlert', () => {
   const defaultProps = {

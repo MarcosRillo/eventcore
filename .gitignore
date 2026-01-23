@@ -1,6 +1,7 @@
 # ===========================================
 # GENERAL
 # ===========================================
+node_modules/
 .DS_Store
 .DS_Store?
 ._*
@@ -100,8 +101,13 @@ backend/.php-cs-fixer.cache
 # Docker volumes (si tienes datos persistentes)
 # docker-volumes/
 
-# Docker environment
+# Docker environment (CRITICAL: Never commit!)
 .env.docker
+**/.env*
+!.env.example
+!.env.docker.example
+!frontend/.env.example
+!backend/.env.example
 
 # ===========================================
 # BACKUP & TEMPORARY FILES
@@ -142,3 +148,4 @@ docs/**/.DS_Store
 docs/**/Thumbs.db
 docs/**/*.tmp
 docs/**/*.bak
+.env

@@ -1,11 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { LocationTable } from '../LocationTable'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { LocationTable } from '@/features/locations/components/dumb/LocationTable'
 import { Location } from '@/types/location.types'
 
-// Mock heroicons
-jest.mock('@heroicons/react/24/outline', () => ({
-  PencilIcon: () => <span data-testid="pencil-icon" />,
-  TrashIcon: () => <span data-testid="trash-icon" />,
+// Mock lucide-react
+jest.mock('lucide-react', () => ({
+  Pencil: () => <span data-testid="pencil-icon" />,
+  Trash2: () => <span data-testid="trash-icon" />,
 }))
 
 // Mock @/components/ui with all needed components

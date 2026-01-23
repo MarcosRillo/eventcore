@@ -7,10 +7,11 @@
  * Created: December 2, 2025
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useEventTypeManager } from '../hooks/useEventTypeManager'
-import * as eventTypeService from '../services/eventType.service'
+import { act, renderHook, waitFor } from '@testing-library/react'
+
 import { useAuth } from '@/context/AuthContext'
+import { useEventTypeManager } from '@/features/event-types/hooks/useEventTypeManager'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import type { EventType, EventTypePagination } from '@/types/eventType.types'
 
 // Mock dependencies

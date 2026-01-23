@@ -2,60 +2,22 @@
 
 namespace App\Features\Events\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Features\Events\Services\EventService;
-use App\Models\Event;
+use App\Features\Events\Requests\IndexEventsRequest;
 use App\Features\Events\Requests\StoreEventRequest;
 use App\Features\Events\Requests\UpdateEventRequest;
-use App\Features\Events\Requests\IndexEventsRequest;
+use App\Features\Events\Services\EventService;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
+use App\Models\Event;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class EventController extends Controller
 {
     public function __construct(
-        private EventService $eventService
+        private EventService $eventService,
     ) {}
-
-    /**
-     * Authorize user access to an event.
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    private function authorizeEventAccess(Event $event, User $user, string $action = 'view'): void
-    {
-        // Platform admins can do everything
-        if ($user->isPlatformAdmin()) {
-            return;
-        }
-
-        $userOrgId = $user->organization_id;
-
-        // Entity admin/staff: can access events in their entity
-        if ($user->isEntityAdmin() || $user->isEntityStaff()) {
-            if ($event->entity_id !== $userOrgId) {
-                abort(403, 'No tienes permiso para acceder a este evento');
-            }
-            // Entity staff can only view, not modify
-            if ($user->isEntityStaff() && in_array($action, ['update', 'delete'])) {
-                abort(403, 'No tienes permiso para modificar eventos');
-            }
-            return;
-        }
-
-        // Organizer admin: can only access their own organization's events
-        if ($user->isOrganizerAdmin()) {
-            if ($event->organization_id !== $userOrgId) {
-                abort(403, 'No tienes permiso para acceder a este evento');
-            }
-            return;
-        }
-
-        // Default: deny access
-        abort(403, 'No tienes permiso para acceder a este evento');
-    }
 
     /**
      * Display a listing of the events.
@@ -67,7 +29,7 @@ class EventController extends Controller
             ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
             ->when($request->validated('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             })
             ->when($request->validated('event_type_id'), function ($query, $eventTypeId) {
                 $query->where('event_type_id', $eventTypeId);
@@ -105,12 +67,12 @@ class EventController extends Controller
     {
         $event = $this->eventService->createEvent(
             $request->validated(),
-            $request->user()
+            $request->user(),
         );
 
         return response()->json([
             'message' => 'Evento creado exitosamente',
-            'data' => new EventResource($event)
+            'data' => new EventResource($event),
         ], 201);
     }
 
@@ -120,10 +82,10 @@ class EventController extends Controller
     public function show(Request $request, string $id)
     {
         $event = Event::withoutGlobalScopes()
-                      ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
-                      ->findOrFail($id);
+            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
+            ->findOrFail($id);
 
-        $this->authorizeEventAccess($event, $request->user(), 'view');
+        Gate::authorize('view', $event);
 
         return new EventResource($event);
     }
@@ -135,17 +97,17 @@ class EventController extends Controller
     {
         $event = Event::withoutGlobalScopes()->findOrFail($id);
 
-        $this->authorizeEventAccess($event, $request->user(), 'update');
+        Gate::authorize('update', $event);
 
         $updated = $this->eventService->updateEvent(
             $event,
             $request->validated(),
-            $request->user()
+            $request->user(),
         );
 
         return response()->json([
             'message' => 'Evento actualizado exitosamente',
-            'data' => new EventResource($updated)
+            'data' => new EventResource($updated),
         ]);
     }
 
@@ -156,12 +118,12 @@ class EventController extends Controller
     {
         $event = Event::withoutGlobalScopes()->with('status')->findOrFail($id);
 
-        $this->authorizeEventAccess($event, $request->user(), 'delete');
+        Gate::authorize('delete', $event);
 
         // Check if event is published using relationship
         if ($event->status && $event->status->status_code === 'published') {
             return response()->json([
-                'message' => 'No se puede eliminar un evento publicado'
+                'message' => 'No se puede eliminar un evento publicado',
             ], 422);
         }
 
@@ -170,7 +132,7 @@ class EventController extends Controller
         });
 
         return response()->json([
-            'message' => 'Evento eliminado exitosamente'
+            'message' => 'Evento eliminado exitosamente',
         ], 200);
     }
 
@@ -182,22 +144,15 @@ class EventController extends Controller
     {
         $event = Event::withoutGlobalScopes()->findOrFail($id);
 
-        $this->authorizeEventAccess($event, $request->user(), 'update');
-
-        // Only entity admins or platform admins can toggle featured
-        if (!$request->user()->hasAdminPrivileges()) {
-            return response()->json([
-                'message' => 'Solo administradores pueden destacar eventos'
-            ], 403);
-        }
+        Gate::authorize('toggleFeatured', $event);
 
         DB::transaction(function () use ($event) {
-            $event->update(['is_featured' => !$event->is_featured]);
+            $event->update(['is_featured' => ! $event->is_featured]);
         });
 
         return response()->json([
             'message' => 'Estado destacado actualizado',
-            'data' => new EventResource($event->fresh())
+            'data' => new EventResource($event->fresh()),
         ]);
     }
 
@@ -208,13 +163,13 @@ class EventController extends Controller
     {
         $event = Event::withoutGlobalScopes()->findOrFail($id);
 
-        $this->authorizeEventAccess($event, $request->user(), 'view');
+        Gate::authorize('duplicate', $event);
 
         $duplicate = $this->eventService->duplicate($event);
 
         return response()->json([
             'message' => 'Evento duplicado exitosamente',
-            'data' => new EventResource($duplicate)
+            'data' => new EventResource($duplicate),
         ], 201);
     }
 
@@ -225,9 +180,9 @@ class EventController extends Controller
     {
         $stats = [
             'total' => Event::count(),
-            'published' => Event::whereHas('status', fn($q) => $q->where('status_code', 'published'))->count(),
-            'pending' => Event::whereHas('status', fn($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval']))->count(),
-            'draft' => Event::whereHas('status', fn($q) => $q->where('status_code', 'draft'))->count(),
+            'published' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'))->count(),
+            'pending' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval']))->count(),
+            'draft' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'draft'))->count(),
         ];
 
         return response()->json(['data' => $stats]);

@@ -2,13 +2,13 @@
 
 namespace App\Features\EventTypes\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Features\EventTypes\Requests\StoreEventSubtypeRequest;
 use App\Features\EventTypes\Requests\UpdateEventSubtypeRequest;
-use App\Http\Resources\EventSubtypeResource;
-use App\Models\EventType;
-use App\Models\EventSubtype;
 use App\Features\EventTypes\Services\EventSubtypeService;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\EventSubtypeResource;
+use App\Models\EventSubtype;
+use App\Models\EventType;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Log;
 class EventSubtypeController extends Controller
 {
     public function __construct(
-        private EventSubtypeService $eventSubtypeService
+        private EventSubtypeService $eventSubtypeService,
     ) {}
 
     /**
@@ -39,7 +39,7 @@ class EventSubtypeController extends Controller
 
         $subtypes = $this->eventSubtypeService->getSubtypesForEventType(
             $eventType,
-            array_filter($filters, fn($v) => $v !== null)
+            array_filter($filters, fn ($v) => $v !== null),
         );
 
         return EventSubtypeResource::collection($subtypes);
@@ -54,7 +54,7 @@ class EventSubtypeController extends Controller
             $subtype = $this->eventSubtypeService->createEventSubtype(
                 $eventType,
                 $request->validated(),
-                $request->user()
+                $request->user(),
             );
 
             return response()->json([
@@ -64,6 +64,7 @@ class EventSubtypeController extends Controller
             ], 201);
         } catch (QueryException $e) {
             Log::error('Database error creating event subtype', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create event subtype due to database error',
@@ -112,7 +113,7 @@ class EventSubtypeController extends Controller
         try {
             $updatedSubtype = $this->eventSubtypeService->updateEventSubtype(
                 $subtype,
-                $request->validated()
+                $request->validated(),
             );
 
             return response()->json([
@@ -122,6 +123,7 @@ class EventSubtypeController extends Controller
             ]);
         } catch (QueryException $e) {
             Log::error('Database error updating event subtype', ['id' => $subtype->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update event subtype due to database error',
@@ -156,6 +158,7 @@ class EventSubtypeController extends Controller
             ]);
         } catch (QueryException $e) {
             Log::error('Database error deleting event subtype', ['id' => $subtype->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete event subtype. It may have associated events.',

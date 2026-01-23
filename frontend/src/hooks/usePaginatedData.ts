@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { useDebounce } from "./useDebounce";
-import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
 import axios from "axios";
+import { useCallback, useEffect, useMemo,useState } from "react";
+
+import { useDebounce } from "@/hooks/useDebounce";
+import { PaginatedResponse, PaginationMeta } from "@/types/api-response.types";
 
 // Re-export for backward compatibility
 export type LaravelPaginatedResponse<T> = PaginatedResponse<T>;
@@ -36,6 +37,14 @@ export interface UsePaginatedDataReturn<T, F extends BaseFilters> {
   removeItem: (id: number | string) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.fetchFn
+ * @param root0.initialFilters
+ * @param root0.debounceMs
+ * @param root0.autoLoad
+ */
 export function usePaginatedData<T extends { id: number | string }, F extends BaseFilters>({
   fetchFn,
   initialFilters,
@@ -54,8 +63,8 @@ export function usePaginatedData<T extends { id: number | string }, F extends Ba
   // When search changes, only debouncedSearch should trigger the effect (after delay)
   // Other filters (page, status, etc.) trigger immediately
   const filtersWithoutSearch = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { search, ...rest } = filters;
+     
+    const { search: _search, ...rest } = filters;
     return rest;
   }, [filters]);
 

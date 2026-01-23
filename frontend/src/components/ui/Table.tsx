@@ -6,11 +6,12 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Pagination, Button, Skeleton, EmptyState, EmptyStateIcons } from '@/components/ui'
+
 import { PermissionGate } from '@/components/auth/PermissionGate'
+import { Button, EmptyState, EmptyStateIcons,Pagination, Skeleton } from '@/components/ui'
 import type { Permission } from '@/types/auth.types'
-import type { Event } from '@/types/event.types'
 import type { User } from '@/types/auth.types'
+import type { Event } from '@/types/event.types'
 import type { TablePaginationProps } from '@/types/pagination.types'
 
 type TableDataType = Event | User

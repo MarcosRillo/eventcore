@@ -7,9 +7,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+
+import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
 import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrganizerStats'
-import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 
 export const OrganizerDashboardContainer = () => {
   const router = useRouter()

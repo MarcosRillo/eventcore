@@ -6,9 +6,9 @@ use App\Models\Event;
 use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRotationType;
+use App\Models\EventSubtype;
 use App\Models\EventTheme;
 use App\Models\EventType;
-use App\Models\EventSubtype;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -63,12 +63,12 @@ class EventFactory extends Factory
             'created_by' => User::factory(),
             'entity_id' => \App\Models\Organization::factory(),
             'organization_id' => null,
-            'format_id' => fn() => \DB::table('event_formats')->first()?->id ?? 1,
-            'status_id' => fn() => \DB::table('event_statuses')->first()?->id ?? 1,
+            'format_id' => fn () => \DB::table('event_formats')->first()?->id ?? 1,
+            'status_id' => fn () => \DB::table('event_statuses')->first()?->id ?? 1,
 
             // Event Type and Subtype (hierarchical categorization - Dec 2, 2025)
-            'event_type_id' => fn() => EventType::inRandomOrder()->first()?->id ?? EventType::factory(),
-            'event_subtype_id' => fn() => EventSubtype::inRandomOrder()->first()?->id ?? EventSubtype::factory(),
+            'event_type_id' => fn () => EventType::inRandomOrder()->first()?->id ?? EventType::factory(),
+            'event_subtype_id' => fn () => EventSubtype::inRandomOrder()->first()?->id ?? EventSubtype::factory(),
 
             // Display
             'is_featured' => false,
@@ -91,10 +91,10 @@ class EventFactory extends Factory
 
             // Foreign keys (normalized)
             'subtype_id' => null,
-            'origin_id' => fn() => EventOrigin::inRandomOrder()->first()?->id,
-            'theme_id' => fn() => EventTheme::inRandomOrder()->first()?->id,
-            'frequency_id' => fn() => EventFrequency::inRandomOrder()->first()?->id,
-            'rotation_type_id' => fn() => EventRotationType::inRandomOrder()->first()?->id,
+            'origin_id' => fn () => EventOrigin::inRandomOrder()->first()?->id,
+            'theme_id' => fn () => EventTheme::inRandomOrder()->first()?->id,
+            'frequency_id' => fn () => EventFrequency::inRandomOrder()->first()?->id,
+            'rotation_type_id' => fn () => EventRotationType::inRandomOrder()->first()?->id,
             'producer_id' => null,
         ];
     }
@@ -122,35 +122,35 @@ class EventFactory extends Factory
     public function draft(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'draft')->first()?->id ?? 1,
+            'status_id' => fn () => \DB::table('event_statuses')->where('status_code', 'draft')->first()?->id ?? 1,
         ]);
     }
 
     public function pendingInternalApproval(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'pending_internal_approval')->first()?->id ?? 2,
+            'status_id' => fn () => \DB::table('event_statuses')->where('status_code', 'pending_internal_approval')->first()?->id ?? 2,
         ]);
     }
 
     public function approvedInternal(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'approved_internal')->first()?->id ?? 3,
+            'status_id' => fn () => \DB::table('event_statuses')->where('status_code', 'approved_internal')->first()?->id ?? 3,
         ]);
     }
 
     public function pendingPublicApproval(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'pending_public_approval')->first()?->id ?? 4,
+            'status_id' => fn () => \DB::table('event_statuses')->where('status_code', 'pending_public_approval')->first()?->id ?? 4,
         ]);
     }
 
     public function published(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'published')->first()?->id ?? 5,
+            'status_id' => fn () => \DB::table('event_statuses')->where('status_code', 'published')->first()?->id ?? 5,
             'published_at' => now(),
         ]);
     }
@@ -158,7 +158,7 @@ class EventFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_id' => fn() => \DB::table('event_statuses')->where('status_code', 'rejected')->first()?->id ?? 6,
+            'status_id' => fn () => \DB::table('event_statuses')->where('status_code', 'rejected')->first()?->id ?? 6,
         ]);
     }
 
@@ -187,21 +187,21 @@ class EventFactory extends Factory
     public function local(): static
     {
         return $this->state(fn (array $attributes) => [
-            'origin_id' => fn() => EventOrigin::where('code', 'local')->first()?->id,
+            'origin_id' => fn () => EventOrigin::where('code', 'local')->first()?->id,
         ]);
     }
 
     public function national(): static
     {
         return $this->state(fn (array $attributes) => [
-            'origin_id' => fn() => EventOrigin::where('code', 'national')->first()?->id,
+            'origin_id' => fn () => EventOrigin::where('code', 'national')->first()?->id,
         ]);
     }
 
     public function international(): static
     {
         return $this->state(fn (array $attributes) => [
-            'origin_id' => fn() => EventOrigin::where('code', 'international')->first()?->id,
+            'origin_id' => fn () => EventOrigin::where('code', 'international')->first()?->id,
         ]);
     }
 
@@ -212,14 +212,14 @@ class EventFactory extends Factory
     public function unique(): static
     {
         return $this->state(fn (array $attributes) => [
-            'frequency_id' => fn() => EventFrequency::where('code', 'unico')->first()?->id,
+            'frequency_id' => fn () => EventFrequency::where('code', 'unico')->first()?->id,
         ]);
     }
 
     public function annual(): static
     {
         return $this->state(fn (array $attributes) => [
-            'frequency_id' => fn() => EventFrequency::where('code', 'anual')->first()?->id,
+            'frequency_id' => fn () => EventFrequency::where('code', 'anual')->first()?->id,
         ]);
     }
 
@@ -230,14 +230,14 @@ class EventFactory extends Factory
     public function cultural(): static
     {
         return $this->state(fn (array $attributes) => [
-            'theme_id' => fn() => EventTheme::where('code', 'cultural')->first()?->id,
+            'theme_id' => fn () => EventTheme::where('code', 'cultural')->first()?->id,
         ]);
     }
 
     public function business(): static
     {
         return $this->state(fn (array $attributes) => [
-            'theme_id' => fn() => EventTheme::where('code', 'negocios')->first()?->id,
+            'theme_id' => fn () => EventTheme::where('code', 'negocios')->first()?->id,
         ]);
     }
 }

@@ -6,8 +6,8 @@
 
 'use client';
 
+import { EventCardContainer } from '@/features/events/components/smart/EventCardContainer';
 import { Event } from '@/types/event.types';
-import { EventCardContainer } from './smart/EventCardContainer';
 
 interface EventsListProps {
   events: Event[];

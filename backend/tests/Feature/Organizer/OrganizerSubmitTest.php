@@ -22,12 +22,19 @@ use Tests\TestCase;
 class OrganizerSubmitTest extends TestCase
 {
     use RefreshDatabase;
+
     private User $user;
+
     private Organization $organization;
+
     private Organization $producerOrg;
+
     private Location $location;
+
     private EventStatus $draftStatus;
+
     private EventStatus $pendingInternalStatus;
+
     private int $formatId;
 
     protected function setUp(): void
@@ -96,7 +103,7 @@ class OrganizerSubmitTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Event submitted for review',
-                'status' => 'pending_internal_approval'
+                'status' => 'pending_internal_approval',
             ]);
 
         $event->refresh();
@@ -115,7 +122,7 @@ class OrganizerSubmitTest extends TestCase
             ->assertJsonStructure([
                 'message',
                 'status',
-                'event' => ['id', 'title', 'status_id']
+                'event' => ['id', 'title', 'status_id'],
             ]);
     }
 
@@ -134,7 +141,7 @@ class OrganizerSubmitTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonStructure(['errors' => ['edition_number']])
-            ->assertJsonPath('errors.edition_number', fn($v) => str_contains($v, 'requerido'));
+            ->assertJsonPath('errors.edition_number', fn ($v) => str_contains($v, 'requerido'));
     }
 
     #[Test]
@@ -180,7 +187,7 @@ class OrganizerSubmitTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonStructure([
-                'errors' => ['edition_number']
+                'errors' => ['edition_number'],
             ]);
 
         $errors = $response->json('errors');

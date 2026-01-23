@@ -6,6 +6,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import { Button } from '@/components/ui'
 
 interface ShareButtonsEvent {
@@ -19,6 +20,11 @@ interface ShareButtonsProps {
 
 type SocialPlatform = 'facebook' | 'twitter' | 'whatsapp'
 
+/**
+ *
+ * @param root0
+ * @param root0.event
+ */
 export function ShareButtons({ event }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
 

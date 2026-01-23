@@ -3,8 +3,10 @@
  * Tests for token validation, form rendering, success state, and error handling
  */
 import { render, screen } from '@testing-library/react';
-import AcceptInvitationPage from '../page';
+
 import { useAcceptInvitation } from '@/features/invitations/hooks/useAcceptInvitation';
+
+import AcceptInvitationPage from '../page';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({

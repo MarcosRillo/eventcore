@@ -2,6 +2,6 @@
  * Entity Admin Hooks - Barrel Export
  */
 
-export { useApprovalManager } from './useApprovalManager'
-export { useAdminStats } from './useAdminStats'
-export { useEventManagement } from './useEventManagement'
+export { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats'
+export { useApprovalManager } from '@/features/entity-admin/hooks/useApprovalManager'
+export { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement'

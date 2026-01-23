@@ -5,12 +5,13 @@
  * Public page for accepting an invitation and creating an account
  */
 
-import { useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense,useEffect } from 'react'
+
 import { LoadingSpinner } from '@/components/ui'
-import { useAcceptInvitation } from '@/features/invitations/hooks/useAcceptInvitation'
 import { AcceptInvitationForm } from '@/features/invitations/components/dumb/AcceptInvitationForm'
+import { useAcceptInvitation } from '@/features/invitations/hooks/useAcceptInvitation'
 
 function AcceptInvitationContent() {
   const searchParams = useSearchParams()
@@ -242,6 +243,9 @@ function AcceptInvitationContent() {
   )
 }
 
+/**
+ *
+ */
 export default function AcceptInvitationPage() {
   return (
     <Suspense

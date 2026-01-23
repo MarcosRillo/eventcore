@@ -196,6 +196,7 @@ export const initialFormData: RegistrationRequestFormData = {
 
 /**
  * Check if request is pending
+ * @param request
  */
 export const isRequestPending = (request: RegistrationRequest): boolean => {
   return request.status === 'pending'
@@ -203,6 +204,7 @@ export const isRequestPending = (request: RegistrationRequest): boolean => {
 
 /**
  * Check if request is approved
+ * @param request
  */
 export const isRequestApproved = (request: RegistrationRequest): boolean => {
   return request.status === 'approved'
@@ -210,6 +212,7 @@ export const isRequestApproved = (request: RegistrationRequest): boolean => {
 
 /**
  * Check if request is rejected
+ * @param request
  */
 export const isRequestRejected = (request: RegistrationRequest): boolean => {
   return request.status === 'rejected'
@@ -217,6 +220,7 @@ export const isRequestRejected = (request: RegistrationRequest): boolean => {
 
 /**
  * Check if user/org is suspended (only for approved requests)
+ * @param request
  */
 export const isRequestSuspended = (request: RegistrationRequest): boolean => {
   return request.status === 'approved' && request.user_status === 'suspended'
@@ -224,6 +228,7 @@ export const isRequestSuspended = (request: RegistrationRequest): boolean => {
 
 /**
  * Get display status text
+ * @param request
  */
 export const getStatusText = (request: RegistrationRequest): string => {
   if (isRequestSuspended(request)) {

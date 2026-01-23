@@ -12,7 +12,7 @@ class RegistrationRejectedNotification extends Notification
     use Queueable;
 
     public function __construct(
-        private RegistrationRequest $request
+        private RegistrationRequest $request,
     ) {}
 
     public function via(object $notifiable): array

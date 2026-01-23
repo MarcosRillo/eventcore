@@ -3,7 +3,7 @@
  * Clean checkbox with label and description support
  */
 
-import { useId, type ChangeEvent } from 'react'
+import { type ChangeEvent,useId } from 'react'
 
 interface CheckboxProps {
   id?: string

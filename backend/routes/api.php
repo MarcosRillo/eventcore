@@ -1,33 +1,31 @@
 <?php
 
 // Feature Controllers - Dashboard
-use App\Features\Dashboard\Controllers\DashboardController;
-use App\Features\Dashboard\Controllers\OrganizerStatsController;
-
+use App\Features\Appearance\Controllers\AppearanceController;
+use App\Features\Approval\Controllers\ApprovalController;
 // Feature Controllers - Auth
 use App\Features\Auth\Controllers\AuthController;
 use App\Features\Auth\Controllers\InvitationController;
-use App\Features\Auth\Controllers\RegistrationRequestController;
 use App\Features\Auth\Controllers\PasswordResetController;
+use App\Features\Auth\Controllers\RegistrationRequestController;
 use App\Features\Auth\Controllers\RoleController;
-
 // Feature Controllers - Users
-use App\Features\Users\Controllers\UserController;
-
+use App\Features\Dashboard\Controllers\DashboardController;
 // Feature Controllers - PublicEvents
-use App\Features\PublicEvents\Controllers\PublicEventController;
-
-// Feature Controllers - Appearance
-use App\Features\Appearance\Controllers\AppearanceController;
-
-// Feature Controllers - SIMPLE
+use App\Features\Dashboard\Controllers\OrganizerStatsController;
+// Feature Controllers - InternalCalendar
 use App\Features\Events\Controllers\EventController as FeatureEventController;
-use App\Features\Approval\Controllers\ApprovalController;
-use App\Features\Locations\Controllers\LocationController;
-use App\Features\Organizer\Controllers\OrganizerController;
-use App\Features\Organizations\Controllers\OrganizationController;
-use App\Features\EventTypes\Controllers\EventTypeController;
 use App\Features\EventTypes\Controllers\EventSubtypeController;
+// Feature Controllers - Appearance
+use App\Features\EventTypes\Controllers\EventTypeController;
+// Feature Controllers - SIMPLE
+use App\Features\InternalCalendar\Controllers\InternalCalendarController;
+use App\Features\InternalCalendar\Controllers\InternalCalendarStatsController;
+use App\Features\Locations\Controllers\LocationController;
+use App\Features\Organizations\Controllers\OrganizationController;
+use App\Features\Organizer\Controllers\OrganizerController;
+use App\Features\PublicEvents\Controllers\PublicEventController;
+use App\Features\Users\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -201,6 +199,28 @@ Route::prefix('v1')->group(function () {
             // Organizations read-only
             Route::get('organizations', [OrganizationController::class, 'index']);
             Route::get('organizations/{id}', [OrganizationController::class, 'show']);
+        });
+
+        // ===== INTERNAL CALENDAR (entity_admin, entity_staff, organizer_admin) =====
+        Route::middleware(['role:platform_admin,entity_admin,entity_staff,organizer_admin'])->group(function () {
+            Route::prefix('internal-calendar')->group(function () {
+                // Events listing - moderate limit (consulta frecuente)
+                Route::get('events', [InternalCalendarController::class, 'index'])
+                    ->middleware('throttle:60,1');
+
+                // Single event detail - moderate limit
+                Route::get('events/{id}', [InternalCalendarController::class, 'show'])
+                    ->middleware('throttle:60,1')
+                    ->where('id', '[0-9]+');
+
+                // Event statuses - low limit (consultado ocasionalmente)
+                Route::get('event-statuses', [InternalCalendarController::class, 'eventStatuses'])
+                    ->middleware('throttle:30,1');
+
+                // Stats - moderate limit (puede ser costoso computacionalmente)
+                Route::get('stats', [InternalCalendarStatsController::class, 'index'])
+                    ->middleware('throttle:30,1');
+            });
         });
 
         // ===== LOCATIONS, EVENT TYPES READ ACCESS (All authenticated users need this) =====

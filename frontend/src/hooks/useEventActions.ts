@@ -3,12 +3,12 @@
  * Manages approval, rejection, and change request actions with loading states
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
+
 import {
-  eventApprovalService,
   ApprovalRequest,
-  ApprovalResponse
-} from '@/services/eventApprovalService';
+  ApprovalResponse,
+  eventApprovalService} from '@/services/eventApprovalService';
 
 interface UseEventActionsReturn {
   isPerformingAction: boolean;

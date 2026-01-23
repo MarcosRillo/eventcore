@@ -1,10 +1,10 @@
 import {
-  eventOrganizerService,
-  eventOrganizerCommunicationService,
   combinedEventOrganizerService,
-} from '../eventOrganizerService'
+  eventOrganizerCommunicationService,
+  eventOrganizerService,
+} from '@/features/events/services/eventOrganizerService'
 import apiClient from '@/services/apiClient'
-import { Event, EVENT_STATUS, EVENT_TYPE, EventStatusCode, EventTypeCode, EventFormData } from '@/types/event.types'
+import { Event, EVENT_STATUS, EVENT_TYPE, EventFormData,EventStatusCode, EventTypeCode } from '@/types/event.types'
 
 jest.mock('@/services/apiClient')
 

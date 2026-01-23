@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -29,10 +28,10 @@ class UserRolesSeeder extends Seeder
                     'manage_platform',
                     'manage_organizations',
                     'manage_users',
-                    'view_all_events'
+                    'view_all_events',
                 ]),
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'role_code' => 'entity_admin',
@@ -42,10 +41,10 @@ class UserRolesSeeder extends Seeder
                     'manage_entity_events',
                     'approve_events',
                     'manage_entity_users',
-                    'view_analytics'
+                    'view_analytics',
                 ]),
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'role_code' => 'entity_staff',
@@ -54,10 +53,10 @@ class UserRolesSeeder extends Seeder
                 'permissions' => json_encode([
                     'create_events',
                     'edit_own_events',
-                    'view_entity_events'
+                    'view_entity_events',
                 ]),
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'role_code' => 'organizer_admin',
@@ -66,11 +65,11 @@ class UserRolesSeeder extends Seeder
                 'permissions' => json_encode([
                     'create_events',
                     'manage_own_events',
-                    'view_own_analytics'
+                    'view_own_analytics',
                 ]),
                 'created_at' => now(),
-                'updated_at' => now()
-            ]
+                'updated_at' => now(),
+            ],
         ];
 
         DB::table('user_roles')->insert($roles);

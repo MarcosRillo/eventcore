@@ -6,10 +6,11 @@
 'use client';
 
 import React from 'react';
-import { Event, EventStatus, EventType } from '@/types/event.types';
-import { Permission } from '@/types/auth.types';
-import { Button, LoadingSpinner, ConfirmDialog } from '@/components/ui';
+
 import { PermissionGate } from '@/components/auth/PermissionGate';
+import { Button, ConfirmDialog,LoadingSpinner } from '@/components/ui';
+import { Permission } from '@/types/auth.types';
+import { Event, EventStatus, EventType } from '@/types/event.types';
 
 // View mode types
 export type EventTableViewMode = 'admin' | 'organizer' | 'public';
@@ -217,7 +218,7 @@ function renderTableCell(
     case 'status':
       // Prefer status_object from backend (3NF structure)
       const statusCode = event.status_object?.status_code || getEventStatusCode(event.status);
-      const statusLabel = event.status_object?.name;
+      const statusLabel = event.status_object?.status_name;
       const statusInfo = statusLabels[statusCode] || { label: statusCode, className: 'bg-gray-100 text-gray-800' };
       return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.className}`}>

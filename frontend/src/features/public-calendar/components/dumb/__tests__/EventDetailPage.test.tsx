@@ -5,8 +5,9 @@
  * and calendar export functionality.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import EventDetailPage from '../EventDetailPage'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage'
 import { Event } from '@/types/event.types'
 
 // Mock Next.js Image

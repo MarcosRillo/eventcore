@@ -6,8 +6,9 @@
  */
 
 import React from 'react'
-import type { Organization, PaginationMeta } from '../../types/organization.types'
+
 import { Button } from '@/components/ui'
+import type { Organization, PaginationMeta } from '@/features/organizations/types/organization.types'
 
 interface OrganizationTableProps {
   organizations: Organization[]

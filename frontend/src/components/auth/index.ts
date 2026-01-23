@@ -2,4 +2,4 @@
  * Auth Components Export Index
  */
 
-export { default as PermissionGate } from './PermissionGate';
+export { default as PermissionGate } from '@/components/auth/PermissionGate';

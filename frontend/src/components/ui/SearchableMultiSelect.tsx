@@ -6,8 +6,8 @@
  * Uses @headlessui/react Combobox for accessibility
  */
 
-import { useState, useMemo, useId } from 'react'
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react'
+import { useId,useMemo, useState } from 'react'
 
 export interface SelectOption {
   id: number
@@ -25,6 +25,18 @@ export interface SearchableMultiSelectProps {
   required?: boolean
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.options
+ * @param root0.selected
+ * @param root0.onChange
+ * @param root0.placeholder
+ * @param root0.label
+ * @param root0.error
+ * @param root0.disabled
+ * @param root0.required
+ */
 export function SearchableMultiSelect({
   options,
   selected,

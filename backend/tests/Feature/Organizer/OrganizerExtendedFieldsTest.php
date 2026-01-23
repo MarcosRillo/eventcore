@@ -6,7 +6,6 @@ use App\Models\Event;
 use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRoom;
-use App\Models\EventRotationType;
 use App\Models\EventService;
 use App\Models\EventTheme;
 use App\Models\Organization;

@@ -4,19 +4,18 @@
  */
 
 // Main service facade
-export { getEventServiceForContext } from './event.service';
-export type { EventServiceContext } from './event.service';
+export type { EventServiceContext } from '@/features/events/services/event.service';
+export { getEventServiceForContext } from '@/features/events/services/event.service';
 
 // Specialized services
-export { eventAdminService, eventAdminApprovalService, combinedEventAdminService } from './eventAdminService';
-export { eventPublicService, eventPublicExportService, combinedEventPublicService } from './eventPublicService';
-export { eventOrganizerService, combinedEventOrganizerService } from './eventOrganizerService';
-export { approvalService, approvalValidation } from './approvalService';
+export { approvalService, approvalValidation } from '@/features/events/services/approvalService';
+export { combinedEventAdminService,eventAdminApprovalService, eventAdminService } from '@/features/events/services/eventAdminService';
+export { combinedEventOrganizerService,eventOrganizerService } from '@/features/events/services/eventOrganizerService';
+export { combinedEventPublicService,eventPublicExportService, eventPublicService } from '@/features/events/services/eventPublicService';
 
 // Service types
 export type {
   AdminEventService,
-  PublicEventService,
+  EventApprovalService,
   OrganizerEventService,
-  EventApprovalService
-} from './types';
+  PublicEventService} from '@/features/events/services/types';

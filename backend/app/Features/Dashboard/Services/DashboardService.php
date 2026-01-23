@@ -15,38 +15,46 @@ use Carbon\Carbon;
 class DashboardService
 {
     public function __construct(
-        private DashboardTransformer $transformer
+        private DashboardTransformer $transformer,
     ) {}
+
     /**
      * Get events summary with counters for each dashboard tab
-     * 
-     * @return array
+     * Uses database-level counting for performance.
      */
     public function getEventsSummary(): array
     {
-        // Get all events with status information
-        $events = Event::with(['status', 'format'])
-            ->get()
-            ->groupBy(function ($event) {
-                return $this->categorizeEventForTab($event);
-            });
+        $now = Carbon::now();
+
+        // Count events requiring action (non-past events with pending/requires_changes status)
+        $requiresAction = Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval', 'requires_changes']),
+        )->where('end_date', '>=', $now)->count();
+
+        // Count pending events (non-past events with approved_internal/draft status)
+        $pending = Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['approved_internal', 'draft']),
+        )->where('end_date', '>=', $now)->count();
+
+        // Count published events (non-past events with published status)
+        $published = Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'),
+        )->where('end_date', '>=', $now)->count();
+
+        // Count historic events (past events OR rejected/cancelled regardless of date)
+        $historic = Event::where(function ($q) use ($now) {
+            $q->where('end_date', '<', $now)
+                ->orWhereHas('status', fn ($statusQuery) => $statusQuery->whereIn('status_code', ['rejected', 'cancelled']),
+                );
+        })->count();
 
         return [
-            'requiere_accion' => $events->get('requires-action', collect())->count(),
-            'pendientes' => $events->get('pending', collect())->count(),
-            'publicados' => $events->get('published', collect())->count(),
-            'historico' => $events->get('historic', collect())->count(),
+            'requiere_accion' => $requiresAction,
+            'pendientes' => $pending,
+            'publicados' => $published,
+            'historico' => $historic,
         ];
     }
 
     /**
      * Get filtered and paginated events for a specific dashboard tab
-     * 
-     * @param string $tab
-     * @param int $page
-     * @param string $search
-     * @param int $perPage
-     * @return array
      */
     public function getFilteredEvents(string $tab, int $page, string $search, int $perPage): array
     {
@@ -56,12 +64,11 @@ class DashboardService
         $this->applyTabFilter($query, $tab);
 
         // Apply search if provided
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'ilike', "%{$search}%")
-                  ->orWhereHas('entity', fn($orgQuery) => 
-                      $orgQuery->where('name', 'ilike', "%{$search}%")
-                  );
+                    ->orWhereHas('entity', fn ($orgQuery) => $orgQuery->where('name', 'ilike', "%{$search}%"),
+                    );
             });
         }
 
@@ -74,7 +81,7 @@ class DashboardService
         $events = $query->offset($offset)->limit($perPage)->get();
 
         // Transform events for frontend consumption
-        $eventsData = $events->map(fn($event) => $this->transformer->transformForList($event));
+        $eventsData = $events->map(fn ($event) => $this->transformer->transformForList($event));
 
         return [
             'data' => $eventsData->toArray(),
@@ -85,15 +92,12 @@ class DashboardService
                 'last_page' => ceil($total / $perPage),
                 'from' => $offset + 1,
                 'to' => min($offset + $perPage, $total),
-            ]
+            ],
         ];
     }
 
     /**
      * Get detailed event information for modal view.
-     *
-     * @param int $eventId
-     * @return array|null
      */
     public function getEventDetail(int $eventId): ?array
     {
@@ -105,10 +109,10 @@ class DashboardService
             'eventSubtype',
             'locations',
             'creator',
-            'approver'
+            'approver',
         ])->find($eventId);
 
-        if (!$event) {
+        if (! $event) {
             return null;
         }
 
@@ -116,58 +120,27 @@ class DashboardService
     }
 
     /**
-     * Categorize event for appropriate dashboard tab
-     * 
-     * @param Event $event
-     * @return string
-     */
-    private function categorizeEventForTab(Event $event): string
-    {
-        $statusCode = $event->status?->status_code;
-
-        // Check if event has ended (past events go to historic)
-        if ($event->hasEnded()) {
-            return 'historic';
-        }
-
-        return match ($statusCode) {
-            'pending_internal_approval', 'pending_public_approval', 'requires_changes' => 'requires-action',
-            'approved_internal', 'draft' => 'pending',
-            'published' => 'published',
-            'rejected', 'cancelled' => 'historic',
-            default => 'pending'
-        };
-    }
-
-    /**
      * Apply tab-specific filters to event query
-     * 
-     * @param $query
-     * @param string $tab
-     * @return void
      */
     private function applyTabFilter($query, string $tab): void
     {
         switch ($tab) {
             case 'requires-action':
-                $query->whereHas('status', fn($q) => 
-                    $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval', 'requires_changes'])
+                $query->whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval', 'requires_changes']),
                 );
                 // Only include non-past events
                 $query->where('end_date', '>=', Carbon::now());
                 break;
 
             case 'pending':
-                $query->whereHas('status', fn($q) => 
-                    $q->whereIn('status_code', ['approved_internal', 'draft'])
+                $query->whereHas('status', fn ($q) => $q->whereIn('status_code', ['approved_internal', 'draft']),
                 );
                 // Only include non-past events
                 $query->where('end_date', '>=', Carbon::now());
                 break;
 
             case 'published':
-                $query->whereHas('status', fn($q) => 
-                    $q->where('status_code', 'published')
+                $query->whereHas('status', fn ($q) => $q->where('status_code', 'published'),
                 );
                 // Only include non-past events
                 $query->where('end_date', '>=', Carbon::now());
@@ -178,9 +151,8 @@ class DashboardService
                     // Past events regardless of status
                     $q->where('end_date', '<', Carbon::now())
                       // OR rejected/cancelled events regardless of date
-                      ->orWhereHas('status', fn($statusQuery) => 
-                          $statusQuery->whereIn('status_code', ['rejected', 'cancelled'])
-                      );
+                        ->orWhereHas('status', fn ($statusQuery) => $statusQuery->whereIn('status_code', ['rejected', 'cancelled']),
+                        );
                 });
                 break;
         }
@@ -188,10 +160,6 @@ class DashboardService
 
     /**
      * Apply ordering to event query
-     * 
-     * @param $query
-     * @param string $tab
-     * @return void
      */
     private function applyOrdering($query, string $tab): void
     {
@@ -201,8 +169,7 @@ class DashboardService
         } else {
             // For active events, show upcoming events first, then by updated_at ASC for older first
             $query->orderBy('start_date', 'asc')
-                  ->orderBy('updated_at', 'asc');
+                ->orderBy('updated_at', 'asc');
         }
     }
-
 }

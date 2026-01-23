@@ -5,9 +5,10 @@
 
 import { renderHook, waitFor } from '@testing-library/react'
 import { act } from 'react'
-import { usePublicEvents } from '../usePublicEvents'
+
+import { usePublicEvents } from '@/features/public-calendar/hooks/usePublicEvents'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
-import type { PublicEvent, EventType, EventSubtype, Location } from '@/features/public-calendar/types/public-calendar.types'
+import type { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 // Mock the service
 jest.mock('@/features/public-calendar/services/public-events.service')

@@ -1,13 +1,15 @@
-'use client'
-
 /**
  * Registration Requests Page
  * Admin panel for managing organizer account requests
  */
 
 import { ClipboardList } from 'lucide-react'
+
 import { RegistrationRequestsContainer } from '@/features/registration-requests/components/smart/RegistrationRequestsContainer'
 
+/**
+ *
+ */
 export default function RegistrationRequestsPage() {
   return (
     <div className="min-h-screen bg-neutral-50">

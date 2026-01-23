@@ -21,6 +21,13 @@ const columnClasses: Record<2 | 3 | 4, string> = {
   4: 'md:grid-cols-4',
 };
 
+/**
+ *
+ * @param root0
+ * @param root0.children
+ * @param root0.columns
+ * @param root0.testId
+ */
 export function StatsGrid({
   children,
   columns = 4,

@@ -15,9 +15,6 @@ class DashboardTransformer
 {
     /**
      * Transform event for dashboard list display.
-     *
-     * @param Event $event
-     * @return array
      */
     public function transformForList(Event $event): array
     {
@@ -61,9 +58,6 @@ class DashboardTransformer
 
     /**
      * Transform event for detail modal view.
-     *
-     * @param Event $event
-     * @return array
      */
     public function transformForDetail(Event $event): array
     {
@@ -143,9 +137,6 @@ class DashboardTransformer
 
     /**
      * Calculate how long the event has been in its current state.
-     *
-     * @param Event $event
-     * @return array
      */
     public function calculateCurrentStateDuration(Event $event): array
     {
@@ -159,20 +150,21 @@ class DashboardTransformer
             return [
                 'value' => $diffInDays,
                 'unit' => $diffInDays === 1 ? 'día' : 'días',
-                'formatted' => $diffInDays . ($diffInDays === 1 ? ' día' : ' días'),
+                'formatted' => $diffInDays.($diffInDays === 1 ? ' día' : ' días'),
             ];
         } elseif ($diffInHours > 0) {
             return [
                 'value' => $diffInHours,
                 'unit' => $diffInHours === 1 ? 'hora' : 'horas',
-                'formatted' => $diffInHours . ($diffInHours === 1 ? ' hora' : ' horas'),
+                'formatted' => $diffInHours.($diffInHours === 1 ? ' hora' : ' horas'),
             ];
         } else {
             $diffInMinutes = $lastUpdate->diffInMinutes($now);
+
             return [
                 'value' => max(1, $diffInMinutes),
                 'unit' => $diffInMinutes <= 1 ? 'minuto' : 'minutos',
-                'formatted' => max(1, $diffInMinutes) . ($diffInMinutes <= 1 ? ' minuto' : ' minutos'),
+                'formatted' => max(1, $diffInMinutes).($diffInMinutes <= 1 ? ' minuto' : ' minutos'),
             ];
         }
     }

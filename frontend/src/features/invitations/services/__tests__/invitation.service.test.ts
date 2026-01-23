@@ -1,7 +1,9 @@
-import apiClient from '@/services/apiClient'
-import invitationService from '../invitation.service'
-import { Invitation } from '../../types/invitation.types'
 import { AxiosResponse } from 'axios'
+
+import invitationService from '@/features/invitations/services/invitation.service'
+import { Invitation } from '@/features/invitations/types/invitation.types'
+import apiClient from '@/services/apiClient'
+
 
 jest.mock('@/services/apiClient')
 

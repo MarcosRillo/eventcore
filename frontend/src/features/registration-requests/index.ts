@@ -3,24 +3,24 @@
  */
 
 // Types
-export * from './types/registration-request.types'
+export * from '@/features/registration-requests/types/registration-request.types'
 
 // Services
-export { default as registrationRequestService } from './services/registration-request.service'
+export { default as registrationRequestService } from '@/features/registration-requests/services/registration-request.service'
 export {
-  getRegistrationRequests,
-  getRegistrationRequestById,
   approveRegistrationRequest,
+  getRegistrationRequestById,
+  getRegistrationRequests,
   rejectRegistrationRequest,
-} from './services/registration-request.service'
+} from '@/features/registration-requests/services/registration-request.service'
 
 // Hooks
-export { useRegistrationRequests } from './hooks/useRegistrationRequests'
-export { useRegistrationForm } from './hooks/useRegistrationForm'
+export { useRegistrationForm } from '@/features/registration-requests/hooks/useRegistrationForm'
+export { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
 
 // Components
-export { RegistrationForm as RegistrationPublicForm } from './components/dumb/RegistrationPublicForm'
-export { RegistrationRequestTable } from './components/dumb/RegistrationRequestTable'
-export { RegistrationRequestDetailPanel } from './components/dumb/RegistrationRequestDetail'
-export { RejectRequestModal } from './components/dumb/RejectRequestModal'
-export { RegistrationRequestsContainer } from './components/smart/RegistrationRequestsContainer'
+export { RegistrationForm as RegistrationPublicForm } from '@/features/registration-requests/components/dumb/RegistrationPublicForm'
+export { RegistrationRequestDetailPanel } from '@/features/registration-requests/components/dumb/RegistrationRequestDetail'
+export { RegistrationRequestTable } from '@/features/registration-requests/components/dumb/RegistrationRequestTable'
+export { RejectRequestModal } from '@/features/registration-requests/components/dumb/RejectRequestModal'
+export { RegistrationRequestsContainer } from '@/features/registration-requests/components/smart/RegistrationRequestsContainer'

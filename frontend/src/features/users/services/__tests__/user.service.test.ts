@@ -1,7 +1,9 @@
-import apiClient from '@/services/apiClient'
-import userService from '../user.service'
-import type { User, UsersResponse, UserResponse, PaginationMeta } from '../../types/user.types'
 import { AxiosResponse } from 'axios'
+
+import userService from '@/features/users/services/user.service'
+import type { PaginationMeta,User, UserResponse, UsersResponse } from '@/features/users/types/user.types'
+import apiClient from '@/services/apiClient'
+
 
 jest.mock('@/services/apiClient')
 

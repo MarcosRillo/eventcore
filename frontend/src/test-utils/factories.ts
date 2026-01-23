@@ -3,12 +3,13 @@
  * Reusable mock factory functions for common types used in tests
  */
 
-import { Event, EventStatusCode, EventTypeCode, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
+import { PaginationLinks,PaginationMeta } from '@/types/api-response.types'
+import { Event, EVENT_STATUS, EVENT_TYPE,EventStatusCode, EventTypeCode } from '@/types/event.types'
 import { Location } from '@/types/location.types'
-import { PaginationMeta, PaginationLinks } from '@/types/api-response.types'
 
 /**
  * Creates a valid Event mock with required fields
+ * @param overrides
  */
 export const createMockEvent = (overrides: Partial<Event> & { id: number; title: string }): Event => ({
   description: 'Test event description',
@@ -27,6 +28,7 @@ export const createMockEvent = (overrides: Partial<Event> & { id: number; title:
 /**
  * Creates a valid Location mock with required fields
  * Simplified for Tucumán Tourism
+ * @param overrides
  */
 export const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
   address: 'Av. Soldati 330',
@@ -42,6 +44,7 @@ export const createMockLocation = (overrides: Partial<Location> & { id: number; 
 
 /**
  * Creates valid PaginationMeta
+ * @param overrides
  */
 export const createMockPaginationMeta = (overrides: Partial<PaginationMeta> = {}): PaginationMeta => ({
   current_page: 1,
@@ -57,6 +60,7 @@ export const createMockPaginationMeta = (overrides: Partial<PaginationMeta> = {}
 
 /**
  * Creates valid PaginationLinks
+ * @param overrides
  */
 export const createMockPaginationLinks = (overrides: Partial<PaginationLinks> = {}): PaginationLinks => ({
   first: 'http://api.example.com/test?page=1',
@@ -68,6 +72,9 @@ export const createMockPaginationLinks = (overrides: Partial<PaginationLinks> = 
 
 /**
  * Creates a complete paginated response structure
+ * @param data
+ * @param metaOverrides
+ * @param linksOverrides
  */
 export const createMockPaginatedResponse = <T>(
   data: T[],

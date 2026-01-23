@@ -3,7 +3,7 @@
  * Dashboard and stats functionality for event organizers
  */
 
-export * from './components';
-export * from './hooks';
-export * from './services';
-export * from './types';
+export * from '@/features/organizer-dashboard/components';
+export * from '@/features/organizer-dashboard/hooks';
+export * from '@/features/organizer-dashboard/services';
+export * from '@/features/organizer-dashboard/types';

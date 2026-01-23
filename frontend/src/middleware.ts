@@ -6,8 +6,8 @@
  * Optimized for Next.js 15 Edge Runtime
  */
 
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * User role codes - MUST match backend user_roles.role_code
@@ -25,6 +25,7 @@ interface User {
 /**
  * Check if token is expired based on expires_at cookie
  * Uses a buffer of 30 seconds to prevent edge cases
+ * @param request
  */
 function isTokenExpired(request: NextRequest): boolean {
   const expiresAtStr = request.cookies.get('token_expires_at')?.value;
@@ -44,39 +45,134 @@ function isTokenExpired(request: NextRequest): boolean {
   }
 }
 
-// Public routes configuration (optimized for Edge Runtime)
-// Set provides O(1) lookup vs Array O(n)
-const PUBLIC_ROUTES = new Set([
-  '/',                  // Landing page
-  '/login',             // Authentication
-  '/register-request',  // Registration request form
-  '/accept-invitation', // Accept invitation (public)
-  '/forgot-password',   // Password recovery
-  '/reset-password',    // Password reset
-]);
+/**
+ * Route configuration types for type-safe route management
+ */
+type ExactRoute = string;
+type RoutePrefix = string;
 
-// Public route prefixes (allow sub-routes)
-const PUBLIC_PREFIXES = [
-  '/calendar', // Public calendar and event details
-];
+interface RouteConfig {
+  /** Exact route matches (no sub-routes) */
+  exact: readonly ExactRoute[];
+  /** Public route prefixes (allow sub-routes) */
+  prefixes: readonly RoutePrefix[];
+  /** Authenticated route prefixes (block even if matches public) */
+  authenticatedPrefixes: readonly RoutePrefix[];
+}
 
 /**
- * Check if a route is public (no authentication required)
- * Optimized for Next.js 15 Edge Runtime performance
+ * Normalize pathname for consistent matching
+ *
+ * Handles:
+ * - Trailing slashes: /calendar/ → /calendar
+ * - Double slashes: //calendar → /calendar
+ * - Multiple trailing: /calendar/// → /calendar
+ *
+ * @param pathname - Raw pathname from request.nextUrl.pathname
+ * @returns Normalized pathname without trailing slashes
  */
-function isPublicRoute(pathname: string): boolean {
-  // Exact match for static routes (O(1))
-  if (PUBLIC_ROUTES.has(pathname)) {
+function normalizePath(pathname: string): string {
+  return pathname
+    .replace(/\/+/g, '/') // Replace multiple slashes with single
+    .replace(/\/+$/, '');  // Remove trailing slashes
+}
+
+/**
+ * Check if pathname matches a prefix with proper boundary validation
+ *
+ * Prevents false positives:
+ * - matchesPrefix('/calendar', '/calendar') → true
+ * - matchesPrefix('/calendar/123', '/calendar') → true
+ * - matchesPrefix('/calendar-admin', '/calendar') → false (boundary check)
+ *
+ * @param pathname - Normalized pathname
+ * @param prefix - Route prefix to match
+ * @returns true if pathname starts with prefix AND has valid boundary
+ */
+function matchesPrefix(pathname: string, prefix: string): boolean {
+  // Check if pathname starts with prefix
+  if (!pathname.startsWith(prefix)) {
+    return false;
+  }
+
+  // Exact match (e.g., /calendar === /calendar)
+  if (pathname === prefix) {
     return true;
   }
 
-  // Prefix match for dynamic routes
-  return PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
+  // Sub-route match: next character MUST be slash
+  // This prevents /calendar matching /calendar-admin
+  return pathname.charAt(prefix.length) === '/';
+}
+
+/**
+ * Type-safe route configuration (optimized for Edge Runtime)
+ *
+ * Performance:
+ * - exact: O(1) lookup with Array.includes (small array, fast)
+ * - prefixes: O(n) where n = 1-5 (negligible)
+ * - authenticatedPrefixes: O(m) where m = 1-3 (checked first for security)
+ */
+const ROUTE_CONFIG: RouteConfig = {
+  // Public routes: no authentication required
+  exact: [
+    '/',                  // Landing page
+    '/login',             // Authentication
+    '/register-request',  // Registration request form
+    '/accept-invitation', // Accept invitation (public)
+    '/forgot-password',   // Password recovery
+    '/reset-password',    // Password reset
+  ],
+
+  // Public prefixes: allow sub-routes
+  prefixes: [
+    '/calendar', // Public calendar and event details (/calendar, /calendar/123)
+  ],
+
+  // Authenticated prefixes: ALWAYS require auth (checked first)
+  authenticatedPrefixes: [
+    '/organizer/calendar',  // Organizer calendar (protected)
+    '/internal-calendar',   // Entity admin internal calendar (protected)
+  ],
+} as const;
+
+/**
+ * Check if route is public (no authentication required)
+ *
+ * Security-first design:
+ * 1. Check exact routes (fastest, O(1))
+ * 2. Check authenticated routes FIRST (security precedence)
+ * 3. Check public prefixes last
+ *
+ * Optimized for Next.js 15 Edge Runtime performance
+ *
+ * @param pathname - Raw pathname from request.nextUrl.pathname
+ * @returns true if route is public, false if requires authentication
+ */
+function isPublicRoute(pathname: string): boolean {
+  // Normalize pathname for consistent matching
+  const normalized = normalizePath(pathname);
+
+  // Step 1: Exact match for static routes (fastest, O(1))
+  if (ROUTE_CONFIG.exact.includes(normalized)) {
+    return true;
+  }
+
+  // Step 2: SECURITY FIRST - Check authenticated routes
+  // Authenticated routes take precedence over public prefixes
+  // Example: /organizer/calendar should NOT match /calendar prefix
+  if (ROUTE_CONFIG.authenticatedPrefixes.some(prefix => matchesPrefix(normalized, prefix))) {
+    return false;
+  }
+
+  // Step 3: Check public prefixes with boundary validation
+  // Prevents false positives (e.g., /calendar-admin matching /calendar)
+  return ROUTE_CONFIG.prefixes.some(prefix => matchesPrefix(normalized, prefix));
 }
 
 // Helper function to get user from cookies with robust validation
 function getUserFromCookies(request: NextRequest): User | null {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('access_token')?.value;
   const userStr = request.cookies.get('user')?.value;
 
   if (!token || !userStr) {
@@ -113,6 +209,10 @@ function getRoleCode(user: User): UserRoleCode | null {
   return user?.role?.role_code || null;
 }
 
+/**
+ *
+ * @param request
+ */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -148,11 +248,16 @@ export function middleware(request: NextRequest) {
 
   // ROLE-BASED PROTECTION
 
-  // Event Organizer - ONLY /organizer/* and /calendar
+  // Event Organizer - ONLY /organizer/* and /calendar (public)
   if (roleCode === 'organizer_admin') {
-    // Allow: /organizer/*, /calendar/*
+    // Allow: /organizer/*, /calendar/* (public), NO /internal-calendar
     const allowedPaths = ['/organizer', '/calendar'];
     const isAllowed = allowedPaths.some(path => pathname.startsWith(path));
+
+    // Block internal calendar for organizers
+    if (pathname.startsWith('/internal-calendar')) {
+      return NextResponse.redirect(new URL('/organizer/calendar', request.url));
+    }
 
     if (!isAllowed) {
       // Trying to access Entity routes - redirect to organizer dashboard

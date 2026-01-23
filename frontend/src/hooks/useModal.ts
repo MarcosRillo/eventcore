@@ -3,7 +3,8 @@
  * Provides modal state management for single and multiple modals
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
+
 import { ModalId, ModalState } from '@/types/modal.types';
 
 // Single modal hook

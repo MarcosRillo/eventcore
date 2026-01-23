@@ -5,14 +5,14 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Event, EVENT_STATUS } from '@/types/event.types';
+import React, { useMemo,useState } from 'react';
+
 import {
-  ApprovalModal,
   ApprovalActionOption,
   ApprovalFormData,
-  ApprovalFormErrors
-} from '@/features/entity-admin/components/dumb/ApprovalModal';
+  ApprovalFormErrors,
+  ApprovalModal} from '@/features/entity-admin/components/dumb/ApprovalModal';
+import { Event, EVENT_STATUS } from '@/types/event.types';
 
 interface ApprovalModalContainerProps {
   isOpen: boolean;

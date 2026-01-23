@@ -2,4 +2,4 @@
  * Appearance Hooks Export Index
  */
 
-export { useAppearanceForm } from './useAppearanceForm';
+export { useAppearanceForm } from '@/features/appearance/hooks/useAppearanceForm';

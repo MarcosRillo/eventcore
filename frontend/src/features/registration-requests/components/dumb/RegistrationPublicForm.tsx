@@ -1,11 +1,12 @@
 'use client'
 
+import { AlertCircle, Building2, CheckCircle, FileText,Loader2, User } from 'lucide-react'
 import Link from 'next/link'
+
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
-} from '../../types/registration-request.types'
-import { Loader2, CheckCircle, AlertCircle, User, Building2, FileText } from 'lucide-react'
+} from '@/features/registration-requests/types/registration-request.types'
 
 // Type aliases for simpler usage
 type RegistrationFormData = Omit<RegistrationRequestFormData, 'profile_photo' | 'organization_logo'>

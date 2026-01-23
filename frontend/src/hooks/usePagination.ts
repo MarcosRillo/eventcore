@@ -3,7 +3,7 @@
  * Provides pagination functionality for any data set
  */
 
-import { useState, useMemo } from 'react';
+import { useMemo,useState } from 'react';
 
 export interface PaginationState {
   currentPage: number;

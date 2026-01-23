@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/services/apiClient';
-import { AppearanceResponse, AppearanceFormData } from '@/types/appearance.types';
+import { AppearanceFormData,AppearanceResponse } from '@/types/appearance.types';
 
 const APPEARANCE_ENDPOINTS = {
   base: '/admin/appearance',
@@ -21,6 +21,7 @@ export const getAppearanceSettings = async (): Promise<AppearanceResponse> => {
 
 /**
  * Updates appearance settings on the server
+ * @param data
  */
 export const updateAppearanceSettings = async (
   data: Partial<AppearanceFormData>

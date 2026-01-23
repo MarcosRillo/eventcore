@@ -76,6 +76,7 @@ export const STATUS_COLOR_MAP: Record<EventStatusCode, StatusColorConfig> = {
 /**
  * Get status color classes for a given status code
  * Returns combined className string for easy spreading
+ * @param statusCode
  */
 export const getStatusColorClasses = (statusCode: string): string => {
   const config = STATUS_COLOR_MAP[statusCode as EventStatusCode];
@@ -90,6 +91,7 @@ export const getStatusColorClasses = (statusCode: string): string => {
 
 /**
  * Get individual color config object
+ * @param statusCode
  */
 export const getStatusColorConfig = (statusCode: string): StatusColorConfig => {
   return STATUS_COLOR_MAP[statusCode as EventStatusCode] || {

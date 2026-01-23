@@ -5,12 +5,12 @@
  * Provides read-only access to published events with public-focused features.
  */
 
-import apiClient from '@/services/apiClient';
+import { PublicEventService } from '@/features/events/services/types';
+import publicApiClient from '@/services/publicApiClient';
 import {
   Event,
   EventPagination,
 } from '@/types/event.types';
-import { PublicEventService } from './types';
 import { PublicEventFilters } from '@/types/filter.types';
 
 // ExtendedPublicEventFilters eliminated - consolidated into PublicEventFilters in filter.types.ts
@@ -21,6 +21,7 @@ import { PublicEventFilters } from '@/types/filter.types';
 export const eventPublicService: Omit<PublicEventService, 'export'> = {
   /**
    * Get paginated list of events (alias for public events)
+   * @param filters
    */
   async getEvents(filters: PublicEventFilters = {}): Promise<EventPagination> {
     const params = new URLSearchParams();
@@ -31,21 +32,23 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/public/events?${params.toString()}`);
+    const response = await publicApiClient.get(`/public/events?${params.toString()}`);
     return response.data;
   },
 
   /**
    * Get single event (alias for public event)
+   * @param id
    */
   async getEvent(id: number): Promise<Event> {
-    const response = await apiClient.get(`/public/events/${id}`);
+    const response = await publicApiClient.get(`/public/events/${id}`);
     return response.data.data;
   },
 
   /**
    * Get paginated list of published events for public view
    * Uses new public events endpoint without authentication
+   * @param filters
    */
   async getPublicEvents(filters: PublicEventFilters = {}): Promise<EventPagination> {
     const params = new URLSearchParams();
@@ -57,20 +60,23 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/public/events?${params.toString()}`);
+    const response = await publicApiClient.get(`/public/events?${params.toString()}`);
     return response.data;
   },
 
   /**
    * Get a single published event by ID or slug
+   * @param identifier
    */
   async getPublicEvent(identifier: number | string): Promise<Event> {
-    const response = await apiClient.get(`/public/events/${identifier}`);
+    const response = await publicApiClient.get(`/public/events/${identifier}`);
     return response.data.data;
   },
 
   /**
    * Search events with full-text search
+   * @param query
+   * @param filters
    */
   async searchEvents(query: string, filters: PublicEventFilters = {}): Promise<EventPagination> {
     const params = new URLSearchParams();
@@ -82,15 +88,16 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
       }
     });
 
-    const response = await apiClient.get(`/public/events/search?${params.toString()}`);
+    const response = await publicApiClient.get(`/public/events/search?${params.toString()}`);
     return response.data;
   },
 
   /**
    * Get featured events
+   * @param limit
    */
   async getFeaturedEvents(limit: number = 6): Promise<Event[]> {
-    const response = await apiClient.get(`/public/events/featured?limit=${limit}`);
+    const response = await publicApiClient.get(`/public/events/featured?limit=${limit}`);
     return response.data.data;
   },
 
@@ -101,9 +108,10 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
 
   /**
    * Get upcoming events
+   * @param limit
    */
   async getUpcomingEvents(limit: number = 10): Promise<Event[]> {
-    const response = await apiClient.get(`/public/events/upcoming?limit=${limit}`);
+    const response = await publicApiClient.get(`/public/events/upcoming?limit=${limit}`);
     return response.data.data;
   },
 
@@ -116,6 +124,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
 export const eventPublicExportService = {
   /**
    * Get RSS feed URL for public events
+   * @param filters
    */
   getRSSFeedUrl(filters: PublicEventFilters = {}): string {
     const params = new URLSearchParams();
@@ -132,6 +141,7 @@ export const eventPublicExportService = {
 
   /**
    * Get iCal URL for public events
+   * @param filters
    */
   getICalUrl(filters: PublicEventFilters = {}): string {
     const params = new URLSearchParams();
@@ -148,6 +158,7 @@ export const eventPublicExportService = {
 
   /**
    * Get iCal URL for a specific event
+   * @param eventId
    */
   getEventICalUrl(eventId: number): string {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -156,6 +167,7 @@ export const eventPublicExportService = {
 
   /**
    * Download events as iCal file
+   * @param filters
    */
   async downloadICalFile(filters: PublicEventFilters = {}): Promise<Blob> {
     const params = new URLSearchParams();
@@ -166,15 +178,16 @@ export const eventPublicExportService = {
       }
     });
 
-    const response = await apiClient.get(`/public/events/ical?${params.toString()}`, {
+    const response = await publicApiClient.get(`/public/events/ical?${params.toString()}`, {
       responseType: 'blob',
     });
-    
+
     return response.data;
   },
 
   /**
    * Get Google Calendar add URL for an event
+   * @param event
    */
   getGoogleCalendarUrl(event: Event): string {
     const startDate = new Date(event.start_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -193,6 +206,7 @@ export const eventPublicExportService = {
 
   /**
    * Get Outlook Calendar add URL for an event
+   * @param event
    */
   getOutlookCalendarUrl(event: Event): string {
     const startDate = new Date(event.start_date).toISOString();

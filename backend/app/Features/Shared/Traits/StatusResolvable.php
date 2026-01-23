@@ -32,16 +32,17 @@ trait StatusResolvable
     /**
      * Get event status ID by status code with caching.
      *
-     * @param string $statusCode The status code (e.g., 'draft', 'published')
+     * @param  string  $statusCode  The status code (e.g., 'draft', 'published')
      * @return int The status ID
+     *
      * @throws \RuntimeException If status code not found
      */
     protected function getStatusId(string $statusCode): int
     {
         return Cache::remember(
-            self::STATUS_CACHE_PREFIX . $statusCode,
+            self::STATUS_CACHE_PREFIX.$statusCode,
             self::STATUS_CACHE_TTL,
-            fn() => $this->fetchStatusIdFromDb($statusCode)
+            fn () => $this->fetchStatusIdFromDb($statusCode),
         );
     }
 
@@ -56,9 +57,9 @@ trait StatusResolvable
         return Cache::remember(
             'event_status.ids.all',
             self::STATUS_CACHE_TTL,
-            fn() => DB::table('event_statuses')
+            fn () => DB::table('event_statuses')
                 ->pluck('id', 'status_code')
-                ->toArray()
+                ->toArray(),
         );
     }
 
@@ -82,15 +83,16 @@ trait StatusResolvable
         ];
 
         foreach ($statusCodes as $code) {
-            Cache::forget(self::STATUS_CACHE_PREFIX . $code);
+            Cache::forget(self::STATUS_CACHE_PREFIX.$code);
         }
     }
 
     /**
      * Fetch status ID directly from database.
      *
-     * @param string $statusCode The status code
+     * @param  string  $statusCode  The status code
      * @return int The status ID
+     *
      * @throws \RuntimeException If status not found
      */
     private function fetchStatusIdFromDb(string $statusCode): int
@@ -99,7 +101,7 @@ trait StatusResolvable
             ->where('status_code', $statusCode)
             ->value('id');
 
-        if (!$statusId) {
+        if (! $statusId) {
             throw new \RuntimeException("Event status '{$statusCode}' not found");
         }
 

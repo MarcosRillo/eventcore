@@ -7,12 +7,13 @@
  * Created: December 2, 2025
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useEventSubtypeManager } from '../hooks/useEventSubtypeManager'
-import * as eventSubtypeService from '../services/eventSubtype.service'
-import * as eventTypeService from '../services/eventType.service'
+import { act, renderHook, waitFor } from '@testing-library/react'
+
 import { useAuth } from '@/context/AuthContext'
-import type { EventType, EventSubtype, EventSubtypePagination } from '@/types/eventType.types'
+import { useEventSubtypeManager } from '@/features/event-types/hooks/useEventSubtypeManager'
+import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
+import * as eventTypeService from '@/features/event-types/services/eventType.service'
+import type { EventSubtype, EventSubtypePagination,EventType } from '@/types/eventType.types'
 
 // Mock dependencies
 jest.mock('../services/eventSubtype.service')

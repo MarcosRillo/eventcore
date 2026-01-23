@@ -9,8 +9,9 @@
  * 5. Error Handling (API failures)
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { useEventManager } from '../useEventManager';
+import { act,renderHook } from '@testing-library/react';
+
+import { useEventManager } from '@/features/events/hooks/useEventManager';
 import * as eventService from '@/features/events/services/event.service';
 import { Event, EventFormData } from '@/types/event.types';
 

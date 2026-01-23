@@ -1,5 +1,6 @@
-import { renderHook, act } from '@testing-library/react'
-import { useCreateInvitation } from '../useCreateInvitation'
+import { act,renderHook } from '@testing-library/react'
+
+import { useCreateInvitation } from '@/features/invitations/hooks/useCreateInvitation'
 
 describe('useCreateInvitation', () => {
   const defaultProps = {

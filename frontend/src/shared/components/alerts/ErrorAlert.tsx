@@ -5,7 +5,7 @@
 
 'use client';
 
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { X, XCircle } from 'lucide-react';
 
 interface ErrorAlertProps {
   /** Error message to display */
@@ -24,6 +24,17 @@ interface ErrorAlertProps {
   testId?: string;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.message
+ * @param root0.title
+ * @param root0.details
+ * @param root0.onDismiss
+ * @param root0.onRetry
+ * @param root0.retryText
+ * @param root0.testId
+ */
 export function ErrorAlert({
   message,
   title = 'Error',
@@ -41,7 +52,7 @@ export function ErrorAlert({
     >
       <div className="flex">
         <div className="flex-shrink-0">
-          <XCircleIcon className="h-5 w-5 text-error-400" aria-hidden="true" />
+          <XCircle className="h-5 w-5 text-error-400" aria-hidden="true" />
         </div>
         <div className="ml-3 flex-1">
           <h3 className="text-sm font-medium text-error-800">{title}</h3>
@@ -71,7 +82,7 @@ export function ErrorAlert({
               className="inline-flex bg-error-50 rounded-md p-1.5 text-error-500 hover:bg-error-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-error-50 focus:ring-error-600"
               aria-label="Cerrar"
             >
-              <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
         )}

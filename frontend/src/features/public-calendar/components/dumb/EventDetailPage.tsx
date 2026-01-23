@@ -1,39 +1,51 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
+import { format, isSameDay, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
   ArrowLeft,
   Calendar,
-  MapPin,
-  Phone,
+  ExternalLink,
   Mail,
-  ExternalLink
-} from 'lucide-react';
-import moment from 'moment';
-import { Event } from '@/types/event.types';
+  MapPin,
+  Phone} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons';
-import { Button } from '@/components/ui';
+import { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML';
+import { Event } from '@/types/event.types';
 
 interface EventDetailPageProps {
   event: Event;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.event
+ */
 export default function EventDetailPage({ event }: EventDetailPageProps) {
+  // CAPA 3: Sanitize description on frontend (third layer of defense)
+  // Even though backend already sanitized (CAPA 1 + CAPA 2), this provides
+  // additional protection against compromised database or old unsanitized data
+  const sanitizedDescription = useSanitizedHTML(event.description || '');
+
   const formatDate = (dateString: string) => {
-    return moment(dateString).format('dddd, DD [de] MMMM [de] YYYY');
+    return format(parseISO(dateString), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es });
   };
 
   const formatTime = (dateString: string) => {
-    return moment(dateString).format('HH:mm');
+    return format(parseISO(dateString), 'HH:mm', { locale: es });
   };
 
   const formatDateRange = (startDate: string, endDate?: string) => {
-    const start = moment(startDate);
-    const end = endDate ? moment(endDate) : start;
+    const start = parseISO(startDate);
+    const end = endDate ? parseISO(endDate) : start;
 
-    if (start.isSame(end, 'day')) {
+    if (isSameDay(start, end)) {
       return `${formatDate(startDate)} de ${formatTime(startDate)} a ${formatTime(endDate || startDate)}`;
     } else {
       return `${formatDate(startDate)} ${formatTime(startDate)} - ${formatDate(endDate || startDate)} ${formatTime(endDate || startDate)}`;
@@ -263,13 +275,13 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
             </div>
           </div>
 
-          {/* Description */}
-          {event.description && (
+          {/* Description - Sanitized (CAPA 3) */}
+          {sanitizedDescription && (
             <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
               <h2 className="text-2xl font-bold text-neutral-900 mb-4">Descripción</h2>
               <div
                 className="prose prose-lg max-w-none text-neutral-700"
-                dangerouslySetInnerHTML={{ __html: event.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
               />
             </div>
           )}

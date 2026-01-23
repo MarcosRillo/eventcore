@@ -2,4 +2,4 @@
  * Appearance Services Export Index
  */
 
-export { getAppearanceSettings, updateAppearanceSettings } from './appearance.service';
+export { getAppearanceSettings, updateAppearanceSettings } from '@/features/appearance/services/appearance.service';

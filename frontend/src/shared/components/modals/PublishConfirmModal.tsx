@@ -5,8 +5,8 @@
  * Reusable across all features that need publish/approval workflows.
  */
 
-import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
+import Modal from '@/components/ui/Modal'
 
 interface PublishConfirmModalProps {
   isOpen: boolean

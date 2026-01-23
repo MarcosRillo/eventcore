@@ -1,11 +1,12 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useCalendarEvents } from '../useCalendarEvents'
+import { act, renderHook, waitFor } from '@testing-library/react'
+
+import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
-  PublicEvent,
   EventsResponse,
   EventType,
   Location,
+  PublicEvent,
 } from '@/features/public-calendar/types/public-calendar.types'
 
 // Mock dependencies

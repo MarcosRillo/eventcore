@@ -17,6 +17,15 @@ interface CreateInvitationModalContainerProps {
   isLoading: boolean
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.isOpen
+ * @param root0.onClose
+ * @param root0.onSubmit
+ * @param root0.roles
+ * @param root0.isLoading
+ */
 export function CreateInvitationModalContainer({
   isOpen,
   onClose,

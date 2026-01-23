@@ -3,8 +3,8 @@
  * Clean category cards with subtle hover effects
  */
 
+import { EmptyState, EmptyStateIcons,LoadingSpinner } from '@/components/ui'
 import type { CategoriesSectionProps } from '@/features/landing/types/landing.types'
-import { LoadingSpinner, EmptyState, EmptyStateIcons } from '@/components/ui'
 
 const getCategoryIcon = (categoryName: string): string => {
   const name = categoryName.toLowerCase()

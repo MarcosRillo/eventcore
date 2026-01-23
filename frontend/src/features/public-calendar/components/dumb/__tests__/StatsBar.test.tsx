@@ -5,7 +5,8 @@
  */
 
 import { render, screen } from '@testing-library/react'
-import { StatsBar } from '../StatsBar'
+
+import { StatsBar } from '@/features/public-calendar/components/dumb/StatsBar'
 import { PublicStats } from '@/features/public-calendar/types/public-calendar.types'
 
 describe('StatsBar', () => {

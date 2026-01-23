@@ -4,8 +4,9 @@
  * Tests the quick filter tabs for the event table.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { AdminQuickFilters } from '../AdminQuickFilters';
+import { fireEvent,render, screen } from '@testing-library/react';
+
+import { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters';
 
 describe('AdminQuickFilters', () => {
   const mockOnFilterChange = jest.fn();

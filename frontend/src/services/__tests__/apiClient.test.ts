@@ -1,36 +1,21 @@
+/**
+ * API Client Tests
+ *
+ * Tests for the axios-based API client.
+ * Note: Authentication is now handled via httpOnly cookies (XSS protection).
+ * - No tokens are stored in localStorage
+ * - No manual Authorization headers are injected
+ * - Cookies are sent automatically via withCredentials: true
+ */
+
 import apiClient, {
-  makeApiRequest,
-  setAuthToken,
-  removeAuthToken,
-  getAuthToken,
   isAuthenticated,
-} from '../apiClient'
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: jest.fn((key: string) => store[key] || null),
-    setItem: jest.fn((key: string, value: string) => {
-      store[key] = value
-    }),
-    removeItem: jest.fn((key: string) => {
-      delete store[key]
-    }),
-    clear: jest.fn(() => {
-      store = {}
-    }),
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
-})
+  makeApiRequest,
+} from '@/services/apiClient'
 
 describe('apiClient', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    localStorageMock.clear()
   })
 
   describe('apiClient instance', () => {
@@ -40,100 +25,24 @@ describe('apiClient', () => {
       expect(apiClient.defaults.headers['Accept']).toBe('application/json')
       expect(apiClient.defaults.timeout).toBe(10000)
     })
-  })
 
-  describe('setAuthToken (storeTokens)', () => {
-    const mockRefreshToken = 'mock-refresh-token'
-    const mockExpiresAt = '2025-12-31T23:59:59.000Z'
-
-    it('should set all tokens in localStorage', () => {
-      setAuthToken('test-token-123', mockRefreshToken, mockExpiresAt)
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('authToken', 'test-token-123')
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('refreshToken', mockRefreshToken)
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('tokenExpiresAt', mockExpiresAt)
-    })
-
-    it('should handle empty token', () => {
-      setAuthToken('', mockRefreshToken, mockExpiresAt)
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('authToken', '')
-    })
-
-    it('should handle long tokens', () => {
-      const longToken = 'a'.repeat(1000)
-      setAuthToken(longToken, mockRefreshToken, mockExpiresAt)
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('authToken', longToken)
-    })
-  })
-
-  describe('removeAuthToken', () => {
-    it('should remove authToken from localStorage', () => {
-      removeAuthToken()
-
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('authToken')
-    })
-
-    it('should remove user from localStorage', () => {
-      removeAuthToken()
-
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('user')
-    })
-
-    it('should be idempotent (can be called multiple times)', () => {
-      removeAuthToken()
-      removeAuthToken()
-      removeAuthToken()
-
-      // clearTokens removes 4 items: authToken, refreshToken, tokenExpiresAt, user
-      expect(localStorageMock.removeItem).toHaveBeenCalledTimes(12) // 4 calls per removeAuthToken
-    })
-  })
-
-  describe('getAuthToken', () => {
-    it('should return token from localStorage', () => {
-      localStorageMock.getItem.mockReturnValue('stored-token')
-
-      const result = getAuthToken()
-
-      expect(localStorageMock.getItem).toHaveBeenCalledWith('authToken')
-      expect(result).toBe('stored-token')
-    })
-
-    it('should return null when no token exists', () => {
-      localStorageMock.getItem.mockReturnValue(null)
-
-      const result = getAuthToken()
-
-      expect(result).toBeNull()
+    it('should have withCredentials enabled for cookie-based auth', () => {
+      expect(apiClient.defaults.withCredentials).toBe(true)
     })
   })
 
   describe('isAuthenticated', () => {
-    it('should return true when token exists', () => {
-      localStorageMock.getItem.mockReturnValue('valid-token')
-
+    it('should always return false (cannot read httpOnly cookies from JS)', () => {
+      // With httpOnly cookies, JavaScript cannot read auth state
+      // Real auth state comes from AuthContext via API calls
       const result = isAuthenticated()
-
-      expect(result).toBe(true)
-    })
-
-    it('should return false when no token exists', () => {
-      localStorageMock.getItem.mockReturnValue(null)
-
-      const result = isAuthenticated()
-
       expect(result).toBe(false)
     })
 
-    it('should return true for any non-null token', () => {
-      localStorageMock.getItem.mockReturnValue('')
-
+    it('should return false regardless of any localStorage state', () => {
+      // Even if something were in localStorage, we don't use it
       const result = isAuthenticated()
-
-      // Empty string is still truthy for existence check
-      expect(result).toBe(true)
+      expect(result).toBe(false)
     })
   })
 
@@ -155,7 +64,7 @@ describe('apiClient', () => {
       expect(result.url).toBe('/api/v1/test-endpoint')
     })
 
-    it('should not add prefix if URL already starts with /api', async () => {
+    it('should not add prefix if URL already starts with /api/v1', async () => {
       const requestConfig = {
         url: '/api/v1/existing',
         headers: {},
@@ -171,9 +80,7 @@ describe('apiClient', () => {
       expect(result.url).toBe('/api/v1/existing')
     })
 
-    it('should add Authorization header when token exists', async () => {
-      localStorageMock.getItem.mockReturnValue('my-auth-token')
-
+    it('should NOT add Authorization header (handled via httpOnly cookies)', async () => {
       const requestConfig = {
         url: '/test',
         headers: {} as Record<string, string>,
@@ -185,10 +92,12 @@ describe('apiClient', () => {
       const requestInterceptor = interceptors.handlers[0].fulfilled
 
       const result = requestInterceptor(requestConfig) as {
-        headers: { Authorization: string }
+        headers: { Authorization?: string }
       }
 
-      expect(result.headers.Authorization).toBe('Bearer my-auth-token')
+      // With httpOnly cookies, we don't inject Authorization headers
+      // The cookie is sent automatically by the browser
+      expect(result.headers.Authorization).toBeUndefined()
     })
   })
 

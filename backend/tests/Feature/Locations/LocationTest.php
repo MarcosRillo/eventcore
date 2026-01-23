@@ -2,14 +2,16 @@
 
 namespace Tests\Feature\Locations;
 
-use Tests\TestCase;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Events\EventTestCase;
 
-class LocationTest extends TestCase
+class LocationTest extends EventTestCase
 {
     use RefreshDatabase;
+
+    protected $organization;
 
     /**
      * Setup the test environment.
@@ -25,14 +27,14 @@ class LocationTest extends TestCase
     }
 
     /**
-     * Authenticate a user for testing protected endpoints.
+     * Override to add organization attachment for location tests
      */
-    protected function authenticateUser(): User
+    protected function authenticateUser(string $role = 'entity_admin'): User
     {
-        $user = User::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $user->organizations()->attach($organization->id);
-        $this->actingAs($user);
+        $user = parent::authenticateUser($role);
+        $this->organization = \App\Models\Organization::factory()->create();
+        $user->organizations()->attach($this->organization->id);
+
         return $user;
     }
 
@@ -54,11 +56,11 @@ class LocationTest extends TestCase
 
         // Assert: Verify Laravel Resource Collection pagination structure
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data',
-                     'meta' => ['current_page', 'last_page', 'per_page', 'total'],
-                     'links'
-                 ]);
+            ->assertJsonStructure([
+                'data',
+                'meta' => ['current_page', 'last_page', 'per_page', 'total'],
+                'links',
+            ]);
 
         // Assert: At least some locations exist
         $this->assertGreaterThan(0, count($response->json('data')));
@@ -98,7 +100,10 @@ class LocationTest extends TestCase
     {
         // Arrange: Authenticate and create location
         $this->authenticateUser();
-        $location = Location::factory()->create(['name' => 'Original Location']);
+        $location = Location::factory()->create([
+            'entity_id' => $this->organization->id,
+            'name' => 'Original Location',
+        ]);
 
         // Act: Update location
         $response = $this->putJson("/api/v1/locations/{$location->id}", [
@@ -120,7 +125,9 @@ class LocationTest extends TestCase
     {
         // Arrange: Authenticate and create location
         $this->authenticateUser();
-        $location = Location::factory()->create();
+        $location = Location::factory()->create([
+            'entity_id' => $this->organization->id,
+        ]);
 
         // Act: Delete location
         $response = $this->deleteJson("/api/v1/locations/{$location->id}");
@@ -145,13 +152,13 @@ class LocationTest extends TestCase
         // Create active locations
         Location::factory()->count(3)->create([
             'entity_id' => $organization->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Create inactive locations (should not be returned)
         Location::factory()->count(2)->create([
             'entity_id' => $organization->id,
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         // Act: Get active locations
@@ -159,7 +166,7 @@ class LocationTest extends TestCase
 
         // Assert: Only active locations returned
         $response->assertStatus(200)
-                 ->assertJsonStructure(['success', 'message', 'data']);
+            ->assertJsonStructure(['success', 'message', 'data']);
 
         // Assert: At least some active locations exist
         $this->assertGreaterThan(0, count($response->json('data')));
@@ -374,7 +381,7 @@ class LocationTest extends TestCase
 
         // Assert: Validation error
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['name']);
+            ->assertJsonValidationErrors(['name']);
     }
 
     /**
@@ -393,7 +400,7 @@ class LocationTest extends TestCase
 
         // Assert: Validation error
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['address']);
+            ->assertJsonValidationErrors(['address']);
     }
 
     /**
@@ -412,7 +419,7 @@ class LocationTest extends TestCase
 
         // Assert: Validation error
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['city']);
+            ->assertJsonValidationErrors(['city']);
     }
 
     /**
@@ -446,7 +453,9 @@ class LocationTest extends TestCase
     {
         // Arrange: Authenticate and create location
         $this->authenticateUser();
-        $location = Location::factory()->create();
+        $location = Location::factory()->create([
+            'entity_id' => $this->organization->id,
+        ]);
 
         // Act: Update with valid data
         $response = $this->putJson("/api/v1/locations/{$location->id}", [

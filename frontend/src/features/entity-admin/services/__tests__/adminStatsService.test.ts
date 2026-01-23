@@ -5,9 +5,9 @@
  * Following TDD: RED phase - these tests should fail initially.
  */
 
-import { adminStatsService } from '../adminStatsService';
-import apiClient from '@/services/apiClient';
+import { adminStatsService } from '@/features/entity-admin/services/adminStatsService';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';
+import apiClient from '@/services/apiClient';
 
 // Mock the API client
 jest.mock('@/services/apiClient');

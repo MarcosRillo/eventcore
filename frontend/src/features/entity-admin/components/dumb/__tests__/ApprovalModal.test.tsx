@@ -1,7 +1,8 @@
+import { fireEvent,render, screen } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
-import { ApprovalModal, ApprovalFormData, ApprovalActionOption } from '../ApprovalModal'
-import { Event, EventStatus, EventStatusObject, EVENT_STATUS } from '@/types/event.types'
+
+import { ApprovalActionOption,ApprovalFormData, ApprovalModal } from '@/features/entity-admin/components/dumb/ApprovalModal'
+import { Event, EVENT_STATUS,EventStatus, EventStatusObject } from '@/types/event.types'
 
 interface MockModalProps {
   isOpen: boolean

@@ -4,9 +4,10 @@
  * Tests filter inputs, expandable sections, and filter management.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
-import { EventFiltersBar } from '../EventFiltersBar'
-import { EventFilters, EVENT_TYPE } from '@/types/event.types'
+import { fireEvent,render, screen } from '@testing-library/react'
+
+import { EventFiltersBar } from '@/features/events/components/EventFiltersBar'
+import { EVENT_TYPE,EventFilters } from '@/types/event.types'
 
 // Mock UI components
 jest.mock('@/components/ui', () => ({

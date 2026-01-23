@@ -11,6 +11,11 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.params
+ */
 export default async function LegacyEditEventPage({ params }: PageProps) {
   const { id } = await params
   redirect(`/organizer/${id}/edit`)

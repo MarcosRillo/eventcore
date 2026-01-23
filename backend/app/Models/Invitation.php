@@ -71,7 +71,7 @@ class Invitation extends Model
      */
     public function isValid(): bool
     {
-        return !$this->isExpired() && !$this->isAccepted();
+        return ! $this->isExpired() && ! $this->isAccepted();
     }
 
     /**
@@ -88,7 +88,7 @@ class Invitation extends Model
     public function scopeValid($query)
     {
         return $query->whereNull('accepted_at')
-                     ->where('expires_at', '>', now());
+            ->where('expires_at', '>', now());
     }
 
     /**

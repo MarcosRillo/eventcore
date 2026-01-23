@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import apiClient from '@/services/apiClient';
-import { Event } from '@/types/event.types';
+
 import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage';
+import publicApiClient from '@/services/publicApiClient';
+import { Event } from '@/types/event.types';
 
 interface EventPageProps {
   params: Promise<{
@@ -10,12 +11,17 @@ interface EventPageProps {
   }>;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.params
+ */
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   try {
     // Try to get the event by ID
     const { id } = await params;
     const eventId = parseInt(id) || id;
-    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
+    const response = await publicApiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data.data;
 
     const eventUrl = `/calendar/${id}`;
@@ -69,12 +75,17 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   }
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.params
+ */
 export default async function EventPage({ params }: EventPageProps) {
   try {
     // Try to get the event by ID
     const { id } = await params;
     const eventId = parseInt(id) || id;
-    const response = await apiClient.get<{data: Event}>(`/public/events/${eventId}`);
+    const response = await publicApiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data.data;
 
     return <EventDetailPage event={event} />;

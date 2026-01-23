@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\EventType;
 use App\Models\EventSubtype;
+use App\Models\EventType;
 use App\Models\Organization;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -25,8 +25,9 @@ class EventTypeSeeder extends Seeder
         // Get the main tourism entity
         $enteTurismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
 
-        if (!$enteTurismo) {
+        if (! $enteTurismo) {
             $this->command->warn('Ente de Turismo not found. Skipping EventType seeding.');
+
             return;
         }
 

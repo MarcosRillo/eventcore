@@ -5,8 +5,9 @@
  * Dumb component - receives history data via props.
  */
 
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+
 import type { ApprovalHistoryEntry } from '@/types/event.types';
 
 interface ApprovalHistoryTimelineProps {
@@ -16,6 +17,7 @@ interface ApprovalHistoryTimelineProps {
 
 /**
  * Format timestamp for display
+ * @param timestamp
  */
 const formatTimestamp = (timestamp: string): string => {
   const date = new Date(timestamp);
@@ -83,9 +85,9 @@ export const ApprovalHistoryTimeline = ({
           <span className="text-neutral-400">({history.length})</span>
         </span>
         {isExpanded ? (
-          <ChevronUpIcon className="w-4 h-4" />
+          <ChevronUp className="w-4 h-4" />
         ) : (
-          <ChevronDownIcon className="w-4 h-4" />
+          <ChevronDown className="w-4 h-4" />
         )}
       </button>
 

@@ -5,13 +5,14 @@
  * Public form for organizations to request registration
  */
 
-import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useEffect,useState } from 'react'
+
 import { Button, Input } from '@/components/ui'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
-} from '../../types/registration-request.types'
+} from '@/features/registration-requests/types/registration-request.types'
 
 interface RegistrationRequestFormProps {
   formData: RegistrationRequestFormData
@@ -36,6 +37,15 @@ const ORGANIZATION_SECTORS = [
   { value: 'other', label: 'Otro' },
 ]
 
+/**
+ *
+ * @param root0
+ * @param root0.formData
+ * @param root0.formErrors
+ * @param root0.submitting
+ * @param root0.onFieldChange
+ * @param root0.onSubmit
+ */
 export function RegistrationRequestForm({
   formData,
   formErrors,
