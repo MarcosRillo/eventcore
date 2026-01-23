@@ -9,6 +9,7 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "test": "jest --passWithNoTests",
+    "test:ci": "jest --passWithNoTests --ci",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
