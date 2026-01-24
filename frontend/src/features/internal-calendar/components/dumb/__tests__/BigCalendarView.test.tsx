@@ -12,12 +12,15 @@ import type { BigCalendarEvent } from '@/features/internal-calendar/types/intern
 
 // Mock react-big-calendar to avoid complex calendar rendering in tests
 jest.mock('react-big-calendar', () => ({
-  Calendar: ({ onSelectEvent, events, components, defaultView, views }: {
+  Calendar: ({ onSelectEvent, events, components, view, views, date, onNavigate, onView }: {
     onSelectEvent: (event: BigCalendarEvent) => void
     events: BigCalendarEvent[]
     components?: { toolbar?: React.ComponentType }
-    defaultView?: string
+    view?: string
     views?: string[]
+    date?: Date
+    onNavigate?: (date: Date) => void
+    onView?: (view: string) => void
   }) => {
     const Toolbar = components?.toolbar
     const mockLocalizer = {
@@ -29,12 +32,12 @@ jest.mock('react-big-calendar', () => ({
       messages: {},
     }
     const toolbarProps = {
-      date: new Date('2025-12-10T12:00:00.000Z'),
-      view: defaultView || 'month',
+      date: date || new Date('2025-12-10T12:00:00.000Z'),
+      view: view || 'month',
       views: views || ['month', 'week', 'day', 'agenda'],
       label: 'December 2025',
-      onNavigate: jest.fn(),
-      onView: jest.fn(),
+      onNavigate: onNavigate || jest.fn(),
+      onView: onView || jest.fn(),
       localizer: mockLocalizer,
     }
 
@@ -113,6 +116,10 @@ describe('BigCalendarView', () => {
     events: mockEvents,
     loading: false,
     onSelectEvent: mockOnSelectEvent,
+    currentDate: new Date('2025-12-10'),
+    currentView: 'month' as const,
+    onNavigate: jest.fn(),
+    onView: jest.fn(),
   }
 
   beforeEach(() => {
@@ -168,7 +175,7 @@ describe('BigCalendarView', () => {
     render(<BigCalendarView {...defaultProps} loading={true} />)
 
     // Assert
-    expect(screen.getByText(/loading/i)).toBeInTheDocument()
+    expect(screen.getByText(/cargando/i)).toBeInTheDocument()
     expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.queryByTestId('big-calendar')).not.toBeInTheDocument()
   })
@@ -178,7 +185,7 @@ describe('BigCalendarView', () => {
     render(<BigCalendarView {...defaultProps} events={[]} />)
 
     // Assert
-    expect(screen.getByText(/no events found/i)).toBeInTheDocument()
+    expect(screen.getByText(/no se encontraron eventos/i)).toBeInTheDocument()
     expect(screen.getByTestId('big-calendar')).toBeInTheDocument() // Calendar still renders
   })
 
