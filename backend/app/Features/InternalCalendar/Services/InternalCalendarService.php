@@ -29,9 +29,8 @@ class InternalCalendarService
     /**
      * Get internal calendar events with optional filters.
      *
-     * Applies tenant scoping based on user role:
-     * - entity_admin/entity_staff: See all events (tenant scope disabled)
-     * - organizer_admin: See only their organization's events (tenant scope active)
+     * For the planning view, all privileged roles can see all events across organizations.
+     * This enables date coordination and conflict detection.
      *
      * @param  array  $filters  Available filters: status, start_date, end_date, event_type_id
      * @return Collection<int, Event> Collection of events with eager-loaded relationships
@@ -44,10 +43,10 @@ class InternalCalendarService
             ->with(['status', 'eventType', 'eventSubtype', 'locations', 'organization'])
             ->orderBy('start_date', 'asc');
 
-        // For entity_admin and entity_staff: show all events (disable tenant scope)
-        // For organizers: TenantScope automatically filters to their organization
+        // For planning view: all authenticated users with these roles can see all events
+        // This enables organizer_admin to view all organizations' events for date coordination
         $userRoleCode = $user?->role?->role_code;
-        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff'])) {
+        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff', 'organizer_admin'])) {
             $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
         }
 
@@ -60,9 +59,8 @@ class InternalCalendarService
     /**
      * Get a single event by ID with role-based access control.
      *
-     * Applies same tenant scoping as getInternalCalendarEvents:
-     * - entity_admin/entity_staff/platform_admin: Can view any event
-     * - organizer_admin: Can only view their organization's events
+     * For the planning view, all privileged roles can view any event's details
+     * across organizations for coordination purposes.
      *
      * @param  int  $id  Event ID
      * @return Event|null Event if found and accessible, null otherwise
@@ -75,10 +73,10 @@ class InternalCalendarService
             ->with(['status', 'eventType', 'eventSubtype', 'locations', 'organization'])
             ->where('id', $id);
 
-        // For entity_admin and entity_staff: show all events (disable tenant scope)
-        // For organizers: TenantScope automatically filters to their organization
+        // For planning view: all authenticated users with these roles can see all events
+        // This enables organizer_admin to view any organization's event details
         $userRoleCode = $user?->role?->role_code;
-        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff'])) {
+        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff', 'organizer_admin'])) {
             $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
         }
 

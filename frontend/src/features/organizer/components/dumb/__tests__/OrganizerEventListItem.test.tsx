@@ -53,22 +53,26 @@ describe('OrganizerEventListItem', () => {
       expect(screen.getByText('Test Event')).toBeInTheDocument()
     })
 
-    test('should render event date', () => {
+    test('should render event date with icon', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText(/Date:/)).toBeInTheDocument()
+      // Date is now displayed with locale format and icon, no label
+      // Timezone may shift the day, so we check for June 2025
+      expect(screen.getByText(/\d+\/6\/2025/)).toBeInTheDocument()
     })
 
-    test('should render location name', () => {
+    test('should render location name with icon', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('Location: Location 1')).toBeInTheDocument()
+      // Location is now displayed without label, just the value
+      expect(screen.getByText('Location 1')).toBeInTheDocument()
     })
 
-    test('should render event type name', () => {
+    test('should render event type name with icon', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('Type: Category 1')).toBeInTheDocument()
+      // Event type is now displayed without label, just the value
+      expect(screen.getByText('Category 1')).toBeInTheDocument()
     })
 
     test('should render status badge', () => {
@@ -146,17 +150,16 @@ describe('OrganizerEventListItem', () => {
       const event = { ...baseEvent, start_date: '2025-12-25' }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      // Should show December 25 - check for date content
-      const dateText = screen.getByText(/Date:/).textContent
-      expect(dateText).toContain('2025')
+      // Should show December 2025 in locale format (timezone may shift the day)
+      expect(screen.getByText(/\d+\/12\/2025/)).toBeInTheDocument()
     })
 
-    test('should show N/A when no date is available', () => {
+    test('should show Sin fecha when no date is available', () => {
       // Type assertion needed for edge case testing - component handles missing dates gracefully
       const event = { ...baseEvent, start_date: '' } as OrganizerEvent
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.getByText('Date: N/A')).toBeInTheDocument()
+      expect(screen.getByText('Sin fecha')).toBeInTheDocument()
     })
   })
 
@@ -164,14 +167,14 @@ describe('OrganizerEventListItem', () => {
     test('should use locations array when available', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('Location: Location 1')).toBeInTheDocument()
+      expect(screen.getByText('Location 1')).toBeInTheDocument()
     })
 
     test('should show N/A when locations array is empty', () => {
       const event = { ...baseEvent, locations: [] }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.getByText('Location: N/A')).toBeInTheDocument()
+      expect(screen.getByText('N/A')).toBeInTheDocument()
     })
 
     test('should show N/A when no location is available', () => {
@@ -179,7 +182,7 @@ describe('OrganizerEventListItem', () => {
       const event = { ...baseEvent, locations: undefined } as unknown as OrganizerEvent
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.getByText('Location: N/A')).toBeInTheDocument()
+      expect(screen.getByText('N/A')).toBeInTheDocument()
     })
   })
 
@@ -187,7 +190,7 @@ describe('OrganizerEventListItem', () => {
     test('should render event type when available', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('Type: Category 1')).toBeInTheDocument()
+      expect(screen.getByText('Category 1')).toBeInTheDocument()
     })
 
     test('should show N/A when event type is not available', () => {
@@ -195,7 +198,8 @@ describe('OrganizerEventListItem', () => {
       const event = { ...baseEvent, event_type: undefined } as unknown as OrganizerEvent
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.getByText('Type: N/A')).toBeInTheDocument()
+      // Multiple N/A may appear (for location and type), check that at least one exists
+      expect(screen.getAllByText('N/A').length).toBeGreaterThanOrEqual(1)
     })
   })
 

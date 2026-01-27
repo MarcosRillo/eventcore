@@ -10,21 +10,44 @@ jest.mock('next/navigation', () => ({
   })
 }))
 
-// Mock dumb components
-jest.mock('@/features/landing/components/dumb', () => ({
-  HeroSection: () => <div data-testid="hero-section">Hero Section</div>,
+// Mock next/dynamic to return components synchronously
+jest.mock('next/dynamic', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react')
+  return function dynamic(importFn: () => Promise<{ default: React.ComponentType }>) {
+    // Determine which component to return based on the import path
+    const importStr = importFn.toString()
+    if (importStr.includes('CategoriesSection')) {
+      return function MockCategoriesSection({ loading, eventTypes }: { loading: boolean; eventTypes: unknown[] }) {
+        return React.createElement('div', { 'data-testid': 'categories-section' },
+          `Event Types: ${loading ? 'Loading' : eventTypes.length}`
+        )
+      }
+    }
+    if (importStr.includes('OrganizersSection')) {
+      return function MockOrganizersSection() {
+        return React.createElement('div', { 'data-testid': 'organizers-section' }, 'Organizers Section')
+      }
+    }
+    // Fallback: return a placeholder
+    return function MockComponent() {
+      return React.createElement('div', null, 'Dynamic Component')
+    }
+  }
+})
+
+// Mock HeroSection (direct import)
+jest.mock('@/features/landing/components/dumb/HeroSection', () => ({
+  HeroSection: () => <div data-testid="hero-section">Hero Section</div>
+}))
+
+// Mock FeaturedEventsSection (direct import)
+jest.mock('@/features/landing/components/dumb/FeaturedEventsSection', () => ({
   FeaturedEventsSection: ({ loading, events }: { loading: boolean; events: unknown[] }) => (
     <div data-testid="featured-section">
       Featured: {loading ? 'Loading' : events.length}
     </div>
-  ),
-  CategoriesSection: ({ loading, eventTypes }: { loading: boolean; eventTypes: unknown[] }) => (
-    <div data-testid="categories-section">
-      Event Types: {loading ? 'Loading' : eventTypes.length}
-    </div>
-  ),
-  OrganizersSection: () => <div data-testid="organizers-section">Organizers Section</div>,
-  Footer: () => <div data-testid="footer">Footer</div>
+  )
 }))
 
 // Helper to create mock data

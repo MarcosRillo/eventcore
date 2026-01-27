@@ -26,6 +26,14 @@ export type CalendarToolbarProps = ToolbarProps<object, object>
  * @param props.views
  * @returns React component
  */
+// Spanish labels for view names
+const viewLabels: Record<string, string> = {
+  month: 'Mes',
+  week: 'Semana',
+  day: 'Día',
+  agenda: 'Agenda',
+}
+
 export function CalendarToolbar({
   label,
   onNavigate,
@@ -45,15 +53,15 @@ export function CalendarToolbar({
           type="button"
           onClick={() => onNavigate('TODAY')}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Go to today"
+          aria-label="Ir a hoy"
         >
-          Today
+          Hoy
         </button>
         <button
           type="button"
           onClick={() => onNavigate('PREV')}
           className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Go to previous"
+          aria-label="Ir al anterior"
         >
           ‹
         </button>
@@ -61,7 +69,7 @@ export function CalendarToolbar({
           type="button"
           onClick={() => onNavigate('NEXT')}
           className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Go to next"
+          aria-label="Ir al siguiente"
         >
           ›
         </button>
@@ -82,10 +90,10 @@ export function CalendarToolbar({
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }`}
-            aria-label={`View ${viewName}`}
+            aria-label={`Ver ${viewLabels[viewName] || viewName}`}
             aria-pressed={view === viewName}
           >
-            {viewName.charAt(0).toUpperCase() + viewName.slice(1)}
+            {viewLabels[viewName] || viewName}
           </button>
         )) : null}
       </div>

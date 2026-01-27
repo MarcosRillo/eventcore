@@ -4,6 +4,15 @@
  * Main dashboard UI integrating stats, filters, and event list.
  */
 
+import {
+  AlertTriangle,
+  Calendar,
+  CalendarCheck,
+  CalendarClock,
+  CheckCircle,
+  Clock,
+  Globe
+} from 'lucide-react'
 import Link from 'next/link'
 
 import Button from '@/components/ui/Button'
@@ -14,6 +23,7 @@ import { EventViewTabs } from '@/features/organizer/components/dumb/EventViewTab
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import { StatCard } from '@/features/organizer-dashboard/components/dumb/StatCard'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
 
 interface OrganizerDashboardProps {
@@ -67,57 +77,51 @@ export const OrganizerDashboard = ({
       {/* Stats Section */}
       {stats && (
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mb-8"
+          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8"
           data-testid="stats-grid"
         >
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Total Eventos</h3>
-              <p className="text-3xl font-bold text-neutral-900 mt-2">{stats.total_events}</p>
-            </div>
-          </div>
-
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Próximos</h3>
-              <p className="text-3xl font-bold text-primary-600 mt-2">{stats.upcoming_events}</p>
-            </div>
-          </div>
-
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Pasados</h3>
-              <p className="text-3xl font-bold text-neutral-600 mt-2">{stats.past_events}</p>
-            </div>
-          </div>
-
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Pendientes</h3>
-              <p className="text-3xl font-bold text-warning-600 mt-2">{stats.pending_internal}</p>
-            </div>
-          </div>
-
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Aprobados</h3>
-              <p className="text-3xl font-bold text-success-600 mt-2">{stats.approved_internal}</p>
-            </div>
-          </div>
-
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Publicados</h3>
-              <p className="text-3xl font-bold text-info-600 mt-2">{stats.published}</p>
-            </div>
-          </div>
-
-          <div role="article">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-neutral-500">Requiere Cambios</h3>
-              <p className="text-3xl font-bold text-error-600 mt-2">{stats.requires_changes}</p>
-            </div>
-          </div>
+          <StatCard
+            icon={Calendar}
+            value={stats.total_events}
+            label="Total Eventos"
+            variant="default"
+          />
+          <StatCard
+            icon={CalendarClock}
+            value={stats.upcoming_events}
+            label="Próximos"
+            variant="primary"
+          />
+          <StatCard
+            icon={CalendarCheck}
+            value={stats.past_events}
+            label="Pasados"
+            variant="default"
+          />
+          <StatCard
+            icon={Clock}
+            value={stats.pending_internal}
+            label="Pendientes"
+            variant="warning"
+          />
+          <StatCard
+            icon={CheckCircle}
+            value={stats.approved_internal}
+            label="Aprobados"
+            variant="success"
+          />
+          <StatCard
+            icon={Globe}
+            value={stats.published}
+            label="Publicados"
+            variant="info"
+          />
+          <StatCard
+            icon={AlertTriangle}
+            value={stats.requires_changes}
+            label="Requiere Cambios"
+            variant="error"
+          />
         </div>
       )}
 

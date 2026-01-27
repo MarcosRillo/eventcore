@@ -1,3 +1,5 @@
+import { Calendar, MapPin, Tag } from 'lucide-react'
+
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
@@ -45,22 +47,31 @@ export const OrganizerEventListItem = ({
   const eventSubtypeName = event.event_subtype?.name
 
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white border rounded-lg hover:shadow-md transition-shadow gap-4">
+    <article className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg hover:border-neutral-300 hover:shadow-md transition-all duration-150 gap-4">
       <div className="flex-1">
-        <h3 className="text-lg font-semibold text-neutral-900">{event.title}</h3>
-        <div className="mt-1 space-y-1 text-sm text-neutral-600">
-          <p>Date: {eventDate ? new Date(eventDate).toLocaleDateString() : 'N/A'}</p>
-          <p>Location: {locationName}</p>
-          <p>
-            Type: {eventTypeName}
-            {eventSubtypeName && ` - ${eventSubtypeName}`}
-          </p>
+        <h3 className="text-base font-semibold text-neutral-900">{event.title}</h3>
+        <div className="mt-2 space-y-1.5">
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <Calendar className="w-4 h-4 text-neutral-400 shrink-0" />
+            <span>{eventDate ? new Date(eventDate).toLocaleDateString('es-AR') : 'Sin fecha'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
+            <span>{locationName}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <Tag className="w-4 h-4 text-neutral-400 shrink-0" />
+            <span>
+              {eventTypeName}
+              {eventSubtypeName && ` - ${eventSubtypeName}`}
+            </span>
+          </div>
         </div>
         <Badge
           variant={statusBadgeVariant[statusCode as keyof typeof statusBadgeVariant] || 'default'}
           size="sm"
           dot
-          className="mt-2"
+          className="mt-3"
         >
           {statusDisplay}
         </Badge>
@@ -92,6 +103,6 @@ export const OrganizerEventListItem = ({
           onSuccess={onSuccess}
         />
       </div>
-    </div>
+    </article>
   )
 }

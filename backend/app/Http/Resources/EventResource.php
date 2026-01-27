@@ -160,29 +160,37 @@ class EventResource extends JsonResource
                 'notes' => $date->notes,
             ])),
 
-            // Foreign key IDs (for forms)
-            'status_id' => $this->status_id,
-            'format_id' => $this->format_id,
-            'entity_id' => $this->entity_id,
-            'organization_id' => $this->organization_id,
+            // Foreign key IDs for public use (type/subtype)
             'event_type_id' => $this->event_type_id,
             'event_subtype_id' => $this->event_subtype_id,
-            'subtype_id' => $this->subtype_id,
-            'origin_id' => $this->origin_id,
-            'theme_id' => $this->theme_id,
-            'frequency_id' => $this->frequency_id,
-            'rotation_type_id' => $this->rotation_type_id,
-            'producer_id' => $this->producer_id,
 
-            // Approval workflow
-            'approval_comments' => $this->approval_comments,
-            'approval_history' => $this->approval_history,
-            'created_by' => $this->created_by,
-            'approved_by' => $this->approved_by,
-            'approved_at' => $this->approved_at?->toISOString(),
+            // Administrative fields - only for authenticated admin users
+            $this->mergeWhen(
+                $this->isAdminUser($request),
+                [
+                    // Foreign key IDs (for admin forms)
+                    'status_id' => $this->status_id,
+                    'format_id' => $this->format_id,
+                    'entity_id' => $this->entity_id,
+                    'organization_id' => $this->organization_id,
+                    'subtype_id' => $this->subtype_id,
+                    'origin_id' => $this->origin_id,
+                    'theme_id' => $this->theme_id,
+                    'frequency_id' => $this->frequency_id,
+                    'rotation_type_id' => $this->rotation_type_id,
+                    'producer_id' => $this->producer_id,
+
+                    // Approval workflow
+                    'approval_comments' => $this->approval_comments,
+                    'approval_history' => $this->approval_history,
+                    'created_by' => $this->created_by,
+                    'approved_by' => $this->approved_by,
+                    'approved_at' => $this->approved_at?->toISOString(),
+                ],
+            ),
+
+            // Public timestamps
             'published_at' => $this->published_at?->toISOString(),
-
-            // Timestamps
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];
@@ -190,16 +198,38 @@ class EventResource extends JsonResource
 
     /**
      * Get additional data that should be returned with the resource array.
+     * Only includes metadata for authenticated admin users.
      *
      * @return array<string, mixed>
      */
     public function with(Request $request): array
     {
+        if (! $this->isAdminUser($request)) {
+            return [];
+        }
+
         return [
             'meta' => [
                 'available_statuses' => \App\Models\EventStatus::all(['id', 'status_name', 'status_code']),
                 'available_formats' => \App\Models\EventFormat::all(['id', 'format_name', 'format_code']),
             ],
         ];
+    }
+
+    /**
+     * Check if the current user has admin privileges.
+     */
+    private function isAdminUser(Request $request): bool
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->isPlatformAdmin()
+            || $user->isEntityAdmin()
+            || $user->isEntityStaff()
+            || $user->isOrganizerAdmin();
     }
 }

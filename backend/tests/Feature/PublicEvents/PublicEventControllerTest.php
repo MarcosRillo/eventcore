@@ -862,9 +862,13 @@ class PublicEventControllerTest extends TestCase
                 'description',
                 'start_date',
                 'end_date',
-                'status_id',
             ],
         ]);
+        // Verify sensitive admin fields are NOT exposed to public
+        $response->assertJsonMissing(['approval_comments', 'approval_history']);
+        $this->assertArrayNotHasKey('status_id', $response->json('data'));
+        $this->assertArrayNotHasKey('created_by', $response->json('data'));
+        $this->assertArrayNotHasKey('approved_by', $response->json('data'));
         $response->assertJsonFragment([
             'id' => $event->id,
             'title' => 'Festival Cultural 2025',

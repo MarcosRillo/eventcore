@@ -34,7 +34,7 @@ export const FeaturedEventsSection = ({
         )}
 
         {/* Events Grid */}
-        {!loading && events.length > 0 && (
+        {!loading && events.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {events.slice(0, 6).map(event => (
@@ -53,7 +53,7 @@ export const FeaturedEventsSection = ({
               </Button>
             </div>
           </>
-        )}
+        ) : null}
 
         {/* Empty State */}
         {!loading && events.length === 0 && (

@@ -13,7 +13,7 @@ import '@/features/internal-calendar/styles/calendar.css'
 
 import { format, getDay,parse, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Calendar, dateFnsLocalizer, type ToolbarProps,Views } from 'react-big-calendar'
+import { Calendar, dateFnsLocalizer, type ToolbarProps, type View, Views } from 'react-big-calendar'
 
 import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
@@ -28,6 +28,23 @@ const localizer = dateFnsLocalizer({
   locales: { es },
 })
 
+// Spanish messages for react-big-calendar
+const messages = {
+  allDay: 'Todo el día',
+  previous: 'Anterior',
+  next: 'Siguiente',
+  today: 'Hoy',
+  month: 'Mes',
+  week: 'Semana',
+  day: 'Día',
+  agenda: 'Agenda',
+  date: 'Fecha',
+  time: 'Hora',
+  event: 'Evento',
+  noEventsInRange: 'No hay eventos en este rango',
+  showMore: (total: number) => `+ Ver más (${total})`,
+}
+
 /**
  * BigCalendarView Props
  */
@@ -35,6 +52,10 @@ export interface BigCalendarViewProps {
   events: BigCalendarEvent[]
   loading: boolean
   onSelectEvent: (event: BigCalendarEvent) => void
+  currentDate: Date
+  currentView: View
+  onNavigate: (date: Date) => void
+  onView: (view: View) => void
 }
 
 /**
@@ -52,6 +73,10 @@ export function BigCalendarView({
   events,
   loading,
   onSelectEvent,
+  currentDate,
+  currentView,
+  onNavigate,
+  onView,
 }: BigCalendarViewProps) {
   // Show loading state
   if (loading) {
@@ -63,7 +88,7 @@ export function BigCalendarView({
       >
         <div className="text-center">
           <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="mt-2 text-gray-600">Loading events...</p>
+          <p className="mt-2 text-gray-600">Cargando eventos...</p>
         </div>
       </div>
     )
@@ -90,20 +115,25 @@ export function BigCalendarView({
       {events.length === 0 && (
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <p className="text-sm text-blue-700">
-            No events found for the selected filters.
+            No se encontraron eventos para los filtros seleccionados.
           </p>
         </div>
       )}
       <Calendar
         localizer={localizer}
         events={events}
+        messages={messages}
+        culture="es"
         startAccessor="start"
         endAccessor="end"
         style={{ height: '100%' }}
         onSelectEvent={onSelectEvent}
         eventPropGetter={eventStyleGetter}
         views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
-        defaultView={Views.MONTH}
+        date={currentDate}
+        view={currentView}
+        onNavigate={onNavigate}
+        onView={onView}
         components={{
           toolbar: CalendarToolbar as React.ComponentType<ToolbarProps<BigCalendarEvent, object>>,
         }}

@@ -92,7 +92,7 @@ export const PublicHeader = () => {
           <button
             type="button"
             className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMobileMenuOpen(prev => !prev)}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
             aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
@@ -126,7 +126,7 @@ export const PublicHeader = () => {
                       ? 'text-primary-600 bg-primary-50'
                       : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
                   }`}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setMobileMenuOpen(() => false)}
                 >
                   {link.label}
                 </Link>
@@ -135,14 +135,14 @@ export const PublicHeader = () => {
               <Link
                 href="/register-request"
                 className="px-4 py-3 text-sm font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMobileMenuOpen(() => false)}
               >
                 Registrar Organización
               </Link>
               <Link
                 href="/login"
                 className="mx-4 mt-2 px-4 py-3 text-sm font-medium text-center text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMobileMenuOpen(() => false)}
               >
                 Acceso Organizadores
               </Link>

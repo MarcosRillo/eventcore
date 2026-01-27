@@ -5,15 +5,23 @@
 
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 
-import {
-  CategoriesSection,
-  FeaturedEventsSection,
-  HeroSection,
-  OrganizersSection
-} from '@/features/landing/components/dumb'
+import { FeaturedEventsSection } from '@/features/landing/components/dumb/FeaturedEventsSection'
+import { HeroSection } from '@/features/landing/components/dumb/HeroSection'
 import { EventType,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
+
+// Below-the-fold components - lazy loaded for better initial page load
+const CategoriesSection = dynamic(
+  () => import('@/features/landing/components/dumb/CategoriesSection').then(mod => ({ default: mod.CategoriesSection })),
+  { loading: () => <div className="py-20 bg-white" /> }
+)
+
+const OrganizersSection = dynamic(
+  () => import('@/features/landing/components/dumb/OrganizersSection').then(mod => ({ default: mod.OrganizersSection })),
+  { loading: () => <div className="py-16 bg-primary-600" /> }
+)
 
 interface LandingContainerProps {
   initialFeaturedEvents: PublicEvent[]
