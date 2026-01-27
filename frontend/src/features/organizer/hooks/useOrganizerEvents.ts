@@ -57,17 +57,20 @@ export const useOrganizerEvents = () => {
     })
   }
 
+  // Initial fetch on mount - intentionally runs once
+  // Current state values are accessed via refs to avoid stale closures
   useEffect(() => {
     fetchEvents()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Initial mount fetch only, refs handle current state
   }, [])
 
-  // Effect to refetch when refreshKey changes (triggered by refetch())
+  // Refetch when refreshKey changes (triggered by refetch())
+  // Uses refs to get current filter values without adding them as dependencies
   useEffect(() => {
     if (refreshKey > 0) {
       fetchEvents(currentPageRef.current, statusFilterRef.current, showPastRef.current)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshKey is the only trigger, refs provide current values
   }, [refreshKey])
 
   // Function to force a re-fetch of current page/filter

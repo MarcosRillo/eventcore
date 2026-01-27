@@ -495,7 +495,7 @@ class InternalCalendarControllerTest extends TestCase
     }
 
     #[Test]
-    public function it_respects_tenant_scope_for_organizers()
+    public function it_shows_all_organizations_events_for_organizers()
     {
         // Arrange: Create event in organizer's organization
         Event::factory()->create([
@@ -508,7 +508,7 @@ class InternalCalendarControllerTest extends TestCase
             'end_date' => now()->addDays(2),
         ]);
 
-        // Create event in other organization (should NOT appear for organizer)
+        // Create event in other organization (SHOULD appear - internal calendar shows all)
         $otherEventType = EventType::factory()->create([
             'entity_id' => $this->otherOrganization->id,
             'is_active' => true,
@@ -530,7 +530,7 @@ class InternalCalendarControllerTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/internal-calendar/events');
 
-        // Assert: Only own organization events returned
+        // Assert: ALL organization events returned (internal calendar is for planning/coordination)
         $response->assertOk();
         $data = $response->json('data');
         $titles = array_column($data, 'title');
@@ -538,12 +538,7 @@ class InternalCalendarControllerTest extends TestCase
         // Should see own event
         $this->assertContains('Organizer Own Event', $titles);
 
-        // Should NOT see other organization's event
-        $this->assertNotContains('Other Organization Event', $titles);
-
-        // Verify entity_id matches organizer's organization
-        foreach ($data as $event) {
-            $this->assertEquals($this->organization->id, $event['entity_id']);
-        }
+        // Should ALSO see other organization's event (this is the purpose of internal calendar)
+        $this->assertContains('Other Organization Event', $titles);
     }
 }

@@ -51,6 +51,8 @@ export const usePublicEvents = (
   // Track if this is the initial render (for skipping first fetch when we have initial data)
   const isInitialRender = useRef(true)
   const hasInitialEvents = useRef(!!initialEvents)
+  // Track the latest eventTypeId to prevent race conditions in fetchEventSubtypes
+  const lastEventTypeIdRef = useRef<number | null>(null)
 
   // Initialize state with server-side data if available
   const [events, setEvents] = useState<PublicEvent[]>(initialEvents ?? [])
@@ -100,15 +102,24 @@ export const usePublicEvents = (
   }
 
   const fetchEventSubtypes = async (eventTypeId: number | null): Promise<void> => {
+    // Track the current request to prevent race conditions
+    lastEventTypeIdRef.current = eventTypeId
+
     if (!eventTypeId) {
       setEventSubtypes([])
       return
     }
     try {
       const subtypesRes = await publicEventsService.getEventSubtypes(eventTypeId)
-      setEventSubtypes(subtypesRes.data)
+      // Only update state if this is still the latest request
+      if (lastEventTypeIdRef.current === eventTypeId) {
+        setEventSubtypes(subtypesRes.data)
+      }
     } catch {
-      setEventSubtypes([])
+      // Only clear if this is still the latest request
+      if (lastEventTypeIdRef.current === eventTypeId) {
+        setEventSubtypes([])
+      }
     }
   }
 

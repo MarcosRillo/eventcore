@@ -57,6 +57,8 @@ export interface TableProps<T extends TableDataType = TableDataType> {
   selectedItems?: T[]
   onSelectionChange?: (items: T[]) => void
   getItemId?: (item: T) => string | number
+  /** Accessible caption for screen readers (visually hidden) */
+  caption?: string
 }
 
 const TableSkeleton = ({ columns }: { columns: number }) => (
@@ -96,6 +98,7 @@ export const Table = <T extends TableDataType>({
   selectedItems = [],
   onSelectionChange,
   getItemId,
+  caption,
 }: TableProps<T>) => {
   const visibleColumns = columns.filter(col => col.visible !== false)
 
@@ -173,6 +176,7 @@ export const Table = <T extends TableDataType>({
     <div className={`bg-white rounded-lg border border-neutral-200 overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
         <table className={`min-w-full divide-y divide-neutral-200 ${tableClassName}`}>
+          {caption && <caption className="sr-only">{caption}</caption>}
           <thead className={`bg-neutral-50 ${headerClassName}`}>
             <tr>
               {finalColumns.map((column) => (

@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { View } from 'react-big-calendar'
 
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView'
@@ -50,8 +50,11 @@ export function InternalCalendarContainer({
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [currentView, setCurrentView] = useState<View>('month')
 
-  // Transform events for BigCalendar
-  const bigCalendarEvents = transformToBigCalendarEvents(events)
+  // Memoize transformation - only recalculate when events array changes
+  const bigCalendarEvents = useMemo(
+    () => transformToBigCalendarEvents(events),
+    [events]
+  )
 
   // Event handlers
   const handleSelectEvent = (event: BigCalendarEvent) => {
