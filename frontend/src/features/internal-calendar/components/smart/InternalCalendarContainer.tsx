@@ -9,6 +9,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { View } from 'react-big-calendar'
 
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView'
 import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal'
@@ -46,6 +47,8 @@ export function InternalCalendarContainer({
   const [selectedEvent, setSelectedEvent] = useState<BigCalendarEvent | null>(
     null
   )
+  const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [currentView, setCurrentView] = useState<View>('month')
 
   // Transform events for BigCalendar
   const bigCalendarEvents = transformToBigCalendarEvents(events)
@@ -57,6 +60,14 @@ export function InternalCalendarContainer({
 
   const handleCloseModal = () => {
     setSelectedEvent(null)
+  }
+
+  const handleNavigate = (date: Date) => {
+    setCurrentDate(date)
+  }
+
+  const handleViewChange = (view: View) => {
+    setCurrentView(view)
   }
 
   // Error state
@@ -95,6 +106,10 @@ export function InternalCalendarContainer({
         events={bigCalendarEvents}
         loading={loading}
         onSelectEvent={handleSelectEvent}
+        currentDate={currentDate}
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        onView={handleViewChange}
       />
       <EventDetailModal
         event={selectedEvent}
