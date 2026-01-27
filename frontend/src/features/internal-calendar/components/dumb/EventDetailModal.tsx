@@ -9,6 +9,7 @@
 'use client'
 
 import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 import Modal from '@/components/ui/Modal'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
@@ -42,8 +43,8 @@ export function EventDetailModal({
 
   const { resource } = event
 
-  // Format dates
-  const startDate = format(event.start, 'MMMM dd, yyyy')
+  // Format dates in Spanish
+  const startDate = format(event.start, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })
   const startTime = format(event.start, 'HH:mm')
   const endTime = format(event.end, 'HH:mm')
 
@@ -60,7 +61,7 @@ export function EventDetailModal({
         {/* Date & Time */}
         <div>
           <h3 className="text-sm font-semibold text-gray-900 mb-1">
-            Date & Time
+            Fecha y Hora
           </h3>
           <p className="text-sm text-gray-600">
             {startDate}
@@ -74,7 +75,7 @@ export function EventDetailModal({
         {resource.eventType && (
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-1">
-              Event Type
+              Tipo de Evento
             </h3>
             <div className="flex items-center gap-2">
               <span
@@ -91,14 +92,14 @@ export function EventDetailModal({
         {/* Organization */}
         <div>
           <h3 className="text-sm font-semibold text-gray-900 mb-1">
-            Organization
+            Organización
           </h3>
           <p className="text-sm text-gray-600">{resource.organization.name}</p>
         </div>
 
         {/* Status */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Status</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Estado</h3>
           <p className="text-sm text-gray-600">{resource.status.status_name}</p>
         </div>
 
@@ -106,7 +107,7 @@ export function EventDetailModal({
         {resource.locations && resource.locations.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-1">
-              Location{resource.locations.length > 1 ? 's' : ''}
+              {resource.locations.length > 1 ? 'Ubicaciones' : 'Ubicación'}
             </h3>
             <ul className="space-y-1">
               {resource.locations.map((location) => (

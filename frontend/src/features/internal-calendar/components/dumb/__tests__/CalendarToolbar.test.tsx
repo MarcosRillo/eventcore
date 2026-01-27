@@ -52,10 +52,10 @@ describe('CalendarToolbar', () => {
     render(<CalendarToolbar {...defaultProps} />)
 
     // Assert
-    expect(screen.getByRole('button', { name: 'View month' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'View week' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'View day' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'View agenda' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ver Mes' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ver Semana' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ver Día' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ver Agenda' })).toBeInTheDocument()
   })
 
   it('highlights the current active view button', () => {
@@ -63,14 +63,14 @@ describe('CalendarToolbar', () => {
     const { rerender } = render(<CalendarToolbar {...defaultProps} view="month" />)
 
     // Assert - Month button should have active styling
-    const monthButton = screen.getByRole('button', { name: /month/i })
+    const monthButton = screen.getByRole('button', { name: /mes/i })
     expect(monthButton).toHaveClass('bg-blue-600') // Active styling
 
     // Act - Change to 'week' view
     rerender(<CalendarToolbar {...defaultProps} view="week" />)
 
     // Assert - Week button should now have active styling
-    const weekButton = screen.getByRole('button', { name: /week/i })
+    const weekButton = screen.getByRole('button', { name: /semana/i })
     expect(weekButton).toHaveClass('bg-blue-600')
     expect(monthButton).not.toHaveClass('bg-blue-600')
   })
@@ -78,7 +78,7 @@ describe('CalendarToolbar', () => {
   it('calls onView handler when view button is clicked', () => {
     // Arrange
     render(<CalendarToolbar {...defaultProps} />)
-    const weekButton = screen.getByRole('button', { name: /week/i })
+    const weekButton = screen.getByRole('button', { name: /semana/i })
 
     // Act
     fireEvent.click(weekButton)
@@ -88,32 +88,32 @@ describe('CalendarToolbar', () => {
     expect(mockOnView).toHaveBeenCalledWith('week')
   })
 
-  it('renders navigation buttons (Today, Previous, Next)', () => {
+  it('renders navigation buttons (Hoy, Anterior, Siguiente)', () => {
     // Act
     render(<CalendarToolbar {...defaultProps} />)
 
     // Assert
-    expect(screen.getByRole('button', { name: /today/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hoy/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /anterior/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /siguiente/i })).toBeInTheDocument()
   })
 
   it('calls onNavigate with correct action when navigation buttons clicked', () => {
     // Arrange
     render(<CalendarToolbar {...defaultProps} />)
-    const todayButton = screen.getByRole('button', { name: /today/i })
-    const previousButton = screen.getByRole('button', { name: /previous/i })
-    const nextButton = screen.getByRole('button', { name: /next/i })
+    const todayButton = screen.getByRole('button', { name: /hoy/i })
+    const previousButton = screen.getByRole('button', { name: /anterior/i })
+    const nextButton = screen.getByRole('button', { name: /siguiente/i })
 
-    // Act & Assert - Today button
+    // Act & Assert - Hoy button
     fireEvent.click(todayButton)
     expect(mockOnNavigate).toHaveBeenCalledWith('TODAY')
 
-    // Act & Assert - Previous button
+    // Act & Assert - Anterior button
     fireEvent.click(previousButton)
     expect(mockOnNavigate).toHaveBeenCalledWith('PREV')
 
-    // Act & Assert - Next button
+    // Act & Assert - Siguiente button
     fireEvent.click(nextButton)
     expect(mockOnNavigate).toHaveBeenCalledWith('NEXT')
 
@@ -144,10 +144,10 @@ describe('CalendarToolbar', () => {
     expect(toolbar).toHaveAttribute('aria-label', 'Calendar toolbar')
 
     // Assert - All buttons have accessible names
-    expect(screen.getByRole('button', { name: /today/i })).toHaveAccessibleName()
-    expect(screen.getByRole('button', { name: /previous/i })).toHaveAccessibleName()
-    expect(screen.getByRole('button', { name: /next/i })).toHaveAccessibleName()
-    expect(screen.getByRole('button', { name: /month/i })).toHaveAccessibleName()
-    expect(screen.getByRole('button', { name: /week/i })).toHaveAccessibleName()
+    expect(screen.getByRole('button', { name: /hoy/i })).toHaveAccessibleName()
+    expect(screen.getByRole('button', { name: /anterior/i })).toHaveAccessibleName()
+    expect(screen.getByRole('button', { name: /siguiente/i })).toHaveAccessibleName()
+    expect(screen.getByRole('button', { name: /mes/i })).toHaveAccessibleName()
+    expect(screen.getByRole('button', { name: /semana/i })).toHaveAccessibleName()
   })
 })

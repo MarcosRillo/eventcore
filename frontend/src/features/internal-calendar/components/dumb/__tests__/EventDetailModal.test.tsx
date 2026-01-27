@@ -115,13 +115,13 @@ describe('EventDetailModal', () => {
     ).toBeInTheDocument()
   })
 
-  it('displays formatted start and end dates', () => {
+  it('displays formatted start and end dates in Spanish', () => {
     // Act
     render(<EventDetailModal event={mockEvent} isOpen={true} onClose={mockOnClose} />)
 
     // Assert
-    // Dates should be formatted in a readable way
-    expect(screen.getByText('December 10, 2025')).toBeInTheDocument() // Date
+    // Dates should be formatted in Spanish format
+    expect(screen.getByText(/miércoles, 10 de diciembre de 2025/i)).toBeInTheDocument() // Date in Spanish
     expect(screen.getByText(/07:00 - 15:00/)).toBeInTheDocument() // Time range
   })
 
@@ -152,7 +152,7 @@ describe('EventDetailModal', () => {
     // Assert
     expect(screen.getByText('Convention Center - Buenos Aires')).toBeInTheDocument()
     expect(screen.getByText('Virtual Platform - Online')).toBeInTheDocument()
-    expect(screen.getByText(/Locations/)).toBeInTheDocument() // Plural label
+    expect(screen.getByText(/Ubicaciones/)).toBeInTheDocument() // Plural label in Spanish
   })
 
   it('handles events without description gracefully', () => {

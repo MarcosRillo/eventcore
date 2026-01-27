@@ -100,7 +100,8 @@ describe('OrganizerDashboard', () => {
     test('displays stats cards in correct order', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      const statsCards = screen.getAllByRole('article')
+      const statsGrid = screen.getByTestId('stats-grid')
+      const statsCards = statsGrid.querySelectorAll('article')
 
       expect(statsCards).toHaveLength(7)
       expect(statsCards[0]).toHaveTextContent('Total Eventos')
@@ -130,8 +131,8 @@ describe('OrganizerDashboard', () => {
       const statsGrid = screen.getByTestId('stats-grid')
 
       expect(statsGrid.className).toContain('grid')
-      expect(statsGrid.className).toMatch(/grid-cols-1/)
-      expect(statsGrid.className).toMatch(/md:grid-cols-2/)
+      expect(statsGrid.className).toMatch(/grid-cols-2/)
+      expect(statsGrid.className).toMatch(/md:grid-cols-4/)
       expect(statsGrid.className).toMatch(/lg:grid-cols-7/)
     })
   })
@@ -213,8 +214,9 @@ describe('OrganizerDashboard', () => {
     test('stats cards have role="article"', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      const articles = screen.getAllByRole('article')
-      expect(articles).toHaveLength(7)
+      const statsGrid = screen.getByTestId('stats-grid')
+      const statsArticles = statsGrid.querySelectorAll('article')
+      expect(statsArticles).toHaveLength(7)
     })
 
     test('filter buttons have aria-pressed attribute', () => {
