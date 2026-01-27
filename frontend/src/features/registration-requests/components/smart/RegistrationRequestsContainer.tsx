@@ -5,15 +5,27 @@
  * Orchestrates hook and dumb components for registration request management
  */
 
+import dynamic from 'next/dynamic'
 import { useCallback, useEffect,useState } from 'react'
 
 import { useToast } from '@/components/ui'
-import { DeleteOrganizationModal } from '@/features/registration-requests/components/dumb/DeleteOrganizationModal'
 import { RegistrationRequestDetailPanel } from '@/features/registration-requests/components/dumb/RegistrationRequestDetail'
 import { RegistrationRequestTable } from '@/features/registration-requests/components/dumb/RegistrationRequestTable'
-import { SuspendConfirmModal } from '@/features/registration-requests/components/dumb/SuspendConfirmModal'
-import { RejectRequestModalContainer } from '@/features/registration-requests/components/smart/RejectRequestModalContainer'
 import { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
+
+// Lazy load modals - only loaded when user triggers action
+const DeleteOrganizationModal = dynamic(
+  () => import('@/features/registration-requests/components/dumb/DeleteOrganizationModal').then(mod => ({ default: mod.DeleteOrganizationModal })),
+  { ssr: false }
+)
+const SuspendConfirmModal = dynamic(
+  () => import('@/features/registration-requests/components/dumb/SuspendConfirmModal').then(mod => ({ default: mod.SuspendConfirmModal })),
+  { ssr: false }
+)
+const RejectRequestModalContainer = dynamic(
+  () => import('@/features/registration-requests/components/smart/RejectRequestModalContainer').then(mod => ({ default: mod.RejectRequestModalContainer })),
+  { ssr: false }
+)
 import type { RegistrationRequest } from '@/features/registration-requests/types/registration-request.types'
 
 /**

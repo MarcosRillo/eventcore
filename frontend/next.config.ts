@@ -6,6 +6,18 @@ const nextConfig: NextConfig = {
 
   // Monorepo support: explicitly set workspace root to avoid multiple lockfile warning
   outputFileTracingRoot: path.join(__dirname, '../'),
+
+  experimental: {
+    // Optimize barrel imports for better tree-shaking
+    // This transforms: import { X } from 'lucide-react' -> import X from 'lucide-react/dist/esm/icons/X'
+    optimizePackageImports: [
+      'lucide-react',
+      '@/components/ui',
+      '@/features/events',
+      '@/features/auth',
+      '@/features/appearance',
+    ],
+  },
   images: {
     remotePatterns: [
       {

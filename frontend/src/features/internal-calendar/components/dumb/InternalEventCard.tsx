@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { EventStatusBadge } from '@/features/internal-calendar/components/dumb/EventStatusBadge';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
@@ -28,7 +30,7 @@ interface InternalEventCardProps {
  * />
  * ```
  */
-export function InternalEventCard({ event, onClick }: InternalEventCardProps) {
+export const InternalEventCard = memo(function InternalEventCard({ event, onClick }: InternalEventCardProps) {
   const handleClick = () => {
     if (onClick) {
       onClick(event.id);
@@ -125,4 +127,4 @@ export function InternalEventCard({ event, onClick }: InternalEventCardProps) {
       )}
     </div>
   );
-}
+});

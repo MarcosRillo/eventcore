@@ -7,6 +7,7 @@
 
 import Image from 'next/image'
 import type { KeyboardEvent } from 'react'
+import { memo } from 'react'
 
 import { Badge } from '@/components/ui'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
@@ -16,7 +17,7 @@ interface EventCardProps {
   onClick?: (eventId: number) => void
 }
 
-export const EventCard = ({ event, onClick }: EventCardProps) => {
+export const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
   const handleClick = (): void => {
     onClick?.(event.id)
   }
@@ -138,4 +139,4 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
       </div>
     </article>
   )
-}
+})

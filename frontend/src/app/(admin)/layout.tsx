@@ -6,11 +6,18 @@
 
 'use client';
 
-import { useState } from 'react';
+import { Suspense,useState } from 'react';
 
 import { Header, Sidebar } from '@/components/layout';
 import { LoadingSpinner } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+
+// Loading fallback for page content
+const PageLoadingFallback = () => (
+  <div className="flex items-center justify-center py-12">
+    <LoadingSpinner size="lg" text="Cargando contenido..." />
+  </div>
+);
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -75,7 +82,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           {/* Main content with proper scrolling */}
           <main className="flex-1 relative overflow-y-auto focus:outline-none">
             <div className="py-6">
-              {children}
+              <Suspense fallback={<PageLoadingFallback />}>
+                {children}
+              </Suspense>
             </div>
           </main>
         </div>

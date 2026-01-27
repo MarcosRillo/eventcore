@@ -24,7 +24,7 @@ interface EventCardProps {
   onViewDetail: () => void;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({
+export const EventCard: React.FC<EventCardProps> = React.memo(({
   event,
   formattedDate,
   statusColor,
@@ -99,4 +99,6 @@ export const EventCard: React.FC<EventCardProps> = ({
       </div>
     </Card>
   );
-};
+});
+
+EventCard.displayName = 'EventCard';

@@ -8,6 +8,7 @@
 
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useCallback,useState } from 'react';
 
 import { Pagination } from '@/components/ui';
@@ -16,9 +17,14 @@ import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminSta
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
 import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline';
 import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
-import { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal';
 import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
 import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
+
+// Lazy load modal - only loaded when needed
+const EventManagementModal = dynamic(
+  () => import('@/features/entity-admin/components/dumb/EventManagementModal').then(mod => ({ default: mod.EventManagementModal })),
+  { ssr: false }
+);
 import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';

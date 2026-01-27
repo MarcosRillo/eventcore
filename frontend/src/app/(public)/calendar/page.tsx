@@ -2,6 +2,7 @@ import { endOfMonth,format, startOfMonth } from 'date-fns'
 import { Metadata } from 'next'
 
 import { CalendarPageContainer } from '@/features/public-calendar/components/smart/CalendarPageContainer'
+import * as cachedEvents from '@/features/public-calendar/services/public-events.cached'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 
 export const metadata: Metadata = {
@@ -32,18 +33,18 @@ export const metadata: Metadata = {
 export default async function CalendarPage() {
   const now = new Date()
 
-  // Fetch all data server-side in parallel for better performance
+  // Fetch all data server-side in parallel with React.cache for request deduplication
   const [statsResponse, eventsResponse, eventTypesResponse, locationsResponse] =
     await Promise.all([
-      publicEventsService.getStats().catch(() => ({ data: null })),
+      cachedEvents.getStats().catch(() => ({ data: null })),
       publicEventsService
         .getAll({
           start_date: format(startOfMonth(now), 'yyyy-MM-dd'),
           end_date: format(endOfMonth(now), 'yyyy-MM-dd'),
         })
         .catch(() => ({ data: [] })),
-      publicEventsService.getEventTypes().catch(() => ({ data: [] })),
-      publicEventsService.getLocations().catch(() => ({ data: [] })),
+      cachedEvents.getEventTypes().catch(() => ({ data: [] })),
+      cachedEvents.getLocations().catch(() => ({ data: [] })),
     ])
 
   return (

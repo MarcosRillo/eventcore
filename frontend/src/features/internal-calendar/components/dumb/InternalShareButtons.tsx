@@ -7,10 +7,16 @@
 
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
 import { useToast } from '@/components/ui';
-import { QRCodeModal } from '@/features/internal-calendar/components/dumb/QRCodeModal';
+
+// Lazy load QRCodeModal - uses qrcode.react library (heavy)
+const QRCodeModal = dynamic(
+  () => import('@/features/internal-calendar/components/dumb/QRCodeModal').then(mod => ({ default: mod.QRCodeModal })),
+  { ssr: false }
+);
 
 export interface InternalShareButtonsProps {
   eventId: number;

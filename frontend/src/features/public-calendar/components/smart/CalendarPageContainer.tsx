@@ -6,12 +6,34 @@
 
 'use client'
 
-import { useEffect,useState } from 'react'
+import dynamic from 'next/dynamic'
+import { Suspense,useEffect,useState } from 'react'
 
+import { SkeletonCard } from '@/components/ui'
 import { StatsBar } from '@/features/public-calendar/components/dumb/StatsBar'
-import { CalendarViewContainer } from '@/features/public-calendar/components/smart/CalendarViewContainer'
-import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
+
+// Lazy load view containers - only the active view is loaded
+const CalendarViewContainer = dynamic(
+  () => import('@/features/public-calendar/components/smart/CalendarViewContainer').then(mod => ({ default: mod.CalendarViewContainer })),
+  { ssr: false }
+)
+const PublicCalendarContainer = dynamic(
+  () => import('@/features/public-calendar/components/smart/PublicCalendarContainer').then(mod => ({ default: mod.PublicCalendarContainer })),
+  { ssr: false }
+)
+
+// Loading fallback for calendar views
+const CalendarViewSkeleton = () => (
+  <div className="space-y-4">
+    <div className="h-12 bg-neutral-200 rounded-lg animate-pulse" />
+    <div className="grid grid-cols-7 gap-1">
+      {Array.from({ length: 35 }).map((_, i) => (
+        <SkeletonCard key={i} className="aspect-square" />
+      ))}
+    </div>
+  </div>
+)
 import {
   EventType,
   Location,
@@ -133,19 +155,21 @@ export const CalendarPageContainer = ({
 
       {/* Content */}
       <div className="container mx-auto px-4 py-6">
-        {viewMode === 'calendar' ? (
-          <CalendarViewContainer
-            initialEvents={initialEvents}
-            initialEventTypes={initialEventTypes}
-            initialLocations={initialLocations}
-          />
-        ) : (
-          <PublicCalendarContainer
-            initialEvents={initialEvents}
-            initialEventTypes={initialEventTypes}
-            initialLocations={initialLocations}
-          />
-        )}
+        <Suspense fallback={<CalendarViewSkeleton />}>
+          {viewMode === 'calendar' ? (
+            <CalendarViewContainer
+              initialEvents={initialEvents}
+              initialEventTypes={initialEventTypes}
+              initialLocations={initialLocations}
+            />
+          ) : (
+            <PublicCalendarContainer
+              initialEvents={initialEvents}
+              initialEventTypes={initialEventTypes}
+              initialLocations={initialLocations}
+            />
+          )}
+        </Suspense>
       </div>
     </div>
   )

@@ -8,12 +8,18 @@
 
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
 import type { View } from 'react-big-calendar'
 
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView'
-import { EventDetailModal } from '@/features/internal-calendar/components/dumb/EventDetailModal'
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents'
+
+// Lazy load EventDetailModal - reduces initial bundle size
+const EventDetailModal = dynamic(
+  () => import('@/features/internal-calendar/components/dumb/EventDetailModal').then(mod => ({ default: mod.EventDetailModal })),
+  { ssr: false }
+)
 import type {
   BigCalendarEvent,
   InternalCalendarFilters,
