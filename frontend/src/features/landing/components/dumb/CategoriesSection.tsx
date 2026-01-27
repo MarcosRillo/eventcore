@@ -43,7 +43,7 @@ export const CategoriesSection = ({
         )}
 
         {/* Event Types Grid */}
-        {!loading && eventTypes.length > 0 && (
+        {!loading && eventTypes.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {eventTypes.map(eventType => (
               <button
@@ -71,7 +71,7 @@ export const CategoriesSection = ({
               </button>
             ))}
           </div>
-        )}
+        ) : null}
 
         {/* Empty State */}
         {!loading && eventTypes.length === 0 && (
