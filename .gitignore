@@ -16,6 +16,7 @@ Thumbs.db
 .tmp
 .temp
 .claude/
+.agents/
 
 # Root level files that should never be committed
 .env
