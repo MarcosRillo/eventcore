@@ -41,6 +41,12 @@ const WHITELISTED_ERROR_PATTERNS = [
   { pattern: /TestComponent/, secondaryPattern: /not wrapped in act/, reason: 'renderHook internal component' },
   // InternalCalendarPageContainer async useEffect (fetches event types on mount)
   { pattern: /InternalCalendarPageContainer/, secondaryPattern: /not wrapped in act/, reason: 'Async useEffect fetch on mount' },
+  // Next.js dynamic() imports cause act() warnings during lazy load
+  { pattern: /LoadableComponent/, secondaryPattern: /not wrapped in act/, reason: 'Next.js dynamic() lazy loading' },
+  // HeadlessUI internal components (MainTreeProvider, InternalDialog, FocusTrap, etc.)
+  { pattern: /MainTreeProvider|InternalDialog|FocusTrap/, secondaryPattern: /not wrapped in act/, reason: 'HeadlessUI internal state management' },
+  // InternalShareButtons clipboard/popover state updates
+  { pattern: /InternalShareButtons/, secondaryPattern: /not wrapped in act/, reason: 'Clipboard async operations' },
   // JSDOM limitations
   { pattern: /Not implemented: HTMLFormElement\.prototype\.requestSubmit/, secondaryPattern: null, reason: 'JSDOM API limitation' },
 ];
@@ -72,6 +78,7 @@ console.error = (...args) => {
   // FAIL-FAST: Unknown console.error should fail the test
   // This ensures new warnings are caught immediately
   originalError.apply(console, args);
+  throw new Error(`Unexpected console.error in test: ${message.substring(0, 100)}`);
 };
 
 const originalWarn = console.warn;
@@ -87,6 +94,17 @@ console.warn = (...args) => {
 
   // FAIL-FAST: Unknown console.warn should fail the test
   originalWarn.apply(console, args);
+  throw new Error(`Unexpected console.warn in test: ${message.substring(0, 100)}`);
+};
+
+// Intercept console.log to fail tests (no debugging statements in tests)
+const originalLog = console.log;
+console.log = (...args) => {
+  const message = args.join(' ');
+  // FAIL-FAST: console.log should fail the test
+  // Remove debugging statements before committing
+  originalLog.apply(console, args);
+  throw new Error(`Unexpected console.log in test: ${message.substring(0, 100)}`);
 };
 
 // Global cleanup after each test to prevent resource leaks and worker exit issues
