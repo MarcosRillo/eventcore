@@ -81,10 +81,15 @@ class UpdateOrganizerEventRequest extends FormRequest
             // Additional information
             'event_website' => 'nullable|url|max:500',
 
-            // Images
+            // Images (URLs)
             'logo_url' => 'nullable|string|max:500',
             'featured_image' => 'nullable|string|max:500',
             'responsive_image_url' => 'nullable|string|max:500',
+
+            // Images (File uploads)
+            'logo_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            'featured_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            'responsive_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
         ];
     }
 }

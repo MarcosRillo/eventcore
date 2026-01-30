@@ -13,6 +13,7 @@ import { EventFormData, EventFormErrors } from '@/features/organizer/types/event
 
 describe('OrganizerEventForm', () => {
   const mockHandleChange = jest.fn()
+  const mockHandleFileChange = jest.fn()
   const mockHandleSubmit = jest.fn((e) => e.preventDefault())
   const mockHandleCancel = jest.fn()
   const mockSetNewAsyncDate = jest.fn()
@@ -67,7 +68,10 @@ describe('OrganizerEventForm', () => {
     event_website: '',
     logo_url: '',
     featured_image: '',
-    responsive_image_url: ''
+    responsive_image_url: '',
+    logo_file: null,
+    featured_image_file: null,
+    responsive_image_file: null
   }
 
   const filledFormData: EventFormData = {
@@ -93,7 +97,10 @@ describe('OrganizerEventForm', () => {
     event_website: 'https://festival.com',
     logo_url: 'https://ejemplo.com/logo.png',
     featured_image: 'https://ejemplo.com/imagen.jpg',
-    responsive_image_url: 'https://ejemplo.com/imagen-mobile.jpg'
+    responsive_image_url: 'https://ejemplo.com/imagen-mobile.jpg',
+    logo_file: null,
+    featured_image_file: null,
+    responsive_image_file: null
   }
 
   const mockSearchLocations = jest.fn().mockResolvedValue(mockLocations)
@@ -121,6 +128,7 @@ describe('OrganizerEventForm', () => {
     newAsyncDate: { date: '', notes: '' },
     setNewAsyncDate: mockSetNewAsyncDate,
     handleChange: mockHandleChange,
+    handleFileChange: mockHandleFileChange,
     handleSubmit: mockHandleSubmit,
     handleCancel: mockHandleCancel,
     addAsynchronousDate: mockAddAsynchronousDate,
@@ -356,20 +364,22 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('section 3: dates', () => {
-    test('should render start_date input as datetime-local', () => {
+    test('should render start_date date picker', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const startDateInput = screen.getByLabelText(/fecha inicio/i)
-      expect(startDateInput).toBeInTheDocument()
-      expect(startDateInput).toHaveAttribute('type', 'datetime-local')
+      const startDatePicker = screen.getByLabelText(/fecha inicio/i)
+      expect(startDatePicker).toBeInTheDocument()
+      // DateTimePicker uses a button trigger
+      expect(startDatePicker).toHaveAttribute('type', 'button')
     })
 
-    test('should render end_date input as datetime-local', () => {
+    test('should render end_date date picker', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const endDateInput = screen.getByLabelText(/fecha fin/i)
-      expect(endDateInput).toBeInTheDocument()
-      expect(endDateInput).toHaveAttribute('type', 'datetime-local')
+      const endDatePicker = screen.getByLabelText(/fecha fin/i)
+      expect(endDatePicker).toBeInTheDocument()
+      // DateTimePicker uses a button trigger
+      expect(endDatePicker).toHaveAttribute('type', 'button')
     })
 
     test('should render async dates section', () => {
@@ -391,7 +401,8 @@ describe('OrganizerEventForm', () => {
 
       expect(screen.getByText('2025-12-20')).toBeInTheDocument()
       expect(screen.getByText(/sesión adicional/i)).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument()
+      // Use specific aria-label to find async date delete button (not image delete buttons)
+      expect(screen.getByRole('button', { name: /eliminar fecha/i })).toBeInTheDocument()
     })
 
     test('should disable add button when async date field is empty', () => {
@@ -401,22 +412,24 @@ describe('OrganizerEventForm', () => {
       expect(addButton).toBeDisabled()
     })
 
-    test('should call handleChange when start_date changes', () => {
+    test('should open calendar when start_date picker is clicked', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const startDateInput = screen.getByLabelText(/fecha inicio/i)
-      fireEvent.change(startDateInput, { target: { value: '2025-12-20T10:00' } })
+      const startDatePicker = screen.getByLabelText(/fecha inicio/i)
+      fireEvent.click(startDatePicker)
 
-      expect(mockHandleChange).toHaveBeenCalledWith('start_date', '2025-12-20T10:00')
+      // Calendar dialog should appear
+      expect(screen.getByRole('dialog', { name: /seleccionar fecha/i })).toBeInTheDocument()
     })
 
-    test('should call handleChange when end_date changes', () => {
+    test('should open calendar when end_date picker is clicked', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const endDateInput = screen.getByLabelText(/fecha fin/i)
-      fireEvent.change(endDateInput, { target: { value: '2025-12-20T18:00' } })
+      const endDatePicker = screen.getByLabelText(/fecha fin/i)
+      fireEvent.click(endDatePicker)
 
-      expect(mockHandleChange).toHaveBeenCalledWith('end_date', '2025-12-20T18:00')
+      // Calendar dialog should appear
+      expect(screen.getByRole('dialog', { name: /seleccionar fecha/i })).toBeInTheDocument()
     })
   })
 
@@ -443,7 +456,8 @@ describe('OrganizerEventForm', () => {
     test('should call removeAsynchronousDate when delete button is clicked', () => {
       render(<OrganizerEventForm {...defaultProps} formData={filledFormData} />)
 
-      const deleteButton = screen.getByRole('button', { name: /eliminar/i })
+      // Use specific aria-label to find async date delete button (not image delete buttons)
+      const deleteButton = screen.getByRole('button', { name: /eliminar fecha/i })
       fireEvent.click(deleteButton)
 
       expect(mockRemoveAsynchronousDate).toHaveBeenCalledWith(0)
@@ -514,45 +528,34 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('section 6: images', () => {
-    test('should render image URL inputs', () => {
+    test('should render images section header', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      expect(screen.getByLabelText(/^logo$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/imagen principal/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/imagen responsive/i)).toBeInTheDocument()
+      expect(screen.getByText('6. Imágenes')).toBeInTheDocument()
     })
 
-    test('should render help text about image URLs', () => {
+    test('should render recommended dimensions', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      expect(screen.getByText(/por ahora ingresa urls de imágenes/i)).toBeInTheDocument()
+      expect(screen.getByText(/1920 x 1080 px/i)).toBeInTheDocument()
+      expect(screen.getByText(/500 x 500 px/i)).toBeInTheDocument()
+      expect(screen.getByText(/800 x 450 px/i)).toBeInTheDocument()
     })
 
-    test('should call handleChange when logo_url input changes', () => {
+    test('should render mode toggle buttons for file/url', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const logoInput = screen.getByLabelText(/^logo$/i)
-      fireEvent.change(logoInput, { target: { value: 'https://ejemplo.com/nuevo-logo.png' } })
-
-      expect(mockHandleChange).toHaveBeenCalledWith('logo_url', 'https://ejemplo.com/nuevo-logo.png')
+      // Each ImageUploadField has two toggle buttons
+      expect(screen.getAllByRole('button', { name: /subir archivo/i })).toHaveLength(3)
+      expect(screen.getAllByRole('button', { name: /ingresar url/i })).toHaveLength(3)
     })
 
-    test('should call handleChange when featured_image input changes', () => {
+    test('should render helper text for each image field', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      const imageInput = screen.getByLabelText(/imagen principal/i)
-      fireEvent.change(imageInput, { target: { value: 'https://ejemplo.com/nueva-imagen.jpg' } })
-
-      expect(mockHandleChange).toHaveBeenCalledWith('featured_image', 'https://ejemplo.com/nueva-imagen.jpg')
-    })
-
-    test('should call handleChange when responsive_image_url input changes', () => {
-      render(<OrganizerEventForm {...defaultProps} />)
-
-      const responsiveInput = screen.getByLabelText(/imagen responsive/i)
-      fireEvent.change(responsiveInput, { target: { value: 'https://ejemplo.com/mobile.jpg' } })
-
-      expect(mockHandleChange).toHaveBeenCalledWith('responsive_image_url', 'https://ejemplo.com/mobile.jpg')
+      expect(screen.getByText(/banner principal, hero en página de detalle/i)).toBeInTheDocument()
+      expect(screen.getByText(/thumbnails, favicon/i)).toBeInTheDocument()
+      expect(screen.getByText(/vista móvil, cards pequeños/i)).toBeInTheDocument()
     })
   })
 
@@ -732,7 +735,8 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventForm {...defaultProps} loading={true} formData={filledFormData} />)
 
       expect(screen.getByRole('button', { name: /agregar/i })).toBeDisabled()
-      expect(screen.getByRole('button', { name: /eliminar/i })).toBeDisabled()
+      // Use specific aria-label to find async date delete button (not image delete buttons)
+      expect(screen.getByRole('button', { name: /eliminar fecha/i })).toBeDisabled()
     })
   })
 
@@ -795,11 +799,12 @@ describe('OrganizerEventForm', () => {
       expect(screen.getByLabelText(/número de edición/i)).toHaveValue('10ma Edición')
     })
 
-    test('should display date values', () => {
+    test('should display date values in Spanish format', () => {
       render(<OrganizerEventForm {...defaultProps} formData={filledFormData} />)
 
-      expect(screen.getByLabelText(/fecha inicio/i)).toHaveValue('2025-12-15T18:00')
-      expect(screen.getByLabelText(/fecha fin/i)).toHaveValue('2025-12-16T22:00')
+      // DateTimePicker displays dates in Spanish format
+      expect(screen.getByText(/15 de diciembre 2025/i)).toBeInTheDocument()
+      expect(screen.getByText(/16 de diciembre 2025/i)).toBeInTheDocument()
     })
 
     test('should display selected locations as chips', () => {
@@ -825,12 +830,12 @@ describe('OrganizerEventForm', () => {
       expect(screen.getByLabelText(/asistencia extranjeros/i)).toHaveValue(50)
     })
 
-    test('should display image URLs', () => {
+    test('should display image previews when URLs are set', () => {
       render(<OrganizerEventForm {...defaultProps} formData={filledFormData} />)
 
-      expect(screen.getByLabelText(/^logo$/i)).toHaveValue('https://ejemplo.com/logo.png')
-      expect(screen.getByLabelText(/imagen principal/i)).toHaveValue('https://ejemplo.com/imagen.jpg')
-      expect(screen.getByLabelText(/imagen responsive/i)).toHaveValue('https://ejemplo.com/imagen-mobile.jpg')
+      // ImageUploadField shows preview images when URLs are provided
+      const previews = screen.getAllByAltText('Vista previa')
+      expect(previews).toHaveLength(3)
     })
   })
 

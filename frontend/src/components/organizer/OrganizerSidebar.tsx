@@ -29,7 +29,7 @@ export function OrganizerSidebar() {
   const { logout } = useAuth();
 
   return (
-    <div className="w-64 bg-gradient-to-b from-primary-600 to-primary-800 text-white">
+    <div className="w-64 bg-gradient-to-b from-primary-600 to-primary-800 text-white relative h-full flex flex-col">
       <div className="p-6">
         <h2 className="text-2xl font-bold">Panel Organizador</h2>
         <p className="text-primary-100 text-sm mt-1">Gestiona tus eventos</p>
@@ -57,7 +57,7 @@ export function OrganizerSidebar() {
         })}
       </nav>
 
-      <div className="absolute bottom-0 w-64 p-4 border-t border-primary-700">
+      <div className="mt-auto p-4 border-t border-primary-700">
         <button
           className="w-full text-left px-3 py-2 text-primary-100 hover:bg-primary-700/50 rounded-lg transition-colors"
           onClick={logout}

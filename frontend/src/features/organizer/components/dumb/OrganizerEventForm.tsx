@@ -24,6 +24,7 @@ interface OrganizerEventFormProps {
   newAsyncDate: { date: string; notes: string }
   setNewAsyncDate: (value: { date: string; notes: string }) => void
   handleChange: (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => void
+  handleFileChange: (field: keyof EventFormData, file: File | null) => void
   handleSubmit: (e: React.FormEvent) => void
   handleCancel: () => void
   addAsynchronousDate: () => void
@@ -58,6 +59,7 @@ export const OrganizerEventForm = ({
   newAsyncDate,
   setNewAsyncDate,
   handleChange,
+  handleFileChange,
   handleSubmit,
   handleCancel,
   addAsynchronousDate,
@@ -128,6 +130,7 @@ export const OrganizerEventForm = ({
         errors={errors}
         loading={loading}
         handleChange={handleChange}
+        handleFileChange={handleFileChange}
       />
 
       {/* Action Buttons */}

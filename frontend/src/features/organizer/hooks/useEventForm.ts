@@ -13,8 +13,8 @@ import { useCallback, useEffect, useState, useTransition } from 'react'
 import { getActiveEventSubtypes } from '@/features/event-types/services/eventSubtype.service'
 import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
 import { searchLocations } from '@/features/locations/services/location.service'
-import { createEvent, getEvent, updateEvent } from '@/features/organizer/services/organizer-event.service'
-import { AsynchronousDate,EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
+import { createEvent, createEventWithFiles, getEvent, updateEvent, updateEventWithFiles } from '@/features/organizer/services/organizer-event.service'
+import { AsynchronousDate, EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
 import { hasErrors,validateEventForm } from '@/features/organizer/utils/eventFormValidation'
 import { EventSubtype,EventType } from '@/types/eventType.types'
 
@@ -76,10 +76,15 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     // Additional info
     event_website: '',
 
-    // Images
+    // Images (URLs)
     logo_url: '',
     featured_image: '',
-    responsive_image_url: ''
+    responsive_image_url: '',
+
+    // Images (Files)
+    logo_file: null,
+    featured_image_file: null,
+    responsive_image_file: null
   })
 
   const [errors, setErrors] = useState<EventFormErrors>({})
@@ -182,10 +187,15 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
           // Additional info
           event_website: event.event_website || '',
 
-          // Images
+          // Images (URLs)
           logo_url: event.logo_url || '',
           featured_image: event.featured_image || '',
-          responsive_image_url: event.responsive_image_url || ''
+          responsive_image_url: event.responsive_image_url || '',
+
+          // Images (Files - null when editing, only set when user uploads)
+          logo_file: null,
+          featured_image_file: null,
+          responsive_image_file: null
         })
 
         // Store locations with names for the async select chips
@@ -203,6 +213,19 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
 
   const handleChange = (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+
+    // Clear field error on change (if it exists)
+    if (field in errors) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field as keyof EventFormErrors]
+        return newErrors
+      })
+    }
+  }
+
+  const handleFileChange = (field: keyof EventFormData, file: File | null) => {
+    setFormData(prev => ({ ...prev, [field]: file }))
 
     // Clear field error on change (if it exists)
     if (field in errors) {
@@ -349,16 +372,33 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
           // Additional info
           event_website: formData.event_website || undefined,
 
-          // Images
-          logo_url: formData.logo_url || undefined,
-          featured_image: formData.featured_image || undefined,
-          responsive_image_url: formData.responsive_image_url || undefined,
+          // Images (URLs - only include if no file is being uploaded for that field)
+          logo_url: !formData.logo_file ? (formData.logo_url || undefined) : undefined,
+          featured_image: !formData.featured_image_file ? (formData.featured_image || undefined) : undefined,
+          responsive_image_url: !formData.responsive_image_file ? (formData.responsive_image_url || undefined) : undefined,
         }
 
+        // Check if we have any files to upload
+        const hasFiles = formData.logo_file || formData.featured_image_file || formData.responsive_image_file
+
+        // Collect files if present
+        const files: { logo_file?: File; featured_image_file?: File; responsive_image_file?: File } = {}
+        if (formData.logo_file) files.logo_file = formData.logo_file
+        if (formData.featured_image_file) files.featured_image_file = formData.featured_image_file
+        if (formData.responsive_image_file) files.responsive_image_file = formData.responsive_image_file
+
         if (isEditMode) {
-          await updateEvent(eventId, { ...payload, id: eventId })
+          if (hasFiles) {
+            await updateEventWithFiles(eventId, { ...payload, id: eventId }, files)
+          } else {
+            await updateEvent(eventId, { ...payload, id: eventId })
+          }
         } else {
-          await createEvent(payload)
+          if (hasFiles) {
+            await createEventWithFiles(payload, files)
+          } else {
+            await createEvent(payload)
+          }
         }
 
         // Call onSuccess callback or navigate
@@ -399,6 +439,7 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
     newAsyncDate,
     setNewAsyncDate,
     handleChange,
+    handleFileChange,
     handleSubmit,
     handleCancel,
     addAsynchronousDate,

@@ -342,10 +342,15 @@ export interface EventFormData {
   // Additional info
   event_website: string
 
-  // Images
+  // Images (URLs)
   logo_url: string
   featured_image: string
   responsive_image_url: string
+
+  // Images (Files for upload)
+  logo_file: File | null
+  featured_image_file: File | null
+  responsive_image_file: File | null
 }
 
 /**
@@ -391,10 +396,15 @@ export interface EventFormErrors {
   // Additional info
   event_website?: string
 
-  // Images
+  // Images (URLs)
   logo_url?: string
   featured_image?: string
   responsive_image_url?: string
+
+  // Images (Files)
+  logo_file?: string
+  featured_image_file?: string
+  responsive_image_file?: string
 
   // General error
   general?: string

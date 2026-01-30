@@ -1,6 +1,6 @@
 import { EventFormSection } from '@/features/organizer/components/dumb/event-form/EventFormSection'
 import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
-import { Input } from '@/shared/components/form'
+import { ImageUploadField, Input } from '@/shared/components/form'
 
 type FormFieldValue = string | number | boolean | null
 
@@ -9,6 +9,7 @@ interface EventFormMediaProps {
   errors: EventFormErrors
   loading: boolean
   handleChange: (field: keyof EventFormData, value: FormFieldValue) => void
+  handleFileChange: (field: keyof EventFormData, file: File | null) => void
 }
 
 /**
@@ -18,7 +19,8 @@ export const EventFormMedia = ({
   formData,
   errors,
   loading,
-  handleChange
+  handleChange,
+  handleFileChange
 }: EventFormMediaProps) => {
   return (
     <>
@@ -43,50 +45,49 @@ export const EventFormMedia = ({
 
       {/* SECCIÓN 6: IMÁGENES */}
       <EventFormSection number={6} title="Imágenes">
-        <p className="text-sm text-neutral-500">
-          Por ahora ingresa URLs de imágenes. Próximamente podrás subir archivos directamente.
-        </p>
-
-        <div className="grid grid-cols-1 gap-4">
-          {/* Logo */}
-          <Input
-            type="url"
-            label="Logo"
-            value={formData.logo_url}
-            onChange={(e) => handleChange('logo_url', e.target.value)}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Imagen Principal (Featured Image) */}
+          <ImageUploadField
+            label="Imagen Principal"
+            value={formData.featured_image}
+            onChange={(value) => handleChange('featured_image', value)}
+            file={formData.featured_image_file}
+            onFileChange={(file) => handleFileChange('featured_image_file', file)}
+            recommendedSize="1920 x 1080 px"
+            aspectRatio="16:9"
             disabled={loading}
-            error={errors.logo_url}
-            placeholder="https://ejemplo.com/logo.png"
-            spellCheck={false}
-            autoComplete="off"
+            error={errors.featured_image || errors.featured_image_file}
+            helperText="Banner principal, hero en página de detalle, cards grandes"
             fullWidth
           />
 
-          {/* Imagen Principal */}
-          <Input
-            type="url"
-            label="Imagen Principal"
-            value={formData.featured_image}
-            onChange={(e) => handleChange('featured_image', e.target.value)}
+          {/* Logo */}
+          <ImageUploadField
+            label="Logo del Evento"
+            value={formData.logo_url}
+            onChange={(value) => handleChange('logo_url', value)}
+            file={formData.logo_file}
+            onFileChange={(file) => handleFileChange('logo_file', file)}
+            recommendedSize="500 x 500 px"
+            aspectRatio="1:1"
             disabled={loading}
-            error={errors.featured_image}
-            placeholder="https://ejemplo.com/imagen.jpg"
-            spellCheck={false}
-            autoComplete="off"
+            error={errors.logo_url || errors.logo_file}
+            helperText="Logo del evento, thumbnails, favicon"
             fullWidth
           />
 
           {/* Imagen Responsive */}
-          <Input
-            type="url"
+          <ImageUploadField
             label="Imagen Responsive (Móvil)"
             value={formData.responsive_image_url}
-            onChange={(e) => handleChange('responsive_image_url', e.target.value)}
+            onChange={(value) => handleChange('responsive_image_url', value)}
+            file={formData.responsive_image_file}
+            onFileChange={(file) => handleFileChange('responsive_image_file', file)}
+            recommendedSize="800 x 450 px"
+            aspectRatio="16:9"
             disabled={loading}
-            error={errors.responsive_image_url}
-            placeholder="https://ejemplo.com/imagen-mobile.jpg"
-            spellCheck={false}
-            autoComplete="off"
+            error={errors.responsive_image_url || errors.responsive_image_file}
+            helperText="Vista móvil, cards pequeños, redes sociales"
             fullWidth
           />
         </div>

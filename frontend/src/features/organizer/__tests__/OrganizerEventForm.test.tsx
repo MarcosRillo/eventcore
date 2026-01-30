@@ -27,6 +27,51 @@ jest.mock('@/features/locations/services/location.service')
 jest.mock('@/features/event-types/services/eventType.service')
 jest.mock('@/features/event-types/services/eventSubtype.service')
 
+// Mock DateTimePicker to simplify integration tests
+jest.mock('@/shared/components/form/DateTimePicker', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react')
+  const MockDateTimePicker = ({
+    label,
+    value,
+    onChange,
+    disabled,
+    required,
+    error,
+    fullWidth,
+  }: {
+    label?: string
+    value: string
+    onChange: (value: string) => void
+    disabled?: boolean
+    required?: boolean
+    error?: string
+    fullWidth?: boolean
+  }) =>
+    React.createElement(
+      'div',
+      { className: fullWidth ? 'w-full' : '' },
+      label &&
+        React.createElement(
+          'label',
+          { htmlFor: `datetime-${label}` },
+          label,
+          required && React.createElement('span', { className: 'text-error-500 ml-0.5' }, '*')
+        ),
+      React.createElement('input', {
+        type: 'datetime-local',
+        id: `datetime-${label}`,
+        'aria-label': label,
+        value: value,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
+        disabled: disabled,
+      }),
+      error && React.createElement('p', { role: 'alert' }, error)
+    )
+  MockDateTimePicker.displayName = 'MockDateTimePicker'
+  return { __esModule: true, default: MockDateTimePicker }
+})
+
 const mockPush = jest.fn()
 const mockBack = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -108,7 +153,7 @@ describe('OrganizerEventForm', () => {
       expect(organizerEventService.createEvent).not.toHaveBeenCalled()
     })
 
-    test('should show error when date is in the past', async () => {
+    test('should show error when start date is not provided', async () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
@@ -117,17 +162,16 @@ describe('OrganizerEventForm', () => {
 
       const titleInput = screen.getByLabelText(/nombre del evento/i)
       const descInput = screen.getByLabelText(/descripción/i)
-      const startDateInput = screen.getByLabelText(/fecha inicio/i)
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
-      fireEvent.change(startDateInput, { target: { value: '2020-01-01T10:00' } })
+      // Don't set start date - DateTimePicker enforces minDate=today so past dates cannot be selected
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByText(/la fecha de inicio debe ser en el futuro/i)).toBeInTheDocument()
+        expect(screen.getByText(/la fecha de inicio es requerida/i)).toBeInTheDocument()
       })
     })
   })

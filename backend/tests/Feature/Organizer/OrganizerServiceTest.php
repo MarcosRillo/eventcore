@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Organizer;
 
+use App\Features\Organizer\Services\EventImageService;
 use App\Features\Organizer\Services\EventValidator;
 use App\Features\Organizer\Services\OrganizerService;
 use App\Models\Event;
@@ -24,6 +25,8 @@ class OrganizerServiceTest extends TestCase
     private OrganizerService $service;
 
     private EventValidator $validator;
+
+    private EventImageService $imageService;
 
     private User $user;
 
@@ -49,7 +52,8 @@ class OrganizerServiceTest extends TestCase
         $this->seed(\Database\Seeders\EventStatusesSeeder::class);
 
         $this->validator = new EventValidator;
-        $this->service = new OrganizerService($this->validator);
+        $this->imageService = new EventImageService;
+        $this->service = new OrganizerService($this->validator, $this->imageService);
 
         // Create organization
         $this->organization = Organization::factory()->create();

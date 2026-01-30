@@ -25,6 +25,7 @@ export const OrganizerEventFormContainer = ({
     newAsyncDate,
     setNewAsyncDate,
     handleChange,
+    handleFileChange,
     handleSubmit,
     handleCancel,
     addAsynchronousDate,
@@ -47,6 +48,7 @@ export const OrganizerEventFormContainer = ({
       newAsyncDate={newAsyncDate}
       setNewAsyncDate={setNewAsyncDate}
       handleChange={handleChange}
+      handleFileChange={handleFileChange}
       handleSubmit={handleSubmit}
       handleCancel={handleCancel}
       addAsynchronousDate={addAsynchronousDate}

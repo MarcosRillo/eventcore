@@ -22,6 +22,7 @@ class OrganizerService
 
     public function __construct(
         private EventValidator $validator,
+        private EventImageService $imageService,
     ) {}
 
     /**
@@ -42,6 +43,12 @@ class OrganizerService
         }
 
         return DB::transaction(function () use ($data, $user, $draftStatus, $formatId) {
+            // Process image uploads if present
+            $imageUrls = $this->imageService->processUploads($data, $user->organization_id);
+
+            // Merge uploaded image URLs into data
+            $data = array_merge($data, $imageUrls);
+
             $eventData = $this->prepareEventData($data, $user, $draftStatus->id, $formatId);
             $event = Event::create($eventData);
 
@@ -72,6 +79,19 @@ class OrganizerService
         $this->validator->validateForUpdate($event, $user);
 
         return DB::transaction(function () use ($event, $data, $user) {
+            // Get existing images for potential cleanup
+            $existingImages = [
+                'logo_url' => $event->logo_url,
+                'featured_image' => $event->featured_image,
+                'responsive_image_url' => $event->responsive_image_url,
+            ];
+
+            // Process image uploads if present
+            $imageUrls = $this->imageService->processUploads($data, $user->organization_id, $existingImages);
+
+            // Merge uploaded image URLs into data
+            $data = array_merge($data, $imageUrls);
+
             $updateData = $this->prepareUpdateData($data, $event);
 
             // Determine if event status should change after update

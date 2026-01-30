@@ -1,6 +1,6 @@
 import { EventFormSection } from '@/features/organizer/components/dumb/event-form/EventFormSection'
 import { AsynchronousDate,EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
-import { Button, Input } from '@/shared/components/form'
+import { Button, DateTimePicker, Input } from '@/shared/components/form'
 
 type FormFieldValue = string | number | boolean | null | number[] | AsynchronousDate[]
 
@@ -32,27 +32,25 @@ export const EventFormDates = ({
     <EventFormSection number={3} title="Fechas">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha Inicio */}
-        <Input
-          type="datetime-local"
+        <DateTimePicker
           label="Fecha Inicio"
           value={formData.start_date}
-          onChange={(e) => handleChange('start_date', e.target.value)}
+          onChange={(value) => handleChange('start_date', value)}
+          minDate={new Date()}
           disabled={loading}
           required
           error={errors.start_date}
-          autoComplete="off"
           fullWidth
         />
 
         {/* Fecha Fin */}
-        <Input
-          type="datetime-local"
+        <DateTimePicker
           label="Fecha Fin"
           value={formData.end_date}
-          onChange={(e) => handleChange('end_date', e.target.value)}
+          onChange={(value) => handleChange('end_date', value)}
+          minDate={formData.start_date ? new Date(formData.start_date) : new Date()}
           disabled={loading}
           error={errors.end_date}
-          autoComplete="off"
           fullWidth
         />
       </div>
