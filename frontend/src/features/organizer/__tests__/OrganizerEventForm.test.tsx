@@ -7,6 +7,7 @@
 import '@testing-library/jest-dom'
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
 import * as eventTypeService from '@/features/event-types/services/eventType.service'
@@ -34,6 +35,9 @@ jest.mock('next/navigation', () => ({
     back: mockBack,
   }),
 }))
+
+// Helper to setup userEvent instance
+const setupUser = () => userEvent.setup()
 
 describe('OrganizerEventForm', () => {
   const mockLocations = [
@@ -108,12 +112,12 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(document.getElementById('title')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
       })
 
-      const titleInput = document.getElementById('title') as HTMLInputElement
-      const descInput = document.getElementById('description') as HTMLTextAreaElement
-      const startDateInput = document.getElementById('start_date') as HTMLInputElement
+      const titleInput = screen.getByLabelText(/nombre del evento/i)
+      const descInput = screen.getByLabelText(/descripción/i)
+      const startDateInput = screen.getByLabelText(/fecha inicio/i)
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
@@ -130,6 +134,7 @@ describe('OrganizerEventForm', () => {
 
   describe('Create Mode', () => {
     test('should create event with custom location', async () => {
+      const user = setupUser()
       const mockNewEvent = {
         id: 1,
         title: 'Festival de Jazz',
@@ -149,41 +154,47 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(document.getElementById('title')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
       })
 
-      const titleInput = document.getElementById('title') as HTMLInputElement
-      const descInput = document.getElementById('description') as HTMLTextAreaElement
-      const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const endDateInput = document.getElementById('end_date') as HTMLInputElement
-      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
-      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      const titleInput = screen.getByLabelText(/nombre del evento/i)
+      const descInput = screen.getByLabelText(/descripción/i)
+      const startDateInput = screen.getByLabelText(/fecha inicio/i)
+      const endDateInput = screen.getByLabelText(/fecha fin/i)
 
       fireEvent.change(titleInput, { target: { value: 'Festival de Jazz' } })
       fireEvent.change(descInput, { target: { value: 'Un evento increíble' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
       fireEvent.change(endDateInput, { target: { value: '2030-12-15T22:00' } })
-      // Select event type and subtype (required since Dec 2, 2025)
-      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
-      // Wait for subtype select to be enabled after type selection
+
+      // Select event type using Headless UI - userEvent triggers full event sequence
+      const typeButton = screen.getByText(/Seleccionar tipo de evento/i).closest('button')!
+      await user.click(typeButton)
       await waitFor(() => {
-        expect(eventSubtypeSelect).not.toBeDisabled()
+        expect(screen.getByText('Congreso')).toBeInTheDocument()
       })
-      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
-      // Wait for value to be set
+      await user.click(screen.getByText('Congreso'))
+
+      // Wait for subtype to be enabled and select it
       await waitFor(() => {
-        expect(eventSubtypeSelect.value).toBe('1')
+        expect(screen.getByText(/Seleccionar subtipo/i)).toBeInTheDocument()
       })
+      const subtypeButton = screen.getByText(/Seleccionar subtipo/i).closest('button')!
+      await user.click(subtypeButton)
+      await waitFor(() => {
+        expect(screen.getByText('Internacional')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('Internacional'))
 
       // Use custom location instead of selecting from dropdown
       const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
-      fireEvent.click(otroCheckbox)
+      await user.click(otroCheckbox)
 
       await waitFor(() => {
-        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del lugar/i)).toBeInTheDocument()
       })
 
-      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      const customLocationInput = screen.getByLabelText(/nombre del lugar/i)
       fireEvent.change(customLocationInput, { target: { value: 'Salón El Jardín' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
@@ -231,7 +242,7 @@ describe('OrganizerEventForm', () => {
       })
 
       await waitFor(() => {
-        const titleInput = document.getElementById('title') as HTMLInputElement
+        const titleInput = screen.getByLabelText(/nombre del evento/i) as HTMLInputElement
         expect(titleInput).toBeInTheDocument()
         expect(titleInput.value).toBe('Existing Event')
       })
@@ -263,11 +274,11 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer eventId={1} />)
 
       await waitFor(() => {
-        const titleInput = document.getElementById('title') as HTMLInputElement
+        const titleInput = screen.getByLabelText(/nombre del evento/i) as HTMLInputElement
         expect(titleInput.value).toBe('Original Title')
       })
 
-      const titleInput = document.getElementById('title') as HTMLInputElement
+      const titleInput = screen.getByLabelText(/nombre del evento/i)
       fireEvent.change(titleInput, { target: { value: 'Updated Title' } })
 
       const submitButton = screen.getByRole('button', { name: /actualizar evento/i })
@@ -293,6 +304,7 @@ describe('OrganizerEventForm', () => {
 
   describe('Loading States', () => {
     test('should show loading state during submission', async () => {
+      const user = setupUser()
       ;(organizerEventService.createEvent as jest.Mock).mockImplementation(
         () => new Promise((resolve) => setTimeout(() => resolve({ data: { id: 1 } }), 200))
       )
@@ -300,47 +312,59 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(document.getElementById('title')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
       })
 
-      const titleInput = document.getElementById('title') as HTMLInputElement
-      const descInput = document.getElementById('description') as HTMLTextAreaElement
-      const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
-      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      const titleInput = screen.getByLabelText(/nombre del evento/i)
+      const descInput = screen.getByLabelText(/descripción/i)
+      const startDateInput = screen.getByLabelText(/fecha inicio/i)
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
-      // Select event type and subtype (required since Dec 2, 2025)
-      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
-      // Wait for subtype select to be enabled after type selection
+
+      // Select event type using Headless UI - userEvent triggers full event sequence
+      const typeButton = screen.getByText(/Seleccionar tipo de evento/i).closest('button')!
+      await user.click(typeButton)
       await waitFor(() => {
-        expect(eventSubtypeSelect).not.toBeDisabled()
+        expect(screen.getByText('Congreso')).toBeInTheDocument()
       })
-      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
+      await user.click(screen.getByText('Congreso'))
+
+      // Wait for subtype and select it
+      await waitFor(() => {
+        expect(screen.getByText(/Seleccionar subtipo/i)).toBeInTheDocument()
+      })
+      const subtypeButton = screen.getByText(/Seleccionar subtipo/i).closest('button')!
+      await user.click(subtypeButton)
+      await waitFor(() => {
+        expect(screen.getByText('Internacional')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('Internacional'))
 
       // Use custom location
       const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
-      fireEvent.click(otroCheckbox)
+      await user.click(otroCheckbox)
 
       await waitFor(() => {
-        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del lugar/i)).toBeInTheDocument()
       })
 
-      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      const customLocationInput = screen.getByLabelText(/nombre del lugar/i)
       fireEvent.change(customLocationInput, { target: { value: 'Test Location' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)
 
+      // Button shows loading state with aria-busy
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /creando/i })
-        expect(button).toBeDisabled()
+        const button = screen.getByRole('button', { name: /crear evento/i })
+        expect(button).toHaveAttribute('aria-busy', 'true')
       })
     })
 
     test('should disable all form fields during submission', async () => {
+      const user = setupUser()
       ;(organizerEventService.createEvent as jest.Mock).mockImplementation(
         () => new Promise((resolve) => setTimeout(() => resolve({ data: { id: 1 } }), 200))
       )
@@ -348,84 +372,104 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(document.getElementById('title')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
       })
 
-      const titleInput = document.getElementById('title') as HTMLInputElement
-      const descInput = document.getElementById('description') as HTMLTextAreaElement
-      const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
-      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      const titleInput = screen.getByLabelText(/nombre del evento/i)
+      const descInput = screen.getByLabelText(/descripción/i)
+      const startDateInput = screen.getByLabelText(/fecha inicio/i)
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
-      // Select event type and subtype (required since Dec 2, 2025)
-      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
-      // Wait for subtype select to be enabled after type selection
+
+      // Select event type using Headless UI - userEvent triggers full event sequence
+      const typeButton = screen.getByText(/Seleccionar tipo de evento/i).closest('button')!
+      await user.click(typeButton)
       await waitFor(() => {
-        expect(eventSubtypeSelect).not.toBeDisabled()
+        expect(screen.getByText('Congreso')).toBeInTheDocument()
       })
-      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
+      await user.click(screen.getByText('Congreso'))
+
+      // Wait for subtype and select it
+      await waitFor(() => {
+        expect(screen.getByText(/Seleccionar subtipo/i)).toBeInTheDocument()
+      })
+      const subtypeButton = screen.getByText(/Seleccionar subtipo/i).closest('button')!
+      await user.click(subtypeButton)
+      await waitFor(() => {
+        expect(screen.getByText('Internacional')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('Internacional'))
 
       // Use custom location
       const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
-      fireEvent.click(otroCheckbox)
+      await user.click(otroCheckbox)
 
       await waitFor(() => {
-        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del lugar/i)).toBeInTheDocument()
       })
 
-      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      const customLocationInput = screen.getByLabelText(/nombre del lugar/i)
       fireEvent.change(customLocationInput, { target: { value: 'Test Location' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        const titleInputDisabled = document.getElementById('title') as HTMLInputElement
-        expect(titleInputDisabled).toBeDisabled()
+        expect(screen.getByLabelText(/nombre del evento/i)).toBeDisabled()
       })
     })
   })
 
   describe('Error Handling', () => {
     test('should display error message when API call fails', async () => {
+      const user = setupUser()
       const mockError = new Error('Network error')
       ;(organizerEventService.createEvent as jest.Mock).mockRejectedValue(mockError)
 
       render(<OrganizerEventFormContainer />)
 
       await waitFor(() => {
-        expect(document.getElementById('title')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
       })
 
-      const titleInput = document.getElementById('title') as HTMLInputElement
-      const descInput = document.getElementById('description') as HTMLTextAreaElement
-      const startDateInput = document.getElementById('start_date') as HTMLInputElement
-      const eventTypeSelect = document.getElementById('event_type_id') as HTMLSelectElement
-      const eventSubtypeSelect = document.getElementById('event_subtype_id') as HTMLSelectElement
+      const titleInput = screen.getByLabelText(/nombre del evento/i)
+      const descInput = screen.getByLabelText(/descripción/i)
+      const startDateInput = screen.getByLabelText(/fecha inicio/i)
 
       fireEvent.change(titleInput, { target: { value: 'Test Event' } })
       fireEvent.change(descInput, { target: { value: 'Test description' } })
       fireEvent.change(startDateInput, { target: { value: '2030-12-15T18:00' } })
-      // Select event type and subtype (required since Dec 2, 2025)
-      fireEvent.change(eventTypeSelect, { target: { value: '1' } })
-      // Wait for subtype select to be enabled after type selection
+
+      // Select event type using Headless UI - userEvent triggers full event sequence
+      const typeButton = screen.getByText(/Seleccionar tipo de evento/i).closest('button')!
+      await user.click(typeButton)
       await waitFor(() => {
-        expect(eventSubtypeSelect).not.toBeDisabled()
+        expect(screen.getByText('Congreso')).toBeInTheDocument()
       })
-      fireEvent.change(eventSubtypeSelect, { target: { value: '1' } })
+      await user.click(screen.getByText('Congreso'))
+
+      // Wait for subtype and select it
+      await waitFor(() => {
+        expect(screen.getByText(/Seleccionar subtipo/i)).toBeInTheDocument()
+      })
+      const subtypeButton = screen.getByText(/Seleccionar subtipo/i).closest('button')!
+      await user.click(subtypeButton)
+      await waitFor(() => {
+        expect(screen.getByText('Internacional')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('Internacional'))
 
       // Use custom location
       const otroCheckbox = screen.getByLabelText(/agregar ubicación personalizada/i)
-      fireEvent.click(otroCheckbox)
+      await user.click(otroCheckbox)
 
       await waitFor(() => {
-        expect(document.getElementById('custom_location_name')).toBeInTheDocument()
+        expect(screen.getByLabelText(/nombre del lugar/i)).toBeInTheDocument()
       })
 
-      const customLocationInput = document.getElementById('custom_location_name') as HTMLInputElement
+      const customLocationInput = screen.getByLabelText(/nombre del lugar/i)
       fireEvent.change(customLocationInput, { target: { value: 'Test Location' } })
 
       const submitButton = screen.getByRole('button', { name: /crear evento/i })
