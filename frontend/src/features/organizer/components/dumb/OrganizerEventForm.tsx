@@ -8,7 +8,7 @@ import {
   EventFormLocation,
   EventFormMedia} from '@/features/organizer/components/dumb/event-form'
 import { AsynchronousDate,EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
-import { SelectOption } from '@/shared/components/form'
+import { AsyncSelectOption } from '@/shared/components/form'
 import { EventSubtype,EventType } from '@/types/eventType.types'
 
 interface OrganizerEventFormProps {
@@ -18,8 +18,8 @@ interface OrganizerEventFormProps {
   initialLoading: boolean
   eventTypes: EventType[]
   eventSubtypes: EventSubtype[]
-  onSearchLocations: (query: string) => Promise<SelectOption[]>
-  selectedLocations: SelectOption[]
+  onSearchLocations: (query: string) => Promise<AsyncSelectOption[]>
+  selectedLocations: AsyncSelectOption[]
   isEditMode: boolean
   newAsyncDate: { date: string; notes: string }
   setNewAsyncDate: (value: { date: string; notes: string }) => void
@@ -73,7 +73,7 @@ export const OrganizerEventForm = ({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8" noValidate>
       {/* General Error Alert */}
       {errors.general && (
         <div className="bg-error-50 border-l-4 border-error-600 text-error-800 px-4 py-3 rounded-sm" role="alert">

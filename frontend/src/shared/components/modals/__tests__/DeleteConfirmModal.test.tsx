@@ -32,7 +32,7 @@ jest.mock('@/components/ui/Modal', () => ({
     ) : null,
 }))
 
-jest.mock('@/components/ui/Button', () => ({
+jest.mock('@/shared/components/form/Button', () => ({
   __esModule: true,
   default: ({ children, onClick, variant, disabled }: MockButtonProps) => (
     <button

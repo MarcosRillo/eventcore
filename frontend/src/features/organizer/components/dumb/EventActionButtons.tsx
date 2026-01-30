@@ -5,9 +5,9 @@
  * Buttons visibility depends on event status.
  */
 
-import Button from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import { Button } from '@/shared/components/form'
 
 interface EventActionButtonsProps {
   event: OrganizerEvent

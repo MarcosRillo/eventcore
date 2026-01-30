@@ -1,5 +1,6 @@
 import { EventFormSection } from '@/features/organizer/components/dumb/event-form/EventFormSection'
 import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
+import { Input } from '@/shared/components/form'
 
 type FormFieldValue = string | number | boolean | null
 
@@ -25,21 +26,18 @@ export const EventFormMedia = ({
       <EventFormSection number={5} title="Información Adicional">
         <div className="grid grid-cols-1 gap-4">
           {/* Web del Evento */}
-          <div>
-            <label htmlFor="event_website" className="block text-sm font-medium text-neutral-600">
-              Web del Evento
-            </label>
-            <input
-              type="url"
-              id="event_website"
-              value={formData.event_website}
-              onChange={(e) => handleChange('event_website', e.target.value)}
-              disabled={loading}
-              aria-invalid={!!errors.event_website}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="https://ejemplo.com"
-            />
-          </div>
+          <Input
+            type="url"
+            label="Web del Evento"
+            value={formData.event_website}
+            onChange={(e) => handleChange('event_website', e.target.value)}
+            disabled={loading}
+            error={errors.event_website}
+            placeholder="https://ejemplo.com"
+            spellCheck={false}
+            autoComplete="url"
+            fullWidth
+          />
         </div>
       </EventFormSection>
 
@@ -51,55 +49,46 @@ export const EventFormMedia = ({
 
         <div className="grid grid-cols-1 gap-4">
           {/* Logo */}
-          <div>
-            <label htmlFor="logo_url" className="block text-sm font-medium text-neutral-600">
-              Logo
-            </label>
-            <input
-              type="url"
-              id="logo_url"
-              value={formData.logo_url}
-              onChange={(e) => handleChange('logo_url', e.target.value)}
-              disabled={loading}
-              aria-invalid={!!errors.logo_url}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="https://ejemplo.com/logo.png"
-            />
-          </div>
+          <Input
+            type="url"
+            label="Logo"
+            value={formData.logo_url}
+            onChange={(e) => handleChange('logo_url', e.target.value)}
+            disabled={loading}
+            error={errors.logo_url}
+            placeholder="https://ejemplo.com/logo.png"
+            spellCheck={false}
+            autoComplete="off"
+            fullWidth
+          />
 
           {/* Imagen Principal */}
-          <div>
-            <label htmlFor="featured_image" className="block text-sm font-medium text-neutral-600">
-              Imagen Principal
-            </label>
-            <input
-              type="url"
-              id="featured_image"
-              value={formData.featured_image}
-              onChange={(e) => handleChange('featured_image', e.target.value)}
-              disabled={loading}
-              aria-invalid={!!errors.featured_image}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
-          </div>
+          <Input
+            type="url"
+            label="Imagen Principal"
+            value={formData.featured_image}
+            onChange={(e) => handleChange('featured_image', e.target.value)}
+            disabled={loading}
+            error={errors.featured_image}
+            placeholder="https://ejemplo.com/imagen.jpg"
+            spellCheck={false}
+            autoComplete="off"
+            fullWidth
+          />
 
           {/* Imagen Responsive */}
-          <div>
-            <label htmlFor="responsive_image_url" className="block text-sm font-medium text-neutral-600">
-              Imagen Responsive (Móvil)
-            </label>
-            <input
-              type="url"
-              id="responsive_image_url"
-              value={formData.responsive_image_url}
-              onChange={(e) => handleChange('responsive_image_url', e.target.value)}
-              disabled={loading}
-              aria-invalid={!!errors.responsive_image_url}
-              className="mt-1 block w-full rounded-sm border border-neutral-300 bg-neutral-50 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all disabled:bg-neutral-100 disabled:cursor-not-allowed"
-              placeholder="https://ejemplo.com/imagen-mobile.jpg"
-            />
-          </div>
+          <Input
+            type="url"
+            label="Imagen Responsive (Móvil)"
+            value={formData.responsive_image_url}
+            onChange={(e) => handleChange('responsive_image_url', e.target.value)}
+            disabled={loading}
+            error={errors.responsive_image_url}
+            placeholder="https://ejemplo.com/imagen-mobile.jpg"
+            spellCheck={false}
+            autoComplete="off"
+            fullWidth
+          />
         </div>
       </EventFormSection>
     </>

@@ -7,8 +7,8 @@
 
 import { useEffect } from 'react'
 
-import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
+import { Button } from '@/shared/components/form'
 
 interface ConfirmDialogProps {
   isOpen: boolean

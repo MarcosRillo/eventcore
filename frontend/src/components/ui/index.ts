@@ -3,22 +3,19 @@
  * Centralized export for all UI components
  */
 
-export { default as Button } from '@/components/ui/Button';
+// Form components - canonical location: @/shared/components/form
 export { type FieldErrorMap, FormModal, type FormModalProps, type FormRenderProps, type FormSubmitHandler,type FormValidator } from '@/components/ui/FormModal';
-export { default as Input } from '@/components/ui/Input';
 export { LoadingDots, LoadingOverlay,default as LoadingSpinner } from '@/components/ui/LoadingSpinner';
 export { default as Modal } from '@/components/ui/Modal';
 export { SearchableMultiSelect, type SearchableMultiSelectProps, type SelectOption } from '@/components/ui/SearchableMultiSelect';
-export { default as Select } from '@/components/ui/Select';
-export { default as Textarea } from '@/components/ui/Textarea';
 export { Tooltip } from '@/components/ui/Tooltip';
+export { Button, Checkbox, Input, Select, Textarea } from '@/shared/components/form';
 
 // State Components
 export { default as EmptyState, EmptyStateIcons } from '@/components/ui/EmptyState';
 export { default as Skeleton, SkeletonAvatar, SkeletonButton, SkeletonCard, SkeletonTable,SkeletonText } from '@/components/ui/Skeleton';
 
 // Data Components
-export { default as Checkbox } from '@/components/ui/Checkbox';
 export { ColorPicker } from '@/components/ui/ColorPicker';
 export { default as Pagination } from '@/components/ui/Pagination';
 export { RadioGroup } from '@/components/ui/RadioGroup';

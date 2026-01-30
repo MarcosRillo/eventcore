@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-import Button from '@/components/ui/Button'
 import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Pagination from '@/components/ui/Pagination'
@@ -25,6 +24,7 @@ import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/Orga
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { StatCard } from '@/features/organizer-dashboard/components/dumb/StatCard'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
+import { Button } from '@/shared/components/form'
 
 interface OrganizerDashboardProps {
   stats: OrganizerStats | null

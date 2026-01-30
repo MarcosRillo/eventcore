@@ -13,12 +13,12 @@ import { useRouter } from 'next/navigation'
 import { useCallback,useEffect, useState } from 'react'
 
 import Badge from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
 import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
 import { getEvent } from '@/features/organizer/services/organizer-event.service'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import { Button } from '@/shared/components/form'
 
 interface OrganizerEventDetailContainerProps {
   eventId: number
