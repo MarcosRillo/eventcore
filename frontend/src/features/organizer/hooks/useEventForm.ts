@@ -21,10 +21,11 @@ import { EventSubtype,EventType } from '@/types/eventType.types'
 interface UseEventFormProps {
   eventId?: number
   onSuccess?: () => void
+  onError?: (message: string) => void
   onCancel?: () => void
 }
 
-export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps = {}) => {
+export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEventFormProps = {}) => {
   const router = useRouter()
   const isEditMode = !!eventId
 
@@ -313,6 +314,31 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
 
     if (hasErrors(validationErrors)) {
       setErrors(validationErrors)
+
+      // Scroll to first error field for better UX
+      // Order matches visual layout of the form
+      const fieldOrder = [
+        'title',
+        'event_type_id',
+        'event_subtype_id',
+        'description',
+        'location_ids',
+        'custom_location_name',
+        'start_date',
+        'end_date'
+      ]
+
+      const firstErrorField = fieldOrder.find(field => field in validationErrors)
+
+      if (firstErrorField) {
+        const element = document.querySelector(`[name="${firstErrorField}"]`)
+        if (element instanceof HTMLElement) {
+          // scrollIntoView may not be available in test environments (JSDOM)
+          element.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+          element.focus()
+        }
+      }
+
       return
     }
 
@@ -408,9 +434,9 @@ export const useEventForm = ({ eventId, onSuccess, onCancel }: UseEventFormProps
           router.push('/organizer/events')
         }
       } catch {
-        setErrors({
-          general: isEditMode ? 'Error updating event' : 'Error creating event'
-        })
+        const errorMessage = isEditMode ? 'Error al actualizar el evento' : 'Error al crear el evento'
+        setErrors({ general: errorMessage })
+        onError?.(errorMessage)
       }
     })
   }

@@ -26,6 +26,7 @@ interface SelectProps {
   fullWidth?: boolean
   className?: string
   required?: boolean
+  name?: string
 }
 
 const Select = ({
@@ -41,6 +42,7 @@ const Select = ({
   fullWidth = false,
   className = '',
   required = false,
+  name,
 }: SelectProps) => {
   // Size variants
   const sizeClasses: Record<string, string> = {
@@ -85,7 +87,7 @@ const Select = ({
 
       <Listbox value={value ?? ''} onChange={onChange} disabled={disabled}>
         <div className="relative">
-          <Listbox.Button className={buttonClasses}>
+          <Listbox.Button className={buttonClasses} name={name}>
             <span className={`block truncate ${!selectedOption ? 'text-neutral-400' : 'text-neutral-900'}`}>
               {displayValue}
             </span>

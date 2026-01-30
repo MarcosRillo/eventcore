@@ -10,12 +10,27 @@
 import { useRouter } from 'next/navigation'
 
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
+import { useToast } from '@/shared/context'
 
 export function OrganizerEventCreateContainer() {
   const router = useRouter()
+  const { addToast } = useToast()
 
   const handleSuccess = () => {
+    addToast({
+      message: 'Evento creado correctamente como borrador.',
+      type: 'success',
+      duration: 5000
+    })
     router.push('/organizer/dashboard')
+  }
+
+  const handleError = (message: string) => {
+    addToast({
+      message,
+      type: 'error',
+      duration: 5000
+    })
   }
 
   const handleCancel = () => {
@@ -28,6 +43,7 @@ export function OrganizerEventCreateContainer() {
       <OrganizerEventFormContainer
         mode="create"
         onSuccess={handleSuccess}
+        onError={handleError}
         onCancel={handleCancel}
       />
     </div>

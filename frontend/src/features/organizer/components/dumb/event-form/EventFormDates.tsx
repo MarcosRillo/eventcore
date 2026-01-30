@@ -33,6 +33,7 @@ export const EventFormDates = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha Inicio */}
         <DateTimePicker
+          name="start_date"
           label="Fecha Inicio"
           value={formData.start_date}
           onChange={(value) => handleChange('start_date', value)}
@@ -45,6 +46,7 @@ export const EventFormDates = ({
 
         {/* Fecha Fin */}
         <DateTimePicker
+          name="end_date"
           label="Fecha Fin"
           value={formData.end_date}
           onChange={(value) => handleChange('end_date', value)}

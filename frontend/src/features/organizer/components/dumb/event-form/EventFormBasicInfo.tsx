@@ -61,6 +61,7 @@ export const EventFormBasicInfo = ({
         <div className="md:col-span-2">
           <Input
             type="text"
+            name="title"
             label="Nombre del Evento"
             value={formData.title}
             onChange={(e) => handleChange('title', e.target.value)}
@@ -88,6 +89,7 @@ export const EventFormBasicInfo = ({
 
         {/* Tipo de Evento */}
         <Select
+          name="event_type_id"
           label="Tipo de Evento"
           value={formData.event_type_id}
           onChange={handleTypeChange}
@@ -101,6 +103,7 @@ export const EventFormBasicInfo = ({
 
         {/* Subtipo de Evento */}
         <Select
+          name="event_subtype_id"
           label="Subtipo de Evento"
           value={formData.event_subtype_id}
           onChange={handleSubtypeChange}
@@ -115,6 +118,7 @@ export const EventFormBasicInfo = ({
         {/* Descripción */}
         <div className="md:col-span-2">
           <Textarea
+            name="description"
             label="Descripción"
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}

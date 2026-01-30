@@ -28,6 +28,7 @@ export interface AsyncSearchableMultiSelectProps {
   required?: boolean
   debounceMs?: number
   minChars?: number
+  name?: string
 }
 
 /**
@@ -44,6 +45,7 @@ export interface AsyncSearchableMultiSelectProps {
  * @param root0.required
  * @param root0.debounceMs
  * @param root0.minChars
+ * @param root0.name
  */
 export function AsyncSearchableMultiSelect({
   onSearch,
@@ -57,6 +59,7 @@ export function AsyncSearchableMultiSelect({
   required = false,
   debounceMs = 300,
   minChars = 2,
+  name,
 }: AsyncSearchableMultiSelectProps) {
   const [query, setQuery] = useState('')
   const [options, setOptions] = useState<SelectOption[]>([])
@@ -213,6 +216,7 @@ export function AsyncSearchableMultiSelect({
           <div className="relative">
             <ComboboxInput
               id={inputId}
+              name={name}
               className={inputClasses}
               placeholder={placeholder}
               displayValue={() => query}

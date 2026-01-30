@@ -24,6 +24,7 @@ export interface DateTimePickerProps {
   disabled?: boolean
   required?: boolean
   fullWidth?: boolean
+  name?: string
 }
 
 /**
@@ -60,6 +61,7 @@ const DateTimePicker = ({
   disabled = false,
   required = false,
   fullWidth = false,
+  name,
 }: DateTimePickerProps) => {
   const generatedId = useId()
   const inputId = `datetime-picker-${generatedId}`
@@ -175,6 +177,7 @@ const DateTimePicker = ({
       {/* Input trigger */}
       <button
         id={inputId}
+        name={name}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}

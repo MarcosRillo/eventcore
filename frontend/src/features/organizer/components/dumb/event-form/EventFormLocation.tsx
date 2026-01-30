@@ -32,6 +32,7 @@ export const EventFormLocation = ({
         {/* Ubicaciones (selección múltiple con búsqueda async) */}
         <div className="md:col-span-2">
           <AsyncSearchableMultiSelect
+            name="location_ids"
             label="Ubicaciones"
             onSearch={onSearchLocations}
             selected={formData.location_ids}
@@ -59,6 +60,7 @@ export const EventFormLocation = ({
           <>
             <Input
               type="text"
+              name="custom_location_name"
               label="Nombre del Lugar"
               value={formData.custom_location_name}
               onChange={(e) => handleChange('custom_location_name', e.target.value)}
