@@ -48,6 +48,9 @@ const createMockLoginForm = (overrides = {}) => ({
   isLoading: false,
   isValid: false,
   isDirty: false,
+  fieldErrors: {},
+  validateField: jest.fn().mockReturnValue(true),
+  getFirstErrorField: jest.fn().mockReturnValue(null),
   updateField: jest.fn(),
   setError: jest.fn(),
   submit: jest.fn(),
@@ -57,9 +60,9 @@ const createMockLoginForm = (overrides = {}) => ({
   ...overrides,
 });
 
-// Helper to get inputs by placeholder (Input component doesn't use htmlFor)
-const getEmailInput = () => screen.getByPlaceholderText('tu@ejemplo.com');
-const getPasswordInput = () => screen.getByPlaceholderText('Tu contraseña');
+// Helper to get inputs by placeholder (placeholders end with "…" - proper ellipsis)
+const getEmailInput = () => screen.getByPlaceholderText('tu@ejemplo.com…');
+const getPasswordInput = () => screen.getByPlaceholderText('Tu contraseña…');
 
 describe('LoginPage', () => {
   beforeEach(() => {
@@ -128,18 +131,20 @@ describe('LoginPage', () => {
       expect(mockUpdateField).toHaveBeenCalledWith('password', 'mypassword');
     });
 
-    it('should disable submit button when form is invalid', () => {
-      mockUseLoginForm.mockReturnValue(createMockLoginForm({ isValid: false }));
+    it('should keep submit button enabled when form is invalid (per UX guidelines)', () => {
+      mockUseLoginForm.mockReturnValue(createMockLoginForm({ isValid: false, isLoading: false }));
 
       render(<LoginPage />);
 
       const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
-      expect(submitButton).toBeDisabled();
+      // Button is now always enabled until loading (per UX guidelines)
+      expect(submitButton).not.toBeDisabled();
     });
 
-    it('should enable submit button when form is valid', () => {
+    it('should keep submit button enabled when form is valid', () => {
       mockUseLoginForm.mockReturnValue(createMockLoginForm({
         isValid: true,
+        isLoading: false,
         data: { email: 'test@example.com', password: 'Password123' }
       }));
 
@@ -179,12 +184,13 @@ describe('LoginPage', () => {
       expect(passwordInput).toBeDisabled();
     });
 
-    it('should disable submit button when loading', () => {
+    it('should disable submit button when loading and show loading text', () => {
       mockUseLoginForm.mockReturnValue(createMockLoginForm({ isLoading: true, isValid: true }));
 
       render(<LoginPage />);
 
-      const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
+      // Button text changes to "Iniciando sesión..." during loading
+      const submitButton = screen.getByRole('button', { name: /iniciando sesión/i });
       expect(submitButton).toBeDisabled();
     });
 

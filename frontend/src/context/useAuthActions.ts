@@ -116,12 +116,24 @@ export const useAuthActions = (): AuthContextType => {
 
       if (axiosError.response?.status === 401) {
         errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+      } else if (axiosError.response?.status === 403) {
+        // Account blocked
+        errorMessage = 'Tu cuenta ha sido bloqueada. Contacta a soporte para más información.';
+      } else if (axiosError.response?.status === 429) {
+        // Rate limiting
+        errorMessage = 'Demasiados intentos. Por favor, espera unos minutos antes de intentar de nuevo.';
       } else if (axiosError.response?.status === 422) {
         const errors = axiosError.response.data.errors;
         if (errors) {
           const firstError = Object.values(errors)[0];
           errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
         }
+      } else if (axiosError.response?.status === 503) {
+        // Service unavailable
+        errorMessage = 'El servicio no está disponible en este momento. Intenta más tarde.';
+      } else if (!axiosError.response) {
+        // Network error (no response from server)
+        errorMessage = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
       } else if (axiosError.response?.data?.message) {
         errorMessage = axiosError.response.data.message;
       }
