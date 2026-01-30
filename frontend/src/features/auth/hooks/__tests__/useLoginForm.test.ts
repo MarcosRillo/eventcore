@@ -205,13 +205,13 @@ describe('useLoginForm', () => {
   })
 
   describe('User Redirection', () => {
-    it('should redirect Event Organizer to /organizer/dashboard after login', async () => {
+    it('should redirect organizer_admin to /organizer/dashboard after login', async () => {
       const mockUser = {
         id: 1,
         email: 'organizer@example.com',
         role: {
           id: 2,
-          role_name: 'Event Organizer',
+          role_code: 'organizer_admin',
         },
       }
 
@@ -231,13 +231,13 @@ describe('useLoginForm', () => {
       })
     })
 
-    it('should redirect non-organizer users to /events after login', async () => {
+    it('should redirect entity roles to /internal-calendar after login', async () => {
       const mockUser = {
         id: 1,
         email: 'admin@example.com',
         role: {
           id: 1,
-          role_name: 'Entity Admin',
+          role_code: 'entity_admin',
         },
       }
 
@@ -253,7 +253,7 @@ describe('useLoginForm', () => {
       renderHook(() => useLoginForm())
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/events')
+        expect(mockPush).toHaveBeenCalledWith('/internal-calendar')
       })
     })
 

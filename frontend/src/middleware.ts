@@ -221,6 +221,17 @@ export function middleware(request: NextRequest) {
 
   // Allow public routes (no authentication required)
   if (isPublicRoute(pathname)) {
+    // Best Practice (Next.js): Redirect authenticated users away from /login
+    if (pathname === '/login') {
+      const user = getUserFromCookies(request);
+      if (user && !isTokenExpired(request)) {
+        const roleCode = getRoleCode(user);
+        if (roleCode === 'organizer_admin') {
+          return NextResponse.redirect(new URL('/organizer/dashboard', request.url));
+        }
+        return NextResponse.redirect(new URL('/internal-calendar', request.url));
+      }
+    }
     return NextResponse.next();
   }
 
@@ -272,8 +283,8 @@ export function middleware(request: NextRequest) {
   const entityRoles: UserRoleCode[] = ['entity_admin', 'entity_staff', 'platform_admin'];
   if (entityRoles.includes(roleCode)) {
     if (pathname.startsWith('/organizer')) {
-      // Trying to access Organizer routes - redirect to events
-      return NextResponse.redirect(new URL('/events', request.url));
+      // Trying to access Organizer routes - redirect to internal calendar
+      return NextResponse.redirect(new URL('/internal-calendar', request.url));
     }
   }
 
@@ -290,7 +301,7 @@ export function middleware(request: NextRequest) {
     ];
 
     if (readOnlyRestrictions.some(path => pathname.startsWith(path))) {
-      return NextResponse.redirect(new URL('/events', request.url));
+      return NextResponse.redirect(new URL('/internal-calendar', request.url));
     }
   }
 

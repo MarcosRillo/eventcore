@@ -17,11 +17,11 @@ export const useLoginForm = (): UseLoginFormReturn => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Redirigir según el rol del usuario
-      if (user.role?.role_name === 'Event Organizer') {
+      // Usar role_code (requerido) en lugar de role_name (opcional)
+      if (user.role?.role_code === 'organizer_admin') {
         router.push('/organizer/dashboard');
       } else {
-        router.push('/events');
+        router.push('/internal-calendar');
       }
     }
   }, [isAuthenticated, user, router]);
