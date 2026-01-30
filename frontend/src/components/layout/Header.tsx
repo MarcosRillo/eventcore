@@ -43,7 +43,6 @@ const Header = ({
     const routeTitles: Record<string, string> = {
       '/': 'Dashboard',
       '/event-types': 'Gestión de Tipos de Evento',
-      '/event-types/subtypes': 'Gestión de Subtipos',
       '/calendar': 'Calendario de Eventos',
       '/events': 'Gestión de Eventos',
       '/organizations': 'Gestión de Organizaciones',

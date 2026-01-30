@@ -5,7 +5,6 @@ import {
   ChevronsLeft,
   ClipboardList,
   Home,
-  Layers,
   LayoutGrid,
   Mail,
   MapPin,
@@ -78,11 +77,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           name: 'Tipos de Evento',
           href: '/event-types',
           icon: <LayoutGrid className="w-5 h-5" />,
-        },
-        {
-          name: 'Subtipos de Evento',
-          href: '/event-types/subtypes',
-          icon: <Layers className="w-5 h-5" />,
         },
         {
           name: 'Ubicaciones',
