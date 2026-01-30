@@ -567,3 +567,97 @@ body {
   background: linear-gradient(90deg, var(--color-neutral-100) 25%, var(--color-neutral-200) 50%, var(--color-neutral-100) 75%);
   background-size: 200% 100%;
 }
+
+/* ==========================================
+   LAYOUT CONSTRAINTS
+   ========================================== */
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ==========================================
+   REACT-DAY-PICKER CUSTOMIZATION
+   ========================================== */
+.rdp-root {
+  --rdp-accent-color: var(--color-primary-600);
+  --rdp-accent-background-color: var(--color-primary-100);
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  --rdp-day_button-height: 2rem;
+  --rdp-day_button-width: 2rem;
+  --rdp-disabled-opacity: 0.5;
+  --rdp-outside-opacity: 0.5;
+  --rdp-today-color: var(--color-primary-700);
+}
+
+/* Calendar background - white */
+.rdp-root {
+  background-color: white;
+}
+
+/* Month/year caption - dark text */
+.rdp-month_caption,
+.rdp-caption_label {
+  color: var(--color-neutral-900) !important;
+}
+
+/* Weekday headers (Lu, Ma, Mi...) - dark text */
+.rdp-weekday {
+  color: var(--color-neutral-700) !important;
+}
+
+/* Navigation buttons - dark */
+.rdp-button_previous,
+.rdp-button_next {
+  color: var(--color-neutral-700) !important;
+}
+
+.rdp-button_previous:hover,
+.rdp-button_next:hover {
+  background-color: var(--color-neutral-200) !important;
+}
+
+/* Day text color - dark text on light background */
+.rdp-day_button {
+  color: var(--color-neutral-900) !important;
+  background-color: transparent;
+}
+
+/* Hover state - gray background */
+.rdp-day_button:not(:disabled):hover {
+  background-color: var(--color-neutral-200) !important;
+}
+
+/* Selected day - primary background with white text */
+.rdp-selected .rdp-day_button {
+  background-color: var(--color-primary-600) !important;
+  color: white !important;
+  border-color: var(--color-primary-600) !important;
+}
+
+/* Selected day hover - slightly darker */
+.rdp-selected .rdp-day_button:hover {
+  background-color: var(--color-primary-700) !important;
+}
+
+/* Today indicator - bold with primary color */
+.rdp-today:not(.rdp-outside) .rdp-day_button {
+  font-weight: 600;
+  color: var(--color-primary-700) !important;
+}
+
+/* Today + Selected - keep white text */
+.rdp-today.rdp-selected .rdp-day_button {
+  color: white !important;
+}
+
+/* Focus visible state for keyboard navigation */
+.rdp-day_button:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
