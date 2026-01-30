@@ -345,7 +345,7 @@ describe('useEventForm', () => {
         await result.current.handleSubmit(createMockFormEvent())
       })
 
-      expect(result.current.errors.general).toBe('Error creating event')
+      expect(result.current.errors.general).toBe('Error al crear el evento')
     })
   })
 

@@ -17,7 +17,6 @@ export function ForgotPasswordPageContainer() {
     isLoading,
     error,
     success,
-    isValid,
     handleSubmit,
   } = useForgotPassword();
 
@@ -117,9 +116,10 @@ export function ForgotPasswordPageContainer() {
               label="Correo electrónico"
               type="email"
               name="email"
+              autoComplete="email"
               value={email}
               onChange={handleInputChange}
-              placeholder="tu@ejemplo.com"
+              placeholder="tu@ejemplo.com..."
               required
               disabled={isLoading}
               fullWidth
@@ -130,15 +130,15 @@ export function ForgotPasswordPageContainer() {
               }
             />
 
-            {/* Submit button */}
+            {/* Submit button - always enabled until loading */}
             <Button
               type="submit"
-              disabled={!isValid || isLoading}
+              disabled={isLoading}
               loading={isLoading}
               fullWidth
               size="lg"
             >
-              Enviar enlace de recuperación
+              {isLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
             </Button>
           </form>
 

@@ -520,7 +520,7 @@ describe('OrganizerEventForm', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByText(/error creating event/i)).toBeInTheDocument()
+        expect(screen.getByText(/error al crear el evento/i)).toBeInTheDocument()
       })
 
       // Wait for the form to be re-enabled after the transition completes

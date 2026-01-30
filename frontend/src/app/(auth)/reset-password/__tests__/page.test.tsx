@@ -39,9 +39,9 @@ const createMockResetPassword = (overrides = {}) => ({
   ...overrides,
 });
 
-// Helpers to get inputs
-const getPasswordInput = () => screen.getByPlaceholderText('Tu nueva contraseña');
-const getConfirmInput = () => screen.getByPlaceholderText('Repite tu contraseña');
+// Helpers to get inputs (placeholders end with "...")
+const getPasswordInput = () => screen.getByPlaceholderText('Tu nueva contraseña...');
+const getConfirmInput = () => screen.getByPlaceholderText('Repite tu contraseña...');
 
 describe('ResetPasswordPage', () => {
   beforeEach(() => {
@@ -156,20 +156,23 @@ describe('ResetPasswordPage', () => {
       expect(mockSetConfirmPassword).toHaveBeenCalledWith('NewPassword123');
     });
 
-    it('should disable submit button when form is invalid', () => {
+    it('should keep submit button enabled when form is invalid (allows click to trigger validation)', () => {
       mockUseResetPassword.mockReturnValue(createMockResetPassword({
         isValid: false,
+        isLoading: false,
       }));
 
       render(<ResetPasswordPage />);
 
       const submitButton = screen.getByRole('button', { name: /restablecer contraseña/i });
-      expect(submitButton).toBeDisabled();
+      // Button is now always enabled until loading starts (per UX guidelines)
+      expect(submitButton).not.toBeDisabled();
     });
 
-    it('should enable submit button when form is valid', () => {
+    it('should keep submit button enabled when form is valid', () => {
       mockUseResetPassword.mockReturnValue(createMockResetPassword({
         isValid: true,
+        isLoading: false,
       }));
 
       render(<ResetPasswordPage />);
@@ -206,7 +209,7 @@ describe('ResetPasswordPage', () => {
       expect(getConfirmInput()).toBeDisabled();
     });
 
-    it('should disable submit button when loading', () => {
+    it('should disable submit button when loading and show loading text', () => {
       mockUseResetPassword.mockReturnValue(createMockResetPassword({
         isLoading: true,
         isValid: true,
@@ -214,7 +217,8 @@ describe('ResetPasswordPage', () => {
 
       render(<ResetPasswordPage />);
 
-      const submitButton = screen.getByRole('button', { name: /restablecer contraseña/i });
+      // Button text changes to "Restableciendo..." during loading
+      const submitButton = screen.getByRole('button', { name: /restableciendo/i });
       expect(submitButton).toBeDisabled();
     });
   });

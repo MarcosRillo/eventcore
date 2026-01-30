@@ -7,13 +7,13 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react'
 
-import { useToast } from '@/components/ui/Toast'
 import { useEventActions } from '@/features/organizer/hooks/useEventActions'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
+import { useToast } from '@/shared/context'
 
 // Mock dependencies
 jest.mock('@/features/organizer/services/organizer-event.service')
-jest.mock('@/components/ui/Toast')
+jest.mock('@/shared/context')
 
 describe('useEventActions', () => {
   const mockRefresh = jest.fn()

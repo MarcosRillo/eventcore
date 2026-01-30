@@ -5,16 +5,24 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useForgotPassword } from '@/features/auth/hooks/useForgotPassword';
 import * as authService from '@/services/authService';
+import { useToast } from '@/shared/context';
 
 jest.mock('@/services/authService');
+jest.mock('@/shared/context', () => ({
+  useToast: jest.fn(),
+}));
 
 const mockForgotPassword = authService.forgotPassword as jest.MockedFunction<
   typeof authService.forgotPassword
 >;
+const mockAddToast = jest.fn();
 
 describe('useForgotPassword', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useToast as jest.Mock).mockReturnValue({
+      addToast: mockAddToast,
+    });
   });
 
   describe('initial state', () => {
@@ -94,6 +102,29 @@ describe('useForgotPassword', () => {
       expect(result.current.error).toBeNull();
     });
 
+    it('should show success toast on successful submit', async () => {
+      mockForgotPassword.mockResolvedValueOnce({
+        success: true,
+        message: 'Email sent',
+      });
+
+      const { result } = renderHook(() => useForgotPassword());
+
+      act(() => {
+        result.current.setEmail('test@example.com');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'Revisa tu correo para continuar con la recuperación.',
+        type: 'success',
+        duration: 5000,
+      });
+    });
+
     it('should set loading state during submission', async () => {
       let resolvePromise: (value: { success: boolean; message: string }) => void;
       const promise = new Promise<{ success: boolean; message: string }>((resolve) => {
@@ -137,6 +168,26 @@ describe('useForgotPassword', () => {
 
       expect(result.current.error).toBe('Error de conexión. Por favor intenta de nuevo.');
       expect(result.current.success).toBe(false);
+    });
+
+    it('should show error toast on network error', async () => {
+      mockForgotPassword.mockRejectedValueOnce(new Error('Network error'));
+
+      const { result } = renderHook(() => useForgotPassword());
+
+      act(() => {
+        result.current.setEmail('test@example.com');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'Error de conexión. Por favor intenta de nuevo.',
+        type: 'error',
+        duration: 5000,
+      });
     });
   });
 

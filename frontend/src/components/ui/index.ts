@@ -9,7 +9,7 @@ export { LoadingDots, LoadingOverlay,default as LoadingSpinner } from '@/compone
 export { default as Modal } from '@/components/ui/Modal';
 export { SearchableMultiSelect, type SearchableMultiSelectProps, type SelectOption } from '@/components/ui/SearchableMultiSelect';
 export { Tooltip } from '@/components/ui/Tooltip';
-export { Button, Checkbox, Input, Select, Textarea } from '@/shared/components/form';
+export { Button, Checkbox, Input, PasswordInput, Select, Textarea } from '@/shared/components/form';
 
 // State Components
 export { default as EmptyState, EmptyStateIcons } from '@/components/ui/EmptyState';
@@ -36,5 +36,6 @@ export { default as Card } from '@/components/ui/Card';
 export { default as ConfirmDialog } from '@/components/ui/ConfirmDialog';
 export { default as PromptDialog } from '@/components/ui/PromptDialog';
 
-// Toast Components
-export { default as Toast, ToastProvider, useToast } from '@/components/ui/Toast';
+// Toast Components - re-exported from canonical location
+export { Toast, ToastContainer } from '@/shared/components/feedback';
+export { ToastProvider, useToast } from '@/shared/context';

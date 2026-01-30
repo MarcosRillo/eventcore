@@ -10,7 +10,7 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
-import { useToast } from '@/components/ui';
+import { useToast } from '@/shared/context';
 
 // Lazy load QRCodeModal - uses qrcode.react library (heavy)
 const QRCodeModal = dynamic(

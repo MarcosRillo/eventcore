@@ -5,7 +5,9 @@
  * Displays the form for accepting an invitation
  */
 
-import { Button, Input } from '@/components/ui'
+import { useMemo } from 'react'
+
+import { Button, Input, PasswordInput } from '@/components/ui'
 
 interface InvitationInfo {
   email: string
@@ -37,16 +39,6 @@ interface AcceptInvitationFormProps {
   onSubmit: () => void
 }
 
-/**
- *
- * @param root0
- * @param root0.invitationInfo
- * @param root0.formData
- * @param root0.formErrors
- * @param root0.submitting
- * @param root0.onFieldChange
- * @param root0.onSubmit
- */
 export function AcceptInvitationForm({
   invitationInfo,
   formData,
@@ -65,17 +57,19 @@ export function AcceptInvitationForm({
     onSubmit()
   }
 
-  const isValid =
-    formData.name.trim().length >= 2 &&
-    formData.dni.trim().length >= 7 &&
-    formData.password.length >= 8 &&
-    formData.password === formData.password_confirmation
+  // Calculate password requirements
+  const passwordRequirements = useMemo(() => [
+    { label: 'Mínimo 8 caracteres', met: formData.password.length >= 8 },
+    { label: 'Al menos una mayúscula', met: /[A-Z]/.test(formData.password) },
+    { label: 'Al menos una minúscula', met: /[a-z]/.test(formData.password) },
+    { label: 'Al menos un número', met: /[0-9]/.test(formData.password) },
+  ], [formData.password])
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* General error */}
       {formErrors.general && (
-        <div className="bg-error-50 border border-error-200 rounded-md p-4">
+        <div className="bg-error-50 border border-error-200 rounded-md p-4" role="alert">
           <div className="flex">
             <svg className="w-5 h-5 text-error-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path
@@ -120,9 +114,10 @@ export function AcceptInvitationForm({
         label="Nombre completo"
         type="text"
         name="name"
+        autoComplete="name"
         value={formData.name}
         onChange={handleInputChange}
-        placeholder="Tu nombre completo"
+        placeholder="Tu nombre completo..."
         required
         disabled={submitting}
         fullWidth
@@ -144,9 +139,10 @@ export function AcceptInvitationForm({
         label="DNI"
         type="text"
         name="dni"
+        autoComplete="off"
         value={formData.dni}
         onChange={handleInputChange}
-        placeholder="Tu número de DNI"
+        placeholder="Tu número de DNI..."
         required
         disabled={submitting}
         fullWidth
@@ -164,18 +160,19 @@ export function AcceptInvitationForm({
       />
 
       {/* Password field */}
-      <Input
+      <PasswordInput
         label="Contraseña"
-        type="password"
         name="password"
+        autoComplete="new-password"
         value={formData.password}
         onChange={handleInputChange}
-        placeholder="Crea una contraseña segura"
+        placeholder="Crea una contraseña segura..."
         required
         disabled={submitting}
         fullWidth
         error={formErrors.password}
-        helperText="Mínimo 8 caracteres, una mayúscula, una minúscula y un número"
+        showRequirements
+        requirements={passwordRequirements}
         leftIcon={
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -189,13 +186,13 @@ export function AcceptInvitationForm({
       />
 
       {/* Password confirmation field */}
-      <Input
+      <PasswordInput
         label="Confirmar contraseña"
-        type="password"
         name="password_confirmation"
+        autoComplete="new-password"
         value={formData.password_confirmation}
         onChange={handleInputChange}
-        placeholder="Repite tu contraseña"
+        placeholder="Repite tu contraseña..."
         required
         disabled={submitting}
         fullWidth
@@ -212,15 +209,15 @@ export function AcceptInvitationForm({
         }
       />
 
-      {/* Submit button */}
+      {/* Submit button - always enabled until loading */}
       <Button
         type="submit"
-        disabled={!isValid || submitting}
+        disabled={submitting}
         loading={submitting}
         fullWidth
         size="lg"
       >
-        Crear mi cuenta
+        {submitting ? 'Creando cuenta...' : 'Crear mi cuenta'}
       </Button>
     </form>
   )

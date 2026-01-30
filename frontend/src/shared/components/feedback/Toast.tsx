@@ -1,12 +1,14 @@
+'use client'
+
 /**
  * Toast Component - Minimalist Design System
  * Clean notification system with auto-dismiss
  */
 
-'use client'
-
 import { Transition } from '@headlessui/react'
-import { createContext, type ReactNode,useCallback, useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import type { ToastWithId } from '@/shared/context/ToastContext'
 
 interface ToastProps {
   id: string
@@ -16,20 +18,7 @@ interface ToastProps {
   onClose: () => void
 }
 
-interface ToastConfig {
-  message: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  duration?: number
-}
-
-interface ToastContextType {
-  addToast: (config: ToastConfig) => void
-  removeToast: (id: string) => void
-}
-
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
-
-const Toast = ({ message, type, duration = 5000, onClose }: ToastProps) => {
+function Toast({ message, type, duration = 5000, onClose }: ToastProps) {
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
@@ -146,9 +135,12 @@ const Toast = ({ message, type, duration = 5000, onClose }: ToastProps) => {
   )
 }
 
-const ToastContainer = ({ toasts }: { toasts: (ToastConfig & { id: string })[] }) => {
-  const { removeToast } = useToast()
+interface ToastContainerProps {
+  toasts: ToastWithId[]
+  onRemove: (id: string) => void
+}
 
+export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   return (
     <div
       aria-live="assertive"
@@ -162,45 +154,12 @@ const ToastContainer = ({ toasts }: { toasts: (ToastConfig & { id: string })[] }
             message={toast.message}
             type={toast.type}
             duration={toast.duration}
-            onClose={() => removeToast(toast.id)}
+            onClose={() => onRemove(toast.id)}
           />
         ))}
       </div>
     </div>
   )
-}
-
-export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const [toasts, setToasts] = useState<(ToastConfig & { id: string })[]>([])
-
-  const addToast = useCallback((config: ToastConfig) => {
-    const id = crypto.randomUUID()
-    setToasts(prev => [...prev, { ...config, id }])
-  }, [])
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }, [])
-
-  const contextValue = {
-    addToast,
-    removeToast,
-  }
-
-  return (
-    <ToastContext.Provider value={contextValue}>
-      {children}
-      <ToastContainer toasts={toasts} />
-    </ToastContext.Provider>
-  )
-}
-
-export const useToast = (): ToastContextType => {
-  const context = useContext(ToastContext)
-  if (context === undefined) {
-    throw new Error('useToast must be used within a ToastProvider')
-  }
-  return context
 }
 
 export default Toast

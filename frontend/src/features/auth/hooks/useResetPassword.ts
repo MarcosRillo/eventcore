@@ -6,7 +6,8 @@ import { AxiosError } from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 
-import { resetPassword,validateResetToken } from '@/services/authService';
+import { resetPassword, validateResetToken } from '@/services/authService';
+import { useToast } from '@/shared/context';
 
 interface PasswordErrors {
   password?: string;
@@ -65,6 +66,7 @@ export const useResetPassword = (): UseResetPasswordReturn => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
   const email = searchParams.get('email') || '';
+  const { addToast } = useToast();
 
   // React 19 transitions for non-blocking UI
   const [, startValidateTransition] = useTransition();
@@ -159,25 +161,40 @@ export const useResetPassword = (): UseResetPasswordReturn => {
           password_confirmation: confirmPassword,
         });
         setSuccess(true);
+        addToast({
+          message: 'Tu contraseña ha sido restablecida exitosamente.',
+          type: 'success',
+          duration: 5000,
+        });
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
+        let errorMessage: string;
 
         // Use HTTP status codes for reliable error detection
         if (axiosError.response?.status === 400 || axiosError.response?.status === 422) {
           // Token expired, invalid, or already used
-          setError('El enlace ha expirado. Por favor solicita uno nuevo.');
+          errorMessage = 'El enlace ha expirado. Por favor solicita uno nuevo.';
+          setError(errorMessage);
           setTokenValid(false);
         } else if (axiosError.response?.data?.message) {
           // Backend provided a specific error message
-          setError(axiosError.response.data.message);
+          errorMessage = axiosError.response.data.message;
+          setError(errorMessage);
         } else {
-          setError('Error al restablecer la contraseña. Por favor intenta de nuevo.');
+          errorMessage = 'Error al restablecer la contraseña. Por favor intenta de nuevo.';
+          setError(errorMessage);
         }
+
+        addToast({
+          message: errorMessage,
+          type: 'error',
+          duration: 5000,
+        });
       } finally {
         setIsLoadingState(false);
       }
     });
-  }, [email, token, password, confirmPassword, tokenValid, validateForm, startResetTransition]);
+  }, [email, token, password, confirmPassword, tokenValid, validateForm, startResetTransition, addToast]);
 
   const reset = useCallback(() => {
     setPassword('');

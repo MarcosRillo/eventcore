@@ -6,6 +6,7 @@
 import { useCallback, useState, useTransition } from 'react';
 
 import { forgotPassword } from '@/services/authService';
+import { useToast } from '@/shared/context';
 
 interface UseForgotPasswordReturn {
   email: string;
@@ -31,6 +32,7 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
   // React 19 transition for non-blocking UI
   const [, startTransition] = useTransition();
   const [isLoadingState, setIsLoadingState] = useState(false);
+  const { addToast } = useToast();
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -53,19 +55,28 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
       try {
         await forgotPassword({ email: email.trim() });
         setSuccess(true);
+        addToast({
+          message: 'Revisa tu correo para continuar con la recuperación.',
+          type: 'success',
+          duration: 5000,
+        });
       } catch (err) {
         // Backend always returns success for security (email enumeration prevention)
         // But network errors can still occur
-        if (err instanceof Error) {
-          setError('Error de conexión. Por favor intenta de nuevo.');
-        } else {
-          setError('Error inesperado. Por favor intenta de nuevo.');
-        }
+        const errorMessage = err instanceof Error
+          ? 'Error de conexión. Por favor intenta de nuevo.'
+          : 'Error inesperado. Por favor intenta de nuevo.';
+        setError(errorMessage);
+        addToast({
+          message: errorMessage,
+          type: 'error',
+          duration: 5000,
+        });
       } finally {
         setIsLoadingState(false);
       }
     });
-  }, [email, isValid, startTransition]);
+  }, [email, isValid, startTransition, addToast]);
 
   const reset = useCallback(() => {
     setEmail('');

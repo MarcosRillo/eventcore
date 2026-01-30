@@ -3,14 +3,19 @@ import { useRouter } from 'next/navigation'
 
 import { useAuth } from '@/context/AuthContext'
 import { useLoginForm } from '@/features/auth/hooks/useLoginForm'
+import { useToast } from '@/shared/context'
 
 // Mock dependencies
 jest.mock('@/context/AuthContext')
 jest.mock('next/navigation')
+jest.mock('@/shared/context', () => ({
+  useToast: jest.fn(),
+}))
 
 const mockLogin = jest.fn()
 const mockClearError = jest.fn()
 const mockPush = jest.fn()
+const mockAddToast = jest.fn()
 
 describe('useLoginForm', () => {
   beforeEach(() => {
@@ -28,6 +33,10 @@ describe('useLoginForm', () => {
 
     ;(useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
+    })
+
+    ;(useToast as jest.Mock).mockReturnValue({
+      addToast: mockAddToast,
     })
   })
 
@@ -410,6 +419,48 @@ describe('useLoginForm', () => {
 
       expect(mockLogin).toHaveBeenCalled()
       expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('should show error toast when login fails', async () => {
+      mockLogin.mockResolvedValueOnce(false)
+
+      const { result } = renderHook(() => useLoginForm())
+
+      act(() => {
+        result.current.updateField('email', 'test@example.com')
+        result.current.updateField('password', 'wrongpassword')
+      })
+
+      await act(async () => {
+        await result.current.handleSubmit()
+      })
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'Credenciales incorrectas. Verifica tu email y contraseña.',
+        type: 'error',
+        duration: 5000,
+      })
+    })
+
+    it('should show success toast when login succeeds', async () => {
+      mockLogin.mockResolvedValueOnce(true)
+
+      const { result } = renderHook(() => useLoginForm())
+
+      act(() => {
+        result.current.updateField('email', 'test@example.com')
+        result.current.updateField('password', 'password123')
+      })
+
+      await act(async () => {
+        await result.current.handleSubmit()
+      })
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'Sesión iniciada correctamente',
+        type: 'success',
+        duration: 3000,
+      })
     })
 
     it('should handle login exception gracefully', async () => {

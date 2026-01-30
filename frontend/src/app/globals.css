@@ -90,9 +90,11 @@
   --color-warning-dark: #92400e;
   --color-warning-50: #fffbeb;
   --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;  /* borders */
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
   --color-warning-700: #b45309;
+  --color-warning-800: #92400e;  /* texto oscuro */
 
   /* Error (Red) */
   --color-error: #ef4444;
@@ -100,10 +102,12 @@
   --color-error-dark: #991b1b;
   --color-error-50: #fef2f2;
   --color-error-100: #fee2e2;
+  --color-error-200: #fecaca;   /* borders */
   --color-error-300: #fca5a5;
   --color-error-500: #ef4444;
   --color-error-600: #dc2626;
   --color-error-700: #b91c1c;
+  --color-error-800: #991b1b;   /* texto oscuro - buen contraste */
 
   /* Info (Blue - alias to primary) */
   --color-info: #3b82f6;
@@ -355,19 +359,23 @@
   --color-warning-dark: var(--color-warning-dark);
   --color-warning-50: var(--color-warning-50);
   --color-warning-100: var(--color-warning-100);
+  --color-warning-200: var(--color-warning-200);
   --color-warning-500: var(--color-warning-500);
   --color-warning-600: var(--color-warning-600);
   --color-warning-700: var(--color-warning-700);
+  --color-warning-800: var(--color-warning-800);
 
   --color-error: var(--color-error);
   --color-error-light: var(--color-error-light);
   --color-error-dark: var(--color-error-dark);
   --color-error-50: var(--color-error-50);
   --color-error-100: var(--color-error-100);
+  --color-error-200: var(--color-error-200);
   --color-error-300: var(--color-error-300);
   --color-error-500: var(--color-error-500);
   --color-error-600: var(--color-error-600);
   --color-error-700: var(--color-error-700);
+  --color-error-800: var(--color-error-800);
 
   --color-info: var(--color-info);
   --color-info-light: var(--color-info-light);

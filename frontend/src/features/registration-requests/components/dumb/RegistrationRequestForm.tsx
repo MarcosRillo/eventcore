@@ -135,9 +135,10 @@ export function RegistrationRequestForm({
             label="Nombre"
             type="text"
             name="first_name"
+            autoComplete="given-name"
             value={formData.first_name}
             onChange={handleInputChange}
-            placeholder="Tu nombre"
+            placeholder="Tu nombre..."
             required
             disabled={submitting}
             error={formErrors.first_name}
@@ -146,9 +147,10 @@ export function RegistrationRequestForm({
             label="Apellido"
             type="text"
             name="last_name"
+            autoComplete="family-name"
             value={formData.last_name}
             onChange={handleInputChange}
-            placeholder="Tu apellido"
+            placeholder="Tu apellido..."
             required
             disabled={submitting}
             error={formErrors.last_name}
@@ -157,9 +159,10 @@ export function RegistrationRequestForm({
             label="DNI"
             type="text"
             name="dni"
+            autoComplete="off"
             value={formData.dni}
             onChange={handleInputChange}
-            placeholder="12345678"
+            placeholder="12345678..."
             required
             disabled={submitting}
             error={formErrors.dni}
@@ -168,9 +171,10 @@ export function RegistrationRequestForm({
             label="Email"
             type="email"
             name="email"
+            autoComplete="email"
             value={formData.email}
             onChange={handleInputChange}
-            placeholder="tu@email.com"
+            placeholder="tu@email.com..."
             required
             disabled={submitting}
             error={formErrors.email}
@@ -179,9 +183,10 @@ export function RegistrationRequestForm({
             label="WhatsApp"
             type="text"
             name="whatsapp"
+            autoComplete="tel"
             value={formData.whatsapp}
             onChange={handleInputChange}
-            placeholder="+54 9 11 1234-5678"
+            placeholder="+54 9 11 1234-5678..."
             required
             disabled={submitting}
             error={formErrors.whatsapp}
@@ -240,9 +245,10 @@ export function RegistrationRequestForm({
             label="Nombre de la Organización"
             type="text"
             name="organization_name"
+            autoComplete="organization"
             value={formData.organization_name}
             onChange={handleInputChange}
-            placeholder="Mi Organización S.A."
+            placeholder="Mi Organización S.A...."
             required
             disabled={submitting}
             error={formErrors.organization_name}
@@ -251,9 +257,10 @@ export function RegistrationRequestForm({
             label="CUIT"
             type="text"
             name="organization_cuit"
+            autoComplete="off"
             value={formData.organization_cuit}
             onChange={handleInputChange}
-            placeholder="20-12345678-9"
+            placeholder="20-12345678-9..."
             required
             disabled={submitting}
             error={formErrors.organization_cuit}
@@ -292,9 +299,10 @@ export function RegistrationRequestForm({
             label="Sitio Web (opcional)"
             type="url"
             name="website"
+            autoComplete="url"
             value={formData.website}
             onChange={handleInputChange}
-            placeholder="https://miorganizacion.com"
+            placeholder="https://miorganizacion.com..."
             disabled={submitting}
             error={formErrors.website}
           />
@@ -379,7 +387,9 @@ export function RegistrationRequestForm({
                   : 'text-neutral-500'
               }`}
             >
-              {characterCount}/1000 caracteres (mínimo 50)
+              {characterCount < 50
+                ? `${50 - characterCount} caracteres más requeridos`
+                : `${1000 - characterCount} caracteres restantes`}
             </p>
           </div>
         </div>
@@ -422,7 +432,7 @@ export function RegistrationRequestForm({
           fullWidth
           size="lg"
         >
-          Enviar Solicitud
+          {submitting ? 'Enviando solicitud...' : 'Enviar Solicitud'}
         </Button>
         <p className="mt-4 text-xs text-neutral-500 text-center">
           Al enviar este formulario, tu solicitud será revisada por nuestro equipo.

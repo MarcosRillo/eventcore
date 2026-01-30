@@ -5,12 +5,14 @@ interface OrganizerEventFormContainerProps {
   eventId?: number
   mode?: 'create' | 'edit'
   onSuccess?: () => void
+  onError?: (message: string) => void
   onCancel?: () => void
 }
 
 export const OrganizerEventFormContainer = ({
   eventId,
   onSuccess,
+  onError,
   onCancel
 }: OrganizerEventFormContainerProps) => {
   const {
@@ -32,7 +34,7 @@ export const OrganizerEventFormContainer = ({
     removeAsynchronousDate,
     handleCustomLocationToggle,
     handleSearchLocations
-  } = useEventForm({ eventId, onSuccess, onCancel })
+  } = useEventForm({ eventId, onSuccess, onError, onCancel })
 
   return (
     <OrganizerEventForm

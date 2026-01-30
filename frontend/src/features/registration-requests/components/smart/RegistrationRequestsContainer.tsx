@@ -8,10 +8,10 @@
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect,useState } from 'react'
 
-import { useToast } from '@/components/ui'
 import { RegistrationRequestDetailPanel } from '@/features/registration-requests/components/dumb/RegistrationRequestDetail'
 import { RegistrationRequestTable } from '@/features/registration-requests/components/dumb/RegistrationRequestTable'
 import { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
+import { useToast } from '@/shared/context'
 
 // Lazy load modals - only loaded when user triggers action
 const DeleteOrganizationModal = dynamic(

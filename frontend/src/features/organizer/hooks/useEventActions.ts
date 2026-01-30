@@ -10,9 +10,9 @@
 import { AxiosError } from 'axios'
 import { useRef, useState, useTransition } from 'react'
 
-import { useToast } from '@/components/ui/Toast'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { SubmitEventError } from '@/features/organizer/types/event.types'
+import { useToast } from '@/shared/context'
 
 interface UseEventActionsReturn {
   loading: boolean

@@ -5,6 +5,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useResetPassword } from '@/features/auth/hooks/useResetPassword';
 import * as authService from '@/services/authService';
+import { useToast } from '@/shared/context';
 
 // Mock next/navigation
 const mockSearchParams = new Map<string, string>();
@@ -15,6 +16,9 @@ jest.mock('next/navigation', () => ({
 }));
 
 jest.mock('@/services/authService');
+jest.mock('@/shared/context', () => ({
+  useToast: jest.fn(),
+}));
 
 const mockValidateResetToken = authService.validateResetToken as jest.MockedFunction<
   typeof authService.validateResetToken
@@ -22,11 +26,15 @@ const mockValidateResetToken = authService.validateResetToken as jest.MockedFunc
 const mockResetPassword = authService.resetPassword as jest.MockedFunction<
   typeof authService.resetPassword
 >;
+const mockAddToast = jest.fn();
 
 describe('useResetPassword', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSearchParams.clear();
+    (useToast as jest.Mock).mockReturnValue({
+      addToast: mockAddToast,
+    });
   });
 
   describe('initial state without token', () => {
@@ -226,6 +234,35 @@ describe('useResetPassword', () => {
       expect(result.current.success).toBe(true);
     });
 
+    it('should show success toast on successful password reset', async () => {
+      mockResetPassword.mockResolvedValueOnce({
+        success: true,
+        message: 'Password reset',
+        data: { user_id: 1 },
+      });
+
+      const { result } = renderHook(() => useResetPassword());
+
+      await waitFor(() => {
+        expect(result.current.isValidating).toBe(false);
+      });
+
+      act(() => {
+        result.current.setPassword('NewPassword1');
+        result.current.setConfirmPassword('NewPassword1');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'Tu contraseña ha sido restablecida exitosamente.',
+        type: 'success',
+        duration: 5000,
+      });
+    });
+
     it('should handle reset error', async () => {
       mockResetPassword.mockRejectedValueOnce(new Error('Reset failed'));
 
@@ -246,6 +283,61 @@ describe('useResetPassword', () => {
 
       expect(result.current.success).toBe(false);
       expect(result.current.error).toContain('Error');
+    });
+
+    it('should show error toast on reset failure', async () => {
+      mockResetPassword.mockRejectedValueOnce(new Error('Reset failed'));
+
+      const { result } = renderHook(() => useResetPassword());
+
+      await waitFor(() => {
+        expect(result.current.isValidating).toBe(false);
+      });
+
+      act(() => {
+        result.current.setPassword('NewPassword1');
+        result.current.setConfirmPassword('NewPassword1');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'Error al restablecer la contraseña. Por favor intenta de nuevo.',
+        type: 'error',
+        duration: 5000,
+      });
+    });
+
+    it('should show expired token toast on 400/422 error', async () => {
+      const axiosError = {
+        response: {
+          status: 400,
+        },
+      };
+      mockResetPassword.mockRejectedValueOnce(axiosError);
+
+      const { result } = renderHook(() => useResetPassword());
+
+      await waitFor(() => {
+        expect(result.current.isValidating).toBe(false);
+      });
+
+      act(() => {
+        result.current.setPassword('NewPassword1');
+        result.current.setConfirmPassword('NewPassword1');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: 'El enlace ha expirado. Por favor solicita uno nuevo.',
+        type: 'error',
+        duration: 5000,
+      });
     });
   });
 

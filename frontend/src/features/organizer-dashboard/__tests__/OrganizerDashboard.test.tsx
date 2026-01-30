@@ -8,9 +8,9 @@
 
 import { fireEvent,render, screen } from '@testing-library/react'
 
-import { ToastProvider } from '@/components/ui/Toast'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
+import { ToastProvider } from '@/shared/context'
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

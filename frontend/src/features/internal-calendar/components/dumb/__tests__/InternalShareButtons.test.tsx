@@ -7,11 +7,11 @@
 
 import { fireEvent,render, screen } from '@testing-library/react';
 
-import { useToast } from '@/components/ui';
 import { InternalShareButtons } from '@/features/internal-calendar/components/dumb/InternalShareButtons';
+import { useToast } from '@/shared/context';
 
 // Mock useToast
-jest.mock('@/components/ui', () => ({
+jest.mock('@/shared/context', () => ({
   useToast: jest.fn(),
 }));
 

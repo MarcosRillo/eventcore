@@ -8,7 +8,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { Button, Input, LoadingSpinner } from '@/components/ui';
+import { Button, LoadingSpinner, PasswordInput } from '@/components/ui';
 import { useResetPassword } from '@/features/auth';
 
 const ResetPasswordContent = () => {
@@ -23,7 +23,6 @@ const ResetPasswordContent = () => {
     fieldErrors,
     success,
     tokenValid,
-    isValid,
     passwordRequirements,
     handleSubmit,
   } = useResetPassword();
@@ -175,55 +174,34 @@ const ResetPasswordContent = () => {
             )}
 
             {/* Password field */}
-            <div>
-              <Input
-                label="Nueva contraseña"
-                type="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tu nueva contraseña"
-                required
-                disabled={isLoading}
-                fullWidth
-                error={fieldErrors.password}
-                aria-describedby="password-requirements"
-                leftIcon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                }
-              />
-
-              {/* Password requirements */}
-              <div id="password-requirements" className="mt-2 space-y-1" role="list" aria-label="Requisitos de contraseña">
-                {passwordRequirements.map((req, index) => (
-                  <div key={index} className="flex items-center text-xs" role="listitem">
-                    {req.met ? (
-                      <svg className="w-4 h-4 text-success-500 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 text-neutral-300 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                    <span className={req.met ? 'text-success-600' : 'text-neutral-500'}>
-                      {req.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <PasswordInput
+              label="Nueva contraseña"
+              name="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Tu nueva contraseña..."
+              required
+              disabled={isLoading}
+              fullWidth
+              error={fieldErrors.password}
+              showRequirements
+              requirements={passwordRequirements}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              }
+            />
 
             {/* Confirm password field */}
-            <Input
+            <PasswordInput
               label="Confirmar contraseña"
-              type="password"
               name="confirmPassword"
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repite tu contraseña"
+              placeholder="Repite tu contraseña..."
               required
               disabled={isLoading}
               fullWidth
@@ -235,15 +213,15 @@ const ResetPasswordContent = () => {
               }
             />
 
-            {/* Submit button */}
+            {/* Submit button - always enabled until loading */}
             <Button
               type="submit"
-              disabled={!isValid || isLoading}
+              disabled={isLoading}
               loading={isLoading}
               fullWidth
               size="lg"
             >
-              Restablecer contraseña
+              {isLoading ? 'Restableciendo...' : 'Restablecer contraseña'}
             </Button>
           </form>
 

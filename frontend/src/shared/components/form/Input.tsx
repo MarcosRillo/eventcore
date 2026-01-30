@@ -143,6 +143,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
           id={`${inputId}-error`}
           className="mt-1.5 text-sm text-error-600 flex items-center gap-1"
           role="alert"
+          aria-live="polite"
         >
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path

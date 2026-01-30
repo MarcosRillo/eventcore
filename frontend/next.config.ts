@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       'lucide-react',
       '@/components/ui',
+      '@/shared/components/form',
       '@/features/events',
       '@/features/auth',
       '@/features/appearance',

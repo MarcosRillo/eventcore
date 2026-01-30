@@ -28,8 +28,8 @@ const createMockForgotPassword = (overrides = {}) => ({
   ...overrides,
 });
 
-// Helper to get email input
-const getEmailInput = () => screen.getByPlaceholderText('tu@ejemplo.com');
+// Helper to get email input (placeholder ends with "...")
+const getEmailInput = () => screen.getByPlaceholderText('tu@ejemplo.com...');
 
 describe('ForgotPasswordPage', () => {
   beforeEach(() => {
@@ -119,18 +119,20 @@ describe('ForgotPasswordPage', () => {
       expect(mockSetEmail).toHaveBeenCalledWith('test@example.com');
     });
 
-    it('should disable submit button when form is invalid', () => {
-      mockUseForgotPassword.mockReturnValue(createMockForgotPassword({ isValid: false }));
+    it('should keep submit button enabled when form is invalid (per UX guidelines)', () => {
+      mockUseForgotPassword.mockReturnValue(createMockForgotPassword({ isValid: false, isLoading: false }));
 
       render(<ForgotPasswordPage />);
 
       const submitButton = screen.getByRole('button', { name: /enviar enlace/i });
-      expect(submitButton).toBeDisabled();
+      // Button is now always enabled until loading (per UX guidelines)
+      expect(submitButton).not.toBeDisabled();
     });
 
-    it('should enable submit button when form is valid', () => {
+    it('should keep submit button enabled when form is valid', () => {
       mockUseForgotPassword.mockReturnValue(createMockForgotPassword({
         isValid: true,
+        isLoading: false,
         email: 'test@example.com',
       }));
 
@@ -166,7 +168,7 @@ describe('ForgotPasswordPage', () => {
       expect(emailInput).toBeDisabled();
     });
 
-    it('should disable submit button when loading', () => {
+    it('should disable submit button when loading and show loading text', () => {
       mockUseForgotPassword.mockReturnValue(createMockForgotPassword({
         isLoading: true,
         isValid: true,
@@ -174,7 +176,8 @@ describe('ForgotPasswordPage', () => {
 
       render(<ForgotPasswordPage />);
 
-      const submitButton = screen.getByRole('button', { name: /enviar enlace/i });
+      // Button text changes to "Enviando..." during loading
+      const submitButton = screen.getByRole('button', { name: /enviando/i });
       expect(submitButton).toBeDisabled();
     });
   });

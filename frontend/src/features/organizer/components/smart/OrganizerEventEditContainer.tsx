@@ -10,8 +10,8 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { useToast } from '@/components/ui/Toast'
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
+import { useToast } from '@/shared/context'
 
 interface OrganizerEventEditContainerProps {
   eventId: number
@@ -28,6 +28,14 @@ export function OrganizerEventEditContainer({ eventId }: OrganizerEventEditConta
       duration: 6000
     })
     router.push(`/organizer/${eventId}`)
+  }
+
+  const handleError = (message: string) => {
+    addToast({
+      message,
+      type: 'error',
+      duration: 5000
+    })
   }
 
   const handleCancel = () => {
@@ -54,6 +62,7 @@ export function OrganizerEventEditContainer({ eventId }: OrganizerEventEditConta
         eventId={eventId}
         mode="edit"
         onSuccess={handleSuccess}
+        onError={handleError}
         onCancel={handleCancel}
       />
     </div>

@@ -291,16 +291,16 @@ describe('RegistrationRequestForm', () => {
   })
 
   describe('Character Counter', () => {
-    test('displays character count for motivation', () => {
+    test('displays character count for motivation - shows remaining when below minimum', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
-      expect(screen.getByText(/0\/1000 caracteres/i)).toBeInTheDocument()
-      expect(screen.getByText(/mínimo 50/i)).toBeInTheDocument()
+      // When empty (0 chars), shows "50 caracteres más requeridos"
+      expect(screen.getByText(/50 caracteres más requeridos/i)).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/describe brevemente/i)).toBeInTheDocument()
       expect(screen.getByText('Motivación')).toBeInTheDocument()
     })
 
-    test('updates character count when motivation changes', () => {
+    test('updates character count when motivation changes - shows remaining', () => {
       const formDataWithMotivation = {
         ...defaultFormData,
         motivation: 'A'.repeat(100)
@@ -308,10 +308,10 @@ describe('RegistrationRequestForm', () => {
 
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithMotivation} />)
 
-      expect(screen.getByText(/100\/1000 caracteres/i)).toBeInTheDocument()
+      // 100 chars means 900 remaining
+      expect(screen.getByText(/900 caracteres restantes/i)).toBeInTheDocument()
       expect(screen.getByDisplayValue('A'.repeat(100))).toBeInTheDocument()
       expect(formDataWithMotivation.motivation.length).toBe(100)
-      expect(screen.getByText(/mínimo 50/i)).toBeInTheDocument()
     })
 
     test('shows error styling when character count is below minimum', () => {
@@ -322,7 +322,8 @@ describe('RegistrationRequestForm', () => {
 
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithShortMotivation} />)
 
-      const counter = screen.getByText(/5\/1000 caracteres/i)
+      // 5 chars means 45 more required
+      const counter = screen.getByText(/45 caracteres más requeridos/i)
       expect(counter).toHaveClass('text-error-500')
       expect(formDataWithShortMotivation.motivation.length).toBe(5)
       expect(formDataWithShortMotivation.motivation.length).toBeLessThan(50)
@@ -337,7 +338,8 @@ describe('RegistrationRequestForm', () => {
 
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithLongMotivation} />)
 
-      const counter = screen.getByText(/1001\/1000 caracteres/i)
+      // 1001 chars means -1 remaining (negative)
+      const counter = screen.getByText(/-1 caracteres restantes/i)
       expect(counter).toHaveClass('text-error-500')
       expect(formDataWithLongMotivation.motivation.length).toBe(1001)
       expect(formDataWithLongMotivation.motivation.length).toBeGreaterThan(1000)
@@ -351,7 +353,8 @@ describe('RegistrationRequestForm', () => {
 
       render(<RegistrationRequestForm {...defaultProps} formData={formDataWithValidMotivation} />)
 
-      const counter = screen.getByText(/100\/1000 caracteres/i)
+      // 100 chars means 900 remaining
+      const counter = screen.getByText(/900 caracteres restantes/i)
       expect(counter).toHaveClass('text-neutral-500')
       expect(formDataWithValidMotivation.motivation.length).toBeGreaterThanOrEqual(50)
       expect(formDataWithValidMotivation.motivation.length).toBeLessThanOrEqual(1000)
@@ -398,7 +401,8 @@ describe('RegistrationRequestForm', () => {
         />
       )
 
-      const submitButton = screen.getByRole('button', { name: /enviar solicitud/i })
+      // Button text changes to "Enviando solicitud..." while submitting
+      const submitButton = screen.getByRole('button', { name: /enviando solicitud/i })
       expect(submitButton).toBeDisabled()
       expect(submitButton).toBeInTheDocument()
       expect(screen.getByRole('checkbox')).toBeDisabled()
@@ -552,7 +556,8 @@ describe('RegistrationRequestForm', () => {
       const removeButton = screen.getByRole('button', { name: /eliminar/i })
       expect(removeButton).toBeDisabled()
       expect(screen.getByAltText(/vista previa de foto de perfil/i)).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /enviar solicitud/i })).toBeDisabled()
+      // Button text changes to "Enviando solicitud..." while submitting
+      expect(screen.getByRole('button', { name: /enviando solicitud/i })).toBeDisabled()
       expect(formDataWithFiles.profile_photo).not.toBeNull()
     })
   })
