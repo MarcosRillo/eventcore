@@ -3,6 +3,7 @@
  * Exports for the event types and subtypes management feature
  *
  * Created: December 2, 2025
+ * Updated: January 2026 - Unified types + subtypes view
  */
 
 // Services
@@ -32,12 +33,14 @@ export {
 } from '@/features/event-types/services/eventType.service';
 
 // Hooks
-export { useEventSubtypeManager } from '@/features/event-types/hooks/useEventSubtypeManager';
 export { useEventTypeManager } from '@/features/event-types/hooks/useEventTypeManager';
+export { useEventTypeWithSubtypes } from '@/features/event-types/hooks/useEventTypeWithSubtypes';
 
 // Components - Smart
-export { EventSubtypeTableContainer } from '@/features/event-types/components/smart/EventSubtypeTableContainer';
 export { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer';
+
+// Components - Dumb
+export { SubtypeRowsContent } from '@/features/event-types/components/dumb/SubtypeRowsContent';
 
 // Components - Modals
 export { default as CreateEventSubtypeModal } from '@/features/event-types/components/CreateEventSubtypeModal';

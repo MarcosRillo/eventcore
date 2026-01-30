@@ -1,9 +1,11 @@
-'use client'
+'use client';
 
 /**
  * Event Types Page Container
- * Main admin page for event type management with full CRUD operations
- * This component is "dumb" - it only renders data from the useEventTypeManager hook
+ * Main admin page for unified event type and subtype management
+ * Uses expandable table for inline subtype display and CRUD
+ *
+ * Updated: January 2026 - Unified types + subtypes view
  */
 
 import {
@@ -13,20 +15,24 @@ import {
   Tag,
   X,
   XCircle,
-} from 'lucide-react'
-import { useState } from 'react'
+} from 'lucide-react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
-import { Button, Input, LoadingSpinner, Select } from '@/components/ui'
-import {
-  CreateEventTypeModal,
-  EditEventTypeModal,
-  EventTypeTableContainer,
-  useEventTypeManager,
-} from '@/features/event-types'
-import { EventType, EventTypeFilterStatus } from '@/types/eventType.types'
+import { Button, ConfirmDialog, Input, LoadingSpinner, Select } from '@/components/ui';
+import CreateEventSubtypeModal from '@/features/event-types/components/CreateEventSubtypeModal';
+import CreateEventTypeModal from '@/features/event-types/components/CreateEventTypeModal';
+import EditEventSubtypeModal from '@/features/event-types/components/EditEventSubtypeModal';
+import EditEventTypeModal from '@/features/event-types/components/EditEventTypeModal';
+import { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer';
+import { useEventTypeWithSubtypes } from '@/features/event-types/hooks/useEventTypeWithSubtypes';
+import { EventSubtype, EventType, EventTypeFilterStatus } from '@/types/eventType.types';
 
 export function EventTypesPageContainer() {
-  // Use the custom hook - all values are guaranteed to be safe
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Use the combined hook for types + subtypes
   const {
     eventTypes,
     pagination,
@@ -40,49 +46,153 @@ export function EventTypesPageContainer() {
     handleDeleteEventType,
     refreshData,
     stats,
-  } = useEventTypeManager()
+    // Subtypes
+    subtypesByType,
+    loadingSubtypes,
+    // Expansion
+    expandedTypeIds,
+    toggleExpand,
+    // Subtype CRUD
+    handleUpdateSubtype,
+    handleDeleteSubtype,
+    // URL sync
+    setInitialExpandedIds,
+  } = useEventTypeWithSubtypes();
 
-  // Modal states
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
-  const [selectedEventType, setSelectedEventType] = useState<EventType | null>(
-    null
-  )
+  // Event Type Modal states
+  const [isCreateTypeModalOpen, setIsCreateTypeModalOpen] = useState(false);
+  const [isEditTypeModalOpen, setIsEditTypeModalOpen] = useState(false);
+  const [selectedEventType, setSelectedEventType] = useState<EventType | null>(null);
 
-  // Handle event type creation success
-  const handleCreateSuccess = (): void => {
-    refreshData()
-  }
+  // Subtype Modal states
+  const [isCreateSubtypeModalOpen, setIsCreateSubtypeModalOpen] = useState(false);
+  const [isEditSubtypeModalOpen, setIsEditSubtypeModalOpen] = useState(false);
+  const [selectedSubtype, setSelectedSubtype] = useState<EventSubtype | null>(null);
+  const [parentTypeForSubtype, setParentTypeForSubtype] = useState<EventType | null>(null);
 
-  // Handle event type edit
-  const handleEditEventType = (eventType: EventType): void => {
-    setSelectedEventType(eventType)
-    setIsEditModalOpen(true)
-  }
+  // Subtype delete confirmation
+  const [subtypeToDelete, setSubtypeToDelete] = useState<EventSubtype | null>(null);
 
-  // Handle edit success
-  const handleEditSuccess = (): void => {
-    refreshData()
-    setSelectedEventType(null)
-  }
-
-  // Handle modal close
-  const handleCloseModals = (): void => {
-    setIsCreateModalOpen(false)
-    setIsEditModalOpen(false)
-    setSelectedEventType(null)
-  }
-
-  // Handle delete
-  const handleDelete = async (
-    eventTypeId: number
-  ): Promise<void> => {
-    try {
-      await handleDeleteEventType(eventTypeId)
-    } catch {
-      // Error is handled by the hook
+  // Parse expanded IDs from URL on mount
+  useEffect(() => {
+    const expandedParam = searchParams.get('expanded');
+    if (expandedParam) {
+      const ids = expandedParam
+        .split(',')
+        .map(Number)
+        .filter((n) => !isNaN(n) && n > 0);
+      setInitialExpandedIds(ids);
     }
-  }
+  }, [searchParams, setInitialExpandedIds]);
+
+  // Sync expanded IDs to URL (shallow routing)
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (expandedTypeIds.size > 0) {
+      params.set('expanded', Array.from(expandedTypeIds).join(','));
+    } else {
+      params.delete('expanded');
+    }
+
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname;
+
+    // Use pushState for shallow routing (no full page reload)
+    window.history.replaceState(null, '', newUrl);
+  }, [expandedTypeIds, pathname, searchParams]);
+
+  // Event Type handlers
+  const handleCreateTypeSuccess = useCallback(() => {
+    refreshData();
+  }, [refreshData]);
+
+  const handleEditEventType = useCallback((eventType: EventType) => {
+    setSelectedEventType(eventType);
+    setIsEditTypeModalOpen(true);
+  }, []);
+
+  const handleEditTypeSuccess = useCallback(() => {
+    refreshData();
+    setSelectedEventType(null);
+  }, [refreshData]);
+
+  const handleCloseTypeModals = useCallback(() => {
+    setIsCreateTypeModalOpen(false);
+    setIsEditTypeModalOpen(false);
+    setSelectedEventType(null);
+  }, []);
+
+  const handleDelete = useCallback(
+    async (eventTypeId: number) => {
+      try {
+        await handleDeleteEventType(eventTypeId);
+      } catch {
+        // Error handled by hook
+      }
+    },
+    [handleDeleteEventType]
+  );
+
+  // Subtype handlers
+  const handleOpenCreateSubtypeModal = useCallback((eventType: EventType) => {
+    setParentTypeForSubtype(eventType);
+    setIsCreateSubtypeModalOpen(true);
+  }, []);
+
+  const handleCreateSubtypeSuccess = useCallback(async () => {
+    if (parentTypeForSubtype) {
+      // Refresh subtypes for this type
+      refreshData();
+    }
+    setIsCreateSubtypeModalOpen(false);
+    setParentTypeForSubtype(null);
+  }, [parentTypeForSubtype, refreshData]);
+
+  const handleEditSubtype = useCallback((subtype: EventSubtype) => {
+    setSelectedSubtype(subtype);
+    setIsEditSubtypeModalOpen(true);
+  }, []);
+
+  const handleEditSubtypeSuccess = useCallback(() => {
+    if (selectedSubtype) {
+      handleUpdateSubtype(selectedSubtype, {
+        name: selectedSubtype.name,
+        is_active: selectedSubtype.is_active,
+      }).catch(() => {
+        // Error handled silently, modal will close
+      });
+    }
+    refreshData();
+    setIsEditSubtypeModalOpen(false);
+    setSelectedSubtype(null);
+  }, [selectedSubtype, handleUpdateSubtype, refreshData]);
+
+  const handleCloseSubtypeModals = useCallback(() => {
+    setIsCreateSubtypeModalOpen(false);
+    setIsEditSubtypeModalOpen(false);
+    setSelectedSubtype(null);
+    setParentTypeForSubtype(null);
+  }, []);
+
+  const handleRequestDeleteSubtype = useCallback((subtype: EventSubtype) => {
+    setSubtypeToDelete(subtype);
+  }, []);
+
+  const handleConfirmDeleteSubtype = useCallback(async () => {
+    if (subtypeToDelete) {
+      try {
+        await handleDeleteSubtype(subtypeToDelete);
+      } catch {
+        // Error handled by hook
+      }
+      setSubtypeToDelete(null);
+    }
+  }, [subtypeToDelete, handleDeleteSubtype]);
+
+  const handleCancelDeleteSubtype = useCallback(() => {
+    setSubtypeToDelete(null);
+  }, []);
 
   // Show loading spinner while data is loading
   if (isLoading) {
@@ -90,7 +200,7 @@ export function EventTypesPageContainer() {
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="xl" text="Cargando tipos de evento..." />
       </div>
-    )
+    );
   }
 
   return (
@@ -104,12 +214,12 @@ export function EventTypesPageContainer() {
                 Gestión de Tipos de Evento
               </h1>
               <p className="mt-2 text-neutral-600">
-                Organiza y administra los tipos de evento. Cada tipo puede tener
-                múltiples subtipos.
+                Organiza y administra los tipos de evento. Haz clic en una fila
+                para ver y gestionar sus subtipos.
               </p>
             </div>
             <Button
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => setIsCreateTypeModalOpen(true)}
               leftIcon={<Plus className="w-5 h-5" />}
             >
               Nuevo Tipo
@@ -229,7 +339,7 @@ export function EventTypesPageContainer() {
           </div>
         )}
 
-        {/* Event Types Table */}
+        {/* Event Types Table with Expandable Subtypes */}
         {!isLoading && (
           <EventTypeTableContainer
             eventTypes={eventTypes}
@@ -238,6 +348,15 @@ export function EventTypesPageContainer() {
             onDelete={handleDelete}
             onPageChange={handlePageChange}
             loading={false}
+            // Expansion props
+            expandedTypeIds={expandedTypeIds}
+            onToggleExpand={toggleExpand}
+            loadingSubtypes={loadingSubtypes}
+            subtypesByType={subtypesByType}
+            // Subtype handlers
+            onEditSubtype={handleEditSubtype}
+            onDeleteSubtype={handleRequestDeleteSubtype}
+            onCreateSubtype={handleOpenCreateSubtypeModal}
           />
         )}
 
@@ -252,28 +371,57 @@ export function EventTypesPageContainer() {
               Crea tu primer tipo de evento para comenzar a organizar tu
               calendario
             </p>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Button onClick={() => setIsCreateTypeModalOpen(true)}>
               Crear Primer Tipo de Evento
             </Button>
           </div>
         )}
 
-        {/* Modals */}
+        {/* Event Type Modals */}
         <CreateEventTypeModal
-          isOpen={isCreateModalOpen}
-          onClose={handleCloseModals}
-          onSuccess={handleCreateSuccess}
+          isOpen={isCreateTypeModalOpen}
+          onClose={handleCloseTypeModals}
+          onSuccess={handleCreateTypeSuccess}
           onEventTypeCreated={refreshData}
         />
 
         <EditEventTypeModal
-          isOpen={isEditModalOpen}
-          onClose={handleCloseModals}
-          onSuccess={handleEditSuccess}
+          isOpen={isEditTypeModalOpen}
+          onClose={handleCloseTypeModals}
+          onSuccess={handleEditTypeSuccess}
           eventType={selectedEventType}
           onEventTypeUpdated={refreshData}
         />
+
+        {/* Subtype Modals */}
+        {parentTypeForSubtype && (
+          <CreateEventSubtypeModal
+            isOpen={isCreateSubtypeModalOpen}
+            onClose={handleCloseSubtypeModals}
+            onSuccess={handleCreateSubtypeSuccess}
+            eventTypeId={parentTypeForSubtype.id}
+            eventTypeName={parentTypeForSubtype.name}
+            onSubtypeCreated={refreshData}
+          />
+        )}
+
+        <EditEventSubtypeModal
+          isOpen={isEditSubtypeModalOpen}
+          onClose={handleCloseSubtypeModals}
+          onSuccess={handleEditSubtypeSuccess}
+          eventSubtype={selectedSubtype}
+          onSubtypeUpdated={refreshData}
+        />
+
+        {/* Subtype Delete Confirmation */}
+        <ConfirmDialog
+          isOpen={subtypeToDelete !== null}
+          title="Confirmar Eliminación"
+          message={`¿Estás seguro de que quieres eliminar el subtipo "${subtypeToDelete?.name}"? Esta acción no se puede deshacer.`}
+          onConfirm={handleConfirmDeleteSubtype}
+          onCancel={handleCancelDeleteSubtype}
+        />
       </div>
     </div>
-  )
+  );
 }

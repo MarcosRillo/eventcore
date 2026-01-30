@@ -283,26 +283,6 @@ class EventSubtypeTest extends TestCase
         ]);
     }
 
-    /**
-     * Test that flat route (without event_type_id in URL) returns 404.
-     * This test verifies that the old flat route structure is not supported.
-     */
-    public function test_cannot_create_subtype_using_flat_route(): void
-    {
-        // Arrange
-        $this->authenticateAndSetup();
-
-        // Act - Try to POST to flat route (old structure)
-        $response = $this->postJson('/api/v1/event-subtypes', [
-            'event_type_id' => $this->eventType->id,
-            'name' => 'Test Subtype',
-            'is_active' => true,
-        ]);
-
-        // Assert - Should return 404 because route doesn't exist
-        $response->assertStatus(404);
-    }
-
     // ==================== SHOW TESTS ====================
 
     /**

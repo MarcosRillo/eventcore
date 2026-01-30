@@ -1,26 +1,26 @@
 /**
  * EventType Table Container - Smart Component
- * Uses GenericTable with custom column renderers for event types
+ * Uses ExpandableTable with inline subtypes display
  * Handles business logic, state management, and configuration
  *
  * Created: December 2, 2025
+ * Updated: January 2026 - Migrated to ExpandableTable with subtypes
  */
 
 'use client';
 
-import { List,Pencil, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback,useMemo, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { SubtypeRowsContent } from '@/features/event-types/components/dumb/SubtypeRowsContent';
 import {
   ConfirmDialogData,
-  GenericTable,
+  ExpandableTable,
   TableActionConfig,
   TableColumnConfig,
 } from '@/shared/components/tables';
 import { PaginationMeta } from '@/types/api-response.types';
-import { EventType } from '@/types/eventType.types';
-
+import { EventSubtype, EventType } from '@/types/eventType.types';
 
 // Re-export types for backward compatibility
 export type EventTypeColumnConfig = TableColumnConfig<EventType>;
@@ -34,6 +34,17 @@ interface EventTypeTableContainerProps {
   onDelete: (eventTypeId: number, eventTypeName: string) => void;
   onPageChange: (page: number) => void;
   loading?: boolean;
+
+  // Expansion props
+  expandedTypeIds: Set<number>;
+  onToggleExpand: (typeId: number) => void;
+  loadingSubtypes: Set<number>;
+  subtypesByType: Map<number, EventSubtype[]>;
+
+  // Subtype handlers
+  onEditSubtype: (subtype: EventSubtype) => void;
+  onDeleteSubtype: (subtype: EventSubtype) => void;
+  onCreateSubtype: (eventType: EventType) => void;
 }
 
 const BADGE_BASE_CLASSES =
@@ -46,9 +57,14 @@ export const EventTypeTableContainer = ({
   onDelete,
   onPageChange,
   loading = false,
+  expandedTypeIds,
+  onToggleExpand,
+  loadingSubtypes,
+  subtypesByType,
+  onEditSubtype,
+  onDeleteSubtype,
+  onCreateSubtype,
 }: EventTypeTableContainerProps) => {
-  const router = useRouter();
-
   // Confirm dialog state
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogData>({
     isOpen: false,
@@ -69,14 +85,6 @@ export const EventTypeTableContainer = ({
       return dateString;
     }
   }, []);
-
-  // Navigate to subtypes page
-  const handleViewSubtypes = useCallback(
-    (eventType: EventType) => {
-      router.push(`/event-types/${eventType.id}/subtypes`);
-    },
-    [router]
-  );
 
   // Delete event type handler with confirmation
   const handleDeleteEventType = useCallback(
@@ -116,7 +124,9 @@ export const EventTypeTableContainer = ({
         label: 'Tipo de Evento',
         render: (eventType) => (
           <div className="flex flex-col">
-            <span className="font-medium text-neutral-900">{eventType.name}</span>
+            <span className="font-medium text-neutral-900">
+              {eventType.name}
+            </span>
           </div>
         ),
       },
@@ -160,16 +170,9 @@ export const EventTypeTableContainer = ({
     [formatDate]
   );
 
-  // Action configuration
+  // Action configuration - removed "Ver Subtipos" since expansion handles it
   const actions = useMemo(
     (): TableActionConfig<EventType>[] => [
-      {
-        key: 'subtypes',
-        label: 'Subtipos',
-        icon: <List className="w-5 h-5" />,
-        variant: 'secondary',
-        onClick: handleViewSubtypes,
-      },
       {
         key: 'edit',
         label: 'Editar',
@@ -185,7 +188,7 @@ export const EventTypeTableContainer = ({
         onClick: handleDeleteEventType,
       },
     ],
-    [onEdit, handleDeleteEventType, handleViewSubtypes]
+    [onEdit, handleDeleteEventType]
   );
 
   // Close confirm dialog handler
@@ -193,8 +196,49 @@ export const EventTypeTableContainer = ({
     setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
+  // Get item ID for expandable table
+  const getItemId = useCallback((eventType: EventType) => eventType.id, []);
+
+  // Handle toggle expand with number type
+  const handleToggleExpand = useCallback(
+    (id: string | number) => {
+      onToggleExpand(typeof id === 'string' ? parseInt(id, 10) : id);
+    },
+    [onToggleExpand]
+  );
+
+  // Render expanded content for an event type
+  const renderExpandedContent = useCallback(
+    (eventType: EventType) => {
+      const subtypes = subtypesByType.get(eventType.id) || [];
+      const isLoadingSubtypes = loadingSubtypes.has(eventType.id);
+
+      return (
+        <SubtypeRowsContent
+          subtypes={subtypes}
+          isLoading={isLoadingSubtypes}
+          onEdit={onEditSubtype}
+          onDelete={onDeleteSubtype}
+          onCreateNew={() => onCreateSubtype(eventType)}
+        />
+      );
+    },
+    [subtypesByType, loadingSubtypes, onEditSubtype, onDeleteSubtype, onCreateSubtype]
+  );
+
+  // Convert number Set to string | number Set for ExpandableTable
+  const expandedIdsAsGeneric = useMemo(
+    () => expandedTypeIds as Set<string | number>,
+    [expandedTypeIds]
+  );
+
+  const loadingSubtypesAsGeneric = useMemo(
+    () => loadingSubtypes as Set<string | number>,
+    [loadingSubtypes]
+  );
+
   return (
-    <GenericTable<EventType>
+    <ExpandableTable<EventType>
       items={eventTypes}
       columns={columns}
       actions={actions}
@@ -205,6 +249,11 @@ export const EventTypeTableContainer = ({
       confirmDialog={confirmDialog}
       onCloseConfirmDialog={handleCloseConfirmDialog}
       testId="event-type-table"
+      getItemId={getItemId}
+      renderExpandedContent={renderExpandedContent}
+      expandedIds={expandedIdsAsGeneric}
+      onToggleExpand={handleToggleExpand}
+      loadingExpandedIds={loadingSubtypesAsGeneric}
     />
   );
 };

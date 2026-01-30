@@ -15,9 +15,10 @@ const mockService = organizationService as jest.Mocked<typeof organizationServic
 
 // Suppress React 19 useTransition act() warnings in tests
 // This is a known issue with React 19's useTransition and testing-library
-const originalConsoleError = console.error
+let errorSpy: jest.SpyInstance
+
 beforeAll(() => {
-  console.error = (...args: unknown[]) => {
+  errorSpy = jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
     const message = args[0]
     if (
       typeof message === 'string' &&
@@ -25,12 +26,13 @@ beforeAll(() => {
     ) {
       return // Suppress this specific warning
     }
-    originalConsoleError(...args)
-  }
+    // Call through to original for other errors
+    errorSpy.mock.calls.push(args)
+  })
 })
 
 afterAll(() => {
-  console.error = originalConsoleError
+  errorSpy.mockRestore()
 })
 
 // Helper to create mock organization

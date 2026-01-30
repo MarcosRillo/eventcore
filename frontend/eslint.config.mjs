@@ -170,7 +170,8 @@ const eslintConfig = [
   {
     files: ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
     rules: {
-      "no-console": "off" // Tests can use console for debugging
+      // Block ALL console.* in tests - no debugging statements allowed
+      "no-console": "error"
     }
   }
 ];
