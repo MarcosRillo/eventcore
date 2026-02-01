@@ -258,6 +258,7 @@ describe('useRegistrationRequest', () => {
       organization_cuit: '20-12345678-9',
       organization_sector: 'hotel',
       motivation: 'Quiero publicar eventos turísticos en la plataforma para promocionar mi negocio.',
+      accepted_terms: true,
     }
 
     it('should not submit if validation fails', async () => {

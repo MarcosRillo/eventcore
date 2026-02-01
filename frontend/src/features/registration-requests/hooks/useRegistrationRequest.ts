@@ -22,7 +22,7 @@ interface UseRegistrationRequestReturn {
   success: boolean
 
   // Actions
-  updateField: (field: keyof RegistrationRequestFormData, value: string | File | null) => void
+  updateField: (field: keyof RegistrationRequestFormData, value: string | File | null | boolean) => void
   submitForm: () => Promise<void>
   resetForm: () => void
   clearErrors: () => void
@@ -72,6 +72,20 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
   const [formErrors, setFormErrors] = useState<RegistrationRequestFormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  /**
+   * Scroll to and focus the first field with an error
+   */
+  const scrollToFirstError = useCallback((errors: RegistrationRequestFormErrors): void => {
+    const firstErrorField = Object.keys(errors)[0]
+    if (!firstErrorField) return
+
+    const element = document.querySelector(`[name="${firstErrorField}"]`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      ;(element as HTMLElement).focus?.()
+    }
+  }, [])
 
   /**
    * Validate all form fields
@@ -167,15 +181,26 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
       }
     }
 
+    // Terms acceptance validation
+    if (!formData.accepted_terms) {
+      errors.accepted_terms = 'Debes aceptar los términos y condiciones'
+    }
+
     setFormErrors(errors)
+
+    // Scroll to first error if validation fails
+    if (Object.keys(errors).length > 0) {
+      scrollToFirstError(errors)
+    }
+
     return Object.keys(errors).length === 0
-  }, [formData])
+  }, [formData, scrollToFirstError])
 
   /**
    * Update a single form field
    */
   const updateField = useCallback(
-    (field: keyof RegistrationRequestFormData, value: string | File | null): void => {
+    (field: keyof RegistrationRequestFormData, value: string | File | null | boolean): void => {
       setFormData((prev) => ({ ...prev, [field]: value }))
       // Clear error for the field being updated
       setFormErrors((prev) => ({ ...prev, [field]: undefined }))
@@ -242,7 +267,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
         setIsSubmitting(false)
       }
     })
-  }, [formData, validateForm, startTransition])
+  }, [formData, validateForm])
 
   /**
    * Reset form to initial state

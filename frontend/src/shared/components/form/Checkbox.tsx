@@ -3,18 +3,19 @@
  * Clean checkbox with label and description support
  */
 
-import { type ChangeEvent,useId } from 'react'
+import { type ChangeEvent,type ReactNode, useId } from 'react'
 
 interface CheckboxProps {
   id?: string
   name?: string
-  label?: string
+  label?: ReactNode
   checked: boolean
   onChange: (checked: boolean) => void
   disabled?: boolean
   error?: string
   className?: string
   description?: string
+  required?: boolean
 }
 
 const Checkbox = ({
@@ -27,6 +28,7 @@ const Checkbox = ({
   error,
   className = '',
   description,
+  required = false,
 }: CheckboxProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.checked)
@@ -72,6 +74,7 @@ const Checkbox = ({
               `}
             >
               {label}
+              {required && <span className="text-error-500 ml-0.5">*</span>}
             </label>
           )}
           {description && (

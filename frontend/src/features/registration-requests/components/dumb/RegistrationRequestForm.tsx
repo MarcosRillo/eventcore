@@ -8,7 +8,7 @@
 import Image from 'next/image'
 import { useEffect,useState } from 'react'
 
-import { Button, Input } from '@/components/ui'
+import { Button, Checkbox, Input, Select, Textarea } from '@/components/ui'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
@@ -18,12 +18,12 @@ interface RegistrationRequestFormProps {
   formData: RegistrationRequestFormData
   formErrors: RegistrationRequestFormErrors
   submitting: boolean
-  onFieldChange: (field: keyof RegistrationRequestFormData, value: string | File | null) => void
+  onFieldChange: (field: keyof RegistrationRequestFormData, value: string | File | null | boolean) => void
   onSubmit: () => void
 }
 
 const ORGANIZATION_SECTORS = [
-  { value: '', label: 'Seleccionar sector...' },
+  { value: '', label: 'Seleccionar sector…' },
   { value: 'hotel', label: 'Hotel' },
   { value: 'restaurant', label: 'Restaurante' },
   { value: 'tourism_agency', label: 'Agencia de Turismo' },
@@ -58,24 +58,27 @@ export function RegistrationRequestForm({
 
   // Generate previews when files change
   useEffect(() => {
+    const urls: { profile?: string; logo?: string } = {}
+
     if (formData.profile_photo) {
-      const url = URL.createObjectURL(formData.profile_photo)
-      setProfilePhotoPreview(url)
-      return () => URL.revokeObjectURL(url)
+      urls.profile = URL.createObjectURL(formData.profile_photo)
+      setProfilePhotoPreview(urls.profile)
     } else {
       setProfilePhotoPreview(null)
     }
-  }, [formData.profile_photo])
 
-  useEffect(() => {
     if (formData.organization_logo) {
-      const url = URL.createObjectURL(formData.organization_logo)
-      setLogoPreview(url)
-      return () => URL.revokeObjectURL(url)
+      urls.logo = URL.createObjectURL(formData.organization_logo)
+      setLogoPreview(urls.logo)
     } else {
       setLogoPreview(null)
     }
-  }, [formData.organization_logo])
+
+    return () => {
+      if (urls.profile) URL.revokeObjectURL(urls.profile)
+      if (urls.logo) URL.revokeObjectURL(urls.logo)
+    }
+  }, [formData.profile_photo, formData.organization_logo])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -84,8 +87,8 @@ export function RegistrationRequestForm({
     onFieldChange(name as keyof RegistrationRequestFormData, value)
   }
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    onFieldChange('accepted_terms', e.target.checked as unknown as string)
+  const handleCheckboxChange = (checked: boolean): void => {
+    onFieldChange('accepted_terms', checked)
   }
 
   const handleFileChange = (
@@ -138,7 +141,7 @@ export function RegistrationRequestForm({
             autoComplete="given-name"
             value={formData.first_name}
             onChange={handleInputChange}
-            placeholder="Tu nombre..."
+            placeholder="Tu nombre…"
             required
             disabled={submitting}
             error={formErrors.first_name}
@@ -150,7 +153,7 @@ export function RegistrationRequestForm({
             autoComplete="family-name"
             value={formData.last_name}
             onChange={handleInputChange}
-            placeholder="Tu apellido..."
+            placeholder="Tu apellido…"
             required
             disabled={submitting}
             error={formErrors.last_name}
@@ -162,7 +165,7 @@ export function RegistrationRequestForm({
             autoComplete="off"
             value={formData.dni}
             onChange={handleInputChange}
-            placeholder="12345678..."
+            placeholder="12345678…"
             required
             disabled={submitting}
             error={formErrors.dni}
@@ -174,7 +177,7 @@ export function RegistrationRequestForm({
             autoComplete="email"
             value={formData.email}
             onChange={handleInputChange}
-            placeholder="tu@email.com..."
+            placeholder="tu@email.com…"
             required
             disabled={submitting}
             error={formErrors.email}
@@ -186,7 +189,7 @@ export function RegistrationRequestForm({
             autoComplete="tel"
             value={formData.whatsapp}
             onChange={handleInputChange}
-            placeholder="+54 9 11 1234-5678..."
+            placeholder="+54 9 11 1234-5678…"
             required
             disabled={submitting}
             error={formErrors.whatsapp}
@@ -248,7 +251,7 @@ export function RegistrationRequestForm({
             autoComplete="organization"
             value={formData.organization_name}
             onChange={handleInputChange}
-            placeholder="Mi Organización S.A...."
+            placeholder="Mi Organización S.A.…"
             required
             disabled={submitting}
             error={formErrors.organization_name}
@@ -260,41 +263,24 @@ export function RegistrationRequestForm({
             autoComplete="off"
             value={formData.organization_cuit}
             onChange={handleInputChange}
-            placeholder="20-12345678-9..."
+            placeholder="20-12345678-9…"
             required
             disabled={submitting}
             error={formErrors.organization_cuit}
             helperText="Formato: XX-XXXXXXXX-X"
           />
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">
-              Sector <span className="text-error-500">*</span>
-            </label>
-            <select
-              name="organization_sector"
-              value={formData.organization_sector}
-              onChange={handleInputChange}
-              disabled={submitting}
-              className={`w-full h-10 px-3 text-sm bg-white border rounded-md text-neutral-900 transition-all duration-150 ease-in-out focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed ${
-                formErrors.organization_sector
-                  ? 'border-error-300 focus:border-error-500 focus:ring-error-500/10 bg-error-50/50'
-                  : 'border-neutral-200'
-              }`}
-            >
-              {ORGANIZATION_SECTORS.map((sector) => (
-                <option
-                  key={sector.value}
-                  value={sector.value}
-                  className="bg-white text-neutral-900 py-2"
-                >
-                  {sector.label}
-                </option>
-              ))}
-            </select>
-            {formErrors.organization_sector && (
-              <p className="mt-1 text-sm text-error-600">{formErrors.organization_sector}</p>
-            )}
-          </div>
+          <Select
+            label="Sector"
+            name="organization_sector"
+            value={formData.organization_sector}
+            onChange={(value) => onFieldChange('organization_sector', String(value))}
+            options={ORGANIZATION_SECTORS.filter(s => s.value !== '').map(s => ({ value: s.value, label: s.label }))}
+            placeholder="Seleccionar sector…"
+            error={formErrors.organization_sector}
+            required
+            disabled={submitting}
+            fullWidth
+          />
           <Input
             label="Sitio Web (opcional)"
             type="url"
@@ -302,7 +288,7 @@ export function RegistrationRequestForm({
             autoComplete="url"
             value={formData.website}
             onChange={handleInputChange}
-            placeholder="https://miorganizacion.com..."
+            placeholder="https://miorganizacion.com…"
             disabled={submitting}
             error={formErrors.website}
           />
@@ -356,71 +342,58 @@ export function RegistrationRequestForm({
       <div>
         <h3 className="text-lg font-medium text-neutral-900 mb-4">Motivación</h3>
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">
-            ¿Por qué deseas unirte a la plataforma? <span className="text-error-500">*</span>
-          </label>
-          <textarea
+          <Textarea
+            label="¿Por qué deseas unirte a la plataforma?"
             name="motivation"
             value={formData.motivation}
             onChange={handleInputChange}
             rows={4}
             disabled={submitting}
-            placeholder="Describe brevemente por qué tu organización quiere publicar eventos en la plataforma de turismo..."
-            className={`w-full px-3 py-2 text-sm bg-white border rounded-md text-neutral-900 placeholder:text-neutral-400 transition-all duration-150 ease-in-out focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed resize-none ${
-              formErrors.motivation
-                ? 'border-error-300 focus:border-error-500 focus:ring-error-500/10 bg-error-50/50'
-                : 'border-neutral-200'
-            }`}
+            error={formErrors.motivation}
+            required
+            placeholder="Describe brevemente por qué tu organización quiere publicar eventos en la plataforma de turismo…"
+            fullWidth
           />
-          <div className="mt-1 flex justify-between">
-            <div>
-              {formErrors.motivation && (
-                <p className="text-sm text-error-600">{formErrors.motivation}</p>
-              )}
-            </div>
-            <p
-              className={`text-xs ${
-                characterCount < 50
-                  ? 'text-error-500'
-                  : characterCount > 1000
-                  ? 'text-error-500'
-                  : 'text-neutral-500'
-              }`}
-            >
-              {characterCount < 50
-                ? `${50 - characterCount} caracteres más requeridos`
-                : `${1000 - characterCount} caracteres restantes`}
-            </p>
-          </div>
+          <p
+            className={`mt-1 text-xs ${
+              characterCount < 50
+                ? 'text-error-500'
+                : characterCount > 1000
+                ? 'text-error-500'
+                : 'text-neutral-500'
+            }`}
+          >
+            {characterCount < 50
+              ? `${50 - characterCount} caracteres más requeridos`
+              : `${1000 - characterCount} caracteres restantes`}
+          </p>
         </div>
       </div>
 
       {/* Terms Checkbox */}
       <div className="border-t border-neutral-200 pt-6">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="accepted_terms"
-            checked={formData.accepted_terms}
-            onChange={handleCheckboxChange}
-            disabled={submitting}
-            className="mt-1 h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 disabled:opacity-50"
-          />
-          <label htmlFor="accepted_terms" className="text-sm text-neutral-600">
-            Acepto los{' '}
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 underline">
-              términos y condiciones
-            </a>
-            {' '}y la{' '}
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 underline">
-              política de privacidad
-            </a>
-            {' '}de la plataforma. <span className="text-error-500">*</span>
-          </label>
-        </div>
-        {formErrors.accepted_terms && (
-          <p className="mt-2 text-sm text-error-600">{formErrors.accepted_terms}</p>
-        )}
+        <Checkbox
+          id="accepted_terms"
+          name="accepted_terms"
+          checked={formData.accepted_terms}
+          onChange={handleCheckboxChange}
+          disabled={submitting}
+          error={formErrors.accepted_terms}
+          required
+          label={
+            <>
+              Acepto los{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 underline">
+                términos y condiciones
+              </a>
+              {' '}y la{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 underline">
+                política de privacidad
+              </a>
+              {' '}de la plataforma
+            </>
+          }
+        />
       </div>
 
       {/* Submit Button */}
@@ -432,7 +405,7 @@ export function RegistrationRequestForm({
           fullWidth
           size="lg"
         >
-          {submitting ? 'Enviando solicitud...' : 'Enviar Solicitud'}
+          {submitting ? 'Enviando solicitud…' : 'Enviar Solicitud'}
         </Button>
         <p className="mt-4 text-xs text-neutral-500 text-center">
           Al enviar este formulario, tu solicitud será revisada por nuestro equipo.

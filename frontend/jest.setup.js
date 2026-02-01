@@ -4,6 +4,16 @@ import { mockAnimationsApi } from 'jsdom-testing-mocks';
 // Mock Web Animations API for HeadlessUI transitions
 mockAnimationsApi();
 
+// Mock ResizeObserver for HeadlessUI (Listbox uses it for positioning)
+global.ResizeObserver = class ResizeObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Mock HTMLFormElement.prototype.requestSubmit for JSDOM
 // JSDOM doesn't implement this HTML5 API, causing warnings in form tests
 if (typeof HTMLFormElement.prototype.requestSubmit === 'undefined') {
