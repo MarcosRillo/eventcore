@@ -49,7 +49,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
     'text-neutral-900',
     'placeholder:text-neutral-400',
     'rounded-md',
-    'transition-all duration-150 ease-in-out',
+    'transition-colors duration-150 ease-in-out transition-shadow',
     'focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10',
     'disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed',
   ].join(' ')

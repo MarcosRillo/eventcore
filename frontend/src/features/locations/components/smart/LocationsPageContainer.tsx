@@ -109,8 +109,10 @@ export function LocationsPageContainer() {
         {/* Search Filter */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <Input
+            name="search-locations"
+            autoComplete="off"
             label="Buscar ubicaciones"
-            placeholder="Buscar por nombre o ciudad..."
+            placeholder="Buscar por nombre o ciudad…"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
             leftIcon={<Search className="w-5 h-5" />}
