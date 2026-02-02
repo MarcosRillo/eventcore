@@ -23,6 +23,7 @@ class StoreEventTypeRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'color' => 'required|hex_color',
             'is_active' => 'boolean',
         ];
     }

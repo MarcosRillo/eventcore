@@ -7,10 +7,9 @@
  */
 
 import { LoadingSpinner } from '@/components/ui';
-import { ColorPicker } from '@/components/ui/ColorPicker';
 import SafeImage from '@/components/ui/SafeImage';
 import { useAppearanceForm } from '@/features/appearance/hooks/useAppearanceForm';
-import { Button, Input } from '@/shared/components/form';
+import { Button, ColorPicker, Input } from '@/shared/components/form';
 
 export function AppearancePageContainer() {
   const {

@@ -18,6 +18,7 @@ import {
   updateEventType,
   validateEventTypeData,
 } from '@/features/event-types/services/eventType.service';
+import { ColorPicker } from '@/shared/components/form';
 import { EventType, UpdateEventTypeData } from '@/types/eventType.types';
 
 interface EditEventTypeModalProps {
@@ -43,6 +44,7 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
   // Track initial data for form reset
   const [initialData, setInitialData] = useState<UpdateEventTypeData>({
     name: '',
+    color: '#3B82F6',
     is_active: true,
   });
 
@@ -51,6 +53,7 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
     if (eventType) {
       setInitialData({
         name: eventType.name,
+        color: eventType.color,
         is_active: eventType.is_active,
       });
     }
@@ -64,6 +67,7 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
   ) => {
     await updateEventType(eventType!.id, {
       name: formData.name?.trim(),
+      color: formData.color,
       is_active: formData.is_active,
     });
 
@@ -111,6 +115,16 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
               disabled={isLoading}
               error={errors.name}
               fullWidth
+            />
+          </div>
+
+          {/* Color Field */}
+          <div>
+            <ColorPicker
+              label="Color"
+              value={formData.color || '#3B82F6'}
+              onChange={(value) => handleFieldChange('color', value)}
+              disabled={isLoading}
             />
           </div>
 

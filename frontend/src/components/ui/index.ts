@@ -16,7 +16,6 @@ export { default as EmptyState, EmptyStateIcons } from '@/components/ui/EmptySta
 export { default as Skeleton, SkeletonAvatar, SkeletonButton, SkeletonCard, SkeletonTable,SkeletonText } from '@/components/ui/Skeleton';
 
 // Data Components
-export { ColorPicker } from '@/components/ui/ColorPicker';
 export { default as Pagination } from '@/components/ui/Pagination';
 export { RadioGroup } from '@/components/ui/RadioGroup';
 export { default as SafeImage } from '@/components/ui/SafeImage';

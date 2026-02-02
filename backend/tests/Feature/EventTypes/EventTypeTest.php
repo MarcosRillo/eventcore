@@ -172,6 +172,7 @@ class EventTypeTest extends EventTestCase
         $this->authenticateUser();
         $eventTypeData = [
             'name' => 'Congreso Nacional',
+            'color' => '#FF5733',
             'is_active' => true,
         ];
 
@@ -182,6 +183,7 @@ class EventTypeTest extends EventTestCase
         $response->assertStatus(201)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.name', 'Congreso Nacional')
+            ->assertJsonPath('data.color', '#FF5733')
             ->assertJsonPath('data.is_active', true);
 
         $this->assertDatabaseHas('event_types', [
@@ -231,6 +233,7 @@ class EventTypeTest extends EventTestCase
         // Act - Create without specifying is_active
         $response = $this->postJson('/api/v1/event-types', [
             'name' => 'Default Active Type',
+            'color' => '#3B82F6',
         ]);
 
         // Assert

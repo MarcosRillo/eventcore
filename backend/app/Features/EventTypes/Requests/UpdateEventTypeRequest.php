@@ -23,6 +23,7 @@ class UpdateEventTypeRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required|string|max:255',
+            'color' => 'sometimes|required|hex_color',
             'is_active' => 'boolean',
         ];
     }

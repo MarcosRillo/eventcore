@@ -62,6 +62,7 @@ class EventTypeService
                 $eventTypeData = [
                     'name' => $data['name'],
                     'entity_id' => $organization->id,
+                    'color' => $data['color'],
                     'is_active' => $data['is_active'] ?? true,
                 ];
 

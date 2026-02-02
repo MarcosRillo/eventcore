@@ -6,6 +6,7 @@ export {
 } from './AsyncSearchableMultiSelect'
 export { default as Button } from './Button'
 export { default as Checkbox } from './Checkbox'
+export { ColorPicker, type ColorPickerProps } from './ColorPicker'
 export { default as DateTimePicker, type DateTimePickerProps } from './DateTimePicker'
 export { default as ImageUploadField, type ImageUploadFieldProps } from './ImageUploadField'
 export { default as Input } from './Input'

@@ -16,6 +16,7 @@ import {
   createEventType,
   validateEventTypeData,
 } from '@/features/event-types/services/eventType.service';
+import { ColorPicker } from '@/shared/components/form';
 import { CreateEventTypeData } from '@/types/eventType.types';
 
 interface CreateEventTypeModalProps {
@@ -28,6 +29,7 @@ interface CreateEventTypeModalProps {
 // Initial form data
 const initialData: CreateEventTypeData = {
   name: '',
+  color: '#3B82F6',
   is_active: true,
 };
 
@@ -48,6 +50,7 @@ const CreateEventTypeModal: React.FC<CreateEventTypeModalProps> = ({
   ) => {
     await createEventType({
       name: formData.name?.trim(),
+      color: formData.color,
       is_active: formData.is_active,
     });
 
@@ -91,6 +94,16 @@ const CreateEventTypeModal: React.FC<CreateEventTypeModalProps> = ({
               disabled={isLoading}
               error={errors.name}
               fullWidth
+            />
+          </div>
+
+          {/* Color Field */}
+          <div>
+            <ColorPicker
+              label="Color"
+              value={formData.color || '#3B82F6'}
+              onChange={(value) => handleFieldChange('color', value)}
+              disabled={isLoading}
             />
           </div>
 

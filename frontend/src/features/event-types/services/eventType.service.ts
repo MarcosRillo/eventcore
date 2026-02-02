@@ -67,6 +67,7 @@ export const createEventType = async (
     '/event-types',
     {
       name: eventTypeData.name,
+      color: eventTypeData.color,
       is_active:
         eventTypeData.is_active !== undefined ? eventTypeData.is_active : true,
     }
@@ -89,6 +90,7 @@ export const updateEventType = async (
     `/event-types/${id}`,
     {
       name: eventTypeData.name,
+      color: eventTypeData.color,
       is_active: eventTypeData.is_active,
     }
   );
@@ -192,6 +194,13 @@ export const validateEventTypeData = (
       errors.push('El nombre debe tener al menos 2 caracteres');
     } else if (data.name.trim().length > 255) {
       errors.push('El nombre no puede exceder 255 caracteres');
+    }
+  }
+
+  if ('color' in data && data.color !== undefined) {
+    const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+    if (!hexColorRegex.test(data.color)) {
+      errors.push('El color debe ser un código hexadecimal válido (ej: #FF5733)');
     }
   }
 

@@ -31,6 +31,7 @@ describe('CreateEventTypeModal', () => {
   const mockCreatedEventType: EventType = {
     id: 1,
     name: 'Conferencia',
+    color: '#3B82F6',
     is_active: true,
     subtypes_count: 0,
     created_at: '2025-01-01T00:00:00.000Z',
@@ -116,6 +117,7 @@ describe('CreateEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.createEventType).toHaveBeenCalledWith({
           name: 'Nueva Conferencia',
+          color: '#3B82F6',
           is_active: true,
         })
       })
@@ -164,6 +166,7 @@ describe('CreateEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.createEventType).toHaveBeenCalledWith({
           name: 'Inactive Type',
+          color: '#3B82F6',
           is_active: false,
         })
       })
@@ -181,6 +184,7 @@ describe('CreateEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.createEventType).toHaveBeenCalledWith({
           name: 'Trimmed Name',
+          color: '#3B82F6',
           is_active: true,
         })
       })
@@ -255,6 +259,7 @@ describe('CreateEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.createEventType).toHaveBeenCalledWith({
           name: 'Tipo Sin Callback',
+          color: '#3B82F6',
           is_active: true,
         })
       })
@@ -273,6 +278,7 @@ describe('EditEventTypeModal', () => {
   const mockEventType: EventType = {
     id: 1,
     name: 'Conferencia Existente',
+    color: '#3B82F6',
     is_active: true,
     subtypes_count: 3,
     created_at: '2025-01-01T00:00:00.000Z',
@@ -387,6 +393,7 @@ describe('EditEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.updateEventType).toHaveBeenCalledWith(1, {
           name: 'Updated Conferencia',
+          color: '#3B82F6',
           is_active: true,
         })
       })
@@ -438,6 +445,7 @@ describe('EditEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.updateEventType).toHaveBeenCalledWith(1, {
           name: 'Conferencia Existente',
+          color: '#3B82F6',
           is_active: false,
         })
       })
@@ -459,6 +467,7 @@ describe('EditEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.updateEventType).toHaveBeenCalledWith(1, {
           name: 'Trimmed Update',
+          color: '#3B82F6',
           is_active: true,
         })
       })
@@ -578,6 +587,7 @@ describe('EditEventTypeModal', () => {
       await waitFor(() => {
         expect(mockedService.updateEventType).toHaveBeenCalledWith(1, {
           name: 'Nombre Actualizado',
+          color: '#3B82F6',
           is_active: true,
         })
       })

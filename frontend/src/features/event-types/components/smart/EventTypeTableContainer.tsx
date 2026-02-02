@@ -130,6 +130,18 @@ export const EventTypeTableContainer = ({
           </div>
         ),
       },
+      // Color column
+      {
+        key: 'color',
+        label: 'Color',
+        render: (eventType) => (
+          <div
+            className="w-6 h-6 rounded border border-neutral-300"
+            style={{ backgroundColor: eventType.color }}
+            title={eventType.color}
+          />
+        ),
+      },
       // Subtypes count column
       {
         key: 'subtypes_count',

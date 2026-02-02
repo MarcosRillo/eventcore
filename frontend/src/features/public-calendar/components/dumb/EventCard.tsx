@@ -10,6 +10,7 @@ import type { KeyboardEvent } from 'react'
 import { memo } from 'react'
 
 import { Badge } from '@/components/ui'
+import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 interface EventCardProps {
@@ -97,9 +98,15 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
       <div className="p-4">
         {/* Event Type */}
         <div className="mb-2">
-          <Badge variant="info" size="sm">
+          <span
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: event.event_type.color || '#3B82F6',
+              color: getContrastTextColor(event.event_type.color || '#3B82F6')
+            }}
+          >
             {event.event_type.name}
-          </Badge>
+          </span>
         </div>
 
         {/* Title */}
