@@ -92,7 +92,7 @@ export function FuzzySearchSelect({
   }
 
   // Get selected options for display
-  const displayedSelectedOptions = providedSelectedOptions
+  const displayedSelectedOptions = providedSelectedOptions && providedSelectedOptions.length > 0
     ? providedSelectedOptions.filter(opt => selected.includes(opt.id))
     : options.filter(opt => selected.includes(opt.id))
 
