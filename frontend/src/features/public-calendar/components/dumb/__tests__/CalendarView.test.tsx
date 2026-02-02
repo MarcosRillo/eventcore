@@ -200,7 +200,7 @@ describe('CalendarView', () => {
       render(<CalendarView {...defaultProps} />)
 
       const calendarContainer = document.querySelector('.calendar-container')
-      expect(calendarContainer).toHaveStyle({ height: '700px' })
+      expect(calendarContainer).toHaveStyle({ height: '800px' })
     })
   })
 

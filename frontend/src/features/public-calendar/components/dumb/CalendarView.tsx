@@ -91,7 +91,7 @@ export const CalendarView = ({
         </div>
       )}
 
-      <div className="calendar-container" style={{ height: '700px' }}>
+      <div className="calendar-container" style={{ height: '800px' }}>
         <Calendar
           localizer={localizer}
           events={events}
