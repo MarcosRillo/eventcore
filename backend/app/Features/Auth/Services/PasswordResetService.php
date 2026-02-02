@@ -49,6 +49,14 @@ class PasswordResetService
             // Send notification with plain token
             $user->notify(new PasswordResetNotification($token));
 
+            // Log clean URL for development (when using MAIL_MAILER=log)
+            if (config('app.debug')) {
+                $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+                Log::info('Password reset URL (copy this for testing):', [
+                    'url' => "{$frontendUrl}/reset-password?token={$token}&email=".urlencode($email),
+                ]);
+            }
+
             return true;
         });
     }

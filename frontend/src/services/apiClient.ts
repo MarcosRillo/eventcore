@@ -153,13 +153,9 @@ apiClient.interceptors.response.use(
         // Retry original request (new cookie is already set)
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - redirect to login
         processQueue(refreshError as Error);
-
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
-
+        // No redirect - let components handle auth errors appropriately
+        // Middleware handles route protection, components handle UX
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -142,7 +142,7 @@ export interface AuthContextType extends Record<string, unknown> {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<boolean>;
 
   // Permission methods
   hasRole: (role: UserRoleCode) => boolean;

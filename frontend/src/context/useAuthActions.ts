@@ -167,8 +167,9 @@ export const useAuthActions = (): AuthContextType => {
 
   /**
    * Refresh user data from server
+   * @returns true if user was successfully refreshed, false otherwise
    */
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<boolean> => {
     try {
       const response = await apiClient.get<{ data: User }>('/auth/me');
 
@@ -181,10 +182,13 @@ export const useAuthActions = (): AuthContextType => {
         expiresAt.setDate(expiresAt.getDate() + 7);
         const maxAgeSeconds = 7 * 24 * 60 * 60;
         document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
+        return true;
       }
+      return false;
     } catch {
       handleLogout();
-      router.push('/login');
+      // Don't redirect - caller decides navigation based on context
+      return false;
     }
   };
 
