@@ -15,7 +15,7 @@ class RegistrationApprovedNotification extends Notification
     public function __construct(
         private RegistrationRequest $request,
         private User $user,
-        private string $temporaryPassword,
+        private string $resetToken,
     ) {}
 
     public function via(object $notifiable): array
@@ -26,18 +26,16 @@ class RegistrationApprovedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
-        $loginUrl = "{$frontendUrl}/login";
+        $resetUrl = "{$frontendUrl}/reset-password?token={$this->resetToken}&email=".urlencode($this->user->email);
 
         return (new MailMessage)
             ->subject('¡Solicitud Aprobada! - Plataforma Calendario')
             ->greeting("¡Felicitaciones {$this->request->first_name}!")
             ->line('Tu solicitud de registro ha sido aprobada.')
-            ->line('Ya puedes acceder a la plataforma con las siguientes credenciales:')
-            ->line("**Email:** {$this->user->email}")
-            ->line("**Contraseña temporal:** {$this->temporaryPassword}")
-            ->action('Iniciar Sesión', $loginUrl)
-            ->line('Te recomendamos cambiar tu contraseña después de iniciar sesión.')
-            ->line('¡Bienvenido a Plataforma Calendario!')
+            ->line('Para comenzar, crea tu contraseña haciendo clic en el siguiente botón:')
+            ->action('Crear mi Contraseña', $resetUrl)
+            ->line('Este enlace expira en 60 minutos.')
+            ->line('Si no solicitaste esto, puedes ignorar este mensaje.')
             ->salutation('Saludos, Plataforma Calendario');
     }
 

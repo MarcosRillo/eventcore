@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class RegistrationRequestService
@@ -82,15 +83,20 @@ class RegistrationRequestService
                 'website' => $request->website,
             ]);
 
-            // Generate temporary password
-            $tempPassword = $this->generateTemporaryPassword();
-
-            // Create user
+            // Create user with placeholder password (will be set via reset link)
             $user = User::create([
                 'name' => $request->full_name,
                 'email' => $request->email,
-                'password' => Hash::make($tempPassword),
+                'password' => Hash::make(Str::random(64)),
                 'role_id' => $organizerRole->id,
+            ]);
+
+            // Generate password reset token
+            $resetToken = Str::random(64);
+            DB::table('password_reset_tokens')->insert([
+                'email' => $user->email,
+                'token' => Hash::make($resetToken),
+                'created_at' => now(),
             ]);
 
             // Associate user with organization
@@ -113,10 +119,18 @@ class RegistrationRequestService
                 'email' => $request->email,
             ]);
 
+            // Log password setup URL for development testing
+            if (config('app.debug')) {
+                $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+                Log::info('Registration approved - Password setup URL (copy for testing):', [
+                    'url' => "{$frontendUrl}/reset-password?token={$resetToken}&email=".urlencode($user->email),
+                ]);
+            }
+
             return [
                 'user' => $user->load('role'),
                 'organization' => $organization,
-                'temporary_password' => $tempPassword,
+                'reset_token' => $resetToken,
                 'request' => $request,
             ];
         });
@@ -335,13 +349,5 @@ class RegistrationRequestService
                 'admin_id' => $admin->id,
             ]);
         });
-    }
-
-    /**
-     * Generate a temporary password.
-     */
-    private function generateTemporaryPassword(): string
-    {
-        return bin2hex(random_bytes(8)); // 16 character hex string
     }
 }

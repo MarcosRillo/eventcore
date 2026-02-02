@@ -194,6 +194,23 @@ class RegistrationRequestTest extends TestCase
     }
 
     #[Test]
+    public function test_approving_creates_password_reset_token(): void
+    {
+        Notification::fake();
+
+        $entityAdmin = $this->createUserWithRole('entity_admin');
+        $this->actingAs($entityAdmin, 'sanctum');
+
+        $request = RegistrationRequest::create(array_merge($this->getValidRequestData(), ['status' => 'pending']));
+
+        $this->postJson("/api/v1/registration-requests/{$request->id}/approve");
+
+        $this->assertDatabaseHas('password_reset_tokens', [
+            'email' => 'organizer@example.com',
+        ]);
+    }
+
+    #[Test]
     public function test_entity_admin_can_reject_request(): void
     {
         Notification::fake();

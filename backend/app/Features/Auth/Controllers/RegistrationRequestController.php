@@ -82,7 +82,7 @@ class RegistrationRequestController extends Controller
         $result['request']->notify(new RegistrationApprovedNotification(
             $result['request'],
             $result['user'],
-            $result['temporary_password'],
+            $result['reset_token'],
         ));
 
         return response()->json([
