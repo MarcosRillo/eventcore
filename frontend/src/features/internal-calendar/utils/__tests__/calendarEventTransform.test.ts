@@ -33,7 +33,7 @@ describe('calendarEventTransform', () => {
           id: 1,
           name: 'Test Organization',
         },
-        eventType: {
+        event_type: {
           id: 1,
           name: 'Conference',
           color: '#FF5733',
@@ -67,7 +67,7 @@ describe('calendarEventTransform', () => {
           id: 1,
           name: 'Test Organization',
         },
-        eventType: {
+        event_type: {
           id: 1,
           name: 'Workshop',
           color: '#00FF00',
@@ -84,7 +84,7 @@ describe('calendarEventTransform', () => {
       expect(result.end.toISOString()).toBe('2025-12-15T16:45:00.000Z')
     })
 
-    it('extracts color from eventType when available', () => {
+    it('extracts color from event_type when available', () => {
       // Arrange
       const mockEvent: InternalCalendarEvent = {
         id: 3,
@@ -101,7 +101,7 @@ describe('calendarEventTransform', () => {
           id: 1,
           name: 'Test Organization',
         },
-        eventType: {
+        event_type: {
           id: 2,
           name: 'Seminar',
           color: '#1E40AF',
@@ -116,7 +116,7 @@ describe('calendarEventTransform', () => {
       expect(result.color).toMatch(/^#[0-9A-F]{6}$/i)
     })
 
-    it('uses fallback color when eventType is missing', () => {
+    it('uses fallback color when event_type is missing', () => {
       // Arrange
       const mockEvent: InternalCalendarEvent = {
         id: 4,
@@ -133,7 +133,7 @@ describe('calendarEventTransform', () => {
           id: 1,
           name: 'Test Organization',
         },
-        // eventType is undefined
+        // event_type is undefined
       }
 
       // Act
@@ -145,7 +145,7 @@ describe('calendarEventTransform', () => {
       expect(result).toHaveProperty('color')
     })
 
-    it('uses fallback color when eventType color property is missing', () => {
+    it('uses fallback color when event_type color property is missing', () => {
       // Arrange
       const mockEvent: InternalCalendarEvent = {
         id: 5,
@@ -162,7 +162,7 @@ describe('calendarEventTransform', () => {
           id: 1,
           name: 'Test Organization',
         },
-        eventType: {
+        event_type: {
           id: 3,
           name: 'Meeting',
           color: '', // Empty string
@@ -196,7 +196,7 @@ describe('calendarEventTransform', () => {
           id: 2,
           name: 'Another Organization',
         },
-        eventType: {
+        event_type: {
           id: 4,
           name: 'Festival',
           color: '#FFAA00',
@@ -240,7 +240,7 @@ describe('calendarEventTransform', () => {
             id: 1,
             name: 'Organization A',
           },
-          eventType: {
+          event_type: {
             id: 1,
             name: 'Type A',
             color: '#FF0000',
@@ -260,7 +260,7 @@ describe('calendarEventTransform', () => {
             id: 2,
             name: 'Organization B',
           },
-          eventType: {
+          event_type: {
             id: 2,
             name: 'Type B',
             color: '#00FF00',
@@ -311,7 +311,7 @@ describe('calendarEventTransform', () => {
             id: 1,
             name: 'Org 1',
           },
-          eventType: {
+          event_type: {
             id: 1,
             name: 'Type 1',
             color: '#AA00BB',
@@ -331,7 +331,7 @@ describe('calendarEventTransform', () => {
             id: 2,
             name: 'Org 2',
           },
-          eventType: {
+          event_type: {
             id: 2,
             name: 'Type 2',
             color: '#CCDDEE',
@@ -361,7 +361,7 @@ describe('calendarEventTransform', () => {
       expect(result).toHaveLength(3)
       expect(result[0].start).toBeInstanceOf(Date)
       expect(result[1].end).toBeInstanceOf(Date)
-      expect(result[2].color).toBe('#3B82F6') // Fallback color for missing eventType
+      expect(result[2].color).toBe('#3B82F6') // Fallback color for missing event_type
       expect(result[0].resource.id).toBe(20)
       expect(result[1].resource.id).toBe(21)
       expect(result[2].resource.id).toBe(22)

@@ -82,7 +82,7 @@ export function BigCalendarView({
   if (loading) {
     return (
       <div
-        className="flex items-center justify-center h-[600px]"
+        className="flex items-center justify-center h-[800px]"
         role="status"
         aria-live="polite"
       >
@@ -111,7 +111,7 @@ export function BigCalendarView({
   }
 
   return (
-    <div className="calendar-container h-[600px] bg-white rounded-lg shadow p-4">
+    <div className="calendar-container h-[800px] bg-white rounded-lg shadow p-4">
       {events.length === 0 && (
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <p className="text-sm text-blue-700">
@@ -134,6 +134,7 @@ export function BigCalendarView({
         view={currentView}
         onNavigate={onNavigate}
         onView={onView}
+        popup={true}
         components={{
           toolbar: CalendarToolbar as React.ComponentType<ToolbarProps<BigCalendarEvent, object>>,
         }}

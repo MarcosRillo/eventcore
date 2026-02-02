@@ -63,7 +63,7 @@ describe('EventDetailModal', () => {
         id: 1,
         name: 'Tech Organization',
       },
-      eventType: {
+      event_type: {
         id: 1,
         name: 'Conference',
         color: '#FF5733',

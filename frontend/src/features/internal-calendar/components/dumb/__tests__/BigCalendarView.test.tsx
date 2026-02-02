@@ -91,7 +91,7 @@ describe('BigCalendarView', () => {
         end_date: '2025-12-10T12:00:00.000Z',
         status: { id: 1, status_code: 'approved_internal', status_name: 'Approved Internal', description: 'Event approved for internal use' },
         organization: { id: 1, name: 'Test Org' },
-        eventType: { id: 1, name: 'Conference', color: '#FF5733' },
+        event_type: { id: 1, name: 'Conference', color: '#FF5733' },
       },
     },
     {
@@ -107,7 +107,7 @@ describe('BigCalendarView', () => {
         end_date: '2025-12-15T16:00:00.000Z',
         status: { id: 2, status_code: 'published', status_name: 'Published', description: 'Event published' },
         organization: { id: 2, name: 'Another Org' },
-        eventType: { id: 2, name: 'Workshop', color: '#00FF00' },
+        event_type: { id: 2, name: 'Workshop', color: '#00FF00' },
       },
     },
   ]
@@ -249,10 +249,10 @@ describe('BigCalendarView', () => {
     // Assert
     const calendarContainer = container.querySelector('.calendar-container')
     expect(calendarContainer).toBeInTheDocument()
-    expect(calendarContainer).toHaveClass('h-[600px]') // Height class
+    expect(calendarContainer).toHaveClass('h-[800px]') // Height class
   })
 
-  it('handles events with missing eventType gracefully', () => {
+  it('handles events with missing event_type gracefully', () => {
     // Arrange
     const eventWithoutType: BigCalendarEvent = {
       id: 100,
@@ -267,7 +267,7 @@ describe('BigCalendarView', () => {
         end_date: '2025-12-25T11:00:00.000Z',
         status: { id: 1, status_code: 'approved_internal', status_name: 'Approved Internal', description: 'Event approved for internal use' },
         organization: { id: 1, name: 'Org' },
-        // eventType is undefined
+        // event_type is undefined
       },
     }
 

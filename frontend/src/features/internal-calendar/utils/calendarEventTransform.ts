@@ -36,7 +36,7 @@ export function transformToBigCalendarEvent(
     start: new Date(event.start_date),
     end: new Date(event.end_date),
     resource: event,
-    color: event.eventType?.color || DEFAULT_EVENT_COLOR,
+    color: event.event_type?.color || DEFAULT_EVENT_COLOR,
   }
 }
 

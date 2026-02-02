@@ -48,7 +48,7 @@ describe('InternalCalendarViewContainer', () => {
       end_date: '2025-12-15T12:00:00Z',
       status: { id: 1, status_code: 'approved_internal', status_name: 'Approved', description: 'Event approved for internal use' },
       organization: { id: 1, name: 'Org A' },
-      eventType: { id: 1, name: 'Conference', color: '#FF0000' },
+      event_type: { id: 1, name: 'Conference', color: '#FF0000' },
     },
     {
       id: 2,
@@ -57,7 +57,7 @@ describe('InternalCalendarViewContainer', () => {
       end_date: '2025-12-20T16:00:00Z',
       status: { id: 2, status_code: 'published', status_name: 'Published', description: 'Event published' },
       organization: { id: 2, name: 'Org B' },
-      eventType: { id: 2, name: 'Workshop', color: '#00FF00' },
+      event_type: { id: 2, name: 'Workshop', color: '#00FF00' },
     },
   ];
 
@@ -165,7 +165,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should pass filters to useInternalCalendarEvents hook', () => {
-    const filters = { eventTypeId: 1, status: 'published' as const };
+    const filters = { event_typeId: 1, status: 'published' as const };
     render(<InternalCalendarViewContainer filters={filters} />);
 
     expect(useInternalCalendarEvents).toHaveBeenCalledWith(filters);

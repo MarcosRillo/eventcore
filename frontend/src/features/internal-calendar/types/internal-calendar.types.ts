@@ -71,8 +71,8 @@ export interface InternalCalendarEvent {
   end_date: string;
   status: EventStatus;
   organization: Organization;
-  eventType?: EventType;
-  eventSubtype?: EventSubtype;
+  event_type?: EventType;
+  event_subtype?: EventSubtype;
   locations?: Location[];
   featured_image?: string;
 }

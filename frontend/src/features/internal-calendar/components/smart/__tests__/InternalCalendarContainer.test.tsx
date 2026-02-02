@@ -67,7 +67,7 @@ jest.mock('@/features/internal-calendar/utils/calendarEventTransform', () => ({
       title: event.title,
       start: new Date(event.start_date),
       end: new Date(event.end_date),
-      color: event.eventType?.color || '#3B82F6',
+      color: event.event_type?.color || '#3B82F6',
       resource: event,
     })),
 }))
@@ -89,7 +89,7 @@ describe('InternalCalendarContainer', () => {
         id: 1,
         name: 'Test Org',
       },
-      eventType: {
+      event_type: {
         id: 1,
         name: 'Conference',
         color: '#FF5733',
@@ -109,7 +109,7 @@ describe('InternalCalendarContainer', () => {
         id: 2,
         name: 'Another Org',
       },
-      eventType: {
+      event_type: {
         id: 2,
         name: 'Workshop',
         color: '#00FF00',

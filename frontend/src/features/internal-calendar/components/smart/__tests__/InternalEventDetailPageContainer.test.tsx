@@ -43,7 +43,7 @@ describe('InternalEventDetailPageContainer', () => {
       id: 1,
       name: 'Test Organization',
     },
-    eventType: {
+    event_type: {
       id: 1,
       name: 'Conference',
       color: '#FF0000',

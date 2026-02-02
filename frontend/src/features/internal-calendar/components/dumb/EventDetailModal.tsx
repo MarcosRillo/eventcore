@@ -72,7 +72,7 @@ export function EventDetailModal({
         </div>
 
         {/* Event Type */}
-        {resource.eventType && (
+        {resource.event_type && (
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-1">
               Tipo de Evento
@@ -80,10 +80,10 @@ export function EventDetailModal({
             <div className="flex items-center gap-2">
               <span
                 className="inline-block w-3 h-3 rounded-full"
-                style={{ backgroundColor: resource.eventType.color }}
+                style={{ backgroundColor: resource.event_type.color }}
               />
               <span className="text-sm text-gray-600">
-                {resource.eventType.name}
+                {resource.event_type.name}
               </span>
             </div>
           </div>

@@ -20,7 +20,7 @@ describe('InternalEventCard', () => {
       id: 1,
       name: 'Tech Corp',
     },
-    eventType: {
+    event_type: {
       id: 1,
       name: 'Conferencia',
       color: '#FF5733',

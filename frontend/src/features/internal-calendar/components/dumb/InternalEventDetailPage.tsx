@@ -87,18 +87,18 @@ export function InternalEventDetailPage({
               </div>
 
               {/* Event Type */}
-              {event.eventType && (
+              {event.event_type && (
                 <div className="flex items-center gap-2">
                   <span
                     className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: event.eventType.color }}
+                    style={{ backgroundColor: event.event_type.color }}
                   />
                   <span className="text-sm font-medium text-neutral-600">
-                    {event.eventType.name}
+                    {event.event_type.name}
                   </span>
-                  {event.eventSubtype && (
+                  {event.event_subtype && (
                     <span className="text-sm text-neutral-500">
-                      • {event.eventSubtype.name}
+                      • {event.event_subtype.name}
                     </span>
                   )}
                 </div>

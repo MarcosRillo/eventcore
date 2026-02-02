@@ -32,7 +32,7 @@ describe('InternalCalendarGridContainer', () => {
         id: 1,
         name: 'Test Org',
       },
-      eventType: {
+      event_type: {
         id: 1,
         name: 'Conference',
         color: '#FF5733',
@@ -137,7 +137,7 @@ describe('InternalCalendarGridContainer', () => {
   });
 
   test('should pass filters to useInternalCalendarEvents hook', () => {
-    const filters = { eventTypeId: 1, status: 'published' as const };
+    const filters = { event_typeId: 1, status: 'published' as const };
     render(<InternalCalendarGridContainer filters={filters} />);
 
     expect(useInternalCalendarEvents).toHaveBeenCalledWith(filters);
