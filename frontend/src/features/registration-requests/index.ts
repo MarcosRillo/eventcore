@@ -15,7 +15,6 @@ export {
 } from '@/features/registration-requests/services/registration-request.service'
 
 // Hooks
-export { useRegistrationForm } from '@/features/registration-requests/hooks/useRegistrationForm'
 export { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
 
 // Components
