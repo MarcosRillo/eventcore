@@ -8,17 +8,11 @@
 import { useEffect, useState } from 'react';
 
 import {
-  Checkbox,
-  FormModal,
-  FormSubmitHandler,
-  FormValidator,
-  Input,
-} from '@/components/ui';
-import {
   updateEventType,
   validateEventTypeData,
 } from '@/features/event-types/services/eventType.service';
-import { ColorPicker } from '@/shared/components/form';
+import { Checkbox, ColorPicker, Input } from '@/shared/components/form';
+import { FormModal, FormSubmitHandler, FormValidator } from '@/shared/components/modals';
 import { EventType, UpdateEventTypeData } from '@/types/eventType.types';
 
 interface EditEventTypeModalProps {

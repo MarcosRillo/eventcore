@@ -7,11 +7,13 @@
 
 import { Check, Eye, Pause, Play, Trash2,X } from 'lucide-react'
 
-import { Badge,Button, LoadingSpinner } from '@/components/ui'
 import {
   DisplayStatusFilter,
   RegistrationRequest,
 } from '@/features/registration-requests/types/registration-request.types'
+import { Badge } from '@/shared/components/display'
+import { LoadingSpinner } from '@/shared/components/feedback'
+import { Button } from '@/shared/components/form'
 
 interface RegistrationRequestTableProps {
   requests: RegistrationRequest[]

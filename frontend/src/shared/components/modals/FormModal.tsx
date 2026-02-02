@@ -8,7 +8,8 @@
 
 import { FormEvent, ReactNode,useEffect, useState } from 'react';
 
-import { Button,Modal } from '@/components/ui';
+import { Button } from '@/shared/components/form';
+import Modal from '@/shared/components/modals/Modal';
 import { EventFormData } from '@/types/event.types';
 import { EventSubtype,EventType } from '@/types/eventType.types';
 

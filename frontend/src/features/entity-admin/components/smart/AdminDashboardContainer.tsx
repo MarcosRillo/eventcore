@@ -11,7 +11,6 @@
 import dynamic from 'next/dynamic';
 import { useCallback,useState } from 'react';
 
-import { Pagination } from '@/components/ui';
 import { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters';
 import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid';
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
@@ -19,6 +18,7 @@ import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb
 import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
 import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
 import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
+import { Pagination } from '@/shared/components/tables';
 
 // Lazy load modal - only loaded when needed
 const EventManagementModal = dynamic(

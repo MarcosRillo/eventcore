@@ -8,9 +8,9 @@
 import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
 import { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
+import { LoadingSpinner } from '@/shared/components/feedback'
 
 interface PublicCalendarProps {
   events: PublicEvent[]

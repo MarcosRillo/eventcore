@@ -7,8 +7,8 @@
 'use client';
 
 import { OrganizerSidebar } from '@/components/organizer/OrganizerSidebar';
-import { LoadingSpinner } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '@/shared/components/feedback';
 
 interface OrganizerLayoutProps {
   children: React.ReactNode;

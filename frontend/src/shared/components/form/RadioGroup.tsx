@@ -33,7 +33,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-      
+
       <div className="space-y-2">
         {options.map((option) => (
           <label
@@ -55,7 +55,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
           </label>
         ))}
       </div>
-      
+
       {error && (
         <p className="mt-1 text-sm text-red-600">{error}</p>
       )}

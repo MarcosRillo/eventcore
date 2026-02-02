@@ -1,4 +1,8 @@
-// Form components - canonical location for all form-related UI components
+/**
+ * Form Components - Barrel Export
+ * Canonical location for all form-related UI components
+ */
+
 export {
   AsyncSearchableMultiSelect,
   type AsyncSearchableMultiSelectProps,
@@ -11,5 +15,7 @@ export { default as DateTimePicker, type DateTimePickerProps } from './DateTimeP
 export { default as ImageUploadField, type ImageUploadFieldProps } from './ImageUploadField'
 export { default as Input } from './Input'
 export { default as PasswordInput, type PasswordInputProps, type PasswordRequirement } from './PasswordInput'
-export { default as Select, type SelectOption } from './Select'
+export { RadioGroup } from './RadioGroup'
+export { SearchableMultiSelect, type SearchableMultiSelectProps, type SelectOption } from './SearchableMultiSelect'
+export { type SelectOption as FormSelectOption,default as Select } from './Select'
 export { default as Textarea } from './Textarea'

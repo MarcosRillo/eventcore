@@ -8,8 +8,10 @@
 import { Building2, Check, FileText, User, X, XCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import { Badge,Button, LoadingSpinner } from '@/components/ui'
 import { RegistrationRequestDetail as RequestDetail } from '@/features/registration-requests/types/registration-request.types'
+import { Badge } from '@/shared/components/display'
+import { LoadingSpinner } from '@/shared/components/feedback'
+import { Button } from '@/shared/components/form'
 
 interface RegistrationRequestDetailProps {
   request: RequestDetail | null

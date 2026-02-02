@@ -9,9 +9,9 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense,useEffect } from 'react'
 
-import { LoadingSpinner } from '@/components/ui'
 import { AcceptInvitationForm } from '@/features/invitations/components/dumb/AcceptInvitationForm'
 import { useAcceptInvitation } from '@/features/invitations/hooks/useAcceptInvitation'
+import { LoadingSpinner } from '@/shared/components/feedback'
 
 function AcceptInvitationContent() {
   const searchParams = useSearchParams()

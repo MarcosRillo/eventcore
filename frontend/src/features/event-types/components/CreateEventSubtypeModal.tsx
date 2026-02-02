@@ -6,16 +6,11 @@
  */
 
 import {
-  Checkbox,
-  FormModal,
-  FormSubmitHandler,
-  FormValidator,
-  Input,
-} from '@/components/ui';
-import {
   createEventSubtype,
   validateEventSubtypeData,
 } from '@/features/event-types/services/eventSubtype.service';
+import { Checkbox, Input } from '@/shared/components/form';
+import { FormModal, FormSubmitHandler, FormValidator } from '@/shared/components/modals';
 import { CreateEventSubtypeData, EventSubtype } from '@/types/eventType.types';
 
 interface CreateEventSubtypeModalProps {

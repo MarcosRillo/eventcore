@@ -7,8 +7,8 @@
 
 import Link from 'next/link';
 
-import { Button, Input } from '@/components/ui';
 import { useForgotPassword } from '@/features/auth';
+import { Button, Input } from '@/shared/components/form';
 
 export function ForgotPasswordPageContainer() {
   const {

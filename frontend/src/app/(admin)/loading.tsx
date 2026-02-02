@@ -1,4 +1,4 @@
-import { LoadingSpinner } from '@/components/ui'
+import { LoadingSpinner } from '@/shared/components/feedback'
 
 /**
  *

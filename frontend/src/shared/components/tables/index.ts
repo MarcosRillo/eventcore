@@ -1,14 +1,10 @@
 /**
- * Table Components Exports
- * Re-exports for the reusable table components
+ * Table Components - Barrel Export
+ * Reusable table components including pagination
  */
 
-export type { ExpandableTableProps } from '@/shared/components/tables/ExpandableTable';
-export { ExpandableTable } from '@/shared/components/tables/ExpandableTable';
-export { GenericTable } from '@/shared/components/tables/GenericTable';
-export type {
-  ConfirmDialogData,
-  GenericTableProps,
-  TableActionConfig,
-  TableColumnConfig,
-} from '@/shared/components/tables/types';
+export { ExpandableTable, type ExpandableTableProps } from './ExpandableTable'
+export { GenericTable } from './GenericTable'
+export { default as Pagination } from './Pagination'
+export { Table, type TableAction, type TableColumn, type TableProps } from './Table'
+export type { ConfirmDialogData, GenericTableProps, TableActionConfig, TableColumnConfig } from './types'

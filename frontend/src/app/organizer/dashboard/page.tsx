@@ -7,8 +7,8 @@
 
 import { Suspense } from 'react'
 
-import { LoadingSpinner } from '@/components/ui'
 import { OrganizerDashboardContainer } from '@/features/organizer-dashboard'
+import { LoadingSpinner } from '@/shared/components/feedback'
 
 // Loading fallback for dashboard
 const DashboardSkeleton = () => (

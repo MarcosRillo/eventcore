@@ -9,11 +9,12 @@
 import { MapPin, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button, Input, LoadingSpinner } from '@/components/ui';
 import { CreateLocationModal } from '@/features/locations/components/CreateLocationModal';
 import { EditLocationModal } from '@/features/locations/components/EditLocationModal';
 import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer';
 import { useLocationManager } from '@/features/locations/hooks/useLocationManager';
+import { LoadingSpinner } from '@/shared/components/feedback';
+import { Button, Input } from '@/shared/components/form';
 import { Location } from '@/types/location.types';
 
 export function LocationsPageContainer() {

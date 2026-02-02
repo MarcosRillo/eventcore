@@ -3,9 +3,10 @@
  * Clean event cards grid with subtle styling
  */
 
-import { Button,EmptyState, EmptyStateIcons, LoadingSpinner } from '@/components/ui'
 import type { FeaturedEventsSectionProps } from '@/features/landing/types/landing.types'
 import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
+import { EmptyState, EmptyStateIcons, LoadingSpinner } from '@/shared/components/feedback'
+import { Button } from '@/shared/components/form'
 
 export const FeaturedEventsSection = ({
   events,

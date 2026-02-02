@@ -5,8 +5,8 @@
  * Reusable across all features (events, categories, locations, etc.)
  */
 
-import Modal from '@/components/ui/Modal'
 import { Button } from '@/shared/components/form'
+import { Modal } from '@/shared/components/modals'
 
 interface DeleteConfirmModalProps {
   isOpen: boolean

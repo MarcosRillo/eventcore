@@ -18,8 +18,9 @@ import {
   X} from 'lucide-react';
 import { Fragment, useState } from 'react';
 
-import { Button, ConfirmDialog } from '@/components/ui';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
+import { Button } from '@/shared/components/form';
+import ConfirmDialog from '@/shared/components/modals/ConfirmDialog';
 import { Event } from '@/types/event.types';
 
 // Context-specific configuration

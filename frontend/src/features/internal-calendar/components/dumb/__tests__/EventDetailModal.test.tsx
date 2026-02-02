@@ -11,7 +11,7 @@ import { EventDetailModal } from '@/features/internal-calendar/components/dumb/E
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 
 // Mock the base Modal component
-jest.mock('@/components/ui/Modal', () => {
+jest.mock('@/shared/components/modals/Modal', () => {
   return function MockModal({
     isOpen,
     onClose,

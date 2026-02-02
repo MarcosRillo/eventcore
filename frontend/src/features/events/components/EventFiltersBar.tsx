@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { Button, Input, Select } from '@/components/ui';
+import { Button, Input, Select } from '@/shared/components/form';
 import { EVENT_STATUS, EVENT_TYPE,EventFilters } from '@/types/event.types';
 
 // Define Section interface for type safety

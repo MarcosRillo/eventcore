@@ -9,9 +9,9 @@
 import dynamic from 'next/dynamic'
 import { Suspense,useEffect,useState } from 'react'
 
-import { SkeletonCard } from '@/components/ui'
 import { StatsBar } from '@/features/public-calendar/components/dumb/StatsBar'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
+import { SkeletonCard } from '@/shared/components/feedback'
 
 // Lazy load view containers - only the active view is loaded
 const CalendarViewContainer = dynamic(

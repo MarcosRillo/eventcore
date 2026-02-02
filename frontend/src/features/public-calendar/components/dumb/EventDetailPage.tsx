@@ -12,10 +12,10 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Button } from '@/components/ui';
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons';
 import { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML';
+import { Button } from '@/shared/components/form';
 import { Event } from '@/types/event.types';
 
 interface EventDetailPageProps {

@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { Button,Modal, RadioGroup, Textarea } from '@/components/ui';
+import { Button, RadioGroup, Textarea } from '@/shared/components/form';
+import { Modal } from '@/shared/components/modals';
 import { Event } from '@/types/event.types';
 
 // Action option interface

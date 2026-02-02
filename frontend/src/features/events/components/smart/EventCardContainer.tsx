@@ -8,11 +8,11 @@
 import { Clock } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@/components/ui';
 import { EventCard } from '@/features/events/components/dumb/EventCard';
 import { useEventActions } from '@/features/events/hooks/useEventActions';
 import { useEventCardLogic } from '@/features/events/hooks/useEventCardLogic';
 import { useEventUrgency } from '@/features/events/hooks/useEventUrgency';
+import { Button } from '@/shared/components/form';
 import { Event } from '@/types/event.types';
 
 interface EventCardContainerProps {

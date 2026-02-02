@@ -8,11 +8,11 @@
 import { X, XCircle } from 'lucide-react';
 import { useCallback,useState } from 'react';
 
-import { Button,Input } from '@/components/ui';
 import { UserTable } from '@/features/users/components/dumb/UserTable';
 import { UserEditModalContainer } from '@/features/users/components/smart/UserEditModalContainer';
 import { useUserManager } from '@/features/users/hooks/useUserManager';
 import type { User } from '@/features/users/types/user.types';
+import { Button, Input } from '@/shared/components/form';
 import { ConfirmDialogData } from '@/shared/components/tables';
 
 /**

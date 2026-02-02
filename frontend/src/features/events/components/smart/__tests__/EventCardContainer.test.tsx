@@ -47,7 +47,7 @@ jest.mock('@/features/events/components/dumb/EventCard', () => ({
 }))
 
 // Mock Button component
-jest.mock('@/components/ui', () => ({
+jest.mock('@/shared/components/form', () => ({
   Button: ({ children, onClick, variant, size }: {
     children: React.ReactNode
     onClick: () => void

@@ -1,8 +1,13 @@
 /**
  * Shared Modals - Barrel Export
  *
- * Generic confirmation modals reusable across all features
+ * Generic modals and dialogs reusable across all features
  */
 
-export { DeleteConfirmModal } from '@/shared/components/modals/DeleteConfirmModal'
-export { PublishConfirmModal } from '@/shared/components/modals/PublishConfirmModal'
+export { default as ConfirmDialog } from './ConfirmDialog'
+export { DeleteConfirmModal } from './DeleteConfirmModal'
+export { type EventDetailContext, EventDetailModal, type EventDetailModalProps } from './EventDetailModal'
+export { type FieldErrorMap, FormModal, type FormModalProps, type FormRenderProps, type FormSubmitHandler, type FormValidator } from './FormModal'
+export { default as Modal } from './Modal'
+export { default as PromptDialog } from './PromptDialog'
+export { PublishConfirmModal } from './PublishConfirmModal'

@@ -15,16 +15,16 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-import EmptyState, { EmptyStateIcons } from '@/components/ui/EmptyState'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import Pagination from '@/components/ui/Pagination'
 import { EventViewTabs } from '@/features/organizer/components/dumb/EventViewTabs'
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerQuickFilters } from '@/features/organizer/components/dumb/OrganizerQuickFilters'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { StatCard } from '@/features/organizer-dashboard/components/dumb/StatCard'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
+import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
+import LoadingSpinner from '@/shared/components/feedback/LoadingSpinner'
 import { Button } from '@/shared/components/form'
+import StatCard from '@/shared/components/stats/StatCard'
+import Pagination from '@/shared/components/tables/Pagination'
 
 interface OrganizerDashboardProps {
   stats: OrganizerStats | null
@@ -81,43 +81,43 @@ export const OrganizerDashboard = ({
           data-testid="stats-grid"
         >
           <StatCard
-            icon={Calendar}
+            icon={<Calendar className="w-5 h-5" />}
             value={stats.total_events}
             label="Total Eventos"
             variant="default"
           />
           <StatCard
-            icon={CalendarClock}
+            icon={<CalendarClock className="w-5 h-5" />}
             value={stats.upcoming_events}
             label="Próximos"
             variant="primary"
           />
           <StatCard
-            icon={CalendarCheck}
+            icon={<CalendarCheck className="w-5 h-5" />}
             value={stats.past_events}
             label="Pasados"
             variant="default"
           />
           <StatCard
-            icon={Clock}
+            icon={<Clock className="w-5 h-5" />}
             value={stats.pending_internal}
             label="Pendientes"
             variant="warning"
           />
           <StatCard
-            icon={CheckCircle}
+            icon={<CheckCircle className="w-5 h-5" />}
             value={stats.approved_internal}
             label="Aprobados"
             variant="success"
           />
           <StatCard
-            icon={Globe}
+            icon={<Globe className="w-5 h-5" />}
             value={stats.published}
             label="Publicados"
             variant="info"
           />
           <StatCard
-            icon={AlertTriangle}
+            icon={<AlertTriangle className="w-5 h-5" />}
             value={stats.requires_changes}
             label="Requiere Cambios"
             variant="error"

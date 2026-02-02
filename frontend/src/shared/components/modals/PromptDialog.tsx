@@ -8,8 +8,8 @@
 
 import { useEffect, useRef,useState } from 'react';
 
-import Modal from '@/components/ui/Modal';
 import { Button, Input, Textarea } from '@/shared/components/form';
+import Modal from '@/shared/components/modals/Modal';
 
 interface PromptDialogProps {
   isOpen: boolean;

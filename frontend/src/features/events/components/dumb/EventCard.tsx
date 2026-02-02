@@ -9,7 +9,7 @@
 import { Building2,Calendar, Clock, Star } from 'lucide-react';
 import React from 'react';
 
-import { Badge,Card } from '@/components/ui';
+import { Badge, Card } from '@/shared/components/display';
 import { Event } from '@/types/event.types';
 
 interface EventCardProps {

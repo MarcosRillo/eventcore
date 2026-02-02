@@ -10,8 +10,8 @@ import { Location } from '@/types/location.types'
 jest.mock('@/features/locations/services/location.service')
 const mockUpdateLocation = locationService.updateLocation as jest.Mock
 
-// Mock @/components/ui
-jest.mock('@/components/ui', () => ({
+// Mock UI components
+jest.mock('@/shared/components/modals', () => ({
   FormModal: ({
     isOpen,
     onClose,
@@ -94,6 +94,9 @@ jest.mock('@/components/ui', () => ({
       </div>
     )
   },
+}))
+
+jest.mock('@/shared/components/form', () => ({
   Input: ({
     label,
     name,

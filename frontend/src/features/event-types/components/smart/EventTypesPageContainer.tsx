@@ -19,13 +19,15 @@ import {
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import { Button, ConfirmDialog, Input, LoadingSpinner, Select } from '@/components/ui';
 import CreateEventSubtypeModal from '@/features/event-types/components/CreateEventSubtypeModal';
 import CreateEventTypeModal from '@/features/event-types/components/CreateEventTypeModal';
 import EditEventSubtypeModal from '@/features/event-types/components/EditEventSubtypeModal';
 import EditEventTypeModal from '@/features/event-types/components/EditEventTypeModal';
 import { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer';
 import { useEventTypeWithSubtypes } from '@/features/event-types/hooks/useEventTypeWithSubtypes';
+import { LoadingSpinner } from '@/shared/components/feedback';
+import { Button, Input, Select } from '@/shared/components/form';
+import { ConfirmDialog } from '@/shared/components/modals';
 import { EventSubtype, EventType, EventTypeFilterStatus } from '@/types/eventType.types';
 
 export function EventTypesPageContainer() {

@@ -8,7 +8,10 @@
 import type { ReactNode } from 'react'
 
 import { PermissionGate } from '@/components/auth/PermissionGate'
-import { Button, EmptyState, EmptyStateIcons,Pagination, Skeleton } from '@/components/ui'
+import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
+import Skeleton from '@/shared/components/feedback/Skeleton'
+import { Button } from '@/shared/components/form'
+import Pagination from '@/shared/components/tables/Pagination'
 import type { Permission } from '@/types/auth.types'
 import type { User } from '@/types/auth.types'
 import type { Event } from '@/types/event.types'

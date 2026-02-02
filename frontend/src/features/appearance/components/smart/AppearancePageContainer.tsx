@@ -6,9 +6,9 @@
  * Renders theme customization form with real-time preview
  */
 
-import { LoadingSpinner } from '@/components/ui';
-import SafeImage from '@/components/ui/SafeImage';
 import { useAppearanceForm } from '@/features/appearance/hooks/useAppearanceForm';
+import { SafeImage } from '@/shared/components/display';
+import { LoadingSpinner } from '@/shared/components/feedback';
 import { Button, ColorPicker, Input } from '@/shared/components/form';
 
 export function AppearancePageContainer() {

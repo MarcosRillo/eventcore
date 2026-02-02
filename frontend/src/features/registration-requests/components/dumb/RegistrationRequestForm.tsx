@@ -8,11 +8,11 @@
 import Image from 'next/image'
 import { useEffect,useState } from 'react'
 
-import { Button, Checkbox, Input, Select, Textarea } from '@/components/ui'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
 } from '@/features/registration-requests/types/registration-request.types'
+import { Button, Checkbox, Input, Select, Textarea } from '@/shared/components/form'
 
 interface RegistrationRequestFormProps {
   formData: RegistrationRequestFormData

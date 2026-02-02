@@ -9,9 +9,9 @@
 
 'use client';
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { InternalEventCard } from '@/features/internal-calendar/components/dumb/InternalEventCard';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
+import { LoadingSpinner } from '@/shared/components/feedback';
 
 interface InternalCalendarProps {
   events: InternalCalendarEvent[];

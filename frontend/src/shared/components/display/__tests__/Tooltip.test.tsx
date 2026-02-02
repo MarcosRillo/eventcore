@@ -1,6 +1,6 @@
 import { fireEvent,render, screen } from '@testing-library/react'
 
-import { Tooltip } from '@/components/ui/Tooltip'
+import { Tooltip } from '@/shared/components/display/Tooltip'
 
 describe('Tooltip', () => {
   it('shows tooltip on hover', () => {

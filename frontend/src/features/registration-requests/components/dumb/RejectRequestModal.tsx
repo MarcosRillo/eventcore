@@ -7,7 +7,8 @@
 import { AlertCircle } from 'lucide-react'
 import { type ChangeEvent } from 'react'
 
-import { Button, Modal, Textarea } from '@/components/ui'
+import { Button, Textarea } from '@/shared/components/form'
+import { Modal } from '@/shared/components/modals'
 
 interface RejectRequestModalProps {
   isOpen: boolean

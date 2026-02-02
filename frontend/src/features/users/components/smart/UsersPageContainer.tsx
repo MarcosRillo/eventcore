@@ -8,8 +8,8 @@
 import { Users } from 'lucide-react'
 import Link from 'next/link'
 
-import { Button } from '@/components/ui'
 import UserTableContainer from '@/features/users/components/smart/UserTableContainer'
+import { Button } from '@/shared/components/form'
 
 export function UsersPageContainer() {
   return (

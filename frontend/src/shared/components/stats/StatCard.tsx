@@ -13,7 +13,7 @@ interface StatCardProps {
     value: number
     label?: string
   }
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger'
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'error'
   size?: 'sm' | 'md' | 'lg'
   className?: string
   onClick?: () => void
@@ -50,6 +50,9 @@ const StatCard = ({
     },
   }
 
+  // Support both 'danger' and 'error' as aliases
+  const normalizedVariant = variant === 'error' ? 'danger' : variant
+
   const variantClasses = {
     default: {
       icon: 'bg-neutral-100 text-neutral-600',
@@ -71,15 +74,19 @@ const StatCard = ({
       icon: 'bg-error-50 text-error-600',
       accent: 'text-error-600',
     },
+    info: {
+      icon: 'bg-info-50 text-info-600',
+      accent: 'text-info-600',
+    },
   }
 
   const styles = sizeClasses[size]
-  const colors = variantClasses[variant]
+  const colors = variantClasses[normalizedVariant] || variantClasses.default
 
   const isClickable = !!onClick
 
   return (
-    <div
+    <article
       className={`
         bg-white rounded-lg border border-neutral-200
         ${styles.container}
@@ -135,7 +142,7 @@ const StatCard = ({
           </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }
 

@@ -8,7 +8,8 @@
 import { AlertTriangle } from 'lucide-react'
 import { useCallback } from 'react'
 
-import { Button,Modal } from '@/components/ui'
+import { Button } from '@/shared/components/form'
+import { Modal } from '@/shared/components/modals'
 
 interface SuspendConfirmModalProps {
   isOpen: boolean

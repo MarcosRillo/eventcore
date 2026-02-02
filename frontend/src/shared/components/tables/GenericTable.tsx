@@ -8,8 +8,9 @@
 
 import { Fragment } from 'react';
 
-import { Button, ConfirmDialog } from '@/components/ui';
-import Pagination from '@/components/ui/Pagination';
+import { Button } from '@/shared/components/form';
+import { ConfirmDialog } from '@/shared/components/modals';
+import { Pagination } from '@/shared/components/tables';
 import type {
   GenericTableProps,
   TableActionConfig,

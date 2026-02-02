@@ -7,10 +7,10 @@
 
 import React, { useCallback,useState } from 'react'
 
-import { Button,Input } from '@/components/ui'
 import { OrganizationDetailModal } from '@/features/organizations/components/dumb/OrganizationDetailModal'
 import { OrganizationTable } from '@/features/organizations/components/dumb/OrganizationTable'
 import { useOrganizations } from '@/features/organizations/hooks/useOrganizations'
+import { Button, Input } from '@/shared/components/form'
 
 export const OrganizationTableContainer: React.FC = () => {
   const {

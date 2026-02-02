@@ -9,9 +9,10 @@
 import Link from 'next/link';
 import { useRef } from 'react';
 
-import { Button, Input, LoadingSpinner, PasswordInput } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/features/auth';
+import { LoadingSpinner } from '@/shared/components/feedback';
+import { Button, Input, PasswordInput } from '@/shared/components/form';
 
 export function LoginPageContainer() {
   const { isAuthenticated } = useAuth();

@@ -10,10 +10,10 @@
 import { useRouter } from 'next/navigation';
 import { useEffect,useState } from 'react';
 
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { InternalEventDetailPage } from '@/features/internal-calendar/components/dumb/InternalEventDetailPage';
 import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
+import { LoadingSpinner } from '@/shared/components/feedback';
 
 export interface InternalEventDetailPageContainerProps {
   eventId: number;

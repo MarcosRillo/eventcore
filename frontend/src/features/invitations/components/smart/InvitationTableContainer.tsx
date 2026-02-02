@@ -3,11 +3,11 @@
 import { RefreshCw, UserPlus, X, XCircle } from 'lucide-react';
 import { useCallback,useState } from 'react';
 
-import { Button } from '@/components/ui';
 import InvitationTable from '@/features/invitations/components/dumb/InvitationTable';
 import { CreateInvitationModalContainer } from '@/features/invitations/components/smart/CreateInvitationModalContainer';
 import { useInvitations } from '@/features/invitations/hooks/useInvitations';
 import type { Invitation } from '@/features/invitations/types/invitation.types';
+import { Button } from '@/shared/components/form';
 import { ConfirmDialogData } from '@/shared/components/tables';
 
 export const InvitationTableContainer = () => {

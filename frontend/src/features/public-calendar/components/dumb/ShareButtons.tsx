@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 
-import { Button } from '@/components/ui'
+import { Button } from '@/shared/components/form'
 
 interface ShareButtonsEvent {
   title: string

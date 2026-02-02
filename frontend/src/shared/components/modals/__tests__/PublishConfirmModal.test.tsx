@@ -18,7 +18,7 @@ interface MockButtonProps {
 }
 
 // Mock UI components
-jest.mock('@/components/ui/Modal', () => ({
+jest.mock('@/shared/components/modals/Modal', () => ({
   __esModule: true,
   default: ({ isOpen, onClose, title, children }: MockModalProps) =>
     isOpen ? (

@@ -10,7 +10,7 @@ import { EventFiltersBar } from '@/features/events/components/EventFiltersBar'
 import { EVENT_TYPE,EventFilters } from '@/types/event.types'
 
 // Mock UI components
-jest.mock('@/components/ui', () => ({
+jest.mock('@/shared/components/form', () => ({
   Button: ({ children, onClick, variant, size }: {
     children: React.ReactNode
     onClick?: () => void

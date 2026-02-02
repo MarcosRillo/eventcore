@@ -9,8 +9,8 @@ jest.mock('lucide-react', () => ({
   Trash2: () => <span data-testid="trash-icon" />,
 }))
 
-// Mock @/components/ui with all needed components
-jest.mock('@/components/ui', () => ({
+// Mock UI components
+jest.mock('@/shared/components/form', () => ({
   Button: ({ children, onClick, title, variant, size, 'aria-label': ariaLabel }: {
     children: React.ReactNode
     onClick?: () => void
@@ -23,6 +23,9 @@ jest.mock('@/components/ui', () => ({
       {children}
     </button>
   ),
+}))
+
+jest.mock('@/shared/components/tables', () => ({
   Pagination: ({ currentPage, totalPages, onPageChange }: {
     currentPage: number
     totalPages: number
@@ -35,6 +38,9 @@ jest.mock('@/components/ui', () => ({
       <button onClick={() => onPageChange(currentPage + 1)}>Next</button>
     </div>
   ),
+}))
+
+jest.mock('@/shared/components/modals', () => ({
   ConfirmDialog: ({ isOpen, title, message }: {
     isOpen: boolean
     title: string

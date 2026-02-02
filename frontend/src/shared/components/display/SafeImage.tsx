@@ -38,7 +38,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
 
   if (hasError) {
     return (
-      <div 
+      <div
         className={`bg-gray-200 flex items-center justify-center text-gray-500 text-sm ${className}`}
         style={style}
       >
@@ -47,7 +47,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
     );
   }
 
-  const imageProps = fill 
+  const imageProps = fill
     ? { fill: true }
     : { width: width || 100, height: height || 100 };
 

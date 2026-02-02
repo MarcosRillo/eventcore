@@ -6,7 +6,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import PromptDialog from '@/components/ui/PromptDialog'
+import PromptDialog from '@/shared/components/modals/PromptDialog'
 
 describe('PromptDialog', () => {
   const defaultProps = {

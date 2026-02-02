@@ -8,8 +8,9 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { Button, LoadingSpinner, PasswordInput } from '@/components/ui';
 import { useResetPassword } from '@/features/auth';
+import { LoadingSpinner } from '@/shared/components/feedback';
+import { Button, PasswordInput } from '@/shared/components/form';
 
 const ResetPasswordContent = () => {
   const {

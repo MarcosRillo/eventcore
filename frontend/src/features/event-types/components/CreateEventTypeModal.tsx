@@ -6,17 +6,11 @@
  */
 
 import {
-  Checkbox,
-  FormModal,
-  FormSubmitHandler,
-  FormValidator,
-  Input,
-} from '@/components/ui';
-import {
   createEventType,
   validateEventTypeData,
 } from '@/features/event-types/services/eventType.service';
-import { ColorPicker } from '@/shared/components/form';
+import { Checkbox, ColorPicker, Input } from '@/shared/components/form';
+import { FormModal, FormSubmitHandler, FormValidator } from '@/shared/components/modals';
 import { CreateEventTypeData } from '@/types/eventType.types';
 
 interface CreateEventTypeModalProps {

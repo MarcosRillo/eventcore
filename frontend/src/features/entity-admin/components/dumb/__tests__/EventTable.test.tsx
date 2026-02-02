@@ -23,8 +23,11 @@ interface MockPermissionGateProps {
 }
 
 // Mock UI components
-jest.mock('@/components/ui', () => ({
+jest.mock('@/shared/components/feedback', () => ({
   LoadingSpinner: () => <div data-testid="loading-spinner">Loading...</div>,
+}))
+
+jest.mock('@/shared/components/modals', () => ({
   ConfirmDialog: ({ isOpen, title, message, onConfirm, onCancel }: MockConfirmDialogProps) =>
     isOpen ? (
       <div data-testid="confirm-dialog">
@@ -38,6 +41,9 @@ jest.mock('@/components/ui', () => ({
         </button>
       </div>
     ) : null,
+}))
+
+jest.mock('@/shared/components/form', () => ({
   Button: ({ children, onClick, ...props }: MockButtonProps) => (
     <button onClick={onClick} {...props}>
       {children}

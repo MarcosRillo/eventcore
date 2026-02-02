@@ -7,7 +7,7 @@
 
 'use client';
 
-import Modal from '@/components/ui/Modal';
+import { Modal } from '@/shared/components/modals';
 import type { Event } from '@/types/event.types';
 import { EVENT_STATUS_COLORS,EVENT_STATUS_LABELS } from '@/types/event.types';
 

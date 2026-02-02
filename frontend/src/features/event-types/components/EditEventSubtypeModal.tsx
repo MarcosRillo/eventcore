@@ -8,16 +8,11 @@
 import { useEffect, useState } from 'react';
 
 import {
-  Checkbox,
-  FormModal,
-  FormSubmitHandler,
-  FormValidator,
-  Input,
-} from '@/components/ui';
-import {
   updateEventSubtype,
   validateEventSubtypeData,
 } from '@/features/event-types/services/eventSubtype.service';
+import { Checkbox, Input } from '@/shared/components/form';
+import { FormModal, FormSubmitHandler, FormValidator } from '@/shared/components/modals';
 import { EventSubtype, UpdateEventSubtypeData } from '@/types/eventType.types';
 
 interface EditEventSubtypeModalProps {

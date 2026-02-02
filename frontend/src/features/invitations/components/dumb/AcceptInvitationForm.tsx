@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react'
 
-import { Button, Input, PasswordInput } from '@/components/ui'
+import { Button, Input, PasswordInput } from '@/shared/components/form'
 
 interface InvitationInfo {
   email: string

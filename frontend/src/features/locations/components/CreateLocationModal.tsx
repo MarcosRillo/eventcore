@@ -5,8 +5,9 @@
 
 'use client';
 
-import { FormModal, FormSubmitHandler, FormValidator, Input, Textarea } from '@/components/ui';
 import { createLocation } from '@/features/locations/services/location.service';
+import { Input, Textarea } from '@/shared/components/form';
+import { FormModal, FormSubmitHandler, FormValidator } from '@/shared/components/modals';
 import { LocationFormData, LocationPayload } from '@/types/location.types';
 
 interface CreateLocationModalProps {

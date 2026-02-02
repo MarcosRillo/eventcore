@@ -11,8 +11,8 @@
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-import Modal from '@/components/ui/Modal'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
+import { Modal } from '@/shared/components/modals'
 
 /**
  * EventDetailModal Props

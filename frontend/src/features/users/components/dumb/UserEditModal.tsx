@@ -4,9 +4,9 @@
  * Receives all state via props (no hooks)
  */
 
-import { Button } from '@/components/ui'
-import Modal from '@/components/ui/Modal'
 import type { User } from '@/features/users/types/user.types'
+import { Button } from '@/shared/components/form'
+import { Modal } from '@/shared/components/modals'
 
 interface UserEditModalProps {
   user: User | null

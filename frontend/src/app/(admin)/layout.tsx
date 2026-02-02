@@ -9,8 +9,8 @@
 import { Suspense,useState } from 'react';
 
 import { Header, Sidebar } from '@/components/layout';
-import { LoadingSpinner } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '@/shared/components/feedback';
 
 // Loading fallback for page content
 const PageLoadingFallback = () => (

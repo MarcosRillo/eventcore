@@ -9,9 +9,9 @@ import Image from 'next/image'
 import type { KeyboardEvent } from 'react'
 import { memo } from 'react'
 
-import { Badge } from '@/components/ui'
 import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
+import { Badge } from '@/shared/components/display'
 
 interface EventCardProps {
   event: PublicEvent

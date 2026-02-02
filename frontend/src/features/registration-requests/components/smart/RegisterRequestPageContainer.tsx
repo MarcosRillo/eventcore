@@ -8,9 +8,9 @@
 import { Building2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
-import { Button } from '@/components/ui'
 import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
 import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
+import { Button } from '@/shared/components/form'
 
 export function RegisterRequestPageContainer() {
   const {

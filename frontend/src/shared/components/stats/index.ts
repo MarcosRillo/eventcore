@@ -1,6 +1,7 @@
 /**
- * Shared Stats Components
+ * Stats Components - Barrel Export
+ * Statistics and metrics display components
  */
 
-export { StatsCard } from '@/shared/components/stats/StatsCard';
-export { StatsGrid } from '@/shared/components/stats/StatsGrid';
+export { default as StatCard, StatIcons } from './StatCard'
+export { StatsGrid } from './StatsGrid'

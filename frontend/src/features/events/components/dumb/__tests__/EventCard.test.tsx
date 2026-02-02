@@ -10,7 +10,7 @@ import { EventCard } from '@/features/events/components/dumb/EventCard'
 import { Event, EventStatus,EventType } from '@/types/event.types'
 
 // Mock UI components
-jest.mock('@/components/ui', () => ({
+jest.mock('@/shared/components/display', () => ({
   Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="card" className={className}>{children}</div>
   ),

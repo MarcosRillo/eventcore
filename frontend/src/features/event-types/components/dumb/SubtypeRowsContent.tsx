@@ -11,7 +11,8 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
-import { Button, LoadingSpinner } from '@/components/ui';
+import { LoadingSpinner } from '@/shared/components/feedback';
+import { Button } from '@/shared/components/form';
 import { EventSubtype } from '@/types/eventType.types';
 
 const BADGE_BASE_CLASSES =

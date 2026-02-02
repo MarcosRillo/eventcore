@@ -44,7 +44,7 @@ interface MockButtonProps {
 }
 
 // Mock UI components
-jest.mock('@/components/ui', () => ({
+jest.mock('@/shared/components/modals', () => ({
   Modal: ({ isOpen, onClose, title, children, footer }: MockModalProps) =>
     isOpen ? (
       <div data-testid="modal">
@@ -56,6 +56,9 @@ jest.mock('@/components/ui', () => ({
         </button>
       </div>
     ) : null,
+}))
+
+jest.mock('@/shared/components/form', () => ({
   Textarea: ({ label, value, onChange, placeholder, disabled, error, name }: MockTextareaProps) => (
     <div>
       <label>{label}</label>
