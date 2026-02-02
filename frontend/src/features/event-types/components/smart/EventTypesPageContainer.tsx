@@ -53,6 +53,7 @@ export function EventTypesPageContainer() {
     expandedTypeIds,
     toggleExpand,
     // Subtype CRUD
+    handleCreateSubtype,
     handleUpdateSubtype,
     handleDeleteSubtype,
     // URL sync
@@ -140,14 +141,10 @@ export function EventTypesPageContainer() {
     setIsCreateSubtypeModalOpen(true);
   }, []);
 
-  const handleCreateSubtypeSuccess = useCallback(async () => {
-    if (parentTypeForSubtype) {
-      // Refresh subtypes for this type
-      refreshData();
-    }
+  const handleCreateSubtypeSuccess = useCallback(() => {
     setIsCreateSubtypeModalOpen(false);
     setParentTypeForSubtype(null);
-  }, [parentTypeForSubtype, refreshData]);
+  }, []);
 
   const handleEditSubtype = useCallback((subtype: EventSubtype) => {
     setSelectedSubtype(subtype);
@@ -194,8 +191,11 @@ export function EventTypesPageContainer() {
     setSubtypeToDelete(null);
   }, []);
 
-  // Show loading spinner while data is loading
-  if (isLoading) {
+  // Show full-page loading spinner ONLY on initial load (no data yet)
+  // During search/filter, keep the form mounted to preserve input focus
+  const isInitialLoad = isLoading && eventTypes.length === 0;
+
+  if (isInitialLoad) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="xl" text="Cargando tipos de evento..." />
@@ -303,6 +303,13 @@ export function EventTypesPageContainer() {
               />
             </div>
           </div>
+          {/* Inline loading indicator during search/filter (when data already exists) */}
+          {isLoading && eventTypes.length > 0 && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-neutral-500">
+              <LoadingSpinner size="sm" />
+              <span>Buscando...</span>
+            </div>
+          )}
         </div>
 
         {/* Error Message */}
@@ -401,7 +408,7 @@ export function EventTypesPageContainer() {
             onSuccess={handleCreateSubtypeSuccess}
             eventTypeId={parentTypeForSubtype.id}
             eventTypeName={parentTypeForSubtype.name}
-            onSubtypeCreated={refreshData}
+            onCreateSubtype={handleCreateSubtype}
           />
         )}
 

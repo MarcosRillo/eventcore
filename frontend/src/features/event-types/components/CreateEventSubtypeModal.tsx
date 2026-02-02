@@ -16,7 +16,7 @@ import {
   createEventSubtype,
   validateEventSubtypeData,
 } from '@/features/event-types/services/eventSubtype.service';
-import { CreateEventSubtypeData } from '@/types/eventType.types';
+import { CreateEventSubtypeData, EventSubtype } from '@/types/eventType.types';
 
 interface CreateEventSubtypeModalProps {
   isOpen: boolean;
@@ -25,6 +25,10 @@ interface CreateEventSubtypeModalProps {
   eventTypeId: number;
   eventTypeName: string;
   onSubtypeCreated?: () => void;
+  onCreateSubtype?: (
+    typeId: number,
+    data: CreateEventSubtypeData
+  ) => Promise<EventSubtype>;
 }
 
 // Initial form data
@@ -45,19 +49,24 @@ const CreateEventSubtypeModal: React.FC<CreateEventSubtypeModalProps> = ({
   eventTypeId,
   eventTypeName,
   onSubtypeCreated,
+  onCreateSubtype,
 }) => {
   // Submit handler
   const handleSubmit: FormSubmitHandler<CreateEventSubtypeData> = async (
     formData
   ) => {
-    await createEventSubtype(eventTypeId, {
-      name: formData.name?.trim(),
+    const data: CreateEventSubtypeData = {
+      name: formData.name?.trim() || '',
       is_active: formData.is_active,
-    });
+    };
 
-    // Notify parent component
-    if (onSubtypeCreated) {
-      onSubtypeCreated();
+    if (onCreateSubtype) {
+      // Use parent's handler (updates cache automatically)
+      await onCreateSubtype(eventTypeId, data);
+    } else {
+      // Fallback for standalone usage
+      await createEventSubtype(eventTypeId, data);
+      onSubtypeCreated?.();
     }
   };
 
