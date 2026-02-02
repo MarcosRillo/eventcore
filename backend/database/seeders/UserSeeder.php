@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
         $entityStaffRole = UserRole::where('role_code', 'entity_staff')->first();
 
         // Create Platform Admin
-        $platformAdmin = User::create([
+        User::create([
             'name' => 'Marcos Rillo Cabanne',
             'email' => 'marcos@plataforma.com',
             'role_id' => $platformAdminRole->id,
@@ -40,13 +40,10 @@ class UserSeeder extends Seeder
 
         // Get organizations for associating users
         $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $secretariaCultura = Organization::where('slug', 'secretaria-cultura')->first();
         $sheraton = Organization::where('slug', 'sheraton-tucuman')->first();
         $laRural = Organization::where('slug', 'la-rural-tucuman')->first();
-        $centroVirla = Organization::where('slug', 'centro-cultural-virla')->first();
-        $teatroSanMartin = Organization::where('slug', 'teatro-san-martin')->first();
 
-        // Create Entity Admins
+        // Create Entity Admin for Ente de Turismo
         $entityAdminTurismo = User::create([
             'name' => 'Ana García',
             'email' => 'ana.garcia@enteturismo.gov.ar',
@@ -55,15 +52,6 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         $entityAdminTurismo->organizations()->attach($enteDeturismo->id);
-
-        $entityAdminCultura = User::create([
-            'name' => 'Carlos Mendoza',
-            'email' => 'carlos.mendoza@cultura.gov.ar',
-            'role_id' => $entityAdminRole->id,
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
-        $entityAdminCultura->organizations()->attach($secretariaCultura->id);
 
         // Create Organizer Admins
         $organizerSheraton = User::create([
@@ -83,24 +71,6 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         $organizerLaRural->organizations()->attach($laRural->id);
-
-        $organizerVirla = User::create([
-            'name' => 'Laura Fernández',
-            'email' => 'laura.fernandez@centrovirla.gov.ar',
-            'role_id' => $organizerAdminRole->id,
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
-        $organizerVirla->organizations()->attach($centroVirla->id);
-
-        $organizerTeatro = User::create([
-            'name' => 'Roberto Silva',
-            'email' => 'roberto.silva@teatrosanmartin.gov.ar',
-            'role_id' => $organizerAdminRole->id,
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
-        $organizerTeatro->organizations()->attach($teatroSanMartin->id);
 
         // Create Entity Staff members for Ente de Turismo
         $staffTurismo1 = User::create([
@@ -144,33 +114,11 @@ class UserSeeder extends Seeder
         ]);
         $staffTurismoSuspended->organizations()->attach($enteDeturismo->id);
 
-        // Create Entity Staff members for Secretaría de Cultura
-        $staffCultura1 = User::create([
-            'name' => 'Diego Martinez',
-            'email' => 'diego.martinez@cultura.gov.ar',
-            'role_id' => $entityStaffRole->id,
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-            'status' => 'active',
-        ]);
-        $staffCultura1->organizations()->attach($secretariaCultura->id);
-
-        $staffCultura2 = User::create([
-            'name' => 'Sofía Herrera',
-            'email' => 'sofia.herrera@cultura.gov.ar',
-            'role_id' => $entityStaffRole->id,
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-            'status' => 'active',
-        ]);
-        $staffCultura2->organizations()->attach($secretariaCultura->id);
-
         $this->command->info('Users created successfully!');
         $this->command->info('- 1 Platform Admin');
-        $this->command->info('- 2 Entity Admins');
-        $this->command->info('- 4 Organizer Admins');
-        $this->command->info('- 6 Entity Staff (4 Turismo + 2 Cultura)');
-        $this->command->info('- 1 Suspended user for testing');
+        $this->command->info('- 1 Entity Admin (Ente de Turismo)');
+        $this->command->info('- 2 Organizer Admins (Sheraton + La Rural)');
+        $this->command->info('- 4 Entity Staff (3 active + 1 suspended)');
         $this->command->info('- All passwords: password123');
     }
 }

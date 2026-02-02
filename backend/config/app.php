@@ -123,4 +123,20 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Production Seeder Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These values are used by the ProductionSeeder to create the initial
+    | primary entity and admin user in a production environment.
+    |
+    */
+
+    'primary_entity_name' => env('PRIMARY_ENTITY_NAME', 'Ente de Turismo'),
+    'primary_entity_cuit' => env('PRIMARY_ENTITY_CUIT'),
+    'initial_admin_email' => env('INITIAL_ADMIN_EMAIL'),
+    'initial_admin_password' => env('INITIAL_ADMIN_PASSWORD'),
+    'initial_admin_name' => env('INITIAL_ADMIN_NAME', 'Administrador'),
+
 ];

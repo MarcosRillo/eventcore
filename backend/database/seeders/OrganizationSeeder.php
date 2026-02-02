@@ -27,7 +27,7 @@ class OrganizationSeeder extends Seeder
         $primaryEntityType = OrganizationType::where('type_code', 'primary_entity')->first();
         $eventOrganizerType = OrganizationType::where('type_code', 'event_organizer')->first();
 
-        // Create Primary Entities (Entidades Principales)
+        // Create Primary Entity (Ente de Turismo de Tucumán)
         $enteDeturismo = Organization::create([
             'name' => 'Ente de Turismo de Tucumán',
             'cuit' => '30-70000001-5',
@@ -35,15 +35,6 @@ class OrganizationSeeder extends Seeder
             'status_id' => $activeStatus->id,
             'type_id' => $primaryEntityType->id,
             'slug' => 'ente-turismo-tucuman',
-        ]);
-
-        $secretariaCultura = Organization::create([
-            'name' => 'Secretaría de Cultura',
-            'cuit' => '30-70000002-3',
-            'description' => 'Organismo público encargado de la gestión cultural provincial',
-            'status_id' => $activeStatus->id,
-            'type_id' => $primaryEntityType->id,
-            'slug' => 'secretaria-cultura',
         ]);
 
         // Create Event Organizers for Ente de Turismo
@@ -67,29 +58,8 @@ class OrganizationSeeder extends Seeder
             'slug' => 'la-rural-tucuman',
         ]);
 
-        // Create Event Organizers for Secretaría de Cultura
-        Organization::create([
-            'name' => 'Centro Cultural Virla',
-            'cuit' => '30-70000005-7',
-            'description' => 'Centro cultural que organiza eventos artísticos y culturales',
-            'status_id' => $activeStatus->id,
-            'type_id' => $eventOrganizerType->id,
-            'parent_id' => $secretariaCultura->id,
-            'slug' => 'centro-cultural-virla',
-        ]);
-
-        Organization::create([
-            'name' => 'Teatro San Martín',
-            'cuit' => '30-70000006-5',
-            'description' => 'Teatro oficial de la provincia que presenta obras y espectáculos',
-            'status_id' => $activeStatus->id,
-            'type_id' => $eventOrganizerType->id,
-            'parent_id' => $secretariaCultura->id,
-            'slug' => 'teatro-san-martin',
-        ]);
-
         $this->command->info('Organizations created successfully!');
-        $this->command->info('- 2 Primary Entities created');
-        $this->command->info('- 4 Event Organizers created (2 for each entity)');
+        $this->command->info('- 1 Primary Entity (Ente de Turismo de Tucumán)');
+        $this->command->info('- 2 Event Organizers (Sheraton + La Rural)');
     }
 }
