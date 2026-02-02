@@ -8,7 +8,7 @@ import {
   EventFormLocation,
   EventFormMedia} from '@/features/organizer/components/dumb/event-form'
 import { AsynchronousDate,EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
-import { AsyncSelectOption } from '@/shared/components/form'
+import { FuzzySelectOption } from '@/shared/components/form'
 import { EventSubtype,EventType } from '@/types/eventType.types'
 
 interface OrganizerEventFormProps {
@@ -18,8 +18,8 @@ interface OrganizerEventFormProps {
   initialLoading: boolean
   eventTypes: EventType[]
   eventSubtypes: EventSubtype[]
-  onSearchLocations: (query: string) => Promise<AsyncSelectOption[]>
-  selectedLocations: AsyncSelectOption[]
+  allLocations: FuzzySelectOption[]
+  selectedLocations: FuzzySelectOption[]
   isEditMode: boolean
   newAsyncDate: { date: string; notes: string }
   setNewAsyncDate: (value: { date: string; notes: string }) => void
@@ -53,7 +53,7 @@ export const OrganizerEventForm = ({
   initialLoading,
   eventTypes,
   eventSubtypes,
-  onSearchLocations,
+  allLocations,
   selectedLocations,
   isEditMode,
   newAsyncDate,
@@ -98,7 +98,7 @@ export const OrganizerEventForm = ({
         formData={formData}
         errors={errors}
         loading={loading}
-        onSearchLocations={onSearchLocations}
+        allLocations={allLocations}
         selectedLocations={selectedLocations}
         handleChange={handleChange}
         handleCustomLocationToggle={handleCustomLocationToggle}

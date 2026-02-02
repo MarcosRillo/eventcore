@@ -103,8 +103,6 @@ describe('OrganizerEventForm', () => {
     responsive_image_file: null
   }
 
-  const mockSearchLocations = jest.fn().mockResolvedValue(mockLocations)
-
   const mockEventTypes = [
     { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
     { id: 2, name: 'Feria', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' }
@@ -122,7 +120,7 @@ describe('OrganizerEventForm', () => {
     initialLoading: false,
     eventTypes: mockEventTypes,
     eventSubtypes: mockEventSubtypes,
-    onSearchLocations: mockSearchLocations,
+    allLocations: mockLocations,
     selectedLocations: [] as { id: number; name: string }[],
     isEditMode: false,
     newAsyncDate: { date: '', notes: '' },
@@ -281,7 +279,7 @@ describe('OrganizerEventForm', () => {
 
       // AsyncSearchableMultiSelect renders with "Ubicaciones" label
       expect(screen.getByText('Ubicaciones')).toBeInTheDocument()
-      expect(screen.getByPlaceholderText(/Escribe para buscar ubicación/)).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/Buscar ubicacion/)).toBeInTheDocument()
     })
 
     test('should render "Otro" checkbox for custom location', () => {

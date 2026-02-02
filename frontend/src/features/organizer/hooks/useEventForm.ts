@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState, useTransition } from 'react'
 
 import { getActiveEventSubtypes } from '@/features/event-types/services/eventSubtype.service'
 import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
-import { searchLocations } from '@/features/locations/services/location.service'
+import { getActiveLocations } from '@/features/locations/services/location.service'
 import { createEvent, createEventWithFiles, getEvent, updateEvent, updateEventWithFiles } from '@/features/organizer/services/organizer-event.service'
 import { AsynchronousDate, EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
 import { hasErrors,validateEventForm } from '@/features/organizer/utils/eventFormValidation'
@@ -94,16 +94,23 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
   const [initialLoadStarted, setInitialLoadStarted] = useState(false)
   const [eventTypes, setEventTypes] = useState<EventType[]>([])
   const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
+  const [allLocations, setAllLocations] = useState<{ id: number; name: string }[]>([])
   const [selectedLocations, setSelectedLocations] = useState<{ id: number; name: string }[]>([])
 
-  // Load event types on mount
+  // Load event types and locations on mount
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const eventTypesRes = await getActiveEventTypes()
+        const [eventTypesRes, locationsRes] = await Promise.all([
+          getActiveEventTypes(),
+          getActiveLocations()
+        ])
 
         // Event Types (Dec 2, 2025)
         setEventTypes(eventTypesRes || [])
+
+        // Locations for fuzzy search select
+        setAllLocations(locationsRes?.map(loc => ({ id: loc.id, name: loc.name })) || [])
       } catch {
         setErrors({ general: 'Error loading form options' })
       }
@@ -283,11 +290,7 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     }))
   }
 
-  // Wrapped search function for AsyncSearchableMultiSelect
-  const handleSearchLocations = useCallback(async (query: string) => {
-    return searchLocations(query)
-  }, [])
-
+  
   // Handle location IDs change from AsyncSearchableMultiSelect
   const handleLocationIdsChange = useCallback((ids: number[]) => {
     setFormData(prev => ({
@@ -460,6 +463,7 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     initialLoading,
     eventTypes,
     eventSubtypes,
+    allLocations,
     selectedLocations,
     isEditMode,
     newAsyncDate,
@@ -472,7 +476,6 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     removeAsynchronousDate,
     handleLocationChange,
     handleCustomLocationToggle,
-    handleSearchLocations,
     handleLocationIdsChange,
     updateSelectedLocations
   }

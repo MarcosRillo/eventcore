@@ -22,6 +22,7 @@ export const OrganizerEventFormContainer = ({
     initialLoading,
     eventTypes,
     eventSubtypes,
+    allLocations,
     selectedLocations,
     isEditMode,
     newAsyncDate,
@@ -32,8 +33,7 @@ export const OrganizerEventFormContainer = ({
     handleCancel,
     addAsynchronousDate,
     removeAsynchronousDate,
-    handleCustomLocationToggle,
-    handleSearchLocations
+    handleCustomLocationToggle
   } = useEventForm({ eventId, onSuccess, onError, onCancel })
 
   return (
@@ -44,7 +44,7 @@ export const OrganizerEventFormContainer = ({
       initialLoading={initialLoading}
       eventTypes={eventTypes}
       eventSubtypes={eventSubtypes}
-      onSearchLocations={handleSearchLocations}
+      allLocations={allLocations}
       selectedLocations={selectedLocations}
       isEditMode={isEditMode}
       newAsyncDate={newAsyncDate}

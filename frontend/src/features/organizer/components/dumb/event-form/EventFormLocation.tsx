@@ -1,6 +1,6 @@
 import { EventFormSection } from '@/features/organizer/components/dumb/event-form/EventFormSection'
 import { EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
-import { AsyncSearchableMultiSelect, AsyncSelectOption, Checkbox, Input } from '@/shared/components/form'
+import { Checkbox, FuzzySearchSelect, FuzzySelectOption, Input } from '@/shared/components/form'
 
 type FormFieldValue = string | number | boolean | null | number[]
 
@@ -8,8 +8,8 @@ interface EventFormLocationProps {
   formData: EventFormData
   errors: EventFormErrors
   loading: boolean
-  onSearchLocations: (query: string) => Promise<AsyncSelectOption[]>
-  selectedLocations: AsyncSelectOption[]
+  allLocations: FuzzySelectOption[]
+  selectedLocations: FuzzySelectOption[]
   handleChange: (field: keyof EventFormData, value: FormFieldValue) => void
   handleCustomLocationToggle: (checked: boolean) => void
 }
@@ -21,7 +21,7 @@ export const EventFormLocation = ({
   formData,
   errors,
   loading,
-  onSearchLocations,
+  allLocations,
   selectedLocations,
   handleChange,
   handleCustomLocationToggle
@@ -29,19 +29,20 @@ export const EventFormLocation = ({
   return (
     <EventFormSection number={2} title="Ubicación">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Ubicaciones (selección múltiple con búsqueda async) */}
+        {/* Ubicaciones (selección múltiple con búsqueda fuzzy) */}
         <div className="md:col-span-2">
-          <AsyncSearchableMultiSelect
+          <FuzzySearchSelect
             name="location_ids"
             label="Ubicaciones"
-            onSearch={onSearchLocations}
+            options={allLocations}
             selected={formData.location_ids}
             selectedOptions={selectedLocations}
             onChange={(ids) => handleChange('location_ids', ids)}
-            placeholder="Escribe para buscar ubicación…"
+            placeholder="Buscar ubicacion…"
             error={errors.location_ids}
             disabled={loading}
             required={!formData.has_custom_location}
+            maxResults={10}
           />
         </div>
 
