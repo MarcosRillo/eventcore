@@ -45,9 +45,11 @@ describe('InternalCalendarFilterBar', () => {
     expect(screen.getByText('Desde')).toBeInTheDocument();
     expect(screen.getByText('Hasta')).toBeInTheDocument();
 
-    // Verify all 4 filter inputs
-    expect(screen.getByLabelText('Tipo de Evento')).toBeInTheDocument();
-    expect(screen.getByLabelText('Estado')).toBeInTheDocument();
+    // Verify select triggers (Headless UI Listbox buttons)
+    expect(screen.getByRole('button', { name: /Todos los tipos/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Todos los estados/ })).toBeInTheDocument();
+
+    // Verify date inputs (Input shared component has htmlFor)
     expect(screen.getByLabelText('Desde')).toBeInTheDocument();
     expect(screen.getByLabelText('Hasta')).toBeInTheDocument();
   });
@@ -63,14 +65,10 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const eventTypeSelect = screen.getByLabelText('Tipo de Evento') as HTMLSelectElement;
+    const trigger = screen.getByRole('button', { name: /Todos los tipos/ });
 
     // Should be disabled when loading
-    expect(eventTypeSelect).toBeDisabled();
-
-    // Should show only default option when loading
-    expect(eventTypeSelect.options.length).toBe(1);
-    expect(eventTypeSelect.options[0].text).toBe('Todos los tipos');
+    expect(trigger).toBeDisabled();
   });
 
   test('event type dropdown shows options when loaded', () => {
@@ -84,17 +82,20 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const eventTypeSelect = screen.getByLabelText('Tipo de Evento') as HTMLSelectElement;
+    const trigger = screen.getByRole('button', { name: /Todos los tipos/ });
 
     // Should not be disabled
-    expect(eventTypeSelect).not.toBeDisabled();
+    expect(trigger).not.toBeDisabled();
 
-    // Should have default option + 3 event types
-    expect(eventTypeSelect.options.length).toBe(4);
-    expect(eventTypeSelect.options[0].text).toBe('Todos los tipos');
-    expect(eventTypeSelect.options[1].text).toBe('Conferencia');
-    expect(eventTypeSelect.options[2].text).toBe('Taller');
-    expect(eventTypeSelect.options[3].text).toBe('Exposición');
+    // Open the dropdown
+    fireEvent.click(trigger);
+
+    // Should have 3 event type options (placeholder is in the button, not an option)
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(3);
+    expect(screen.getByRole('option', { name: 'Conferencia' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Taller' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Exposición' })).toBeInTheDocument();
   });
 
   test('calls onFiltersChange when event type selected', () => {
@@ -107,10 +108,9 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const eventTypeSelect = screen.getByLabelText('Tipo de Evento') as HTMLSelectElement;
-
-    // Select event type with id 2 (Taller)
-    fireEvent.change(eventTypeSelect, { target: { value: '2' } });
+    // Open the event type dropdown and select "Taller" (id: 2)
+    fireEvent.click(screen.getByRole('button', { name: /Todos los tipos/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'Taller' }));
 
     // Should call onFiltersChange with event_type_id
     expect(mockOnFiltersChange).toHaveBeenCalledTimes(1);
@@ -129,10 +129,9 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const statusSelect = screen.getByLabelText('Estado') as HTMLSelectElement;
-
-    // Select status 'approved_internal'
-    fireEvent.change(statusSelect, { target: { value: 'approved_internal' } });
+    // Open the status dropdown and select "Aprobado Interno"
+    fireEvent.click(screen.getByRole('button', { name: /Todos los estados/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'Aprobado Interno' }));
 
     // Should call onFiltersChange with status
     expect(mockOnFiltersChange).toHaveBeenCalledTimes(1);
@@ -151,14 +150,15 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const statusSelect = screen.getByLabelText('Estado') as HTMLSelectElement;
+    // Open the status dropdown
+    fireEvent.click(screen.getByRole('button', { name: /Todos los estados/ }));
 
-    // Should have default option + 3 statuses
-    expect(statusSelect.options.length).toBe(4);
-    expect(statusSelect.options[0].text).toBe('Todos los estados');
-    expect(statusSelect.options[1].text).toBe('Aprobado Interno');
-    expect(statusSelect.options[2].text).toBe('Pendiente Aprobación Pública');
-    expect(statusSelect.options[3].text).toBe('Publicado');
+    // Should have 3 status options (placeholder is in the button, not an option)
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(3);
+    expect(screen.getByRole('option', { name: 'Aprobado Interno' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Pendiente Aprobación Pública' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Publicado' })).toBeInTheDocument();
   });
 
   test('status dropdown is disabled when statusesLoading is true', () => {
@@ -172,8 +172,7 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const statusSelect = screen.getByLabelText('Estado') as HTMLSelectElement;
-    expect(statusSelect).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Todos los estados/ })).toBeDisabled();
   });
 
   test('calls onFiltersChange when dates selected', () => {
