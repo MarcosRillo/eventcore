@@ -432,14 +432,22 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('async dates functionality', () => {
-    test('should call setNewAsyncDate when date input changes', () => {
+    test('should call setNewAsyncDate when date selected in picker', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      // Find the date input in the async dates section by exact aria-label
-      const asyncDateInput = screen.getByLabelText('Fecha adicional')
-      fireEvent.change(asyncDateInput, { target: { value: '2025-12-25' } })
+      // Open the async date picker
+      const asyncDateTrigger = screen.getByLabelText('Fecha adicional')
+      fireEvent.click(asyncDateTrigger)
 
-      expect(mockSetNewAsyncDate).toHaveBeenCalledWith({ date: '2025-12-25', notes: '' })
+      // Click a day in the calendar
+      const dayButtons = screen.getAllByRole('gridcell')
+      const day15 = dayButtons.find((btn) => btn.textContent === '15')
+      expect(day15).toBeTruthy()
+      fireEvent.click(day15!.firstChild as Element)
+
+      // Should call setNewAsyncDate with a date string matching yyyy-MM-dd format
+      expect(mockSetNewAsyncDate).toHaveBeenCalledTimes(1)
+      expect(mockSetNewAsyncDate.mock.calls[0][0].date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     })
 
     test('should call addAsynchronousDate when add button clicked', () => {

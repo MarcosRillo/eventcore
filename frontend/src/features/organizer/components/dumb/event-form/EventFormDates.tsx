@@ -101,13 +101,13 @@ export const EventFormDates = ({
 
         {/* Formulario para agregar nueva fecha asincrónica */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Input
-            type="date"
+          <DateTimePicker
+            label="Fecha adicional"
             value={newAsyncDate.date}
-            onChange={(e) => setNewAsyncDate({ ...newAsyncDate, date: e.target.value })}
+            onChange={(value) => setNewAsyncDate({ ...newAsyncDate, date: value })}
+            showTime={false}
             disabled={loading}
-            aria-label="Fecha adicional"
-            autoComplete="off"
+            name="async-date"
             fullWidth
           />
           <Input

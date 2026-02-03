@@ -25,6 +25,8 @@ export interface DateTimePickerProps {
   required?: boolean
   fullWidth?: boolean
   name?: string
+  /** When false, hides the time input and emits date-only values (yyyy-MM-dd). Default: true */
+  showTime?: boolean
 }
 
 /**
@@ -35,12 +37,16 @@ const toDateTimeLocalString = (date: Date): string => {
 }
 
 /**
- * Parses an ISO datetime-local string to Date
+ * Parses an ISO datetime-local string or date-only string to Date
  */
 const parseDateTimeLocal = (value: string): Date | null => {
   if (!value) return null
-  const date = parse(value, "yyyy-MM-dd'T'HH:mm", new Date())
-  return isValid(date) ? date : null
+  // Try date-only format first (yyyy-MM-dd)
+  const dateOnly = parse(value, 'yyyy-MM-dd', new Date())
+  if (isValid(dateOnly)) return dateOnly
+  // Then try datetime-local format (yyyy-MM-ddTHH:mm)
+  const dateTime = parse(value, "yyyy-MM-dd'T'HH:mm", new Date())
+  return isValid(dateTime) ? dateTime : null
 }
 
 /**
@@ -62,9 +68,11 @@ const DateTimePicker = ({
   required = false,
   fullWidth = false,
   name,
+  showTime = true,
 }: DateTimePickerProps) => {
   const generatedId = useId()
   const inputId = `datetime-picker-${generatedId}`
+  const dialogId = `datetime-dialog-${generatedId}`
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
@@ -117,16 +125,19 @@ const DateTimePicker = ({
   const handleDaySelect = (date: Date | undefined) => {
     if (!date) return
 
-    const [hours, minutes] = timeValue.split(':').map((str) => parseInt(str, 10))
-    const newDate = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      hours,
-      minutes
-    )
-
-    onChange(toDateTimeLocalString(newDate))
+    if (showTime) {
+      const [hours, minutes] = timeValue.split(':').map((str) => parseInt(str, 10))
+      const newDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        hours,
+        minutes
+      )
+      onChange(toDateTimeLocalString(newDate))
+    } else {
+      onChange(format(date, 'yyyy-MM-dd'))
+    }
     setIsOpen(false)
   }
 
@@ -183,6 +194,7 @@ const DateTimePicker = ({
         disabled={disabled}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
+        aria-controls={isOpen ? dialogId : undefined}
         className={`
           w-full h-10 px-3 text-sm text-left
           bg-white border rounded-md
@@ -197,7 +209,13 @@ const DateTimePicker = ({
         `}
       >
         <span className={selectedDate ? 'text-neutral-900' : 'text-neutral-400'}>
-          {selectedDate ? formatDisplayDate(selectedDate) : 'Seleccionar fecha y hora'}
+          {selectedDate
+            ? showTime
+              ? formatDisplayDate(selectedDate)
+              : format(selectedDate, "d 'de' MMMM yyyy", { locale: es })
+            : showTime
+              ? 'Seleccionar fecha y hora'
+              : 'Seleccionar fecha'}
         </span>
         <Calendar className="w-4 h-4 text-neutral-400 flex-shrink-0" aria-hidden="true" />
       </button>
@@ -205,6 +223,7 @@ const DateTimePicker = ({
       {/* Dropdown calendar */}
       {isOpen && (
         <div
+          id={dialogId}
           role="dialog"
           aria-label="Seleccionar fecha"
           className="absolute z-50 mt-1 p-4 bg-white rounded-lg shadow-lg border border-neutral-200 left-0"
@@ -217,6 +236,7 @@ const DateTimePicker = ({
             disabled={disabledDays}
             defaultMonth={selectedDate || minDate || new Date()}
             showOutsideDays
+            autoFocus
             classNames={{
               root: `${getDefaultClassNames().root} text-sm`,
               today: 'font-semibold',
@@ -228,7 +248,7 @@ const DateTimePicker = ({
           />
 
           {/* Time input */}
-          <div className="mt-3 pt-3 border-t border-neutral-200">
+          {showTime && <div className="mt-3 pt-3 border-t border-neutral-200">
             <label className="flex items-center gap-2 text-sm text-neutral-700">
               <span>Hora:</span>
               <input
@@ -239,7 +259,7 @@ const DateTimePicker = ({
                 className="flex-1 h-8 px-2 text-sm bg-white border border-neutral-200 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/20 focus-visible:border-primary-500"
               />
             </label>
-          </div>
+          </div>}
 
           {/* Actions */}
           <div className="mt-3 pt-3 border-t border-neutral-200 flex justify-between gap-2">

@@ -14,7 +14,7 @@ import type {
   InternalCalendarFilters,
   InternalCalendarStatusCode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
-import { Button, type FormSelectOption,Input, Select } from '@/shared/components/form';
+import { Button, DateTimePicker, type FormSelectOption, Select } from '@/shared/components/form';
 
 export interface InternalCalendarFilterBarProps {
   /** Current active filters */
@@ -73,17 +73,17 @@ export function InternalCalendarFilterBar({
     });
   };
 
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStartDateChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      start_date: e.target.value || undefined,
+      start_date: value || undefined,
     });
   };
 
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEndDateChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      end_date: e.target.value || undefined,
+      end_date: value || undefined,
     });
   };
 
@@ -142,22 +142,22 @@ export function InternalCalendarFilterBar({
 
         {/* Start Date Filter */}
         <div>
-          <Input
+          <DateTimePicker
             label="Desde"
-            type="date"
             value={filters.start_date || ''}
             onChange={handleStartDateChange}
+            showTime={false}
             fullWidth
           />
         </div>
 
         {/* End Date Filter */}
         <div>
-          <Input
+          <DateTimePicker
             label="Hasta"
-            type="date"
             value={filters.end_date || ''}
             onChange={handleEndDateChange}
+            showTime={false}
             fullWidth
           />
         </div>

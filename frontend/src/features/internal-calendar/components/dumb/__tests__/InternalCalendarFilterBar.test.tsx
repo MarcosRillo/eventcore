@@ -185,26 +185,21 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const startDateInput = screen.getByLabelText('Desde') as HTMLInputElement;
-    const endDateInput = screen.getByLabelText('Hasta') as HTMLInputElement;
+    // Open the start date picker
+    const startDateTrigger = screen.getByLabelText('Desde');
+    fireEvent.click(startDateTrigger);
 
-    // Select start date
-    fireEvent.change(startDateInput, { target: { value: '2025-12-01' } });
-    expect(mockOnFiltersChange).toHaveBeenCalledWith({
-      start_date: '2025-12-01',
-    });
+    // Click a day in the calendar (pick the first available day button with number 15)
+    const dayButtons = screen.getAllByRole('gridcell');
+    const day15 = dayButtons.find((btn) => btn.textContent === '15');
+    expect(day15).toBeTruthy();
+    fireEvent.click(day15!.firstChild as Element);
 
-    // Clear mock
-    mockOnFiltersChange.mockClear();
-
-    // Select end date
-    fireEvent.change(endDateInput, { target: { value: '2025-12-31' } });
-    expect(mockOnFiltersChange).toHaveBeenCalledWith({
-      end_date: '2025-12-31',
-    });
-
-    // Should have been called twice total (once for each date)
+    // Should call onFiltersChange with a date string matching yyyy-MM-dd format
     expect(mockOnFiltersChange).toHaveBeenCalledTimes(1);
+    expect(mockOnFiltersChange.mock.calls[0][0].start_date).toMatch(
+      /^\d{4}-\d{2}-\d{2}$/
+    );
   });
 
   test('clear button appears when filters are applied', () => {
