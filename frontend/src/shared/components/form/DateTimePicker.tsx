@@ -242,7 +242,7 @@ const DateTimePicker = ({
               today: 'font-semibold',
               selected: 'font-medium',
               disabled: 'cursor-not-allowed',
-              outside: '',
+              outside: 'rdp-outside',
               chevron: `${getDefaultClassNames().chevron} fill-neutral-600`,
             }}
           />

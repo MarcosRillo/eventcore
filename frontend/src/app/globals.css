@@ -599,7 +599,7 @@ body {
   --rdp-day_button-height: 2rem;
   --rdp-day_button-width: 2rem;
   --rdp-disabled-opacity: 0.5;
-  --rdp-outside-opacity: 0.5;
+  --rdp-outside-opacity: 1;
   --rdp-today-color: var(--color-primary-700);
 }
 
@@ -662,6 +662,11 @@ body {
 /* Today + Selected - keep white text */
 .rdp-today.rdp-selected .rdp-day_button {
   color: white !important;
+}
+
+/* Outside days - muted color for adjacent months */
+.rdp-outside .rdp-day_button {
+  color: var(--color-neutral-300) !important;
 }
 
 /* Focus visible state for keyboard navigation */
