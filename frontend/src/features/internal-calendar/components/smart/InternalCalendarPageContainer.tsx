@@ -24,10 +24,14 @@ import type {
 } from '@/features/internal-calendar/types/internal-calendar.types';
 import type { EventType } from '@/types/eventType.types';
 
+interface InternalCalendarPageContainerProps {
+  basePath: string;
+}
+
 /**
  *
  */
-export function InternalCalendarPageContainer() {
+export function InternalCalendarPageContainer({ basePath }: InternalCalendarPageContainerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [filters, setFilters] = useState<InternalCalendarFilters>({});
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
@@ -110,12 +114,14 @@ export function InternalCalendarPageContainer() {
             events={events}
             loading={eventsLoading}
             error={eventsError}
+            basePath={basePath}
           />
         ) : (
           <InternalCalendarViewContainer
             events={events}
             loading={eventsLoading}
             error={eventsError}
+            basePath={basePath}
           />
         )}
       </div>

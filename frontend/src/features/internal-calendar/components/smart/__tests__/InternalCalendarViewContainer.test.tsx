@@ -65,6 +65,7 @@ describe('InternalCalendarViewContainer', () => {
     events: mockEvents,
     loading: false,
     error: null,
+    basePath: '/internal-calendar',
   };
 
   beforeEach(() => {

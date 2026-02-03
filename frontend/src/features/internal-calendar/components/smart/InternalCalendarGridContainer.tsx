@@ -14,6 +14,7 @@ export interface InternalCalendarGridContainerProps {
   events: InternalCalendarEvent[];
   loading: boolean;
   error: string | null;
+  basePath: string;
 }
 
 /**
@@ -22,11 +23,13 @@ export interface InternalCalendarGridContainerProps {
  * @param root0.events
  * @param root0.loading
  * @param root0.error
+ * @param root0.basePath
  */
 export function InternalCalendarGridContainer({
   events,
   loading,
   error,
+  basePath,
 }: InternalCalendarGridContainerProps) {
-  return <InternalCalendar events={events} loading={loading} error={error} />;
+  return <InternalCalendar events={events} loading={loading} error={error} basePath={basePath} />;
 }

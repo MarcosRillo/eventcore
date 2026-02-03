@@ -17,6 +17,7 @@ interface InternalCalendarProps {
   events: InternalCalendarEvent[];
   loading: boolean;
   error: string | null;
+  basePath: string;
 }
 
 /**
@@ -25,11 +26,13 @@ interface InternalCalendarProps {
  * @param root0.events
  * @param root0.loading
  * @param root0.error
+ * @param root0.basePath
  */
 export function InternalCalendar({
   events,
   loading,
   error,
+  basePath,
 }: InternalCalendarProps) {
   // Loading state
   if (loading) {
@@ -90,7 +93,7 @@ export function InternalCalendar({
       aria-label="Event grid"
     >
       {events.map((event) => (
-        <InternalEventCard key={event.id} event={event} />
+        <InternalEventCard key={event.id} event={event} basePath={basePath} />
       ))}
     </div>
   );

@@ -17,5 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default function CalendarPage() {
-  return <InternalCalendarPageContainer />
+  return <InternalCalendarPageContainer basePath="/internal-calendar" />
 }

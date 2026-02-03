@@ -10,6 +10,8 @@ import type { InternalCalendarEvent } from '@/features/internal-calendar/types/i
 interface InternalEventCardProps {
   /** The event to display */
   event: InternalCalendarEvent;
+  /** Base path for event detail navigation */
+  basePath: string;
 }
 
 /**
@@ -21,12 +23,13 @@ interface InternalEventCardProps {
  *
  * @param root0
  * @param root0.event
+ * @param root0.basePath
  * @example
  * ```tsx
- * <InternalEventCard event={event} />
+ * <InternalEventCard event={event} basePath="/internal-calendar" />
  * ```
  */
-export const InternalEventCard = memo(function InternalEventCard({ event }: InternalEventCardProps) {
+export const InternalEventCard = memo(function InternalEventCard({ event, basePath }: InternalEventCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-AR', {
@@ -38,7 +41,7 @@ export const InternalEventCard = memo(function InternalEventCard({ event }: Inte
 
   return (
     <Link
-      href={`/organizer/calendar/${event.id}`}
+      href={`${basePath}/${event.id}`}
       className="block rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
     >
       {/* Header: Title and Status */}

@@ -35,13 +35,13 @@ describe('InternalEventCard', () => {
   };
 
   test('should render event title correctly', () => {
-    render(<InternalEventCard event={mockEvent} />);
+    render(<InternalEventCard event={mockEvent} basePath="/internal-calendar" />);
 
     expect(screen.getByText('Conferencia de Tecnología')).toBeInTheDocument();
   });
 
   test('should render event status badge', () => {
-    render(<InternalEventCard event={mockEvent} />);
+    render(<InternalEventCard event={mockEvent} basePath="/internal-calendar" />);
 
     const badge = screen.getByText('Aprobado Interno');
     expect(badge).toBeInTheDocument();
@@ -50,15 +50,22 @@ describe('InternalEventCard', () => {
   });
 
   test('should render organization name', () => {
-    render(<InternalEventCard event={mockEvent} />);
+    render(<InternalEventCard event={mockEvent} basePath="/internal-calendar" />);
 
     expect(screen.getByText(/Tech Corp/i)).toBeInTheDocument();
   });
 
   test('should render location information when available', () => {
-    render(<InternalEventCard event={mockEvent} />);
+    render(<InternalEventCard event={mockEvent} basePath="/internal-calendar" />);
 
     expect(screen.getByText(/Centro de Convenciones/i)).toBeInTheDocument();
     expect(screen.getByText(/San Miguel de Tucumán/i)).toBeInTheDocument();
+  });
+
+  test('should render link with correct basePath', () => {
+    render(<InternalEventCard event={mockEvent} basePath="/organizer/calendar" />);
+
+    const link = screen.getByText('Conferencia de Tecnología').closest('a');
+    expect(link).toHaveAttribute('href', '/organizer/calendar/1');
   });
 });

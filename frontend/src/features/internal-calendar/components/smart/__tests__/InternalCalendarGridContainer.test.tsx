@@ -54,6 +54,7 @@ describe('InternalCalendarGridContainer', () => {
     events: mockEvents,
     loading: false,
     error: null,
+    basePath: '/internal-calendar',
   };
 
   beforeEach(() => {
@@ -73,11 +74,11 @@ describe('InternalCalendarGridContainer', () => {
     // Event cards are now Link components, check they exist
     const eventCard1 = screen.getByText('Test Event 1').closest('a');
     expect(eventCard1).toBeInTheDocument();
-    expect(eventCard1).toHaveAttribute('href', '/organizer/calendar/1');
+    expect(eventCard1).toHaveAttribute('href', '/internal-calendar/1');
 
     const eventCard2 = screen.getByText('Test Event 2').closest('a');
     expect(eventCard2).toBeInTheDocument();
-    expect(eventCard2).toHaveAttribute('href', '/organizer/calendar/2');
+    expect(eventCard2).toHaveAttribute('href', '/internal-calendar/2');
   });
 
   test('should show loading state correctly', () => {

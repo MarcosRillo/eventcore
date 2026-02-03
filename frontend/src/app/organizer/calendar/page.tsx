@@ -12,5 +12,5 @@ import { InternalCalendarPageContainer } from '@/features/internal-calendar/comp
  *
  */
 export default function CalendarPage() {
-  return <InternalCalendarPageContainer />
+  return <InternalCalendarPageContainer basePath="/organizer/calendar" />
 }

@@ -14,8 +14,8 @@ import type { InternalCalendarEvent } from '@/features/internal-calendar/types/i
 
 // Mock InternalEventCard
 jest.mock('../InternalEventCard', () => ({
-  InternalEventCard: ({ event }: { event: InternalCalendarEvent }) => (
-    <div data-testid={`event-card-${event.id}`}>
+  InternalEventCard: ({ event, basePath }: { event: InternalCalendarEvent; basePath: string }) => (
+    <div data-testid={`event-card-${event.id}`} data-basepath={basePath}>
       {event.title}
     </div>
   ),
@@ -49,6 +49,7 @@ describe('InternalCalendar (Grid View)', () => {
     events: mockEvents,
     loading: false,
     error: null,
+    basePath: '/internal-calendar',
   };
 
   beforeEach(() => {

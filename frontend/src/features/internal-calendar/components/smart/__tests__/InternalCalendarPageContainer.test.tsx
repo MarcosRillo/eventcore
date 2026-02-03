@@ -23,24 +23,26 @@ jest.mock('../StatsBarContainer', () => ({
   ),
 }));
 jest.mock('../InternalCalendarGridContainer', () => ({
-  InternalCalendarGridContainer: ({ events, loading, error }: {
+  InternalCalendarGridContainer: ({ events, loading, error, basePath }: {
     events: InternalCalendarEvent[];
     loading: boolean;
     error: string | null;
+    basePath: string;
   }) => (
     <div data-testid="grid-container">
-      Grid View - Events: {events.length}, Loading: {String(loading)}, Error: {error || 'none'}
+      Grid View - Events: {events.length}, Loading: {String(loading)}, Error: {error || 'none'}, BasePath: {basePath}
     </div>
   ),
 }));
 jest.mock('../InternalCalendarViewContainer', () => ({
-  InternalCalendarViewContainer: ({ events, loading, error }: {
+  InternalCalendarViewContainer: ({ events, loading, error, basePath }: {
     events: InternalCalendarEvent[];
     loading: boolean;
     error: string | null;
+    basePath: string;
   }) => (
     <div data-testid="calendar-container">
-      Calendar View - Events: {events.length}, Loading: {String(loading)}, Error: {error || 'none'}
+      Calendar View - Events: {events.length}, Loading: {String(loading)}, Error: {error || 'none'}, BasePath: {basePath}
     </div>
   ),
 }));
@@ -72,7 +74,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should render without crashing', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     // Should have main container
     expect(screen.getByTestId('stats-bar-container')).toBeInTheDocument();
@@ -81,7 +83,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should render StatsBarContainer with auth token', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     const statsBar = screen.getByTestId('stats-bar-container');
     expect(statsBar).toBeInTheDocument();
@@ -89,7 +91,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should render both view toggle buttons', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     const gridButton = screen.getByText('Vista Grid');
     const calendarButton = screen.getByText('Vista Calendario');
@@ -101,7 +103,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should default to calendar view', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     // Calendar view should be rendered by default
     expect(screen.getByTestId('calendar-container')).toBeInTheDocument();
@@ -113,7 +115,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should switch to grid view when grid button is clicked', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     // Initially calendar view
     expect(screen.getByTestId('calendar-container')).toBeInTheDocument();
@@ -131,7 +133,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should switch back to calendar view when calendar button is clicked', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     // Switch to grid view first
     const gridButton = screen.getByText('Vista Grid').closest('button');
@@ -152,7 +154,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should have correct aria-pressed attributes on buttons', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     const gridButton = screen.getByText('Vista Grid').closest('button');
     const calendarButton = screen.getByText('Vista Calendario').closest('button');
@@ -172,7 +174,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should apply active styles to selected view button', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     const gridButton = screen.getByText('Vista Grid').closest('button');
     const calendarButton = screen.getByText('Vista Calendario').closest('button');
@@ -206,7 +208,7 @@ describe('InternalCalendarPageContainer', () => {
       isAuthenticated: false,
     });
 
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     // Should render with empty token
     const statsBar = screen.getByTestId('stats-bar-container');
@@ -218,7 +220,7 @@ describe('InternalCalendarPageContainer', () => {
   });
 
   test('should pass events to view containers', () => {
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     // Calendar view receives events
     expect(screen.getByTestId('calendar-container')).toHaveTextContent('Events: 1');
@@ -233,7 +235,7 @@ describe('InternalCalendarPageContainer', () => {
       error: null,
     });
 
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     expect(screen.getByTestId('calendar-container')).toHaveTextContent('Loading: true');
   });
@@ -245,7 +247,7 @@ describe('InternalCalendarPageContainer', () => {
       error: 'Failed to load',
     });
 
-    render(<InternalCalendarPageContainer />);
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     expect(screen.getByTestId('calendar-container')).toHaveTextContent('Error: Failed to load');
   });

@@ -23,6 +23,7 @@ export interface InternalCalendarViewContainerProps {
   events: InternalCalendarEvent[];
   loading: boolean;
   error: string | null;
+  basePath: string;
 }
 
 /**
@@ -31,11 +32,13 @@ export interface InternalCalendarViewContainerProps {
  * @param root0.events
  * @param root0.loading
  * @param root0.error
+ * @param root0.basePath
  */
 export function InternalCalendarViewContainer({
   events,
   loading,
   error,
+  basePath,
 }: InternalCalendarViewContainerProps) {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -49,7 +52,7 @@ export function InternalCalendarViewContainer({
 
   const handleSelectEvent = (event: BigCalendarEvent) => {
     // Navigate to event detail page
-    router.push(`/internal-calendar/${event.id}`);
+    router.push(`${basePath}/${event.id}`);
   };
 
   const handleNavigate = (date: Date) => {
