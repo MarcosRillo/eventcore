@@ -17,15 +17,18 @@ import { LoadingSpinner } from '@/shared/components/feedback';
 
 export interface InternalEventDetailPageContainerProps {
   eventId: number;
+  basePath: string;
 }
 
 /**
  *
  * @param root0
  * @param root0.eventId
+ * @param root0.basePath
  */
 export function InternalEventDetailPageContainer({
   eventId,
+  basePath,
 }: InternalEventDetailPageContainerProps) {
   const router = useRouter();
   const [event, setEvent] = useState<InternalCalendarEvent | null>(null);
@@ -56,7 +59,7 @@ export function InternalEventDetailPageContainer({
   }, [eventId]);
 
   const handleBack = () => {
-    router.back();
+    router.push(basePath);
   };
 
   // Loading state
@@ -82,7 +85,7 @@ export function InternalEventDetailPageContainer({
           </p>
           <button
             onClick={handleBack}
-            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
           >
             Volver al calendario
           </button>

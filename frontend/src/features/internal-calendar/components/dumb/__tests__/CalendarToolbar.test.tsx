@@ -64,15 +64,15 @@ describe('CalendarToolbar', () => {
 
     // Assert - Month button should have active styling
     const monthButton = screen.getByRole('button', { name: /mes/i })
-    expect(monthButton).toHaveClass('bg-blue-600') // Active styling
+    expect(monthButton).toHaveClass('bg-primary-600') // Active styling
 
     // Act - Change to 'week' view
     rerender(<CalendarToolbar {...defaultProps} view="week" />)
 
     // Assert - Week button should now have active styling
     const weekButton = screen.getByRole('button', { name: /semana/i })
-    expect(weekButton).toHaveClass('bg-blue-600')
-    expect(monthButton).not.toHaveClass('bg-blue-600')
+    expect(weekButton).toHaveClass('bg-primary-600')
+    expect(monthButton).not.toHaveClass('bg-primary-600')
   })
 
   it('calls onView handler when view button is clicked', () => {

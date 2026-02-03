@@ -37,5 +37,5 @@ export default async function OrganizerEventDetailPage({ params }: Props) {
     );
   }
 
-  return <InternalEventDetailPageContainer eventId={eventId} />;
+  return <InternalEventDetailPageContainer eventId={eventId} basePath="/organizer/calendar" />;
 }

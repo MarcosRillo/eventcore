@@ -38,5 +38,5 @@ export default async function EventDetailPage({ params }: Props) {
     );
   }
 
-  return <InternalEventDetailPageContainer eventId={eventId} />;
+  return <InternalEventDetailPageContainer eventId={eventId} basePath="/internal-calendar" />;
 }

@@ -29,7 +29,7 @@ export function ExportCalendarButton({
     <button
       onClick={handleExport}
       disabled={isDisabled}
-      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors"
+      className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors"
       aria-label="Exportar calendario"
       title={events.length === 0 ? 'No hay eventos para exportar' : `Exportar ${events.length} eventos`}
     >
@@ -48,7 +48,7 @@ export function ExportCalendarButton({
         />
       </svg>
       <span className="hidden sm:inline">Exportar</span>
-      <span className="text-xs bg-blue-700 px-1.5 py-0.5 rounded">
+      <span className="text-xs bg-primary-700 px-1.5 py-0.5 rounded">
         {events.length}
       </span>
     </button>

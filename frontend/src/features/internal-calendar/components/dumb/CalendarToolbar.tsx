@@ -52,7 +52,7 @@ export function CalendarToolbar({
         <button
           type="button"
           onClick={() => onNavigate('TODAY')}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
           aria-label="Ir a hoy"
         >
           Hoy
@@ -60,7 +60,7 @@ export function CalendarToolbar({
         <button
           type="button"
           onClick={() => onNavigate('PREV')}
-          className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
           aria-label="Ir al anterior"
         >
           ‹
@@ -68,7 +68,7 @@ export function CalendarToolbar({
         <button
           type="button"
           onClick={() => onNavigate('NEXT')}
-          className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
           aria-label="Ir al siguiente"
         >
           ›
@@ -85,9 +85,9 @@ export function CalendarToolbar({
             key={viewName}
             type="button"
             onClick={() => onView(viewName)}
-            className={`px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
               view === viewName
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }`}
             aria-label={`Ver ${viewLabels[viewName] || viewName}`}

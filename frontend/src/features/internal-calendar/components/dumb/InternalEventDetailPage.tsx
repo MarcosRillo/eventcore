@@ -8,6 +8,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import Image from 'next/image';
 
 import { EventStatusBadge } from '@/features/internal-calendar/components/dumb/EventStatusBadge';
@@ -29,9 +30,9 @@ export function InternalEventDetailPage({
   event,
   onBack,
 }: InternalEventDetailPageProps) {
-  const startDate = format(new Date(event.start_date), 'MMMM dd, yyyy');
+  const startDate = format(new Date(event.start_date), "d 'de' MMMM 'de' yyyy", { locale: es });
   const startTime = format(new Date(event.start_date), 'HH:mm');
-  const endDate = format(new Date(event.end_date), 'MMMM dd, yyyy');
+  const endDate = format(new Date(event.end_date), "d 'de' MMMM 'de' yyyy", { locale: es });
   const endTime = format(new Date(event.end_date), 'HH:mm');
 
   const isSameDay = event.start_date.split('T')[0] === event.end_date.split('T')[0];
@@ -49,6 +50,7 @@ export function InternalEventDetailPage({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -170,6 +172,7 @@ export function InternalEventDetailPage({
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap="round"

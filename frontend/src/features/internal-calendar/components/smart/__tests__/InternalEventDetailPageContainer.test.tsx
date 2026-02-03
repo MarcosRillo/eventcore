@@ -24,8 +24,9 @@ jest.mock('@/features/internal-calendar/components/dumb/InternalEventDetailPage'
 }));
 
 describe('InternalEventDetailPageContainer', () => {
-  const mockRouterBack = jest.fn();
+  const mockRouterPush = jest.fn();
   const mockGetEventById = internalCalendarService.getEventById as jest.MockedFunction<typeof internalCalendarService.getEventById>;
+  const basePath = '/organizer/calendar';
 
   const mockEvent: InternalCalendarEvent = {
     id: 1,
@@ -57,14 +58,14 @@ describe('InternalEventDetailPageContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue({
-      back: mockRouterBack,
+      push: mockRouterPush,
     });
   });
 
   test('shows loading state initially', () => {
     mockGetEventById.mockImplementation(() => new Promise(() => {})); // Never resolves
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Should show loading spinner and message
     expect(screen.getByText('Cargando evento...')).toBeInTheDocument();
@@ -73,7 +74,7 @@ describe('InternalEventDetailPageContainer', () => {
   test('fetches event by ID on mount and renders detail page', async () => {
     mockGetEventById.mockResolvedValue(mockEvent);
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Wait for loading to finish
     await waitFor(() => {
@@ -92,7 +93,7 @@ describe('InternalEventDetailPageContainer', () => {
     // Return null when event not found
     mockGetEventById.mockResolvedValue(null);
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Wait for error state
     await waitFor(() => {
@@ -109,7 +110,7 @@ describe('InternalEventDetailPageContainer', () => {
   test('shows error when network fails', async () => {
     mockGetEventById.mockRejectedValue(new Error('Network error'));
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Wait for error state
     await waitFor(() => {
@@ -126,7 +127,7 @@ describe('InternalEventDetailPageContainer', () => {
   test('renders InternalEventDetailPage when loaded successfully', async () => {
     mockGetEventById.mockResolvedValue(mockEvent);
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Wait for success state
     await waitFor(() => {
@@ -140,10 +141,10 @@ describe('InternalEventDetailPageContainer', () => {
     expect(screen.getByTestId('back-button')).toBeInTheDocument();
   });
 
-  test('calls router.back() when back button clicked', async () => {
+  test('calls router.push(basePath) when back button clicked', async () => {
     mockGetEventById.mockResolvedValue(mockEvent);
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Wait for success state
     await waitFor(() => {
@@ -154,14 +155,15 @@ describe('InternalEventDetailPageContainer', () => {
     const backButton = screen.getByTestId('back-button');
     fireEvent.click(backButton);
 
-    // Should call router.back()
-    expect(mockRouterBack).toHaveBeenCalledTimes(1);
+    // Should call router.push with basePath
+    expect(mockRouterPush).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith(basePath);
   });
 
-  test('calls router.back() when back button clicked from error state', async () => {
+  test('calls router.push(basePath) when back button clicked from error state', async () => {
     mockGetEventById.mockRejectedValue(new Error('Network error'));
 
-    render(<InternalEventDetailPageContainer eventId={1} />);
+    render(<InternalEventDetailPageContainer eventId={1} basePath={basePath} />);
 
     // Wait for error state
     await waitFor(() => {
@@ -172,7 +174,8 @@ describe('InternalEventDetailPageContainer', () => {
     const backButton = screen.getByText('Volver al calendario');
     fireEvent.click(backButton);
 
-    // Should call router.back()
-    expect(mockRouterBack).toHaveBeenCalledTimes(1);
+    // Should call router.push with basePath
+    expect(mockRouterPush).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith(basePath);
   });
 });
