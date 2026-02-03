@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { memo } from 'react';
 
 import { EventStatusBadge } from '@/features/internal-calendar/components/dumb/EventStatusBadge';
@@ -9,8 +10,6 @@ import type { InternalCalendarEvent } from '@/features/internal-calendar/types/i
 interface InternalEventCardProps {
   /** The event to display */
   event: InternalCalendarEvent;
-  /** Optional click handler */
-  onClick?: (eventId: number) => void;
 }
 
 /**
@@ -18,25 +17,16 @@ interface InternalEventCardProps {
  *
  * Displays an event card for the internal calendar.
  * Shows title, status, organization, dates, and location.
+ * Navigates to event detail page when clicked.
  *
  * @param root0
  * @param root0.event
- * @param root0.onClick
  * @example
  * ```tsx
- * <InternalEventCard
- *   event={event}
- *   onClick={(id) => console.log('Clicked event', id)}
- * />
+ * <InternalEventCard event={event} />
  * ```
  */
-export const InternalEventCard = memo(function InternalEventCard({ event, onClick }: InternalEventCardProps) {
-  const handleClick = () => {
-    if (onClick) {
-      onClick(event.id);
-    }
-  };
-
+export const InternalEventCard = memo(function InternalEventCard({ event }: InternalEventCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-AR', {
@@ -47,11 +37,9 @@ export const InternalEventCard = memo(function InternalEventCard({ event, onClic
   };
 
   return (
-    <div
-      className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md ${
-        onClick ? 'cursor-pointer' : ''
-      }`}
-      onClick={handleClick}
+    <Link
+      href={`/organizer/calendar/${event.id}`}
+      className="block rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
     >
       {/* Header: Title and Status */}
       <div className="mb-3 flex items-start justify-between">
@@ -66,6 +54,7 @@ export const InternalEventCard = memo(function InternalEventCard({ event, onClic
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -84,6 +73,7 @@ export const InternalEventCard = memo(function InternalEventCard({ event, onClic
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -106,6 +96,7 @@ export const InternalEventCard = memo(function InternalEventCard({ event, onClic
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -125,6 +116,6 @@ export const InternalEventCard = memo(function InternalEventCard({ event, onClic
           </span>
         </div>
       )}
-    </div>
+    </Link>
   );
 });

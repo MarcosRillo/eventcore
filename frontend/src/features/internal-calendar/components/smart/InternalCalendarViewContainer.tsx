@@ -1,7 +1,7 @@
 /**
  * InternalCalendarViewContainer - Smart Component
  *
- * Container for calendar view that fetches events and transforms them
+ * Container for calendar view that transforms events
  * to BigCalendar format. Passes data to BigCalendarView.
  * Navigates to event detail page on click.
  */
@@ -9,36 +9,43 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { View } from 'react-big-calendar';
 
 import { BigCalendarView } from '@/features/internal-calendar/components/dumb/BigCalendarView';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import type {
   BigCalendarEvent,
-  InternalCalendarFilters,
+  InternalCalendarEvent,
 } from '@/features/internal-calendar/types/internal-calendar.types';
 import { transformToBigCalendarEvents } from '@/features/internal-calendar/utils/calendarEventTransform';
 
 export interface InternalCalendarViewContainerProps {
-  filters?: InternalCalendarFilters;
+  events: InternalCalendarEvent[];
+  loading: boolean;
+  error: string | null;
 }
 
 /**
  *
  * @param root0
- * @param root0.filters
+ * @param root0.events
+ * @param root0.loading
+ * @param root0.error
  */
 export function InternalCalendarViewContainer({
-  filters = {},
+  events,
+  loading,
+  error,
 }: InternalCalendarViewContainerProps) {
   const router = useRouter();
-  const { events, loading, error } = useInternalCalendarEvents(filters);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<View>('month');
 
-  // Transform events to BigCalendar format
-  const bigCalendarEvents = transformToBigCalendarEvents(events);
+  // Transform events to BigCalendar format (memoized to avoid recalculation on every render)
+  const bigCalendarEvents = useMemo(
+    () => transformToBigCalendarEvents(events),
+    [events]
+  );
 
   const handleSelectEvent = (event: BigCalendarEvent) => {
     // Navigate to event detail page

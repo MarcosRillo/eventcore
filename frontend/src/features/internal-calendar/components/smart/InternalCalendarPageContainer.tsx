@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { getEventTypes } from '@/features/event-types/services/eventType.service';
@@ -17,6 +17,7 @@ import { InternalCalendarFilterBar } from '@/features/internal-calendar/componen
 import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
 import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import type {
   InternalCalendarFilters,
   ViewMode,
@@ -32,6 +33,9 @@ export function InternalCalendarPageContainer() {
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [eventTypesLoading, setEventTypesLoading] = useState(false);
   const { token } = useAuth();
+
+  // Fetch events at page level for export functionality
+  const { events, loading: eventsLoading, error: eventsError } = useInternalCalendarEvents(filters);
 
   // Fetch event types for filter dropdown
   useEffect(() => {
@@ -64,6 +68,7 @@ export function InternalCalendarPageContainer() {
           onFiltersChange={setFilters}
           eventTypes={eventTypes}
           eventTypesLoading={eventTypesLoading}
+          events={events}
         />
 
         <div className="bg-neutral-100 rounded-lg p-1 inline-flex mb-6">
@@ -101,9 +106,17 @@ export function InternalCalendarPageContainer() {
 
         {/* Conditional View Rendering */}
         {viewMode === 'grid' ? (
-          <InternalCalendarGridContainer filters={filters} />
+          <InternalCalendarGridContainer
+            events={events}
+            loading={eventsLoading}
+            error={eventsError}
+          />
         ) : (
-          <InternalCalendarViewContainer filters={filters} />
+          <InternalCalendarViewContainer
+            events={events}
+            loading={eventsLoading}
+            error={eventsError}
+          />
         )}
       </div>
     </div>

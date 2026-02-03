@@ -69,7 +69,8 @@ describe('StatsBar (Internal Calendar)', () => {
     })
 
     it('renders all three stat icons', () => {
-      const icons = screen.getAllByRole('img', { hidden: true })
+      const statsBar = screen.getByRole('region', { name: /estadísticas/i })
+      const icons = statsBar.querySelectorAll('svg')
       expect(icons).toHaveLength(3)
     })
 
@@ -121,7 +122,8 @@ describe('StatsBar (Internal Calendar)', () => {
     it('icons have aria-hidden attribute', () => {
       render(<StatsBar stats={mockStats} loading={false} />)
 
-      const icons = screen.getAllByRole('img', { hidden: true })
+      const statsBar = screen.getByRole('region', { name: /estadísticas/i })
+      const icons = statsBar.querySelectorAll('svg')
       icons.forEach(icon => {
         expect(icon).toHaveAttribute('aria-hidden', 'true')
       })

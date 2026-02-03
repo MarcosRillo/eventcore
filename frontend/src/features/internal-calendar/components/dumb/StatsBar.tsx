@@ -57,7 +57,6 @@ export function StatsBar({ stats, loading }: StatsBarProps) {
           stroke="currentColor"
           viewBox="0 0 24 24"
           aria-hidden="true"
-          role="img"
         >
           <path
             strokeLinecap="round"
@@ -78,7 +77,6 @@ export function StatsBar({ stats, loading }: StatsBarProps) {
           stroke="currentColor"
           viewBox="0 0 24 24"
           aria-hidden="true"
-          role="img"
         >
           <path
             strokeLinecap="round"
@@ -99,7 +97,6 @@ export function StatsBar({ stats, loading }: StatsBarProps) {
           stroke="currentColor"
           viewBox="0 0 24 24"
           aria-hidden="true"
-          role="img"
         >
           <path
             strokeLinecap="round"

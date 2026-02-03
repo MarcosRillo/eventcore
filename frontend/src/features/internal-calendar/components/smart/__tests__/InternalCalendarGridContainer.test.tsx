@@ -1,19 +1,13 @@
 /**
  * InternalCalendarGridContainer Component Tests
  *
- * Tests for the grid view container component with navigation functionality.
+ * Tests for the grid view container component.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
+import { render, screen } from '@testing-library/react';
 
 import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
-
-// Mock the hooks
-jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
-jest.mock('next/navigation');
 
 describe('InternalCalendarGridContainer', () => {
   const mockEvents: InternalCalendarEvent[] = [
@@ -46,7 +40,8 @@ describe('InternalCalendarGridContainer', () => {
       status: {
         id: 2,
         status_code: 'published',
-        name: 'Published',
+        status_name: 'Published',
+        description: 'Event published',
       },
       organization: {
         id: 2,
@@ -55,97 +50,51 @@ describe('InternalCalendarGridContainer', () => {
     },
   ];
 
-  const mockPush = jest.fn();
+  const defaultProps = {
+    events: mockEvents,
+    loading: false,
+    error: null,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
-      push: mockPush,
-    });
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: mockEvents,
-      loading: false,
-      error: null,
-    });
   });
 
   test('should render InternalCalendar with events', () => {
-    render(<InternalCalendarGridContainer />);
+    render(<InternalCalendarGridContainer {...defaultProps} />);
 
     expect(screen.getByText('Test Event 1')).toBeInTheDocument();
     expect(screen.getByText('Test Event 2')).toBeInTheDocument();
   });
 
-  test('should navigate to event detail page when event is clicked', () => {
-    render(<InternalCalendarGridContainer />);
+  test('should render event cards as links for navigation', () => {
+    render(<InternalCalendarGridContainer {...defaultProps} />);
 
-    // Click on the first event card
-    const eventCard = screen.getByText('Test Event 1').closest('div');
-    expect(eventCard).toBeInTheDocument();
+    // Event cards are now Link components, check they exist
+    const eventCard1 = screen.getByText('Test Event 1').closest('a');
+    expect(eventCard1).toBeInTheDocument();
+    expect(eventCard1).toHaveAttribute('href', '/organizer/calendar/1');
 
-    if (eventCard) {
-      fireEvent.click(eventCard);
-    }
-
-    // Should navigate to the event detail page
-    expect(mockPush).toHaveBeenCalledWith('/internal-calendar/1');
-  });
-
-  test('should navigate to correct event when different events are clicked', () => {
-    render(<InternalCalendarGridContainer />);
-
-    // Click on first event
-    const eventCard1 = screen.getByText('Test Event 1').closest('div');
-    if (eventCard1) {
-      fireEvent.click(eventCard1);
-    }
-
-    expect(mockPush).toHaveBeenCalledWith('/internal-calendar/1');
-
-    // Click on second event
-    const eventCard2 = screen.getByText('Test Event 2').closest('div');
-    if (eventCard2) {
-      fireEvent.click(eventCard2);
-    }
-
-    expect(mockPush).toHaveBeenCalledWith('/internal-calendar/2');
-    expect(mockPush).toHaveBeenCalledTimes(2);
+    const eventCard2 = screen.getByText('Test Event 2').closest('a');
+    expect(eventCard2).toBeInTheDocument();
+    expect(eventCard2).toHaveAttribute('href', '/organizer/calendar/2');
   });
 
   test('should show loading state correctly', () => {
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: [],
-      loading: true,
-      error: null,
-    });
-
-    render(<InternalCalendarGridContainer />);
+    render(<InternalCalendarGridContainer {...defaultProps} loading={true} events={[]} />);
 
     expect(screen.getByText(/cargando eventos/i)).toBeInTheDocument();
   });
 
   test('should show error state correctly', () => {
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: [],
-      loading: false,
-      error: 'Failed to fetch events',
-    });
-
-    render(<InternalCalendarGridContainer />);
+    render(<InternalCalendarGridContainer {...defaultProps} error="Failed to fetch events" events={[]} />);
 
     expect(screen.getByText('Failed to fetch events')).toBeInTheDocument();
   });
 
-  test('should pass filters to useInternalCalendarEvents hook', () => {
-    const filters = { event_typeId: 1, status: 'published' as const };
-    render(<InternalCalendarGridContainer filters={filters} />);
+  test('should handle empty events array', () => {
+    render(<InternalCalendarGridContainer events={[]} loading={false} error={null} />);
 
-    expect(useInternalCalendarEvents).toHaveBeenCalledWith(filters);
-  });
-
-  test('should use empty filters by default', () => {
-    render(<InternalCalendarGridContainer />);
-
-    expect(useInternalCalendarEvents).toHaveBeenCalledWith({});
+    expect(screen.getByRole('heading', { name: /no hay eventos/i })).toBeInTheDocument();
   });
 });

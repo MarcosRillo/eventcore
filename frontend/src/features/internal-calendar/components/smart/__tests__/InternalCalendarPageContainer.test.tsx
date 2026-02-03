@@ -4,36 +4,70 @@
  * Tests for the main page container with view toggle and stats bar.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { useAuth } from '@/context/AuthContext';
 import { InternalCalendarPageContainer } from '@/features/internal-calendar/components/smart/InternalCalendarPageContainer';
+import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
+import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 // Mock dependencies
 jest.mock('@/context/AuthContext');
+jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
+jest.mock('@/features/event-types/services/eventType.service', () => ({
+  getEventTypes: jest.fn().mockResolvedValue({ data: [] }),
+}));
 jest.mock('../StatsBarContainer', () => ({
   StatsBarContainer: ({ token }: { token: string }) => (
     <div data-testid="stats-bar-container">StatsBar with token: {token}</div>
   ),
 }));
 jest.mock('../InternalCalendarGridContainer', () => ({
-  InternalCalendarGridContainer: () => (
-    <div data-testid="grid-container">Grid View</div>
+  InternalCalendarGridContainer: ({ events, loading, error }: {
+    events: InternalCalendarEvent[];
+    loading: boolean;
+    error: string | null;
+  }) => (
+    <div data-testid="grid-container">
+      Grid View - Events: {events.length}, Loading: {String(loading)}, Error: {error || 'none'}
+    </div>
   ),
 }));
 jest.mock('../InternalCalendarViewContainer', () => ({
-  InternalCalendarViewContainer: () => (
-    <div data-testid="calendar-container">Calendar View</div>
+  InternalCalendarViewContainer: ({ events, loading, error }: {
+    events: InternalCalendarEvent[];
+    loading: boolean;
+    error: string | null;
+  }) => (
+    <div data-testid="calendar-container">
+      Calendar View - Events: {events.length}, Loading: {String(loading)}, Error: {error || 'none'}
+    </div>
   ),
 }));
 
 describe('InternalCalendarPageContainer', () => {
+  const mockEvents: InternalCalendarEvent[] = [
+    {
+      id: 1,
+      title: 'Test Event',
+      start_date: '2025-12-15',
+      end_date: '2025-12-15',
+      status: { id: 1, status_code: 'approved_internal', status_name: 'Approved', description: 'Approved' },
+      organization: { id: 1, name: 'Org' },
+    },
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useAuth as jest.Mock).mockReturnValue({
       token: 'mock-token-12345',
       user: { id: 1, name: 'Test User' },
       isAuthenticated: true,
+    });
+    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
+      events: mockEvents,
+      loading: false,
+      error: null,
     });
   });
 
@@ -181,5 +215,38 @@ describe('InternalCalendarPageContainer', () => {
     // Rest of component should still work
     expect(screen.getByText('Vista Grid')).toBeInTheDocument();
     expect(screen.getByText('Vista Calendario')).toBeInTheDocument();
+  });
+
+  test('should pass events to view containers', () => {
+    render(<InternalCalendarPageContainer />);
+
+    // Calendar view receives events
+    expect(screen.getByTestId('calendar-container')).toHaveTextContent('Events: 1');
+    expect(screen.getByTestId('calendar-container')).toHaveTextContent('Loading: false');
+    expect(screen.getByTestId('calendar-container')).toHaveTextContent('Error: none');
+  });
+
+  test('should pass loading state to view containers', () => {
+    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
+      events: [],
+      loading: true,
+      error: null,
+    });
+
+    render(<InternalCalendarPageContainer />);
+
+    expect(screen.getByTestId('calendar-container')).toHaveTextContent('Loading: true');
+  });
+
+  test('should pass error state to view containers', () => {
+    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
+      events: [],
+      loading: false,
+      error: 'Failed to load',
+    });
+
+    render(<InternalCalendarPageContainer />);
+
+    expect(screen.getByTestId('calendar-container')).toHaveTextContent('Error: Failed to load');
   });
 });

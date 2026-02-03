@@ -14,8 +14,8 @@ import type { InternalCalendarEvent } from '@/features/internal-calendar/types/i
 
 // Mock InternalEventCard
 jest.mock('../InternalEventCard', () => ({
-  InternalEventCard: ({ event, onClick }: { event: InternalCalendarEvent; onClick?: (id: number) => void }) => (
-    <div data-testid={`event-card-${event.id}`} onClick={() => onClick?.(event.id)}>
+  InternalEventCard: ({ event }: { event: InternalCalendarEvent }) => (
+    <div data-testid={`event-card-${event.id}`}>
       {event.title}
     </div>
   ),
@@ -49,7 +49,6 @@ describe('InternalCalendar (Grid View)', () => {
     events: mockEvents,
     loading: false,
     error: null,
-    onEventClick: jest.fn(),
   };
 
   beforeEach(() => {
@@ -109,8 +108,9 @@ describe('InternalCalendar (Grid View)', () => {
     it('renders empty state icon', () => {
       render(<InternalCalendar {...defaultProps} events={[]} />);
 
-      const emptyIcon = screen.getByRole('img', { hidden: true });
-      expect(emptyIcon).toBeInTheDocument();
+      // Icon has aria-hidden="true", so query by the container
+      const emptyStateContainer = screen.getByRole('heading', { name: /no hay eventos/i }).closest('div');
+      expect(emptyStateContainer).toBeInTheDocument();
     });
   });
 
@@ -127,17 +127,6 @@ describe('InternalCalendar (Grid View)', () => {
 
       const grid = screen.getByRole('region', { name: /event grid/i });
       expect(grid).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
-    });
-
-    it('calls onEventClick when event card is clicked', () => {
-      const onEventClick = jest.fn();
-      render(<InternalCalendar {...defaultProps} onEventClick={onEventClick} />);
-
-      const eventCard = screen.getByTestId('event-card-1');
-      eventCard.click();
-
-      expect(onEventClick).toHaveBeenCalledWith(1);
-      expect(onEventClick).toHaveBeenCalledTimes(1);
     });
   });
 

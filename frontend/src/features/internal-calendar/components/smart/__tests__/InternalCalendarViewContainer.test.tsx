@@ -4,15 +4,13 @@
  * Tests for calendar view container with BigCalendar and navigation functionality.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
-import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
-import type { BigCalendarEvent,InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
+import type { BigCalendarEvent, InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 
 // Mock dependencies
-jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
 jest.mock('next/navigation');
 jest.mock('@/features/internal-calendar/components/dumb/BigCalendarView', () => ({
   BigCalendarView: ({ events, loading, onSelectEvent }: {
@@ -63,26 +61,27 @@ describe('InternalCalendarViewContainer', () => {
 
   const mockPush = jest.fn();
 
+  const defaultProps = {
+    events: mockEvents,
+    loading: false,
+    error: null,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: mockEvents,
-      loading: false,
-      error: null,
-    });
   });
 
   test('should render without crashing', () => {
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} />);
 
     expect(screen.getByTestId('big-calendar-view')).toBeInTheDocument();
   });
 
   test('should render BigCalendarView with transformed events', () => {
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} />);
 
     // BigCalendarView should be rendered
     expect(screen.getByTestId('big-calendar-view')).toBeInTheDocument();
@@ -95,13 +94,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should pass loading state to BigCalendarView', () => {
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: [],
-      loading: true,
-      error: null,
-    });
-
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} loading={true} events={[]} />);
 
     // Loading state should be shown
     expect(screen.getByTestId('loading')).toBeInTheDocument();
@@ -109,13 +102,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should show error message when there is an error', () => {
-    (useInternalCalendarEvents as jest.Mock).mockReturnValue({
-      events: [],
-      loading: false,
-      error: 'Failed to load events',
-    });
-
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} error="Failed to load events" events={[]} />);
 
     // Error message should be displayed
     expect(screen.getByText('Failed to load events')).toBeInTheDocument();
@@ -125,7 +112,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should navigate to event detail page when event is selected', () => {
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} />);
 
     // Click on first event
     const eventElement = screen.getByTestId('calendar-event-1');
@@ -136,7 +123,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should navigate to correct event when different events are selected', () => {
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} />);
 
     // Select first event
     const event1 = screen.getByTestId('calendar-event-1');
@@ -153,7 +140,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should transform events to BigCalendar format correctly', () => {
-    render(<InternalCalendarViewContainer />);
+    render(<InternalCalendarViewContainer {...defaultProps} />);
 
     // Events should be rendered (transformation successful)
     expect(screen.getByTestId('calendar-event-1')).toBeInTheDocument();
@@ -164,16 +151,10 @@ describe('InternalCalendarViewContainer', () => {
     expect(screen.getByText('Workshop 2025')).toBeInTheDocument();
   });
 
-  test('should pass filters to useInternalCalendarEvents hook', () => {
-    const filters = { event_typeId: 1, status: 'published' as const };
-    render(<InternalCalendarViewContainer filters={filters} />);
+  test('should handle empty events array', () => {
+    render(<InternalCalendarViewContainer events={[]} loading={false} error={null} />);
 
-    expect(useInternalCalendarEvents).toHaveBeenCalledWith(filters);
-  });
-
-  test('should use empty filters by default', () => {
-    render(<InternalCalendarViewContainer />);
-
-    expect(useInternalCalendarEvents).toHaveBeenCalledWith({});
+    expect(screen.getByTestId('big-calendar-view')).toBeInTheDocument();
+    expect(screen.queryByTestId('calendar-event-1')).not.toBeInTheDocument();
   });
 });
