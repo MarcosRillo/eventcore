@@ -14,6 +14,7 @@ import type {
   InternalCalendarFilters,
   InternalCalendarStatusCode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
+import { Button, type FormSelectOption,Input, Select } from '@/shared/components/form';
 
 export interface InternalCalendarFilterBarProps {
   /** Current active filters */
@@ -38,17 +39,6 @@ const STATUS_LABELS: Record<InternalCalendarStatusCode, string> = {
   published: 'Publicado',
 };
 
-const selectClasses = `w-full px-3 py-2 pr-10 border border-neutral-300 rounded-md
-  bg-white text-neutral-900 appearance-none
-  bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+fill%3D%22none%22+viewBox%3D%220+0+20+20%22%3E%3Cpath+stroke%3D%22%236b7280%22+stroke-linecap%3D%22round%22+stroke-linejoin%3D%22round%22+stroke-width%3D%221.5%22+d%3D%22m6+8+4+4+4-4%22%2F%3E%3C%2Fsvg%3E')]
-  bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25rem_1.25rem]
-  focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-  disabled:bg-neutral-100 disabled:cursor-not-allowed`;
-
-const inputClasses = `w-full px-3 py-2 border border-neutral-300 rounded-md
-  bg-white text-neutral-900
-  focus:ring-2 focus:ring-primary-500 focus:border-primary-500`;
-
 /**
  *
  * @param root0
@@ -69,19 +59,17 @@ export function InternalCalendarFilterBar({
   statusesLoading = false,
   events = [],
 }: InternalCalendarFilterBarProps) {
-  const handleEventTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleEventTypeChange = (value: string | number) => {
     onFiltersChange({
       ...filters,
       event_type_id: value ? Number(value) : undefined,
     });
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as InternalCalendarStatusCode | '';
+  const handleStatusChange = (value: string | number) => {
     onFiltersChange({
       ...filters,
-      status: value || undefined,
+      status: (value || undefined) as InternalCalendarStatusCode | undefined,
     });
   };
 
@@ -109,6 +97,16 @@ export function InternalCalendarFilterBar({
     filters.start_date ||
     filters.end_date;
 
+  const eventTypeOptions: FormSelectOption[] = eventTypes.map((type) => ({
+    value: type.id,
+    label: type.name,
+  }));
+
+  const statusOptions: FormSelectOption[] = statuses.map((code) => ({
+    value: code,
+    label: STATUS_LABELS[code] || code,
+  }));
+
   return (
     <div
       className="bg-white rounded-lg shadow-sm border border-neutral-200 p-4 mb-6"
@@ -118,83 +116,49 @@ export function InternalCalendarFilterBar({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Event Type Filter */}
         <div>
-          <label
-            htmlFor="event-type-filter"
-            className="block text-sm font-medium text-neutral-700 mb-1"
-          >
-            Tipo de Evento
-          </label>
-          <select
-            id="event-type-filter"
-            value={filters.event_type_id || ''}
+          <Select
+            label="Tipo de Evento"
+            value={filters.event_type_id ?? ''}
             onChange={handleEventTypeChange}
+            options={eventTypeOptions}
+            placeholder="Todos los tipos"
             disabled={eventTypesLoading}
-            className={`${selectClasses} ${!filters.event_type_id ? 'text-neutral-500' : ''}`}
-          >
-            <option value="">Todos los tipos</option>
-            {eventTypes.map((type) => (
-              <option key={type.id} value={type.id} className="text-neutral-900">
-                {type.name}
-              </option>
-            ))}
-          </select>
+            fullWidth
+          />
         </div>
 
         {/* Status Filter */}
         <div>
-          <label
-            htmlFor="status-filter"
-            className="block text-sm font-medium text-neutral-700 mb-1"
-          >
-            Estado
-          </label>
-          <select
-            id="status-filter"
-            value={filters.status || ''}
+          <Select
+            label="Estado"
+            value={filters.status ?? ''}
             onChange={handleStatusChange}
+            options={statusOptions}
+            placeholder="Todos los estados"
             disabled={statusesLoading}
-            className={`${selectClasses} ${!filters.status ? 'text-neutral-500' : ''}`}
-          >
-            <option value="">Todos los estados</option>
-            {statuses.map((statusCode) => (
-              <option key={statusCode} value={statusCode} className="text-neutral-900">
-                {STATUS_LABELS[statusCode] || statusCode}
-              </option>
-            ))}
-          </select>
+            fullWidth
+          />
         </div>
 
         {/* Start Date Filter */}
         <div>
-          <label
-            htmlFor="start-date-filter"
-            className="block text-sm font-medium text-neutral-700 mb-1"
-          >
-            Desde
-          </label>
-          <input
-            id="start-date-filter"
+          <Input
+            label="Desde"
             type="date"
             value={filters.start_date || ''}
             onChange={handleStartDateChange}
-            className={inputClasses}
+            fullWidth
           />
         </div>
 
         {/* End Date Filter */}
         <div>
-          <label
-            htmlFor="end-date-filter"
-            className="block text-sm font-medium text-neutral-700 mb-1"
-          >
-            Hasta
-          </label>
-          <input
-            id="end-date-filter"
+          <Input
+            label="Hasta"
             type="date"
             value={filters.end_date || ''}
             onChange={handleEndDateChange}
-            className={inputClasses}
+            fullWidth
           />
         </div>
       </div>
@@ -206,12 +170,9 @@ export function InternalCalendarFilterBar({
 
         {/* Clear Filters Button */}
         {hasActiveFilters && (
-          <button
-            onClick={handleClearFilters}
-            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors"
-          >
+          <Button variant="ghost" size="sm" onClick={handleClearFilters}>
             Limpiar filtros
-          </button>
+          </Button>
         )}
       </div>
     </div>
