@@ -9,7 +9,8 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { getEventTypes } from '@/features/event-types/services/eventType.service';
@@ -18,11 +19,13 @@ import { InternalCalendarGridContainer } from '@/features/internal-calendar/comp
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
 import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
+import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
 import type {
+  EventType,
   InternalCalendarFilters,
+  InternalCalendarStatusCode,
   ViewMode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
-import type { EventType } from '@/types/eventType.types';
 
 interface InternalCalendarPageContainerProps {
   basePath: string;
@@ -32,16 +35,58 @@ interface InternalCalendarPageContainerProps {
  *
  */
 export function InternalCalendarPageContainer({ basePath }: InternalCalendarPageContainerProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
-  const [filters, setFilters] = useState<InternalCalendarFilters>({});
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Parse initial filters from URL
+  const initialFilters: InternalCalendarFilters = useMemo(() => ({
+    status: (searchParams.get('status') as InternalCalendarStatusCode) || undefined,
+    event_type_id: searchParams.get('event_type_id') ? Number(searchParams.get('event_type_id')) : undefined,
+    start_date: searchParams.get('start_date') || undefined,
+    end_date: searchParams.get('end_date') || undefined,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+
+  const initialViewMode = (searchParams.get('view') as ViewMode) || 'calendar';
+
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+  const [filters, setFilters] = useState<InternalCalendarFilters>(initialFilters);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [eventTypesLoading, setEventTypesLoading] = useState(false);
+  const [statuses, setStatuses] = useState<InternalCalendarStatusCode[]>([]);
+  const [statusesLoading, setStatusesLoading] = useState(false);
   const { token } = useAuth();
 
   // Fetch events at page level for export functionality
   const { events, loading: eventsLoading, error: eventsError } = useInternalCalendarEvents(filters);
 
-  // Fetch event types for filter dropdown
+  // Sync filters to URL
+  const handleFiltersChange = useCallback((newFilters: InternalCalendarFilters) => {
+    setFilters(newFilters);
+    const params = new URLSearchParams();
+    if (newFilters.status) params.set('status', newFilters.status);
+    if (newFilters.event_type_id) params.set('event_type_id', String(newFilters.event_type_id));
+    if (newFilters.start_date) params.set('start_date', newFilters.start_date);
+    if (newFilters.end_date) params.set('end_date', newFilters.end_date);
+    if (viewMode !== 'calendar') params.set('view', viewMode);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [pathname, router, viewMode]);
+
+  const handleViewModeChange = useCallback((newViewMode: ViewMode) => {
+    setViewMode(newViewMode);
+    const params = new URLSearchParams();
+    if (filters.status) params.set('status', filters.status);
+    if (filters.event_type_id) params.set('event_type_id', String(filters.event_type_id));
+    if (filters.start_date) params.set('start_date', filters.start_date);
+    if (filters.end_date) params.set('end_date', filters.end_date);
+    if (newViewMode !== 'calendar') params.set('view', newViewMode);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [pathname, router, filters]);
+
+  // Fetch event types and statuses in parallel
   useEffect(() => {
     const fetchEventTypes = async () => {
       setEventTypesLoading(true);
@@ -49,14 +94,26 @@ export function InternalCalendarPageContainer({ basePath }: InternalCalendarPage
         const data = await getEventTypes({ active: true, per_page: 100 });
         setEventTypes(data.data);
       } catch {
-        // Silently fail - filter will show empty dropdown
         setEventTypes([]);
       } finally {
         setEventTypesLoading(false);
       }
     };
 
+    const fetchStatuses = async () => {
+      setStatusesLoading(true);
+      try {
+        const data = await internalCalendarService.getAvailableStatuses();
+        setStatuses(data);
+      } catch {
+        setStatuses([]);
+      } finally {
+        setStatusesLoading(false);
+      }
+    };
+
     fetchEventTypes();
+    fetchStatuses();
   }, []);
 
   return (
@@ -69,15 +126,17 @@ export function InternalCalendarPageContainer({ basePath }: InternalCalendarPage
         {/* Filter Bar */}
         <InternalCalendarFilterBar
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={handleFiltersChange}
           eventTypes={eventTypes}
           eventTypesLoading={eventTypesLoading}
+          statuses={statuses}
+          statusesLoading={statusesLoading}
           events={events}
         />
 
         <div className="bg-neutral-100 rounded-lg p-1 inline-flex mb-6">
           <button
-            onClick={() => setViewMode('grid')}
+            onClick={() => handleViewModeChange('grid')}
             className={`
               px-4 py-2 rounded-md font-medium text-sm transition-all
               ${viewMode === 'grid'
@@ -92,7 +151,7 @@ export function InternalCalendarPageContainer({ basePath }: InternalCalendarPage
             Vista Grid
           </button>
           <button
-            onClick={() => setViewMode('calendar')}
+            onClick={() => handleViewModeChange('calendar')}
             className={`
               px-4 py-2 rounded-md font-medium text-sm transition-all
               ${viewMode === 'calendar'

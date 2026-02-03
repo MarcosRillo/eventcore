@@ -5,7 +5,6 @@
  * Detailed event rendering is tested in container tests.
  */
 import { render, screen } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
 
 import { useAuth } from '@/context/AuthContext';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
@@ -16,24 +15,32 @@ import CalendarPage from '../page';
 // Mock the hooks
 jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
 jest.mock('@/context/AuthContext');
-jest.mock('next/navigation');
+
+const mockReplace = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: mockReplace,
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/internal-calendar',
+}));
 
 // Mock the event types service
 jest.mock('@/features/event-types/services/eventType.service', () => ({
   getEventTypes: jest.fn().mockResolvedValue({ data: [] }),
 }));
 
-// Mock the internal calendar stats service
+// Mock the internal calendar service
 jest.mock('@/features/internal-calendar/services/internalCalendar.service', () => ({
-  getInternalCalendarStats: jest.fn().mockResolvedValue({ data: { approved: 0, pending: 0, published: 0 } }),
+  internalCalendarService: {
+    getAvailableStatuses: jest.fn().mockResolvedValue([]),
+  },
 }));
 
 describe('Admin Calendar Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
-      push: jest.fn(),
-    });
     (useInternalCalendarEvents as jest.Mock).mockReturnValue({
       events: [],
       loading: false,

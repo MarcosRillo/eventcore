@@ -120,7 +120,7 @@ export function StatsBar({ stats, loading }: StatsBarProps) {
           {statItems.map((item, index) => (
             <div key={index} className="flex items-center gap-2 text-primary-700">
               {item.icon}
-              <span className="font-semibold text-primary-900">{item.value}</span>
+              <span className="font-semibold text-primary-900 tabular-nums">{item.value}</span>
               <span className="text-sm text-primary-600">{item.label}</span>
             </div>
           ))}

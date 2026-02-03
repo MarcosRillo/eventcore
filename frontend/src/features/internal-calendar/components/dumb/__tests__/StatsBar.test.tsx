@@ -138,4 +138,13 @@ describe('StatsBar (Internal Calendar)', () => {
       expect(statsContainer).toHaveClass('gap-6', 'md:gap-12')
     })
   })
+
+  describe('Tabular Numbers', () => {
+    it('uses tabular-nums for stat values', () => {
+      render(<StatsBar stats={mockStats} loading={false} />)
+
+      const valueElement = screen.getByText('42')
+      expect(valueElement).toHaveClass('tabular-nums')
+    })
+  })
 })

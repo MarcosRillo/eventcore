@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 
 import { InternalCalendarPageContainer } from '@/features/internal-calendar/components/smart/InternalCalendarPageContainer'
 
@@ -20,5 +21,9 @@ export const metadata: Metadata = {
  *
  */
 export default function CalendarPage() {
-  return <InternalCalendarPageContainer basePath="/organizer/calendar" />
+  return (
+    <Suspense>
+      <InternalCalendarPageContainer basePath="/organizer/calendar" />
+    </Suspense>
+  )
 }

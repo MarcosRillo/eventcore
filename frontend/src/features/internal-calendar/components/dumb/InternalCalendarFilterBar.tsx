@@ -9,11 +9,11 @@
 
 import { ExportCalendarButton } from '@/features/internal-calendar/components/dumb/ExportCalendarButton';
 import type {
+  EventType,
   InternalCalendarEvent,
   InternalCalendarFilters,
   InternalCalendarStatusCode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
-import type { EventType } from '@/types/eventType.types';
 
 export interface InternalCalendarFilterBarProps {
   /** Current active filters */
@@ -24,15 +24,30 @@ export interface InternalCalendarFilterBarProps {
   eventTypes: EventType[];
   /** Loading state for event types */
   eventTypesLoading?: boolean;
+  /** Available status codes from API */
+  statuses: InternalCalendarStatusCode[];
+  /** Loading state for statuses */
+  statusesLoading?: boolean;
   /** Events for export (optional) */
   events?: InternalCalendarEvent[];
 }
 
-const STATUS_OPTIONS: { value: InternalCalendarStatusCode; label: string }[] = [
-  { value: 'approved_internal', label: 'Aprobado Interno' },
-  { value: 'pending_public_approval', label: 'Pendiente Aprobación Pública' },
-  { value: 'published', label: 'Publicado' },
-];
+const STATUS_LABELS: Record<InternalCalendarStatusCode, string> = {
+  approved_internal: 'Aprobado Interno',
+  pending_public_approval: 'Pendiente Aprobación Pública',
+  published: 'Publicado',
+};
+
+const selectClasses = `w-full px-3 py-2 pr-10 border border-neutral-300 rounded-md
+  bg-white text-neutral-900 appearance-none
+  bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+fill%3D%22none%22+viewBox%3D%220+0+20+20%22%3E%3Cpath+stroke%3D%22%236b7280%22+stroke-linecap%3D%22round%22+stroke-linejoin%3D%22round%22+stroke-width%3D%221.5%22+d%3D%22m6+8+4+4+4-4%22%2F%3E%3C%2Fsvg%3E')]
+  bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25rem_1.25rem]
+  focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+  disabled:bg-neutral-100 disabled:cursor-not-allowed`;
+
+const inputClasses = `w-full px-3 py-2 border border-neutral-300 rounded-md
+  bg-white text-neutral-900
+  focus:ring-2 focus:ring-primary-500 focus:border-primary-500`;
 
 /**
  *
@@ -41,6 +56,8 @@ const STATUS_OPTIONS: { value: InternalCalendarStatusCode; label: string }[] = [
  * @param root0.onFiltersChange
  * @param root0.eventTypes
  * @param root0.eventTypesLoading
+ * @param root0.statuses
+ * @param root0.statusesLoading
  * @param root0.events
  */
 export function InternalCalendarFilterBar({
@@ -48,6 +65,8 @@ export function InternalCalendarFilterBar({
   onFiltersChange,
   eventTypes,
   eventTypesLoading = false,
+  statuses,
+  statusesLoading = false,
   events = [],
 }: InternalCalendarFilterBarProps) {
   const handleEventTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -94,7 +113,7 @@ export function InternalCalendarFilterBar({
     <div
       className="bg-white rounded-lg shadow-sm border border-neutral-200 p-4 mb-6"
       role="region"
-      aria-label="Event filters"
+      aria-label="Filtros de eventos"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Event Type Filter */}
@@ -110,11 +129,11 @@ export function InternalCalendarFilterBar({
             value={filters.event_type_id || ''}
             onChange={handleEventTypeChange}
             disabled={eventTypesLoading}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+            className={`${selectClasses} ${!filters.event_type_id ? 'text-neutral-500' : ''}`}
           >
             <option value="">Todos los tipos</option>
             {eventTypes.map((type) => (
-              <option key={type.id} value={type.id}>
+              <option key={type.id} value={type.id} className="text-neutral-900">
                 {type.name}
               </option>
             ))}
@@ -133,12 +152,13 @@ export function InternalCalendarFilterBar({
             id="status-filter"
             value={filters.status || ''}
             onChange={handleStatusChange}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={statusesLoading}
+            className={`${selectClasses} ${!filters.status ? 'text-neutral-500' : ''}`}
           >
             <option value="">Todos los estados</option>
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {statuses.map((statusCode) => (
+              <option key={statusCode} value={statusCode} className="text-neutral-900">
+                {STATUS_LABELS[statusCode] || statusCode}
               </option>
             ))}
           </select>
@@ -157,7 +177,7 @@ export function InternalCalendarFilterBar({
             type="date"
             value={filters.start_date || ''}
             onChange={handleStartDateChange}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={inputClasses}
           />
         </div>
 
@@ -174,7 +194,7 @@ export function InternalCalendarFilterBar({
             type="date"
             value={filters.end_date || ''}
             onChange={handleEndDateChange}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={inputClasses}
           />
         </div>
       </div>

@@ -7,14 +7,22 @@
 import { fireEvent,render, screen } from '@testing-library/react';
 
 import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
-import type { EventType } from '@/types/eventType.types';
+import type {
+  EventType,
+  InternalCalendarStatusCode,
+} from '@/features/internal-calendar/types/internal-calendar.types';
 
 describe('InternalCalendarFilterBar', () => {
   const mockOnFiltersChange = jest.fn();
   const mockEventTypes: EventType[] = [
-    { id: 1, name: 'Conferencia', color: '#FF0000', active: true, created_at: '', updated_at: '' },
-    { id: 2, name: 'Taller', color: '#00FF00', active: true, created_at: '', updated_at: '' },
-    { id: 3, name: 'Exposición', color: '#0000FF', active: true, created_at: '', updated_at: '' },
+    { id: 1, name: 'Conferencia', color: '#FF0000' },
+    { id: 2, name: 'Taller', color: '#00FF00' },
+    { id: 3, name: 'Exposición', color: '#0000FF' },
+  ];
+  const mockStatuses: InternalCalendarStatusCode[] = [
+    'approved_internal',
+    'pending_public_approval',
+    'published',
   ];
 
   beforeEach(() => {
@@ -27,6 +35,7 @@ describe('InternalCalendarFilterBar', () => {
         filters={{}}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -50,6 +59,7 @@ describe('InternalCalendarFilterBar', () => {
         onFiltersChange={mockOnFiltersChange}
         eventTypes={[]}
         eventTypesLoading={true}
+        statuses={mockStatuses}
       />
     );
 
@@ -70,6 +80,7 @@ describe('InternalCalendarFilterBar', () => {
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
         eventTypesLoading={false}
+        statuses={mockStatuses}
       />
     );
 
@@ -92,6 +103,7 @@ describe('InternalCalendarFilterBar', () => {
         filters={{}}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -113,6 +125,7 @@ describe('InternalCalendarFilterBar', () => {
         filters={{}}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -128,12 +141,48 @@ describe('InternalCalendarFilterBar', () => {
     });
   });
 
+  test('status dropdown shows options from statuses prop', () => {
+    render(
+      <InternalCalendarFilterBar
+        filters={{}}
+        onFiltersChange={mockOnFiltersChange}
+        eventTypes={mockEventTypes}
+        statuses={mockStatuses}
+      />
+    );
+
+    const statusSelect = screen.getByLabelText('Estado') as HTMLSelectElement;
+
+    // Should have default option + 3 statuses
+    expect(statusSelect.options.length).toBe(4);
+    expect(statusSelect.options[0].text).toBe('Todos los estados');
+    expect(statusSelect.options[1].text).toBe('Aprobado Interno');
+    expect(statusSelect.options[2].text).toBe('Pendiente Aprobación Pública');
+    expect(statusSelect.options[3].text).toBe('Publicado');
+  });
+
+  test('status dropdown is disabled when statusesLoading is true', () => {
+    render(
+      <InternalCalendarFilterBar
+        filters={{}}
+        onFiltersChange={mockOnFiltersChange}
+        eventTypes={mockEventTypes}
+        statuses={[]}
+        statusesLoading={true}
+      />
+    );
+
+    const statusSelect = screen.getByLabelText('Estado') as HTMLSelectElement;
+    expect(statusSelect).toBeDisabled();
+  });
+
   test('calls onFiltersChange when dates selected', () => {
     render(
       <InternalCalendarFilterBar
         filters={{}}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -165,6 +214,7 @@ describe('InternalCalendarFilterBar', () => {
         filters={{}}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -177,6 +227,7 @@ describe('InternalCalendarFilterBar', () => {
         filters={{ event_type_id: 1 }}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -195,6 +246,7 @@ describe('InternalCalendarFilterBar', () => {
         }}
         onFiltersChange={mockOnFiltersChange}
         eventTypes={mockEventTypes}
+        statuses={mockStatuses}
       />
     );
 
@@ -206,5 +258,18 @@ describe('InternalCalendarFilterBar', () => {
     // Should call onFiltersChange with empty object
     expect(mockOnFiltersChange).toHaveBeenCalledTimes(1);
     expect(mockOnFiltersChange).toHaveBeenCalledWith({});
+  });
+
+  test('has Spanish aria-label', () => {
+    render(
+      <InternalCalendarFilterBar
+        filters={{}}
+        onFiltersChange={mockOnFiltersChange}
+        eventTypes={mockEventTypes}
+        statuses={mockStatuses}
+      />
+    );
+
+    expect(screen.getByRole('region', { name: 'Filtros de eventos' })).toBeInTheDocument();
   });
 });

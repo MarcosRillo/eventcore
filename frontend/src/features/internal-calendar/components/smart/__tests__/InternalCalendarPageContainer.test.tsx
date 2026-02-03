@@ -1,7 +1,7 @@
 /**
  * InternalCalendarPageContainer Component Tests
  *
- * Tests for the main page container with view toggle and stats bar.
+ * Tests for the main page container with view toggle, stats bar, and URL sync.
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -17,6 +17,21 @@ jest.mock('@/features/internal-calendar/hooks/useInternalCalendarEvents');
 jest.mock('@/features/event-types/services/eventType.service', () => ({
   getEventTypes: jest.fn().mockResolvedValue({ data: [] }),
 }));
+jest.mock('@/features/internal-calendar/services/internalCalendar.service', () => ({
+  internalCalendarService: {
+    getAvailableStatuses: jest.fn().mockResolvedValue([]),
+  },
+}));
+
+const mockReplace = jest.fn();
+jest.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({
+    replace: mockReplace,
+  }),
+  usePathname: () => '/internal-calendar',
+}));
+
 jest.mock('../StatsBarContainer', () => ({
   StatsBarContainer: ({ token }: { token: string }) => (
     <div data-testid="stats-bar-container">StatsBar with token: {token}</div>
@@ -250,5 +265,36 @@ describe('InternalCalendarPageContainer', () => {
     render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
 
     expect(screen.getByTestId('calendar-container')).toHaveTextContent('Error: Failed to load');
+  });
+
+  test('should update URL when view mode changes to grid', () => {
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
+
+    const gridButton = screen.getByText('Vista Grid').closest('button');
+    if (gridButton) {
+      fireEvent.click(gridButton);
+    }
+
+    expect(mockReplace).toHaveBeenCalledWith('/internal-calendar?view=grid');
+  });
+
+  test('should update URL when switching back to calendar (removes view param)', () => {
+    render(<InternalCalendarPageContainer basePath="/internal-calendar" />);
+
+    // Switch to grid first
+    const gridButton = screen.getByText('Vista Grid').closest('button');
+    if (gridButton) {
+      fireEvent.click(gridButton);
+    }
+
+    mockReplace.mockClear();
+
+    // Switch back to calendar
+    const calendarButton = screen.getByText('Vista Calendario').closest('button');
+    if (calendarButton) {
+      fireEvent.click(calendarButton);
+    }
+
+    expect(mockReplace).toHaveBeenCalledWith('/internal-calendar');
   });
 });

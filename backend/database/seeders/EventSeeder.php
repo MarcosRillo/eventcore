@@ -40,6 +40,7 @@ class EventSeeder extends Seeder
         $publishedStatus = EventStatus::where('status_code', 'published')->first();
         $approvedInternalStatus = EventStatus::where('status_code', 'approved_internal')->first();
         $pendingInternalStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
+        $pendingPublicStatus = EventStatus::where('status_code', 'pending_public_approval')->first();
         $draftStatus = EventStatus::where('status_code', 'draft')->first();
 
         // Get event formats
@@ -323,6 +324,7 @@ class EventSeeder extends Seeder
             $publishedStatus,
             $approvedInternalStatus,
             $pendingInternalStatus,
+            $pendingPublicStatus,
             $draftStatus,
             $sedeUnicaFormat,
             $multiSedeFormat,
@@ -343,7 +345,8 @@ class EventSeeder extends Seeder
         $this->command->info('- 3 events created for Ente de Turismo (Internal)');
         $this->command->info('- 2 events created by Sheraton Hotel');
         $this->command->info('- 2 events created by La Rural Tucumán');
-        $this->command->info('- 24 events created by EventType (4 per type)');
+        $this->command->info('- 24 events created by EventType (4 per type, includes pending_public_approval)');
+        $this->command->info('- 31 total events across all statuses');
         $this->command->info('- All events have 3NF lookup relationships');
     }
 
@@ -354,6 +357,7 @@ class EventSeeder extends Seeder
         EventStatus $publishedStatus,
         EventStatus $approvedInternalStatus,
         EventStatus $pendingInternalStatus,
+        ?EventStatus $pendingPublicStatus,
         EventStatus $draftStatus,
         EventFormat $sedeUnicaFormat,
         EventFormat $multiSedeFormat,
@@ -378,6 +382,13 @@ class EventSeeder extends Seeder
         $themeAcademico = EventTheme::where('code', 'academico')->first();
         $themeSocial = EventTheme::where('code', 'social')->first();
 
+        // Use pending_public_approval for some types, pending_internal for others
+        $pendingStatusForDeportes = $pendingPublicStatus ?? $pendingInternalStatus;
+        $pendingStatusForCultura = $pendingPublicStatus ?? $pendingInternalStatus;
+        $pendingStatusForConferencias = $pendingPublicStatus ?? $pendingInternalStatus;
+
+        // Distribute events across available locations
+        $locationCount = $ubicacionesTurismo->count();
         $defaultLocation = $ubicacionesTurismo->first();
 
         // =====================================================
@@ -385,6 +396,17 @@ class EventSeeder extends Seeder
         // =====================================================
         $festivalesType = EventType::where('name', 'Festivales')->first();
         $festivalesSubtypes = $festivalesType->subtypes;
+
+        // Helper to get a location by index, cycling through available locations
+        $getLocation = function (int $index) use ($ubicacionesTurismo, $locationCount, $defaultLocation) {
+            if ($locationCount === 0) {
+                return null;
+            }
+
+            return $ubicacionesTurismo->values()->get($index % $locationCount) ?? $defaultLocation;
+        };
+
+        $locationIndex = 0;
 
         // 1. Festival de Rock Tucumano 2025 (Festival de Música) - Published
         $festivalRock = Event::create([
@@ -406,8 +428,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
         ]);
-        if ($defaultLocation) {
-            $festivalRock->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Escenario principal']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $festivalRock->locations()->attach($loc->id, ['location_specific_notes' => 'Escenario principal']);
         }
 
         // 2. Fiesta de la Empanada 2025 (Festival Gastronómico) - Approved
@@ -430,8 +453,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '45',
         ]);
-        if ($defaultLocation) {
-            $fiestaEmpanada->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Plaza central']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $fiestaEmpanada->locations()->attach($loc->id, ['location_specific_notes' => 'Plaza central']);
         }
 
         // 3. Festival del Poncho 2025 (Festival Cultural) - Pending
@@ -454,8 +478,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '52',
         ]);
-        if ($defaultLocation) {
-            $festivalPoncho->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Predio ferial']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $festivalPoncho->locations()->attach($loc->id, ['location_specific_notes' => 'Predio ferial']);
         }
 
         // 4. Encuentro de Folclore del NOA (Festival Folclórico) - Draft
@@ -478,8 +503,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '12',
         ]);
-        if ($defaultLocation) {
-            $encuentroFolclore->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Anfiteatro municipal']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $encuentroFolclore->locations()->attach($loc->id, ['location_specific_notes' => 'Anfiteatro municipal']);
         }
 
         // =====================================================
@@ -508,8 +534,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '15',
         ]);
-        if ($defaultLocation) {
-            $campeonatoFutbol->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Estadio municipal']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $campeonatoFutbol->locations()->attach($loc->id, ['location_specific_notes' => 'Estadio municipal']);
         }
 
         // 2. Maratón Cerro San Javier 2025 (Maratón) - Approved
@@ -532,17 +559,18 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '7',
         ]);
-        if ($defaultLocation) {
-            $maratonSanJavier->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Punto de partida y llegada']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $maratonSanJavier->locations()->attach($loc->id, ['location_specific_notes' => 'Punto de partida y llegada']);
         }
 
-        // 3. Torneo de Tenis Amateur (Torneo) - Pending
+        // 3. Torneo de Tenis Amateur (Torneo) - Pending Public Approval
         $torneoTenis = Event::create([
             'title' => 'Torneo de Tenis Amateur Tucumán',
             'description' => 'Competencia de tenis para jugadores amateur de todas las edades. Categorías individuales y dobles.',
             'start_date' => Carbon::now()->addDays(42)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(44)->setHour(19)->setMinute(0),
-            'status_id' => $pendingInternalStatus->id,
+            'status_id' => $pendingStatusForDeportes->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
             'event_type_id' => $deportesType->id,
@@ -556,8 +584,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
         ]);
-        if ($defaultLocation) {
-            $torneoTenis->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Club de tenis local']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $torneoTenis->locations()->attach($loc->id, ['location_specific_notes' => 'Club de tenis local']);
         }
 
         // 4. Exhibición de Gimnasia Artística (Exhibición Deportiva) - Draft
@@ -580,8 +609,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
         ]);
-        if ($defaultLocation) {
-            $exhibicionGimnasia->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Polideportivo municipal']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $exhibicionGimnasia->locations()->attach($loc->id, ['location_specific_notes' => 'Polideportivo municipal']);
         }
 
         // =====================================================
@@ -610,8 +640,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '5',
         ]);
-        if ($defaultLocation) {
-            $muestraArte->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Museo provincial de bellas artes']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $muestraArte->locations()->attach($loc->id, ['location_specific_notes' => 'Museo provincial de bellas artes']);
         }
 
         // 2. Teatro al Aire Libre - Clásicos (Teatro) - Approved
@@ -634,17 +665,18 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '10',
         ]);
-        if ($defaultLocation) {
-            $teatroAireLibre->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Parque 9 de Julio']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $teatroAireLibre->locations()->attach($loc->id, ['location_specific_notes' => 'Parque 9 de Julio']);
         }
 
-        // 3. Orquesta Sinfónica de Tucumán (Concierto) - Pending
+        // 3. Orquesta Sinfónica de Tucumán (Concierto) - Pending Public Approval
         $orquestaSinfonica = Event::create([
             'title' => 'Orquesta Sinfónica de Tucumán - Gala de Invierno',
             'description' => 'Concierto de gala con la Orquesta Sinfónica Provincial interpretando obras de Beethoven, Tchaikovsky y compositores argentinos.',
             'start_date' => Carbon::now()->addDays(48)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->addDays(48)->setHour(23)->setMinute(0),
-            'status_id' => $pendingInternalStatus->id,
+            'status_id' => $pendingStatusForCultura->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
             'event_type_id' => $culturaType->id,
@@ -658,8 +690,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '25',
         ]);
-        if ($defaultLocation) {
-            $orquestaSinfonica->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Teatro San Martín']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $orquestaSinfonica->locations()->attach($loc->id, ['location_specific_notes' => 'Teatro San Martín']);
         }
 
         // 4. Ballet Folclórico Tucumano (Danza) - Draft
@@ -682,8 +715,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
         ]);
-        if ($defaultLocation) {
-            $balletFolclorico->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Centro cultural']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $balletFolclorico->locations()->attach($loc->id, ['location_specific_notes' => 'Centro cultural']);
         }
 
         // =====================================================
@@ -712,8 +746,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '20',
         ]);
-        if ($defaultLocation) {
-            $cityTour->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Punto de encuentro: Plaza Independencia']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $cityTour->locations()->attach($loc->id, ['location_specific_notes' => 'Punto de encuentro: Plaza Independencia']);
         }
 
         // 2. Excursión Yungas Tucumanas (Excursión) - Approved
@@ -736,8 +771,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '4',
         ]);
-        if ($defaultLocation) {
-            $excursionYungas->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Salida desde plaza central']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $excursionYungas->locations()->attach($loc->id, ['location_specific_notes' => 'Salida desde plaza central']);
         }
 
         // 3. Ruta del Vino Tucumano (Ruta Turística) - Pending
@@ -760,8 +796,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '6',
         ]);
-        if ($defaultLocation) {
-            $rutaVino->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Punto de partida del tour']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $rutaVino->locations()->attach($loc->id, ['location_specific_notes' => 'Punto de partida del tour']);
         }
 
         // 4. Experiencia Gastronómica Regional (Experiencia Gastronómica) - Draft
@@ -784,8 +821,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
         ]);
-        if ($defaultLocation) {
-            $experienciaGastro->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Mercado regional']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $experienciaGastro->locations()->attach($loc->id, ['location_specific_notes' => 'Mercado regional']);
         }
 
         // =====================================================
@@ -814,8 +852,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '18',
         ]);
-        if ($defaultLocation) {
-            $feriaArtesanos->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Paseo de artesanos']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $feriaArtesanos->locations()->attach($loc->id, ['location_specific_notes' => 'Paseo de artesanos']);
         }
 
         // 2. Feria del Libro Tucumán 2025 (Feria del Libro) - Approved
@@ -838,8 +877,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '32',
         ]);
-        if ($defaultLocation) {
-            $feriaLibro->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Centro de convenciones']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $feriaLibro->locations()->attach($loc->id, ['location_specific_notes' => 'Centro de convenciones']);
         }
 
         // 3. Expo Productores Locales (Feria Productiva) - Pending
@@ -862,8 +902,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
         ]);
-        if ($defaultLocation) {
-            $expoProductores->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Predio ferial']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $expoProductores->locations()->attach($loc->id, ['location_specific_notes' => 'Predio ferial']);
         }
 
         // 4. Expo Pyme Regional (Expo Comercial) - Draft
@@ -886,8 +927,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '4',
         ]);
-        if ($defaultLocation) {
-            $expoPyme->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Centro de convenciones']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $expoPyme->locations()->attach($loc->id, ['location_specific_notes' => 'Centro de convenciones']);
         }
 
         // =====================================================
@@ -916,8 +958,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '5',
         ]);
-        if ($defaultLocation) {
-            $congresoTurismo->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Auditorio principal']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $congresoTurismo->locations()->attach($loc->id, ['location_specific_notes' => 'Auditorio principal']);
         }
 
         // 2. Seminario de Innovación Tecnológica (Seminario) - Approved
@@ -940,17 +983,18 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
         ]);
-        if ($defaultLocation) {
-            $seminarioTech->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Sala de conferencias']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $seminarioTech->locations()->attach($loc->id, ['location_specific_notes' => 'Sala de conferencias']);
         }
 
-        // 3. Workshop de Marketing Digital (Workshop) - Pending
+        // 3. Workshop de Marketing Digital (Workshop) - Pending Public Approval
         $workshopMktDigital = Event::create([
             'title' => 'Workshop de Marketing Digital para Turismo',
             'description' => 'Taller práctico de estrategias de marketing digital enfocado en el sector turístico. Redes sociales, SEO y publicidad online.',
             'start_date' => Carbon::now()->addDays(52)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(52)->setHour(17)->setMinute(0),
-            'status_id' => $pendingInternalStatus->id,
+            'status_id' => $pendingStatusForConferencias->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
             'event_type_id' => $conferenciasType->id,
@@ -964,8 +1008,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
         ]);
-        if ($defaultLocation) {
-            $workshopMktDigital->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Aula de capacitación']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $workshopMktDigital->locations()->attach($loc->id, ['location_specific_notes' => 'Aula de capacitación']);
         }
 
         // 4. Charla sobre Emprendedurismo (Charla) - Draft
@@ -988,8 +1033,9 @@ class EventSeeder extends Seeder
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
         ]);
-        if ($defaultLocation) {
-            $charlaEmprendedurismo->locations()->attach($defaultLocation->id, ['location_specific_notes' => 'Sala de eventos']);
+        $loc = $getLocation($locationIndex++);
+        if ($loc) {
+            $charlaEmprendedurismo->locations()->attach($loc->id, ['location_specific_notes' => 'Sala de eventos']);
         }
     }
 }
