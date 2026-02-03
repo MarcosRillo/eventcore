@@ -17,6 +17,16 @@ use Illuminate\Support\Facades\Auth;
 class InternalCalendarService
 {
     /**
+     * Roles that can view events across all organizations in the planning view.
+     */
+    public const PRIVILEGED_ROLES = [
+        'platform_admin',
+        'entity_admin',
+        'entity_staff',
+        'organizer_admin',
+    ];
+
+    /**
      * Event statuses visible in internal calendar.
      * Includes events approved for internal use and public viewing.
      */
@@ -46,7 +56,7 @@ class InternalCalendarService
         // For planning view: all authenticated users with these roles can see all events
         // This enables organizer_admin to view all organizations' events for date coordination
         $userRoleCode = $user?->role?->role_code;
-        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff', 'organizer_admin'])) {
+        if ($userRoleCode && in_array($userRoleCode, self::PRIVILEGED_ROLES)) {
             $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
         }
 
@@ -76,7 +86,7 @@ class InternalCalendarService
         // For planning view: all authenticated users with these roles can see all events
         // This enables organizer_admin to view any organization's event details
         $userRoleCode = $user?->role?->role_code;
-        if ($userRoleCode && in_array($userRoleCode, ['platform_admin', 'entity_admin', 'entity_staff', 'organizer_admin'])) {
+        if ($userRoleCode && in_array($userRoleCode, self::PRIVILEGED_ROLES)) {
             $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
         }
 

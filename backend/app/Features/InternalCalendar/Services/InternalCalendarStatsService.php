@@ -4,6 +4,8 @@ namespace App\Features\InternalCalendar\Services;
 
 use App\Models\Event;
 use App\Models\EventType;
+use App\Models\Scopes\TenantScope;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Internal Calendar Stats Service
@@ -25,13 +27,20 @@ class InternalCalendarStatsService
      * Get total count of internal calendar events.
      *
      * Counts all events with approved_internal or published status.
+     * For privileged roles, counts across all organizations.
      *
      * @return int Total number of events
      */
     public function getTotalEvents(): int
     {
-        return Event::whereHas('status', function ($query) {
-            $query->whereIn('status_code', self::STATS_STATUS_CODES);
+        $query = Event::query();
+
+        if ($this->shouldBypassTenantScope()) {
+            $query->withoutGlobalScope(TenantScope::class);
+        }
+
+        return $query->whereHas('status', function ($q) {
+            $q->whereIn('status_code', self::STATS_STATUS_CODES);
         })->count();
     }
 
@@ -40,13 +49,24 @@ class InternalCalendarStatsService
      *
      * Counts event types that have at least one event with
      * approved_internal or published status.
+     * For privileged roles, counts across all organizations.
      *
      * @return int Total number of event types with events
      */
     public function getTotalEventTypes(): int
     {
-        return EventType::whereHas('events', function ($query) {
-            $query->whereHas('status', function ($statusQuery) {
+        $query = EventType::query();
+        $bypass = $this->shouldBypassTenantScope();
+
+        if ($bypass) {
+            $query->withoutGlobalScope(TenantScope::class);
+        }
+
+        return $query->whereHas('events', function ($q) use ($bypass) {
+            if ($bypass) {
+                $q->withoutGlobalScope(TenantScope::class);
+            }
+            $q->whereHas('status', function ($statusQuery) {
                 $statusQuery->whereIn('status_code', self::STATS_STATUS_CODES);
             });
         })->count();
@@ -57,13 +77,20 @@ class InternalCalendarStatsService
      *
      * Counts events with approved_internal or published status
      * that start within the current calendar month.
+     * For privileged roles, counts across all organizations.
      *
      * @return int Number of events this month
      */
     public function getEventsThisMonth(): int
     {
-        return Event::whereHas('status', function ($query) {
-            $query->whereIn('status_code', self::STATS_STATUS_CODES);
+        $query = Event::query();
+
+        if ($this->shouldBypassTenantScope()) {
+            $query->withoutGlobalScope(TenantScope::class);
+        }
+
+        return $query->whereHas('status', function ($q) {
+            $q->whereIn('status_code', self::STATS_STATUS_CODES);
         })
             ->whereBetween('start_date', [now()->startOfMonth(), now()->endOfMonth()])
             ->count();
@@ -96,5 +123,19 @@ class InternalCalendarStatsService
             'total_event_types' => $this->getTotalEventTypes(),
             'events_this_month' => $this->getEventsThisMonth(),
         ];
+    }
+
+    /**
+     * Check if the current user's role should bypass TenantScope.
+     *
+     * Privileged roles see stats across all organizations,
+     * matching the behavior of InternalCalendarService.
+     */
+    private function shouldBypassTenantScope(): bool
+    {
+        $user = Auth::user();
+        $roleCode = $user?->role?->role_code;
+
+        return $roleCode && in_array($roleCode, InternalCalendarService::PRIVILEGED_ROLES);
     }
 }

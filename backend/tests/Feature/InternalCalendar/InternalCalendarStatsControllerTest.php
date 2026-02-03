@@ -220,6 +220,46 @@ class InternalCalendarStatsControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_includes_events_from_all_organizations_for_privileged_roles()
+    {
+        // Arrange: Create events in the user's organization
+        Event::factory()->count(2)->create([
+            'entity_id' => $this->organization->id,
+            'event_type_id' => $this->eventType->id,
+            'status_id' => $this->approvedInternalStatus->id,
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(2),
+        ]);
+
+        // Create a second organization with its own events
+        $otherOrganization = Organization::factory()->create();
+        $otherEventType = EventType::factory()->create([
+            'entity_id' => $otherOrganization->id,
+            'is_active' => true,
+        ]);
+
+        Event::factory()->count(3)->create([
+            'entity_id' => $otherOrganization->id,
+            'event_type_id' => $otherEventType->id,
+            'status_id' => $this->publishedStatus->id,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(4),
+        ]);
+
+        $token = $this->entityAdmin->createToken('test-token')->plainTextToken;
+
+        // Act
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/v1/internal-calendar/stats');
+
+        // Assert: entity_admin should see events from ALL organizations (bypass TenantScope)
+        $response->assertOk();
+        $data = $response->json('data');
+        $this->assertEquals(5, $data['total_events']); // 2 + 3 from both organizations
+        $this->assertEquals(2, $data['total_event_types']); // 1 per organization
+    }
+
+    #[Test]
     public function it_handles_empty_database_gracefully()
     {
         // Arrange: No events created
