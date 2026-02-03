@@ -100,7 +100,7 @@ export const EventFormDates = ({
         )}
 
         {/* Formulario para agregar nueva fecha asincrónica */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
           <DateTimePicker
             label="Fecha adicional"
             value={newAsyncDate.date}
