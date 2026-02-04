@@ -376,4 +376,61 @@ class RegistrationRequestTest extends TestCase
             'organization_cuit' => ['El CUIT debe tener el formato XX-XXXXXXXX-X.'],
         ]);
     }
+
+    #[Test]
+    public function test_approved_organization_has_parent_id_from_reviewer(): void
+    {
+        Notification::fake();
+
+        // Create a primary entity
+        $primaryEntity = Organization::factory()->primaryEntity()->create();
+
+        // Create entity_admin with the primary entity as their organization
+        $role = UserRole::where('role_code', 'entity_admin')->first();
+        $entityAdmin = User::factory()->create(['role_id' => $role->id]);
+        $entityAdmin->organizations()->attach($primaryEntity->id);
+
+        $this->actingAs($entityAdmin, 'sanctum');
+
+        $request = RegistrationRequest::create(array_merge($this->getValidRequestData(), ['status' => 'pending']));
+
+        $response = $this->postJson("/api/v1/registration-requests/{$request->id}/approve");
+
+        $response->assertStatus(200);
+
+        // Verify organization was created with correct parent_id
+        $orgId = $response->json('data.organization_id');
+        $organization = Organization::find($orgId);
+
+        $this->assertNotNull($organization->parent_id, 'Organization should have a parent_id');
+        $this->assertEquals($primaryEntity->id, $organization->parent_id, 'Organization parent_id should match reviewer organization');
+    }
+
+    #[Test]
+    public function test_approved_organization_has_event_organizer_type(): void
+    {
+        Notification::fake();
+
+        // Create a primary entity
+        $primaryEntity = Organization::factory()->primaryEntity()->create();
+
+        // Create entity_admin with the primary entity as their organization
+        $role = UserRole::where('role_code', 'entity_admin')->first();
+        $entityAdmin = User::factory()->create(['role_id' => $role->id]);
+        $entityAdmin->organizations()->attach($primaryEntity->id);
+
+        $this->actingAs($entityAdmin, 'sanctum');
+
+        $request = RegistrationRequest::create(array_merge($this->getValidRequestData(), ['status' => 'pending']));
+
+        $response = $this->postJson("/api/v1/registration-requests/{$request->id}/approve");
+
+        $response->assertStatus(200);
+
+        // Verify organization was created with event_organizer type
+        $orgId = $response->json('data.organization_id');
+        $organization = Organization::with('type')->find($orgId);
+
+        $this->assertEquals('event_organizer', $organization->type->type_code);
+    }
 }

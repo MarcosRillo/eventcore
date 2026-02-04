@@ -70,7 +70,17 @@ class RegistrationRequestService
 
             // Get default organization status and type
             $statusId = DB::table('organization_statuses')->where('status_code', 'active')->value('id') ?? 1;
-            $typeId = DB::table('organization_types')->first()?->id ?? 1;
+            $typeId = DB::table('organization_types')->where('type_code', 'event_organizer')->value('id') ?? 2;
+
+            // Determine parent_id for the new organization
+            // For entity_admin: use their organization as parent
+            // For platform_admin without organization: use first primary entity as fallback
+            $parentId = $reviewer->organization_id;
+            if (! $parentId) {
+                $parentId = Organization::whereNull('parent_id')
+                    ->whereHas('type', fn ($q) => $q->where('type_code', 'primary_entity'))
+                    ->first()?->id;
+            }
 
             // Create organization
             $organization = Organization::create([
@@ -81,6 +91,7 @@ class RegistrationRequestService
                 'type_id' => $typeId,
                 'logo_url' => $request->organization_logo,
                 'website' => $request->website,
+                'parent_id' => $parentId,
             ]);
 
             // Create user with placeholder password (will be set via reset link)

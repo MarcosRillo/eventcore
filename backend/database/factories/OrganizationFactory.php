@@ -21,9 +21,39 @@ class OrganizationFactory extends Factory
             'description' => fake()->optional()->sentence(),
             'status_id' => fn () => \DB::table('organization_statuses')->where('status_code', 'active')->first()?->id ?? 1,
             'type_id' => fn () => \DB::table('organization_types')->where('type_code', 'event_organizer')->first()?->id ?? 1,
-            'parent_id' => null,
+            'parent_id' => fn () => $this->getOrCreatePrimaryEntity(),
             'trust_level' => 1,
         ];
+    }
+
+    /**
+     * Get an existing primary entity or create one for parent_id.
+     */
+    private function getOrCreatePrimaryEntity(): int
+    {
+        $primaryEntityTypeId = \DB::table('organization_types')
+            ->where('type_code', 'primary_entity')
+            ->first()?->id ?? 1;
+
+        // Try to find an existing primary entity
+        $existing = Organization::where('type_id', $primaryEntityTypeId)->first();
+        if ($existing) {
+            return $existing->id;
+        }
+
+        // Create a new primary entity
+        $name = 'Test Primary Entity';
+
+        return Organization::create([
+            'name' => $name,
+            'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(1, 9999),
+            'cuit' => fake()->unique()->numerify('##-########-#'),
+            'description' => 'Primary entity for testing',
+            'status_id' => \DB::table('organization_statuses')->where('status_code', 'active')->first()?->id ?? 1,
+            'type_id' => $primaryEntityTypeId,
+            'parent_id' => null,
+            'trust_level' => 1,
+        ])->id;
     }
 
     /**
