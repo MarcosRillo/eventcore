@@ -8,9 +8,9 @@ import '@testing-library/jest-dom'
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
+import { SWRConfig } from 'swr'
 
-import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
-import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import * as locationService from '@/features/locations/services/location.service'
 import { OrganizerEventFormContainer } from '@/features/organizer/components/smart/OrganizerEventFormContainer'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
@@ -24,8 +24,14 @@ global.ResizeObserver = class ResizeObserver {
 
 jest.mock('../services/organizer-event.service')
 jest.mock('@/features/locations/services/location.service')
-jest.mock('@/features/event-types/services/eventType.service')
-jest.mock('@/features/event-types/services/eventSubtype.service')
+
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}))
+
+import { apiFetcher } from '@/lib/swr/fetcher'
+
+const mockedFetcher = apiFetcher as jest.Mock
 
 // Mock DateTimePicker to simplify integration tests
 jest.mock('@/shared/components/form/DateTimePicker', () => {
@@ -84,6 +90,12 @@ jest.mock('next/navigation', () => ({
 // Helper to setup userEvent instance
 const setupUser = () => userEvent.setup()
 
+const SWRWrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+)
+
 describe('OrganizerEventForm', () => {
   const mockLocations = [
     { id: 1, name: 'Plaza Independencia' },
@@ -108,14 +120,25 @@ describe('OrganizerEventForm', () => {
 
     // Mock searchLocations for async location search
     ;(locationService.searchLocations as jest.Mock).mockResolvedValue(mockLocations)
-    // Mock event types and subtypes services
-    ;(eventTypeService.getActiveEventTypes as jest.Mock).mockResolvedValue(mockEventTypes)
-    ;(eventSubtypeService.getActiveEventSubtypes as jest.Mock).mockResolvedValue(mockEventSubtypes)
+
+    // Mock the SWR fetcher to return data based on the URL
+    mockedFetcher.mockImplementation((url: string) => {
+      if (url === '/event-types/active') {
+        return Promise.resolve({ data: mockEventTypes })
+      }
+      if (url === '/locations/active') {
+        return Promise.resolve({ data: [] })
+      }
+      if (url.match(/\/event-types\/\d+\/subtypes\/active/)) {
+        return Promise.resolve({ data: mockEventSubtypes })
+      }
+      return Promise.resolve(null)
+    })
   })
 
   describe('Initial Render', () => {
     test('should render all form fields in create mode', async () => {
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /crear evento/i })).toBeInTheDocument()
@@ -123,7 +146,7 @@ describe('OrganizerEventForm', () => {
     })
 
     test('should verify locations are async search only', async () => {
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       // Wait for component to complete initial async operations
       await waitFor(() => {
@@ -137,7 +160,7 @@ describe('OrganizerEventForm', () => {
 
   describe('Validation', () => {
     test('should show validation errors for required fields when submitted empty', async () => {
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /crear evento/i })).toBeInTheDocument()
@@ -154,7 +177,7 @@ describe('OrganizerEventForm', () => {
     })
 
     test('should show error when start date is not provided', async () => {
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
@@ -195,7 +218,7 @@ describe('OrganizerEventForm', () => {
         data: mockNewEvent
       })
 
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
@@ -264,26 +287,30 @@ describe('OrganizerEventForm', () => {
   })
 
   describe('Edit Mode', () => {
-    test('should pre-populate form with event data in edit mode', async () => {
-      const mockEvent = {
-        id: 1,
-        title: 'Existing Event',
-        description: 'Existing description',
-        start_date: '2030-12-15T18:00',
-        end_date: '2030-12-15T22:00',
-        event_type_id: 1,
-        event_subtype_id: 1,
-        locations: [{ id: 1, name: 'Plaza Independencia' }],
-        status: 'draft'
-      }
+    const mockEvent = {
+      id: 1,
+      title: 'Existing Event',
+      description: 'Existing description',
+      start_date: '2030-12-15T18:00',
+      end_date: '2030-12-15T22:00',
+      event_type_id: 1,
+      event_subtype_id: 1,
+      locations: [{ id: 1, name: 'Plaza Independencia' }],
+      status: 'draft'
+    }
 
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockEvent)
-
-      render(<OrganizerEventFormContainer eventId={1} />)
-
-      await waitFor(() => {
-        expect(organizerEventService.getEvent).toHaveBeenCalledWith(1)
+    beforeEach(() => {
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/event-types/active') return Promise.resolve({ data: mockEventTypes })
+        if (url === '/locations/active') return Promise.resolve({ data: [] })
+        if (url.match(/\/event-types\/\d+\/subtypes\/active/)) return Promise.resolve({ data: mockEventSubtypes })
+        if (url === '/organizer/events/1') return Promise.resolve(mockEvent)
+        return Promise.resolve(null)
       })
+    })
+
+    test('should pre-populate form with event data in edit mode', async () => {
+      render(<SWRWrapper><OrganizerEventFormContainer eventId={1} /></SWRWrapper>)
 
       await waitFor(() => {
         const titleInput = screen.getByLabelText(/nombre del evento/i) as HTMLInputElement
@@ -297,29 +324,15 @@ describe('OrganizerEventForm', () => {
     })
 
     test('should update event with valid data in edit mode', async () => {
-      const mockEvent = {
-        id: 1,
-        title: 'Original Title',
-        description: 'Original description',
-        start_date: '2030-12-15T18:00',
-        end_date: '2030-12-15T22:00',
-        event_type_id: 1,
-        event_subtype_id: 1,
-        locations: [{ id: 1, name: 'Plaza Independencia' }],
-        status: 'draft'
-      }
-
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockEvent)
-
       ;(organizerEventService.updateEvent as jest.Mock).mockResolvedValue({
         data: { ...mockEvent, title: 'Updated Title' }
       })
 
-      render(<OrganizerEventFormContainer eventId={1} />)
+      render(<SWRWrapper><OrganizerEventFormContainer eventId={1} /></SWRWrapper>)
 
       await waitFor(() => {
         const titleInput = screen.getByLabelText(/nombre del evento/i) as HTMLInputElement
-        expect(titleInput.value).toBe('Original Title')
+        expect(titleInput.value).toBe('Existing Event')
       })
 
       const titleInput = screen.getByLabelText(/nombre del evento/i)
@@ -353,7 +366,7 @@ describe('OrganizerEventForm', () => {
         () => new Promise((resolve) => setTimeout(() => resolve({ data: { id: 1 } }), 200))
       )
 
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
@@ -413,7 +426,7 @@ describe('OrganizerEventForm', () => {
         () => new Promise((resolve) => setTimeout(() => resolve({ data: { id: 1 } }), 200))
       )
 
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
@@ -472,7 +485,7 @@ describe('OrganizerEventForm', () => {
       const mockError = new Error('Network error')
       ;(organizerEventService.createEvent as jest.Mock).mockRejectedValue(mockError)
 
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByLabelText(/nombre del evento/i)).toBeInTheDocument()
@@ -532,7 +545,7 @@ describe('OrganizerEventForm', () => {
 
   describe('Cancel Action', () => {
     test('should navigate back when cancel button is clicked', async () => {
-      render(<OrganizerEventFormContainer />)
+      render(<SWRWrapper><OrganizerEventFormContainer /></SWRWrapper>)
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()

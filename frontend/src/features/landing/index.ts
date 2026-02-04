@@ -3,5 +3,4 @@
  */
 
 export * from '@/features/landing/components'
-export * from '@/features/landing/hooks'
 export * from '@/features/landing/types/landing.types'

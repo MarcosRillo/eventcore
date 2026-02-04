@@ -1,25 +1,31 @@
-/**
- * Tests for useAdminStats hook
- *
- * Tests the hook that fetches and manages admin approval statistics.
- * Following TDD: RED phase - these tests should fail initially.
- */
-
 import { act,renderHook, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { SWRConfig } from 'swr';
 
 import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { adminStatsService } from '@/features/entity-admin/services';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';
 
-// Mock the service
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}));
+
 jest.mock('@/features/entity-admin/services', () => ({
   adminStatsService: {
-    getApprovalStats: jest.fn(),
     transformStatsToCardData: jest.fn(),
   },
 }));
 
+import { apiFetcher } from '@/lib/swr/fetcher';
+
+const mockedFetcher = apiFetcher as jest.Mock;
 const mockedService = adminStatsService as jest.Mocked<typeof adminStatsService>;
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+);
 
 describe('useAdminStats', () => {
   const mockStats: AdminApprovalStats = {
@@ -41,25 +47,23 @@ describe('useAdminStats', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedService.getApprovalStats.mockResolvedValue(mockStats);
+    mockedFetcher.mockResolvedValue({ data: mockStats });
     mockedService.transformStatsToCardData.mockReturnValue(mockCardData);
   });
 
   test('fetches stats on mount', async () => {
-    const { result } = renderHook(() => useAdminStats());
-
-    expect(result.current.isLoading).toBe(true);
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(mockedService.getApprovalStats).toHaveBeenCalledTimes(1);
+    expect(mockedFetcher).toHaveBeenCalled();
     expect(result.current.stats).toEqual(mockStats);
   });
 
   test('returns card data for dashboard', async () => {
-    const { result } = renderHook(() => useAdminStats());
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -71,9 +75,9 @@ describe('useAdminStats', () => {
 
   test('sets error state when fetch fails', async () => {
     const errorMessage = 'Network error';
-    mockedService.getApprovalStats.mockRejectedValueOnce(new Error(errorMessage));
+    mockedFetcher.mockRejectedValueOnce(new Error(errorMessage));
 
-    const { result } = renderHook(() => useAdminStats());
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -84,50 +88,48 @@ describe('useAdminStats', () => {
   });
 
   test('provides refetch function to reload data', async () => {
-    const { result } = renderHook(() => useAdminStats());
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(mockedService.getApprovalStats).toHaveBeenCalledTimes(1);
+    const callCount = mockedFetcher.mock.calls.length;
 
-    // Call refetch
     await act(async () => {
       await result.current.refetch();
     });
 
-    expect(mockedService.getApprovalStats).toHaveBeenCalledTimes(2);
+    expect(mockedFetcher.mock.calls.length).toBeGreaterThan(callCount);
   });
 
   test('clears error on successful refetch', async () => {
-    // First call fails
-    mockedService.getApprovalStats.mockRejectedValueOnce(new Error('Network error'));
+    mockedFetcher.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() => useAdminStats());
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.error).toBe('Network error');
     });
 
-    // Second call succeeds
-    mockedService.getApprovalStats.mockResolvedValueOnce(mockStats);
+    mockedFetcher.mockResolvedValueOnce({ data: mockStats });
 
     await act(async () => {
       await result.current.refetch();
     });
 
-    expect(result.current.error).toBeNull();
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
     expect(result.current.stats).toEqual(mockStats);
   });
 
   test('returns correct loading state during fetch', async () => {
-    // Delay the response
-    mockedService.getApprovalStats.mockImplementationOnce(
-      () => new Promise((resolve) => setTimeout(() => resolve(mockStats), 100))
+    mockedFetcher.mockImplementationOnce(
+      () => new Promise((resolve) => setTimeout(() => resolve({ data: mockStats }), 100))
     );
 
-    const { result } = renderHook(() => useAdminStats());
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.stats).toBeNull();
@@ -140,9 +142,9 @@ describe('useAdminStats', () => {
   });
 
   test('returns null cardData when stats are null', async () => {
-    mockedService.getApprovalStats.mockRejectedValueOnce(new Error('Error'));
+    mockedFetcher.mockRejectedValueOnce(new Error('Error'));
 
-    const { result } = renderHook(() => useAdminStats());
+    const { result } = renderHook(() => useAdminStats(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);

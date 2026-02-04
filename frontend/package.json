@@ -26,7 +26,8 @@
     "react": "^19.2.3",
     "react-big-calendar": "^1.19.4",
     "react-day-picker": "^9.13.0",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "swr": "^2.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

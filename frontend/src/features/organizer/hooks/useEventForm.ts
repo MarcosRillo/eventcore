@@ -1,22 +1,16 @@
 'use client';
 
-/**
- * useEventForm Hook
- *
- * Custom React hook for managing event form state and operations.
- * Uses React 19 useTransition for loading states during create/update operations.
- */
-
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import useSWR from 'swr'
 
-import { getActiveEventSubtypes } from '@/features/event-types/services/eventSubtype.service'
-import { getActiveEventTypes } from '@/features/event-types/services/eventType.service'
-import { getActiveLocations } from '@/features/locations/services/location.service'
-import { createEvent, createEventWithFiles, getEvent, updateEvent, updateEventWithFiles } from '@/features/organizer/services/organizer-event.service'
-import { AsynchronousDate, EventFormData, EventFormErrors } from '@/features/organizer/types/event.types'
+import { createEvent, createEventWithFiles, updateEvent, updateEventWithFiles } from '@/features/organizer/services/organizer-event.service'
+import { AsynchronousDate, EventFormData, EventFormErrors, OrganizerEvent } from '@/features/organizer/types/event.types'
 import { hasErrors,validateEventForm } from '@/features/organizer/utils/eventFormValidation'
+import { apiFetcher, eventKeys, locationKeys } from '@/lib/swr'
+import { ApiResponse } from '@/types/api-response.types'
 import { EventSubtype,EventType } from '@/types/eventType.types'
+import { Location } from '@/types/location.types'
 
 interface UseEventFormProps {
   eventId?: number
@@ -90,134 +84,124 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
 
   const [errors, setErrors] = useState<EventFormErrors>({})
   const [isSubmitting, startSubmitTransition] = useTransition()
-  const [isInitialLoading, startInitialTransition] = useTransition()
-  const [initialLoadStarted, setInitialLoadStarted] = useState(false)
-  const [eventTypes, setEventTypes] = useState<EventType[]>([])
-  const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
-  const [allLocations, setAllLocations] = useState<{ id: number; name: string }[]>([])
   const [selectedLocations, setSelectedLocations] = useState<{ id: number; name: string }[]>([])
 
-  // Load event types and locations on mount
+  // SWR: Load event types
+  const { data: eventTypesData } = useSWR<ApiResponse<EventType[]>>(
+    eventKeys.types.active,
+    apiFetcher
+  )
+
+  // SWR: Load locations
+  const { data: locationsData } = useSWR<{ data: Location[] }>(
+    locationKeys.active,
+    apiFetcher
+  )
+
+  // SWR: Load subtypes when event type changes
+  const { data: subtypesData } = useSWR<ApiResponse<EventSubtype[]>>(
+    formData.event_type_id ? eventKeys.subtypes.active(formData.event_type_id) : null,
+    apiFetcher
+  )
+
+  // SWR: Load event data in edit mode
+  const { data: existingEvent, isLoading: isLoadingEvent } = useSWR<OrganizerEvent>(
+    eventId ? eventKeys.organizerDetail(eventId) : null,
+    apiFetcher
+  )
+
+  // Derive options from SWR data
+  const eventTypes = useMemo(() => {
+    if (!eventTypesData) return []
+    return Array.isArray(eventTypesData) ? eventTypesData : eventTypesData.data
+  }, [eventTypesData])
+
+  const allLocations = useMemo(() => {
+    if (!locationsData) return []
+    const locations = Array.isArray(locationsData) ? locationsData : locationsData.data
+    return locations?.map(loc => ({ id: loc.id, name: loc.name })) || []
+  }, [locationsData])
+
+  const eventSubtypes = useMemo(() => {
+    if (!subtypesData) return []
+    return Array.isArray(subtypesData) ? subtypesData : subtypesData.data
+  }, [subtypesData])
+
+  // Track if we've already populated form data from existing event
+  const hasPopulatedRef = useRef(false)
+
+  // Populate form data when existing event loads (edit mode)
   useEffect(() => {
-    const loadOptions = async () => {
-      try {
-        const [eventTypesRes, locationsRes] = await Promise.all([
-          getActiveEventTypes(),
-          getActiveLocations()
-        ])
+    if (!existingEvent || hasPopulatedRef.current) return
+    hasPopulatedRef.current = true
 
-        // Event Types (Dec 2, 2025)
-        setEventTypes(eventTypesRes || [])
+    setFormData({
+      // Basic information
+      title: existingEvent.title,
+      description: existingEvent.description || '',
+      edition_number: existingEvent.edition_number || '',
 
-        // Locations for fuzzy search select
-        setAllLocations(locationsRes?.map(loc => ({ id: loc.id, name: loc.name })) || [])
-      } catch {
-        setErrors({ general: 'Error loading form options' })
-      }
-    }
+      // Event Type/Subtype (hierarchical categorization - Dec 2, 2025)
+      event_type_id: existingEvent.event_type_id || existingEvent.event_type?.id || null,
+      event_subtype_id: existingEvent.event_subtype_id || existingEvent.event_subtype?.id || null,
 
-    loadOptions()
-  }, [])
+      // FK references (IDs)
+      type_id: existingEvent.type_id || null,
+      subtype_id: existingEvent.subtype_id || null,
+      origin_id: existingEvent.origin_id || null,
+      theme_id: existingEvent.theme_id || null,
+      frequency_id: existingEvent.frequency_id || null,
+      rotation_type_id: existingEvent.rotation_type_id || null,
+      producer_id: existingEvent.producer_id || null,
 
-  // Load subtypes when event type changes
-  useEffect(() => {
-    const loadSubtypes = async () => {
-      if (!formData.event_type_id) {
-        setEventSubtypes([])
-        return
-      }
+      // Services and Rooms (arrays of IDs)
+      service_ids: existingEvent.services?.map((s: { id: number }) => s.id) || [],
+      room_ids: existingEvent.rooms?.map((r: { id: number }) => r.id) || [],
 
-      try {
-        const subtypes = await getActiveEventSubtypes(formData.event_type_id)
-        setEventSubtypes(subtypes || [])
-      } catch {
-        setEventSubtypes([])
-      }
-    }
+      // Location info
+      location_ids: existingEvent.locations?.map((l: { id: number }) => l.id) || [],
+      has_custom_location: !!existingEvent.custom_location_name,
+      custom_location_name: existingEvent.custom_location_name || '',
+      maps_url: existingEvent.maps_url || '',
+      previous_venue: existingEvent.previous_venue || '',
+      next_venue: existingEvent.next_venue || '',
 
-    loadSubtypes()
-  }, [formData.event_type_id])
+      // Dates
+      start_date: existingEvent.start_date || '',
+      end_date: existingEvent.end_date || '',
+      async_dates: existingEvent.async_dates?.map((d: { date_value?: string; date?: string; notes?: string }) => ({
+        date: d.date_value || d.date || '',
+        notes: d.notes
+      })) || [],
 
-  // Load event data in edit mode
-  useEffect(() => {
-    if (!eventId || initialLoadStarted) return
+      // Attendance
+      local_attendance: existingEvent.local_attendance?.toString() || '',
+      national_attendance: existingEvent.national_attendance?.toString() || '',
+      international_attendance: existingEvent.international_attendance?.toString() || '',
+      virtual_transmission: existingEvent.virtual_transmission || false,
 
-    setInitialLoadStarted(true)
-    startInitialTransition(async () => {
-      try {
-        const event = await getEvent(eventId)
+      // Additional info
+      event_website: existingEvent.event_website || '',
 
-        setFormData({
-          // Basic information
-          title: event.title,
-          description: event.description || '',
-          edition_number: event.edition_number || '',
+      // Images (URLs)
+      logo_url: existingEvent.logo_url || '',
+      featured_image: existingEvent.featured_image || '',
+      responsive_image_url: existingEvent.responsive_image_url || '',
 
-          // Event Type/Subtype (hierarchical categorization - Dec 2, 2025)
-          event_type_id: event.event_type_id || event.event_type?.id || null,
-          event_subtype_id: event.event_subtype_id || event.event_subtype?.id || null,
-
-          // FK references (IDs)
-          type_id: event.type_id || null,
-          subtype_id: event.subtype_id || null,
-          origin_id: event.origin_id || null,
-          theme_id: event.theme_id || null,
-          frequency_id: event.frequency_id || null,
-          rotation_type_id: event.rotation_type_id || null,
-          producer_id: event.producer_id || null,
-
-          // Services and Rooms (arrays of IDs)
-          service_ids: event.services?.map((s: { id: number }) => s.id) || [],
-          room_ids: event.rooms?.map((r: { id: number }) => r.id) || [],
-
-          // Location info
-          location_ids: event.locations?.map((l: { id: number }) => l.id) || [],
-          has_custom_location: !!event.custom_location_name,
-          custom_location_name: event.custom_location_name || '',
-          maps_url: event.maps_url || '',
-          previous_venue: event.previous_venue || '',
-          next_venue: event.next_venue || '',
-
-          // Dates
-          start_date: event.start_date || '',
-          end_date: event.end_date || '',
-          async_dates: event.async_dates?.map((d: { date_value?: string; date?: string; notes?: string }) => ({
-            date: d.date_value || d.date || '',
-            notes: d.notes
-          })) || [],
-
-          // Attendance
-          local_attendance: event.local_attendance?.toString() || '',
-          national_attendance: event.national_attendance?.toString() || '',
-          international_attendance: event.international_attendance?.toString() || '',
-          virtual_transmission: event.virtual_transmission || false,
-
-          // Additional info
-          event_website: event.event_website || '',
-
-          // Images (URLs)
-          logo_url: event.logo_url || '',
-          featured_image: event.featured_image || '',
-          responsive_image_url: event.responsive_image_url || '',
-
-          // Images (Files - null when editing, only set when user uploads)
-          logo_file: null,
-          featured_image_file: null,
-          responsive_image_file: null
-        })
-
-        // Store locations with names for the async select chips
-        if (event.locations && Array.isArray(event.locations)) {
-          setSelectedLocations(event.locations.map((l: { id: number; name: string }) => ({
-            id: l.id,
-            name: l.name
-          })))
-        }
-      } catch {
-        setErrors({ general: 'Error loading event data' })
-      }
+      // Images (Files - null when editing, only set when user uploads)
+      logo_file: null,
+      featured_image_file: null,
+      responsive_image_file: null
     })
-  }, [eventId, initialLoadStarted])
+
+    // Store locations with names for the async select chips
+    if (existingEvent.locations && Array.isArray(existingEvent.locations)) {
+      setSelectedLocations(existingEvent.locations.map((l: { id: number; name: string }) => ({
+        id: l.id,
+        name: l.name
+      })))
+    }
+  }, [existingEvent])
 
   const handleChange = (field: keyof EventFormData, value: string | number | boolean | null | number[] | AsynchronousDate[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -290,7 +274,7 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     }))
   }
 
-  
+
   // Handle location IDs change from AsyncSearchableMultiSelect
   const handleLocationIdsChange = useCallback((ids: number[]) => {
     setFormData(prev => ({
@@ -454,7 +438,7 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
 
   // Backward compatibility: compute loading states
   const loading = isSubmitting
-  const initialLoading = isEditMode && (isInitialLoading || !initialLoadStarted)
+  const initialLoading = isEditMode && isLoadingEvent
 
   return {
     formData,

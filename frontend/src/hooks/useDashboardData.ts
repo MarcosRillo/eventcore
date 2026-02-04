@@ -1,15 +1,25 @@
-/**
- * Dashboard Data Hook
- * Manages dashboard summary and events data with caching and error handling
- */
+import { useMemo } from 'react';
+import useSWR from 'swr';
 
-import { useEffect, useMemo,useState } from 'react';
-
-import { 
-  DashboardEventsParams, 
+import { apiFetcher, dashboardKeys } from '@/lib/swr';
+import type {
+  DashboardEventsParams,
   DashboardEventsResponse,
-  dashboardService, 
-  DashboardSummary} from '@/services/dashboardService';
+  DashboardSummary,
+} from '@/services/dashboardService';
+
+interface DashboardSummaryResponse {
+  success: boolean;
+  data: DashboardSummary;
+  message: string;
+}
+
+interface DashboardEventsApiResponse {
+  success: boolean;
+  data: DashboardEventsResponse['data'];
+  pagination: DashboardEventsResponse['pagination'];
+  message: string;
+}
 
 interface UseDashboardDataReturn {
   summary: DashboardSummary | null;
@@ -22,64 +32,41 @@ interface UseDashboardDataReturn {
 }
 
 export const useDashboardData = (params: DashboardEventsParams = {}): UseDashboardDataReturn => {
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [events, setEvents] = useState<DashboardEventsResponse | null>(null);
-  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const eventsKey = useMemo(() => {
+    const searchParams = new URLSearchParams();
+    if (params.tab) searchParams.set('tab', params.tab);
+    if (params.page) searchParams.set('page', params.page.toString());
+    if (params.search) searchParams.set('search', params.search);
+    return dashboardKeys.events(searchParams.toString());
+  }, [params.tab, params.page, params.search]);
 
-  // Memoize params to prevent infinite re-renders
-  const memoizedParams = useMemo(() => {
-    return params;
-  }, [params]);
+  const {
+    data: summaryData,
+    error: summaryError,
+    isLoading: isLoadingSummary,
+    mutate: mutateSummary,
+  } = useSWR<DashboardSummaryResponse>(dashboardKeys.summary, apiFetcher);
 
-  const fetchSummary = async () => {
-    setIsLoadingSummary(true);
-    setError(null);
+  const {
+    data: eventsData,
+    error: eventsError,
+    isLoading: isLoadingEvents,
+    mutate: mutateEvents,
+  } = useSWR<DashboardEventsApiResponse>(eventsKey, apiFetcher);
 
-    try {
-      const summaryData = await dashboardService.getSummary();
-      setSummary(summaryData);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch dashboard summary';
-      setError(errorMessage);
-    } finally {
-      setIsLoadingSummary(false);
-    }
-  };
+  const events: DashboardEventsResponse | null = eventsData
+    ? { data: eventsData.data, pagination: eventsData.pagination }
+    : null;
 
-  const fetchEvents = async () => {
-    setIsLoadingEvents(true);
-    setError(null);
-
-    try {
-      const eventsData = await dashboardService.getEvents(memoizedParams);
-      setEvents(eventsData);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch events';
-      setError(errorMessage);
-    } finally {
-      setIsLoadingEvents(false);
-    }
-  };
-
-  // Fetch summary on mount
-  useEffect(() => {
-    fetchSummary();
-  }, []);
-
-  // Fetch events when memoized params change
-  useEffect(() => {
-    fetchEvents();
-  }, [memoizedParams]); // eslint-disable-line react-hooks/exhaustive-deps
+  const error = summaryError?.message ?? eventsError?.message ?? null;
 
   return {
-    summary,
+    summary: summaryData?.data ?? null,
     events,
     isLoadingSummary,
     isLoadingEvents,
     error,
-    refetchSummary: fetchSummary,
-    refetchEvents: fetchEvents,
+    refetchSummary: async () => { await mutateSummary(); },
+    refetchEvents: async () => { await mutateEvents(); },
   };
 };

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect,useState } from 'react';
+import useSWR from 'swr';
 
-import { organizerStatsService } from '@/features/organizer-dashboard/services/organizerStatsService';
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types';
+import { apiFetcher, organizerKeys } from '@/lib/swr';
 
 interface UseOrganizerStatsReturn {
   stats: OrganizerStats | null;
@@ -13,32 +13,15 @@ interface UseOrganizerStatsReturn {
 }
 
 export const useOrganizerStats = (): UseOrganizerStatsReturn => {
-  const [stats, setStats] = useState<OrganizerStats | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await organizerStatsService.getStats();
-      setStats(data);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch stats';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const { data, error, isLoading, mutate } = useSWR<{ data: OrganizerStats }>(
+    organizerKeys.stats,
+    apiFetcher
+  );
 
   return {
-    stats,
-    loading,
-    error,
-    refetch: fetchStats,
+    stats: data?.data ?? null,
+    loading: isLoading,
+    error: error?.message ?? null,
+    refetch: async () => { await mutate(); },
   };
 };

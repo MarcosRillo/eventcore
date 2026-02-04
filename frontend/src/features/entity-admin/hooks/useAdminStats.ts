@@ -1,17 +1,11 @@
-/**
- * useAdminStats Hook
- *
- * Custom hook for fetching and managing admin approval statistics.
- * Provides stats data, card data for dashboard, loading states, and refetch capability.
- * Accepts optional initialStats from server-side fetch to avoid waterfall.
- */
-
 'use client';
 
-import { useCallback,useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import useSWR from 'swr';
 
 import { adminStatsService } from '@/features/entity-admin/services';
 import type { AdminApprovalStats, AdminStatCardData } from '@/features/entity-admin/types';
+import { adminKeys, apiFetcher } from '@/lib/swr';
 
 interface UseAdminStatsReturn {
   stats: AdminApprovalStats | null;
@@ -21,48 +15,26 @@ interface UseAdminStatsReturn {
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook for managing admin approval statistics
- */
 export const useAdminStats = (initialStats?: AdminApprovalStats | null): UseAdminStatsReturn => {
-  const [stats, setStats] = useState<AdminApprovalStats | null>(initialStats ?? null);
-  const [cardData, setCardData] = useState<AdminStatCardData[]>(
-    initialStats ? adminStatsService.transformStatsToCardData(initialStats) : []
+  const { data, error, isLoading, mutate } = useSWR<{ data: AdminApprovalStats }>(
+    adminKeys.stats,
+    apiFetcher,
+    { fallbackData: initialStats ? { data: initialStats } : undefined }
   );
-  const [isLoading, setIsLoading] = useState(!initialStats);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const stats = data?.data ?? null;
 
-    try {
-      const data = await adminStatsService.getApprovalStats();
-      setStats(data);
-      setCardData(adminStatsService.transformStatsToCardData(data));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar estadísticas';
-      setError(errorMessage);
-      setStats(null);
-      setCardData([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Skip initial fetch if we have server-provided data
-    if (!initialStats) {
-      fetchStats();
-    }
-  }, [fetchStats, initialStats]);
+  const cardData = useMemo(
+    () => stats ? adminStatsService.transformStatsToCardData(stats) : [],
+    [stats]
+  );
 
   return {
     stats,
     cardData,
     isLoading,
-    error,
-    refetch: fetchStats,
+    error: error?.message ?? null,
+    refetch: async () => { await mutate(); },
   };
 };
 

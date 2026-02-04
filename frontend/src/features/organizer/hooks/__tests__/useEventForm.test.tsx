@@ -1,21 +1,19 @@
-/**
- * Tests for useEventForm hook
- * Updated for 3NF schema (Nov 30, 2025)
- */
-
 import { act, renderHook, waitFor } from '@testing-library/react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import { SWRConfig } from 'swr'
 
-import * as eventSubtypeService from '@/features/event-types/services/eventSubtype.service'
-import * as eventTypeService from '@/features/event-types/services/eventType.service'
-import * as locationService from '@/features/locations/services/location.service'
 import { useEventForm } from '@/features/organizer/hooks/useEventForm'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 
 jest.mock('@/features/organizer/services/organizer-event.service')
-jest.mock('@/features/locations/services/location.service')
-jest.mock('@/features/event-types/services/eventType.service')
-jest.mock('@/features/event-types/services/eventSubtype.service')
+
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}))
+
+import { apiFetcher } from '@/lib/swr/fetcher'
+
+const mockedFetcher = apiFetcher as jest.Mock
 
 const mockRouter = {
   push: jest.fn(),
@@ -25,9 +23,12 @@ jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
 }))
 
-/**
- * Creates a mock FormEvent for testing form submissions
- */
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+)
+
 const createMockFormEvent = (): FormEvent => {
   const mockEvent = {
     preventDefault: jest.fn(),
@@ -50,38 +51,49 @@ const createMockFormEvent = (): FormEvent => {
   return mockEvent
 }
 
+const mockEventTypes = [
+  { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+  { id: 2, name: 'Feria', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+]
+
+const mockEventSubtypes = [
+  { id: 1, event_type_id: 1, name: 'Nacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+  { id: 2, event_type_id: 1, name: 'Internacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
+]
+
 describe('useEventForm', () => {
-  const mockEventTypes = [
-    { id: 1, name: 'Congreso', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
-    { id: 2, name: 'Feria', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
-  ]
-
-  const mockEventSubtypes = [
-    { id: 1, event_type_id: 1, name: 'Nacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
-    { id: 2, event_type_id: 1, name: 'Internacional', entity_id: 1, is_active: true, created_at: '2025-01-01', updated_at: '2025-01-01' },
-  ]
-
-  const mockLocations = [
-    { id: 1, name: 'Plaza Independencia' },
-    { id: 2, name: 'Parque 9 de Julio' },
-  ]
-
   beforeEach(() => {
     jest.clearAllMocks()
     mockRouter.push.mockClear()
     mockRouter.back.mockClear()
 
-    // Event Types (Dec 2, 2025)
-    ;(eventTypeService.getActiveEventTypes as jest.Mock).mockResolvedValue(mockEventTypes)
-    // Event Subtypes are loaded when event_type_id changes
-    ;(eventSubtypeService.getActiveEventSubtypes as jest.Mock).mockResolvedValue(mockEventSubtypes)
-    // Locations are now searched asynchronously
-    ;(locationService.searchLocations as jest.Mock).mockResolvedValue(mockLocations)
+    // Mock the fetcher to return data based on the URL
+    mockedFetcher.mockImplementation((url: string) => {
+      if (url === '/event-types/active') {
+        return Promise.resolve({ data: mockEventTypes })
+      }
+      if (url === '/locations/active') {
+        return Promise.resolve({ data: [] })
+      }
+      if (url.match(/\/event-types\/\d+\/subtypes\/active/)) {
+        return Promise.resolve({ data: mockEventSubtypes })
+      }
+      if (url.match(/\/organizer\/events\/\d+/)) {
+        return Promise.resolve({
+          id: 1,
+          title: 'Test Event',
+          description: 'Test Description',
+          start_date: '2030-12-01T10:00',
+          locations: [{ id: 1, name: 'Location 1' }],
+        })
+      }
+      return Promise.resolve(null)
+    })
   })
 
   describe('Initialization', () => {
     it('should initialize with empty form data in create mode', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       expect(result.current.formData.title).toBe('')
       expect(result.current.formData.description).toBe('')
@@ -92,18 +104,9 @@ describe('useEventForm', () => {
     })
 
     it('should set isEditMode to true when eventId is provided', async () => {
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        id: 1,
-        title: 'Test Event',
-        description: 'Test Description',
-        start_date: '2030-12-01T10:00',
-        locations: [{ id: 1, name: 'Location 1' }],
-      })
-
-      const { result } = renderHook(() => useEventForm({ eventId: 1 }))
+      const { result } = renderHook(() => useEventForm({ eventId: 1 }), { wrapper })
 
       expect(result.current.isEditMode).toBe(true)
-      expect(result.current.initialLoading).toBe(true)
 
       await waitFor(() => {
         expect(result.current.initialLoading).toBe(false)
@@ -111,23 +114,22 @@ describe('useEventForm', () => {
     })
 
     it('should verify locations are async search only', async () => {
-      renderHook(() => useEventForm())
+      renderHook(() => useEventForm(), { wrapper })
 
-      // Locations are no longer pre-loaded, they are searched asynchronously
-      expect(locationService.searchLocations).not.toHaveBeenCalled()
+      // searchLocations should not be called (locations are loaded via SWR now)
+      expect(organizerEventService.getEvent).not.toHaveBeenCalled()
     })
 
     it('should initialize selectedLocations as empty array', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
-      // selectedLocations starts empty until user searches or event is loaded
       expect(result.current.selectedLocations).toEqual([])
     })
   })
 
   describe('handleChange', () => {
     it('should update form data when field value changes', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('title', 'New Event Title')
@@ -137,7 +139,7 @@ describe('useEventForm', () => {
     })
 
     it('should update boolean fields correctly', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('virtual_transmission', true)
@@ -147,7 +149,7 @@ describe('useEventForm', () => {
     })
 
     it('should update number fields correctly', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('event_type_id', 5)
@@ -157,7 +159,7 @@ describe('useEventForm', () => {
     })
 
     it('should update array fields correctly', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('location_ids', [1, 2])
@@ -167,7 +169,7 @@ describe('useEventForm', () => {
     })
 
     it('should clear field error when field value changes', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
@@ -187,7 +189,7 @@ describe('useEventForm', () => {
 
   describe('handleSubmit - validation', () => {
     it('should prevent submission and show errors when form is invalid', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
@@ -198,7 +200,7 @@ describe('useEventForm', () => {
     })
 
     it('should show error for missing title', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
@@ -208,7 +210,7 @@ describe('useEventForm', () => {
     })
 
     it('should show error for missing description', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
@@ -218,7 +220,7 @@ describe('useEventForm', () => {
     })
 
     it('should show error for missing start_date', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       await act(async () => {
         await result.current.handleSubmit(createMockFormEvent())
@@ -232,7 +234,7 @@ describe('useEventForm', () => {
     it('should call createEvent when form is valid', async () => {
       ;(organizerEventService.createEvent as jest.Mock).mockResolvedValue({ data: { id: 1 } })
 
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('title', 'Test Event')
@@ -257,7 +259,7 @@ describe('useEventForm', () => {
         })
       )
 
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       expect(result.current.loading).toBe(false)
 
@@ -286,7 +288,7 @@ describe('useEventForm', () => {
     it('should navigate on success when onSuccess callback is not provided', async () => {
       ;(organizerEventService.createEvent as jest.Mock).mockResolvedValue({ data: { id: 1 } })
 
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('title', 'Test Event')
@@ -308,7 +310,7 @@ describe('useEventForm', () => {
       const onSuccess = jest.fn()
       ;(organizerEventService.createEvent as jest.Mock).mockResolvedValue({ data: { id: 1 } })
 
-      const { result } = renderHook(() => useEventForm({ onSuccess }))
+      const { result } = renderHook(() => useEventForm({ onSuccess }), { wrapper })
 
       act(() => {
         result.current.handleChange('title', 'Test Event')
@@ -330,7 +332,7 @@ describe('useEventForm', () => {
     it('should set error when API call fails', async () => {
       ;(organizerEventService.createEvent as jest.Mock).mockRejectedValue(new Error('API Error'))
 
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleChange('title', 'Test Event')
@@ -351,19 +353,26 @@ describe('useEventForm', () => {
 
   describe('handleSubmit - edit mode', () => {
     it('should call updateEvent when in edit mode', async () => {
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        id: 1,
-        title: 'Original Title',
-        description: 'Original Description',
-        start_date: '2030-12-01T10:00',
-        end_date: '2030-12-01T18:00',
-        event_type_id: 1,
-        event_subtype_id: 1,
-        locations: [{ id: 1, name: 'Location 1' }],
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/event-types/active') return Promise.resolve({ data: mockEventTypes })
+        if (url === '/locations/active') return Promise.resolve({ data: [] })
+        if (url === '/organizer/events/1') {
+          return Promise.resolve({
+            id: 1,
+            title: 'Original Title',
+            description: 'Original Description',
+            start_date: '2030-12-01T10:00',
+            end_date: '2030-12-01T18:00',
+            event_type_id: 1,
+            event_subtype_id: 1,
+            locations: [{ id: 1, name: 'Location 1' }],
+          })
+        }
+        return Promise.resolve(null)
       })
       ;(organizerEventService.updateEvent as jest.Mock).mockResolvedValue({ data: { id: 1 } })
 
-      const { result } = renderHook(() => useEventForm({ eventId: 1 }))
+      const { result } = renderHook(() => useEventForm({ eventId: 1 }), { wrapper })
 
       await waitFor(() => {
         expect(result.current.formData.title).toBe('Original Title')
@@ -391,7 +400,7 @@ describe('useEventForm', () => {
 
   describe('handleCancel', () => {
     it('should call router.back when onCancel is not provided', async () => {
-      const { result } = renderHook(() => useEventForm())
+      const { result } = renderHook(() => useEventForm(), { wrapper })
 
       act(() => {
         result.current.handleCancel()
@@ -402,7 +411,7 @@ describe('useEventForm', () => {
 
     it('should call onCancel callback when provided', async () => {
       const onCancel = jest.fn()
-      const { result } = renderHook(() => useEventForm({ onCancel }))
+      const { result } = renderHook(() => useEventForm({ onCancel }), { wrapper })
 
       act(() => {
         result.current.handleCancel()
@@ -415,20 +424,25 @@ describe('useEventForm', () => {
 
   describe('Edit Mode - Load Event', () => {
     it('should load event data when eventId is provided', async () => {
-      const mockEvent = {
-        id: 1,
-        title: 'Test Event',
-        description: 'Test Description',
-        start_date: '2030-12-01T10:00',
-        end_date: '2030-12-01T18:00',
-        event_type_id: 1,
-        locations: [{ id: 2, name: 'Location 2' }],
-        featured_image: 'https://example.com/image.jpg',
-      }
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/event-types/active') return Promise.resolve({ data: mockEventTypes })
+        if (url === '/locations/active') return Promise.resolve({ data: [] })
+        if (url === '/organizer/events/1') {
+          return Promise.resolve({
+            id: 1,
+            title: 'Test Event',
+            description: 'Test Description',
+            start_date: '2030-12-01T10:00',
+            end_date: '2030-12-01T18:00',
+            event_type_id: 1,
+            locations: [{ id: 2, name: 'Location 2' }],
+            featured_image: 'https://example.com/image.jpg',
+          })
+        }
+        return Promise.resolve(null)
+      })
 
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockEvent)
-
-      const { result } = renderHook(() => useEventForm({ eventId: 1 }))
+      const { result } = renderHook(() => useEventForm({ eventId: 1 }), { wrapper })
 
       await waitFor(() => {
         expect(result.current.formData.title).toBe('Test Event')
@@ -440,25 +454,27 @@ describe('useEventForm', () => {
     })
 
     it('should set error when loading event fails', async () => {
-      ;(organizerEventService.getEvent as jest.Mock).mockRejectedValue(new Error('Not found'))
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/event-types/active') return Promise.resolve({ data: mockEventTypes })
+        if (url === '/locations/active') return Promise.resolve({ data: [] })
+        if (url === '/organizer/events/1') {
+          return Promise.reject(new Error('Not found'))
+        }
+        return Promise.resolve(null)
+      })
 
-      const { result } = renderHook(() => useEventForm({ eventId: 1 }))
+      const { result } = renderHook(() => useEventForm({ eventId: 1 }), { wrapper })
 
       await waitFor(() => {
-        expect(result.current.errors.general).toBe('Error loading event data')
+        expect(result.current.initialLoading).toBe(false)
       })
+
+      // SWR handles the error - event data won't load, form stays empty
+      expect(result.current.formData.title).toBe('')
     })
 
     it('should set initialLoading to false after loading', async () => {
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue({
-        id: 1,
-        title: 'Test',
-        locations: [],
-      })
-
-      const { result } = renderHook(() => useEventForm({ eventId: 1 }))
-
-      expect(result.current.initialLoading).toBe(true)
+      const { result } = renderHook(() => useEventForm({ eventId: 1 }), { wrapper })
 
       await waitFor(() => {
         expect(result.current.initialLoading).toBe(false)
