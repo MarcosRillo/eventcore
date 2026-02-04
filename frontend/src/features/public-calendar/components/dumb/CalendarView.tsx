@@ -10,6 +10,7 @@ import { format, getDay,parse, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 
+import { AgendaEvent } from '@/features/public-calendar/components/dumb/AgendaEvent'
 import { CalendarEvent, CalendarView as CalendarViewType } from '@/features/public-calendar/types/public-calendar.types'
 
 // Setup date-fns localizer with Spanish locale
@@ -105,6 +106,11 @@ export const CalendarView = ({
           date={currentDate}
           view={currentView}
           eventPropGetter={eventStyleGetter}
+          components={{
+            agenda: {
+              event: AgendaEvent,
+            },
+          }}
           popup
           selectable={false}
           views={['month', 'week', 'day', 'agenda']}

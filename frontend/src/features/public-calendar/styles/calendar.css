@@ -157,6 +157,7 @@
 
 .rbc-agenda-view table.rbc-agenda-table {
   width: 100%;
+  table-layout: fixed;
 }
 
 .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
@@ -169,6 +170,14 @@
   color: #374151;
 }
 
+.rbc-agenda-view table.rbc-agenda-table thead > tr > th:first-child {
+  width: 180px;
+}
+
+.rbc-agenda-view table.rbc-agenda-table thead > tr > th:nth-child(2) {
+  width: 150px;
+}
+
 .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
   border-bottom: 1px solid #e5e7eb;
   padding: 0.75rem 1rem;
@@ -179,10 +188,38 @@
 .rbc-agenda-date-cell,
 .rbc-agenda-time-cell {
   white-space: nowrap;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+.rbc-agenda-date-cell {
+  width: 180px;
+}
+
+.rbc-agenda-time-cell {
+  width: 150px;
 }
 
 .rbc-agenda-event-cell {
+  width: auto;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Reset eventPropGetter inline styles on agenda rows */
+.rbc-agenda-view table.rbc-agenda-table tbody > tr {
+  display: table-row !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  opacity: 1 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr:hover {
+  background-color: #f9fafb !important;
 }
 
 /* Week and Day views */
@@ -235,5 +272,23 @@
 
   .rbc-event-content {
     font-size: 0.75rem;
+  }
+
+  .rbc-agenda-view table.rbc-agenda-table {
+    table-layout: auto;
+  }
+
+  .rbc-agenda-date-cell,
+  .rbc-agenda-view table.rbc-agenda-table thead > tr > th:first-child {
+    width: auto;
+  }
+
+  .rbc-agenda-time-cell,
+  .rbc-agenda-view table.rbc-agenda-table thead > tr > th:nth-child(2) {
+    width: auto;
+  }
+
+  .rbc-agenda-event-cell {
+    white-space: normal;
   }
 }
