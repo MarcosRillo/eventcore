@@ -21,6 +21,7 @@ class OrganizerStatsService
      * Map database status codes to API response keys.
      */
     private const STATUS_KEY_MAP = [
+        'draft' => 'draft',
         'pending_internal_approval' => 'pending_internal',
         'approved_internal' => 'approved_internal',
         'pending_public_approval' => 'pending_public',
@@ -32,18 +33,22 @@ class OrganizerStatsService
     /**
      * Get statistics for organizer's events.
      *
-     * @param  int  $userId  User ID (created_by)
+     * @param  int  $organizationId  Organization ID
      * @return array Statistics including counts by status
      */
-    public function getStats(int $userId): array
+    public function getStats(int $organizationId): array
     {
         try {
             // Get all status IDs from cached trait method
             $allStatusIds = $this->getAllStatusIds();
             $statusIds = $this->mapStatusKeys($allStatusIds);
 
+            // Use withoutGlobalScopes to avoid double-filtering from TenantScope
+            $baseQuery = Event::withoutGlobalScopes()
+                ->where('organization_id', $organizationId);
+
             // Single efficient query with groupBy
-            $statusCounts = Event::where('created_by', $userId)
+            $statusCounts = (clone $baseQuery)
                 ->select('status_id', DB::raw('count(*) as count'))
                 ->groupBy('status_id')
                 ->pluck('count', 'status_id');
@@ -51,6 +56,7 @@ class OrganizerStatsService
             // Build stats array using dynamic status IDs
             $stats = [
                 'total_events' => $statusCounts->sum(),
+                'draft' => $statusCounts->get($statusIds['draft'] ?? 0, 0),
                 'pending_internal' => $statusCounts->get($statusIds['pending_internal'] ?? 0, 0),
                 'approved_internal' => $statusCounts->get($statusIds['approved_internal'] ?? 0, 0),
                 'pending_public' => $statusCounts->get($statusIds['pending_public'] ?? 0, 0),
@@ -60,16 +66,16 @@ class OrganizerStatsService
             ];
 
             // Add upcoming vs past breakdown
-            $stats['upcoming_events'] = Event::where('created_by', $userId)
+            $stats['upcoming_events'] = (clone $baseQuery)
                 ->upcoming()
                 ->count();
 
-            $stats['past_events'] = Event::where('created_by', $userId)
+            $stats['past_events'] = (clone $baseQuery)
                 ->past()
                 ->count();
 
             Log::info('Organizer stats fetched successfully', [
-                'user_id' => $userId,
+                'organization_id' => $organizationId,
                 'total_events' => $stats['total_events'],
                 'upcoming_events' => $stats['upcoming_events'],
                 'past_events' => $stats['past_events'],
@@ -78,7 +84,7 @@ class OrganizerStatsService
             return $stats;
         } catch (\Exception $e) {
             Log::error('Failed to fetch organizer stats', [
-                'user_id' => $userId,
+                'organization_id' => $organizationId,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

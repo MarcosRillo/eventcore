@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CheckCircle,
   Clock,
+  FileEdit,
   Globe
 } from 'lucide-react'
 import Link from 'next/link'
@@ -77,7 +78,7 @@ export const OrganizerDashboard = ({
       {/* Stats Section */}
       {stats && (
         <div
-          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8"
+          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8"
           data-testid="stats-grid"
         >
           <StatCard
@@ -85,42 +86,64 @@ export const OrganizerDashboard = ({
             value={stats.total_events}
             label="Total Eventos"
             variant="default"
+            onClick={() => { onFilterChange(null); onShowPastChange(false) }}
+            className={activeFilter === null && !showPast ? 'ring-2 ring-primary-500' : ''}
           />
           <StatCard
             icon={<CalendarClock className="w-5 h-5" />}
             value={stats.upcoming_events}
             label="Próximos"
             variant="primary"
+            onClick={() => { onFilterChange(null); onShowPastChange(false) }}
+            className={activeFilter === null && !showPast ? 'ring-2 ring-primary-500' : ''}
           />
           <StatCard
             icon={<CalendarCheck className="w-5 h-5" />}
             value={stats.past_events}
             label="Pasados"
             variant="default"
+            onClick={() => { onFilterChange(null); onShowPastChange(true) }}
+            className={activeFilter === null && showPast ? 'ring-2 ring-primary-500' : ''}
+          />
+          <StatCard
+            icon={<FileEdit className="w-5 h-5" />}
+            value={stats.draft}
+            label="Borrador"
+            variant="default"
+            onClick={() => onFilterChange('draft')}
+            className={activeFilter === 'draft' ? 'ring-2 ring-primary-500' : ''}
           />
           <StatCard
             icon={<Clock className="w-5 h-5" />}
             value={stats.pending_internal}
             label="Pendientes"
             variant="warning"
+            onClick={() => onFilterChange('pending_internal_approval')}
+            className={activeFilter === 'pending_internal_approval' ? 'ring-2 ring-primary-500' : ''}
           />
           <StatCard
             icon={<CheckCircle className="w-5 h-5" />}
             value={stats.approved_internal}
             label="Aprobados"
             variant="success"
+            onClick={() => onFilterChange('approved_internal')}
+            className={activeFilter === 'approved_internal' ? 'ring-2 ring-primary-500' : ''}
           />
           <StatCard
             icon={<Globe className="w-5 h-5" />}
             value={stats.published}
             label="Publicados"
             variant="info"
+            onClick={() => onFilterChange('published')}
+            className={activeFilter === 'published' ? 'ring-2 ring-primary-500' : ''}
           />
           <StatCard
             icon={<AlertTriangle className="w-5 h-5" />}
             value={stats.requires_changes}
             label="Requiere Cambios"
             variant="error"
+            onClick={() => onFilterChange('requires_changes')}
+            className={activeFilter === 'requires_changes' ? 'ring-2 ring-primary-500' : ''}
           />
         </div>
       )}

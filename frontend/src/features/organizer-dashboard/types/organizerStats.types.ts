@@ -2,6 +2,7 @@ export interface OrganizerStats {
   total_events: number;
   upcoming_events: number;
   past_events: number;
+  draft: number;
   pending_internal: number;
   approved_internal: number;
   pending_public: number;

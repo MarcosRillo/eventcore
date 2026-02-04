@@ -34,8 +34,13 @@ class OrganizerStatsController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $userId = $request->user()->id;
-            $stats = $this->statsService->getStats($userId);
+            $user = $request->user();
+
+            if (! $user->organization_id) {
+                return response()->json(['error' => 'No organization assigned'], 403);
+            }
+
+            $stats = $this->statsService->getStats($user->organization_id);
 
             return response()->json(['data' => $stats]);
         } catch (\Exception $e) {

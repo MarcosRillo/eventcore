@@ -47,6 +47,7 @@ class OrganizerStatsTest extends EventTestCase
         // 2 pending_internal
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
@@ -54,6 +55,7 @@ class OrganizerStatsTest extends EventTestCase
         // 3 approved_internal
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('approved_internal'),
         ]);
@@ -61,6 +63,7 @@ class OrganizerStatsTest extends EventTestCase
         // 1 pending_public
         Event::factory()->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
@@ -68,6 +71,7 @@ class OrganizerStatsTest extends EventTestCase
         // 4 published
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published'),
         ]);
@@ -75,6 +79,7 @@ class OrganizerStatsTest extends EventTestCase
         // 1 requires_changes
         Event::factory()->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('requires_changes'),
         ]);
@@ -82,6 +87,7 @@ class OrganizerStatsTest extends EventTestCase
         // 1 rejected
         Event::factory()->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('rejected'),
         ]);
@@ -128,6 +134,7 @@ class OrganizerStatsTest extends EventTestCase
         // Organizer A: 5 events
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizerA->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
@@ -135,6 +142,7 @@ class OrganizerStatsTest extends EventTestCase
         // Organizer B: 3 events (should not be counted)
         Event::factory()->count(3)->create([
             'entity_id' => $organizationB->id,
+            'organization_id' => $organizationB->id,
             'created_by' => $organizerB->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
@@ -169,10 +177,11 @@ class OrganizerStatsTest extends EventTestCase
         $response->assertJsonPath('data.total_events', 0);               // Assertion 2
         $response->assertJsonPath('data.pending_internal', 0);           // Assertion 3
         $response->assertJsonPath('data.approved_internal', 0);          // Assertion 4
-        $response->assertJsonPath('data.pending_public', 0);             // Assertion 5
-        $response->assertJsonPath('data.published', 0);                  // Assertion 6
-        $response->assertJsonPath('data.requires_changes', 0);           // Assertion 7
-        $response->assertJsonPath('data.rejected', 0);                   // Assertion 8
+        $response->assertJsonPath('data.draft', 0);                       // Assertion 5
+        $response->assertJsonPath('data.pending_public', 0);             // Assertion 6
+        $response->assertJsonPath('data.published', 0);                  // Assertion 7
+        $response->assertJsonPath('data.requires_changes', 0);           // Assertion 8
+        $response->assertJsonPath('data.rejected', 0);                   // Assertion 9
         $this->assertDatabaseMissing('events', [                    // Assertion 9
             'created_by' => $organizer->id,
         ]);
@@ -186,18 +195,21 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Mix of statuses
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published'),
         ]);
@@ -223,18 +235,21 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Mix of statuses
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('approved_internal'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
@@ -260,18 +275,21 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Mix of statuses
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
 
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published'),
         ]);
@@ -297,18 +315,21 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Mix of statuses
         Event::factory()->count(6)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('published'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('approved_internal'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_public_approval'),
         ]);
@@ -336,18 +357,21 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Mix of statuses
         Event::factory()->count(4)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('requires_changes'),
         ]);
 
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('rejected'),
         ]);
 
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
@@ -373,18 +397,21 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Mix of statuses
         Event::factory()->count(3)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('rejected'),
         ]);
 
         Event::factory()->count(5)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('pending_internal_approval'),
         ]);
 
         Event::factory()->count(2)->create([
             'entity_id' => $this->organization->id,
+            'organization_id' => $this->organization->id,
             'created_by' => $organizer->id,
             'status_id' => $this->getStatusId('requires_changes'),
         ]);
