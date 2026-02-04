@@ -3,9 +3,8 @@
  * Clean dropdown using Headless UI for accessibility
  */
 
-import { Listbox, Transition } from '@headlessui/react'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { Fragment } from 'react'
 
 export interface SelectOption {
   value: string | number
@@ -86,51 +85,47 @@ const Select = ({
       )}
 
       <Listbox value={value ?? ''} onChange={onChange} disabled={disabled}>
-        <div className="relative">
-          <Listbox.Button className={buttonClasses} name={name}>
-            <span className={`block truncate ${!selectedOption ? 'text-neutral-400' : 'text-neutral-900'}`}>
-              {displayValue}
-            </span>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <ChevronsUpDown className={`${iconSize[size]} text-neutral-400`} aria-hidden="true" />
-            </span>
-          </Listbox.Button>
+        <ListboxButton className={buttonClasses} name={name}>
+          <span className={`block truncate ${!selectedOption ? 'text-neutral-400' : 'text-neutral-900'}`}>
+            {displayValue}
+          </span>
+          <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+            <ChevronsUpDown className={`${iconSize[size]} text-neutral-400`} aria-hidden="true" />
+          </span>
+        </ListboxButton>
 
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 shadow-lg border border-neutral-100 focus:outline-none">
-              {options.map((option) => (
-                <Listbox.Option
-                  key={option.value}
-                  className={({ active }) =>
-                    `relative cursor-pointer select-none py-2 pl-9 pr-4 text-sm ${
-                      active ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-700'
-                    } ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}`
-                  }
-                  value={option.value}
-                  disabled={option.disabled}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                        {option.label}
-                      </span>
-                      {selected && (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-600">
-                          <Check className="h-4 w-4" aria-hidden="true" />
-                        </span>
-                      )}
-                    </>
+        <ListboxOptions
+          anchor="bottom start"
+          transition
+          modal={false}
+          className="z-50 max-h-60 w-(--button-width) overflow-auto rounded-lg bg-white py-1 shadow-lg border border-neutral-100 focus:outline-none [--anchor-gap:4px] origin-top transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+        >
+          {options.map((option) => (
+            <ListboxOption
+              key={option.value}
+              className={({ focus }) =>
+                `relative cursor-pointer select-none py-2 pl-9 pr-4 text-sm ${
+                  focus ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-700'
+                } ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}`
+              }
+              value={option.value}
+              disabled={option.disabled}
+            >
+              {({ selected }) => (
+                <>
+                  <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                    {option.label}
+                  </span>
+                  {selected && (
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-600">
+                      <Check className="h-4 w-4" aria-hidden="true" />
+                    </span>
                   )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
+                </>
+              )}
+            </ListboxOption>
+          ))}
+        </ListboxOptions>
       </Listbox>
 
       {error && (
