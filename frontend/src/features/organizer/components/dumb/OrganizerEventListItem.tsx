@@ -1,8 +1,26 @@
+/**
+ * OrganizerEventListItem - Redesigned with improved UX/UI
+ *
+ * Features:
+ * - Status badge at top for visual hierarchy
+ * - Horizontal metadata with separators
+ * - Responsive action buttons
+ * - Proper accessibility with aria-hidden icons
+ * - Memoized for performance
+ */
+
 import { Calendar, MapPin, Tag } from 'lucide-react'
+import { memo } from 'react'
 
 import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import {
+  getOrganizerStatusBadgeVariant,
+  getOrganizerStatusLabel,
+} from '@/features/organizer/utils/organizerStatusHelpers'
+import { formatDate } from '@/lib/utils'
 import { Badge } from '@/shared/components/display'
+import Card from '@/shared/components/display/Card'
 import { Button } from '@/shared/components/form'
 
 interface OrganizerEventListItemProps {
@@ -13,71 +31,88 @@ interface OrganizerEventListItemProps {
   disabled?: boolean
 }
 
-export const OrganizerEventListItem = ({
+/**
+ * OrganizerEventListItem Component
+ *
+ * Displays a single event in the organizer dashboard with:
+ * - Status badge prominently at top
+ * - Title with line-clamp for long text
+ * - Metadata row with date, location, and category
+ * - Action buttons aligned right
+ */
+export const OrganizerEventListItem = memo(function OrganizerEventListItem({
   event,
   onEdit,
   onView,
   onSuccess,
-  disabled = false
-}: OrganizerEventListItemProps) => {
-  const statusBadgeVariant: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
-    draft: 'default',
-    pending: 'warning',
-    pending_internal_approval: 'warning',
-    approved_internal: 'success',
-    approved: 'success',
-    rejected: 'danger',
-    published: 'info',
-    requires_changes: 'warning',
-    cancelled: 'default'
-  }
-
+  disabled = false,
+}: OrganizerEventListItemProps) {
   // Extract status code from status object or use as string
   const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status
-  const statusDisplay = typeof event.status === 'object' ? event.status.status_name : event.status
+  // Always use translated label for consistent Spanish display
+  const statusDisplay = getOrganizerStatusLabel(statusCode)
 
-  // Get event date
+  // Get event date formatted
   const eventDate = event.start_date
+  const formattedDate = eventDate ? formatDate(eventDate, 'short') : 'Sin fecha'
 
   // Get location name from locations array
-  const locationName = event.locations?.[0]?.name || 'N/A'
+  const locationName = event.locations?.[0]?.name ?? 'N/A'
 
   // Get event type and subtype names
-  const eventTypeName = event.event_type?.name || 'N/A'
+  const eventTypeName = event.event_type?.name ?? 'N/A'
   const eventSubtypeName = event.event_subtype?.name
 
+  // Get badge variant for status
+  const badgeVariant = getOrganizerStatusBadgeVariant(statusCode)
+
   return (
-    <article className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg hover:border-neutral-300 hover:shadow-md transition-all duration-150 gap-4">
-      <div className="flex-1">
-        <h3 className="text-base font-semibold text-neutral-900">{event.title}</h3>
-        <div className="mt-2 space-y-1.5">
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <Calendar className="w-4 h-4 text-neutral-400 shrink-0" />
-            <span>{eventDate ? new Date(eventDate).toLocaleDateString('es-AR') : 'Sin fecha'}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
-            <span>{locationName}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <Tag className="w-4 h-4 text-neutral-400 shrink-0" />
-            <span>
-              {eventTypeName}
-              {eventSubtypeName && ` - ${eventSubtypeName}`}
-            </span>
-          </div>
-        </div>
+    <Card
+      as="article"
+      variant="default"
+      padding="md"
+      hover
+      className="flex flex-col gap-3"
+    >
+      {/* Row 1: Status Badge */}
+      <div className="flex items-center justify-between">
         <Badge
-          variant={statusBadgeVariant[statusCode as keyof typeof statusBadgeVariant] || 'default'}
+          variant={badgeVariant}
           size="sm"
           dot
-          className="mt-3"
         >
           {statusDisplay}
         </Badge>
       </div>
 
-      <div className="flex items-center gap-2 w-full md:w-auto">
+      {/* Row 2: Title */}
+      <h3 className="text-base font-semibold text-neutral-900 line-clamp-2 min-w-0">
+        {event.title}
+      </h3>
+
+      {/* Row 3: Metadata */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-600">
+        <span className="flex items-center gap-1.5">
+          <Calendar className="w-4 h-4 text-neutral-400 shrink-0" aria-hidden="true" />
+          <span>{formattedDate}</span>
+        </span>
+        <span className="text-neutral-300" aria-hidden="true">·</span>
+        <span className="flex items-center gap-1.5">
+          <MapPin className="w-4 h-4 text-neutral-400 shrink-0" aria-hidden="true" />
+          <span className="truncate max-w-[150px]">{locationName}</span>
+        </span>
+        <span className="text-neutral-300" aria-hidden="true">·</span>
+        <span className="flex items-center gap-1.5">
+          <Tag className="w-4 h-4 text-neutral-400 shrink-0" aria-hidden="true" />
+          <span className="truncate max-w-[200px]">
+            {eventTypeName}
+            {eventSubtypeName ? ` - ${eventSubtypeName}` : ''}
+          </span>
+        </span>
+      </div>
+
+      {/* Row 4: Actions */}
+      <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-neutral-100">
         <Button
           variant="outline"
           size="sm"
@@ -103,6 +138,6 @@ export const OrganizerEventListItem = ({
           onSuccess={onSuccess}
         />
       </div>
-    </article>
+    </Card>
   )
-}
+})

@@ -2,9 +2,10 @@
  * Tests for OrganizerEventListItem (Dumb Component)
  *
  * Tests rendering of event item with status, date, location, and action buttons.
+ * Updated for new layout with status badge at top, horizontal metadata, and Card wrapper.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
@@ -53,32 +54,38 @@ describe('OrganizerEventListItem', () => {
       expect(screen.getByText('Test Event')).toBeInTheDocument()
     })
 
+    test('should render event title in h3 element', () => {
+      render(<OrganizerEventListItem {...defaultProps} />)
+
+      const heading = screen.getByRole('heading', { level: 3 })
+      expect(heading).toHaveTextContent('Test Event')
+    })
+
     test('should render event date with icon', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      // Date is now displayed with locale format and icon, no label
-      // Timezone may shift the day, so we check for June 2025
-      expect(screen.getByText(/\d+\/6\/2025/)).toBeInTheDocument()
+      // Date is now displayed with Intl.DateTimeFormat 'short' preset
+      // Format varies by timezone: "14 jun 2025" or "15 jun 2025" (Spanish locale)
+      expect(screen.getByText(/\d+\s+jun\s+2025/i)).toBeInTheDocument()
     })
 
     test('should render location name with icon', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      // Location is now displayed without label, just the value
       expect(screen.getByText('Location 1')).toBeInTheDocument()
     })
 
     test('should render event type name with icon', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      // Event type is now displayed without label, just the value
       expect(screen.getByText('Category 1')).toBeInTheDocument()
     })
 
-    test('should render status badge', () => {
+    test('should render status badge with translated label', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
-      expect(screen.getByText('draft')).toBeInTheDocument()
+      // Status is now translated via getOrganizerStatusLabel
+      expect(screen.getByText('Borrador')).toBeInTheDocument()
     })
 
     test('should render Ver button', () => {
@@ -98,25 +105,32 @@ describe('OrganizerEventListItem', () => {
 
       expect(screen.getByTestId('action-buttons')).toBeInTheDocument()
     })
+
+    test('should render as article element', () => {
+      render(<OrganizerEventListItem {...defaultProps} />)
+
+      expect(screen.getByRole('article')).toBeInTheDocument()
+    })
   })
 
   describe('status styling', () => {
     // Badge component uses semantic color variants
-    const statusTests: Array<{ status: OrganizerEvent['status']; expectedClass: string }> = [
-      { status: 'draft', expectedClass: 'bg-neutral-100' },
-      { status: 'pending_internal_approval', expectedClass: 'bg-warning-50' },
-      { status: 'approved_internal', expectedClass: 'bg-success-50' },
-      { status: 'rejected', expectedClass: 'bg-error-50' },
-      { status: 'published', expectedClass: 'bg-primary-50' },
+    const statusTests: Array<{ status: OrganizerEvent['status']; expectedClass: string; expectedLabel: string }> = [
+      { status: 'draft', expectedClass: 'bg-neutral-100', expectedLabel: 'Borrador' },
+      { status: 'pending_internal_approval', expectedClass: 'bg-warning-50', expectedLabel: 'Pendiente revision' },
+      { status: 'approved_internal', expectedClass: 'bg-primary-50', expectedLabel: 'Aprobado interno' },
+      { status: 'rejected', expectedClass: 'bg-error-50', expectedLabel: 'Rechazado' },
+      { status: 'published', expectedClass: 'bg-success-50', expectedLabel: 'Publicado' },
+      { status: 'requires_changes', expectedClass: 'bg-warning-50', expectedLabel: 'Requiere cambios' },
+      { status: 'cancelled', expectedClass: 'bg-neutral-100', expectedLabel: 'Cancelado' },
     ]
 
-    statusTests.forEach(({ status, expectedClass }) => {
+    statusTests.forEach(({ status, expectedClass, expectedLabel }) => {
       test(`should apply correct styling for ${typeof status === 'string' ? status : status.status_code} status`, () => {
         const event: OrganizerEvent = { ...baseEvent, status }
         render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-        const statusText = typeof status === 'string' ? status : status.status_name
-        const badge = screen.getByText(statusText)
+        const badge = screen.getByText(expectedLabel)
         expect(badge).toHaveClass(expectedClass)
       })
     })
@@ -128,7 +142,8 @@ describe('OrganizerEventListItem', () => {
       }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      const badge = screen.getByText('Unknown Status')
+      // For unknown status_code, getOrganizerStatusLabel falls back to the code itself
+      const badge = screen.getByText('unknown')
       expect(badge).toHaveClass('bg-neutral-100')
     })
   })
@@ -141,7 +156,8 @@ describe('OrganizerEventListItem', () => {
       }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      expect(screen.getByText('Published Event')).toBeInTheDocument()
+      // Always uses translated label from status_code, ignoring status_name
+      expect(screen.getByText('Publicado')).toBeInTheDocument()
     })
   })
 
@@ -150,8 +166,9 @@ describe('OrganizerEventListItem', () => {
       const event = { ...baseEvent, start_date: '2025-12-25' }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 
-      // Should show December 2025 in locale format (timezone may shift the day)
-      expect(screen.getByText(/\d+\/12\/2025/)).toBeInTheDocument()
+      // Should show December 2025 in Spanish locale format
+      // Format varies by timezone: "24 dic 2025" or "25 dic 2025"
+      expect(screen.getByText(/\d+\s+dic\s+2025/i)).toBeInTheDocument()
     })
 
     test('should show Sin fecha when no date is available', () => {
@@ -191,6 +208,17 @@ describe('OrganizerEventListItem', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
       expect(screen.getByText('Category 1')).toBeInTheDocument()
+    })
+
+    test('should render event subtype when available', () => {
+      const event = {
+        ...baseEvent,
+        event_type: { id: 1, name: 'Main Type' },
+        event_subtype: { id: 2, name: 'Sub Type' }
+      }
+      render(<OrganizerEventListItem {...defaultProps} event={event} />)
+
+      expect(screen.getByText('Main Type - Sub Type')).toBeInTheDocument()
     })
 
     test('should show N/A when event type is not available', () => {
@@ -267,6 +295,33 @@ describe('OrganizerEventListItem', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
       expect(screen.getByRole('button', { name: 'Editar Test Event' })).toBeInTheDocument()
+    })
+
+    test('should have aria-hidden on decorative icons', () => {
+      const { container } = render(<OrganizerEventListItem {...defaultProps} />)
+
+      // All lucide-react icons should have aria-hidden="true"
+      const svgs = container.querySelectorAll('svg')
+      svgs.forEach(svg => {
+        expect(svg).toHaveAttribute('aria-hidden', 'true')
+      })
+    })
+
+    test('should have aria-hidden on decorative separators', () => {
+      const { container } = render(<OrganizerEventListItem {...defaultProps} />)
+
+      // Dot separators should have aria-hidden="true"
+      const separators = container.querySelectorAll('[aria-hidden="true"]')
+      expect(separators.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('memoization', () => {
+    test('should be memoized component', () => {
+      // memo() creates a component that includes the original function name
+      // The $$typeof symbol indicates it's a memo component
+      expect(typeof OrganizerEventListItem).toBe('object')
+      expect(OrganizerEventListItem.$$typeof?.toString()).toContain('react.memo')
     })
   })
 })
