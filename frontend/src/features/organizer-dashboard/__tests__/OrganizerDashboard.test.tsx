@@ -134,11 +134,17 @@ describe('OrganizerDashboard', () => {
     })
 
     test('displays loading state when fetching events', () => {
-      renderWithProviders(
+      const { container } = renderWithProviders(
         <OrganizerDashboard {...defaultProps} events={[]} loading={true} />
       )
 
-      expect(screen.getByText(/cargando eventos/i)).toBeInTheDocument()
+      // Loading state now shows skeleton cards instead of spinner text
+      // Verify skeleton elements are present via role="status" with aria-label
+      expect(screen.getByRole('status', { name: /cargando eventos/i })).toBeInTheDocument()
+
+      // Verify skeleton pulse animations are present
+      const pulseElements = container.querySelectorAll('.animate-pulse')
+      expect(pulseElements.length).toBeGreaterThan(0)
     })
 
     test('displays error message when fetch fails', () => {

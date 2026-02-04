@@ -3,17 +3,28 @@
  * Clean container with subtle shadows and borders
  */
 
-import type { ReactNode } from 'react'
+import type { ButtonHTMLAttributes,ReactNode } from 'react'
 
-interface CardProps {
+interface CardBaseProps {
   children: ReactNode
   className?: string
   variant?: 'default' | 'bordered' | 'elevated' | 'flat'
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
-  onClick?: () => void
   hover?: boolean
+}
+
+interface CardDivProps extends CardBaseProps {
+  onClick?: never
   as?: 'div' | 'article' | 'section'
 }
+
+interface CardButtonProps extends CardBaseProps {
+  onClick: () => void
+  as?: never
+  type?: ButtonHTMLAttributes<HTMLButtonElement>['type']
+}
+
+type CardProps = CardDivProps | CardButtonProps
 
 const Card = ({
   children,
@@ -22,10 +33,11 @@ const Card = ({
   padding = 'md',
   onClick,
   hover = false,
-  as: Component = 'div',
+  as,
+  ...rest
 }: CardProps) => {
-  // Base styles
-  const baseClasses = 'rounded-lg transition-all duration-150 ease-in-out'
+  // Base styles - explicit transition properties instead of transition-all
+  const baseClasses = 'rounded-lg transition-[border-color,box-shadow] duration-150 ease-in-out'
 
   // Variant styles - minimal and clean
   const variantClasses: Record<string, string> = {
@@ -50,7 +62,7 @@ const Card = ({
     : ''
 
   const clickableClasses = onClick
-    ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500/20'
+    ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/20'
     : ''
 
   const finalClasses = [
@@ -62,19 +74,24 @@ const Card = ({
     className,
   ].filter(Boolean).join(' ')
 
+  // Use semantic button element when onClick is provided
+  if (onClick) {
+    const { type = 'button' } = rest as CardButtonProps
+    return (
+      <button
+        type={type}
+        className={`${finalClasses} w-full text-left`}
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    )
+  }
+
+  // Use div or semantic element when no onClick
+  const Component = as ?? 'div'
   return (
-    <Component
-      className={finalClasses}
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onClick()
-        }
-      } : undefined}
-    >
+    <Component className={finalClasses}>
       {children}
     </Component>
   )

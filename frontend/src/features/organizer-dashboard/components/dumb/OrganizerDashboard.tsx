@@ -8,11 +8,11 @@ import Link from 'next/link'
 
 import { OrganizerEventFilters } from '@/features/organizer/components/dumb/OrganizerEventFilters'
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
+import { OrganizerEventListItemSkeletons } from '@/features/organizer/components/dumb/OrganizerEventListItemSkeleton'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerStatsSummary } from '@/features/organizer-dashboard/components/dumb/OrganizerStatsSummary'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
-import LoadingSpinner from '@/shared/components/feedback/LoadingSpinner'
 import { Button } from '@/shared/components/form'
 import Pagination from '@/shared/components/tables/Pagination'
 
@@ -92,8 +92,13 @@ export const OrganizerDashboard = ({
         {/* Event List Section */}
         <div className="bg-white rounded-lg shadow">
           {loading ? (
-            <div className="p-12 flex justify-center animate-fadeIn" role="status" aria-label="Cargando eventos">
-              <LoadingSpinner size="lg" text="Cargando eventos..." />
+            <div
+              className="p-4 space-y-2"
+              role="status"
+              aria-live="polite"
+              aria-label="Cargando eventos"
+            >
+              <OrganizerEventListItemSkeletons count={5} />
             </div>
           ) : error ? (
             <EmptyState

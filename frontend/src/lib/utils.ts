@@ -14,13 +14,69 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Format date to localized string
- * @param date
- * @param options
+ * Date format presets
  */
-export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
+export type DateFormatPreset = 'short' | 'long' | 'time' | 'full'
+
+/**
+ * Preset options for date formatting - hoisted as module constant for performance
+ */
+const DATE_FORMAT_PRESETS: Record<DateFormatPreset, Intl.DateTimeFormatOptions> = {
+  short: {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  },
+  long: {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  },
+  time: {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  },
+  full: {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  },
+}
+
+/**
+ * Format date to localized string using Intl.DateTimeFormat
+ *
+ * @param date - Date string or Date object
+ * @param preset - Format preset ('short', 'long', 'time', 'full') or custom options
+ * @returns Formatted date string in Spanish locale
+ *
+ * @example
+ * ```ts
+ * formatDate('2025-11-15', 'short')  // "15 nov 2025"
+ * formatDate('2025-11-15', 'long')   // "15 de noviembre de 2025"
+ * formatDate('2025-11-15T14:00', 'time')  // "15 nov 2025, 14:00"
+ * formatDate('2025-11-15', { month: 'numeric' })  // Custom options
+ * ```
+ */
+export function formatDate(
+  date: string | Date,
+  preset?: DateFormatPreset | Intl.DateTimeFormatOptions
+): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
+  // Handle preset string
+  if (typeof preset === 'string') {
+    const options = DATE_FORMAT_PRESETS[preset];
+    return new Intl.DateTimeFormat('es-ES', options).format(dateObj);
+  }
+
+  // Handle custom options or default
   const defaultOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
@@ -29,7 +85,7 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
     minute: '2-digit',
   };
 
-  return dateObj.toLocaleDateString('es-ES', { ...defaultOptions, ...options });
+  return new Intl.DateTimeFormat('es-ES', { ...defaultOptions, ...preset }).format(dateObj);
 }
 
 /**
