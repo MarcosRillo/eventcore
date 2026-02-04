@@ -152,7 +152,18 @@
 .rbc-agenda-view {
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  overflow: hidden;
+  overflow: auto;
+}
+
+/* Empty agenda state */
+.rbc-agenda-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 3rem 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .rbc-agenda-view table.rbc-agenda-table {
@@ -206,6 +217,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Consistent left border on time/event cells (fixes missing border when date cell uses rowSpan) */
+.rbc-agenda-view table.rbc-agenda-table .rbc-agenda-time-cell,
+.rbc-agenda-view table.rbc-agenda-table .rbc-agenda-event-cell {
+  border-left: 1px solid #e5e7eb;
 }
 
 /* Reset eventPropGetter inline styles on agenda rows */
