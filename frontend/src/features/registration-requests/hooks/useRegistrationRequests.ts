@@ -4,18 +4,22 @@
  * useRegistrationRequests Hook
  *
  * Manages state and actions for registration requests admin panel.
- * Uses React 19 useTransition for loading states and useOptimistic for instant UI updates.
+ * Uses SWR for data fetching with React 19 useTransition + useOptimistic for mutations.
  */
 
-import { useCallback, useEffect, useOptimistic,useState, useTransition } from 'react'
+import { useCallback, useMemo, useOptimistic, useState, useTransition } from 'react'
+import useSWR from 'swr'
 
+import { useAuth } from '@/context/AuthContext'
 import registrationRequestService from '@/features/registration-requests/services/registration-request.service'
 import {
   DisplayStatusFilter,
   RegistrationRequest,
   RegistrationRequestDetail,
+  RegistrationRequestsResponse,
   RegistrationRequestStatus,
 } from '@/features/registration-requests/types/registration-request.types'
+import { apiFetcher, registrationRequestKeys } from '@/lib/swr'
 
 interface UseRegistrationRequestsReturn {
   // Data
@@ -91,34 +95,31 @@ function optimisticReducer(
 }
 
 export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
-  // Data state
-  const [requests, setRequests] = useState<RegistrationRequest[]>([])
-  const [optimisticRequests, addOptimisticAction] = useOptimistic(requests, optimisticReducer)
-  const [selectedRequest, setSelectedRequest] = useState<RegistrationRequestDetail | null>(null)
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
 
-  // React 19 transitions for loading states
-  const [isLoadingPending, startLoadingTransition] = useTransition()
+  // SWR key: null disables fetching when not authenticated
+  const swrKey = useMemo(() => {
+    if (!isAuthenticated || authLoading) return null
+    return registrationRequestKeys.list('')
+  }, [isAuthenticated, authLoading])
+
+  const { data, error: swrError, isLoading, mutate } = useSWR<RegistrationRequestsResponse>(
+    swrKey,
+    apiFetcher,
+  )
+
+  // Extract the array from the API response wrapper
+  const requests = useMemo(() => data?.data ?? [], [data])
+  const [optimisticRequests, addOptimisticAction] = useOptimistic(requests, optimisticReducer)
+
+  // Detail and action state
+  const [selectedRequest, setSelectedRequest] = useState<RegistrationRequestDetail | null>(null)
   const [isDetailPending, startDetailTransition] = useTransition()
   const [isActionPending, startActionTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
   // Filter state (filtering happens on frontend)
   const [displayFilter, setDisplayFilter] = useState<DisplayStatusFilter>('default')
-
-  /**
-   * Fetch all registration requests (no backend filtering)
-   */
-  const fetchRequests = useCallback(async (): Promise<void> => {
-    setError(null)
-    startLoadingTransition(async () => {
-      try {
-        const data = await registrationRequestService.getAll({})
-        setRequests(data)
-      } catch {
-        setError('Error al cargar las solicitudes')
-      }
-    })
-  }, [])
 
   /**
    * Select a request and load its details
@@ -151,37 +152,26 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
       startActionTransition(async () => {
         addOptimisticAction({ type: 'approve', id })
         try {
-          const result = await registrationRequestService.approve(id)
-
-          // Update local state with new user_id, organization_id and active status
-          setRequests((prev) =>
-            prev.map((req) =>
-              req.id === id
-                ? {
-                    ...req,
-                    status: 'approved' as RegistrationRequestStatus,
-                    user_id: result.user_id,
-                    organization_id: result.organization_id,
-                    user_status: 'active',
-                    organization_status: 'active',
-                  }
-                : req
-            )
-          )
+          await registrationRequestService.approve(id)
 
           // Clear selection if this was the selected request
           if (selectedRequest?.id === id) {
             setSelectedRequest(null)
           }
 
+          // Revalidate SWR cache to get fresh server data
+          await mutate()
+
           resolve(true)
         } catch {
           setError('Error al aprobar la solicitud')
+          // Revalidate to revert optimistic update
+          await mutate()
           resolve(false)
         }
       })
     })
-  }, [selectedRequest?.id, addOptimisticAction])
+  }, [selectedRequest?.id, addOptimisticAction, mutate])
 
   /**
    * Reject a registration request
@@ -195,28 +185,24 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
         try {
           await registrationRequestService.reject(id, reason)
 
-          // Update local state
-          setRequests((prev) =>
-            prev.map((req) =>
-              req.id === id
-                ? { ...req, status: 'rejected' as RegistrationRequestStatus, rejection_reason: reason }
-                : req
-            )
-          )
-
           // Clear selection if this was the selected request
           if (selectedRequest?.id === id) {
             setSelectedRequest(null)
           }
 
+          // Revalidate SWR cache to get fresh server data
+          await mutate()
+
           resolve(true)
         } catch {
           setError('Error al rechazar la solicitud')
+          // Revalidate to revert optimistic update
+          await mutate()
           resolve(false)
         }
       })
     })
-  }, [selectedRequest?.id, addOptimisticAction])
+  }, [selectedRequest?.id, addOptimisticAction, mutate])
 
   /**
    * Suspend an approved registration request
@@ -228,28 +214,26 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
       startActionTransition(async () => {
         addOptimisticAction({ type: 'suspend', id })
         try {
-          const updated = await registrationRequestService.suspend(id)
-
-          // Update local state with new user_status
-          setRequests((prev) =>
-            prev.map((req) =>
-              req.id === id ? { ...req, user_status: updated.user_status, organization_status: updated.organization_status } : req
-            )
-          )
+          await registrationRequestService.suspend(id)
 
           // Clear selection if this was the selected request
           if (selectedRequest?.id === id) {
             setSelectedRequest(null)
           }
 
+          // Revalidate SWR cache to get fresh server data
+          await mutate()
+
           resolve(true)
         } catch {
           setError('Error al suspender la solicitud')
+          // Revalidate to revert optimistic update
+          await mutate()
           resolve(false)
         }
       })
     })
-  }, [selectedRequest?.id, addOptimisticAction])
+  }, [selectedRequest?.id, addOptimisticAction, mutate])
 
   /**
    * Unsuspend (reactivate) a suspended registration request
@@ -261,28 +245,26 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
       startActionTransition(async () => {
         addOptimisticAction({ type: 'unsuspend', id })
         try {
-          const updated = await registrationRequestService.unsuspend(id)
-
-          // Update local state with new user_status
-          setRequests((prev) =>
-            prev.map((req) =>
-              req.id === id ? { ...req, user_status: updated.user_status, organization_status: updated.organization_status } : req
-            )
-          )
+          await registrationRequestService.unsuspend(id)
 
           // Clear selection if this was the selected request
           if (selectedRequest?.id === id) {
             setSelectedRequest(null)
           }
 
+          // Revalidate SWR cache to get fresh server data
+          await mutate()
+
           resolve(true)
         } catch {
           setError('Error al reactivar la solicitud')
+          // Revalidate to revert optimistic update
+          await mutate()
           resolve(false)
         }
       })
     })
-  }, [selectedRequest?.id, addOptimisticAction])
+  }, [selectedRequest?.id, addOptimisticAction, mutate])
 
   /**
    * Delete a suspended registration request (soft delete user + organization)
@@ -296,35 +278,31 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
         try {
           await registrationRequestService.delete(id)
 
-          // Update local state - mark as deleted (soft delete)
-          setRequests((prev) =>
-            prev.map((req) =>
-              req.id === id
-                ? { ...req, is_deleted: true }
-                : req
-            )
-          )
-
           // Clear selection if this was the selected request
           if (selectedRequest?.id === id) {
             setSelectedRequest(null)
           }
 
+          // Revalidate SWR cache to get fresh server data
+          await mutate()
+
           resolve(true)
         } catch {
           setError('Error al eliminar el usuario y organización')
+          // Revalidate to revert optimistic update
+          await mutate()
           resolve(false)
         }
       })
     })
-  }, [selectedRequest?.id, addOptimisticAction])
+  }, [selectedRequest?.id, addOptimisticAction, mutate])
 
   /**
-   * Refresh the requests list
+   * Refresh the requests list via SWR revalidation
    */
   const refresh = useCallback(async (): Promise<void> => {
-    await fetchRequests()
-  }, [fetchRequests])
+    await mutate()
+  }, [mutate])
 
   /**
    * Clear error state
@@ -333,13 +311,8 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
     setError(null)
   }, [])
 
-  // Initial fetch and refetch on filter change
-  useEffect(() => {
-    fetchRequests()
-  }, [fetchRequests])
-
-  // Backward compatibility: map transition states to original names
-  const loading = isLoadingPending
+  // Map SWR/transition states to return interface
+  const loading = isLoading
   const detailLoading = isDetailPending
   const actionLoading = isActionPending
 
@@ -349,15 +322,15 @@ export const useRegistrationRequests = (): UseRegistrationRequestsReturn => {
     loading,
     detailLoading,
     actionLoading,
-    error,
+    error: error ?? swrError?.message ?? null,
     displayFilter,
     setDisplayFilter,
     selectRequest,
-    approveRequest: approveRequest,
-    rejectRequest: rejectRequest,
-    suspendRequest: suspendRequest,
-    unsuspendRequest: unsuspendRequest,
-    deleteRequest: deleteRequest,
+    approveRequest,
+    rejectRequest,
+    suspendRequest,
+    unsuspendRequest,
+    deleteRequest,
     refresh,
     clearError,
   }

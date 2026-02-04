@@ -1,13 +1,21 @@
 'use client'
 
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
+import useSWR from 'swr'
 
-import organizationService from '@/features/organizations/services/organization.service'
+import { useAuth } from '@/context/AuthContext'
+import {
+  getOrganization,
+  toggleOrganizationStatus,
+} from '@/features/organizations/services/organization.service'
 import type {
   Organization,
   OrganizationFilters,
+  OrganizationsResponse,
   PaginationMeta,
 } from '@/features/organizations/types/organization.types'
+import { useDebounce } from '@/hooks/useDebounce'
+import { apiFetcher, organizationKeys } from '@/lib/swr'
 
 interface UseOrganizationsReturn {
   organizations: Organization[]
@@ -18,7 +26,7 @@ interface UseOrganizationsReturn {
   togglingId: number | null
   selectedOrganization: Organization | null
   loadingDetail: boolean
-  fetchOrganizations: (filters?: OrganizationFilters) => Promise<void>
+  fetchOrganizations: () => Promise<void>
   handleToggleStatus: (id: number) => Promise<boolean>
   handleViewDetail: (id: number) => Promise<void>
   handleCloseDetail: () => void
@@ -27,90 +35,98 @@ interface UseOrganizationsReturn {
 }
 
 export const useOrganizations = (): UseOrganizationsReturn => {
-  // React 19 transitions for non-blocking UI
-  const [, startLoadTransition] = useTransition()
-  const [, startDetailTransition] = useTransition()
-  const [, startToggleTransition] = useTransition()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
 
-  const [organizations, setOrganizations] = useState<Organization[]>([])
-  const [pagination, setPagination] = useState<PaginationMeta | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // React 19 transitions for non-blocking UI on toggle and detail
+  const [, startToggleTransition] = useTransition()
+  const [, startDetailTransition] = useTransition()
+
+  // Local state for filters, mutations, and detail
   const [filters, setFiltersState] = useState<OrganizationFilters>({
     status: 'all',
     per_page: 15,
     page: 1,
   })
-  const [togglingIdState, setTogglingIdState] = useState<number | null>(null)
+  const [togglingId, setTogglingId] = useState<number | null>(null)
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null)
   const [isLoadingDetail, setIsLoadingDetail] = useState(false)
+  const [localError, setLocalError] = useState<string | null>(null)
 
-  const fetchOrganizations = useCallback(
-    async (newFilters?: OrganizationFilters) => {
-      setIsLoading(true)
-      setError(null)
+  // Debounce search to avoid excessive requests
+  const debouncedSearch = useDebounce(filters.search, 300)
 
-      startLoadTransition(async () => {
-        try {
-          const result = await organizationService.getOrganizations(newFilters)
-          setOrganizations(result.data)
-          setPagination(result.pagination)
-        } catch {
-          setError('Error al cargar las organizaciones')
-        } finally {
-          setIsLoading(false)
-        }
-      })
-    },
-    [startLoadTransition]
+  // Build SWR key from filters (null when not authenticated)
+  const swrKey = useMemo(() => {
+    if (!isAuthenticated || authLoading) return null
+    const params = new URLSearchParams()
+    if (filters.page) params.set('page', String(filters.page))
+    if (filters.per_page) params.set('per_page', String(filters.per_page))
+    if (debouncedSearch) params.set('search', debouncedSearch)
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status)
+    return organizationKeys.list(params.toString())
+  }, [isAuthenticated, authLoading, filters.page, filters.per_page, debouncedSearch, filters.status])
+
+  const { data, error: swrError, isLoading, mutate } = useSWR<OrganizationsResponse>(
+    swrKey,
+    apiFetcher,
   )
+
+  // Derive organizations and pagination from SWR data
+  const organizations = useMemo(() => data?.data ?? [], [data])
+  const pagination = data?.pagination ?? null
+
+  // Combine SWR error with local error
+  const error = localError ?? (swrError ? 'Error al cargar las organizaciones' : null)
+
+  // fetchOrganizations simplified to SWR revalidation
+  const fetchOrganizations = useCallback(async () => {
+    await mutate()
+  }, [mutate])
 
   const handleToggleStatus = useCallback(
     async (id: number): Promise<boolean> => {
-      setTogglingIdState(id)
-      setError(null)
+      setTogglingId(id)
+      setLocalError(null)
 
       return new Promise((resolve) => {
         startToggleTransition(async () => {
           try {
-            const updatedOrg =
-              await organizationService.toggleOrganizationStatus(id)
-            setOrganizations((prev) =>
-              prev.map((org) => (org.id === id ? updatedOrg : org))
-            )
+            const updatedOrg = await toggleOrganizationStatus(id)
+            // Revalidate the list via SWR
+            await mutate()
             // Also update selected organization if it's the same
             if (selectedOrganization?.id === id) {
               setSelectedOrganization(updatedOrg)
             }
-            setTogglingIdState(null)
+            setTogglingId(null)
             resolve(true)
           } catch {
-            setError('Error al cambiar el estado de la organización')
-            setTogglingIdState(null)
+            setLocalError('Error al cambiar el estado de la organizacion')
+            setTogglingId(null)
             resolve(false)
           }
         })
       })
     },
-    [selectedOrganization, startToggleTransition]
+    [selectedOrganization, mutate]
   )
 
   const handleViewDetail = useCallback(async (id: number) => {
     setIsLoadingDetail(true)
-    setError(null)
+    setLocalError(null)
 
     startDetailTransition(async () => {
       try {
-        const org = await organizationService.getOrganization(id)
+        const org = await getOrganization(id)
         setSelectedOrganization(org)
       } catch {
-        setError('Error al cargar el detalle de la organización')
+        setLocalError('Error al cargar el detalle de la organizacion')
       } finally {
         setIsLoadingDetail(false)
       }
     })
-  }, [startDetailTransition])
+  }, [])
 
   const handleCloseDetail = useCallback(() => {
     setSelectedOrganization(null)
@@ -121,28 +137,18 @@ export const useOrganizations = (): UseOrganizationsReturn => {
   }, [])
 
   const clearError = useCallback(() => {
-    setError(null)
+    setLocalError(null)
   }, [])
-
-  // Fetch on mount and when filters change
-  useEffect(() => {
-    fetchOrganizations(filters)
-  }, [fetchOrganizations, filters])
-
-  // Backward compatibility
-  const loading = isLoading
-  const loadingDetail = isLoadingDetail
-  const togglingId = togglingIdState
 
   return {
     organizations,
     pagination,
-    loading,
+    loading: isLoading,
     error,
     filters,
     togglingId,
     selectedOrganization,
-    loadingDetail,
+    loadingDetail: isLoadingDetail,
     fetchOrganizations,
     handleToggleStatus,
     handleViewDetail,

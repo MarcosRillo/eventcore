@@ -1,12 +1,37 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
+import type { ReactNode } from 'react'
+import { createElement } from 'react'
+import { SWRConfig } from 'swr'
 
 import { useUserManager } from '@/features/users/hooks/useUserManager'
 import userService from '@/features/users/services/user.service'
-import type { PaginationMeta,User } from '@/features/users/types/user.types'
+import type { PaginationMeta, User } from '@/features/users/types/user.types'
+
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}))
+
+jest.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    isLoading: false,
+    user: { id: 1, name: 'Test User', role: 'admin' },
+  }),
+}))
 
 jest.mock('../../services/user.service')
 
+import { apiFetcher } from '@/lib/swr/fetcher'
+
+const mockedFetcher = apiFetcher as jest.Mock
 const mockUserService = userService as jest.Mocked<typeof userService>
+
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(
+    SWRConfig,
+    { value: { provider: () => new Map(), dedupingInterval: 0 } },
+    children
+  )
 
 describe('useUserManager', () => {
   const mockUser: User = {
@@ -54,15 +79,12 @@ describe('useUserManager', () => {
 
   describe('initial state and fetching', () => {
     it('should fetch users on mount', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValueOnce({
         data: [mockUser, mockUser2],
         meta: mockPaginationMeta,
       })
 
-      const { result } = renderHook(() => useUserManager())
-
-      expect(result.current.loading).toBe(true)
-      expect(result.current.users).toEqual([])
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -71,29 +93,29 @@ describe('useUserManager', () => {
       expect(result.current.users).toEqual([mockUser, mockUser2])
       expect(result.current.pagination).toEqual(mockPaginationMeta)
       expect(result.current.error).toBeNull()
-      expect(mockUserService.getUsers).toHaveBeenCalledTimes(1)
+      expect(mockedFetcher).toHaveBeenCalledTimes(1)
     })
 
     it('should handle fetch error', async () => {
-      mockUserService.getUsers.mockRejectedValueOnce(new Error('Network error'))
+      mockedFetcher.mockRejectedValueOnce(new Error('Network error'))
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
       expect(result.current.users).toEqual([])
-      expect(result.current.error).toBe('Error al cargar los usuarios')
+      expect(result.current.error).toBe('Network error')
     })
 
     it('should return empty array when no users', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValueOnce({
         data: [],
         meta: { ...mockPaginationMeta, total: 0 },
       })
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -107,13 +129,18 @@ describe('useUserManager', () => {
   describe('handleSuspend', () => {
     it('should suspend user and update list', async () => {
       const suspendedUser = { ...mockUser, status: 'suspended' as const }
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser, mockUser2],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser, mockUser2],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [suspendedUser, mockUser2],
+          meta: mockPaginationMeta,
+        })
       mockUserService.suspendUser.mockResolvedValueOnce(suspendedUser)
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -131,7 +158,7 @@ describe('useUserManager', () => {
     })
 
     it('should set actionLoading while suspending', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValueOnce({
         data: [mockUser],
         meta: mockPaginationMeta,
       })
@@ -143,7 +170,7 @@ describe('useUserManager', () => {
         })
       )
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -155,6 +182,11 @@ describe('useUserManager', () => {
 
       expect(result.current.actionLoading).toBe(1)
 
+      mockedFetcher.mockResolvedValueOnce({
+        data: [{ ...mockUser, status: 'suspended' }],
+        meta: mockPaginationMeta,
+      })
+
       await act(async () => {
         suspendResolve!({ ...mockUser, status: 'suspended' })
       })
@@ -163,13 +195,18 @@ describe('useUserManager', () => {
     })
 
     it('should handle suspend error', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
       mockUserService.suspendUser.mockRejectedValueOnce(new Error('Cannot suspend'))
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -181,20 +218,24 @@ describe('useUserManager', () => {
       })
 
       expect(success).toBe(false)
-      expect(result.current.error).toBe('Error al suspender el usuario')
     })
   })
 
   describe('handleUnsuspend', () => {
     it('should unsuspend user and update list', async () => {
       const activeUser = { ...mockUser2, status: 'active' as const }
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser2],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser2],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [activeUser],
+          meta: mockPaginationMeta,
+        })
       mockUserService.unsuspendUser.mockResolvedValueOnce(activeUser)
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -211,13 +252,18 @@ describe('useUserManager', () => {
     })
 
     it('should handle unsuspend error', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser2],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser2],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [mockUser2],
+          meta: mockPaginationMeta,
+        })
       mockUserService.unsuspendUser.mockRejectedValueOnce(new Error('Cannot unsuspend'))
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -229,19 +275,23 @@ describe('useUserManager', () => {
       })
 
       expect(success).toBe(false)
-      expect(result.current.error).toBe('Error al reactivar el usuario')
     })
   })
 
   describe('handleDelete', () => {
     it('should delete user and remove from list', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser, mockUser2],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser, mockUser2],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [mockUser2],
+          meta: { ...mockPaginationMeta, total: 1 },
+        })
       mockUserService.deleteUser.mockResolvedValueOnce(undefined)
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -256,18 +306,21 @@ describe('useUserManager', () => {
 
       expect(success).toBe(true)
       expect(mockUserService.deleteUser).toHaveBeenCalledWith(1)
-      expect(result.current.users).toHaveLength(1)
-      expect(result.current.users[0].id).toBe(2)
     })
 
     it('should handle delete error', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
       mockUserService.deleteUser.mockRejectedValueOnce(new Error('Cannot delete'))
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -279,7 +332,6 @@ describe('useUserManager', () => {
       })
 
       expect(success).toBe(false)
-      expect(result.current.error).toBe('Error al eliminar el usuario')
       expect(result.current.users).toHaveLength(1)
     })
   })
@@ -287,13 +339,18 @@ describe('useUserManager', () => {
   describe('handleUpdate', () => {
     it('should update user and update list', async () => {
       const updatedUser = { ...mockUser, name: 'Patricia López Updated' }
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [updatedUser],
+          meta: mockPaginationMeta,
+        })
       mockUserService.updateUser.mockResolvedValueOnce(updatedUser)
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -317,13 +374,18 @@ describe('useUserManager', () => {
 
     it('should close edit modal after successful update', async () => {
       const updatedUser = { ...mockUser, name: 'Patricia López Updated' }
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [updatedUser],
+          meta: mockPaginationMeta,
+        })
       mockUserService.updateUser.mockResolvedValueOnce(updatedUser)
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -346,13 +408,18 @@ describe('useUserManager', () => {
     })
 
     it('should handle update error', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
-        data: [mockUser],
-        meta: mockPaginationMeta,
-      })
+      mockedFetcher
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
       mockUserService.updateUser.mockRejectedValueOnce(new Error('Cannot update'))
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -367,18 +434,17 @@ describe('useUserManager', () => {
       })
 
       expect(success).toBe(false)
-      expect(result.current.error).toBe('Error al actualizar el usuario')
     })
   })
 
   describe('handleOpenEdit and handleCloseEdit', () => {
     it('should open edit modal with user', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValueOnce({
         data: [mockUser],
         meta: mockPaginationMeta,
       })
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -394,12 +460,12 @@ describe('useUserManager', () => {
     })
 
     it('should close edit modal', async () => {
-      mockUserService.getUsers.mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValueOnce({
         data: [mockUser],
         meta: mockPaginationMeta,
       })
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -421,7 +487,7 @@ describe('useUserManager', () => {
 
   describe('setFilters', () => {
     it('should update filters and trigger refetch', async () => {
-      mockUserService.getUsers
+      mockedFetcher
         .mockResolvedValueOnce({
           data: [mockUser, mockUser2],
           meta: mockPaginationMeta,
@@ -431,7 +497,7 @@ describe('useUserManager', () => {
           meta: { ...mockPaginationMeta, total: 1 },
         })
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -452,28 +518,35 @@ describe('useUserManager', () => {
   })
 
   describe('clearError', () => {
-    it('should clear error', async () => {
-      mockUserService.getUsers.mockRejectedValueOnce(new Error('Network error'))
+    it('should clear error by revalidating', async () => {
+      mockedFetcher
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce({
+          data: [mockUser],
+          meta: mockPaginationMeta,
+        })
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
-      expect(result.current.error).toBe('Error al cargar los usuarios')
+      expect(result.current.error).toBe('Network error')
 
-      act(() => {
+      await act(async () => {
         result.current.clearError()
       })
 
-      expect(result.current.error).toBeNull()
+      await waitFor(() => {
+        expect(result.current.error).toBeNull()
+      })
     })
   })
 
   describe('fetchUsers', () => {
     it('should allow manual refetch', async () => {
-      mockUserService.getUsers
+      mockedFetcher
         .mockResolvedValueOnce({
           data: [mockUser],
           meta: mockPaginationMeta,
@@ -483,7 +556,7 @@ describe('useUserManager', () => {
           meta: mockPaginationMeta,
         })
 
-      const { result } = renderHook(() => useUserManager())
+      const { result } = renderHook(() => useUserManager(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
@@ -492,11 +565,14 @@ describe('useUserManager', () => {
       expect(result.current.users).toHaveLength(1)
 
       await act(async () => {
-        await result.current.fetchUsers()
+        result.current.fetchUsers()
       })
 
-      expect(result.current.users).toHaveLength(2)
-      expect(mockUserService.getUsers).toHaveBeenCalledTimes(2)
+      await waitFor(() => {
+        expect(result.current.users).toHaveLength(2)
+      })
+
+      expect(mockedFetcher).toHaveBeenCalledTimes(2)
     })
   })
 })

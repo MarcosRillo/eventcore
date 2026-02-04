@@ -1,35 +1,23 @@
 /**
  * useEventTypeManager Hook
  * Manages event types data fetching, filtering, pagination, and CRUD operations
- *
- * Created: December 2, 2025
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import useSWR from 'swr';
 
 import { useAuth } from '@/context/AuthContext';
-import {
-  deleteEventType,
-  getEventTypes,
-} from '@/features/event-types/services/eventType.service';
-import { PaginationMeta,usePaginatedData } from '@/hooks/usePaginatedData';
+import { deleteEventType } from '@/features/event-types/services/eventType.service';
+import { useDebounce } from '@/hooks/useDebounce';
+import { apiFetcher, eventTypeKeys } from '@/lib/swr';
+import { PaginationMeta } from '@/types/api-response.types';
 import {
   EventType,
   EventTypeFilterStatus,
-  EventTypeQueryParams,
 } from '@/types/eventType.types';
 
-// Define the filters interface for event types
-interface EventTypeFilters {
-  search?: string;
-  page?: number;
-  per_page?: number;
-  status?: EventTypeFilterStatus;
-  [key: string]: string | number | boolean | undefined;
-}
-
 interface UseEventTypeManagerReturn {
-  // Data state from generic hook
+  // Data state
   eventTypes: EventType[];
   pagination: PaginationMeta | null;
   isLoading: boolean;
@@ -40,8 +28,8 @@ interface UseEventTypeManagerReturn {
   filterStatus: EventTypeFilterStatus;
   currentPage: number;
 
-  // Actions from generic hook
-  setFilters: (filters: Partial<EventTypeFilters>) => void;
+  // Actions
+  setFilters: (filters: Partial<{ search: string; page: number; per_page: number; status: EventTypeFilterStatus }>) => void;
   resetFilters: () => void;
   changePage: (page: number) => void;
   refreshData: () => void;
@@ -65,151 +53,162 @@ interface UseEventTypeManagerReturn {
   };
 }
 
-/**
- *
- */
 export function useEventTypeManager(): UseEventTypeManagerReturn {
-  // Initial filters
-  const initialFilters: EventTypeFilters = {
-    page: 1,
-    per_page: 10,
-    status: 'all',
-  };
-
-  // Check authentication status
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Service function adapter for Laravel API parameters
-  const fetchEventTypes = useCallback(async (filters: EventTypeFilters) => {
-    const params: EventTypeQueryParams = {
-      page: filters.page || 1,
-      per_page: filters.per_page || 10,
-      search: filters.search,
-      active:
-        filters.status === 'active'
-          ? true
-          : filters.status === 'inactive'
-            ? false
-            : undefined,
-    };
+  // Filter state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<EventTypeFilterStatus>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 10;
 
-    // Call service and return response
-    const response = await getEventTypes(params);
-    return response;
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  // Build SWR key from filters
+  const swrKey = useMemo(() => {
+    if (!isAuthenticated || authLoading) return null;
+    const params = new URLSearchParams();
+    params.set('page', String(currentPage));
+    params.set('per_page', String(perPage));
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (filterStatus === 'active') params.set('active', 'true');
+    else if (filterStatus === 'inactive') params.set('active', 'false');
+    return eventTypeKeys.list(params.toString());
+  }, [isAuthenticated, authLoading, currentPage, debouncedSearch, filterStatus]);
+
+  const { data, error, isLoading, mutate } = useSWR<{ data: EventType[]; meta: PaginationMeta }>(
+    swrKey,
+    apiFetcher,
+  );
+
+  const eventTypes = useMemo(() => data?.data ?? [], [data]);
+  const pagination = data?.meta ?? null;
+
+  // Setters
+  const setFilters = useCallback((newFilters: Partial<{ search: string; page: number; per_page: number; status: EventTypeFilterStatus }>) => {
+    if (newFilters.search !== undefined) setSearchTerm(newFilters.search);
+    if (newFilters.status !== undefined) setFilterStatus(newFilters.status);
+    if (newFilters.page !== undefined) setCurrentPage(newFilters.page);
+    if (newFilters.page === undefined && (newFilters.search !== undefined || newFilters.status !== undefined)) {
+      setCurrentPage(1);
+    }
   }, []);
 
-  // Use the generic paginated data hook - only auto-load if authenticated
-  const {
-    data: eventTypes,
-    pagination,
-    filters,
-    isLoading,
-    error,
-    setFilters,
-    resetFilters,
-    changePage,
-    refreshData,
-    addItem: addEventType,
-    updateItem: updateEventType,
-    removeItem: removeEventType,
-  } = usePaginatedData<EventType, EventTypeFilters>({
-    fetchFn: fetchEventTypes,
-    initialFilters,
-    debounceMs: 300,
-    autoLoad: isAuthenticated && !authLoading,
-  });
+  const resetFilters = useCallback(() => {
+    setSearchTerm('');
+    setFilterStatus('all');
+    setCurrentPage(1);
+  }, []);
 
-  // Derived state
-  const searchTerm = filters.search || '';
-  const filterStatus = filters.status || 'all';
-  const currentPage = filters.page || 1;
+  const changePage = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const refreshData = useCallback(() => {
+    mutate();
+  }, [mutate]);
 
   // EventType-specific handlers
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setFilters({ search: value });
-    },
-    [setFilters]
-  );
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  }, []);
 
-  const handleFilterChange = useCallback(
-    (filter: EventTypeFilterStatus) => {
-      setFilters({ status: filter });
-    },
-    [setFilters]
-  );
+  const handleFilterChange = useCallback((filter: EventTypeFilterStatus) => {
+    setFilterStatus(filter);
+    setCurrentPage(1);
+  }, []);
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      changePage(page);
-    },
-    [changePage]
-  );
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
 
   // Delete event type with optimistic update
-  const handleDeleteEventType = useCallback(
-    async (eventTypeId: number) => {
-      try {
-        // Optimistic update
-        removeEventType(eventTypeId);
+  const handleDeleteEventType = useCallback(async (eventTypeId: number) => {
+    await mutate(
+      (current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          data: current.data.filter((et) => et.id !== eventTypeId),
+        };
+      },
+      { revalidate: false }
+    );
 
-        // API call
-        await deleteEventType(eventTypeId);
+    try {
+      await deleteEventType(eventTypeId);
+      mutate();
+    } catch {
+      mutate();
+      throw new Error('Error al eliminar el tipo de evento');
+    }
+  }, [mutate]);
 
-        // Refresh to get updated pagination
-        refreshData();
-      } catch {
-        // Revert optimistic update by refreshing
-        refreshData();
-        throw new Error('Error al eliminar el tipo de evento');
-      }
-    },
-    [removeEventType, refreshData]
-  );
+  // Optimistic update helpers
+  const addEventType = useCallback((eventType: EventType) => {
+    mutate(
+      (current) => {
+        if (!current) return current;
+        return { ...current, data: [eventType, ...current.data] };
+      },
+      { revalidate: false }
+    );
+  }, [mutate]);
+
+  const updateEventType = useCallback((id: number, updatedFields: Partial<EventType>) => {
+    mutate(
+      (current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          data: current.data.map((et) => (et.id === id ? { ...et, ...updatedFields } : et)),
+        };
+      },
+      { revalidate: false }
+    );
+  }, [mutate]);
+
+  const removeEventType = useCallback((id: number) => {
+    mutate(
+      (current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          data: current.data.filter((et) => et.id !== id),
+        };
+      },
+      { revalidate: false }
+    );
+  }, [mutate]);
 
   // Calculate statistics
   const stats = useMemo(() => {
     const total = pagination?.total || 0;
     const active = eventTypes.filter((et) => et.is_active).length;
     const inactive = eventTypes.filter((et) => !et.is_active).length;
-
-    return {
-      total,
-      active,
-      inactive,
-    };
+    return { total, active, inactive };
   }, [eventTypes, pagination]);
 
   return {
-    // Data state
     eventTypes,
     pagination,
     isLoading,
-    error,
-
-    // Filter state
+    error: error?.message ?? null,
     searchTerm,
     filterStatus,
     currentPage,
-
-    // Generic actions
     setFilters,
     resetFilters,
     changePage,
     refreshData,
-
-    // EventType-specific actions
     handleSearchChange,
     handleFilterChange,
     handlePageChange,
     handleDeleteEventType,
-
-    // Optimistic updates
     addEventType,
     updateEventType,
     removeEventType,
-
-    // Statistics
     stats,
   };
 }

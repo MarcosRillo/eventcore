@@ -4,13 +4,22 @@
  * useInvitations Hook
  *
  * Manages invitation state and operations.
- * Uses React 19 useTransition for loading states and useOptimistic for cancel.
+ * Uses SWR for data fetching, React 19 useTransition for loading states,
+ * and useOptimistic for cancel.
  */
 
-import { useCallback, useEffect, useOptimistic,useState, useTransition } from 'react'
+import { useCallback, useMemo, useOptimistic, useState, useTransition } from 'react'
+import useSWR from 'swr'
 
 import invitationService from '@/features/invitations/services/invitation.service'
-import { AssignableRole, Invitation, SendInvitationData } from '@/features/invitations/types/invitation.types'
+import {
+  AssignableRole,
+  Invitation,
+  InvitationsListResponse,
+  RolesListResponse,
+  SendInvitationData,
+} from '@/features/invitations/types/invitation.types'
+import { apiFetcher, invitationKeys } from '@/lib/swr'
 
 interface UseInvitationsReturn {
   invitations: Invitation[]
@@ -41,53 +50,35 @@ function optimisticReducer(invitations: Invitation[], action: OptimisticAction):
 }
 
 export const useInvitations = (): UseInvitationsReturn => {
-  const [invitations, setInvitations] = useState<Invitation[]>([])
+  // SWR for data fetching
+  const {
+    data: invitationsData,
+    error: invError,
+    isLoading: invLoading,
+    mutate: mutateInvitations,
+  } = useSWR<InvitationsListResponse>(invitationKeys.list, apiFetcher)
+
+  const {
+    data: rolesData,
+    error: rolesError,
+    isLoading: rolesLoading,
+    mutate: mutateRoles,
+  } = useSWR<RolesListResponse>(invitationKeys.roles, apiFetcher)
+
+  // Derive arrays from SWR data
+  const invitations = useMemo(() => invitationsData?.data ?? [], [invitationsData])
+  const roles = useMemo(() => rolesData?.data ?? [], [rolesData])
+
+  // Optimistic updates for cancel
   const [optimisticInvitations, addOptimisticAction] = useOptimistic(invitations, optimisticReducer)
-  const [roles, setRoles] = useState<AssignableRole[]>([])
 
   // React 19 transitions for non-blocking UI
-  const [, startLoadingTransition] = useTransition()
-  const [, startRolesTransition] = useTransition()
   const [isCreatingPending, startCreatingTransition] = useTransition()
   const [isActionPending, startActionTransition] = useTransition()
-
-  // Manual loading states for reliable test behavior
-  const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
   const [actionId, setActionId] = useState<number | null>(null)
   const [actionType, setActionType] = useState<'resend' | 'cancel' | null>(null)
-
-  const fetchInvitations = useCallback(async () => {
-    setError(null)
-    setIsLoading(true)
-
-    startLoadingTransition(async () => {
-      try {
-        const data = await invitationService.getInvitations()
-        setInvitations(data)
-      } catch {
-        setError('Error al cargar las invitaciones')
-      } finally {
-        setIsLoading(false)
-      }
-    })
-  }, [])
-
-  const fetchRoles = useCallback(async () => {
-    setIsLoadingRoles(true)
-    startRolesTransition(async () => {
-      try {
-        const data = await invitationService.getAssignableRoles()
-        setRoles(data)
-      } catch {
-        setError('Error al cargar los roles')
-      } finally {
-        setIsLoadingRoles(false)
-      }
-    })
-  }, [])
 
   const handleCreate = useCallback(async (data: SendInvitationData): Promise<boolean> => {
     setError(null)
@@ -95,8 +86,8 @@ export const useInvitations = (): UseInvitationsReturn => {
     return new Promise((resolve) => {
       startCreatingTransition(async () => {
         try {
-          const newInvitation = await invitationService.sendInvitation(data)
-          setInvitations((prev) => [newInvitation, ...prev])
+          await invitationService.sendInvitation(data)
+          await mutateInvitations()
           resolve(true)
         } catch {
           setError('Error al crear la invitación')
@@ -104,7 +95,7 @@ export const useInvitations = (): UseInvitationsReturn => {
         }
       })
     })
-  }, [])
+  }, [mutateInvitations])
 
   const handleResend = useCallback(async (id: number): Promise<boolean> => {
     setError(null)
@@ -114,10 +105,8 @@ export const useInvitations = (): UseInvitationsReturn => {
     return new Promise((resolve) => {
       startActionTransition(async () => {
         try {
-          const updatedInvitation = await invitationService.resendInvitation(id)
-          setInvitations((prev) =>
-            prev.map((inv) => (inv.id === id ? updatedInvitation : inv))
-          )
+          await invitationService.resendInvitation(id)
+          await mutateInvitations()
           setActionId(null)
           setActionType(null)
           resolve(true)
@@ -129,7 +118,7 @@ export const useInvitations = (): UseInvitationsReturn => {
         }
       })
     })
-  }, [])
+  }, [mutateInvitations])
 
   const handleCancel = useCallback(async (id: number): Promise<boolean> => {
     setError(null)
@@ -141,35 +130,46 @@ export const useInvitations = (): UseInvitationsReturn => {
         addOptimisticAction({ type: 'cancel', id })
         try {
           await invitationService.cancelInvitation(id)
-          setInvitations((prev) => prev.filter((inv) => inv.id !== id))
+          await mutateInvitations()
           setActionId(null)
           setActionType(null)
           resolve(true)
         } catch {
           setError('Error al cancelar la invitación')
+          await mutateInvitations()
           setActionId(null)
           setActionType(null)
           resolve(false)
         }
       })
     })
-  }, [addOptimisticAction])
+  }, [addOptimisticAction, mutateInvitations])
 
   const clearError = useCallback(() => {
     setError(null)
-  }, [])
+    // Revalidate to clear SWR errors on next successful fetch
+    mutateInvitations()
+    mutateRoles()
+  }, [mutateInvitations, mutateRoles])
 
-  useEffect(() => {
-    fetchInvitations()
-    fetchRoles()
-  }, [fetchInvitations, fetchRoles])
+  // Backward compatibility: map SWR mutate to fetch functions
+  const fetchInvitations = useCallback(async () => {
+    await mutateInvitations()
+  }, [mutateInvitations])
+
+  const fetchRoles = useCallback(async () => {
+    await mutateRoles()
+  }, [mutateRoles])
 
   // Backward compatibility: map states to original names
-  const loading = isLoading
-  const loadingRoles = isLoadingRoles
+  const loading = invLoading
+  const loadingRoles = rolesLoading
   const creating = isCreatingPending
   const resendingId = isActionPending && actionType === 'resend' ? actionId : null
   const cancellingId = isActionPending && actionType === 'cancel' ? actionId : null
+
+  // Combine errors: manual errors take precedence, then SWR fetch errors
+  const combinedError = error ?? invError?.message ?? rolesError?.message ?? null
 
   return {
     invitations: optimisticInvitations,
@@ -177,7 +177,7 @@ export const useInvitations = (): UseInvitationsReturn => {
     loading,
     loadingRoles,
     creating,
-    error,
+    error: combinedError,
     resendingId,
     cancellingId,
     fetchInvitations,

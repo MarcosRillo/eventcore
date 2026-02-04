@@ -3,7 +3,6 @@
  */
 
 export { useDebounce } from '@/hooks/useDebounce';
-export { usePaginatedData } from '@/hooks/usePaginatedData';
 export { default as usePermissions } from '@/hooks/usePermissions';
 
 // Generic table and UI hooks

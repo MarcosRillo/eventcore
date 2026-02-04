@@ -1,10 +1,21 @@
-import { fireEvent,render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { SWRConfig } from 'swr';
 
 import InvitationTableContainer from '@/features/invitations/components/smart/InvitationTableContainer';
 import invitationService from '@/features/invitations/services/invitation.service';
 import type { Invitation } from '@/features/invitations/types/invitation.types';
 
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}));
+
 jest.mock('../../../services/invitation.service');
+
+import { apiFetcher } from '@/lib/swr/fetcher';
+
+const mockedFetcher = apiFetcher as jest.Mock;
+const mockInvitationService = invitationService as jest.Mocked<typeof invitationService>;
 
 // Mock InvitationTable to simplify testing
 jest.mock('../../dumb/InvitationTable', () => {
@@ -82,7 +93,15 @@ jest.mock('../CreateInvitationModalContainer', () => {
   };
 });
 
-const mockInvitationService = invitationService as jest.Mocked<typeof invitationService>;
+const mockRoles = [
+  { id: 1, role_code: 'entity_staff', role_name: 'Entity Staff' },
+];
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+);
 
 describe('InvitationTableContainer', () => {
   const mockInvitation: Invitation = {
@@ -96,18 +115,23 @@ describe('InvitationTableContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock getAssignableRoles by default (called on mount)
-    mockInvitationService.getAssignableRoles.mockResolvedValue([
-      { id: 1, role_code: 'entity_staff', role_name: 'Entity Staff' }
-    ]);
+    // Default: return empty invitations and roles
+    mockedFetcher.mockImplementation((url: string) => {
+      if (url === '/invitations') {
+        return Promise.resolve({ data: [] });
+      }
+      if (url === '/roles/assignable') {
+        return Promise.resolve({ data: mockRoles });
+      }
+      return Promise.resolve({ data: [] });
+    });
   });
 
   describe('loading state', () => {
     it('should show loading state through InvitationTable', async () => {
-      mockInvitationService.getInvitations.mockReturnValue(new Promise(() => {}));
-      mockInvitationService.getAssignableRoles.mockReturnValue(new Promise(() => {}));
+      mockedFetcher.mockImplementation(() => new Promise(() => {}));
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       expect(screen.getByTestId('table-loading')).toBeInTheDocument();
     });
@@ -115,9 +139,17 @@ describe('InvitationTableContainer', () => {
 
   describe('data display', () => {
     it('should render invitations after loading', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -128,11 +160,8 @@ describe('InvitationTableContainer', () => {
     });
 
     it('should show empty state when no invitations', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([]);
+      render(<InvitationTableContainer />, { wrapper });
 
-      render(<InvitationTableContainer />);
-
-      // Wait for the empty state to appear
       await waitFor(() => {
         expect(screen.getByTestId('table-empty')).toBeInTheDocument();
       }, { timeout: 3000 });
@@ -142,30 +171,45 @@ describe('InvitationTableContainer', () => {
   });
 
   describe('error handling', () => {
-    beforeEach(() => {
-      // Ensure clean mock state for error tests
-      mockInvitationService.getInvitations.mockReset();
-    });
-
     it('should show error state on fetch failure', async () => {
-      mockInvitationService.getInvitations.mockRejectedValue(new Error('Network error'));
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.reject(new Error('Network error'));
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
-      // Wait for error state to appear
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument();
       }, { timeout: 3000 });
 
-      expect(screen.getByText('Error al cargar las invitaciones')).toBeInTheDocument();
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
 
     it('should allow dismissing error', async () => {
-      mockInvitationService.getInvitations.mockRejectedValue(new Error('Network error'));
+      let callCount = 0;
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          callCount++;
+          // First call fails, subsequent calls succeed (revalidation after clearError)
+          if (callCount <= 1) {
+            return Promise.reject(new Error('Network error'));
+          }
+          return Promise.resolve({ data: [] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
-      // Wait for error state
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument();
       }, { timeout: 3000 });
@@ -185,9 +229,17 @@ describe('InvitationTableContainer', () => {
 
   describe('refresh functionality', () => {
     it('should have a refresh button', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -198,18 +250,29 @@ describe('InvitationTableContainer', () => {
     });
 
     it('should refresh data when clicking refresh button', async () => {
-      mockInvitationService.getInvitations
-        .mockResolvedValueOnce([mockInvitation])
-        .mockResolvedValueOnce([mockInvitation, { ...mockInvitation, id: 2, email: 'new@example.com' }]);
+      let callCount = 0;
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          callCount++;
+          if (callCount <= 1) {
+            return Promise.resolve({ data: [mockInvitation] });
+          }
+          return Promise.resolve({
+            data: [mockInvitation, { ...mockInvitation, id: 2, email: 'new@example.com' }],
+          });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
-      // Wait for initial data to load
       await waitFor(() => {
         expect(screen.getByText('test@example.com')).toBeInTheDocument();
       }, { timeout: 3000 });
 
-      // Wait for button to be enabled (loading to finish)
       await waitFor(() => {
         expect(screen.getByTestId('refresh-button')).not.toBeDisabled();
       });
@@ -217,19 +280,26 @@ describe('InvitationTableContainer', () => {
       const refreshButton = screen.getByTestId('refresh-button');
       fireEvent.click(refreshButton);
 
-      // Wait for second call to complete
       await waitFor(() => {
-        expect(mockInvitationService.getInvitations).toHaveBeenCalledTimes(2);
+        expect(callCount).toBeGreaterThanOrEqual(2);
       }, { timeout: 3000 });
     });
   });
 
   describe('resend action', () => {
     it('should call resend service when clicking resend button', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
       mockInvitationService.resendInvitation.mockResolvedValueOnce(mockInvitation);
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -246,9 +316,17 @@ describe('InvitationTableContainer', () => {
 
   describe('cancel action', () => {
     it('should show confirm dialog when clicking cancel button', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -265,10 +343,18 @@ describe('InvitationTableContainer', () => {
     });
 
     it('should call cancel service after confirming', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
       mockInvitationService.cancelInvitation.mockResolvedValueOnce(undefined);
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -290,9 +376,17 @@ describe('InvitationTableContainer', () => {
     });
 
     it('should close dialog when clicking cancel on confirm dialog', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -316,9 +410,17 @@ describe('InvitationTableContainer', () => {
 
   describe('create invitation', () => {
     it('should have create invitation button', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -329,9 +431,17 @@ describe('InvitationTableContainer', () => {
     });
 
     it('should open modal when clicking create button', async () => {
-      mockInvitationService.getInvitations.mockResolvedValueOnce([mockInvitation]);
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.resolve({ data: [mockInvitation] });
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
       await waitFor(() => {
         expect(screen.queryByTestId('table-loading')).not.toBeInTheDocument();
@@ -350,16 +460,19 @@ describe('InvitationTableContainer', () => {
   });
 
   describe('semantic color tokens', () => {
-    beforeEach(() => {
-      mockInvitationService.getInvitations.mockReset();
-    });
-
     it('should use error semantic tokens for error alert', async () => {
-      mockInvitationService.getInvitations.mockRejectedValue(new Error('Network error'));
+      mockedFetcher.mockImplementation((url: string) => {
+        if (url === '/invitations') {
+          return Promise.reject(new Error('Network error'));
+        }
+        if (url === '/roles/assignable') {
+          return Promise.resolve({ data: mockRoles });
+        }
+        return Promise.resolve({ data: [] });
+      });
 
-      render(<InvitationTableContainer />);
+      render(<InvitationTableContainer />, { wrapper });
 
-      // Wait for error state
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument();
       }, { timeout: 3000 });

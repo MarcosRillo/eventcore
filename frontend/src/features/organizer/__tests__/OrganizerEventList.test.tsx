@@ -1,10 +1,17 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import type { ReactNode } from 'react'
+import { SWRConfig } from 'swr'
 
 import { OrganizerEventListContainer } from '@/features/organizer/components/smart/OrganizerEventListContainer'
-import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { ToastProvider } from '@/shared/context'
 
-jest.mock('../services/organizer-event.service')
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}))
+
+import { apiFetcher } from '@/lib/swr/fetcher'
+
+const mockedFetcher = apiFetcher as jest.Mock
 
 // Mock Next.js router
 const mockPush = jest.fn()
@@ -19,9 +26,14 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
-// Helper to render with ToastProvider
+// Helper to render with providers (SWRConfig + ToastProvider)
 const renderWithProviders = (component: React.ReactElement) => {
-  return render(<ToastProvider>{component}</ToastProvider>)
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+      <ToastProvider>{children}</ToastProvider>
+    </SWRConfig>
+  )
+  return render(component, { wrapper: Wrapper })
 }
 
 describe('OrganizerEventList', () => {
@@ -31,23 +43,16 @@ describe('OrganizerEventList', () => {
   })
 
   describe('Initial Render & Loading', () => {
-    // Test 1: Shows loading state initially
     test('should display loading state on initial render', () => {
-      // ARRANGE
-      (organizerEventService.getEvents as jest.Mock).mockImplementation(
-        () => new Promise(() => {}) // Never resolves (stays loading)
-      )
+      // Never resolves — stays loading
+      mockedFetcher.mockImplementation(() => new Promise(() => {}))
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
-      // ASSERT
       expect(screen.getByText(/loading/i)).toBeInTheDocument()
     })
 
-    // Test 2: Fetches events on mount
     test('should fetch and display events on mount', async () => {
-      // ARRANGE
       const mockEvents = [
         {
           id: 1,
@@ -65,7 +70,7 @@ describe('OrganizerEventList', () => {
         }
       ]
 
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
+      mockedFetcher.mockResolvedValue({
         data: mockEvents,
         current_page: 1,
         last_page: 1,
@@ -73,27 +78,17 @@ describe('OrganizerEventList', () => {
         per_page: 10
       })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
-      // ASSERT
       await waitFor(() => {
         expect(screen.getByText('Festival de Jazz')).toBeInTheDocument()
         expect(screen.getByText('Expo Gastronómica')).toBeInTheDocument()
-      })
-
-      expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-        page: 1,
-        per_page: 10,
-        status: null
       })
     })
   })
 
   describe('Pagination', () => {
-    // Test 3: Shows pagination controls when needed
     test('should display pagination controls when total > per_page', async () => {
-      // ARRANGE
       const mockEvents = Array.from({ length: 10 }, (_, i) => ({
         id: i + 1,
         title: `Event ${i + 1}`,
@@ -102,7 +97,7 @@ describe('OrganizerEventList', () => {
         location: 'Location'
       }))
 
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
+      mockedFetcher.mockResolvedValue({
         data: mockEvents,
         current_page: 1,
         last_page: 3,
@@ -110,19 +105,15 @@ describe('OrganizerEventList', () => {
         per_page: 10
       })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
-      // ASSERT
       await waitFor(() => {
-        expect(screen.getByText(/1.*3/)).toBeInTheDocument() // "Page 1 of 3"
+        expect(screen.getByText(/1.*3/)).toBeInTheDocument()
         expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument()
       })
     })
 
-    // Test 4: Handles next page navigation
     test('should navigate to next page when next button clicked', async () => {
-      // ARRANGE
       const mockPage1 = Array.from({ length: 10 }, (_, i) => ({
         id: i + 1,
         title: `Event ${i + 1}`,
@@ -139,23 +130,27 @@ describe('OrganizerEventList', () => {
         location: 'Location'
       }))
 
-      ;(organizerEventService.getEvents as jest.Mock)
-        .mockResolvedValueOnce({
-          data: mockPage1,
-          current_page: 1,
-          last_page: 2,
-          total: 15,
-          per_page: 10
-        })
-        .mockResolvedValueOnce({
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) {
+          return Promise.resolve({
+            data: mockPage1,
+            current_page: 1,
+            last_page: 2,
+            total: 15,
+            per_page: 10
+          })
+        }
+        return Promise.resolve({
           data: mockPage2,
           current_page: 2,
           last_page: 2,
           total: 15,
           per_page: 10
         })
+      })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
@@ -164,22 +159,14 @@ describe('OrganizerEventList', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /next/i }))
 
-      // ASSERT
       await waitFor(() => {
         expect(screen.getByText('Event 11')).toBeInTheDocument()
-        expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-          page: 2,
-          per_page: 10,
-          status: null
-        })
       })
     })
   })
 
   describe('Status Filtering', () => {
-    // Test 5: Handles status filter change
     test('should filter events by status when filter selected', async () => {
-      // ARRANGE
       const allEvents = [
         { id: 1, title: 'Event 1', status: 'published', event_date: '2025-11-15', location: 'Loc' },
         { id: 2, title: 'Event 2', status: 'pending', event_date: '2025-11-16', location: 'Loc' }
@@ -189,23 +176,27 @@ describe('OrganizerEventList', () => {
         { id: 1, title: 'Event 1', status: 'published', event_date: '2025-11-15', location: 'Loc' }
       ]
 
-      ;(organizerEventService.getEvents as jest.Mock)
-        .mockResolvedValueOnce({
-          data: allEvents,
-          current_page: 1,
-          last_page: 1,
-          total: 2,
-          per_page: 10
-        })
-        .mockResolvedValueOnce({
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) {
+          return Promise.resolve({
+            data: allEvents,
+            current_page: 1,
+            last_page: 1,
+            total: 2,
+            per_page: 10
+          })
+        }
+        return Promise.resolve({
           data: publishedEvents,
           current_page: 1,
           last_page: 1,
           total: 1,
           per_page: 10
         })
+      })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
@@ -217,25 +208,16 @@ describe('OrganizerEventList', () => {
       const statusSelect = screen.getByLabelText(/filter by status/i)
       fireEvent.change(statusSelect, { target: { value: 'published' } })
 
-      // ASSERT
       await waitFor(() => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
         expect(screen.queryByText('Event 2')).not.toBeInTheDocument()
-      })
-
-      expect(organizerEventService.getEvents).toHaveBeenLastCalledWith({
-        page: 1,
-        per_page: 10,
-        status: 'published'
       })
     })
   })
 
   describe('Empty States', () => {
-    // Test 6: Shows empty state when no events
     test('should display "no events" empty state', async () => {
-      // ARRANGE
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
+      mockedFetcher.mockResolvedValue({
         data: [],
         current_page: 1,
         last_page: 1,
@@ -243,40 +225,40 @@ describe('OrganizerEventList', () => {
         per_page: 10
       })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
-      // ASSERT
       await waitFor(() => {
         expect(screen.getByText(/no events yet/i)).toBeInTheDocument()
         expect(screen.getByText(/create your first event/i)).toBeInTheDocument()
       })
     })
 
-    // Test 7: Shows filtered empty state
     test('should display "no matching events" when filter returns empty', async () => {
-      // ARRANGE
       const allEvents = [
         { id: 1, title: 'Event 1', status: 'published', event_date: '2025-11-15', location: 'Loc' }
       ]
 
-      ;(organizerEventService.getEvents as jest.Mock)
-        .mockResolvedValueOnce({
-          data: allEvents,
-          current_page: 1,
-          last_page: 1,
-          total: 1,
-          per_page: 10
-        })
-        .mockResolvedValueOnce({
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) {
+          return Promise.resolve({
+            data: allEvents,
+            current_page: 1,
+            last_page: 1,
+            total: 1,
+            per_page: 10
+          })
+        }
+        return Promise.resolve({
           data: [],
           current_page: 1,
           last_page: 1,
           total: 0,
           per_page: 10
         })
+      })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
@@ -287,7 +269,6 @@ describe('OrganizerEventList', () => {
       const statusSelect = screen.getByLabelText(/filter by status/i)
       fireEvent.change(statusSelect, { target: { value: 'rejected' } })
 
-      // ASSERT
       await waitFor(() => {
         expect(screen.getByText(/no events found/i)).toBeInTheDocument()
         expect(screen.getByText(/try a different filter/i)).toBeInTheDocument()
@@ -296,14 +277,12 @@ describe('OrganizerEventList', () => {
   })
 
   describe('Event Actions', () => {
-    // Test 8: Handles edit action
     test('should navigate to edit page when edit button clicked', async () => {
-      // ARRANGE
       const mockEvents = [
         { id: 1, title: 'Event 1', status: 'draft', event_date: '2025-11-15', location: 'Loc' }
       ]
 
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
+      mockedFetcher.mockResolvedValue({
         data: mockEvents,
         current_page: 1,
         last_page: 1,
@@ -311,7 +290,6 @@ describe('OrganizerEventList', () => {
         per_page: 10
       })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
@@ -321,18 +299,15 @@ describe('OrganizerEventList', () => {
       const editButton = screen.getByLabelText(/editar.*event 1/i)
       fireEvent.click(editButton)
 
-      // ASSERT
       expect(mockPush).toHaveBeenCalledWith('/organizer/1/edit')
     })
 
-    // Test 9: Handles view action
     test('should navigate to event detail when view button clicked', async () => {
-      // ARRANGE
       const mockEvents = [
         { id: 1, title: 'Event 1', status: 'published', event_date: '2025-11-15', location: 'Loc' }
       ]
 
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue({
+      mockedFetcher.mockResolvedValue({
         data: mockEvents,
         current_page: 1,
         last_page: 1,
@@ -340,7 +315,6 @@ describe('OrganizerEventList', () => {
         per_page: 10
       })
 
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
@@ -350,27 +324,18 @@ describe('OrganizerEventList', () => {
       const viewButton = screen.getByLabelText(/ver.*event 1/i)
       fireEvent.click(viewButton)
 
-      // ASSERT
       expect(mockPush).toHaveBeenCalledWith('/organizer/1')
     })
   })
 
   describe('Error Handling', () => {
-    // Test 11: Displays error state on API failure
     test('should display error message when API call fails', async () => {
-      // ARRANGE
-      const mockError = new Error('Network error')
-      ;(organizerEventService.getEvents as jest.Mock).mockRejectedValue(mockError)
+      mockedFetcher.mockRejectedValue(new Error('Network Error'))
 
-      // Mock console.error to avoid noise in tests
-      jest.spyOn(console, 'error').mockImplementation(() => {})
-
-      // ACT
       renderWithProviders(<OrganizerEventListContainer />)
 
-      // ASSERT
       await waitFor(() => {
-        expect(screen.getByText(/error loading events/i)).toBeInTheDocument()
+        expect(screen.getByText('Network Error')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
       })
     })

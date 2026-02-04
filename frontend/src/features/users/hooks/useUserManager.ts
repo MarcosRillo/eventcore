@@ -4,11 +4,14 @@
  * useUserManager Hook
  *
  * Custom React hook for managing user operations.
- * Uses React 19 useTransition for loading states and useOptimistic for instant UI feedback.
+ * Uses SWR for data fetching, useTransition for loading states,
+ * and useOptimistic for instant UI feedback on mutations.
  */
 
-import { useCallback, useEffect, useOptimistic,useState, useTransition } from 'react'
+import { useCallback, useMemo, useOptimistic, useState, useTransition } from 'react'
+import useSWR from 'swr'
 
+import { useAuth } from '@/context/AuthContext'
 import userService from '@/features/users/services/user.service'
 import type {
   PaginationMeta,
@@ -16,6 +19,7 @@ import type {
   User,
   UserFilters,
 } from '@/features/users/types/user.types'
+import { apiFetcher, userKeys } from '@/lib/swr'
 
 interface UseUserManagerReturn {
   users: User[]
@@ -26,7 +30,7 @@ interface UseUserManagerReturn {
   actionLoading: number | null
   selectedUser: User | null
   editingUser: User | null
-  fetchUsers: (filters?: UserFilters) => Promise<void>
+  fetchUsers: () => void
   handleSuspend: (id: number) => Promise<boolean>
   handleUnsuspend: (id: number) => Promise<boolean>
   handleDelete: (id: number) => Promise<boolean>
@@ -67,13 +71,10 @@ function optimisticReducer(users: User[], action: OptimisticAction): User[] {
 }
 
 export const useUserManager = (): UseUserManagerReturn => {
-  const [users, setUsers] = useState<User[]>([])
-  const [optimisticUsers, addOptimisticAction] = useOptimistic(users, optimisticReducer)
-  const [pagination, setPagination] = useState<PaginationMeta | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+
   const [isActionPending, startActionTransition] = useTransition()
   const [actionUserId, setActionUserId] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [filters, setFiltersState] = useState<UserFilters>({
     status: 'all',
     per_page: 15,
@@ -82,111 +83,109 @@ export const useUserManager = (): UseUserManagerReturn => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [editingUser, setEditingUser] = useState<User | null>(null)
 
-  const fetchUsers = useCallback(
-    async (newFilters?: UserFilters) => {
-      setError(null)
-      startTransition(async () => {
-        try {
-          const result = await userService.getUsers(newFilters)
-          setUsers(result.data)
-          setPagination(result.meta)
-        } catch {
-          setError('Error al cargar los usuarios')
-        }
-      })
-    },
-    []
+  // Build SWR key from filters
+  const swrKey = useMemo(() => {
+    if (!isAuthenticated || authLoading) return null
+    const params = new URLSearchParams()
+    if (filters.page) params.set('page', String(filters.page))
+    if (filters.per_page) params.set('per_page', String(filters.per_page))
+    if (filters.search) params.set('search', filters.search)
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status)
+    return userKeys.list(params.toString())
+  }, [isAuthenticated, authLoading, filters])
+
+  const { data, error, isLoading, mutate } = useSWR<{ data: User[]; meta: PaginationMeta }>(
+    swrKey,
+    apiFetcher,
   )
+
+  const users = useMemo(() => data?.data ?? [], [data])
+  const pagination = data?.meta ?? null
+  const [optimisticUsers, addOptimisticAction] = useOptimistic(users, optimisticReducer)
 
   const handleSuspend = useCallback(async (id: number): Promise<boolean> => {
     setActionUserId(id)
-    setError(null)
 
     return new Promise((resolve) => {
       startActionTransition(async () => {
         addOptimisticAction({ type: 'suspend', id })
         try {
-          const updatedUser = await userService.suspendUser(id)
-          setUsers((prev) =>
-            prev.map((user) => (user.id === id ? updatedUser : user))
-          )
+          await userService.suspendUser(id)
+          await mutate()
           if (selectedUser?.id === id) {
-            setSelectedUser(updatedUser)
+            setSelectedUser((prev) =>
+              prev ? { ...prev, status: 'suspended' } : null
+            )
           }
           setActionUserId(null)
           resolve(true)
         } catch {
-          setError('Error al suspender el usuario')
+          await mutate()
           setActionUserId(null)
           resolve(false)
         }
       })
     })
-  }, [selectedUser, addOptimisticAction])
+  }, [selectedUser, addOptimisticAction, mutate])
 
   const handleUnsuspend = useCallback(async (id: number): Promise<boolean> => {
     setActionUserId(id)
-    setError(null)
 
     return new Promise((resolve) => {
       startActionTransition(async () => {
         addOptimisticAction({ type: 'unsuspend', id })
         try {
-          const updatedUser = await userService.unsuspendUser(id)
-          setUsers((prev) =>
-            prev.map((user) => (user.id === id ? updatedUser : user))
-          )
+          await userService.unsuspendUser(id)
+          await mutate()
           if (selectedUser?.id === id) {
-            setSelectedUser(updatedUser)
+            setSelectedUser((prev) =>
+              prev ? { ...prev, status: 'active' } : null
+            )
           }
           setActionUserId(null)
           resolve(true)
         } catch {
-          setError('Error al reactivar el usuario')
+          await mutate()
           setActionUserId(null)
           resolve(false)
         }
       })
     })
-  }, [selectedUser, addOptimisticAction])
+  }, [selectedUser, addOptimisticAction, mutate])
 
   const handleDelete = useCallback(async (id: number): Promise<boolean> => {
     setActionUserId(id)
-    setError(null)
 
     return new Promise((resolve) => {
       startActionTransition(async () => {
         addOptimisticAction({ type: 'delete', id })
         try {
           await userService.deleteUser(id)
-          setUsers((prev) => prev.filter((user) => user.id !== id))
+          await mutate()
           if (selectedUser?.id === id) {
             setSelectedUser(null)
           }
           setActionUserId(null)
           resolve(true)
         } catch {
-          setError('Error al eliminar el usuario')
+          await mutate()
           setActionUserId(null)
           resolve(false)
         }
       })
     })
-  }, [selectedUser, addOptimisticAction])
+  }, [selectedUser, addOptimisticAction, mutate])
 
   const handleUpdate = useCallback(
     async (id: number, data: UpdateUserData): Promise<boolean> => {
       setActionUserId(id)
-      setError(null)
 
       return new Promise((resolve) => {
         startActionTransition(async () => {
           addOptimisticAction({ type: 'update', id, data })
           try {
             const updatedUser = await userService.updateUser(id, data)
-            setUsers((prev) =>
-              prev.map((user) => (user.id === id ? updatedUser : user))
-            )
+            await mutate()
             if (selectedUser?.id === id) {
               setSelectedUser(updatedUser)
             }
@@ -194,26 +193,24 @@ export const useUserManager = (): UseUserManagerReturn => {
             setActionUserId(null)
             resolve(true)
           } catch {
-            setError('Error al actualizar el usuario')
+            await mutate()
             setActionUserId(null)
             resolve(false)
           }
         })
       })
     },
-    [selectedUser, addOptimisticAction]
+    [selectedUser, addOptimisticAction, mutate]
   )
 
   const handleViewDetail = useCallback(async (id: number) => {
     setActionUserId(id)
-    setError(null)
     startActionTransition(async () => {
       try {
         const user = await userService.getUser(id)
         setSelectedUser(user)
         setActionUserId(null)
       } catch {
-        setError('Error al cargar el detalle del usuario')
         setActionUserId(null)
       }
     })
@@ -236,13 +233,13 @@ export const useUserManager = (): UseUserManagerReturn => {
   }, [])
 
   const clearError = useCallback(() => {
-    setError(null)
-  }, [])
+    // SWR manages error state; mutate to clear by revalidating
+    mutate()
+  }, [mutate])
 
-  // Fetch on mount and when filters change
-  useEffect(() => {
-    fetchUsers(filters)
-  }, [fetchUsers, filters])
+  const fetchUsers = useCallback(() => {
+    mutate()
+  }, [mutate])
 
   // Compute actionLoading for backward compatibility
   const actionLoading = isActionPending ? actionUserId : null
@@ -250,8 +247,8 @@ export const useUserManager = (): UseUserManagerReturn => {
   return {
     users: optimisticUsers,
     pagination,
-    loading: isPending,
-    error,
+    loading: isLoading,
+    error: error?.message ?? null,
     filters,
     actionLoading,
     selectedUser,

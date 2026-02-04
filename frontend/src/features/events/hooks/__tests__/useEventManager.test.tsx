@@ -1,52 +1,42 @@
-/**
- * Tests for useEventManager Hook
- *
- * Coverage areas:
- * 1. CRUD Operations (create, update, delete events)
- * 2. Approval Workflow (approve, reject, request changes)
- * 3. Modal Management (open, close modals)
- * 4. Filter Management (update filters)
- * 5. Error Handling (API failures)
- */
-
-import { act,renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { SWRConfig } from 'swr';
 
 import { useEventManager } from '@/features/events/hooks/useEventManager';
 import * as eventService from '@/features/events/services/event.service';
-import { Event, EventFormData } from '@/types/event.types';
+import type { Event, EventFormData } from '@/types/event.types';
 
-// Mock dependencies
-jest.mock('@/features/events/services/event.service');
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}));
+
 jest.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
     isAuthenticated: true,
     isLoading: false,
-    user: { id: 1, name: 'Test User', role: 'admin' }
-  })
+    user: { id: 1, name: 'Test User', role: 'admin' },
+  }),
 }));
+
 jest.mock('@/hooks/usePermissions', () => ({
   usePermissions: () => ({
     isAdmin: () => true,
     isOrganizer: () => false,
-    canAccessAdmin: () => true
-  })
+    canAccessAdmin: () => true,
+  }),
 }));
-jest.mock('@/hooks/usePaginatedData', () => ({
-  usePaginatedData: ({ initialFilters }: { initialFilters: Record<string, unknown> }) => ({
-    data: [],
-    pagination: null,
-    filters: initialFilters,
-    isLoading: false,
-    error: null,
-    setFilters: jest.fn(),
-    resetFilters: jest.fn(),
-    changePage: jest.fn(),
-    refreshData: jest.fn(),
-    addItem: jest.fn(),
-    updateItem: jest.fn(),
-    removeItem: jest.fn(),
-  })
-}));
+
+jest.mock('@/features/events/services/event.service');
+
+import { apiFetcher } from '@/lib/swr/fetcher';
+
+const mockedFetcher = apiFetcher as jest.Mock;
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+);
 
 const mockEvent: Event = {
   id: 1,
@@ -81,7 +71,6 @@ const mockEventFormData: EventFormData = {
   max_attendees: 50,
 };
 
-// Mock admin service
 const mockAdminService = {
   getEvents: jest.fn(),
   getEvent: jest.fn(),
@@ -98,28 +87,40 @@ const mockAdminService = {
     requestChanges: jest.fn(),
     rejectEvent: jest.fn(),
     getApprovalStatistics: jest.fn(),
-  }
+  },
+};
+
+const mockEventsResponse = {
+  data: [mockEvent],
+  meta: {
+    current_page: 1,
+    last_page: 1,
+    per_page: 15,
+    total: 1,
+    from: 1,
+    to: 1,
+    path: 'http://api.example.com/events',
+    links: [],
+  },
 };
 
 describe('useEventManager Hook', () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
-    // Setup default mock for getEventServiceForContext
     (eventService.getEventServiceForContext as jest.Mock).mockReturnValue(mockAdminService);
+    mockedFetcher.mockResolvedValue(mockEventsResponse);
   });
 
-  // ============================================================
-  // CRUD OPERATIONS TESTS
-  // ============================================================
-
   describe('CRUD Operations', () => {
-
     test('should create event successfully', async () => {
       const newEvent = { ...mockEvent, id: 2, title: 'New Event' };
       mockAdminService.createEvent.mockResolvedValue(newEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.createEvent(mockEventFormData);
@@ -127,14 +128,17 @@ describe('useEventManager Hook', () => {
 
       expect(mockAdminService.createEvent).toHaveBeenCalledWith(mockEventFormData);
       expect(result.current.isCreateModalOpen).toBe(false);
-      expect(result.current.isCreating).toBe(false);
     });
 
     test('should update event successfully', async () => {
       const updatedEvent = { ...mockEvent, title: 'Updated Event' };
       mockAdminService.updateEvent.mockResolvedValue(updatedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const updateData = { title: 'Updated Event' };
 
@@ -145,13 +149,16 @@ describe('useEventManager Hook', () => {
       expect(mockAdminService.updateEvent).toHaveBeenCalledWith(1, updateData);
       expect(result.current.isEditModalOpen).toBe(false);
       expect(result.current.currentEvent).toBeNull();
-      expect(result.current.isUpdating).toBe(false);
     });
 
     test('should delete event successfully', async () => {
       mockAdminService.deleteEvent.mockResolvedValue(undefined);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.deleteEvent(1);
@@ -160,14 +167,17 @@ describe('useEventManager Hook', () => {
       expect(mockAdminService.deleteEvent).toHaveBeenCalledWith(1);
       expect(result.current.isDeleteModalOpen).toBe(false);
       expect(result.current.currentEvent).toBeNull();
-      expect(result.current.isDeleting).toBe(false);
     });
 
     test('should duplicate event successfully', async () => {
       const duplicatedEvent = { ...mockEvent, id: 3, title: 'Test Event (Copy)' };
       mockAdminService.duplicateEvent.mockResolvedValue(duplicatedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.duplicateEvent(1, { title: 'Test Event (Copy)' });
@@ -180,7 +190,11 @@ describe('useEventManager Hook', () => {
       const updatedEvent = { ...mockEvent, is_featured: true };
       mockAdminService.toggleFeatured.mockResolvedValue(updatedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.toggleFeatured(1);
@@ -190,17 +204,16 @@ describe('useEventManager Hook', () => {
     });
   });
 
-  // ============================================================
-  // APPROVAL WORKFLOW TESTS
-  // ============================================================
-
   describe('Approval Workflow', () => {
-
     test('should approve event internally', async () => {
       const approvedEvent = { ...mockEvent, status_id: 2 };
       mockAdminService.approval.approveInternal.mockResolvedValue(approvedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.approveInternal(1, 'Looks good');
@@ -215,7 +228,11 @@ describe('useEventManager Hook', () => {
       const updatedEvent = { ...mockEvent, status_id: 3 };
       mockAdminService.approval.requestPublic.mockResolvedValue(updatedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.requestPublic(1, 'Ready for public');
@@ -229,7 +246,11 @@ describe('useEventManager Hook', () => {
       const approvedEvent = { ...mockEvent, status_id: 4 };
       mockAdminService.approval.approvePublic.mockResolvedValue(approvedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.approvePublic(1);
@@ -243,7 +264,11 @@ describe('useEventManager Hook', () => {
       const updatedEvent = { ...mockEvent, status_id: 5 };
       mockAdminService.approval.requestChanges.mockResolvedValue(updatedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.requestChanges(1, 'Please update the description');
@@ -257,7 +282,11 @@ describe('useEventManager Hook', () => {
       const rejectedEvent = { ...mockEvent, status_id: 6 };
       mockAdminService.approval.rejectEvent.mockResolvedValue(rejectedEvent);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.rejectEvent(1, 'Does not meet criteria');
@@ -268,14 +297,9 @@ describe('useEventManager Hook', () => {
     });
   });
 
-  // ============================================================
-  // MODAL MANAGEMENT TESTS
-  // ============================================================
-
   describe('Modal Management', () => {
-
-    test('should open create modal', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should open create modal', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
       act(() => {
         result.current.openCreateModal();
@@ -284,8 +308,8 @@ describe('useEventManager Hook', () => {
       expect(result.current.isCreateModalOpen).toBe(true);
     });
 
-    test('should open edit modal with event', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should open edit modal with event', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
       act(() => {
         result.current.openEditModal(mockEvent);
@@ -295,8 +319,8 @@ describe('useEventManager Hook', () => {
       expect(result.current.currentEvent).toEqual(mockEvent);
     });
 
-    test('should open delete modal with event', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should open delete modal with event', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
       act(() => {
         result.current.openDeleteModal(mockEvent);
@@ -306,8 +330,8 @@ describe('useEventManager Hook', () => {
       expect(result.current.currentEvent).toEqual(mockEvent);
     });
 
-    test('should open approval modal with event', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should open approval modal with event', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
       act(() => {
         result.current.openApprovalModal(mockEvent);
@@ -317,8 +341,8 @@ describe('useEventManager Hook', () => {
       expect(result.current.currentEvent).toEqual(mockEvent);
     });
 
-    test('should open details modal with event', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should open details modal with event', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
       act(() => {
         result.current.openDetailsModal(mockEvent);
@@ -328,10 +352,9 @@ describe('useEventManager Hook', () => {
       expect(result.current.currentEvent).toEqual(mockEvent);
     });
 
-    test('should close all modals', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should close all modals', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
-      // First open all modals
       act(() => {
         result.current.openCreateModal();
         result.current.openEditModal(mockEvent);
@@ -340,7 +363,6 @@ describe('useEventManager Hook', () => {
         result.current.openDetailsModal(mockEvent);
       });
 
-      // Then close all
       act(() => {
         result.current.closeAllModals();
       });
@@ -354,96 +376,103 @@ describe('useEventManager Hook', () => {
     });
   });
 
-  // ============================================================
-  // FILTER MANAGEMENT TESTS
-  // ============================================================
-
   describe('Filter Management', () => {
+    test('should update filters', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
-    test('should update filters', () => {
-      const { result } = renderHook(() => useEventManager());
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       act(() => {
         result.current.updateFilters({ status: 'published' });
       });
 
-      // Since we're mocking usePaginatedData, we can't test the actual filter change
-      // but we can verify the function is callable without errors
-      expect(result.current.updateFilters).toBeDefined();
+      expect(result.current.filters.status).toBe('published');
     });
 
-    test('should include show_past filter when enabled', () => {
-      const { result } = renderHook(() => useEventManager());
+    test('should reset page to 1 when filters change', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
 
-      act(() => {
-        result.current.updateFilters({ show_past: '1' });
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
 
-      // Assert: updateFilters function is callable with show_past parameter
-      expect(result.current.updateFilters).toBeDefined();
-      // The mock should have been called with the show_past filter
-      // This verifies the filter can be passed through the hook
+      act(() => {
+        result.current.changePage(3);
+      });
+
+      expect(result.current.filters.page).toBe(3);
+
+      act(() => {
+        result.current.setFilters({ status: 'published' });
+      });
+
+      expect(result.current.filters.page).toBe(1);
     });
   });
 
-  // ============================================================
-  // ERROR HANDLING TESTS
-  // ============================================================
-
   describe('Error Handling', () => {
-
     test('should handle create event error gracefully', async () => {
       const mockError = new Error('API Error: Cannot create event');
       mockAdminService.createEvent.mockRejectedValue(mockError);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await expect(async () => {
         await act(async () => {
           await result.current.createEvent(mockEventFormData);
         });
       }).rejects.toThrow('API Error: Cannot create event');
-
-      expect(result.current.isCreating).toBe(false);
     });
 
     test('should handle update event error gracefully', async () => {
       const mockError = new Error('API Error: Cannot update event');
       mockAdminService.updateEvent.mockRejectedValue(mockError);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await expect(async () => {
         await act(async () => {
           await result.current.updateEvent(1, { title: 'Updated' });
         });
       }).rejects.toThrow('API Error: Cannot update event');
-
-      expect(result.current.isUpdating).toBe(false);
     });
 
-    test('should handle delete event error and revert optimistic update', async () => {
+    test('should handle delete event error', async () => {
       const mockError = new Error('API Error: Cannot delete event');
       mockAdminService.deleteEvent.mockRejectedValue(mockError);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await expect(async () => {
         await act(async () => {
           await result.current.deleteEvent(1);
         });
       }).rejects.toThrow('API Error: Cannot delete event');
-
-      expect(result.current.isDeleting).toBe(false);
-      // Verify refreshData was called to revert optimistic update
-      // This would require deeper mocking of usePaginatedData
     });
 
     test('should handle approval error gracefully', async () => {
       const mockError = new Error('Approval failed');
       mockAdminService.approval.approveInternal.mockRejectedValue(mockError);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await expect(async () => {
         await act(async () => {
@@ -453,31 +482,27 @@ describe('useEventManager Hook', () => {
     });
 
     test('should throw error when create is not available in context', async () => {
-      // Mock service without createEvent
       const limitedService = {
         ...mockAdminService,
         createEvent: undefined,
       };
       (eventService.getEventServiceForContext as jest.Mock).mockReturnValue(limitedService);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await expect(async () => {
         await act(async () => {
           await result.current.createEvent(mockEventFormData);
         });
       }).rejects.toThrow('Create event not available in current context');
-
-      expect(result.current.isCreating).toBe(false);
     });
   });
 
-  // ============================================================
-  // STATISTICS TESTS
-  // ============================================================
-
   describe('Statistics Loading', () => {
-
     test('should load event statistics successfully', async () => {
       const mockStats = {
         total: 100,
@@ -487,7 +512,11 @@ describe('useEventManager Hook', () => {
       };
       mockAdminService.getStatistics.mockResolvedValue(mockStats);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.loadStatistics();
@@ -505,7 +534,11 @@ describe('useEventManager Hook', () => {
       };
       mockAdminService.approval.getApprovalStatistics.mockResolvedValue(mockApprovalStats);
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.loadApprovalStatistics();
@@ -518,33 +551,116 @@ describe('useEventManager Hook', () => {
     test('should handle statistics error silently', async () => {
       mockAdminService.getStatistics.mockRejectedValue(new Error('Stats error'));
 
-      const { result } = renderHook(() => useEventManager());
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       await act(async () => {
         await result.current.loadStatistics();
       });
 
-      // Should not throw, error handled silently
       expect(result.current.statistics).toBeNull();
     });
   });
 
-  // ============================================================
-  // CONTEXT DETECTION TESTS
-  // ============================================================
-
   describe('Service Context Detection', () => {
-
-    test('should use admin service for admin users', () => {
-      renderHook(() => useEventManager());
+    test('should use admin service for admin users', async () => {
+      renderHook(() => useEventManager(), { wrapper });
 
       expect(eventService.getEventServiceForContext).toHaveBeenCalledWith('admin');
     });
 
-    test('should use specified context when provided', () => {
-      renderHook(() => useEventManager({ context: 'public' }));
+    test('should use specified context when provided', async () => {
+      renderHook(() => useEventManager({ context: 'public' }), { wrapper });
 
       expect(eventService.getEventServiceForContext).toHaveBeenCalledWith('public');
+    });
+  });
+
+  describe('Data fetching', () => {
+    test('should fetch events on mount', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockedFetcher).toHaveBeenCalled();
+      expect(result.current.events).toHaveLength(1);
+      expect(result.current.events[0].title).toBe('Test Event');
+    });
+
+    test('should return pagination data', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.pagination).toBeDefined();
+      expect(result.current.pagination?.current_page).toBe(1);
+      expect(result.current.pagination?.total).toBe(1);
+    });
+
+    test('should handle fetch error', async () => {
+      mockedFetcher.mockRejectedValue(new Error('Network error'));
+
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.error).toBe('Network error');
+    });
+  });
+
+  describe('Optimistic updates', () => {
+    test('should add event optimistically', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const newEvent = { ...mockEvent, id: 99, title: 'New Optimistic Event' };
+
+      act(() => {
+        result.current.addEvent(newEvent);
+      });
+
+      expect(result.current.events).toContainEqual(newEvent);
+    });
+
+    test('should update event in list optimistically', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.updateEventInList(1, { title: 'Updated Title' });
+      });
+
+      const updated = result.current.events.find(e => e.id === 1);
+      expect(updated?.title).toBe('Updated Title');
+    });
+
+    test('should remove event optimistically', async () => {
+      const { result } = renderHook(() => useEventManager(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.removeEvent(1);
+      });
+
+      expect(result.current.events.find(e => e.id === 1)).toBeUndefined();
     });
   });
 });

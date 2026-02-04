@@ -6,15 +6,18 @@
  * Supports server-side initial data to avoid waterfall fetching.
  */
 
-import { useCallback, useEffect, useRef,useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import useSWR from 'swr'
 
-import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   EventFilters,
+  EventsResponse,
   EventSubtype,
   EventType,
   Location,
-  PublicEvent} from '@/features/public-calendar/types/public-calendar.types'
+  PublicEvent,
+} from '@/features/public-calendar/types/public-calendar.types'
+import { publicEventKeys, publicFetcher } from '@/lib/swr'
 
 /**
  * Options for usePublicEvents hook
@@ -48,19 +51,6 @@ export const usePublicEvents = (
 ): UsePublicEventsReturn => {
   const { initialEvents, initialEventTypes, initialLocations } = options
 
-  // Track if this is the initial render (for skipping first fetch when we have initial data)
-  const isInitialRender = useRef(true)
-  const hasInitialEvents = useRef(!!initialEvents)
-  // Track the latest eventTypeId to prevent race conditions in fetchEventSubtypes
-  const lastEventTypeIdRef = useRef<number | null>(null)
-
-  // Initialize state with server-side data if available
-  const [events, setEvents] = useState<PublicEvent[]>(initialEvents ?? [])
-  const [eventTypes, setEventTypes] = useState<EventType[]>(initialEventTypes ?? [])
-  const [eventSubtypes, setEventSubtypes] = useState<EventSubtype[]>([])
-  const [locations, setLocations] = useState<Location[]>(initialLocations ?? [])
-  const [loading, setLoading] = useState(!initialEvents)
-  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<EventFilters>({
     event_type_id: null,
     event_subtype_id: null,
@@ -69,105 +59,72 @@ export const usePublicEvents = (
     end_date: null
   })
 
-  const fetchEvents = useCallback(async (): Promise<void> => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await publicEventsService.getAll({
-        event_type_id: filters.event_type_id,
-        event_subtype_id: filters.event_subtype_id,
-        location_id: filters.location_id,
-        start_date: filters.start_date,
-        end_date: filters.end_date
-      })
-      setEvents(data.data)
-    } catch {
-      setError('Failed to load events')
-    } finally {
-      setLoading(false)
-    }
+  // SWR: Event types (static)
+  const { data: eventTypesData } = useSWR<{ data: EventType[] }>(
+    publicEventKeys.types,
+    publicFetcher,
+    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined }
+  )
+
+  // SWR: Subtypes (conditional on event_type_id)
+  const { data: subtypesData } = useSWR<{ data: EventSubtype[] }>(
+    filters.event_type_id ? publicEventKeys.subtypes(filters.event_type_id) : null,
+    publicFetcher
+  )
+
+  // SWR: Locations (static)
+  const { data: locationsData } = useSWR<{ data: Location[] }>(
+    publicEventKeys.locations,
+    publicFetcher,
+    { fallbackData: initialLocations ? { data: initialLocations } : undefined }
+  )
+
+  // SWR: Events (dynamic key with filters)
+  const eventsKey = useMemo(() => {
+    const params = new URLSearchParams()
+    if (filters.event_type_id) params.set('event_type_id', String(filters.event_type_id))
+    if (filters.event_subtype_id) params.set('event_subtype_id', String(filters.event_subtype_id))
+    if (filters.location_id) params.set('location_id', String(filters.location_id))
+    if (filters.start_date) params.set('start_date', filters.start_date)
+    if (filters.end_date) params.set('end_date', filters.end_date)
+    return publicEventKeys.list(params.toString())
   }, [filters])
 
-  const fetchEventTypesAndLocations = async (): Promise<void> => {
-    try {
-      const [eventTypesRes, locationsRes] = await Promise.all([
-        publicEventsService.getEventTypes(),
-        publicEventsService.getLocations()
-      ])
-      setEventTypes(eventTypesRes.data)
-      setLocations(locationsRes.data)
-    } catch {
-      // Silently fail - not critical
-    }
-  }
+  const { data: eventsData, error: eventsError, isLoading, mutate } = useSWR<EventsResponse>(
+    eventsKey,
+    publicFetcher,
+    { fallbackData: initialEvents ? { data: initialEvents, meta: { current_page: 1, total: initialEvents.length, per_page: 100 } } : undefined }
+  )
 
-  const fetchEventSubtypes = async (eventTypeId: number | null): Promise<void> => {
-    // Track the current request to prevent race conditions
-    lastEventTypeIdRef.current = eventTypeId
+  const eventTypes = eventTypesData?.data ?? []
+  const eventSubtypes = filters.event_type_id ? (subtypesData?.data ?? []) : []
+  const locations = locationsData?.data ?? []
+  const events = eventsData?.data ?? []
 
-    if (!eventTypeId) {
-      setEventSubtypes([])
-      return
-    }
-    try {
-      const subtypesRes = await publicEventsService.getEventSubtypes(eventTypeId)
-      // Only update state if this is still the latest request
-      if (lastEventTypeIdRef.current === eventTypeId) {
-        setEventSubtypes(subtypesRes.data)
-      }
-    } catch {
-      // Only clear if this is still the latest request
-      if (lastEventTypeIdRef.current === eventTypeId) {
-        setEventSubtypes([])
-      }
-    }
-  }
-
-  // Fetch event types and locations on mount (skip if initial data provided)
-  useEffect(() => {
-    if (initialEventTypes && initialLocations) {
-      return
-    }
-    fetchEventTypesAndLocations()
-  }, [initialEventTypes, initialLocations])
-
-  // Fetch events when filters change (skip initial if we have server data)
-  useEffect(() => {
-    // On first render, skip fetch if we have initial data from server
-    if (isInitialRender.current && hasInitialEvents.current) {
-      isInitialRender.current = false
-      return
-    }
-    isInitialRender.current = false
-
-    fetchEvents()
-  }, [fetchEvents])
-
-  const handleEventTypeFilter = (eventTypeId: number | null): void => {
+  const handleEventTypeFilter = useCallback((eventTypeId: number | null): void => {
     setFilters(prev => ({
       ...prev,
       event_type_id: eventTypeId,
       event_subtype_id: null // Reset subtype when type changes
     }))
-    fetchEventSubtypes(eventTypeId)
-  }
+  }, [])
 
-  const handleEventSubtypeFilter = (eventSubtypeId: number | null): void => {
+  const handleEventSubtypeFilter = useCallback((eventSubtypeId: number | null): void => {
     setFilters(prev => ({ ...prev, event_subtype_id: eventSubtypeId }))
-  }
+  }, [])
 
-  const handleLocationFilter = (locationId: number | null): void => {
+  const handleLocationFilter = useCallback((locationId: number | null): void => {
     setFilters(prev => ({ ...prev, location_id: locationId }))
-  }
+  }, [])
 
-  const handleDateRangeFilter = (
+  const handleDateRangeFilter = useCallback((
     startDate: string | null,
     endDate: string | null
   ): void => {
     setFilters(prev => ({ ...prev, start_date: startDate, end_date: endDate }))
-  }
+  }, [])
 
-  const clearFilters = (): void => {
+  const clearFilters = useCallback((): void => {
     setFilters({
       event_type_id: null,
       event_subtype_id: null,
@@ -175,8 +132,7 @@ export const usePublicEvents = (
       start_date: null,
       end_date: null
     })
-    setEventSubtypes([])
-  }
+  }, [])
 
   const hasActiveFilters =
     filters.event_type_id !== null ||
@@ -190,8 +146,8 @@ export const usePublicEvents = (
     eventTypes,
     eventSubtypes,
     locations,
-    loading,
-    error,
+    loading: isLoading,
+    error: eventsError?.message ?? null,
     filters,
     hasActiveFilters,
     handleEventTypeFilter,
@@ -199,6 +155,6 @@ export const usePublicEvents = (
     handleLocationFilter,
     handleDateRangeFilter,
     clearFilters,
-    retry: fetchEvents
+    retry: () => { mutate() }
   }
 }

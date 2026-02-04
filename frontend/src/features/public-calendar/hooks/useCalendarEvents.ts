@@ -4,17 +4,19 @@
  * Supports server-side initial data to avoid waterfall fetching
  */
 
-import { endOfMonth, format,startOfMonth } from 'date-fns'
-import { useCallback, useEffect, useRef,useState } from 'react'
+import { endOfMonth, format, startOfMonth } from 'date-fns'
+import { useCallback, useMemo, useState } from 'react'
+import useSWR from 'swr'
 
-import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 import {
   CalendarEvent,
   CalendarView,
+  EventsResponse,
   EventType,
   Location,
   PublicEvent,
 } from '@/features/public-calendar/types/public-calendar.types'
+import { publicEventKeys, publicFetcher } from '@/lib/swr'
 
 /**
  * Options for useCalendarEvents hook
@@ -61,82 +63,52 @@ export const useCalendarEvents = (
 ): UseCalendarEventsReturn => {
   const { initialEvents, initialEventTypes, initialLocations } = options
 
-  // Track if this is the initial render (for skipping first fetch when we have initial data)
-  const isInitialRender = useRef(true)
-  const hasInitialEvents = useRef(!!initialEvents)
-
-  // Initialize state with server-side data if available
-  const [events, setEvents] = useState<PublicEvent[]>(initialEvents ?? [])
-  const [eventTypes, setEventTypes] = useState<EventType[]>(initialEventTypes ?? [])
-  const [locations, setLocations] = useState<Location[]>(initialLocations ?? [])
-  const [loading, setLoading] = useState(!initialEvents)
-  const [error, setError] = useState<string | null>(null)
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [currentView, setCurrentView] = useState<CalendarView>('month')
   const [selectedEventType, setSelectedEventType] = useState<number | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
 
-  // Fetch event types and locations on mount (skip if initial data provided)
-  useEffect(() => {
-    // Skip if we already have initial data from server
-    if (initialEventTypes && initialLocations) {
-      return
-    }
+  // SWR: Event types (static)
+  const { data: eventTypesData } = useSWR<{ data: EventType[] }>(
+    publicEventKeys.types,
+    publicFetcher,
+    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined }
+  )
 
-    const fetchFilters = async (): Promise<void> => {
-      try {
-        const [eventTypesRes, locationsRes] = await Promise.all([
-          publicEventsService.getEventTypes(),
-          publicEventsService.getLocations(),
-        ])
-        setEventTypes(eventTypesRes.data)
-        setLocations(locationsRes.data)
-      } catch {
-        // Silently fail - not critical for calendar functionality
-      }
-    }
+  // SWR: Locations (static)
+  const { data: locationsData } = useSWR<{ data: Location[] }>(
+    publicEventKeys.locations,
+    publicFetcher,
+    { fallbackData: initialLocations ? { data: initialLocations } : undefined }
+  )
 
-    fetchFilters()
-  }, [initialEventTypes, initialLocations])
-
-  // Fetch events based on current date and filters
-  const fetchEvents = useCallback(async (): Promise<void> => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      // Calculate date range based on current view and date
-      const startDate = startOfMonth(currentDate)
-      const endDate = endOfMonth(currentDate)
-
-      const response = await publicEventsService.getAll({
-        start_date: format(startDate, 'yyyy-MM-dd'),
-        end_date: format(endDate, 'yyyy-MM-dd'),
-        event_type_id: selectedEventType,
-        location_id: selectedLocation,
-        page: 1,
-      })
-
-      setEvents(response.data)
-    } catch {
-      setError('Failed to load calendar events')
-      setEvents([])
-    } finally {
-      setLoading(false)
-    }
+  // SWR: Events (dynamic key based on date range + filters)
+  const eventsKey = useMemo(() => {
+    const startDate = startOfMonth(currentDate)
+    const endDate = endOfMonth(currentDate)
+    const params = new URLSearchParams()
+    params.set('start_date', format(startDate, 'yyyy-MM-dd'))
+    params.set('end_date', format(endDate, 'yyyy-MM-dd'))
+    params.set('page', '1')
+    if (selectedEventType) params.set('event_type_id', String(selectedEventType))
+    if (selectedLocation) params.set('location_id', String(selectedLocation))
+    return publicEventKeys.list(params.toString())
   }, [currentDate, selectedEventType, selectedLocation])
 
-  // Fetch events when dependencies change (skip initial if we have server data)
-  useEffect(() => {
-    // On first render, skip fetch if we have initial data from server
-    if (isInitialRender.current && hasInitialEvents.current) {
-      isInitialRender.current = false
-      return
-    }
-    isInitialRender.current = false
+  const { data: eventsData, error: eventsError, isLoading } = useSWR<EventsResponse>(
+    eventsKey,
+    publicFetcher,
+    { fallbackData: initialEvents ? { data: initialEvents, meta: { current_page: 1, total: initialEvents.length, per_page: 100 } } : undefined }
+  )
 
-    fetchEvents()
-  }, [fetchEvents])
+  const eventTypes = eventTypesData?.data ?? []
+  const locations = locationsData?.data ?? []
+
+  // Transform events to calendar format
+  const calendarEvents = useMemo(
+    () => (eventsData?.data ?? []).map(transformToCalendarEvent),
+    [eventsData]
+  )
 
   // Handle date navigation
   const handleNavigate = useCallback((date: Date): void => {
@@ -158,15 +130,12 @@ export const useCalendarEvents = (
     setSelectedLocation(locationId)
   }, [])
 
-  // Transform events to calendar format
-  const calendarEvents = events.map(transformToCalendarEvent)
-
   return {
     calendarEvents,
     eventTypes,
     locations,
-    loading,
-    error,
+    loading: isLoading,
+    error: eventsError?.message ?? null,
     currentDate,
     currentView,
     handleNavigate,

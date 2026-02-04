@@ -1,11 +1,23 @@
-import { act,renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { SWRConfig } from 'swr';
 
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
-import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
 import type { InternalCalendarFilters } from '@/features/internal-calendar/types/internal-calendar.types';
 
-// Mock the service
-jest.mock('../../services/internalCalendar.service');
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}));
+
+import { apiFetcher } from '@/lib/swr/fetcher';
+
+const mockedFetcher = apiFetcher as jest.Mock;
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+);
 
 describe('useInternalCalendarEvents', () => {
   beforeEach(() => {
@@ -13,22 +25,16 @@ describe('useInternalCalendarEvents', () => {
   });
 
   test('should initialize with loading state', () => {
-    // Arrange
-    (internalCalendarService.getEvents as jest.Mock).mockImplementation(
-      () => new Promise(() => {}) // Never resolves
-    );
+    mockedFetcher.mockImplementation(() => new Promise(() => {}));
 
-    // Act
-    const { result } = renderHook(() => useInternalCalendarEvents());
+    const { result } = renderHook(() => useInternalCalendarEvents(), { wrapper });
 
-    // Assert
     expect(result.current.loading).toBe(true);
     expect(result.current.events).toEqual([]);
     expect(result.current.error).toBeNull();
   });
 
   test('should fetch events on mount and update state', async () => {
-    // Arrange
     const mockEvents = [
       {
         id: 1,
@@ -47,29 +53,24 @@ describe('useInternalCalendarEvents', () => {
         organization: { id: 1, name: 'Test Org' },
       },
     ];
-    (internalCalendarService.getEvents as jest.Mock).mockResolvedValue(mockEvents);
+    mockedFetcher.mockResolvedValue({ data: mockEvents });
 
-    // Act
-    const { result } = renderHook(() => useInternalCalendarEvents());
+    const { result } = renderHook(() => useInternalCalendarEvents(), { wrapper });
 
-    // Assert - Initial state
     expect(result.current.loading).toBe(true);
 
-    // Wait for async operation
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    // Assert - Final state
     expect(result.current.events).toEqual(mockEvents);
     expect(result.current.events).toHaveLength(2);
     expect(result.current.events[0].title).toBe('Event 1');
     expect(result.current.error).toBeNull();
-    expect(internalCalendarService.getEvents).toHaveBeenCalled();
+    expect(mockedFetcher).toHaveBeenCalled();
   });
 
   test('should fetch events with filters when provided', async () => {
-    // Arrange
     const mockFilters: InternalCalendarFilters = {
       status: 'published',
       start_date: '2025-12-01',
@@ -85,42 +86,38 @@ describe('useInternalCalendarEvents', () => {
         organization: { id: 2, name: 'Org 2' },
       },
     ];
-    (internalCalendarService.getEvents as jest.Mock).mockResolvedValue(mockEvents);
+    mockedFetcher.mockResolvedValue({ data: mockEvents });
 
-    // Act
-    const { result } = renderHook(() => useInternalCalendarEvents(mockFilters));
+    const { result } = renderHook(() => useInternalCalendarEvents(mockFilters), { wrapper });
 
-    // Wait for async operation
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    // Assert
-    expect(internalCalendarService.getEvents).toHaveBeenCalledWith(mockFilters);
+    expect(mockedFetcher).toHaveBeenCalledWith(
+      expect.stringContaining('status=published')
+    );
+    expect(mockedFetcher).toHaveBeenCalledWith(
+      expect.stringContaining('start_date=2025-12-01')
+    );
     expect(result.current.events).toEqual(mockEvents);
     expect(result.current.events).toHaveLength(1);
   });
 
   test('should handle fetch error', async () => {
-    // Arrange
-    const mockError = new Error('Failed to fetch events');
-    (internalCalendarService.getEvents as jest.Mock).mockRejectedValue(mockError);
+    mockedFetcher.mockRejectedValue(new Error('Failed to fetch events'));
 
-    // Act
-    const { result } = renderHook(() => useInternalCalendarEvents());
+    const { result } = renderHook(() => useInternalCalendarEvents(), { wrapper });
 
-    // Wait for async operation
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    // Assert
     expect(result.current.events).toEqual([]);
     expect(result.current.error).toBe('Failed to fetch events');
   });
 
   test('should refetch events when refetch is called', async () => {
-    // Arrange
     const mockEvents = [
       {
         id: 4,
@@ -131,43 +128,22 @@ describe('useInternalCalendarEvents', () => {
         organization: { id: 1, name: 'Test Org' },
       },
     ];
-    (internalCalendarService.getEvents as jest.Mock).mockResolvedValue(mockEvents);
+    mockedFetcher.mockResolvedValue({ data: mockEvents });
 
-    // Act
-    const { result } = renderHook(() => useInternalCalendarEvents());
+    const { result } = renderHook(() => useInternalCalendarEvents(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    // Clear previous calls
-    jest.clearAllMocks();
+    const callCount = mockedFetcher.mock.calls.length;
 
-    // Refetch
     await act(async () => {
       await result.current.refetch();
     });
 
-    // Assert
-    expect(internalCalendarService.getEvents).toHaveBeenCalledTimes(1);
+    expect(mockedFetcher.mock.calls.length).toBeGreaterThan(callCount);
     expect(result.current.events).toEqual(mockEvents);
     expect(result.current.events).toHaveLength(1);
-  });
-
-  test('should handle non-Error thrown values', async () => {
-    // Arrange
-    (internalCalendarService.getEvents as jest.Mock).mockRejectedValue('String error');
-
-    // Act
-    const { result } = renderHook(() => useInternalCalendarEvents());
-
-    // Wait for async operation
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    // Assert
-    expect(result.current.error).toBe('Failed to fetch internal calendar events');
-    expect(result.current.events).toEqual([]);
   });
 });

@@ -1,29 +1,50 @@
 /**
  * useRegistrationRequests Hook Tests
- * Tests for admin registration requests management
+ * Tests for admin registration requests management with SWR
  *
  * Test patterns used:
- * - All tests properly await initial data fetch to complete
+ * - SWR is mocked via apiFetcher mock
+ * - SWRConfig wrapper with fresh cache for each test
+ * - Service is mocked for mutation operations only
  * - All async operations are wrapped in act()
- * - waitFor is used to wait for state transitions
+ * - waitFor is used to wait for SWR loading to complete
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
+import type { ReactNode } from 'react'
+import { SWRConfig } from 'swr'
 
 import { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
 import registrationRequestService from '@/features/registration-requests/services/registration-request.service'
 import { RegistrationRequest, RegistrationRequestDetail } from '@/features/registration-requests/types/registration-request.types'
 
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}))
+
+jest.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    isLoading: false,
+  }),
+}))
+
 jest.mock('../../services/registration-request.service')
 
+import { apiFetcher } from '@/lib/swr/fetcher'
+
+const mockedFetcher = apiFetcher as jest.Mock
 const mockService = registrationRequestService as jest.Mocked<typeof registrationRequestService>
 
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+    {children}
+  </SWRConfig>
+)
+
 /**
- * Helper function to wait for initial data fetch to complete
- * This ensures the hook's useEffect has finished before running test assertions
- * @param result
- * @param result.current
+ * Helper function to wait for SWR to finish loading
  */
-const waitForInitialFetch = async (result: { current: ReturnType<typeof useRegistrationRequests> }) => {
+const waitForLoaded = async (result: { current: ReturnType<typeof useRegistrationRequests> }) => {
   await waitFor(() => {
     expect(result.current.loading).toBe(false)
   })
@@ -71,8 +92,8 @@ describe('useRegistrationRequests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    // Default mock for getAll to prevent unhandled promise rejections
-    mockService.getAll.mockResolvedValue([])
+    // Default mock for apiFetcher to return empty list
+    mockedFetcher.mockResolvedValue({ success: true, data: [] })
   })
 
   afterEach(() => {
@@ -81,43 +102,36 @@ describe('useRegistrationRequests', () => {
 
   describe('initial state and fetching', () => {
     it('should fetch requests on mount and update state correctly', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      // Initial state before fetch completes
-      expect(result.current.loading).toBe(true)
-      expect(result.current.requests).toEqual([])
-      expect(result.current.error).toBeNull()
+      await waitForLoaded(result)
 
-      // Wait for fetch to complete
-      await waitForInitialFetch(result)
-
-      // Verify final state
       expect(result.current.requests).toEqual([mockRequest])
       expect(result.current.requests).toHaveLength(1)
       expect(result.current.error).toBeNull()
-      expect(mockService.getAll).toHaveBeenCalledTimes(1)
+      expect(mockedFetcher).toHaveBeenCalled()
     })
 
     it('should handle fetch error and set error message', async () => {
-      mockService.getAll.mockRejectedValueOnce(new Error('Network error'))
+      mockedFetcher.mockRejectedValue(new Error('Network error'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       expect(result.current.requests).toEqual([])
-      expect(result.current.error).toBe('Error al cargar las solicitudes')
+      expect(result.current.error).toBe('Network error')
       expect(result.current.loading).toBe(false)
     })
 
     it('should return empty array when no requests exist', async () => {
-      mockService.getAll.mockResolvedValueOnce([])
+      mockedFetcher.mockResolvedValue({ success: true, data: [] })
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       expect(result.current.requests).toEqual([])
       expect(result.current.requests).toHaveLength(0)
@@ -125,28 +139,26 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should initialize with default display filter', async () => {
-      mockService.getAll.mockResolvedValueOnce([])
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      const { result } = renderHook(() => useRegistrationRequests())
-
-      // Check initial value (before fetch completes)
+      // Check initial value
       expect(result.current.displayFilter).toBe('default')
       expect(result.current.selectedRequest).toBeNull()
       expect(result.current.actionLoading).toBe(false)
       expect(result.current.detailLoading).toBe(false)
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
     })
   })
 
   describe('selectRequest', () => {
     it('should load request details when selecting a valid id', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.getById.mockResolvedValueOnce(mockRequestDetail)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       await act(async () => {
         await result.current.selectRequest(1)
@@ -160,12 +172,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should clear selection when passing null', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.getById.mockResolvedValueOnce(mockRequestDetail)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       // First select a request
       await act(async () => {
@@ -185,12 +197,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should handle detail fetch error gracefully', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.getById.mockRejectedValueOnce(new Error('Not found'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       await act(async () => {
         await result.current.selectRequest(999)
@@ -203,13 +215,24 @@ describe('useRegistrationRequests', () => {
   })
 
   describe('approveRequest', () => {
-    it('should approve request and update local state with new ids', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+    it('should approve request and revalidate via SWR', async () => {
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.approve.mockResolvedValueOnce({ user_id: 10, organization_id: 5 })
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
+
+      // After approve, SWR will revalidate - mock the revalidation response
+      const approvedRequest = {
+        ...mockRequest,
+        status: 'approved' as const,
+        user_id: 10,
+        organization_id: 5,
+        user_status: 'active' as const,
+        organization_status: 'active' as const,
+      }
+      mockedFetcher.mockResolvedValue({ success: true, data: [approvedRequest] })
 
       let success = false
       await act(async () => {
@@ -226,12 +249,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should handle approve error and not modify request', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.approve.mockRejectedValueOnce(new Error('Cannot approve'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       const originalStatus = result.current.requests[0].status
 
@@ -247,13 +270,13 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should clear selection after approving the currently selected request', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.getById.mockResolvedValueOnce(mockRequestDetail)
       mockService.approve.mockResolvedValueOnce({ user_id: 10, organization_id: 5 })
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       // Select the request first
       await act(async () => {
@@ -273,15 +296,23 @@ describe('useRegistrationRequests', () => {
   })
 
   describe('rejectRequest', () => {
-    it('should reject request with reason and update local state', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+    it('should reject request with reason and revalidate via SWR', async () => {
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.reject.mockResolvedValueOnce(undefined)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       const rejectionReason = 'Informacion incompleta'
+
+      // After reject, SWR will revalidate
+      const rejectedRequest = {
+        ...mockRequest,
+        status: 'rejected' as const,
+        rejection_reason: rejectionReason,
+      }
+      mockedFetcher.mockResolvedValue({ success: true, data: [rejectedRequest] })
 
       let success = false
       await act(async () => {
@@ -296,12 +327,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should handle reject error and preserve original state', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.reject.mockRejectedValueOnce(new Error('Cannot reject'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       const originalStatus = result.current.requests[0].status
 
@@ -317,7 +348,7 @@ describe('useRegistrationRequests', () => {
   })
 
   describe('suspendRequest', () => {
-    it('should suspend an approved request and update user status', async () => {
+    it('should suspend an approved request and revalidate via SWR', async () => {
       const approvedRequest: RegistrationRequest = {
         ...mockRequest,
         status: 'approved',
@@ -332,12 +363,15 @@ describe('useRegistrationRequests', () => {
         organization_status: 'suspended',
       }
 
-      mockService.getAll.mockResolvedValueOnce([approvedRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [approvedRequest] })
       mockService.suspend.mockResolvedValueOnce(suspendedRequest)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
+
+      // After suspend, SWR will revalidate
+      mockedFetcher.mockResolvedValue({ success: true, data: [suspendedRequest] })
 
       let success = false
       await act(async () => {
@@ -351,12 +385,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should handle suspend error gracefully', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.suspend.mockRejectedValueOnce(new Error('Cannot suspend'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       let success = true
       await act(async () => {
@@ -369,7 +403,7 @@ describe('useRegistrationRequests', () => {
   })
 
   describe('unsuspendRequest', () => {
-    it('should unsuspend a suspended request and restore active status', async () => {
+    it('should unsuspend a suspended request and revalidate via SWR', async () => {
       const suspendedRequest: RegistrationRequest = {
         ...mockRequest,
         status: 'approved',
@@ -384,12 +418,15 @@ describe('useRegistrationRequests', () => {
         organization_status: 'active',
       }
 
-      mockService.getAll.mockResolvedValueOnce([suspendedRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [suspendedRequest] })
       mockService.unsuspend.mockResolvedValueOnce(reactivatedRequest)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
+
+      // After unsuspend, SWR will revalidate
+      mockedFetcher.mockResolvedValue({ success: true, data: [reactivatedRequest] })
 
       let success = false
       await act(async () => {
@@ -403,12 +440,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should handle unsuspend error gracefully', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.unsuspend.mockRejectedValueOnce(new Error('Cannot unsuspend'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       let success = true
       await act(async () => {
@@ -421,15 +458,19 @@ describe('useRegistrationRequests', () => {
   })
 
   describe('deleteRequest', () => {
-    it('should soft delete a request and update is_deleted flag', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+    it('should soft delete a request and revalidate via SWR', async () => {
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.delete.mockResolvedValueOnce(undefined)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       expect(result.current.requests[0].is_deleted).toBe(false)
+
+      // After delete, SWR will revalidate
+      const deletedRequest = { ...mockRequest, is_deleted: true }
+      mockedFetcher.mockResolvedValue({ success: true, data: [deletedRequest] })
 
       let success = false
       await act(async () => {
@@ -442,12 +483,12 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should handle delete error and preserve original state', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.delete.mockRejectedValueOnce(new Error('Cannot delete'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       let success = true
       await act(async () => {
@@ -460,13 +501,13 @@ describe('useRegistrationRequests', () => {
     })
 
     it('should clear selection after deleting the currently selected request', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
       mockService.getById.mockResolvedValueOnce(mockRequestDetail)
       mockService.delete.mockResolvedValueOnce(undefined)
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       // Select the request first
       await act(async () => {
@@ -485,35 +526,43 @@ describe('useRegistrationRequests', () => {
   })
 
   describe('refresh', () => {
-    it('should refetch all requests from the server', async () => {
-      mockService.getAll
-        .mockResolvedValueOnce([mockRequest])
-        .mockResolvedValueOnce([mockRequest, mockRequest2])
+    it('should revalidate SWR data when refresh is called', async () => {
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       expect(result.current.requests).toHaveLength(1)
+
+      // Update mock for revalidation
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest, mockRequest2] })
 
       await act(async () => {
         await result.current.refresh()
       })
 
-      expect(result.current.requests).toHaveLength(2)
-      expect(mockService.getAll).toHaveBeenCalledTimes(2)
+      await waitFor(() => {
+        expect(result.current.requests).toHaveLength(2)
+      })
     })
   })
 
   describe('clearError', () => {
     it('should clear the error state', async () => {
-      mockService.getAll.mockRejectedValueOnce(new Error('Network error'))
+      mockedFetcher.mockResolvedValue({ success: true, data: [mockRequest] })
+      mockService.approve.mockRejectedValueOnce(new Error('Cannot approve'))
 
-      const { result } = renderHook(() => useRegistrationRequests())
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
-      expect(result.current.error).toBe('Error al cargar las solicitudes')
+      // Trigger an error via a failed mutation
+      await act(async () => {
+        await result.current.approveRequest(1)
+      })
+
+      expect(result.current.error).toBe('Error al aprobar la solicitud')
 
       act(() => {
         result.current.clearError()
@@ -525,11 +574,9 @@ describe('useRegistrationRequests', () => {
 
   describe('setDisplayFilter', () => {
     it('should update display filter state', async () => {
-      mockService.getAll.mockResolvedValueOnce([mockRequest])
+      const { result } = renderHook(() => useRegistrationRequests(), { wrapper })
 
-      const { result } = renderHook(() => useRegistrationRequests())
-
-      await waitForInitialFetch(result)
+      await waitForLoaded(result)
 
       expect(result.current.displayFilter).toBe('default')
 

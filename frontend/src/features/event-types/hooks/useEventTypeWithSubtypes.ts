@@ -2,11 +2,10 @@
  * useEventTypeWithSubtypes Hook
  * Manages event types with lazy-loaded subtypes and expandable table state
  * Combines event type management with inline subtype CRUD operations
- *
- * Created: January 2026
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useSWR from 'swr';
 
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -15,27 +14,17 @@ import {
   getEventSubtypes,
   updateEventSubtype,
 } from '@/features/event-types/services/eventSubtype.service';
-import {
-  deleteEventType,
-  getEventTypes,
-} from '@/features/event-types/services/eventType.service';
-import { PaginationMeta, usePaginatedData } from '@/hooks/usePaginatedData';
+import { deleteEventType } from '@/features/event-types/services/eventType.service';
+import { useDebounce } from '@/hooks/useDebounce';
+import { apiFetcher, eventTypeKeys } from '@/lib/swr';
+import { PaginationMeta } from '@/types/api-response.types';
 import {
   CreateEventSubtypeData,
   EventSubtype,
   EventType,
   EventTypeFilterStatus,
-  EventTypeQueryParams,
   UpdateEventSubtypeData,
 } from '@/types/eventType.types';
-
-interface EventTypeFilters {
-  search?: string;
-  page?: number;
-  per_page?: number;
-  status?: EventTypeFilterStatus;
-  [key: string]: string | number | boolean | undefined;
-}
 
 interface UseEventTypeWithSubtypesReturn {
   // Event Types data
@@ -91,82 +80,52 @@ interface UseEventTypeWithSubtypesReturn {
 }
 
 export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
-  // Initial filters
-  const initialFilters: EventTypeFilters = {
-    page: 1,
-    per_page: 10,
-    status: 'all',
-  };
-
-  // Check authentication status
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Expansion state - use Set for O(1) lookups
-  const [expandedTypeIds, setExpandedTypeIds] = useState<Set<number>>(
-    () => new Set()
-  );
+  // Filter state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<EventTypeFilterStatus>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 10;
+
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  // Expansion state
+  const [expandedTypeIds, setExpandedTypeIds] = useState<Set<number>>(() => new Set());
 
   // Subtypes cache by event type ID
-  const [subtypesByType, setSubtypesByType] = useState<
-    Map<number, EventSubtype[]>
-  >(() => new Map());
+  const [subtypesByType, setSubtypesByType] = useState<Map<number, EventSubtype[]>>(() => new Map());
 
   // Loading states for subtypes
-  const [loadingSubtypes, setLoadingSubtypes] = useState<Set<number>>(
-    () => new Set()
-  );
+  const [loadingSubtypes, setLoadingSubtypes] = useState<Set<number>>(() => new Set());
 
   // Track if initial expansion from URL has been applied
   const initialExpandedAppliedRef = useRef(false);
 
-  // Service function adapter for Laravel API parameters
-  const fetchEventTypes = useCallback(async (filters: EventTypeFilters) => {
-    const params: EventTypeQueryParams = {
-      page: filters.page || 1,
-      per_page: filters.per_page || 10,
-      search: filters.search,
-      active:
-        filters.status === 'active'
-          ? true
-          : filters.status === 'inactive'
-            ? false
-            : undefined,
-    };
+  // Build SWR key from filters
+  const swrKey = useMemo(() => {
+    if (!isAuthenticated || authLoading) return null;
+    const params = new URLSearchParams();
+    params.set('page', String(currentPage));
+    params.set('per_page', String(perPage));
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (filterStatus === 'active') params.set('active', 'true');
+    else if (filterStatus === 'inactive') params.set('active', 'false');
+    return eventTypeKeys.list(params.toString());
+  }, [isAuthenticated, authLoading, currentPage, debouncedSearch, filterStatus]);
 
-    const response = await getEventTypes(params);
-    return response;
-  }, []);
+  const { data, error, isLoading, mutate } = useSWR<{ data: EventType[]; meta: PaginationMeta }>(
+    swrKey,
+    apiFetcher,
+  );
 
-  // Use the generic paginated data hook
-  const {
-    data: eventTypes,
-    pagination,
-    filters,
-    isLoading,
-    error,
-    setFilters,
-    changePage,
-    refreshData,
-    addItem: addEventType,
-    updateItem: updateEventType,
-    removeItem: removeEventType,
-  } = usePaginatedData<EventType, EventTypeFilters>({
-    fetchFn: fetchEventTypes,
-    initialFilters,
-    debounceMs: 300,
-    autoLoad: isAuthenticated && !authLoading,
-  });
-
-  // Derived state
-  const searchTerm = filters.search || '';
-  const filterStatus = filters.status || 'all';
-  const currentPage = filters.page || 1;
+  const eventTypes = useMemo(() => data?.data ?? [], [data]);
+  const pagination = data?.meta ?? null;
 
   // Set initial expanded IDs from URL (called once on mount)
   const setInitialExpandedIds = useCallback((ids: number[]) => {
     if (initialExpandedAppliedRef.current) return;
     initialExpandedAppliedRef.current = true;
-
     if (ids.length > 0) {
       setExpandedTypeIds(new Set(ids));
     }
@@ -176,7 +135,6 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
   useEffect(() => {
     if (!eventTypes.length) return;
 
-    // For each expanded type that doesn't have subtypes cached, load them
     const loadMissingSubtypes = async () => {
       const expandedArray = Array.from(expandedTypeIds);
       const missingTypeIds = expandedArray.filter(
@@ -188,7 +146,6 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
 
       if (missingTypeIds.length === 0) return;
 
-      // Load all missing subtypes in parallel
       await Promise.all(
         missingTypeIds.map(async (typeId) => {
           setLoadingSubtypes((prev) => new Set([...prev, typeId]));
@@ -209,21 +166,18 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
     loadMissingSubtypes();
   }, [eventTypes, expandedTypeIds, subtypesByType, loadingSubtypes]);
 
-  // Toggle expand with lazy loading (no mutation - create new Sets)
+  // Toggle expand with lazy loading
   const toggleExpand = useCallback(
     async (typeId: number) => {
       if (expandedTypeIds.has(typeId)) {
-        // Collapse - create new Set without the ID
         setExpandedTypeIds((prev) => {
           const next = new Set(prev);
           next.delete(typeId);
           return next;
         });
       } else {
-        // Expand - create new Set with the ID
         setExpandedTypeIds((prev) => new Set([...prev, typeId]));
 
-        // Load subtypes if not cached
         if (!subtypesByType.has(typeId) && !loadingSubtypes.has(typeId)) {
           setLoadingSubtypes((prev) => new Set([...prev, typeId]));
           try {
@@ -243,71 +197,94 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
   );
 
   // Event type handlers
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setFilters({ search: value, page: 1 });
-    },
-    [setFilters]
-  );
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  }, []);
 
-  const handleFilterChange = useCallback(
-    (filter: EventTypeFilterStatus) => {
-      setFilters({ status: filter, page: 1 });
-    },
-    [setFilters]
-  );
+  const handleFilterChange = useCallback((filter: EventTypeFilterStatus) => {
+    setFilterStatus(filter);
+    setCurrentPage(1);
+  }, []);
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      changePage(page);
-    },
-    [changePage]
-  );
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const refreshData = useCallback(() => {
+    mutate();
+  }, [mutate]);
 
   // Delete event type with optimistic update
   const handleDeleteEventType = useCallback(
     async (eventTypeId: number) => {
-      try {
-        // Optimistic update
-        removeEventType(eventTypeId);
+      // Optimistic update
+      await mutate(
+        (current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            data: current.data.filter((et) => et.id !== eventTypeId),
+          };
+        },
+        { revalidate: false }
+      );
 
-        // Collapse if expanded
-        if (expandedTypeIds.has(eventTypeId)) {
-          setExpandedTypeIds((prev) => {
-            const next = new Set(prev);
-            next.delete(eventTypeId);
-            return next;
-          });
-        }
-
-        // Remove from subtypes cache
-        setSubtypesByType((prev) => {
-          const next = new Map(prev);
+      // Collapse if expanded
+      if (expandedTypeIds.has(eventTypeId)) {
+        setExpandedTypeIds((prev) => {
+          const next = new Set(prev);
           next.delete(eventTypeId);
           return next;
         });
+      }
 
-        // API call
+      // Remove from subtypes cache
+      setSubtypesByType((prev) => {
+        const next = new Map(prev);
+        next.delete(eventTypeId);
+        return next;
+      });
+
+      try {
         await deleteEventType(eventTypeId);
-
-        // Refresh to get updated pagination
-        refreshData();
+        mutate();
       } catch {
-        // Revert optimistic update by refreshing
-        refreshData();
+        mutate();
         throw new Error('Error al eliminar el tipo de evento');
       }
     },
-    [removeEventType, expandedTypeIds, refreshData]
+    [mutate, expandedTypeIds]
   );
+
+  // Optimistic update helpers
+  const addEventType = useCallback((eventType: EventType) => {
+    mutate(
+      (current) => {
+        if (!current) return current;
+        return { ...current, data: [eventType, ...current.data] };
+      },
+      { revalidate: false }
+    );
+  }, [mutate]);
+
+  const updateEventType = useCallback((id: number, updatedFields: Partial<EventType>) => {
+    mutate(
+      (current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          data: current.data.map((et) => (et.id === id ? { ...et, ...updatedFields } : et)),
+        };
+      },
+      { revalidate: false }
+    );
+  }, [mutate]);
 
   // Subtype CRUD operations
   const handleCreateSubtype = useCallback(
-    async (
-      typeId: number,
-      data: CreateEventSubtypeData
-    ): Promise<EventSubtype> => {
-      const newSubtype = await createEventSubtype(typeId, data);
+    async (typeId: number, subData: CreateEventSubtypeData): Promise<EventSubtype> => {
+      const newSubtype = await createEventSubtype(typeId, subData);
 
       // Update cache
       setSubtypesByType((prev) => {
@@ -318,34 +295,34 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
       });
 
       // Update event type's subtypes_count
-      updateEventType(typeId, {
-        subtypes_count:
-          (eventTypes.find((et) => et.id === typeId)?.subtypes_count || 0) + 1,
-      });
+      mutate(
+        (current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            data: current.data.map((et) =>
+              et.id === typeId
+                ? { ...et, subtypes_count: (et.subtypes_count || 0) + 1 }
+                : et
+            ),
+          };
+        },
+        { revalidate: false }
+      );
 
       return newSubtype;
     },
-    [eventTypes, updateEventType]
+    [mutate]
   );
 
   const handleUpdateSubtype = useCallback(
-    async (
-      subtype: EventSubtype,
-      data: UpdateEventSubtypeData
-    ): Promise<EventSubtype> => {
-      const updated = await updateEventSubtype(
-        subtype.event_type_id,
-        subtype.id,
-        data
-      );
+    async (subtype: EventSubtype, subData: UpdateEventSubtypeData): Promise<EventSubtype> => {
+      const updated = await updateEventSubtype(subtype.event_type_id, subtype.id, subData);
 
-      // Update cache
       setSubtypesByType((prev) => {
         const next = new Map(prev);
         const existing = next.get(subtype.event_type_id) || [];
-        const updatedList = existing.map((st) =>
-          st.id === subtype.id ? updated : st
-        );
+        const updatedList = existing.map((st) => (st.id === subtype.id ? updated : st));
         next.set(subtype.event_type_id, updatedList);
         return next;
       });
@@ -363,20 +340,25 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
       setSubtypesByType((prev) => {
         const next = new Map(prev);
         const existing = next.get(typeId) || [];
-        next.set(
-          typeId,
-          existing.filter((st) => st.id !== subtype.id)
-        );
+        next.set(typeId, existing.filter((st) => st.id !== subtype.id));
         return next;
       });
 
       // Update event type's subtypes_count
-      updateEventType(typeId, {
-        subtypes_count: Math.max(
-          0,
-          (eventTypes.find((et) => et.id === typeId)?.subtypes_count || 1) - 1
-        ),
-      });
+      mutate(
+        (current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            data: current.data.map((et) =>
+              et.id === typeId
+                ? { ...et, subtypes_count: Math.max(0, (et.subtypes_count || 1) - 1) }
+                : et
+            ),
+          };
+        },
+        { revalidate: false }
+      );
 
       try {
         await deleteEventSubtype(typeId, subtype.id);
@@ -387,7 +369,7 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
         throw new Error('Error al eliminar el subtipo de evento');
       }
     },
-    [eventTypes, updateEventType]
+    [mutate]
   );
 
   // Calculate statistics
@@ -395,54 +377,32 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
     const total = pagination?.total || 0;
     const active = eventTypes.filter((et) => et.is_active).length;
     const inactive = eventTypes.filter((et) => !et.is_active).length;
-
-    return {
-      total,
-      active,
-      inactive,
-    };
+    return { total, active, inactive };
   }, [eventTypes, pagination]);
 
   return {
-    // Event Types data
     eventTypes,
     pagination,
     isLoading,
-    error,
-
-    // Filter state
+    error: error?.message ?? null,
     searchTerm,
     filterStatus,
     currentPage,
-
-    // Event Type handlers
     handleSearchChange,
     handleFilterChange,
     handlePageChange,
     handleDeleteEventType,
     refreshData,
-
-    // Optimistic updates
     addEventType,
     updateEventType,
-
-    // Statistics
     stats,
-
-    // Subtypes
     subtypesByType,
     loadingSubtypes,
-
-    // Expansion
     expandedTypeIds,
     toggleExpand,
-
-    // Subtype CRUD
     handleCreateSubtype,
     handleUpdateSubtype,
     handleDeleteSubtype,
-
-    // URL sync
     setInitialExpandedIds,
   };
 }

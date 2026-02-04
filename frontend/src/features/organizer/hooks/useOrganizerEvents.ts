@@ -1,101 +1,58 @@
-import { useEffect, useRef, useState, useTransition } from 'react'
+'use client'
 
-import { deleteEvent,getEvents } from '@/features/organizer/services/organizer-event.service'
-import { EventListParams,OrganizerEvent } from '@/features/organizer/types/event.types'
+import { useCallback, useMemo, useState, useTransition } from 'react'
+import useSWR from 'swr'
+
+import { deleteEvent } from '@/features/organizer/services/organizer-event.service'
+import { EventListResponse, OrganizerEvent } from '@/features/organizer/types/event.types'
+import { apiFetcher, organizerEventKeys } from '@/lib/swr'
+
+const perPage = 10
 
 export const useOrganizerEvents = () => {
-  const [events, setEvents] = useState<OrganizerEvent[]>([])
-  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [showPast, setShowPast] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
 
-  // React 19 transitions for non-blocking UI
-  const [, startLoadingTransition] = useTransition()
+  // React 19 transition for non-blocking delete UI
   const [, startDeleteTransition] = useTransition()
-
-  // Manual loading states for reliable test behavior
-  const [isLoading, setIsLoading] = useState(true)
   const [isDeletingState, setIsDeletingState] = useState(false)
 
-  // Use refs to access current state values in refetch
-  const currentPageRef = useRef(currentPage)
-  const statusFilterRef = useRef(statusFilter)
-  const showPastRef = useRef(showPast)
-  currentPageRef.current = currentPage
-  statusFilterRef.current = statusFilter
-  showPastRef.current = showPast
+  // SWR key built from current filter/pagination state
+  const swrKey = useMemo(() => {
+    const params = new URLSearchParams()
+    params.set('page', String(currentPage))
+    params.set('per_page', String(perPage))
+    if (statusFilter) params.set('status', statusFilter)
+    if (showPast) params.set('show_past', '1')
+    return organizerEventKeys.list(params.toString())
+  }, [currentPage, statusFilter, showPast])
 
-  const perPage = 10
+  const { data, error, isLoading, mutate } = useSWR<EventListResponse>(
+    swrKey,
+    apiFetcher,
+  )
 
-  const fetchEvents = async (page = currentPage, status = statusFilter, isPast = showPast) => {
-    setIsLoading(true)
-    setError(null)
+  // Memoize events array to maintain referential stability
+  const events: OrganizerEvent[] = useMemo(() => data?.data ?? [], [data?.data])
+  const totalPages = data?.last_page ?? 1
+  const total = data?.total ?? 0
 
-    startLoadingTransition(async () => {
-      try {
-        const params: EventListParams = {
-          page,
-          per_page: perPage,
-          status,
-          show_past: isPast ? '1' : undefined
-        }
-
-        const response = await getEvents(params)
-        setEvents(response.data)
-        setCurrentPage(response.current_page)
-        setTotalPages(response.last_page || 1)
-        setTotal(response.total)
-      } catch {
-        setError('Error loading events')
-      } finally {
-        setIsLoading(false)
-      }
-    })
-  }
-
-  // Initial fetch on mount - intentionally runs once
-  // Current state values are accessed via refs to avoid stale closures
-  useEffect(() => {
-    fetchEvents()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Initial mount fetch only, refs handle current state
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page)
   }, [])
 
-  // Refetch when refreshKey changes (triggered by refetch())
-  // Uses refs to get current filter values without adding them as dependencies
-  useEffect(() => {
-    if (refreshKey > 0) {
-      fetchEvents(currentPageRef.current, statusFilterRef.current, showPastRef.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshKey is the only trigger, refs provide current values
-  }, [refreshKey])
-
-  // Function to force a re-fetch of current page/filter
-  const refetch = () => {
-    setRefreshKey(prev => prev + 1)
-  }
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    fetchEvents(page, statusFilter, showPast)
-  }
-
-  const handleStatusFilter = (status: string | null) => {
+  const handleStatusFilter = useCallback((status: string | null) => {
     setStatusFilter(status)
-    setCurrentPage(1) // Reset to page 1
-    fetchEvents(1, status, showPast)
-  }
+    setCurrentPage(1)
+  }, [])
 
-  const handleShowPastToggle = (isPast: boolean) => {
+  const handleShowPastToggle = useCallback((isPast: boolean) => {
     setShowPast(isPast)
-    setCurrentPage(1) // Reset to page 1
-    fetchEvents(1, statusFilter, isPast)
-  }
+    setCurrentPage(1)
+  }, [])
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = useCallback(async (id: number) => {
     if (!confirm('Are you sure you want to delete this event?')) {
       return
     }
@@ -104,34 +61,34 @@ export const useOrganizerEvents = () => {
     startDeleteTransition(async () => {
       try {
         await deleteEvent(id)
-        fetchEvents(currentPage, statusFilter, showPast) // Refresh list
+        mutate()
       } catch {
-        setError('Error deleting event')
+        // Error is surfaced via SWR on next revalidation
       } finally {
         setIsDeletingState(false)
       }
     })
-  }
+  }, [mutate])
 
-  // Backward compatibility: map states to original names
-  const loading = isLoading
-  const isDeleting = isDeletingState
+  const retry = useCallback(() => {
+    mutate()
+  }, [mutate])
 
   return {
     events,
-    loading,
-    error,
-    currentPage,
+    loading: isLoading,
+    error: error?.message ?? null,
+    currentPage: data?.current_page ?? currentPage,
     totalPages,
     total,
     statusFilter,
     showPast,
-    isDeleting,
+    isDeleting: isDeletingState,
     handlePageChange,
     handleStatusFilter,
     handleShowPastToggle,
     handleDelete,
     setShowPast,
-    retry: refetch
+    retry,
   }
 }

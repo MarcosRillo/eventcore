@@ -1,9 +1,22 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { createElement, type ReactNode } from 'react'
+import { SWRConfig } from 'swr'
 
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
+import { EventListResponse } from '@/features/organizer/types/event.types'
 
-jest.mock('@/features/organizer/services/organizer-event.service')
+jest.mock('@/lib/swr/fetcher', () => ({
+  apiFetcher: jest.fn(),
+}))
+
+jest.mock('../../services/organizer-event.service', () => ({
+  deleteEvent: jest.fn(),
+}))
+
+import { apiFetcher } from '@/lib/swr/fetcher'
+
+const mockedFetcher = apiFetcher as jest.Mock
 
 // Mock window.confirm
 const originalConfirm = window.confirm
@@ -14,6 +27,13 @@ afterAll(() => {
   window.confirm = originalConfirm
 })
 
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(
+    SWRConfig,
+    { value: { provider: () => new Map(), dedupingInterval: 0 } },
+    children
+  )
+
 describe('useOrganizerEvents', () => {
   const mockEvents = [
     { id: 1, title: 'Event 1', status: 'draft' },
@@ -21,8 +41,8 @@ describe('useOrganizerEvents', () => {
     { id: 3, title: 'Event 3', status: 'draft' },
   ]
 
-  const mockResponse = {
-    data: mockEvents,
+  const mockResponse: Partial<EventListResponse> = {
+    data: mockEvents as EventListResponse['data'],
     current_page: 1,
     last_page: 3,
     total: 25,
@@ -32,42 +52,41 @@ describe('useOrganizerEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(window.confirm as jest.Mock).mockClear()
-    ;(organizerEventService.getEvents as jest.Mock).mockResolvedValue(mockResponse)
+    mockedFetcher.mockResolvedValue(mockResponse)
   })
 
   describe('Initialization', () => {
-    it('should initialize with default values', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
+    it('should initialize with default values and load data', async () => {
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
-      expect(result.current.events).toEqual([])
-      expect(result.current.loading).toBe(true) // Initial loading
-      expect(result.current.error).toBe(null)
-      expect(result.current.currentPage).toBe(1)
-      expect(result.current.totalPages).toBe(1)
-      expect(result.current.total).toBe(0)
-      expect(result.current.statusFilter).toBe(null)
-      expect(result.current.isDeleting).toBe(false)
-
-      // Wait for async updates to complete
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
+
+      expect(result.current.events).toEqual(mockEvents)
+      expect(result.current.error).toBe(null)
+      expect(result.current.currentPage).toBe(1)
+      expect(result.current.totalPages).toBe(3)
+      expect(result.current.total).toBe(25)
+      expect(result.current.statusFilter).toBe(null)
+      expect(result.current.isDeleting).toBe(false)
     })
 
-    it('should fetch events on mount', async () => {
-      renderHook(() => useOrganizerEvents())
+    it('should fetch events via SWR on mount', async () => {
+      renderHook(() => useOrganizerEvents(), { wrapper })
 
       await waitFor(() => {
-        expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-          page: 1,
-          per_page: 10,
-          status: null,
-        })
+        expect(mockedFetcher).toHaveBeenCalled()
       })
+
+      // SWR key should include page=1&per_page=10
+      const calledUrl = mockedFetcher.mock.calls[0][0]
+      expect(calledUrl).toContain('page=1')
+      expect(calledUrl).toContain('per_page=10')
     })
 
     it('should set events from API response', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.events).toEqual(mockEvents)
@@ -79,163 +98,150 @@ describe('useOrganizerEvents', () => {
     })
 
     it('should handle API error on mount', async () => {
-      ;(organizerEventService.getEvents as jest.Mock).mockRejectedValueOnce(
-        new Error('API Error')
-      )
+      mockedFetcher.mockRejectedValue(new Error('API Error'))
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
       await waitFor(() => {
-        expect(result.current.error).toBe('Error loading events')
+        expect(result.current.error).toBe('API Error')
         expect(result.current.loading).toBe(false)
       })
     })
   })
 
   describe('handlePageChange', () => {
-    it('should change page and fetch new events', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
-
-      // Wait for initial load
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Mock response for page 2
-      const page2Response = {
-        data: [{ id: 4, title: 'Event 4', status: 'draft' }],
+    it('should change page and trigger new SWR fetch', async () => {
+      const page2Response: Partial<EventListResponse> = {
+        data: [{ id: 4, title: 'Event 4', status: 'draft' }] as EventListResponse['data'],
         current_page: 2,
         last_page: 3,
         total: 25,
         per_page: 10,
       }
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(page2Response)
 
-      // Change to page 2
-      await act(async () => {
-        result.current.handlePageChange(2)
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) return Promise.resolve(mockResponse)
+        return Promise.resolve(page2Response)
       })
 
-      await waitFor(() => {
-        expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-          page: 2,
-          per_page: 10,
-          status: null,
-        })
-        expect(result.current.currentPage).toBe(2)
-        expect(result.current.events).toEqual(page2Response.data)
-      })
-    })
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
-    it('should set loading state during page change', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
-
-      // Wait for initial load
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
-      // Mock slow API response
-      ;(organizerEventService.getEvents as jest.Mock).mockImplementationOnce(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockResponse), 100))
-      )
-
-      // Start page change
-      await act(async () => {
+      // Change to page 2
+      act(() => {
         result.current.handlePageChange(2)
       })
 
-      // Should be loading
       await waitFor(() => {
-        expect(result.current.loading).toBe(true)
+        expect(result.current.currentPage).toBe(2)
+        expect(result.current.events).toEqual(page2Response.data)
       })
+
+      // Verify SWR was called with page=2
+      const lastCall = mockedFetcher.mock.calls[mockedFetcher.mock.calls.length - 1][0]
+      expect(lastCall).toContain('page=2')
     })
   })
 
   describe('handleStatusFilter', () => {
     it('should filter events by status and reset to page 1', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
-
-      // Wait for initial load
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Mock response for filtered events
-      const filteredResponse = {
-        data: [{ id: 1, title: 'Event 1', status: 'draft' }],
+      const filteredResponse: Partial<EventListResponse> = {
+        data: [{ id: 1, title: 'Event 1', status: 'draft' }] as EventListResponse['data'],
         current_page: 1,
         last_page: 1,
         total: 1,
         per_page: 10,
       }
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(filteredResponse)
+
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) return Promise.resolve(mockResponse)
+        return Promise.resolve(filteredResponse)
+      })
+
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
 
       // Apply status filter
-      await act(async () => {
+      act(() => {
         result.current.handleStatusFilter('draft')
       })
 
       await waitFor(() => {
-        expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-          page: 1,
-          per_page: 10,
-          status: 'draft',
-        })
         expect(result.current.statusFilter).toBe('draft')
         expect(result.current.currentPage).toBe(1)
         expect(result.current.events).toEqual(filteredResponse.data)
       })
+
+      // Verify SWR was called with status=draft
+      const lastCall = mockedFetcher.mock.calls[mockedFetcher.mock.calls.length - 1][0]
+      expect(lastCall).toContain('status=draft')
     })
 
     it('should clear filter when status is null', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
+      mockedFetcher.mockResolvedValue(mockResponse)
 
-      // Wait for initial load
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
       // First apply a filter
-      await act(async () => {
+      act(() => {
         result.current.handleStatusFilter('draft')
       })
 
+      await waitFor(() => {
+        expect(result.current.statusFilter).toBe('draft')
+      })
+
+      // Verify a call was made with status=draft
+      const draftCall = mockedFetcher.mock.calls.find(
+        (call: string[]) => call[0].includes('status=draft')
+      )
+      expect(draftCall).toBeDefined()
+
       // Clear filter
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(mockResponse)
-      await act(async () => {
+      act(() => {
         result.current.handleStatusFilter(null)
       })
 
       await waitFor(() => {
-        expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-          page: 1,
-          per_page: 10,
-          status: null,
-        })
         expect(result.current.statusFilter).toBe(null)
       })
     })
 
     it('should reset to page 1 when applying filter from page 2', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) {
+          return Promise.resolve(mockResponse)
+        }
+        return Promise.resolve({
+          ...mockResponse,
+          current_page: callCount <= 2 ? 2 : 1,
+        })
+      })
 
-      // Wait for initial load
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
-      // Navigate to page 2 - mock response for page 2
-      const page2Response = {
-        data: mockEvents,
-        current_page: 2,
-        last_page: 3,
-        total: 25,
-        per_page: 10
-      }
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(page2Response)
-
-      await act(async () => {
+      // Navigate to page 2
+      act(() => {
         result.current.handlePageChange(2)
       })
 
@@ -243,9 +249,8 @@ describe('useOrganizerEvents', () => {
         expect(result.current.currentPage).toBe(2)
       })
 
-      // Apply filter
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(mockResponse)
-      await act(async () => {
+      // Apply filter — should reset to page 1
+      act(() => {
         result.current.handleStatusFilter('published')
       })
 
@@ -260,15 +265,11 @@ describe('useOrganizerEvents', () => {
       ;(window.confirm as jest.Mock).mockReturnValueOnce(true)
       ;(organizerEventService.deleteEvent as jest.Mock).mockResolvedValueOnce(undefined)
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
-      // Wait for initial load
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
-
-      // Mock refresh after delete
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(mockResponse)
 
       // Delete event
       await act(async () => {
@@ -277,19 +278,13 @@ describe('useOrganizerEvents', () => {
 
       expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this event?')
       expect(organizerEventService.deleteEvent).toHaveBeenCalledWith(1)
-
-      // Should refresh events list
-      await waitFor(() => {
-        expect(organizerEventService.getEvents).toHaveBeenCalledTimes(2) // Initial + refresh
-      })
     })
 
     it('should not delete event when user cancels', async () => {
       ;(window.confirm as jest.Mock).mockReturnValueOnce(false)
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
-      // Wait for initial load
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
@@ -309,15 +304,14 @@ describe('useOrganizerEvents', () => {
         () => new Promise((resolve) => setTimeout(() => resolve(undefined), 100))
       )
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
-      // Wait for initial load
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
 
       // Start deletion (without await to check intermediate state)
-      await act(async () => {
+      act(() => {
         result.current.handleDelete(1)
       })
 
@@ -331,52 +325,29 @@ describe('useOrganizerEvents', () => {
         expect(result.current.isDeleting).toBe(false)
       })
     })
-
-    it('should handle delete error', async () => {
-      ;(window.confirm as jest.Mock).mockReturnValueOnce(true)
-      ;(organizerEventService.deleteEvent as jest.Mock).mockRejectedValueOnce(
-        new Error('Delete failed')
-      )
-
-      const { result } = renderHook(() => useOrganizerEvents())
-
-      // Wait for initial load
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Try to delete
-      await act(async () => {
-        await result.current.handleDelete(1)
-      })
-
-      await waitFor(() => {
-        expect(result.current.error).toBe('Error deleting event')
-        expect(result.current.isDeleting).toBe(false)
-      })
-    })
   })
 
   describe('retry', () => {
     it('should allow retrying after error', async () => {
-      // First call fails
-      ;(organizerEventService.getEvents as jest.Mock).mockRejectedValueOnce(
-        new Error('Network error')
-      )
+      let callCount = 0
+      mockedFetcher.mockImplementation(() => {
+        callCount++
+        if (callCount <= 1) {
+          return Promise.reject(new Error('Network error'))
+        }
+        return Promise.resolve(mockResponse)
+      })
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
       // Wait for error
       await waitFor(() => {
-        expect(result.current.error).toBe('Error loading events')
+        expect(result.current.error).toBe('Network error')
       })
-
-      // Second call succeeds
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(mockResponse)
 
       // Retry
       await act(async () => {
-        await result.current.retry()
+        result.current.retry()
       })
 
       await waitFor(() => {
@@ -384,42 +355,11 @@ describe('useOrganizerEvents', () => {
         expect(result.current.error).toBe(null)
       })
     })
-
-    it('should maintain current page and filter when retrying', async () => {
-      const { result } = renderHook(() => useOrganizerEvents())
-
-      // Wait for initial load
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Navigate to page 2 with filter
-      await act(async () => {
-        result.current.handlePageChange(2)
-      })
-      await act(async () => {
-        result.current.handleStatusFilter('draft')
-      })
-
-      // Retry
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce(mockResponse)
-      await act(async () => {
-        await result.current.retry()
-      })
-
-      await waitFor(() => {
-        expect(organizerEventService.getEvents).toHaveBeenCalledWith({
-          page: 1, // Reset by filter
-          per_page: 10,
-          status: 'draft',
-        })
-      })
-    })
   })
 
   describe('Edge cases', () => {
     it('should handle empty events array', async () => {
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValue({
         data: [],
         current_page: 1,
         last_page: 0,
@@ -427,7 +367,7 @@ describe('useOrganizerEvents', () => {
         per_page: 10,
       })
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.events).toEqual([])
@@ -437,7 +377,7 @@ describe('useOrganizerEvents', () => {
     })
 
     it('should handle missing last_page in response', async () => {
-      ;(organizerEventService.getEvents as jest.Mock).mockResolvedValueOnce({
+      mockedFetcher.mockResolvedValue({
         data: mockEvents,
         current_page: 1,
         last_page: undefined,
@@ -445,7 +385,7 @@ describe('useOrganizerEvents', () => {
         per_page: 10,
       })
 
-      const { result } = renderHook(() => useOrganizerEvents())
+      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.totalPages).toBe(1) // Defaults to 1

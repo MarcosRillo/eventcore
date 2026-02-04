@@ -1,20 +1,38 @@
 /**
  * useOrganizations Hook Tests
- * Tests for organization management hook
+ * Tests for organization management hook (SWR-based)
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
+import useSWR from 'swr'
 
+import { useAuth } from '@/context/AuthContext'
 import { useOrganizations } from '@/features/organizations/hooks/useOrganizations'
-import organizationService from '@/features/organizations/services/organization.service'
-import type { Organization, PaginationMeta } from '@/features/organizations/types/organization.types'
+import {
+  getOrganization,
+  toggleOrganizationStatus,
+} from '@/features/organizations/services/organization.service'
+import type {
+  Organization,
+  OrganizationsResponse,
+  PaginationMeta,
+} from '@/features/organizations/types/organization.types'
+import { useDebounce } from '@/hooks/useDebounce'
 
-// Mock the service
+// Mock SWR and dependencies
+jest.mock('swr')
+jest.mock('@/context/AuthContext')
+jest.mock('@/hooks/useDebounce')
 jest.mock('@/features/organizations/services/organization.service')
-const mockService = organizationService as jest.Mocked<typeof organizationService>
+
+const mockGetOrganization = getOrganization as jest.MockedFunction<typeof getOrganization>
+const mockToggleOrganizationStatus = toggleOrganizationStatus as jest.MockedFunction<typeof toggleOrganizationStatus>
+
+const mockUseSWR = useSWR as jest.MockedFunction<typeof useSWR>
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseDebounce = useDebounce as jest.MockedFunction<typeof useDebounce>
 
 // Suppress React 19 useTransition act() warnings in tests
-// This is a known issue with React 19's useTransition and testing-library
 let errorSpy: jest.SpyInstance
 
 beforeAll(() => {
@@ -77,202 +95,210 @@ const createMockPagination = (overrides: Partial<PaginationMeta> = {}): Paginati
   last_page: 1,
   per_page: 15,
   total: 2,
-  from: 1,
-  to: 2,
-  path: 'http://api.example.com/organizations',
-  links: [],
   ...overrides,
 })
+
+// Helper to create mock SWR response data
+const createMockSWRData = (
+  organizations: Organization[] = [],
+  pagination?: Partial<PaginationMeta>,
+): OrganizationsResponse => ({
+  success: true,
+  message: 'OK',
+  data: organizations,
+  pagination: createMockPagination(pagination),
+})
+
+// Default mock mutate function
+const mockMutate = jest.fn()
+
+// Helper to create auth mock value
+function createAuthMock(overrides: Partial<{ isAuthenticated: boolean; isLoading: boolean }> = {}) {
+  return {
+    isAuthenticated: true,
+    isLoading: false,
+    user: null,
+    token: null,
+    error: null,
+    login: jest.fn(),
+    logout: jest.fn(),
+    clearError: jest.fn(),
+    refreshUser: jest.fn(),
+    hasRole: jest.fn(),
+    canAccess: jest.fn(),
+    getUserPermissions: jest.fn().mockReturnValue([]),
+    canManageEvents: jest.fn(),
+    canApproveEvents: jest.fn(),
+    canAccessAdmin: jest.fn(),
+    canManageUsers: jest.fn(),
+    canManageOrganization: jest.fn(),
+    canViewAnalytics: jest.fn(),
+    ...overrides,
+  } as unknown as ReturnType<typeof useAuth>
+}
+
+// Helper to setup default mocks
+function setupDefaultMocks(swrOverrides: Partial<ReturnType<typeof useSWR>> = {}) {
+  mockUseAuth.mockReturnValue(createAuthMock())
+
+  mockUseDebounce.mockImplementation((value) => value)
+
+  mockUseSWR.mockReturnValue({
+    data: undefined,
+    error: undefined,
+    isLoading: false,
+    isValidating: false,
+    mutate: mockMutate,
+    ...swrOverrides,
+  } as ReturnType<typeof useSWR>)
+}
 
 describe('useOrganizations', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    // Default mock for initial fetch
-    mockService.getOrganizations.mockResolvedValue({
-      data: [],
-      pagination: createMockPagination({ total: 0 }),
-    })
+    setupDefaultMocks()
   })
 
   describe('initialization', () => {
-    it('should initialize with correct default state', async () => {
-      // Act
+    it('should initialize with correct default state', () => {
       const { result } = renderHook(() => useOrganizations())
 
-      // Assert - initial state before fetch
       expect(result.current.organizations).toEqual([])
       expect(result.current.pagination).toBeNull()
       expect(result.current.error).toBeNull()
       expect(result.current.togglingId).toBeNull()
       expect(result.current.selectedOrganization).toBeNull()
       expect(result.current.loadingDetail).toBe(false)
-
-      // Wait for effect to complete
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
     })
 
-    it('should initialize with correct default filters', async () => {
-      // Act
+    it('should initialize with correct default filters', () => {
       const { result } = renderHook(() => useOrganizations())
 
-      // Assert
       expect(result.current.filters.status).toBe('all')
       expect(result.current.filters.per_page).toBe(15)
       expect(result.current.filters.page).toBe(1)
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
     })
 
-    it('should fetch organizations on mount', async () => {
-      // Arrange
+    it('should return organizations from SWR data', () => {
       const mockOrganizations = [
         createMockOrganization({ id: 1, name: 'Org 1' }),
         createMockOrganization({ id: 2, name: 'Org 2' }),
       ]
-      const mockPagination = createMockPagination({ total: 2 })
 
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: mockOrganizations,
-        pagination: mockPagination,
+      setupDefaultMocks({
+        data: createMockSWRData(mockOrganizations, { total: 2 }),
       })
 
-      // Act
       const { result } = renderHook(() => useOrganizations())
 
-      // Assert
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(2)
-      })
-
-      expect(mockService.getOrganizations).toHaveBeenCalledTimes(1)
+      expect(result.current.organizations).toHaveLength(2)
       expect(result.current.organizations[0].name).toBe('Org 1')
       expect(result.current.organizations[1].name).toBe('Org 2')
       expect(result.current.pagination?.total).toBe(2)
     })
+
+    it('should pass null key when not authenticated', () => {
+      mockUseAuth.mockReturnValue(createAuthMock({ isAuthenticated: false }))
+
+      renderHook(() => useOrganizations())
+
+      expect(mockUseSWR).toHaveBeenCalledWith(null, expect.any(Function))
+    })
+
+    it('should pass null key when auth is loading', () => {
+      mockUseAuth.mockReturnValue(createAuthMock({ isAuthenticated: true, isLoading: true }))
+
+      renderHook(() => useOrganizations())
+
+      expect(mockUseSWR).toHaveBeenCalledWith(null, expect.any(Function))
+    })
+  })
+
+  describe('loading state', () => {
+    it('should reflect SWR isLoading state', () => {
+      setupDefaultMocks({ isLoading: true })
+
+      const { result } = renderHook(() => useOrganizations())
+
+      expect(result.current.loading).toBe(true)
+    })
+
+    it('should not be loading when SWR has data', () => {
+      setupDefaultMocks({
+        data: createMockSWRData([createMockOrganization()]),
+        isLoading: false,
+      })
+
+      const { result } = renderHook(() => useOrganizations())
+
+      expect(result.current.loading).toBe(false)
+    })
+  })
+
+  describe('error handling', () => {
+    it('should show SWR error as user-friendly message', () => {
+      setupDefaultMocks({
+        error: new Error('Network error'),
+      })
+
+      const { result } = renderHook(() => useOrganizations())
+
+      expect(result.current.error).toBe('Error al cargar las organizaciones')
+    })
   })
 
   describe('fetchOrganizations', () => {
-    it('should update organizations and pagination on successful fetch', async () => {
-      // Arrange
-      const mockOrganizations = [createMockOrganization({ id: 1 })]
-      const mockPagination = createMockPagination({ total: 1, current_page: 2 })
-
-      mockService.getOrganizations.mockResolvedValue({
-        data: mockOrganizations,
-        pagination: mockPagination,
-      })
-
-      // Act
+    it('should call mutate for revalidation', async () => {
       const { result } = renderHook(() => useOrganizations())
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Assert
-      expect(result.current.organizations).toHaveLength(1)
-      expect(result.current.pagination?.current_page).toBe(2)
-      expect(result.current.pagination?.total).toBe(1)
-      expect(result.current.error).toBeNull()
-    })
-
-    it('should set error state on fetch failure', async () => {
-      // Arrange
-      mockService.getOrganizations.mockRejectedValueOnce(new Error('Network error'))
-
-      // Act
-      const { result } = renderHook(() => useOrganizations())
-
-      // Assert
-      await waitFor(() => {
-        expect(result.current.error).toBe('Error al cargar las organizaciones')
-      })
-
-      expect(result.current.organizations).toEqual([])
-      expect(result.current.loading).toBe(false)
-    })
-
-    it('should clear error before fetching', async () => {
-      // Arrange
-      mockService.getOrganizations
-        .mockRejectedValueOnce(new Error('First error'))
-        .mockResolvedValueOnce({
-          data: [createMockOrganization()],
-          pagination: createMockPagination(),
-        })
-
-      // Act
-      const { result } = renderHook(() => useOrganizations())
-
-      // Wait for first error
-      await waitFor(() => {
-        expect(result.current.error).toBe('Error al cargar las organizaciones')
-      })
-
-      // Trigger another fetch
       await act(async () => {
-        await result.current.fetchOrganizations({ page: 2 })
+        await result.current.fetchOrganizations()
       })
 
-      // Assert - error should be cleared
-      expect(result.current.error).toBeNull()
+      expect(mockMutate).toHaveBeenCalled()
     })
   })
 
   describe('handleToggleStatus', () => {
-    it('should call service and update organizations list', async () => {
-      // Arrange
-      const originalOrg = createMockOrganization({ id: 1, status: { id: 1, status_code: 'active', status_name: 'Activo', description: '', can_create_events: true } })
-      const updatedOrg = createMockOrganization({ id: 1, status: { id: 2, status_code: 'suspended', status_name: 'Suspendido', description: '', can_create_events: false } })
-
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [originalOrg],
-        pagination: createMockPagination(),
+    it('should call toggleOrganizationStatus and mutate', async () => {
+      const updatedOrg = createMockOrganization({
+        id: 1,
+        status: { id: 2, status_code: 'suspended', status_name: 'Suspendido', description: '', can_create_events: false },
       })
-      mockService.toggleOrganizationStatus.mockResolvedValueOnce(updatedOrg)
 
-      // Act
+      setupDefaultMocks({
+        data: createMockSWRData([createMockOrganization({ id: 1 })]),
+      })
+
+      mockToggleOrganizationStatus.mockResolvedValueOnce(updatedOrg)
+      mockMutate.mockResolvedValueOnce(undefined)
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
 
       let success: boolean = false
       await act(async () => {
         success = await result.current.handleToggleStatus(1)
       })
 
-      // Assert
       expect(success).toBe(true)
-      expect(mockService.toggleOrganizationStatus).toHaveBeenCalledWith(1)
-      expect(result.current.organizations[0].status.status_code).toBe('suspended')
+      expect(mockToggleOrganizationStatus).toHaveBeenCalledWith(1)
+      expect(mockMutate).toHaveBeenCalled()
       expect(result.current.togglingId).toBeNull()
     })
 
     it('should set togglingId during operation', async () => {
-      // Arrange
       let resolveToggle: (value: Organization) => void = () => {}
       const togglePromise = new Promise<Organization>((resolve) => {
         resolveToggle = resolve
       })
 
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [createMockOrganization({ id: 5 })],
-        pagination: createMockPagination(),
+      setupDefaultMocks({
+        data: createMockSWRData([createMockOrganization({ id: 5 })]),
       })
-      mockService.toggleOrganizationStatus.mockReturnValueOnce(togglePromise)
 
-      // Act
+      mockToggleOrganizationStatus.mockReturnValueOnce(togglePromise)
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
 
       // Start toggle without awaiting
       act(() => {
@@ -291,49 +317,43 @@ describe('useOrganizations', () => {
     })
 
     it('should return false and set error on toggle failure', async () => {
-      // Arrange
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [createMockOrganization({ id: 1 })],
-        pagination: createMockPagination(),
+      setupDefaultMocks({
+        data: createMockSWRData([createMockOrganization({ id: 1 })]),
       })
-      mockService.toggleOrganizationStatus.mockRejectedValueOnce(new Error('Toggle failed'))
 
-      // Act
+      mockToggleOrganizationStatus.mockRejectedValueOnce(new Error('Toggle failed'))
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
 
       let success: boolean = true
       await act(async () => {
         success = await result.current.handleToggleStatus(1)
       })
 
-      // Assert
       expect(success).toBe(false)
-      expect(result.current.error).toBe('Error al cambiar el estado de la organización')
+      expect(result.current.error).toBe('Error al cambiar el estado de la organizacion')
       expect(result.current.togglingId).toBeNull()
     })
 
     it('should also update selectedOrganization if it is the same', async () => {
-      // Arrange
-      const originalOrg = createMockOrganization({ id: 1, status: { id: 1, status_code: 'active', status_name: 'Activo', description: '', can_create_events: true } })
-      const updatedOrg = createMockOrganization({ id: 1, status: { id: 2, status_code: 'suspended', status_name: 'Suspendido', description: '', can_create_events: false } })
-
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [originalOrg],
-        pagination: createMockPagination(),
+      const originalOrg = createMockOrganization({
+        id: 1,
+        status: { id: 1, status_code: 'active', status_name: 'Activo', description: '', can_create_events: true },
       })
-      mockService.getOrganization.mockResolvedValueOnce(originalOrg)
-      mockService.toggleOrganizationStatus.mockResolvedValueOnce(updatedOrg)
+      const updatedOrg = createMockOrganization({
+        id: 1,
+        status: { id: 2, status_code: 'suspended', status_name: 'Suspendido', description: '', can_create_events: false },
+      })
 
-      // Act
+      setupDefaultMocks({
+        data: createMockSWRData([originalOrg]),
+      })
+
+      mockGetOrganization.mockResolvedValueOnce(originalOrg)
+      mockToggleOrganizationStatus.mockResolvedValueOnce(updatedOrg)
+      mockMutate.mockResolvedValueOnce(undefined)
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
 
       // First view detail to set selectedOrganization
       await act(async () => {
@@ -354,58 +374,42 @@ describe('useOrganizations', () => {
 
   describe('handleViewDetail', () => {
     it('should load organization details and set selectedOrganization', async () => {
-      // Arrange
       const detailOrg = createMockOrganization({
         id: 1,
         name: 'Detailed Org',
         users: [{ id: 1, name: 'User 1', email: 'user1@example.com' }],
       })
 
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [createMockOrganization({ id: 1 })],
-        pagination: createMockPagination(),
+      setupDefaultMocks({
+        data: createMockSWRData([createMockOrganization({ id: 1 })]),
       })
-      mockService.getOrganization.mockResolvedValueOnce(detailOrg)
 
-      // Act
+      mockGetOrganization.mockResolvedValueOnce(detailOrg)
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
 
       await act(async () => {
         await result.current.handleViewDetail(1)
       })
 
-      // Assert
-      expect(mockService.getOrganization).toHaveBeenCalledWith(1)
+      expect(mockGetOrganization).toHaveBeenCalledWith(1)
       expect(result.current.selectedOrganization?.name).toBe('Detailed Org')
       expect(result.current.selectedOrganization?.users).toHaveLength(1)
       expect(result.current.loadingDetail).toBe(false)
     })
 
     it('should set error on view detail failure', async () => {
-      // Arrange
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [],
-        pagination: createMockPagination(),
-      })
-      mockService.getOrganization.mockRejectedValueOnce(new Error('Not found'))
+      setupDefaultMocks()
 
-      // Act
+      mockGetOrganization.mockRejectedValueOnce(new Error('Not found'))
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
 
       await act(async () => {
         await result.current.handleViewDetail(999)
       })
 
-      // Assert
-      expect(result.current.error).toBe('Error al cargar el detalle de la organización')
+      expect(result.current.error).toBe('Error al cargar el detalle de la organizacion')
       expect(result.current.selectedOrganization).toBeNull()
       expect(result.current.loadingDetail).toBe(false)
     })
@@ -413,21 +417,15 @@ describe('useOrganizations', () => {
 
   describe('handleCloseDetail', () => {
     it('should clear selectedOrganization', async () => {
-      // Arrange
       const detailOrg = createMockOrganization({ id: 1 })
 
-      mockService.getOrganizations.mockResolvedValueOnce({
-        data: [createMockOrganization({ id: 1 })],
-        pagination: createMockPagination(),
+      setupDefaultMocks({
+        data: createMockSWRData([createMockOrganization({ id: 1 })]),
       })
-      mockService.getOrganization.mockResolvedValueOnce(detailOrg)
 
-      // Act
+      mockGetOrganization.mockResolvedValueOnce(detailOrg)
+
       const { result } = renderHook(() => useOrganizations())
-
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
 
       // Open detail
       await act(async () => {
@@ -441,61 +439,28 @@ describe('useOrganizations', () => {
         result.current.handleCloseDetail()
       })
 
-      // Assert
       expect(result.current.selectedOrganization).toBeNull()
     })
   })
 
   describe('setFilters', () => {
-    it('should update filters and trigger refetch', async () => {
-      // Arrange
-      mockService.getOrganizations
-        .mockResolvedValueOnce({
-          data: [createMockOrganization({ id: 1 }), createMockOrganization({ id: 2 })],
-          pagination: createMockPagination({ total: 2 }),
-        })
-        .mockResolvedValueOnce({
-          data: [createMockOrganization({ id: 1 })],
-          pagination: createMockPagination({ total: 1 }),
-        })
-
-      // Act
+    it('should update filters', () => {
       const { result } = renderHook(() => useOrganizations())
 
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(2)
-      })
-
-      // Update filters
       act(() => {
         result.current.setFilters({ status: 'active' })
       })
 
-      // Assert - filters should be updated
       expect(result.current.filters.status).toBe('active')
-
-      // Wait for refetch
-      await waitFor(() => {
-        expect(result.current.organizations).toHaveLength(1)
-      })
-
-      expect(mockService.getOrganizations).toHaveBeenCalledTimes(2)
     })
 
-    it('should merge new filters with existing filters', async () => {
-      // Act
+    it('should merge new filters with existing filters', () => {
       const { result } = renderHook(() => useOrganizations())
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Update only search
       act(() => {
         result.current.setFilters({ search: 'hotel' })
       })
 
-      // Assert - other filters should remain
       expect(result.current.filters.search).toBe('hotel')
       expect(result.current.filters.status).toBe('all')
       expect(result.current.filters.per_page).toBe(15)
@@ -503,22 +468,24 @@ describe('useOrganizations', () => {
   })
 
   describe('clearError', () => {
-    it('should clear error state', async () => {
-      // Arrange
-      mockService.getOrganizations.mockRejectedValueOnce(new Error('Error'))
+    it('should clear local error state', async () => {
+      setupDefaultMocks()
 
-      // Act
+      mockToggleOrganizationStatus.mockRejectedValueOnce(new Error('Error'))
+
       const { result } = renderHook(() => useOrganizations())
 
-      await waitFor(() => {
-        expect(result.current.error).toBe('Error al cargar las organizaciones')
+      // Trigger an error through toggle
+      await act(async () => {
+        await result.current.handleToggleStatus(1)
       })
+
+      expect(result.current.error).toBe('Error al cambiar el estado de la organizacion')
 
       act(() => {
         result.current.clearError()
       })
 
-      // Assert
       expect(result.current.error).toBeNull()
     })
   })

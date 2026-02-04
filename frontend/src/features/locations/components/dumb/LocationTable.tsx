@@ -5,10 +5,10 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 
-import { PaginationMeta } from '@/hooks/usePaginatedData';
 import { Button } from '@/shared/components/form';
 import { ConfirmDialog } from '@/shared/components/modals';
 import { Pagination } from '@/shared/components/tables';
+import { PaginationMeta } from '@/types/api-response.types';
 import { Location } from '@/types/location.types';
 
 
