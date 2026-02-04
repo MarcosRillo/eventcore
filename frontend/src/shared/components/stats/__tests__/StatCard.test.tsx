@@ -51,9 +51,9 @@ describe('StatCard', () => {
 
   describe('styling', () => {
     it('should have white background with border', () => {
-      render(<StatCard {...defaultProps} />);
+      const { container } = render(<StatCard {...defaultProps} />);
 
-      const card = screen.getByRole('article');
+      const card = container.firstChild as HTMLElement;
       expect(card).toHaveClass('bg-white');
       expect(card).toHaveClass('border-neutral-200');
     });
@@ -110,23 +110,23 @@ describe('StatCard', () => {
 
   describe('sizes', () => {
     it('should use sm size', () => {
-      render(<StatCard {...defaultProps} size="sm" />);
+      const { container } = render(<StatCard {...defaultProps} size="sm" />);
 
-      const card = screen.getByRole('article');
+      const card = container.firstChild as HTMLElement;
       expect(card).toHaveClass('p-4');
     });
 
     it('should use md size by default', () => {
-      render(<StatCard {...defaultProps} />);
+      const { container } = render(<StatCard {...defaultProps} />);
 
-      const card = screen.getByRole('article');
+      const card = container.firstChild as HTMLElement;
       expect(card).toHaveClass('p-5');
     });
 
     it('should use lg size', () => {
-      render(<StatCard {...defaultProps} size="lg" />);
+      const { container } = render(<StatCard {...defaultProps} size="lg" />);
 
-      const card = screen.getByRole('article');
+      const card = container.firstChild as HTMLElement;
       expect(card).toHaveClass('p-6');
     });
   });
@@ -185,11 +185,11 @@ describe('StatCard', () => {
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should render as article when not clickable', () => {
-      render(<StatCard {...defaultProps} />);
+    it('should render as div when not clickable', () => {
+      const { container } = render(<StatCard {...defaultProps} />);
 
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
-      expect(screen.getByRole('article')).toBeInTheDocument();
+      expect((container.firstChild as HTMLElement).tagName).toBe('DIV');
     });
   });
 
@@ -201,11 +201,11 @@ describe('StatCard', () => {
       expect(card).toHaveAttribute('aria-label', 'Ver detalles de Total Events');
     });
 
-    it('should have tabIndex when clickable', () => {
-      render(<StatCard {...defaultProps} onClick={() => {}} />);
+    it('should use tabular-nums for numeric values', () => {
+      render(<StatCard {...defaultProps} />);
 
-      const card = screen.getByRole('button');
-      expect(card).toHaveAttribute('tabIndex', '0');
+      const valueEl = screen.getByText('100');
+      expect(valueEl).toHaveClass('tabular-nums');
     });
   });
 });

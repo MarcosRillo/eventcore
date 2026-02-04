@@ -576,6 +576,18 @@ body {
   background-size: 200% 100%;
 }
 
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .animate-slideInUp,
+  .animate-slideInDown,
+  .animate-scaleIn,
+  .animate-pulse,
+  .animate-shimmer {
+    animation: none;
+  }
+}
+
 /* ==========================================
    LAYOUT CONSTRAINTS
    ========================================== */

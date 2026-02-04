@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useState, useTransition } from 'react'
 import useSWR from 'swr'
 
@@ -10,13 +11,39 @@ import { apiFetcher, organizerEventKeys } from '@/lib/swr'
 const perPage = 10
 
 export const useOrganizerEvents = () => {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const [showPast, setShowPast] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Read initial values from URL
+  const initialStatus = searchParams.get('status') || null
+  const initialScope = searchParams.get('scope') === 'past'
+  const initialPage = Number(searchParams.get('page')) || 1
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableInitialStatus = useMemo(() => initialStatus, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableInitialScope = useMemo(() => initialScope, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableInitialPage = useMemo(() => initialPage, [])
+
+  const [currentPage, setCurrentPage] = useState(stableInitialPage)
+  const [statusFilter, setStatusFilter] = useState<string | null>(stableInitialStatus)
+  const [showPast, setShowPast] = useState(stableInitialScope)
 
   // React 19 transition for non-blocking delete UI
   const [, startDeleteTransition] = useTransition()
   const [isDeletingState, setIsDeletingState] = useState(false)
+
+  // Sync state to URL
+  const syncUrl = useCallback((status: string | null, past: boolean, page: number) => {
+    const params = new URLSearchParams()
+    if (status) params.set('status', status)
+    if (past) params.set('scope', 'past')
+    if (page > 1) params.set('page', String(page))
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname)
+  }, [pathname, router])
 
   // SWR key built from current filter/pagination state
   const swrKey = useMemo(() => {
@@ -40,17 +67,20 @@ export const useOrganizerEvents = () => {
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page)
-  }, [])
+    syncUrl(statusFilter, showPast, page)
+  }, [syncUrl, statusFilter, showPast])
 
   const handleStatusFilter = useCallback((status: string | null) => {
     setStatusFilter(status)
     setCurrentPage(1)
-  }, [])
+    syncUrl(status, showPast, 1)
+  }, [syncUrl, showPast])
 
   const handleShowPastToggle = useCallback((isPast: boolean) => {
     setShowPast(isPast)
     setCurrentPage(1)
-  }, [])
+    syncUrl(statusFilter, isPast, 1)
+  }, [syncUrl, statusFilter])
 
   const handleDelete = useCallback(async (id: number) => {
     if (!confirm('Are you sure you want to delete this event?')) {

@@ -6,6 +6,21 @@ import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvent
 import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { EventListResponse } from '@/features/organizer/types/event.types'
 
+// Mock Next.js navigation hooks
+const mockReplace = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    replace: mockReplace,
+    prefetch: jest.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/organizer/dashboard',
+}))
+
 jest.mock('@/lib/swr/fetcher', () => ({
   apiFetcher: jest.fn(),
 }))

@@ -15,7 +15,7 @@ import { useOrganizerStats } from '@/features/organizer-dashboard/hooks/useOrgan
 export const OrganizerDashboardContainer = () => {
   const router = useRouter()
   // Fetch stats
-  const { stats, refetch: refetchStats } = useOrganizerStats()
+  const { stats, loading: statsLoading, refetch: refetchStats } = useOrganizerStats()
 
   // Fetch events (includes filter management and pagination)
   const {
@@ -55,6 +55,7 @@ export const OrganizerDashboardContainer = () => {
   return (
     <OrganizerDashboard
       stats={stats}
+      statsLoading={statsLoading}
       events={events}
       loading={eventsLoading}
       error={eventsError}

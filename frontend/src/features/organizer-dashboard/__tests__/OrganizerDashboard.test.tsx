@@ -1,12 +1,11 @@
 /**
  * Tests for Organizer Dashboard Integration
  *
- * Tests the main dashboard layout, widget integration,
- * filtering, and user interactions.
- * Updated Dec 2, 2025 for Spanish UI, pagination, and Link-based navigation.
+ * Tests the main dashboard layout with stats summary bar,
+ * unified filters, and event list.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerDashboard } from '@/features/organizer-dashboard/components/dumb/OrganizerDashboard'
@@ -39,7 +38,8 @@ describe('OrganizerDashboard', () => {
     pending_public: 3,
     published: 10,
     requires_changes: 2,
-    rejected: 2
+    rejected: 2,
+    draft: 3
   }
 
   const mockEvents: OrganizerEvent[] = [
@@ -59,6 +59,7 @@ describe('OrganizerDashboard', () => {
 
   const mockHandlers = {
     onFilterChange: jest.fn(),
+    onShowPastChange: jest.fn(),
     onPageChange: jest.fn(),
     onSuccess: jest.fn(),
     onEdit: jest.fn(),
@@ -67,6 +68,7 @@ describe('OrganizerDashboard', () => {
 
   const defaultProps = {
     stats: mockStats,
+    statsLoading: false,
     events: mockEvents,
     loading: false,
     error: null,
@@ -97,43 +99,29 @@ describe('OrganizerDashboard', () => {
       expect(createLink).toHaveAttribute('href', '/organizer/create')
     })
 
-    test('displays stats cards in correct order', () => {
+    test('renders stats summary bar', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      const statsGrid = screen.getByTestId('stats-grid')
-      const statsCards = statsGrid.querySelectorAll('article')
-
-      expect(statsCards).toHaveLength(7)
-      expect(statsCards[0]).toHaveTextContent('Total Eventos')
-      expect(statsCards[1]).toHaveTextContent('Próximos')
-      expect(statsCards[2]).toHaveTextContent('Pasados')
-      expect(statsCards[3]).toHaveTextContent('Pendientes')
-      expect(statsCards[4]).toHaveTextContent('Aprobados')
-      expect(statsCards[5]).toHaveTextContent('Publicados')
-      expect(statsCards[6]).toHaveTextContent('Requiere Cambios')
+      const statsRegion = screen.getByRole('region', { name: /estadisticas/i })
+      expect(statsRegion).toBeInTheDocument()
     })
 
-    test('displays correct stat values', () => {
+    test('displays stat values in summary bar', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
       expect(screen.getByText('25')).toBeInTheDocument() // total
       expect(screen.getByText('12')).toBeInTheDocument() // upcoming
       expect(screen.getByText('6')).toBeInTheDocument()  // past
       expect(screen.getByText('5')).toBeInTheDocument()  // pending
-      expect(screen.getByText('8')).toBeInTheDocument()  // approved
-      expect(screen.getByText('10')).toBeInTheDocument() // published
       expect(screen.getByText('2')).toBeInTheDocument()  // requires_changes
     })
 
-    test('applies responsive grid classes to stats section', () => {
-      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+    test('renders stats loading skeleton', () => {
+      renderWithProviders(
+        <OrganizerDashboard {...defaultProps} stats={null} statsLoading={true} />
+      )
 
-      const statsGrid = screen.getByTestId('stats-grid')
-
-      expect(statsGrid.className).toContain('grid')
-      expect(statsGrid.className).toMatch(/grid-cols-2/)
-      expect(statsGrid.className).toMatch(/md:grid-cols-4/)
-      expect(statsGrid.className).toMatch(/lg:grid-cols-7/)
+      expect(screen.getByTestId('stats-loading')).toBeInTheDocument()
     })
   })
 
@@ -166,30 +154,56 @@ describe('OrganizerDashboard', () => {
         <OrganizerDashboard {...defaultProps} events={[]} />
       )
 
-      expect(screen.getByText(/aún no tienes eventos/i)).toBeInTheDocument()
+      expect(screen.getByText(/aun no tienes eventos/i)).toBeInTheDocument()
       expect(screen.getByText(/comienza creando tu primer evento/i)).toBeInTheDocument()
-      // Two create buttons exist (header and empty state), both should be present
       const createButtons = screen.getAllByRole('button', { name: /crear evento/i })
       expect(createButtons.length).toBeGreaterThanOrEqual(1)
     })
   })
 
-  describe('Quick Filters', () => {
+  describe('Unified Filters', () => {
     test('renders status filter buttons', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /^todos$/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /^borrador$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^todos/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^borrador/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /pendiente/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /publicado/i })).toBeInTheDocument()
+    })
+
+    test('renders time scope toggle', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      expect(screen.getByRole('button', { name: 'Proximos' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Pasados' })).toBeInTheDocument()
     })
 
     test('calls onFilterChange when filter button clicked', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /^borrador$/i }))
+      fireEvent.click(screen.getByRole('button', { name: /^borrador/i }))
 
       expect(mockHandlers.onFilterChange).toHaveBeenCalledWith('draft')
+    })
+
+    test('calls onShowPastChange when time scope changed', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Pasados' }))
+
+      expect(mockHandlers.onShowPastChange).toHaveBeenCalledWith(true)
+    })
+
+    test('displays count badges in filter buttons', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      // "Todos" should show total count
+      const todosButton = screen.getByRole('button', { name: /^todos/i })
+      expect(todosButton).toHaveTextContent('(25)')
+
+      // "Pendiente" should show pending count
+      const pendienteButton = screen.getByRole('button', { name: /pendiente/i })
+      expect(pendienteButton).toHaveTextContent('(5)')
     })
 
     test('highlights active filter button', () => {
@@ -197,8 +211,7 @@ describe('OrganizerDashboard', () => {
         <OrganizerDashboard {...defaultProps} activeFilter="draft" />
       )
 
-      const draftButton = screen.getByRole('button', { name: /^borrador$/i })
-
+      const draftButton = screen.getByRole('button', { name: /^borrador/i })
       expect(draftButton.className).toContain('bg-primary-600')
       expect(draftButton.getAttribute('aria-pressed')).toBe('true')
     })
@@ -211,21 +224,26 @@ describe('OrganizerDashboard', () => {
       expect(screen.getByRole('main')).toBeInTheDocument()
     })
 
-    test('stats cards have role="article"', () => {
-      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
-
-      const statsGrid = screen.getByTestId('stats-grid')
-      const statsArticles = statsGrid.querySelectorAll('article')
-      expect(statsArticles).toHaveLength(7)
-    })
-
     test('filter buttons have aria-pressed attribute', () => {
       renderWithProviders(
         <OrganizerDashboard {...defaultProps} activeFilter="draft" />
       )
 
-      const draftButton = screen.getByRole('button', { name: /^borrador$/i })
+      const draftButton = screen.getByRole('button', { name: /^borrador/i })
       expect(draftButton).toHaveAttribute('aria-pressed')
+    })
+
+    test('stats summary has role="region"', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      expect(screen.getByRole('region', { name: /estadisticas/i })).toBeInTheDocument()
+    })
+
+    test('filter groups have proper aria-labels', () => {
+      renderWithProviders(<OrganizerDashboard {...defaultProps} />)
+
+      expect(screen.getByRole('group', { name: /filtrar eventos por estado/i })).toBeInTheDocument()
+      expect(screen.getByRole('group', { name: /filtrar por periodo/i })).toBeInTheDocument()
     })
   })
 
@@ -233,8 +251,7 @@ describe('OrganizerDashboard', () => {
     test('does not render pagination when only one page', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      // Pagination should not be rendered when totalPages is 1
-      expect(screen.queryByRole('navigation', { name: /paginación/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('navigation', { name: /paginaci[oó]n/i })).not.toBeInTheDocument()
     })
 
     test('renders pagination when multiple pages', () => {
@@ -242,8 +259,7 @@ describe('OrganizerDashboard', () => {
         <OrganizerDashboard {...defaultProps} totalPages={3} />
       )
 
-      // Pagination should be visible when there are multiple pages
-      expect(screen.getByRole('navigation', { name: /paginación/i })).toBeInTheDocument()
+      expect(screen.getByRole('navigation', { name: /paginaci[oó]n/i })).toBeInTheDocument()
     })
   })
 })

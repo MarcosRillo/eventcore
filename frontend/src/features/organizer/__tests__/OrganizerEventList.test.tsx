@@ -24,6 +24,8 @@ jest.mock('next/navigation', () => ({
     replace: jest.fn(),
     prefetch: jest.fn(),
   }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/organizer/dashboard',
 }))
 
 // Helper to render with providers (SWRConfig + ToastProvider)

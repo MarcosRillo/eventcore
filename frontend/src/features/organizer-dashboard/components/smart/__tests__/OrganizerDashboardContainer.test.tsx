@@ -4,7 +4,7 @@
  * Tests integration of dashboard with data hooks and state management.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
 import { OrganizerDashboardContainer } from '@/features/organizer-dashboard/components/smart/OrganizerDashboardContainer'
@@ -23,13 +23,16 @@ jest.mock('next/navigation', () => ({
     refresh: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn()
-  })
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/organizer/dashboard'
 }))
 
 // Mock OrganizerDashboard to simplify testing
 jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', () => ({
   OrganizerDashboard: ({
     stats,
+    statsLoading,
     events,
     loading,
     error,
@@ -40,6 +43,7 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
     onView
   }: {
     stats: unknown
+    statsLoading: boolean
     events: unknown
     loading: boolean
     error: string | null
@@ -51,6 +55,7 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
   }) => (
     <div data-testid="organizer-dashboard">
       <span data-testid="loading-state">{loading ? 'loading' : 'loaded'}</span>
+      <span data-testid="stats-loading-state">{statsLoading ? 'loading' : 'loaded'}</span>
       <span data-testid="error-state">{error || 'no-error'}</span>
       <span data-testid="active-filter">{activeFilter || 'all'}</span>
       <span data-testid="stats-present">{stats ? 'yes' : 'no'}</span>
@@ -103,6 +108,7 @@ describe('OrganizerDashboardContainer', () => {
       loading: false,
       error: null,
       statusFilter: null,
+      showPast: false,
       handleStatusFilter: mockHandleStatusFilter,
       retry: mockRetry
     })
@@ -133,6 +139,7 @@ describe('OrganizerDashboardContainer', () => {
         loading: true,
         error: null,
         statusFilter: null,
+        showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
         retry: mockRetry
       })
@@ -142,12 +149,26 @@ describe('OrganizerDashboardContainer', () => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('loading')
     })
 
+    test('should pass stats loading state to OrganizerDashboard', () => {
+      ;(useOrganizerStats as jest.Mock).mockReturnValue({
+        stats: null,
+        loading: true,
+        error: null,
+        refetch: mockRefetchStats
+      })
+
+      render(<OrganizerDashboardContainer />)
+
+      expect(screen.getByTestId('stats-loading-state')).toHaveTextContent('loading')
+    })
+
     test('should pass error state to OrganizerDashboard', () => {
       ;(useOrganizerEvents as jest.Mock).mockReturnValue({
         events: mockEvents,
         loading: false,
         error: 'Failed to load',
         statusFilter: null,
+        showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
         retry: mockRetry
       })
@@ -163,6 +184,7 @@ describe('OrganizerDashboardContainer', () => {
         loading: false,
         error: null,
         statusFilter: 'draft',
+        showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
         retry: mockRetry
       })
@@ -236,6 +258,7 @@ describe('OrganizerDashboardContainer', () => {
         loading: false,
         error: null,
         statusFilter: null,
+        showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
         retry: mockRetry
       })
@@ -258,6 +281,7 @@ describe('OrganizerDashboardContainer', () => {
         loading: false,
         error: null,
         statusFilter: null,
+        showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
         retry: mockRetry
       })
@@ -266,6 +290,7 @@ describe('OrganizerDashboardContainer', () => {
 
       // Events loading is what's passed to dashboard
       expect(screen.getByTestId('loading-state')).toHaveTextContent('loaded')
+      expect(screen.getByTestId('stats-loading-state')).toHaveTextContent('loading')
     })
   })
 

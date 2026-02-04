@@ -85,64 +85,70 @@ const StatCard = ({
 
   const isClickable = !!onClick
 
-  return (
-    <article
-      className={`
-        bg-white rounded-lg border border-neutral-200
-        ${styles.container}
-        ${isClickable ? 'cursor-pointer hover:border-neutral-300 hover:shadow-sm transition-all duration-150' : ''}
-        ${className}
-      `}
-      onClick={onClick}
-      role={isClickable ? 'button' : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      aria-label={isClickable ? `Ver detalles de ${label}` : undefined}
-      onKeyDown={isClickable ? (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onClick()
-        }
-      } : undefined}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className={`font-medium text-neutral-500 ${styles.label}`}>
-            {label}
-          </p>
-          <p className={`font-semibold text-neutral-900 mt-1 ${styles.value}`}>
-            {typeof value === 'number' ? value.toLocaleString() : value}
-          </p>
+  const content = (
+    <div className="flex items-start justify-between">
+      <div className="flex-1">
+        <p className={`font-medium text-neutral-500 ${styles.label}`}>
+          {label}
+        </p>
+        <p className={`font-semibold text-neutral-900 mt-1 tabular-nums ${styles.value}`}>
+          {typeof value === 'number' ? value.toLocaleString() : value}
+        </p>
 
-          {trend && (
-            <div className="flex items-center gap-1 mt-2">
-              {trend.value > 0 ? (
-                <svg className="w-4 h-4 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-              ) : trend.value < 0 ? (
-                <svg className="w-4 h-4 text-error-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              ) : null}
-              <span className={`text-xs font-medium ${trend.value > 0 ? 'text-success-600' : trend.value < 0 ? 'text-error-600' : 'text-neutral-500'}`}>
-                {trend.value > 0 ? '+' : ''}{trend.value}%
+        {trend && (
+          <div className="flex items-center gap-1 mt-2">
+            {trend.value > 0 ? (
+              <svg className="w-4 h-4 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            ) : trend.value < 0 ? (
+              <svg className="w-4 h-4 text-error-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            ) : null}
+            <span className={`text-xs font-medium ${trend.value > 0 ? 'text-success-600' : trend.value < 0 ? 'text-error-600' : 'text-neutral-500'}`}>
+              {trend.value > 0 ? '+' : ''}{trend.value}%
+            </span>
+            {trend.label && (
+              <span className="text-xs text-neutral-400">
+                {trend.label}
               </span>
-              {trend.label && (
-                <span className="text-xs text-neutral-400">
-                  {trend.label}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {icon && (
-          <div className={`rounded-lg p-2.5 ${colors.icon} ${styles.icon} flex items-center justify-center`}>
-            {icon}
+            )}
           </div>
         )}
       </div>
-    </article>
+
+      {icon && (
+        <div className={`rounded-lg p-2.5 ${colors.icon} ${styles.icon} flex items-center justify-center`}>
+          {icon}
+        </div>
+      )}
+    </div>
+  )
+
+  const baseClassName = `
+    bg-white rounded-lg border border-neutral-200
+    ${styles.container}
+    ${className}
+  `
+
+  if (isClickable) {
+    return (
+      <button
+        type="button"
+        className={`${baseClassName} w-full text-left cursor-pointer hover:border-neutral-300 hover:shadow-sm transition-[border-color,box-shadow] duration-150 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none`}
+        onClick={onClick}
+        aria-label={`Ver detalles de ${label}`}
+      >
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <div className={baseClassName}>
+      {content}
+    </div>
   )
 }
 
