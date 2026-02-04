@@ -13,6 +13,16 @@ import { Calendar } from 'lucide-react'
 import { ChangeEvent, useEffect, useId, useRef, useState } from 'react'
 import { DayPicker, getDefaultClassNames } from 'react-day-picker'
 
+const defaultClassNames = getDefaultClassNames()
+const DAY_PICKER_CLASS_NAMES = {
+  root: `${defaultClassNames.root} text-sm`,
+  today: 'font-semibold',
+  selected: 'font-medium',
+  disabled: 'cursor-not-allowed',
+  outside: 'rdp-outside',
+  chevron: `${defaultClassNames.chevron} fill-neutral-600`,
+}
+
 export interface DateTimePickerProps {
   label?: string
   value: string
@@ -76,48 +86,34 @@ const DateTimePicker = ({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [timeValue, setTimeValue] = useState<string>('12:00')
 
   // Parse current value
   const selectedDate = parseDateTimeLocal(value)
 
-  // Keep time input in sync with selected date
-  useEffect(() => {
-    if (selectedDate) {
-      setTimeValue(format(selectedDate, 'HH:mm'))
-    }
-  }, [selectedDate])
+  // Derive time value from selected date (no state needed)
+  const timeValue = selectedDate ? format(selectedDate, 'HH:mm') : '12:00'
 
-  // Close on outside click
+  // Close on outside click or Escape
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen])
-
-  // Close on Escape
-  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsOpen(false)
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown)
-    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen])
@@ -143,8 +139,6 @@ const DateTimePicker = ({
 
   const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const time = e.target.value
-    setTimeValue(time)
-
     if (!selectedDate) return
 
     const [hours, minutes] = time.split(':').map((str) => parseInt(str, 10))
@@ -154,7 +148,6 @@ const DateTimePicker = ({
 
   const handleClear = () => {
     onChange('')
-    setTimeValue('12:00')
   }
 
   // Disable dates before minDate or after maxDate
@@ -237,14 +230,7 @@ const DateTimePicker = ({
             defaultMonth={selectedDate || minDate || new Date()}
             showOutsideDays
             autoFocus
-            classNames={{
-              root: `${getDefaultClassNames().root} text-sm`,
-              today: 'font-semibold',
-              selected: 'font-medium',
-              disabled: 'cursor-not-allowed',
-              outside: 'rdp-outside',
-              chevron: `${getDefaultClassNames().chevron} fill-neutral-600`,
-            }}
+            classNames={DAY_PICKER_CLASS_NAMES}
           />
 
           {/* Time input */}

@@ -11,7 +11,7 @@
 
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react'
 import Fuse, { IFuseOptions } from 'fuse.js'
-import { useEffect, useId, useState, useTransition } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 
 export interface FuzzySelectOption {
   id: number
@@ -57,38 +57,26 @@ export function FuzzySearchSelect({
   name,
 }: FuzzySearchSelectProps) {
   const [query, setQuery] = useState('')
-  const [filteredOptions, setFilteredOptions] = useState<FuzzySelectOption[]>([])
-  const [isPending, startTransition] = useTransition()
   const generatedId = useId()
   const inputId = `fuzzy-select-${generatedId}`
 
   // Lazy state initialization - Fuse instance created once
   const [fuseInstance] = useState(() => new Fuse(options, FUSE_OPTIONS))
 
-  // Update Fuse collection when options change
+  // Sync Fuse collection when options change (side-effect only)
   useEffect(() => {
-    if (!options || options.length === 0) {
-      setFilteredOptions([])
-      return
-    }
     fuseInstance.setCollection(options)
-    // Update filtered options if no query (show first N)
-    if (!query.trim()) {
-      setFilteredOptions(options.slice(0, maxResults))
-    }
-  }, [options, fuseInstance, maxResults, query])
+  }, [options, fuseInstance])
 
-  // Handle search with startTransition for non-blocking updates
+  // Derive filtered options from query and options (no state needed)
+  const filteredOptions = useMemo(() => {
+    if (!options || options.length === 0) return []
+    if (!query.trim()) return options.slice(0, maxResults)
+    return fuseInstance.search(query).slice(0, maxResults).map(r => r.item)
+  }, [options, query, maxResults, fuseInstance])
+
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery)
-    startTransition(() => {
-      if (!searchQuery.trim()) {
-        setFilteredOptions(options.slice(0, maxResults))
-      } else {
-        const results = fuseInstance.search(searchQuery)
-        setFilteredOptions(results.slice(0, maxResults).map(r => r.item))
-      }
-    })
   }
 
   // Get selected options for display
@@ -106,10 +94,6 @@ export function FuzzySearchSelect({
       onChange([...selected, option.id])
     }
     setQuery('')
-    // Reset to show first N options after selection
-    startTransition(() => {
-      setFilteredOptions(options.slice(0, maxResults))
-    })
   }
 
   // Remove a selected item
@@ -192,21 +176,14 @@ export function FuzzySearchSelect({
               aria-describedby={error ? `${inputId}-error` : undefined}
             />
             <ComboboxButton className="absolute inset-0 flex items-center justify-end pr-3">
-              {isPending ? (
-                <svg className="w-4 h-4 text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-              ) : (
-                <svg
-                  className="w-4 h-4 text-neutral-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              )}
+              <svg
+                className="w-4 h-4 text-neutral-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </ComboboxButton>
           </div>
 
