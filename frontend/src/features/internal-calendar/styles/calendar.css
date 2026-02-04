@@ -95,17 +95,20 @@
   text-align: right;
 }
 
-.rbc-date-cell a {
+.rbc-date-cell a,
+.rbc-date-cell .rbc-button-link {
   font-size: 0.875rem;
   font-weight: 500;
   color: #111827;
 }
 
-.rbc-off-range .rbc-date-cell a {
-  color: #9ca3af;
+.rbc-off-range.rbc-date-cell a,
+.rbc-off-range.rbc-date-cell .rbc-button-link {
+  color: #6b7280;
 }
 
-.rbc-now .rbc-date-cell a {
+.rbc-now.rbc-date-cell a,
+.rbc-now.rbc-date-cell .rbc-button-link {
   background-color: #2563eb;
   color: white;
   border-radius: 9999px;
