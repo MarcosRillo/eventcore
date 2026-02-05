@@ -28,31 +28,37 @@ export function OrganizerEventListItemSkeleton({
       as="div"
       variant="default"
       padding="md"
-      className={`flex flex-col gap-3 ${className}`}
+      className={`flex gap-3 ${className}`}
     >
-      {/* Row 1: Status Badge skeleton */}
-      <div className="flex items-center justify-between">
-        <div className="h-5 w-24 bg-neutral-200 rounded-full animate-pulse" />
-      </div>
+      {/* Thumbnail skeleton */}
+      <div className="w-24 h-[4.5rem] shrink-0 rounded-lg bg-neutral-200 animate-pulse" />
 
-      {/* Row 2: Title skeleton */}
-      <div className="space-y-2">
-        <div className="h-5 w-3/4 bg-neutral-200 rounded animate-pulse" />
-        <div className="h-5 w-1/2 bg-neutral-200 rounded animate-pulse" />
-      </div>
+      {/* Content */}
+      <div className="flex flex-col gap-3 min-w-0 flex-1">
+        {/* Row 1: Status Badge skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-24 bg-neutral-200 rounded-full animate-pulse" />
+        </div>
 
-      {/* Row 3: Metadata skeleton */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="h-4 w-28 bg-neutral-200 rounded animate-pulse" />
-        <div className="h-4 w-32 bg-neutral-200 rounded animate-pulse" />
-        <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
-      </div>
+        {/* Row 2: Title skeleton */}
+        <div className="space-y-2">
+          <div className="h-5 w-3/4 bg-neutral-200 rounded animate-pulse" />
+          <div className="h-5 w-1/2 bg-neutral-200 rounded animate-pulse" />
+        </div>
 
-      {/* Row 4: Actions skeleton */}
-      <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
-        <div className="h-8 w-14 bg-neutral-200 rounded animate-pulse" />
-        <div className="h-8 w-16 bg-neutral-200 rounded animate-pulse" />
-        <div className="h-8 w-32 bg-neutral-200 rounded animate-pulse" />
+        {/* Row 3: Metadata skeleton */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="h-4 w-28 bg-neutral-200 rounded animate-pulse" />
+          <div className="h-4 w-32 bg-neutral-200 rounded animate-pulse" />
+          <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
+        </div>
+
+        {/* Row 4: Actions skeleton */}
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
+          <div className="h-8 w-14 bg-neutral-200 rounded animate-pulse" />
+          <div className="h-8 w-16 bg-neutral-200 rounded animate-pulse" />
+          <div className="h-8 w-32 bg-neutral-200 rounded animate-pulse" />
+        </div>
       </div>
     </Card>
   )

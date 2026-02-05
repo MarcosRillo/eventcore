@@ -86,28 +86,29 @@ describe('OrganizerEventListItemSkeletons', () => {
   test('should render default 3 skeletons', () => {
     const { container } = render(<OrganizerEventListItemSkeletons />)
 
-    const skeletons = container.querySelectorAll('.rounded-lg')
+    // Count Card wrappers (have both rounded-lg and flex gap-3)
+    const skeletons = container.querySelectorAll('.rounded-lg.flex.gap-3')
     expect(skeletons.length).toBe(3)
   })
 
   test('should render specified number of skeletons', () => {
     const { container } = render(<OrganizerEventListItemSkeletons count={5} />)
 
-    const skeletons = container.querySelectorAll('.rounded-lg')
+    const skeletons = container.querySelectorAll('.rounded-lg.flex.gap-3')
     expect(skeletons.length).toBe(5)
   })
 
   test('should render 1 skeleton when count is 1', () => {
     const { container } = render(<OrganizerEventListItemSkeletons count={1} />)
 
-    const skeletons = container.querySelectorAll('.rounded-lg')
+    const skeletons = container.querySelectorAll('.rounded-lg.flex.gap-3')
     expect(skeletons.length).toBe(1)
   })
 
   test('should render 0 skeletons when count is 0', () => {
     const { container } = render(<OrganizerEventListItemSkeletons count={0} />)
 
-    const skeletons = container.querySelectorAll('.rounded-lg')
+    const skeletons = container.querySelectorAll('.rounded-lg.flex.gap-3')
     expect(skeletons.length).toBe(0)
   })
 
