@@ -17,18 +17,68 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class EventSeeder extends Seeder
 {
+    private array $seedImagePool = [];
+
     /**
      * Run the database seeds.
      * Creates sample events with proper 3NF relationships.
      */
     public function run(): void
     {
+        $this->downloadSeedImages();
+
         DB::transaction(function () {
             $this->seedEvents();
         });
+    }
+
+    /**
+     * Download seed images from Lorem Picsum before the transaction.
+     */
+    private function downloadSeedImages(int $count = 15): void
+    {
+        $disk = Storage::disk('public');
+        $disk->deleteDirectory('events/seed');
+        $disk->makeDirectory('events/seed');
+
+        for ($i = 0; $i < $count; $i++) {
+            try {
+                $response = Http::timeout(10)
+                    ->connectTimeout(5)
+                    ->get('https://picsum.photos/480/360.webp');
+
+                if ($response->successful()) {
+                    $filename = "seed_{$i}.webp";
+                    $disk->put("events/seed/{$filename}", $response->body());
+                    $this->seedImagePool[] = "/storage/events/seed/{$filename}";
+                }
+            } catch (\Exception $e) {
+                if ($i === 0) {
+                    $this->command->warn('Could not download seed images from picsum.photos — events will have no images.');
+
+                    return;
+                }
+            }
+        }
+
+        $this->command->info("Downloaded {$count} seed images from picsum.photos");
+    }
+
+    /**
+     * Get a random image path from the pool, or null if empty.
+     */
+    private function getRandomSeedImage(): ?string
+    {
+        if (empty($this->seedImagePool)) {
+            return null;
+        }
+
+        return $this->seedImagePool[array_rand($this->seedImagePool)];
     }
 
     /**
@@ -100,7 +150,7 @@ class EventSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(32)->setHour(23)->setMinute(0),
             'status_id' => $publishedStatus->id,
             'format_id' => $multiSedeFormat->id,
-            'featured_image' => 'https://example.com/images/festival-gastronomico.jpg',
+            'featured_image' => $this->getRandomSeedImage(),
             'is_featured' => true,
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $gastronomicoSubtype->id,
@@ -130,7 +180,7 @@ class EventSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(15)->setHour(17)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
-            'featured_image' => 'https://example.com/images/cerro-san-javier.jpg',
+            'featured_image' => $this->getRandomSeedImage(),
             'is_featured' => false,
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $excursionSubtype->id,
@@ -157,7 +207,7 @@ class EventSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(45)->setHour(18)->setMinute(0),
             'status_id' => $pendingInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
-            'featured_image' => 'https://example.com/images/ruta-dulce.jpg',
+            'featured_image' => $this->getRandomSeedImage(),
             'is_featured' => false,
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $rutaTuristicaSubtype->id,
@@ -190,7 +240,7 @@ class EventSeeder extends Seeder
                 'end_date' => Carbon::now()->addDays(25)->setHour(23)->setMinute(30),
                 'status_id' => $pendingInternalStatus->id,
                 'format_id' => $sedeUnicaFormat->id,
-                'featured_image' => 'https://example.com/images/cena-san-valentin.jpg',
+                'featured_image' => $this->getRandomSeedImage(),
                 'is_featured' => false,
                 'organization_id' => $sheratonHotel->id,
                 'entity_id' => $enteDeturismo->id,
@@ -223,7 +273,7 @@ class EventSeeder extends Seeder
                 'end_date' => Carbon::now()->addDays(53)->setHour(18)->setMinute(0),
                 'status_id' => $approvedInternalStatus->id,
                 'format_id' => $multiSedeFormat->id,
-                'featured_image' => 'https://example.com/images/feria-agropecuaria.jpg',
+                'featured_image' => $this->getRandomSeedImage(),
                 'is_featured' => true,
                 'organization_id' => $laRural->id,
                 'entity_id' => $enteDeturismo->id,
@@ -256,6 +306,7 @@ class EventSeeder extends Seeder
                 'end_date' => Carbon::now()->addDays(20)->setHour(18)->setMinute(0),
                 'status_id' => $draftStatus->id,
                 'format_id' => $sedeUnicaFormat->id,
+                'featured_image' => $this->getRandomSeedImage(),
                 'event_type_id' => $conferenciasType->id,
                 'event_subtype_id' => $workshopSubtype->id,
                 'organization_id' => $sheratonHotel->id,
@@ -290,6 +341,7 @@ class EventSeeder extends Seeder
                 'end_date' => Carbon::now()->addDays(25)->setHour(22)->setMinute(0),
                 'status_id' => $draftStatus->id,
                 'format_id' => $sedeUnicaFormat->id,
+                'featured_image' => $this->getRandomSeedImage(),
                 'event_type_id' => $festivalesType->id,
                 'event_subtype_id' => $gastronomicoSubtype->id,
                 'organization_id' => $laRural->id,
@@ -417,6 +469,7 @@ class EventSeeder extends Seeder
             'status_id' => $publishedStatus->id,
             'format_id' => $multiSedeFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesSubtypes->where('name', 'Festival de Música')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -442,6 +495,7 @@ class EventSeeder extends Seeder
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesSubtypes->where('name', 'Festival Gastronómico')->first()->id,
             'organization_id' => $laRural?->id ?? $enteDeturismo->id,
@@ -467,6 +521,7 @@ class EventSeeder extends Seeder
             'status_id' => $pendingInternalStatus->id,
             'format_id' => $multiSedeFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesSubtypes->where('name', 'Festival Cultural')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -492,6 +547,7 @@ class EventSeeder extends Seeder
             'status_id' => $draftStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesSubtypes->where('name', 'Festival Folclórico')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -523,6 +579,7 @@ class EventSeeder extends Seeder
             'status_id' => $publishedStatus->id,
             'format_id' => $multiSedeFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesSubtypes->where('name', 'Competencia')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -548,6 +605,7 @@ class EventSeeder extends Seeder
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesSubtypes->where('name', 'Maratón')->first()->id,
             'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
@@ -573,6 +631,7 @@ class EventSeeder extends Seeder
             'status_id' => $pendingStatusForDeportes->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesSubtypes->where('name', 'Torneo')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -598,6 +657,7 @@ class EventSeeder extends Seeder
             'status_id' => $draftStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesSubtypes->where('name', 'Exhibición Deportiva')->first()->id,
             'organization_id' => $laRural?->id ?? $enteDeturismo->id,
@@ -629,6 +689,7 @@ class EventSeeder extends Seeder
             'status_id' => $publishedStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaSubtypes->where('name', 'Exposición de Arte')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -654,6 +715,7 @@ class EventSeeder extends Seeder
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaSubtypes->where('name', 'Teatro')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -679,6 +741,7 @@ class EventSeeder extends Seeder
             'status_id' => $pendingStatusForCultura->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaSubtypes->where('name', 'Concierto')->first()->id,
             'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
@@ -704,6 +767,7 @@ class EventSeeder extends Seeder
             'status_id' => $draftStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaSubtypes->where('name', 'Danza')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -735,6 +799,7 @@ class EventSeeder extends Seeder
             'status_id' => $publishedStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoSubtypes->where('name', 'Tour Guiado')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -760,6 +825,7 @@ class EventSeeder extends Seeder
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoSubtypes->where('name', 'Excursión')->first()->id,
             'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
@@ -785,6 +851,7 @@ class EventSeeder extends Seeder
             'status_id' => $pendingInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoSubtypes->where('name', 'Ruta Turística')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -810,6 +877,7 @@ class EventSeeder extends Seeder
             'status_id' => $draftStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoSubtypes->where('name', 'Experiencia Gastronómica')->first()->id,
             'organization_id' => $laRural?->id ?? $enteDeturismo->id,
@@ -841,6 +909,7 @@ class EventSeeder extends Seeder
             'status_id' => $publishedStatus->id,
             'format_id' => $multiSedeFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasSubtypes->where('name', 'Feria Artesanal')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -866,6 +935,7 @@ class EventSeeder extends Seeder
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasSubtypes->where('name', 'Feria del Libro')->first()->id,
             'organization_id' => $laRural?->id ?? $enteDeturismo->id,
@@ -891,6 +961,7 @@ class EventSeeder extends Seeder
             'status_id' => $pendingInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasSubtypes->where('name', 'Feria Productiva')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -916,6 +987,7 @@ class EventSeeder extends Seeder
             'status_id' => $draftStatus->id,
             'format_id' => $multiSedeFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasSubtypes->where('name', 'Expo Comercial')->first()->id,
             'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
@@ -947,6 +1019,7 @@ class EventSeeder extends Seeder
             'status_id' => $publishedStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => true,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasSubtypes->where('name', 'Congreso')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -972,6 +1045,7 @@ class EventSeeder extends Seeder
             'status_id' => $approvedInternalStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasSubtypes->where('name', 'Seminario')->first()->id,
             'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
@@ -997,6 +1071,7 @@ class EventSeeder extends Seeder
             'status_id' => $pendingStatusForConferencias->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasSubtypes->where('name', 'Workshop')->first()->id,
             'organization_id' => $enteDeturismo->id,
@@ -1022,6 +1097,7 @@ class EventSeeder extends Seeder
             'status_id' => $draftStatus->id,
             'format_id' => $sedeUnicaFormat->id,
             'is_featured' => false,
+            'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasSubtypes->where('name', 'Charla')->first()->id,
             'organization_id' => $laRural?->id ?? $enteDeturismo->id,
