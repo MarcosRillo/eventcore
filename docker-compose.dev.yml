@@ -30,6 +30,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./backend:/var/www
+      - ./docker/backend/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
       - composer_cache:/home/www/.composer
     env_file: .env.docker
     environment:
@@ -45,6 +46,7 @@ services:
       - plataforma-network
     ports:
       - "8000:8000"
+    entrypoint: ["sh", "/usr/local/bin/entrypoint.sh"]
     command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
     depends_on:
       db:
