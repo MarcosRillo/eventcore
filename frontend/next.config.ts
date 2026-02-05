@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       'lucide-react',
       '@/components/ui',
       '@/shared/components/form',
+      '@/shared/components/display',
       '@/features/events',
       '@/features/auth',
       '@/features/appearance',
@@ -52,6 +53,11 @@ const nextConfig: NextConfig = {
         // Proxy all /api/v1/* requests to the backend
         source: '/api/v1/:path*',
         destination: `${backendUrl}/api/v1/:path*`,
+      },
+      {
+        // Proxy storage files (event images) to the backend
+        source: '/storage/:path*',
+        destination: `${backendUrl}/storage/:path*`,
       },
     ];
   },
