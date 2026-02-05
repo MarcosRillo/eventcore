@@ -5,6 +5,7 @@ namespace App\Features\Organizer\Services;
 use App\Features\Organizer\Traits\EventDataPreparation;
 use App\Models\Event;
 use App\Models\EventStatus;
+use App\Models\Scopes\TenantScope;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -173,7 +174,7 @@ class OrganizerService
     {
         $this->validator->validateUserHasOrganization($user);
 
-        $query = Event::withoutGlobalScopes()
+        $query = Event::withoutGlobalScope(TenantScope::class)
             ->with(['status', 'eventType', 'eventSubtype', 'locations'])
             ->where('organization_id', $user->organization_id);
 

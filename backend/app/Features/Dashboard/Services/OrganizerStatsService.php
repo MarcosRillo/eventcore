@@ -4,6 +4,7 @@ namespace App\Features\Dashboard\Services;
 
 use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
+use App\Models\Scopes\TenantScope;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -44,7 +45,7 @@ class OrganizerStatsService
             $statusIds = $this->mapStatusKeys($allStatusIds);
 
             // Use withoutGlobalScopes to avoid double-filtering from TenantScope
-            $baseQuery = Event::withoutGlobalScopes()
+            $baseQuery = Event::withoutGlobalScope(TenantScope::class)
                 ->where('organization_id', $organizationId);
 
             // Single efficient query with groupBy
