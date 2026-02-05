@@ -1,35 +1,36 @@
 /**
  * AdminDashboardContainer - Smart Component
  *
- * Composes the admin dashboard with stats and quick filters.
+ * Composes the admin dashboard with stats, filters, and event list.
  * Uses useEventManager for events and useEventManagement for modal.
  * Accepts optional initialStats from server-side fetch to avoid waterfall.
+ *
+ * Redesigned UI/UX with:
+ * - Compact stats bar (AdminStatsSummary)
+ * - Unified filters (AdminEventFilters)
+ * - Event cards (AdminEventList)
  */
 
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback,useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { AdminQuickFilters } from '@/features/entity-admin/components/dumb/AdminQuickFilters';
-import { AdminStatsGrid } from '@/features/entity-admin/components/dumb/AdminStatsGrid';
+import { AdminDashboard } from '@/features/entity-admin/components/dumb/AdminDashboard';
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
 import { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline';
 import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel';
-import { EventsPastToggle } from '@/features/entity-admin/components/dumb/EventsPastToggle';
-import { EventTableContainer } from '@/features/entity-admin/components/smart/EventTableContainer';
-import { Pagination } from '@/shared/components/tables';
+import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
+import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
+import type { AdminApprovalStats } from '@/features/entity-admin/types';
+import { useEventManager } from '@/features/events/hooks/useEventManager';
+import type { Event, EventStatusCode } from '@/types/event.types';
 
 // Lazy load modal - only loaded when needed
 const EventManagementModal = dynamic(
   () => import('@/features/entity-admin/components/dumb/EventManagementModal').then(mod => ({ default: mod.EventManagementModal })),
   { ssr: false }
 );
-import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
-import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
-import type { AdminApprovalStats } from '@/features/entity-admin/types';
-import { useEventManager } from '@/features/events/hooks/useEventManager';
-import type { Event, EventStatusCode } from '@/types/event.types';
 
 /**
  * Get status code from event object.
@@ -41,33 +42,27 @@ function getStatusCode(event: Event | null): EventStatusCode {
   return (event.status.status_code || (event.status as { code?: string }).code || 'draft') as EventStatusCode;
 }
 
-const StatsLoadingFallback = (
-  <div className="flex items-center justify-center py-8">
-    <div className="text-neutral-500">Cargando estadísticas...</div>
-  </div>
-);
-
-const StatsErrorFallback = (
-  <div className="flex items-center justify-center py-8">
-    <div className="text-error-600">Error al cargar estadísticas</div>
-  </div>
-);
-
 interface AdminDashboardContainerProps {
   initialStats?: AdminApprovalStats | null;
 }
 
 export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContainerProps) => {
   const [activeFilter, setActiveFilter] = useState<EventStatusCode | null>(null);
-  const [showPast, setShowPast] = useState(false);
+  const [timeScope, setTimeScope] = useState<'upcoming' | 'past'>('upcoming');
 
-  const { cardData, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats(initialStats);
+  const {
+    stats,
+    statusCounts,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useAdminStats(initialStats);
 
   // Use event manager for events list
   const {
     events,
     pagination,
     isLoading: eventsLoading,
+    error: eventsError,
     updateFilters,
     changePage,
     refreshData,
@@ -95,87 +90,76 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
     },
   });
 
-  // Handle filter change
+  // Handle filter change from stats bar or filter pills
   const handleFilterChange = useCallback((status: EventStatusCode | null) => {
     setActiveFilter(status);
+    const showPast = timeScope === 'past';
     if (status) {
       updateFilters({ status, show_past: showPast ? '1' : undefined });
     } else {
       updateFilters({ status: undefined, show_past: showPast ? '1' : undefined });
     }
-  }, [updateFilters, showPast]);
+  }, [updateFilters, timeScope]);
 
-  // Handle show past toggle
-  const handleShowPastChange = useCallback((checked: boolean) => {
-    setShowPast(checked);
+  // Handle time scope toggle
+  const handleTimeScopeChange = useCallback((scope: 'upcoming' | 'past') => {
+    setTimeScope(scope);
     updateFilters({
       status: activeFilter || undefined,
-      show_past: checked ? '1' : undefined,
+      show_past: scope === 'past' ? '1' : undefined,
     });
   }, [updateFilters, activeFilter]);
 
-  // Handle opening modal from event table
-  const handleApprovalAction = useCallback((event: Event) => {
+  // Handle page change
+  const handlePageChange = useCallback((page: number) => {
+    changePage(page);
+  }, [changePage]);
+
+  // Handle manage event (open modal)
+  const handleManageEvent = useCallback((event: Event) => {
     openModal(event);
   }, [openModal]);
 
+  // Handle retry
+  const handleRetry = useCallback(() => {
+    refreshData();
+  }, [refreshData]);
+
+  // Handle clear filters
+  const handleClearFilters = useCallback(() => {
+    setActiveFilter(null);
+    setTimeScope('upcoming');
+    updateFilters({ status: undefined, show_past: undefined });
+  }, [updateFilters]);
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-900">Panel de Administración</h1>
-        <p className="text-sm text-neutral-500 mt-1">
-          Gestiona y aprueba eventos del calendario
-        </p>
-      </div>
+    <AdminDashboard
+      // Stats
+      stats={stats}
+      statsLoading={statsLoading}
 
-      {/* Stats Grid */}
-      {statsLoading ? (
-        StatsLoadingFallback
-      ) : statsError ? (
-        StatsErrorFallback
-      ) : (
-        <AdminStatsGrid cardData={cardData} onStatClick={handleFilterChange} />
-      )}
+      // Events
+      events={events}
+      eventsLoading={eventsLoading}
+      eventsError={eventsError?.message ?? null}
 
-      {/* Quick Filters */}
-      <div className="flex items-center justify-between gap-4">
-        <AdminQuickFilters
-          activeFilter={activeFilter}
-          onFilterChange={handleFilterChange}
-        />
+      // Filters
+      activeStatusFilter={activeFilter}
+      timeScope={timeScope}
+      statusCounts={statusCounts}
 
-        {/* Past Events Toggle */}
-        <EventsPastToggle
-          checked={showPast}
-          onChange={handleShowPastChange}
-        />
-      </div>
+      // Pagination
+      pagination={pagination}
 
-      {/* Event Table */}
-      <div className="bg-white shadow-sm rounded-lg">
-        <EventTableContainer
-          events={events}
-          isLoading={eventsLoading}
-          onApprovalAction={handleApprovalAction}
-        />
-
-        {/* Pagination */}
-        {pagination && (
-          <div className="border-t border-neutral-200 px-6">
-            <Pagination
-              currentPage={pagination.current_page}
-              totalPages={pagination.last_page}
-              onPageChange={changePage}
-              showInfo={true}
-              totalItems={pagination.total}
-              itemsFrom={pagination.from ?? undefined}
-              itemsTo={pagination.to ?? undefined}
-            />
-          </div>
-        )}
-      </div>
-
+      // Handlers
+      onStatClick={handleFilterChange}
+      onStatusFilterChange={handleFilterChange}
+      onTimeScopeChange={handleTimeScopeChange}
+      onPageChange={handlePageChange}
+      onManageEvent={handleManageEvent}
+      onRetry={handleRetry}
+      onClearFilters={handleClearFilters}
+    >
       {/* Event Management Modal */}
       {isOpen && selectedEvent && (
         <EventManagementModal
@@ -210,7 +194,7 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
           </div>
         </EventManagementModal>
       )}
-    </div>
+    </AdminDashboard>
   );
 };
 

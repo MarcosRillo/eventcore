@@ -1,56 +1,56 @@
 /**
- * OrganizerEventFilters - Dumb Component
+ * AdminEventFilters Component
  *
  * Unified filter bar combining status pills (with count badges)
  * and temporal toggle (upcoming/past).
+ * Dumb component - receives data via props, no business logic.
  */
 
 'use client'
 
 import { FilterPill, SegmentedControl } from '@/shared/components/form'
+import type { EventStatusCode } from '@/types/event.types'
 
-interface StatusCounts {
+export interface AdminStatusCounts {
   total: number
-  draft: number
-  pending_internal: number
-  approved_internal: number
+  pending_internal_approval: number
+  pending_public_approval: number
   published: number
   requires_changes: number
   rejected: number
 }
 
-interface OrganizerEventFiltersProps {
-  activeStatus: string | null
+interface AdminEventFiltersProps {
+  activeStatus: EventStatusCode | null
   timeScope: 'upcoming' | 'past'
-  onStatusChange: (status: string | null) => void
+  onStatusChange: (status: EventStatusCode | null) => void
   onTimeScopeChange: (scope: 'upcoming' | 'past') => void
-  statusCounts?: StatusCounts | null
+  statusCounts?: AdminStatusCounts | null
 }
 
 const STATUS_FILTERS = [
   { label: 'Todos', value: null, countKey: 'total' as const },
-  { label: 'Borrador', value: 'draft', countKey: 'draft' as const },
-  { label: 'Pendiente', value: 'pending_internal_approval', countKey: 'pending_internal' as const },
-  { label: 'Aprobado', value: 'approved_internal', countKey: 'approved_internal' as const },
-  { label: 'Publicado', value: 'published', countKey: 'published' as const },
-  { label: 'Req. Cambios', value: 'requires_changes', countKey: 'requires_changes' as const },
-  { label: 'Rechazado', value: 'rejected', countKey: 'rejected' as const },
+  { label: 'Pend. Interno', value: 'pending_internal_approval' as EventStatusCode, countKey: 'pending_internal_approval' as const },
+  { label: 'Pend. Público', value: 'pending_public_approval' as EventStatusCode, countKey: 'pending_public_approval' as const },
+  { label: 'Publicados', value: 'published' as EventStatusCode, countKey: 'published' as const },
+  { label: 'Req. Cambios', value: 'requires_changes' as EventStatusCode, countKey: 'requires_changes' as const },
+  { label: 'Rechazados', value: 'rejected' as EventStatusCode, countKey: 'rejected' as const },
 ] as const
 
-export const OrganizerEventFilters = ({
+export const AdminEventFilters = ({
   activeStatus,
   timeScope,
   onStatusChange,
   onTimeScopeChange,
   statusCounts,
-}: OrganizerEventFiltersProps) => {
+}: AdminEventFiltersProps) => {
   return (
     <div className="flex flex-wrap items-center gap-4 mb-4">
       {/* Status pills */}
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar eventos por estado">
         {STATUS_FILTERS.map((filter) => {
           const isActive = activeStatus === filter.value
-          const count = statusCounts?.[filter.countKey]
+          const count = filter.countKey && statusCounts ? statusCounts[filter.countKey] : undefined
 
           return (
             <FilterPill
@@ -81,3 +81,5 @@ export const OrganizerEventFilters = ({
     </div>
   )
 }
+
+export default AdminEventFilters

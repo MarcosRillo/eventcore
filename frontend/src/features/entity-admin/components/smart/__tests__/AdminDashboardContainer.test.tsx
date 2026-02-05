@@ -1,31 +1,23 @@
 /**
  * Tests for AdminDashboardContainer
  *
- * Smart component that composes the admin dashboard with stats, filters, and event table.
+ * Smart component that composes the admin dashboard with stats, filters, and event list.
+ * Uses the new redesigned UI with AdminDashboard, AdminStatsSummary, AdminEventFilters, and AdminEventList.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer';
 import * as useAdminStatsModule from '@/features/entity-admin/hooks/useAdminStats';
 import * as useEventManagementModule from '@/features/entity-admin/hooks/useEventManagement';
 import type { AdminStatCardData } from '@/features/entity-admin/types';
 import * as useEventManagerModule from '@/features/events/hooks/useEventManager';
+import type { Event } from '@/types/event.types';
 
 jest.mock('@/features/entity-admin/hooks/useAdminStats');
 jest.mock('@/features/entity-admin/hooks/useEventManagement');
 jest.mock('@/features/events/hooks/useEventManager');
 
-// Mock the EventTableContainer as it has its own tests
-jest.mock('@/features/entity-admin/components/smart/EventTableContainer', () => ({
-  EventTableContainer: ({ onApprovalAction }: { onApprovalAction?: (event: unknown) => void }) => (
-    <div data-testid="event-table">
-      <button onClick={() => onApprovalAction?.({ id: 1, title: 'Test Event' })}>
-        Open Modal
-      </button>
-    </div>
-  ),
-}));
 
 describe('AdminDashboardContainer', () => {
   const mockCardData: AdminStatCardData[] = [
@@ -55,16 +47,31 @@ describe('AdminDashboardContainer', () => {
     },
   ];
 
+  const mockStats = {
+    total: 50,
+    pending_internal_approval: 10,
+    pending_public_approval: 5,
+    published: 30,
+    rejected: 3,
+    requires_changes: 2,
+    approved_internal: 0,
+    draft: 0,
+    cancelled: 0,
+  };
+
+  const mockStatusCounts = {
+    total: 50,
+    pending_internal_approval: 10,
+    pending_public_approval: 5,
+    published: 30,
+    requires_changes: 2,
+    rejected: 3,
+  };
+
   const mockUseAdminStats = {
-    stats: {
-      total: 50,
-      pending_internal_approval: 10,
-      pending_public_approval: 5,
-      published: 30,
-      rejected: 3,
-      requires_changes: 2,
-    },
+    stats: mockStats,
     cardData: mockCardData,
+    statusCounts: mockStatusCounts,
     isLoading: false,
     error: null,
     refetch: jest.fn(),
@@ -87,14 +94,31 @@ describe('AdminDashboardContainer', () => {
     cancelAction: jest.fn(),
   };
 
+  const mockEvents: Event[] = [
+    {
+      id: 1,
+      title: 'Test Event 1',
+      description: 'Description 1',
+      start_date: '2025-03-15T10:00:00Z',
+      end_date: '2025-03-15T12:00:00Z',
+      type: 'sede_unica',
+      status: 'pending_internal_approval',
+      locations: [{ id: 1, name: 'Test Location', address: '123 Test St', latitude: 0, longitude: 0 }],
+      is_featured: false,
+      approval_history: [],
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2025-01-01T00:00:00Z',
+    },
+  ];
+
   const mockUseEventManager = {
-    events: [],
+    events: mockEvents,
     pagination: {
       current_page: 1,
       last_page: 1,
-      total: 0,
-      from: null,
-      to: null,
+      total: 1,
+      from: 1,
+      to: 1,
     },
     filters: {},
     statistics: null,
@@ -123,182 +147,167 @@ describe('AdminDashboardContainer', () => {
     (useEventManagerModule.useEventManager as jest.Mock).mockReturnValue(mockUseEventManager);
   });
 
-  test('renders stats grid with card data', () => {
+  test('renders stats summary bar', () => {
     render(<AdminDashboardContainer />);
 
-    expect(screen.getByText('Total Eventos')).toBeInTheDocument();
+    // Stats summary should show key metrics - "Total" appears in both stats bar and filters
+    expect(screen.getAllByText('Total').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('50')).toBeInTheDocument();
-    expect(screen.getByText('Pendientes Internos')).toBeInTheDocument();
-    // "Publicados" appears in both stats and filters
-    expect(screen.getAllByText('Publicados').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Pend. Interno').length).toBeGreaterThanOrEqual(1);
   });
 
-  test('renders quick filters', () => {
+  test('renders filters with status pills', () => {
     render(<AdminDashboardContainer />);
 
     expect(screen.getByText('Todos')).toBeInTheDocument();
-    expect(screen.getByText('Pend. Interno')).toBeInTheDocument();
-    expect(screen.getByText('Pend. Público')).toBeInTheDocument();
-    // "Publicados" appears in both filters and stats, so use getAllByText
+    expect(screen.getAllByText('Pend. Interno').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Pend. Público').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('Publicados').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Rechazados')).toBeInTheDocument();
   });
 
-  test('renders event table', () => {
+  test('renders time scope toggle (Próximos/Pasados)', () => {
     render(<AdminDashboardContainer />);
 
-    expect(screen.getByTestId('event-table')).toBeInTheDocument();
+    expect(screen.getByText('Próximos')).toBeInTheDocument();
+    expect(screen.getByText('Pasados')).toBeInTheDocument();
   });
 
-  test('shows loading state when stats are loading', () => {
+  test('renders event list with events', () => {
+    render(<AdminDashboardContainer />);
+
+    expect(screen.getByText('Test Event 1')).toBeInTheDocument();
+  });
+
+  test('shows loading state in stats when stats are loading', () => {
     (useAdminStatsModule.useAdminStats as jest.Mock).mockReturnValue({
       ...mockUseAdminStats,
       isLoading: true,
-      cardData: [],
+      stats: null,
+      statusCounts: null,
     });
 
     render(<AdminDashboardContainer />);
 
-    expect(screen.getByText(/Cargando/)).toBeInTheDocument();
+    // Stats bar should show skeleton (animated pulse elements)
+    const skeletons = document.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  test('shows error state when stats fail to load', () => {
-    (useAdminStatsModule.useAdminStats as jest.Mock).mockReturnValue({
-      ...mockUseAdminStats,
-      error: 'Error al cargar estadísticas',
-      cardData: [],
-    });
-
+  test('changes filter when status filter pill is clicked', () => {
     render(<AdminDashboardContainer />);
 
-    expect(screen.getByText(/Error al cargar/)).toBeInTheDocument();
-  });
+    // Click on "Pend. Interno" filter (get the one in the filters section)
+    const filterButtons = screen.getAllByText('Pend. Interno');
+    fireEvent.click(filterButtons[0]);
 
-  test('changes filter when quick filter is clicked', () => {
-    render(<AdminDashboardContainer />);
-
-    const pendingFilter = screen.getByText('Pend. Interno');
-    fireEvent.click(pendingFilter);
-
-    // The filter should be active (highlighted)
-    expect(pendingFilter.closest('button')).toHaveClass('bg-primary-600');
-  });
-
-  test('opens modal when event is selected from table', () => {
-    render(<AdminDashboardContainer />);
-
-    const openModalButton = screen.getByText('Open Modal');
-    fireEvent.click(openModalButton);
-
-    expect(mockUseEventManagement.openModal).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, title: 'Test Event' })
+    // The filter should update events
+    expect(mockUseEventManager.updateFilters).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'pending_internal_approval' })
     );
   });
 
-  test('refetches stats when action is successful', async () => {
-    // Start with modal open
-    (useEventManagementModule.useEventManagement as jest.Mock).mockReturnValue({
-      ...mockUseEventManagement,
-      isOpen: true,
-      selectedEvent: { id: 1, title: 'Test', status: 'pending_internal_approval' },
-      availableActions: ['approve_internal'],
-    });
-
+  test('changes time scope when toggle is clicked', () => {
     render(<AdminDashboardContainer />);
 
-    // The onSuccess callback should trigger stats refetch
-    // This is tested indirectly through the component props
-    expect(mockUseAdminStats.refetch).toBeDefined();
-  });
+    const pastButton = screen.getByText('Pasados');
+    fireEvent.click(pastButton);
 
-  test('renders page title', () => {
-    render(<AdminDashboardContainer />);
-
-    expect(screen.getByText(/Panel de Administración/i)).toBeInTheDocument();
-  });
-
-  test('applies selected filter to event table', () => {
-    render(<AdminDashboardContainer />);
-
-    // Click on "Pend. Interno" filter
-    fireEvent.click(screen.getByText('Pend. Interno'));
-
-    // The event table should receive the filter
-    // This is validated through the mock
-    expect(screen.getByTestId('event-table')).toBeInTheDocument();
-  });
-
-  test('renders all stats cards from cardData', () => {
-    render(<AdminDashboardContainer />);
-
-    expect(screen.getByText('10')).toBeInTheDocument(); // Pending internal
-    expect(screen.getByText('5')).toBeInTheDocument();  // Pending public
-    expect(screen.getByText('30')).toBeInTheDocument(); // Published
-  });
-
-  test('displays all stat values', () => {
-    render(<AdminDashboardContainer />);
-
-    // All stat card values should be visible
-    expect(screen.getByText('50')).toBeInTheDocument();
-    expect(screen.getByText('30')).toBeInTheDocument();
-  });
-
-  test('renders EventsPastToggle component', () => {
-    render(<AdminDashboardContainer />);
-
-    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
-
-    // Assert: Toggle exists and is unchecked by default
-    expect(toggle).toBeInTheDocument();
-    expect(toggle).not.toBeChecked();
-  });
-
-  test('updates showPast state when toggle is changed', () => {
-    render(<AdminDashboardContainer />);
-
-    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
-
-    // Act: Click the toggle to show past events
-    fireEvent.click(toggle);
-
-    // Assert: Toggle is now checked
-    expect(toggle).toBeChecked();
-
-    // Act: Click again to hide past events
-    fireEvent.click(toggle);
-
-    // Assert: Toggle is unchecked again
-    expect(toggle).not.toBeChecked();
-  });
-
-  test('passes show_past filter to useEventManager when toggle is enabled', () => {
-    render(<AdminDashboardContainer />);
-
-    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
-
-    // Act: Enable show past events
-    fireEvent.click(toggle);
-
-    // Assert: updateFilters should be called with show_past: '1'
     expect(mockUseEventManager.updateFilters).toHaveBeenCalledWith(
       expect.objectContaining({ show_past: '1' })
     );
   });
 
-  test('removes show_past filter when toggle is disabled', () => {
+  test('switches back to upcoming when Próximos is clicked', () => {
     render(<AdminDashboardContainer />);
 
-    const toggle = screen.getByRole('checkbox', { name: /mostrar eventos pasados/i });
+    // First click Pasados to set time scope to past
+    fireEvent.click(screen.getByText('Pasados'));
 
-    // Act: Enable then disable
-    fireEvent.click(toggle); // Enable
-    fireEvent.click(toggle); // Disable
+    // Then click Próximos
+    fireEvent.click(screen.getByText('Próximos'));
 
-    // Assert: Last call should not include show_past or should be undefined
+    // Last call should have show_past undefined
     const lastCall = mockUseEventManager.updateFilters.mock.calls[
       mockUseEventManager.updateFilters.mock.calls.length - 1
     ][0];
     expect(lastCall.show_past).toBeUndefined();
+  });
+
+  test('opens modal when Gestionar button is clicked', () => {
+    render(<AdminDashboardContainer />);
+
+    const manageButton = screen.getByRole('button', { name: /gestionar aprobación de test event 1/i });
+    fireEvent.click(manageButton);
+
+    expect(mockUseEventManagement.openModal).toHaveBeenCalledWith(mockEvents[0]);
+  });
+
+  test('renders page title', () => {
+    render(<AdminDashboardContainer />);
+
+    expect(screen.getByText(/Gestión de Eventos/i)).toBeInTheDocument();
+  });
+
+  test('shows empty state when no events', () => {
+    (useEventManagerModule.useEventManager as jest.Mock).mockReturnValue({
+      ...mockUseEventManager,
+      events: [],
+    });
+
+    render(<AdminDashboardContainer />);
+
+    expect(screen.getByText('No hay eventos')).toBeInTheDocument();
+  });
+
+  test('shows loading state when events are loading', () => {
+    (useEventManagerModule.useEventManager as jest.Mock).mockReturnValue({
+      ...mockUseEventManager,
+      isLoading: true,
+      events: [],
+    });
+
+    render(<AdminDashboardContainer />);
+
+    // Event list should show skeletons
+    const skeletons = document.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  test('clears filters when clear filters button is clicked', () => {
+    // Setup with active filter
+    (useEventManagerModule.useEventManager as jest.Mock).mockReturnValue({
+      ...mockUseEventManager,
+      events: [],
+    });
+
+    render(<AdminDashboardContainer />);
+
+    // First apply a filter
+    const filterButtons = screen.getAllByText('Pend. Interno');
+    fireEvent.click(filterButtons[0]);
+
+    // Now click clear filters (shown in empty state)
+    const clearButton = screen.getByText('Limpiar filtros');
+    fireEvent.click(clearButton);
+
+    // Should call updateFilters to clear
+    expect(mockUseEventManager.updateFilters).toHaveBeenCalledWith(
+      expect.objectContaining({ status: undefined, show_past: undefined })
+    );
+  });
+
+  test('refetches stats when action is successful', () => {
+    (useEventManagementModule.useEventManagement as jest.Mock).mockReturnValue({
+      ...mockUseEventManagement,
+      isOpen: true,
+      selectedEvent: { id: 1, title: 'Test', status: 'pending_internal_approval', approval_history: [] },
+      availableActions: ['approve_internal'],
+    });
+
+    render(<AdminDashboardContainer />);
+
+    // The onSuccess callback should be defined and will trigger stats refetch
+    expect(mockUseAdminStats.refetch).toBeDefined();
   });
 });

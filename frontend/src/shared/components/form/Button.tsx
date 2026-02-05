@@ -32,8 +32,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     'inline-flex items-center justify-center',
     'font-medium',
     'rounded-md',
-    'transition-all duration-150 ease-in-out',
-    'focus:outline-none focus:ring-2 focus:ring-offset-2',
+    'transition-colors duration-150 ease-in-out',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
   ].join(' ')
 
@@ -44,7 +44,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'bg-primary-500 text-white',
       'hover:bg-primary-600',
       'active:bg-primary-700',
-      'focus:ring-primary-500/40',
+      'focus-visible:ring-primary-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
 
@@ -53,7 +53,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'bg-neutral-100 text-neutral-700',
       'hover:bg-neutral-200 hover:text-neutral-900',
       'active:bg-neutral-300',
-      'focus:ring-neutral-500/40',
+      'focus-visible:ring-neutral-500/40',
     ].join(' '),
 
     // Outline - transparent with border
@@ -62,7 +62,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'border border-neutral-300',
       'hover:bg-neutral-50 hover:border-neutral-400',
       'active:bg-neutral-100',
-      'focus:ring-primary-500/40',
+      'focus-visible:ring-primary-500/40',
     ].join(' '),
 
     // Ghost - no background, subtle hover
@@ -70,7 +70,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'bg-transparent text-neutral-600',
       'hover:bg-neutral-100 hover:text-neutral-900',
       'active:bg-neutral-200',
-      'focus:ring-neutral-500/40',
+      'focus-visible:ring-neutral-500/40',
     ].join(' '),
 
     // Danger - using error semantic token
@@ -78,7 +78,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'bg-error-500 text-white',
       'hover:bg-error-600',
       'active:bg-error-700',
-      'focus:ring-error-500/40',
+      'focus-visible:ring-error-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
 
@@ -87,7 +87,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'bg-success-500 text-white',
       'hover:bg-success-600',
       'active:bg-success-700',
-      'focus:ring-success-500/40',
+      'focus-visible:ring-success-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
 
@@ -96,7 +96,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       'bg-warning-500 text-white',
       'hover:bg-warning-600',
       'active:bg-warning-700',
-      'focus:ring-warning-500/40',
+      'focus-visible:ring-warning-500/40',
       'shadow-sm hover:shadow',
     ].join(' '),
   }

@@ -147,17 +147,17 @@ describe('OrganizerEventFilters', () => {
   })
 
   describe('time scope toggle', () => {
-    test('should render Proximos and Pasados buttons', () => {
+    test('should render Próximos and Pasados buttons', () => {
       render(<OrganizerEventFilters {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: 'Proximos' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Próximos' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Pasados' })).toBeInTheDocument()
     })
 
     test('should highlight upcoming when timeScope is upcoming', () => {
       render(<OrganizerEventFilters {...defaultProps} timeScope="upcoming" />)
 
-      const upcomingButton = screen.getByRole('button', { name: 'Proximos' })
+      const upcomingButton = screen.getByRole('button', { name: 'Próximos' })
       expect(upcomingButton).toHaveClass('bg-white', 'shadow-sm')
       expect(upcomingButton).toHaveAttribute('aria-pressed', 'true')
     })
@@ -173,7 +173,7 @@ describe('OrganizerEventFilters', () => {
     test('should call onTimeScopeChange with upcoming', () => {
       render(<OrganizerEventFilters {...defaultProps} timeScope="past" />)
 
-      fireEvent.click(screen.getByRole('button', { name: 'Proximos' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Próximos' }))
 
       expect(mockOnTimeScopeChange).toHaveBeenCalledWith('upcoming')
     })

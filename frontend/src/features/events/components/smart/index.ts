@@ -4,5 +4,3 @@
  */
 
 export { EventCardContainer } from '@/features/events/components/smart/EventCardContainer';
-// EventTableContainer moved to @/features/entity-admin
-// ApprovalModalContainer moved to @/features/entity-admin

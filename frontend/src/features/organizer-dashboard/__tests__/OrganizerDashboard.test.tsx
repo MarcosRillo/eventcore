@@ -180,7 +180,7 @@ describe('OrganizerDashboard', () => {
     test('renders time scope toggle', () => {
       renderWithProviders(<OrganizerDashboard {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: 'Proximos' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Próximos' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Pasados' })).toBeInTheDocument()
     })
 
