@@ -3,7 +3,7 @@
  * Clean container with subtle shadows and borders
  */
 
-import type { ButtonHTMLAttributes,ReactNode } from 'react'
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react'
 
 interface CardBaseProps {
   children: ReactNode
@@ -11,6 +11,7 @@ interface CardBaseProps {
   variant?: 'default' | 'bordered' | 'elevated' | 'flat'
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
   hover?: boolean
+  style?: CSSProperties
 }
 
 interface CardDivProps extends CardBaseProps {
@@ -33,6 +34,7 @@ const Card = ({
   padding = 'md',
   onClick,
   hover = false,
+  style,
   as,
   ...rest
 }: CardProps) => {
@@ -82,6 +84,7 @@ const Card = ({
         type={type}
         className={`${finalClasses} w-full text-left`}
         onClick={onClick}
+        style={style}
       >
         {children}
       </button>
@@ -91,7 +94,7 @@ const Card = ({
   // Use div or semantic element when no onClick
   const Component = as ?? 'div'
   return (
-    <Component className={finalClasses}>
+    <Component className={finalClasses} style={style}>
       {children}
     </Component>
   )
