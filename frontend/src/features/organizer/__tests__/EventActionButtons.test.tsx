@@ -20,7 +20,6 @@ describe('EventActionButtons', () => {
 
   const mockHandlers = {
     onSubmit: jest.fn(),
-    onDuplicate: jest.fn(),
     onDelete: jest.fn()
   }
 
@@ -97,55 +96,6 @@ describe('EventActionButtons', () => {
 
       const submitButton = screen.getByRole('button', { name: /submit.*review/i })
       expect(submitButton).toBeDisabled()
-    })
-  })
-
-  describe('Duplicate Button', () => {
-    test('renders duplicate button for any event status', () => {
-      const statuses: Array<OrganizerEvent['status']> = [
-        'draft',
-        { id: 1, status_code: 'pending_internal_approval', status_name: 'Pending' },
-        { id: 2, status_code: 'approved_internal', status_name: 'Approved' },
-        { id: 3, status_code: 'published', status_name: 'Published' }
-      ]
-
-      statuses.forEach(status => {
-        const { unmount } = render(
-          <EventActionButtons
-            event={{ ...mockEvent, status }}
-            {...mockHandlers}
-          />
-        )
-
-        expect(screen.getByRole('button', { name: /duplicar/i })).toBeInTheDocument()
-        unmount()
-      })
-    })
-
-    test('duplicate button is always disabled (coming soon feature)', () => {
-      render(
-        <EventActionButtons
-          event={mockEvent}
-          {...mockHandlers}
-        />
-      )
-
-      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
-      expect(duplicateButton).toBeDisabled()
-      expect(duplicateButton).toHaveAttribute('aria-label', 'Duplicar evento (próximamente)')
-    })
-
-    test('duplicate button remains disabled when loading', () => {
-      render(
-        <EventActionButtons
-          event={mockEvent}
-          {...mockHandlers}
-          loading={true}
-        />
-      )
-
-      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
-      expect(duplicateButton).toBeDisabled()
     })
   })
 
@@ -227,7 +177,6 @@ describe('EventActionButtons', () => {
       )
 
       expect(screen.getByRole('button', { name: /submit.*review/i })).toHaveAttribute('aria-label')
-      expect(screen.getByRole('button', { name: /duplicar/i })).toHaveAttribute('aria-label')
       expect(screen.getByRole('button', { name: /delete/i })).toHaveAttribute('aria-label')
     })
   })

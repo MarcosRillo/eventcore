@@ -33,7 +33,7 @@ interface OrganizerEventListItemProps {
   event: OrganizerEvent
   onEdit: () => void
   onView: () => void
-  onSuccess?: () => void
+  onSuccess?: (deletedEventId?: number) => void
   disabled?: boolean
 }
 

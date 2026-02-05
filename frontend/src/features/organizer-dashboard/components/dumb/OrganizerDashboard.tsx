@@ -29,7 +29,7 @@ interface OrganizerDashboardProps {
   onFilterChange: (status: string | null) => void
   onShowPastChange: (isPast: boolean) => void
   onPageChange: (page: number) => void
-  onSuccess: () => void
+  onSuccess: (deletedEventId?: number) => void
   onEdit: (id: number) => void
   onView: (id: number) => void
 }

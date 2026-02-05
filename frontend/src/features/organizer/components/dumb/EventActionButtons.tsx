@@ -1,12 +1,11 @@
 /**
  * EventActionButtons Component (Presentational)
  *
- * Displays action buttons for event: Submit for Review, Duplicate, Delete.
+ * Displays action buttons for event: Submit for Review, Delete.
  * Buttons visibility depends on event status.
  */
 
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { Tooltip } from '@/shared/components/display'
 import { Button } from '@/shared/components/form'
 
 interface EventActionButtonsProps {
@@ -50,18 +49,6 @@ export const EventActionButtons = ({
           Enviar a revisión
         </Button>
       )}
-
-      <Tooltip content="Próximamente" position="top">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => {}}
-          disabled={true}
-          aria-label="Duplicar evento (próximamente)"
-        >
-          Duplicar
-        </Button>
-      </Tooltip>
 
       {canDelete && (
         <Button

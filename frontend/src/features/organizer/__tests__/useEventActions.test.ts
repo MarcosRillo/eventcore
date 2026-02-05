@@ -86,99 +86,6 @@ describe('useEventActions', () => {
     })
   })
 
-  describe('duplicateEvent', () => {
-    test('duplicates event successfully and shows success toast', async () => {
-      const mockOriginalEvent = {
-        id: 1,
-        title: 'Original Event',
-        description: 'Test description',
-        status: 'published' as const,
-        start_date: '2025-11-01T10:00',
-        locations: [{ id: 1, name: 'Test Location' }],
-        category: { id: 1, name: 'Test Category' }
-      }
-      const mockDuplicatedEvent = {
-        data: {
-          id: 2,
-          title: 'Original Event (Copia)',
-          status: 'draft' as const,
-          start_date: '2025-11-01T10:00',
-          locations: [{ id: 1, name: 'Test Location' }]
-        }
-      }
-
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockOriginalEvent)
-      ;(organizerEventService.createEvent as jest.Mock).mockResolvedValue(mockDuplicatedEvent)
-
-      const { result } = renderHook(() => useEventActions(mockRefresh))
-
-      await act(async () => {
-        await result.current.duplicateEvent(1)
-      })
-
-      expect(organizerEventService.getEvent).toHaveBeenCalledWith(1)
-      expect(organizerEventService.createEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Original Event (Copia)',
-          location_ids: [1]
-        })
-      )
-      expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Evento duplicado exitosamente',
-        type: 'success'
-      })
-      expect(mockRefresh).toHaveBeenCalled()
-    })
-
-    test('removes id and timestamps when duplicating', async () => {
-      const mockOriginalEvent = {
-        id: 1,
-        title: 'Original Event',
-        description: 'Test description',
-        start_date: '2025-11-01T10:00',
-        locations: [{ id: 1, name: 'Test Location' }],
-        category: { id: 1, name: 'Test Category' },
-        status: 'draft' as const,
-        created_at: '2025-10-29T00:00:00Z',
-        updated_at: '2025-10-29T00:00:00Z'
-      }
-
-      ;(organizerEventService.getEvent as jest.Mock).mockResolvedValue(mockOriginalEvent)
-      ;(organizerEventService.createEvent as jest.Mock).mockResolvedValue({ data: { id: 2 } })
-
-      const { result } = renderHook(() => useEventActions(mockRefresh))
-
-      await act(async () => {
-        await result.current.duplicateEvent(1)
-      })
-
-      // Verify createEvent was called with proper structure (no id, created_at, updated_at)
-      const createEventCall = (organizerEventService.createEvent as jest.Mock).mock.calls[0][0]
-      expect(createEventCall.id).toBeUndefined()
-      expect(createEventCall.created_at).toBeUndefined()
-      expect(createEventCall.updated_at).toBeUndefined()
-      expect(createEventCall.title).toBe('Original Event (Copia)')
-    })
-
-    test('handles duplicate error and shows error toast', async () => {
-      ;(organizerEventService.getEvent as jest.Mock).mockRejectedValue(
-        new Error('Not found')
-      )
-
-      const { result } = renderHook(() => useEventActions(mockRefresh))
-
-      await act(async () => {
-        await result.current.duplicateEvent(1)
-      })
-
-      expect(mockAddToast).toHaveBeenCalledWith({
-        message: 'Error al duplicar evento',
-        type: 'error'
-      })
-      expect(mockRefresh).not.toHaveBeenCalled()
-    })
-  })
-
   describe('deleteEvent', () => {
     test('deletes event successfully and shows success toast', async () => {
       ;(organizerEventService.deleteEvent as jest.Mock).mockResolvedValue({ success: true })
@@ -194,7 +101,7 @@ describe('useEventActions', () => {
         message: 'Evento eliminado exitosamente',
         type: 'success'
       })
-      expect(mockRefresh).toHaveBeenCalled()
+      expect(mockRefresh).toHaveBeenCalledWith(1)
       expect(result.current.loading).toBe(false)
     })
 
@@ -273,11 +180,5 @@ describe('useEventActions', () => {
       expect(result.current.selectedEventId).toBeNull()
     })
 
-    test('duplicate action does not require confirmation modal', () => {
-      const { result } = renderHook(() => useEventActions(mockRefresh))
-
-      // Should not have duplicate modal state
-      expect(result.current).not.toHaveProperty('duplicateModalOpen')
-    })
   })
 })

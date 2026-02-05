@@ -100,6 +100,17 @@ export const useOrganizerEvents = () => {
     })
   }, [mutate])
 
+  const optimisticRemove = useCallback((eventId: number) => {
+    mutate(
+      (current) => current ? {
+        ...current,
+        data: current.data.filter(e => e.id !== eventId),
+        total: current.total - 1,
+      } : current,
+      { revalidate: true }
+    )
+  }, [mutate])
+
   const retry = useCallback(() => {
     mutate()
   }, [mutate])
@@ -119,6 +130,7 @@ export const useOrganizerEvents = () => {
     handleShowPastToggle,
     handleDelete,
     setShowPast,
+    optimisticRemove,
     retry,
   }
 }

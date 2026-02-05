@@ -29,13 +29,18 @@ export const OrganizerDashboardContainer = () => {
     handlePageChange,
     handleStatusFilter,
     handleShowPastToggle,
+    optimisticRemove,
     retry
   } = useOrganizerEvents()
 
   // Refresh data after actions
-  function handleRefresh(): void {
+  function handleRefresh(deletedEventId?: number): void {
+    if (deletedEventId) {
+      optimisticRemove(deletedEventId)
+    } else {
+      retry()
+    }
     refetchStats()
-    retry()
   }
 
   // Handle filter change

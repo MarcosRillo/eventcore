@@ -27,7 +27,6 @@ describe('EventActionButtonsContainer', () => {
     openDeleteModal: jest.fn(),
     closeDeleteModal: jest.fn(),
     submitForReview: jest.fn(),
-    duplicateEvent: jest.fn(),
     deleteEvent: jest.fn(),
   }
 
@@ -41,7 +40,6 @@ describe('EventActionButtonsContainer', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
       expect(screen.getByRole('button', { name: /submit.*review/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /duplicar/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
     })
 
@@ -164,25 +162,6 @@ describe('EventActionButtonsContainer', () => {
     })
   })
 
-  describe('Duplicate action', () => {
-    it('should render duplicate button as disabled (coming soon feature)', () => {
-      render(<EventActionButtonsContainer event={mockEvent} />)
-
-      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
-      expect(duplicateButton).toBeDisabled()
-      expect(duplicateButton).toHaveAttribute('aria-label', 'Duplicar evento (próximamente)')
-    })
-
-    it('should not call duplicateEvent when duplicate button is clicked', () => {
-      render(<EventActionButtonsContainer event={mockEvent} />)
-
-      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
-      fireEvent.click(duplicateButton)
-
-      expect(mockUseEventActions.duplicateEvent).not.toHaveBeenCalled()
-    })
-  })
-
   describe('Delete action', () => {
     it('should open delete modal when delete button clicked', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
@@ -291,11 +270,9 @@ describe('EventActionButtonsContainer', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
       const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-      const duplicateButton = screen.getByRole('button', { name: /duplicar/i })
       const deleteButton = screen.getByRole('button', { name: /delete/i })
 
       expect(submitButton).toBeDisabled()
-      expect(duplicateButton).toBeDisabled()
       expect(deleteButton).toBeDisabled()
     })
 

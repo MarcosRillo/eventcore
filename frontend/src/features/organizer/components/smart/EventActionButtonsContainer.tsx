@@ -12,7 +12,7 @@ import { DeleteConfirmModal, PublishConfirmModal } from '@/shared/components/mod
 
 interface EventActionButtonsContainerProps {
   event: OrganizerEvent
-  onSuccess?: () => void
+  onSuccess?: (deletedEventId?: number) => void
 }
 
 export const EventActionButtonsContainer = ({
