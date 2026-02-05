@@ -141,7 +141,7 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
       // Events
       events={events}
       eventsLoading={eventsLoading}
-      eventsError={eventsError?.message ?? null}
+      eventsError={eventsError ?? null}
 
       // Filters
       activeStatusFilter={activeFilter}
