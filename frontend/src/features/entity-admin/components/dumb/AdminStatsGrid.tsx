@@ -47,8 +47,16 @@ export const AdminStatsGrid = ({
 }: AdminStatsGridProps) => {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <span className="text-neutral-500">Cargando estadísticas...</span>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="p-4 rounded-lg border-2 border-neutral-200 bg-neutral-50 animate-pulse"
+          >
+            <div className="h-4 w-20 bg-neutral-200 rounded mb-2" />
+            <div className="h-8 w-12 bg-neutral-200 rounded" />
+          </div>
+        ))}
       </div>
     );
   }

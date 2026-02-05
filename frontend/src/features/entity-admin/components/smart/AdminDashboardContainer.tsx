@@ -31,6 +31,28 @@ import type { AdminApprovalStats } from '@/features/entity-admin/types';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
 import type { Event, EventStatusCode } from '@/types/event.types';
 
+/**
+ * Get status code from event object.
+ * Supports both 'status_code' (type definition) and 'code' (API response from EventResource)
+ */
+function getStatusCode(event: Event | null): EventStatusCode {
+  if (!event) return 'draft';
+  if (typeof event.status === 'string') return event.status;
+  return (event.status.status_code || (event.status as { code?: string }).code || 'draft') as EventStatusCode;
+}
+
+const StatsLoadingFallback = (
+  <div className="flex items-center justify-center py-8">
+    <div className="text-neutral-500">Cargando estadísticas...</div>
+  </div>
+);
+
+const StatsErrorFallback = (
+  <div className="flex items-center justify-center py-8">
+    <div className="text-error-600">Error al cargar estadísticas</div>
+  </div>
+);
+
 interface AdminDashboardContainerProps {
   initialStats?: AdminApprovalStats | null;
 }
@@ -97,15 +119,6 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
     openModal(event);
   }, [openModal]);
 
-  // Get status code from event
-  // Supports both 'status_code' (type definition) and 'code' (API response from EventResource)
-  const getStatusCode = (event: Event | null): EventStatusCode => {
-    if (!event) return 'draft';
-    if (typeof event.status === 'string') return event.status;
-    // Backend EventResource returns 'code', type definition expects 'status_code'
-    return (event.status.status_code || (event.status as { code?: string }).code || 'draft') as EventStatusCode;
-  };
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -118,15 +131,11 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
 
       {/* Stats Grid */}
       {statsLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-neutral-500">Cargando estadísticas...</div>
-        </div>
+        StatsLoadingFallback
       ) : statsError ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-error-600">Error al cargar estadísticas</div>
-        </div>
+        StatsErrorFallback
       ) : (
-        <AdminStatsGrid cardData={cardData} />
+        <AdminStatsGrid cardData={cardData} onStatClick={handleFilterChange} />
       )}
 
       {/* Quick Filters */}

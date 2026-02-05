@@ -70,10 +70,16 @@ describe('AdminStatsGrid', () => {
     expect(buttons.length).toBe(0);
   });
 
-  test('shows loading state', () => {
-    render(<AdminStatsGrid cardData={[]} isLoading={true} />);
+  test('shows loading state with skeleton animation', () => {
+    const { container } = render(<AdminStatsGrid cardData={[]} isLoading={true} />);
 
-    expect(screen.getByText('Cargando estadísticas...')).toBeInTheDocument();
+    // Should render 6 skeleton cards with animate-pulse
+    const skeletonCards = container.querySelectorAll('.animate-pulse');
+    expect(skeletonCards.length).toBe(6);
+
+    // Should maintain grid layout
+    const grid = container.querySelector('[class*="grid"]');
+    expect(grid).toBeInTheDocument();
   });
 
   test('handles empty card data', () => {
