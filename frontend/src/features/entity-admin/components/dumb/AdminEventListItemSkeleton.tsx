@@ -28,7 +28,7 @@ export function AdminEventListItemSkeleton({
       as="div"
       variant="default"
       padding="md"
-      className={`flex flex-col gap-3 ${className}`}
+      className={`flex flex-col gap-3 min-h-[140px] ${className}`}
     >
       {/* Row 1: Status Badge + Organizer skeleton */}
       <div className="flex items-center justify-between">

@@ -41,7 +41,7 @@ export const AdminEventList = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-3 p-4">
+      <div className="space-y-3 p-4 min-h-[400px]">
         <AdminEventListItemSkeletons count={5} />
       </div>
     )
@@ -96,7 +96,7 @@ export const AdminEventList = ({
 
   // Event list with staggered animations
   return (
-    <div className="space-y-3 p-4">
+    <div className="space-y-3 p-4 min-h-[400px]">
       {events.map((event, index) => (
         <AdminEventListItem
           key={event.id}

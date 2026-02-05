@@ -135,9 +135,9 @@ export const AdminDashboard = ({
             onClearFilters={onClearFilters}
           />
 
-          {/* Pagination */}
-          {pagination && pagination.last_page > 1 && !eventsLoading && !eventsError && events.length > 0 && (
-            <div className="border-t border-neutral-200 px-4 sm:px-6">
+          {/* Pagination - Always visible when multiple pages exist to prevent layout shift */}
+          {pagination && pagination.last_page > 1 && !eventsError && (
+            <div className={`border-t border-neutral-200 px-4 sm:px-6 transition-opacity duration-200 ${eventsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
               <Pagination
                 currentPage={pagination.current_page}
                 totalPages={pagination.last_page}
