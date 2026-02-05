@@ -34,9 +34,8 @@ describe('eventFormValidation', () => {
     international_attendance: '',
     virtual_transmission: false,
     event_website: '',
-    logo_url: '',
     featured_image: '',
-    responsive_image_url: '',
+    featured_image_file: null,
   })
 
   describe('validateEventForm', () => {

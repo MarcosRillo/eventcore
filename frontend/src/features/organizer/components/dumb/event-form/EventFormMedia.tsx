@@ -13,7 +13,7 @@ interface EventFormMediaProps {
 }
 
 /**
- * Media section: event website, logo, featured image, responsive image
+ * Media section: event website and featured image
  */
 export const EventFormMedia = ({
   formData,
@@ -57,37 +57,7 @@ export const EventFormMedia = ({
             aspectRatio="16:9"
             disabled={loading}
             error={errors.featured_image || errors.featured_image_file}
-            helperText="Banner principal, hero en página de detalle, cards grandes"
-            fullWidth
-          />
-
-          {/* Logo */}
-          <ImageUploadField
-            label="Logo del Evento"
-            value={formData.logo_url}
-            onChange={(value) => handleChange('logo_url', value)}
-            file={formData.logo_file}
-            onFileChange={(file) => handleFileChange('logo_file', file)}
-            recommendedSize="500 x 500 px"
-            aspectRatio="1:1"
-            disabled={loading}
-            error={errors.logo_url || errors.logo_file}
-            helperText="Logo del evento, thumbnails, favicon"
-            fullWidth
-          />
-
-          {/* Imagen Responsive */}
-          <ImageUploadField
-            label="Imagen Responsive (Móvil)"
-            value={formData.responsive_image_url}
-            onChange={(value) => handleChange('responsive_image_url', value)}
-            file={formData.responsive_image_file}
-            onFileChange={(file) => handleFileChange('responsive_image_file', file)}
-            recommendedSize="800 x 450 px"
-            aspectRatio="16:9"
-            disabled={loading}
-            error={errors.responsive_image_url || errors.responsive_image_file}
-            helperText="Vista móvil, cards pequeños, redes sociales"
+            helperText="Imagen principal del evento. Se mostrará como banner, en tarjetas del calendario y en la página de detalle."
             fullWidth
           />
         </div>

@@ -71,15 +71,9 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     // Additional info
     event_website: '',
 
-    // Images (URLs)
-    logo_url: '',
+    // Images
     featured_image: '',
-    responsive_image_url: '',
-
-    // Images (Files)
-    logo_file: null,
-    featured_image_file: null,
-    responsive_image_file: null
+    featured_image_file: null
   })
 
   const [errors, setErrors] = useState<EventFormErrors>({})
@@ -183,15 +177,9 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
       // Additional info
       event_website: existingEvent.event_website || '',
 
-      // Images (URLs)
-      logo_url: existingEvent.logo_url || '',
+      // Images
       featured_image: existingEvent.featured_image || '',
-      responsive_image_url: existingEvent.responsive_image_url || '',
-
-      // Images (Files - null when editing, only set when user uploads)
-      logo_file: null,
-      featured_image_file: null,
-      responsive_image_file: null
+      featured_image_file: null
     })
 
     // Store locations with names for the async select chips
@@ -385,20 +373,16 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
           // Additional info
           event_website: formData.event_website || undefined,
 
-          // Images (URLs - only include if no file is being uploaded for that field)
-          logo_url: !formData.logo_file ? (formData.logo_url || undefined) : undefined,
+          // Images (URL - only include if no file is being uploaded)
           featured_image: !formData.featured_image_file ? (formData.featured_image || undefined) : undefined,
-          responsive_image_url: !formData.responsive_image_file ? (formData.responsive_image_url || undefined) : undefined,
         }
 
         // Check if we have any files to upload
-        const hasFiles = formData.logo_file || formData.featured_image_file || formData.responsive_image_file
+        const hasFiles = !!formData.featured_image_file
 
         // Collect files if present
-        const files: { logo_file?: File; featured_image_file?: File; responsive_image_file?: File } = {}
-        if (formData.logo_file) files.logo_file = formData.logo_file
+        const files: { featured_image_file?: File } = {}
         if (formData.featured_image_file) files.featured_image_file = formData.featured_image_file
-        if (formData.responsive_image_file) files.responsive_image_file = formData.responsive_image_file
 
         if (isEditMode) {
           if (hasFiles) {

@@ -22,9 +22,7 @@ export const updateEvent = async (id: number, data: UpdateEventDto): Promise<{ d
 }
 
 interface ImageFiles {
-  logo_file?: File
   featured_image_file?: File
-  responsive_image_file?: File
 }
 
 /**
@@ -67,14 +65,8 @@ const buildFormData = (data: CreateEventDto | UpdateEventDto, files: ImageFiles)
   })
 
   // Add files
-  if (files.logo_file) {
-    formData.append('logo_file', files.logo_file)
-  }
   if (files.featured_image_file) {
     formData.append('featured_image_file', files.featured_image_file)
-  }
-  if (files.responsive_image_file) {
-    formData.append('responsive_image_file', files.responsive_image_file)
   }
 
   return formData

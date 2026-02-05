@@ -66,12 +66,8 @@ describe('OrganizerEventForm', () => {
     international_attendance: '',
     virtual_transmission: false,
     event_website: '',
-    logo_url: '',
     featured_image: '',
-    responsive_image_url: '',
-    logo_file: null,
-    featured_image_file: null,
-    responsive_image_file: null
+    featured_image_file: null
   }
 
   const filledFormData: EventFormData = {
@@ -95,12 +91,8 @@ describe('OrganizerEventForm', () => {
     international_attendance: '50',
     virtual_transmission: true,
     event_website: 'https://festival.com',
-    logo_url: 'https://ejemplo.com/logo.png',
     featured_image: 'https://ejemplo.com/imagen.jpg',
-    responsive_image_url: 'https://ejemplo.com/imagen-mobile.jpg',
-    logo_file: null,
-    featured_image_file: null,
-    responsive_image_file: null
+    featured_image_file: null
   }
 
   const mockEventTypes = [
@@ -544,24 +536,20 @@ describe('OrganizerEventForm', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
       expect(screen.getByText(/1920 x 1080 px/i)).toBeInTheDocument()
-      expect(screen.getByText(/500 x 500 px/i)).toBeInTheDocument()
-      expect(screen.getByText(/800 x 450 px/i)).toBeInTheDocument()
     })
 
     test('should render mode toggle buttons for file/url', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      // Each ImageUploadField has two toggle buttons
-      expect(screen.getAllByRole('button', { name: /subir archivo/i })).toHaveLength(3)
-      expect(screen.getAllByRole('button', { name: /ingresar url/i })).toHaveLength(3)
+      // Single ImageUploadField has two toggle buttons
+      expect(screen.getAllByRole('button', { name: /subir archivo/i })).toHaveLength(1)
+      expect(screen.getAllByRole('button', { name: /ingresar url/i })).toHaveLength(1)
     })
 
-    test('should render helper text for each image field', () => {
+    test('should render helper text for image field', () => {
       render(<OrganizerEventForm {...defaultProps} />)
 
-      expect(screen.getByText(/banner principal, hero en página de detalle/i)).toBeInTheDocument()
-      expect(screen.getByText(/thumbnails, favicon/i)).toBeInTheDocument()
-      expect(screen.getByText(/vista móvil, cards pequeños/i)).toBeInTheDocument()
+      expect(screen.getByText(/imagen principal del evento/i)).toBeInTheDocument()
     })
   })
 
@@ -836,12 +824,12 @@ describe('OrganizerEventForm', () => {
       expect(screen.getByLabelText(/asistencia extranjeros/i)).toHaveValue(50)
     })
 
-    test('should display image previews when URLs are set', () => {
+    test('should display image preview when URL is set', () => {
       render(<OrganizerEventForm {...defaultProps} formData={filledFormData} />)
 
-      // ImageUploadField shows preview images when URLs are provided
+      // ImageUploadField shows preview image when URL is provided
       const previews = screen.getAllByAltText('Vista previa')
-      expect(previews).toHaveLength(3)
+      expect(previews).toHaveLength(1)
     })
   })
 
