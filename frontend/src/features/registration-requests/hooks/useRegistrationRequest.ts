@@ -28,13 +28,16 @@ interface UseRegistrationRequestReturn {
   clearErrors: () => void
 }
 
+// Hoisted regex patterns for better performance (avoid recreation on each render)
+const CUIT_REGEX = /^\d{2}-\d{8}-\d{1}$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 /**
  * Validate CUIT format (XX-XXXXXXXX-X)
  * @param cuit
  */
 const isValidCuit = (cuit: string): boolean => {
-  const cuitRegex = /^\d{2}-\d{8}-\d{1}$/
-  return cuitRegex.test(cuit)
+  return CUIT_REGEX.test(cuit)
 }
 
 /**
@@ -42,8 +45,7 @@ const isValidCuit = (cuit: string): boolean => {
  * @param email
  */
 const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+  return EMAIL_REGEX.test(email)
 }
 
 /**

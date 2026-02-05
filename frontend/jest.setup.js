@@ -55,6 +55,8 @@ const WHITELISTED_ERROR_PATTERNS = [
   { pattern: /LoadableComponent/, secondaryPattern: /not wrapped in act/, reason: 'Next.js dynamic() lazy loading' },
   // HeadlessUI internal components (MainTreeProvider, InternalDialog, FocusTrap, etc.)
   { pattern: /MainTreeProvider|InternalDialog|FocusTrap/, secondaryPattern: /not wrapped in act/, reason: 'HeadlessUI internal state management' },
+  // HeadlessUI Floating UI anchor positioning (used by Listbox, Combobox, etc.)
+  { pattern: /FloatingProvider/, secondaryPattern: /not wrapped in act/, reason: 'HeadlessUI Floating UI anchor positioning' },
   // InternalShareButtons clipboard/popover state updates
   { pattern: /InternalShareButtons/, secondaryPattern: /not wrapped in act/, reason: 'Clipboard async operations' },
   // JSDOM limitations

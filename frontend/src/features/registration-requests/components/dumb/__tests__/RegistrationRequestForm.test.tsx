@@ -603,10 +603,10 @@ describe('RegistrationRequestForm', () => {
   })
 
   describe('Helper Text', () => {
-    test('displays CUIT format helper text', () => {
+    test('displays CUIT field with auto-formatting mask', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
-      expect(screen.getByText(/formato: xx-xxxxxxxx-x/i)).toBeInTheDocument()
+      // CUIT field uses input mask for auto-formatting (no separate helper text needed)
       expect(screen.getByText('CUIT')).toBeInTheDocument()
       expect(screen.getByText(/datos de la organización/i)).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/20-12345678-9/i)).toBeInTheDocument()

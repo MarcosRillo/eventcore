@@ -6,13 +6,18 @@
  */
 
 import Image from 'next/image'
-import { useEffect,useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { withMask } from 'use-mask-input'
 
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
 } from '@/features/registration-requests/types/registration-request.types'
-import { Button, Checkbox, Input, Select, Textarea } from '@/shared/components/form'
+import Button from '@/shared/components/form/Button'
+import Checkbox from '@/shared/components/form/Checkbox'
+import Input from '@/shared/components/form/Input'
+import Select from '@/shared/components/form/Select'
+import Textarea from '@/shared/components/form/Textarea'
 
 interface RegistrationRequestFormProps {
   formData: RegistrationRequestFormData
@@ -55,6 +60,10 @@ export function RegistrationRequestForm({
 }: RegistrationRequestFormProps) {
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+
+  // CUIT mask ref using use-mask-input
+  const cuitInputRef = useRef<HTMLInputElement>(null)
+  const cuitMaskRef = withMask('99-99999999-9')
 
   // Generate previews when files change
   useEffect(() => {
@@ -162,6 +171,7 @@ export function RegistrationRequestForm({
             label="DNI"
             type="text"
             name="dni"
+            inputMode="numeric"
             autoComplete="off"
             value={formData.dni}
             onChange={handleInputChange}
@@ -184,7 +194,8 @@ export function RegistrationRequestForm({
           />
           <Input
             label="WhatsApp"
-            type="text"
+            type="tel"
+            inputMode="tel"
             name="whatsapp"
             autoComplete="tel"
             value={formData.whatsapp}
@@ -257,8 +268,14 @@ export function RegistrationRequestForm({
             error={formErrors.organization_name}
           />
           <Input
+            ref={(el) => {
+              // Combine refs: store element ref and apply mask
+              cuitInputRef.current = el
+              cuitMaskRef(el)
+            }}
             label="CUIT"
             type="text"
+            inputMode="numeric"
             name="organization_cuit"
             autoComplete="off"
             value={formData.organization_cuit}
@@ -267,7 +284,6 @@ export function RegistrationRequestForm({
             required
             disabled={submitting}
             error={formErrors.organization_cuit}
-            helperText="Formato: XX-XXXXXXXX-X"
           />
           <Select
             label="Sector"
