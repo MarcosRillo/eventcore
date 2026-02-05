@@ -117,9 +117,10 @@ class ApprovalController extends Controller
     /**
      * Get approval statistics.
      */
-    public function statistics(): JsonResponse
+    public function statistics(Request $request): JsonResponse
     {
-        $statistics = $this->approvalService->getApprovalStatistics();
+        $showPast = $request->query('show_past') === '1';
+        $statistics = $this->approvalService->getApprovalStatistics($showPast);
 
         return response()->json(['data' => $statistics]);
     }

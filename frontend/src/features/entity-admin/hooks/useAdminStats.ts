@@ -8,6 +8,11 @@ import { adminStatsService } from '@/features/entity-admin/services';
 import type { AdminApprovalStats, AdminStatCardData } from '@/features/entity-admin/types';
 import { adminKeys, apiFetcher } from '@/lib/swr';
 
+interface UseAdminStatsOptions {
+  initialStats?: AdminApprovalStats | null;
+  showPast?: boolean;
+}
+
 interface UseAdminStatsReturn {
   stats: AdminApprovalStats | null;
   cardData: AdminStatCardData[];
@@ -17,9 +22,11 @@ interface UseAdminStatsReturn {
   refetch: () => Promise<void>;
 }
 
-export const useAdminStats = (initialStats?: AdminApprovalStats | null): UseAdminStatsReturn => {
+export const useAdminStats = (options: UseAdminStatsOptions = {}): UseAdminStatsReturn => {
+  const { initialStats, showPast = false } = options;
+
   const { data, error, isLoading, mutate } = useSWR<{ data: AdminApprovalStats }>(
-    adminKeys.stats,
+    adminKeys.stats(showPast),
     apiFetcher,
     { fallbackData: initialStats ? { data: initialStats } : undefined }
   );

@@ -139,12 +139,23 @@ class ApprovalService
     /**
      * Get approval statistics.
      * Uses single query with JOIN and groupBy for O(1) performance.
+     *
+     * @param bool $showPast If true, count only past events. If false, count only upcoming events.
      */
-    public function getApprovalStatistics(): array
+    public function getApprovalStatistics(bool $showPast = false): array
     {
         // Single query with JOIN instead of 8 separate whereHas queries
-        $counts = Event::query()
-            ->join('event_statuses', 'events.status_id', '=', 'event_statuses.id')
+        $query = Event::query()
+            ->join('event_statuses', 'events.status_id', '=', 'event_statuses.id');
+
+        // Apply time scope filter
+        if ($showPast) {
+            $query->where('events.end_date', '<', now()->startOfDay());
+        } else {
+            $query->where('events.end_date', '>=', now()->startOfDay());
+        }
+
+        $counts = $query
             ->selectRaw('event_statuses.status_code, count(*) as count')
             ->groupBy('event_statuses.status_code')
             ->pluck('count', 'status_code')

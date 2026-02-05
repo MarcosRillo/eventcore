@@ -55,7 +55,7 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
     statusCounts,
     isLoading: statsLoading,
     refetch: refetchStats,
-  } = useAdminStats(initialStats);
+  } = useAdminStats({ initialStats, showPast: timeScope === 'past' });
 
   // Use event manager for events list
   const {

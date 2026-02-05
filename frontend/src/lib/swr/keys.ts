@@ -1,5 +1,5 @@
 export const adminKeys = {
-  stats: '/events/approval/statistics',
+  stats: (showPast?: boolean) => showPast ? '/events/approval/statistics?show_past=1' : '/events/approval/statistics',
 }
 
 export const organizerKeys = {
