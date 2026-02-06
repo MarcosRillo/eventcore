@@ -35,6 +35,9 @@ jest.mock('@/features/public-calendar/components/dumb/PublicCalendar', () => ({
     locations: unknown[]
     loading: boolean
     error: string | null
+    selectedEventTypeId?: number | null
+    selectedSubtypeId?: number | null
+    selectedLocationId?: number | null
     onEventTypeFilter: (id: number | null) => void
     onEventSubtypeFilter: (id: number | null) => void
     onLocationFilter: (id: number | null) => void
@@ -99,6 +102,7 @@ describe('PublicCalendarContainer', () => {
       locations: mockLocations,
       loading: false,
       error: null,
+      filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
       handleEventTypeFilter: mockHandleEventTypeFilter,
       handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
       handleLocationFilter: mockHandleLocationFilter
@@ -144,6 +148,7 @@ describe('PublicCalendarContainer', () => {
         locations: [],
         loading: true,
         error: null,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -162,6 +167,7 @@ describe('PublicCalendarContainer', () => {
         locations: [],
         loading: false,
         error: 'Failed to load',
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -248,6 +254,7 @@ describe('PublicCalendarContainer', () => {
         locations: mockLocations,
         loading: false,
         error: null,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -266,6 +273,7 @@ describe('PublicCalendarContainer', () => {
         locations: mockLocations,
         loading: false,
         error: null,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -284,6 +292,7 @@ describe('PublicCalendarContainer', () => {
         locations: [],
         loading: false,
         error: null,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -302,6 +311,7 @@ describe('PublicCalendarContainer', () => {
         locations: [],
         loading: false,
         error: null,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -326,6 +336,7 @@ describe('PublicCalendarContainer', () => {
         loading: false,
         error: null,
         hasActiveFilters: false,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -345,6 +356,7 @@ describe('PublicCalendarContainer', () => {
         loading: false,
         error: null,
         hasActiveFilters: true,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter
@@ -365,6 +377,7 @@ describe('PublicCalendarContainer', () => {
         loading: false,
         error: null,
         hasActiveFilters: true,
+        filters: { event_type_id: null, event_subtype_id: null, location_id: null, start_date: null, end_date: null },
         handleEventTypeFilter: mockHandleEventTypeFilter,
         handleEventSubtypeFilter: mockHandleEventSubtypeFilter,
         handleLocationFilter: mockHandleLocationFilter,

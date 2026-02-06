@@ -13,6 +13,7 @@ import { InternalEventCard } from '@/features/internal-calendar/components/dumb/
 import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
 import { LoadingSpinner } from '@/shared/components/feedback';
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState';
+import { EventGrid } from '@/shared/components/layout';
 
 interface InternalCalendarProps {
   events: InternalCalendarEvent[];
@@ -74,14 +75,10 @@ export function InternalCalendar({
 
   // Event grid
   return (
-    <div
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-      role="region"
-      aria-label="Event grid"
-    >
+    <EventGrid>
       {events.map((event) => (
         <InternalEventCard key={event.id} event={event} basePath={basePath} />
       ))}
-    </div>
+    </EventGrid>
   );
 }

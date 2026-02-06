@@ -5,10 +5,10 @@
  * filtering, and responsive layout.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 
 import { PublicCalendar } from '@/features/public-calendar/components/dumb/PublicCalendar'
-import { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
+import { EventSubtype, EventType, Location, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 
 describe('PublicCalendar', () => {
   const mockEvents: PublicEvent[] = [
@@ -62,23 +62,26 @@ describe('PublicCalendar', () => {
     onEventClick: jest.fn()
   }
 
+  const defaultProps = {
+    events: mockEvents,
+    eventTypes: mockEventTypes,
+    eventSubtypes: mockEventSubtypes,
+    locations: mockLocations,
+    loading: false,
+    error: null,
+    selectedEventTypeId: null,
+    selectedSubtypeId: null,
+    selectedLocationId: null,
+    ...mockHandlers
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
   describe('Layout Structure', () => {
     test('renders calendar with header and event grid', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
       expect(screen.getByRole('main')).toBeInTheDocument()
       expect(screen.getByText(/eventos en tucumán/i)).toBeInTheDocument()
@@ -86,34 +89,14 @@ describe('PublicCalendar', () => {
     })
 
     test('displays correct number of event cards', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
       expect(screen.getByText('Festival de Música')).toBeInTheDocument()
       expect(screen.getByText('Exposición de Arte')).toBeInTheDocument()
     })
 
     test('applies responsive grid classes', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
       const grid = screen.getByRole('region', { name: /event grid/i })
 
@@ -125,146 +108,100 @@ describe('PublicCalendar', () => {
   })
 
   describe('Filters', () => {
-    test('renders event type filter dropdown', () => {
-      const { container } = render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+    test('renders event type filter with label', () => {
+      render(<PublicCalendar {...defaultProps} />)
 
-      const select = container.querySelector('#event-type-filter')
-      expect(select).toBeInTheDocument()
+      expect(screen.getByText('Tipo de Evento')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /todos los tipos/i })).toBeInTheDocument()
+    })
+
+    test('renders event type options in dropdown', () => {
+      render(<PublicCalendar {...defaultProps} />)
+
+      // Open the listbox
+      fireEvent.click(screen.getByRole('button', { name: /todos los tipos/i }))
+
       expect(screen.getByRole('option', { name: 'Música' })).toBeInTheDocument()
       expect(screen.getByRole('option', { name: 'Arte' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'Gastronomía' })).toBeInTheDocument()
     })
 
-    test('renders event subtype filter dropdown', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+    test('renders event subtype filter with label', () => {
+      render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByLabelText(/subtipo/i)).toBeInTheDocument()
+      expect(screen.getByText('Subtipo (Opcional)')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /todos los subtipos/i })).toBeInTheDocument()
+    })
+
+    test('renders subtype options in dropdown', () => {
+      render(<PublicCalendar {...defaultProps} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /todos los subtipos/i }))
+
       expect(screen.getByRole('option', { name: 'Festival' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'Concierto' })).toBeInTheDocument()
     })
 
-    test('renders location filter dropdown', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+    test('renders location filter with label', () => {
+      render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByLabelText(/ubicación/i)).toBeInTheDocument()
+      expect(screen.getByText('Ubicación')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /todas las ubicaciones/i })).toBeInTheDocument()
+    })
+
+    test('renders location options in dropdown', () => {
+      render(<PublicCalendar {...defaultProps} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /todas las ubicaciones/i }))
+
       expect(screen.getByRole('option', { name: /Teatro San Martín/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: /Museo Provincial/i })).toBeInTheDocument()
     })
 
     test('calls onEventTypeFilter when event type is selected', () => {
-      const { container } = render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
-      const select = container.querySelector('#event-type-filter') as HTMLSelectElement
-      fireEvent.change(select, { target: { value: '1' } })
+      fireEvent.click(screen.getByRole('button', { name: /todos los tipos/i }))
+      fireEvent.click(screen.getByRole('option', { name: 'Música' }))
 
       expect(mockHandlers.onEventTypeFilter).toHaveBeenCalledWith(1)
     })
 
-    test('calls onEventSubtypeFilter when event subtype is selected', () => {
-      const { container } = render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+    test('calls onEventSubtypeFilter when subtype is selected', () => {
+      render(<PublicCalendar {...defaultProps} />)
 
-      const select = container.querySelector('#event-subtype-filter') as HTMLSelectElement
-      fireEvent.change(select, { target: { value: '1' } })
+      fireEvent.click(screen.getByRole('button', { name: /todos los subtipos/i }))
+      fireEvent.click(screen.getByRole('option', { name: 'Festival' }))
 
       expect(mockHandlers.onEventSubtypeFilter).toHaveBeenCalledWith(1)
     })
 
     test('calls onLocationFilter when location is selected', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
-      const select = screen.getByLabelText(/ubicación/i)
-      fireEvent.change(select, { target: { value: '1' } })
+      fireEvent.click(screen.getByRole('button', { name: /todas las ubicaciones/i }))
+      fireEvent.click(screen.getByRole('option', { name: /Teatro San Martín/i }))
 
       expect(mockHandlers.onLocationFilter).toHaveBeenCalledWith(1)
+    })
+
+    test('disables subtype filter when no subtypes available', () => {
+      render(<PublicCalendar {...defaultProps} eventSubtypes={[]} />)
+
+      const subtypeButton = screen.getByRole('button', { name: /todos los subtipos/i })
+      expect(subtypeButton).toBeDisabled()
     })
   })
 
   describe('Loading State', () => {
     test('displays loading spinner when loading is true', () => {
-      render(
-        <PublicCalendar
-          events={[]}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={true}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} loading={true} events={[]} />)
 
       expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
     })
 
     test('does not display event grid when loading', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={true}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} loading={true} />)
 
       expect(screen.queryByRole('region', { name: /event grid/i })).not.toBeInTheDocument()
     })
@@ -272,33 +209,13 @@ describe('PublicCalendar', () => {
 
   describe('Error State', () => {
     test('displays error message when error is present', () => {
-      render(
-        <PublicCalendar
-          events={[]}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error="Failed to load events"
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} events={[]} error="Failed to load events" />)
 
       expect(screen.getByText('Failed to load events')).toBeInTheDocument()
     })
 
     test('does not display event grid when error is present', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error="Failed to load events"
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} error="Failed to load events" />)
 
       expect(screen.queryByRole('region', { name: /event grid/i })).not.toBeInTheDocument()
     })
@@ -306,17 +223,7 @@ describe('PublicCalendar', () => {
 
   describe('Empty State', () => {
     test('displays empty message when no events', () => {
-      render(
-        <PublicCalendar
-          events={[]}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} events={[]} />)
 
       expect(screen.getByText(/no hay eventos disponibles/i)).toBeInTheDocument()
     })
@@ -324,17 +231,7 @@ describe('PublicCalendar', () => {
 
   describe('SEO', () => {
     test('has proper heading hierarchy', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
       const h1 = screen.getByRole('heading', { level: 1 })
       expect(h1).toBeInTheDocument()
@@ -342,17 +239,7 @@ describe('PublicCalendar', () => {
     })
 
     test('uses semantic HTML', () => {
-      render(
-        <PublicCalendar
-          events={mockEvents}
-          eventTypes={mockEventTypes}
-          eventSubtypes={mockEventSubtypes}
-          locations={mockLocations}
-          loading={false}
-          error={null}
-          {...mockHandlers}
-        />
-      )
+      render(<PublicCalendar {...defaultProps} />)
 
       expect(screen.getByRole('main')).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()

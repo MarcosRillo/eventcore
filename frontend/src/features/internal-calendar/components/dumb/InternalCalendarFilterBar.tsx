@@ -15,6 +15,7 @@ import type {
   InternalCalendarStatusCode,
 } from '@/features/internal-calendar/types/internal-calendar.types';
 import { Button, DateTimePicker, type FormSelectOption, Select } from '@/shared/components/form';
+import { FilterBar } from '@/shared/components/layout';
 
 export interface InternalCalendarFilterBarProps {
   /** Current active filters */
@@ -108,11 +109,7 @@ export function InternalCalendarFilterBar({
   }));
 
   return (
-    <div
-      className="bg-white rounded-lg shadow-sm border border-neutral-200 p-4 mb-6"
-      role="region"
-      aria-label="Filtros de eventos"
-    >
+    <FilterBar ariaLabel="Filtros de eventos" className="shadow-sm mb-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Event Type Filter */}
         <div>
@@ -175,6 +172,6 @@ export function InternalCalendarFilterBar({
           </Button>
         )}
       </div>
-    </div>
+    </FilterBar>
   );
 }
