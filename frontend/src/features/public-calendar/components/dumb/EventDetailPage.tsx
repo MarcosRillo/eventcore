@@ -9,12 +9,13 @@ import {
   Mail,
   MapPin,
   Phone} from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { ShareButtons } from '@/features/public-calendar/components/dumb/ShareButtons';
 import { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML';
+import { SafeImage } from '@/shared/components/display';
+import ImagePlaceholder from '@/shared/components/display/ImagePlaceholder';
 import { Button } from '@/shared/components/form';
 import { Event } from '@/types/event.types';
 
@@ -145,17 +146,21 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
         {/* Event Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Featured Image */}
-          {event.featured_image && (
-            <div className="mb-8">
-              <Image
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-lg mb-8">
+            {event.featured_image ? (
+              <SafeImage
                 src={event.featured_image}
                 alt={event.title}
-                width={800}
-                height={320}
-                className="w-full h-64 md:h-80 object-cover rounded-lg shadow-lg"
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 768px, 896px"
+                className="object-cover"
+                fallback={<ImagePlaceholder />}
               />
-            </div>
-          )}
+            ) : (
+              <ImagePlaceholder />
+            )}
+          </div>
 
           {/* Event Header */}
           <div className="bg-white rounded-lg shadow-sm p-8 mb-6">

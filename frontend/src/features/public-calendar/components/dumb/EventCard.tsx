@@ -5,13 +5,13 @@
  * and featured badge. Uses Card and Badge UI components.
  */
 
-import Image from 'next/image'
 import type { KeyboardEvent } from 'react'
 import { memo } from 'react'
 
 import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
-import { Badge } from '@/shared/components/display'
+import { Badge, SafeImage } from '@/shared/components/display'
+import ImagePlaceholder from '@/shared/components/display/ImagePlaceholder'
 
 interface EventCardProps {
   event: PublicEvent
@@ -45,7 +45,7 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
   return (
     <article
       className="
-        bg-white rounded-lg border border-neutral-200 overflow-hidden
+        group bg-white rounded-lg border border-neutral-200 overflow-hidden
         hover:border-neutral-300 hover:shadow-md
         transition-all duration-150
         cursor-pointer
@@ -58,30 +58,19 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
       aria-label={`Ver evento: ${event.title}`}
     >
       {/* Image */}
-      <div className="relative h-48 bg-neutral-100">
+      <div className="relative aspect-video overflow-hidden bg-neutral-100">
         {imageUrl ? (
-          <Image
+          <SafeImage
             src={imageUrl}
             alt={event.title}
             fill
-            className="object-cover"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            fallback={<ImagePlaceholder />}
           />
         ) : (
-          <div
-            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100"
-            data-testid="event-image-placeholder"
-          >
-            <svg
-              className="w-12 h-12 text-primary-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-            </svg>
-          </div>
+          <ImagePlaceholder />
         )}
 
         {/* Featured Badge */}

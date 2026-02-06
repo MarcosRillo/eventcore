@@ -10,10 +10,17 @@ import { fireEvent,render, screen } from '@testing-library/react'
 import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage'
 import { Event } from '@/types/event.types'
 
-// Mock Next.js Image
+// Mock Next.js Image - filter out non-HTML props to avoid React warnings
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  default: ({
+    priority: _priority,
+    fill: _fill,
+    placeholder: _placeholder,
+    blurDataURL: _blurDataURL,
+    ...props
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }: any) => {
     // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
     return <img {...props} />
   }
