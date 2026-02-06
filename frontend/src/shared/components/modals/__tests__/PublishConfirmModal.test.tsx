@@ -1,48 +1,41 @@
-import { fireEvent,render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import React from 'react'
 
 import { PublishConfirmModal } from '@/shared/components/modals/PublishConfirmModal'
 
-interface MockModalProps {
+interface MockConfirmDialogProps {
   isOpen: boolean
-  onClose: () => void
   title: string
-  children: React.ReactNode
-}
-
-interface MockButtonProps {
-  children: React.ReactNode
-  onClick?: () => void
+  message: string
+  confirmText?: string
+  cancelText?: string
   variant?: string
-  disabled?: boolean
+  onConfirm: () => void
+  onCancel: () => void
+  loading?: boolean
 }
 
-// Mock UI components
-jest.mock('@/shared/components/modals/Modal', () => ({
+jest.mock('@/shared/components/modals/ConfirmDialog', () => ({
   __esModule: true,
-  default: ({ isOpen, onClose, title, children }: MockModalProps) =>
-    isOpen ? (
-      <div data-testid="modal">
-        <div data-testid="modal-title">{title}</div>
-        <div data-testid="modal-body">{children}</div>
-        <button data-testid="close-modal" onClick={onClose}>
-          Close
+  default: (props: MockConfirmDialogProps) =>
+    props.isOpen ? (
+      <div
+        data-testid="confirm-dialog"
+        data-variant={props.variant}
+        data-title={props.title}
+        data-message={props.message}
+        data-confirm-text={props.confirmText}
+        data-cancel-text={props.cancelText}
+        data-loading={props.loading}
+      >
+        <button data-testid="confirm-btn" onClick={props.onConfirm}>
+          {props.confirmText}
+        </button>
+        <button data-testid="cancel-btn" onClick={props.onCancel}>
+          {props.cancelText}
         </button>
       </div>
     ) : null,
-}))
-
-jest.mock('@/shared/components/form/Button', () => ({
-  __esModule: true,
-  default: ({ children, onClick, variant, disabled }: MockButtonProps) => (
-    <button
-      data-testid={`button-${variant}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  ),
 }))
 
 describe('PublishConfirmModal', () => {
@@ -65,10 +58,10 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument()
     })
 
-    it('should render when isOpen is true', () => {
+    it('should render ConfirmDialog when isOpen is true', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -77,37 +70,12 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('modal')).toBeInTheDocument()
-    })
-
-    it('should display default title when not provided', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Publish Item')
-    })
-
-    it('should display custom title when provided', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          title="Publish Event"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Publish Event')
+      expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument()
     })
   })
 
-  describe('Message Display', () => {
-    it('should display default message when not provided', () => {
+  describe('Spanish Defaults', () => {
+    it('should default title to "Enviar a revisión"', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -116,27 +84,28 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(
-        screen.getByText('Are you sure you want to publish this item? It will be submitted for internal approval.')
-      ).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-title',
+        'Enviar a revisión'
+      )
     })
 
-    it('should display custom message when provided', () => {
+    it('should default message to Spanish', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
           loading={false}
-          message="Publishing will make this event visible to all users. Continue?"
           {...mockHandlers}
         />
       )
 
-      expect(
-        screen.getByText('Publishing will make this event visible to all users. Continue?')
-      ).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-message',
+        '¿Está seguro de que desea enviar este elemento? Será enviado para aprobación interna.'
+      )
     })
 
-    it('should apply correct text styling to message', () => {
+    it('should default confirmText to "Enviar"', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -145,13 +114,24 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      const messageElement = screen.getByText(/Are you sure you want to publish this item/)
-      expect(messageElement).toHaveClass('text-neutral-700')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-confirm-text', 'Enviar')
+    })
+
+    it('should hardcode cancelText as "Cancelar"', () => {
+      render(
+        <PublishConfirmModal
+          isOpen={true}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-cancel-text', 'Cancelar')
     })
   })
 
-  describe('Cancel Button', () => {
-    it('should render cancel button', () => {
+  describe('Variant Prop', () => {
+    it('should default to info variant', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -160,25 +140,80 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-secondary')).toHaveTextContent('Cancel')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-variant', 'info')
     })
 
-    it('should call onClose when cancel button is clicked', () => {
+    it('should accept warning variant', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
           loading={false}
+          variant="warning"
           {...mockHandlers}
         />
       )
 
-      const cancelButton = screen.getByTestId('button-secondary')
-      fireEvent.click(cancelButton)
-
-      expect(mockHandlers.onClose).toHaveBeenCalledTimes(1)
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-variant', 'warning')
     })
 
-    it('should disable cancel button when loading', () => {
+    it('should accept info variant explicitly', () => {
+      render(
+        <PublishConfirmModal
+          isOpen={true}
+          loading={false}
+          variant="info"
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-variant', 'info')
+    })
+  })
+
+  describe('Custom Props', () => {
+    it('should pass custom title', () => {
+      render(
+        <PublishConfirmModal
+          isOpen={true}
+          loading={false}
+          title="Publicar evento"
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-title', 'Publicar evento')
+    })
+
+    it('should pass custom message', () => {
+      render(
+        <PublishConfirmModal
+          isOpen={true}
+          loading={false}
+          message="Este evento será visible para todos."
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-message',
+        'Este evento será visible para todos.'
+      )
+    })
+
+    it('should map confirmLabel to confirmText', () => {
+      render(
+        <PublishConfirmModal
+          isOpen={true}
+          loading={false}
+          confirmLabel="Publicar"
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-confirm-text', 'Publicar')
+    })
+
+    it('should pass loading prop', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -187,26 +222,12 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      const cancelButton = screen.getByTestId('button-secondary')
-      expect(cancelButton).toBeDisabled()
-    })
-
-    it('should not disable cancel button when not loading', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const cancelButton = screen.getByTestId('button-secondary')
-      expect(cancelButton).not.toBeDisabled()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-loading', 'true')
     })
   })
 
-  describe('Confirm Button', () => {
-    it('should render confirm button with default label', () => {
+  describe('Callback Mapping', () => {
+    it('should map onClose to onCancel', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -215,23 +236,11 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Publish')
+      screen.getByTestId('cancel-btn').click()
+      expect(mockHandlers.onClose).toHaveBeenCalledTimes(1)
     })
 
-    it('should render confirm button with custom label', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          confirmLabel="Submit"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Submit')
-    })
-
-    it('should call onConfirm when confirm button is clicked', () => {
+    it('should forward onConfirm directly', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -240,51 +249,11 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      const confirmButton = screen.getByTestId('button-primary')
-      fireEvent.click(confirmButton)
-
+      screen.getByTestId('confirm-btn').click()
       expect(mockHandlers.onConfirm).toHaveBeenCalledTimes(1)
     })
 
-    it('should show loading text with default label when loading', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Publishing...')
-    })
-
-    it('should show loading text with custom label when loading', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={true}
-          confirmLabel="Submit"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Submiting...')
-    })
-
-    it('should disable confirm button when loading', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      const confirmButton = screen.getByTestId('button-primary')
-      expect(confirmButton).toBeDisabled()
-    })
-
-    it('should not disable confirm button when not loading', () => {
+    it('should not call onConfirm when cancel is clicked', () => {
       render(
         <PublishConfirmModal
           isOpen={true}
@@ -293,14 +262,24 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      const confirmButton = screen.getByTestId('button-primary')
-      expect(confirmButton).not.toBeDisabled()
+      screen.getByTestId('cancel-btn').click()
+      expect(mockHandlers.onConfirm).not.toHaveBeenCalled()
     })
   })
 
-  describe('Modal Close', () => {
-    it('should call onClose when modal is closed', () => {
-      render(
+  describe('State Changes', () => {
+    it('should handle open/close transitions', () => {
+      const { rerender } = render(
+        <PublishConfirmModal
+          isOpen={false}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument()
+
+      rerender(
         <PublishConfirmModal
           isOpen={true}
           loading={false}
@@ -308,141 +287,39 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      const closeButton = screen.getByTestId('close-modal')
-      fireEvent.click(closeButton)
+      expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument()
 
-      expect(mockHandlers.onClose).toHaveBeenCalledTimes(1)
+      rerender(
+        <PublishConfirmModal
+          isOpen={false}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument()
     })
-  })
 
-  describe('Integration Scenarios', () => {
-    it('should handle publish workflow correctly', () => {
+    it('should update loading state', () => {
       const { rerender } = render(
         <PublishConfirmModal
           isOpen={true}
           loading={false}
-          title="Publish Event"
-          message="This event will be visible to everyone."
-          confirmLabel="Publish Now"
           {...mockHandlers}
         />
       )
 
-      // User clicks publish
-      const publishButton = screen.getByTestId('button-primary')
-      fireEvent.click(publishButton)
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-loading', 'false')
 
-      expect(mockHandlers.onConfirm).toHaveBeenCalled()
-
-      // Loading state enabled
       rerender(
         <PublishConfirmModal
           isOpen={true}
           loading={true}
-          title="Publish Event"
-          message="This event will be visible to everyone."
-          confirmLabel="Publish Now"
           {...mockHandlers}
         />
       )
 
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Publish Nowing...')
-      expect(screen.getByTestId('button-primary')).toBeDisabled()
-      expect(screen.getByTestId('button-secondary')).toBeDisabled()
-    })
-
-    it('should handle cancel workflow correctly', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const cancelButton = screen.getByTestId('button-secondary')
-      fireEvent.click(cancelButton)
-
-      expect(mockHandlers.onClose).toHaveBeenCalled()
-      expect(mockHandlers.onConfirm).not.toHaveBeenCalled()
-    })
-
-    it('should not call handlers when buttons are disabled', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      const publishButton = screen.getByTestId('button-primary')
-      const cancelButton = screen.getByTestId('button-secondary')
-
-      expect(publishButton).toBeDisabled()
-      expect(cancelButton).toBeDisabled()
-    })
-  })
-
-  describe('Customization Options', () => {
-    it('should allow full customization of all props', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          title="Submit for Review"
-          message="Your changes will be sent for manager approval."
-          confirmLabel="Submit"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Submit for Review')
-      expect(screen.getByText('Your changes will be sent for manager approval.')).toBeInTheDocument()
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Submit')
-    })
-
-    it('should work with minimal props (all defaults)', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Publish Item')
-      expect(screen.getByText(/Are you sure you want to publish this item/)).toBeInTheDocument()
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Publish')
-    })
-  })
-
-  describe('Accessibility', () => {
-    it('should have proper button variants for screen readers', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-secondary')).toBeInTheDocument() // Cancel
-      expect(screen.getByTestId('button-primary')).toBeInTheDocument() // Publish
-    })
-
-    it('should maintain semantic HTML structure', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const modal = screen.getByTestId('modal-body')
-      expect(modal).toBeInTheDocument()
-      expect(modal.querySelector('.space-y-4')).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-loading', 'true')
     })
   })
 
@@ -458,7 +335,7 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText(longMessage)).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-message', longMessage)
     })
 
     it('should handle messages with special characters', () => {
@@ -466,12 +343,15 @@ describe('PublishConfirmModal', () => {
         <PublishConfirmModal
           isOpen={true}
           loading={false}
-          message='<script>alert("xss")</script> Publishing...'
+          message='<script>alert("xss")</script>'
           {...mockHandlers}
         />
       )
 
-      expect(screen.getByText(/<script>alert\("xss"\)<\/script> Publishing.../)).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-message',
+        '<script>alert("xss")</script>'
+      )
     })
 
     it('should handle empty strings as custom values', () => {
@@ -486,129 +366,9 @@ describe('PublishConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('')
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('')
-    })
-
-    it('should handle rapid state changes', () => {
-      const { rerender } = render(
-        <PublishConfirmModal
-          isOpen={false}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
-
-      rerender(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal')).toBeInTheDocument()
-
-      rerender(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-primary')).toBeDisabled()
-
-      rerender(
-        <PublishConfirmModal
-          isOpen={false}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
-    })
-
-    it('should handle confirm labels with special characters', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          confirmLabel="Publish & Notify"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-primary')).toHaveTextContent('Publish & Notify')
-    })
-
-    it('should handle loading text generation with various confirm labels', () => {
-      const testCases = [
-        { label: 'Approve', expected: 'Approveing...' },
-        { label: 'Submit', expected: 'Submiting...' },
-        { label: 'Send', expected: 'Sending...' },
-        { label: 'Process', expected: 'Processing...' },
-      ]
-
-      testCases.forEach(({ label, expected }) => {
-        const { rerender } = render(
-          <PublishConfirmModal
-            isOpen={true}
-            loading={true}
-            confirmLabel={label}
-            {...mockHandlers}
-          />
-        )
-
-        expect(screen.getByTestId('button-primary')).toHaveTextContent(expected)
-
-        rerender(<></>)
-      })
-    })
-  })
-
-  describe('Comparison with DeleteConfirmModal', () => {
-    it('should use primary variant for confirm button (not danger)', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-primary')).toBeInTheDocument()
-      expect(screen.queryByTestId('button-danger')).not.toBeInTheDocument()
-    })
-
-    it('should not display warning message like DeleteConfirmModal', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.queryByText(/Warning:/)).not.toBeInTheDocument()
-      expect(screen.queryByText(/cannot be undone/)).not.toBeInTheDocument()
-    })
-
-    it('should have different default messaging tone', () => {
-      render(
-        <PublishConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const message = screen.getByText(/Are you sure you want to publish this item/)
-      expect(message).toBeInTheDocument()
-      expect(message).not.toHaveClass('text-red-800')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-title', '')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-message', '')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-confirm-text', '')
     })
   })
 })

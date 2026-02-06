@@ -1,12 +1,12 @@
 /**
  * Publish Confirmation Modal - Shared Component
  *
- * Generic confirmation modal for publish operations.
+ * Generic confirmation modal for publish/submit operations.
  * Reusable across all features that need publish/approval workflows.
+ * Thin wrapper over ConfirmDialog with info/warning variants.
  */
 
-import { Button } from '@/shared/components/form'
-import { Modal } from '@/shared/components/modals'
+import ConfirmDialog from '@/shared/components/modals/ConfirmDialog'
 
 interface PublishConfirmModalProps {
   isOpen: boolean
@@ -16,6 +16,7 @@ interface PublishConfirmModalProps {
   title?: string
   message?: string
   confirmLabel?: string
+  variant?: 'info' | 'warning'
 }
 
 export const PublishConfirmModal = ({
@@ -23,34 +24,22 @@ export const PublishConfirmModal = ({
   onClose,
   onConfirm,
   loading,
-  title = 'Publish Item',
-  message = 'Are you sure you want to publish this item? It will be submitted for internal approval.',
-  confirmLabel = 'Publish'
+  title = 'Enviar a revisión',
+  message = '¿Está seguro de que desea enviar este elemento? Será enviado para aprobación interna.',
+  confirmLabel = 'Enviar',
+  variant = 'info'
 }: PublishConfirmModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <div className="space-y-4">
-        <p className="text-neutral-700">
-          {message}
-        </p>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="secondary"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={onConfirm}
-            disabled={loading}
-          >
-            {loading ? `${confirmLabel}ing...` : confirmLabel}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <ConfirmDialog
+      isOpen={isOpen}
+      title={title}
+      message={message}
+      variant={variant}
+      confirmText={confirmLabel}
+      cancelText="Cancelar"
+      onConfirm={onConfirm}
+      onCancel={onClose}
+      loading={loading}
+    />
   )
 }

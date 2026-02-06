@@ -3,10 +3,10 @@
  *
  * Generic confirmation modal for delete operations.
  * Reusable across all features (events, categories, locations, etc.)
+ * Thin wrapper over ConfirmDialog with variant="danger".
  */
 
-import { Button } from '@/shared/components/form'
-import { Modal } from '@/shared/components/modals'
+import ConfirmDialog from '@/shared/components/modals/ConfirmDialog'
 
 interface DeleteConfirmModalProps {
   isOpen: boolean
@@ -27,37 +27,21 @@ export const DeleteConfirmModal = ({
   itemName,
   warningMessage = 'Advertencia: Esta acción no se puede deshacer'
 }: DeleteConfirmModalProps) => {
+  const message = itemName
+    ? `¿Está seguro de que desea eliminar "${itemName}"? ${warningMessage}`
+    : `¿Está seguro de que desea eliminar este elemento? ${warningMessage}`
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <div className="space-y-4">
-        <div className="bg-red-50 border-l-4 border-red-600 rounded-sm p-4">
-          <p className="text-red-800 font-semibold">
-            {warningMessage}
-          </p>
-        </div>
-
-        <p className="text-neutral-700">
-          ¿Está seguro de que desea eliminar{' '}
-          {itemName && <strong>&quot;{itemName}&quot;</strong>}?
-        </p>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="secondary"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            onClick={onConfirm}
-            disabled={loading}
-          >
-            {loading ? 'Eliminando...' : 'Eliminar'}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <ConfirmDialog
+      isOpen={isOpen}
+      title={title}
+      message={message}
+      variant="danger"
+      confirmText="Eliminar"
+      cancelText="Cancelar"
+      onConfirm={onConfirm}
+      onCancel={onClose}
+      loading={loading}
+    />
   )
 }

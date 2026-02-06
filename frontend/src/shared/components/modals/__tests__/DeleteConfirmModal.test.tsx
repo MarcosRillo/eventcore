@@ -1,48 +1,41 @@
-import { fireEvent,render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import React from 'react'
 
 import { DeleteConfirmModal } from '@/shared/components/modals/DeleteConfirmModal'
 
-interface MockModalProps {
+interface MockConfirmDialogProps {
   isOpen: boolean
-  onClose: () => void
   title: string
-  children: React.ReactNode
-}
-
-interface MockButtonProps {
-  children: React.ReactNode
-  onClick?: () => void
+  message: string
+  confirmText?: string
+  cancelText?: string
   variant?: string
-  disabled?: boolean
+  onConfirm: () => void
+  onCancel: () => void
+  loading?: boolean
 }
 
-// Mock UI components
-jest.mock('@/shared/components/modals/Modal', () => ({
+jest.mock('@/shared/components/modals/ConfirmDialog', () => ({
   __esModule: true,
-  default: ({ isOpen, onClose, title, children }: MockModalProps) =>
-    isOpen ? (
-      <div data-testid="modal">
-        <div data-testid="modal-title">{title}</div>
-        <div data-testid="modal-body">{children}</div>
-        <button data-testid="close-modal" onClick={onClose}>
-          Close
+  default: (props: MockConfirmDialogProps) =>
+    props.isOpen ? (
+      <div
+        data-testid="confirm-dialog"
+        data-variant={props.variant}
+        data-title={props.title}
+        data-message={props.message}
+        data-confirm-text={props.confirmText}
+        data-cancel-text={props.cancelText}
+        data-loading={props.loading}
+      >
+        <button data-testid="confirm-btn" onClick={props.onConfirm}>
+          {props.confirmText}
+        </button>
+        <button data-testid="cancel-btn" onClick={props.onCancel}>
+          {props.cancelText}
         </button>
       </div>
     ) : null,
-}))
-
-jest.mock('@/shared/components/form/Button', () => ({
-  __esModule: true,
-  default: ({ children, onClick, variant, disabled }: MockButtonProps) => (
-    <button
-      data-testid={`button-${variant}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  ),
 }))
 
 describe('DeleteConfirmModal', () => {
@@ -65,10 +58,10 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument()
     })
 
-    it('should render when isOpen is true', () => {
+    it('should render ConfirmDialog when isOpen is true', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
@@ -77,37 +70,12 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('modal')).toBeInTheDocument()
-    })
-
-    it('should display default title when not provided', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Eliminar elemento')
-    })
-
-    it('should display custom title when provided', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          title="Delete Event"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('modal-title')).toHaveTextContent('Delete Event')
+      expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument()
     })
   })
 
-  describe('Warning Message', () => {
-    it('should display default warning message', () => {
+  describe('ConfirmDialog Props', () => {
+    it('should use danger variant', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
@@ -116,23 +84,35 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText('Advertencia: Esta acción no se puede deshacer')).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-variant', 'danger')
     })
 
-    it('should display custom warning message when provided', () => {
+    it('should pass default title', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
           loading={false}
-          warningMessage="Custom warning: Data will be permanently lost"
           {...mockHandlers}
         />
       )
 
-      expect(screen.getByText('Custom warning: Data will be permanently lost')).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-title', 'Eliminar elemento')
     })
 
-    it('should apply warning styles to warning message', () => {
+    it('should pass custom title', () => {
+      render(
+        <DeleteConfirmModal
+          isOpen={true}
+          loading={false}
+          title="Eliminar evento"
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-title', 'Eliminar evento')
+    })
+
+    it('should hardcode confirmText as "Eliminar"', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
@@ -141,25 +121,36 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      const warningElement = screen.getByText('Advertencia: Esta acción no se puede deshacer')
-      expect(warningElement).toHaveClass('text-red-800', 'font-semibold')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-confirm-text', 'Eliminar')
+    })
+
+    it('should hardcode cancelText as "Cancelar"', () => {
+      render(
+        <DeleteConfirmModal
+          isOpen={true}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-cancel-text', 'Cancelar')
+    })
+
+    it('should pass loading prop', () => {
+      render(
+        <DeleteConfirmModal
+          isOpen={true}
+          loading={true}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-loading', 'true')
     })
   })
 
-  describe('Item Name Display', () => {
-    it('should display confirmation message without item name when not provided', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByText(/¿Está seguro de que desea eliminar/)).toBeInTheDocument()
-    })
-
-    it('should display item name in confirmation message when provided', () => {
+  describe('Message Composition', () => {
+    it('should compose message with itemName and default warning', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
@@ -169,27 +160,13 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText(/¿Está seguro de que desea eliminar/)).toBeInTheDocument()
-      expect(screen.getByText('"Test Event"')).toBeInTheDocument()
-    })
-
-    it('should render item name in bold', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          itemName="Important Document"
-          {...mockHandlers}
-        />
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-message',
+        '¿Está seguro de que desea eliminar "Test Event"? Advertencia: Esta acción no se puede deshacer'
       )
-
-      const itemElement = screen.getByText('"Important Document"')
-      expect(itemElement.tagName).toBe('STRONG')
     })
-  })
 
-  describe('Cancel Button', () => {
-    it('should render cancel button', () => {
+    it('should compose message without itemName using generic text', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
@@ -198,238 +175,29 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-secondary')).toHaveTextContent('Cancelar')
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-message',
+        '¿Está seguro de que desea eliminar este elemento? Advertencia: Esta acción no se puede deshacer'
+      )
     })
 
-    it('should call onClose when cancel button is clicked', () => {
+    it('should compose message with custom warning', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
           loading={false}
+          itemName="My Item"
+          warningMessage="Se perderán todos los datos asociados"
           {...mockHandlers}
         />
       )
 
-      const cancelButton = screen.getByTestId('button-secondary')
-      fireEvent.click(cancelButton)
-
-      expect(mockHandlers.onClose).toHaveBeenCalledTimes(1)
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute(
+        'data-message',
+        '¿Está seguro de que desea eliminar "My Item"? Se perderán todos los datos asociados'
+      )
     })
 
-    it('should disable cancel button when loading', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      const cancelButton = screen.getByTestId('button-secondary')
-      expect(cancelButton).toBeDisabled()
-    })
-
-    it('should not disable cancel button when not loading', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const cancelButton = screen.getByTestId('button-secondary')
-      expect(cancelButton).not.toBeDisabled()
-    })
-  })
-
-  describe('Delete Button', () => {
-    it('should render delete button with default text', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-danger')).toHaveTextContent('Eliminar')
-    })
-
-    it('should call onConfirm when delete button is clicked', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const deleteButton = screen.getByTestId('button-danger')
-      fireEvent.click(deleteButton)
-
-      expect(mockHandlers.onConfirm).toHaveBeenCalledTimes(1)
-    })
-
-    it('should show loading text when loading', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-danger')).toHaveTextContent('Eliminando...')
-    })
-
-    it('should disable delete button when loading', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      const deleteButton = screen.getByTestId('button-danger')
-      expect(deleteButton).toBeDisabled()
-    })
-
-    it('should not disable delete button when not loading', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const deleteButton = screen.getByTestId('button-danger')
-      expect(deleteButton).not.toBeDisabled()
-    })
-  })
-
-  describe('Modal Close', () => {
-    it('should call onClose when modal is closed', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      const closeButton = screen.getByTestId('close-modal')
-      fireEvent.click(closeButton)
-
-      expect(mockHandlers.onClose).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('Integration Scenarios', () => {
-    it('should handle deletion workflow correctly', () => {
-      const { rerender } = render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          itemName="Test Item"
-          {...mockHandlers}
-        />
-      )
-
-      // User clicks delete
-      const deleteButton = screen.getByTestId('button-danger')
-      fireEvent.click(deleteButton)
-
-      expect(mockHandlers.onConfirm).toHaveBeenCalled()
-
-      // Loading state enabled
-      rerender(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={true}
-          itemName="Test Item"
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-danger')).toHaveTextContent('Eliminando...')
-      expect(screen.getByTestId('button-danger')).toBeDisabled()
-      expect(screen.getByTestId('button-secondary')).toBeDisabled()
-    })
-
-    it('should handle cancel workflow correctly', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          itemName="Test Item"
-          {...mockHandlers}
-        />
-      )
-
-      const cancelButton = screen.getByTestId('button-secondary')
-      fireEvent.click(cancelButton)
-
-      expect(mockHandlers.onClose).toHaveBeenCalled()
-      expect(mockHandlers.onConfirm).not.toHaveBeenCalled()
-    })
-
-    it('should not call handlers when buttons are disabled', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={true}
-          {...mockHandlers}
-        />
-      )
-
-      const deleteButton = screen.getByTestId('button-danger')
-      const cancelButton = screen.getByTestId('button-secondary')
-
-      fireEvent.click(deleteButton)
-      fireEvent.click(cancelButton)
-
-      // Buttons are disabled, so handlers might still be called depending on implementation
-      // The disabled attribute is for UX, but clicks can still fire in tests
-      // This test verifies the buttons are disabled, actual prevention depends on Button component
-      expect(deleteButton).toBeDisabled()
-      expect(cancelButton).toBeDisabled()
-    })
-  })
-
-  describe('Accessibility', () => {
-    it('should have proper button variants for screen readers', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.getByTestId('button-secondary')).toBeInTheDocument() // Cancel
-      expect(screen.getByTestId('button-danger')).toBeInTheDocument() // Delete
-    })
-
-    it('should maintain semantic HTML structure', () => {
-      render(
-        <DeleteConfirmModal
-          isOpen={true}
-          loading={false}
-          itemName="Test Item"
-          {...mockHandlers}
-        />
-      )
-
-      const modal = screen.getByTestId('modal-body')
-      expect(modal).toBeInTheDocument()
-      expect(modal.querySelector('.space-y-4')).toBeInTheDocument()
-    })
-  })
-
-  describe('Edge Cases', () => {
     it('should handle very long item names', () => {
       const longName = 'A'.repeat(200)
       render(
@@ -441,10 +209,11 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText(`"${longName}"`)).toBeInTheDocument()
+      const message = screen.getByTestId('confirm-dialog').getAttribute('data-message')
+      expect(message).toContain(longName)
     })
 
-    it('should handle item names with special characters', () => {
+    it('should handle special characters in item name', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
@@ -454,24 +223,54 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByText(/"Event <script>alert\("xss"\)<\/script>"/)).toBeInTheDocument()
+      const message = screen.getByTestId('confirm-dialog').getAttribute('data-message')
+      expect(message).toContain('Event <script>alert("xss")</script>')
     })
+  })
 
-    it('should handle empty string as item name', () => {
+  describe('Callback Mapping', () => {
+    it('should map onClose to onCancel', () => {
       render(
         <DeleteConfirmModal
           isOpen={true}
           loading={false}
-          itemName=""
           {...mockHandlers}
         />
       )
 
-      // Should still render the confirmation message
-      expect(screen.getByText(/¿Está seguro de que desea eliminar/)).toBeInTheDocument()
+      screen.getByTestId('cancel-btn').click()
+      expect(mockHandlers.onClose).toHaveBeenCalledTimes(1)
     })
 
-    it('should handle rapid state changes', () => {
+    it('should forward onConfirm directly', () => {
+      render(
+        <DeleteConfirmModal
+          isOpen={true}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      screen.getByTestId('confirm-btn').click()
+      expect(mockHandlers.onConfirm).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not call onConfirm when cancel is clicked', () => {
+      render(
+        <DeleteConfirmModal
+          isOpen={true}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      screen.getByTestId('cancel-btn').click()
+      expect(mockHandlers.onConfirm).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('State Changes', () => {
+    it('should handle open/close transitions', () => {
       const { rerender } = render(
         <DeleteConfirmModal
           isOpen={false}
@@ -480,7 +279,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument()
 
       rerender(
         <DeleteConfirmModal
@@ -490,7 +289,29 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('modal')).toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument()
+
+      rerender(
+        <DeleteConfirmModal
+          isOpen={false}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should update loading state', () => {
+      const { rerender } = render(
+        <DeleteConfirmModal
+          isOpen={true}
+          loading={false}
+          {...mockHandlers}
+        />
+      )
+
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-loading', 'false')
 
       rerender(
         <DeleteConfirmModal
@@ -500,17 +321,7 @@ describe('DeleteConfirmModal', () => {
         />
       )
 
-      expect(screen.getByTestId('button-danger')).toBeDisabled()
-
-      rerender(
-        <DeleteConfirmModal
-          isOpen={false}
-          loading={false}
-          {...mockHandlers}
-        />
-      )
-
-      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+      expect(screen.getByTestId('confirm-dialog')).toHaveAttribute('data-loading', 'true')
     })
   })
 })
