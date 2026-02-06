@@ -6,7 +6,6 @@
 
 'use client';
 
-import { Dialog, Transition } from '@headlessui/react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -15,12 +14,13 @@ import {
   ExternalLink,
   MapPin,
   Star,
-  X} from 'lucide-react';
-import { Fragment, useState } from 'react';
+} from 'lucide-react';
+import { useState } from 'react';
 
 import { eventPublicExportService } from '@/features/events/services/eventPublicService';
 import { Button } from '@/shared/components/form';
 import ConfirmDialog from '@/shared/components/modals/ConfirmDialog';
+import Modal from '@/shared/components/modals/Modal';
 import { Event } from '@/types/event.types';
 
 // Context-specific configuration
@@ -75,7 +75,7 @@ const ShareButtons = ({ event }: { event: Event }) => {
   };
 
   return (
-    <div className="flex space-x-3">
+    <div className="flex gap-3">
       <Button
         variant="outline"
         size="sm"
@@ -313,67 +313,60 @@ export const EventDetailModal = ({
               variant="primary"
               size="sm"
               onClick={() => onApproveInternal(event)}
-              className="bg-blue-600 hover:bg-blue-700"
             >
               Aprobar Internamente
             </Button>
           )}
           {onRequestPublicApproval && (
             <Button
-              variant="primary"
+              variant="warning"
               size="sm"
               onClick={() => onRequestPublicApproval(event)}
-              className="bg-orange-600 hover:bg-orange-700"
             >
               Solicitar Aprobación Pública
             </Button>
           )}
           {onPublishEvent && (
             <Button
-              variant="primary"
+              variant="success"
               size="sm"
               onClick={() => onPublishEvent(event)}
-              className="bg-green-600 hover:bg-green-700"
             >
               Publicar
             </Button>
           )}
           {onRequestChanges && (
             <Button
-              variant="outline"
+              variant="warning"
               size="sm"
               onClick={() => onRequestChanges(event)}
-              className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
             >
               Solicitar Cambios
             </Button>
           )}
           {onReject && (
             <Button
-              variant="outline"
+              variant="danger"
               size="sm"
               onClick={handleReject}
-              className="text-red-600 border-red-600 hover:bg-red-50"
             >
               Rechazar
             </Button>
           )}
           {onApprove && (
             <Button
-              variant="primary"
+              variant="success"
               size="sm"
               onClick={() => onApprove(event)}
-              className="bg-green-600 hover:bg-green-700"
             >
               Aprobar
             </Button>
           )}
           {onDelete && (
             <Button
-              variant="outline"
+              variant="danger"
               size="sm"
               onClick={handleDelete}
-              className="text-red-600 border-red-600 hover:bg-red-50"
             >
               Eliminar
             </Button>
@@ -385,169 +378,123 @@ export const EventDetailModal = ({
     return null;
   };
 
+  const titleContent = (
+    <div>
+      <div className="flex items-center gap-3">
+        <span>{event.title}</span>
+        {event.is_featured && (
+          <Star className="w-6 h-6 text-yellow-500 flex-shrink-0 fill-yellow-500" />
+        )}
+      </div>
+      {(context === 'admin' || context === 'dashboard') && (
+        <span className="inline-flex items-center px-3 py-1 mt-2 rounded-full text-sm font-medium bg-primary-100 text-primary-800">
+          {getStatusDisplay()}
+        </span>
+      )}
+      {context === 'admin' && event.organizer && (
+        <div className="mt-2 flex items-center gap-2">
+          <Building2 className="w-4 h-4 text-neutral-500" />
+          <span className="text-sm text-neutral-600">{event.organizer.organization || event.organizer.name}</span>
+          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+            isEnteEvent ? 'bg-primary-100 text-primary-700' : 'bg-purple-100 text-purple-700'
+          }`}>
+            {isEnteEvent ? 'Interno' : 'Externo'}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={onClose}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-          </Transition.Child>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={titleContent}
+        size="full"
+        showCloseButton={true}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description */}
+            {event.description && (
+              <div>
+                <h4 className="text-lg font-medium text-neutral-900 mb-3">Descripción</h4>
+                <p className="text-neutral-700 whitespace-pre-wrap leading-relaxed">
+                  {event.description}
+                </p>
+              </div>
+            )}
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
-                  {/* Header */}
-                  <div className="relative border-b border-gray-200 px-6 py-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 pr-4">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Dialog.Title as="h3" className="text-xl font-semibold text-gray-900">
-                            {event.title}
-                          </Dialog.Title>
-                          {event.is_featured && (
-                            <Star className="w-6 h-6 text-yellow-500 flex-shrink-0 fill-yellow-500" />
-                          )}
-                        </div>
+            {/* Virtual link */}
+            {event.virtual_link && (
+              <div>
+                <h4 className="text-lg font-medium text-neutral-900 mb-3">Enlace Virtual</h4>
+                <a
+                  href={event.virtual_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Unirse al evento virtual
+                </a>
+              </div>
+            )}
 
-                        {/* Status badge for admin/dashboard context */}
-                        {(context === 'admin' || context === 'dashboard') && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                            {getStatusDisplay()}
-                          </span>
-                        )}
-
-                        {/* Organization info for admin context */}
-                        {context === 'admin' && event.organizer && (
-                          <div className="mt-2 flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm text-gray-600">{event.organizer.organization || event.organizer.name}</span>
-                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                              isEnteEvent
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-purple-100 text-purple-700'
-                            }`}>
-                              {isEnteEvent ? 'Interno' : 'Externo'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        className="rounded-lg p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        onClick={onClose}
-                      >
-                        <X className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="px-6 py-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* Main content */}
-                      <div className="lg:col-span-2 space-y-6">
-                        {/* Description */}
-                        {event.description && (
-                          <div>
-                            <h4 className="text-lg font-medium text-gray-900 mb-3">Descripción</h4>
-                            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                              {event.description}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Virtual link */}
-                        {event.virtual_link && (
-                          <div>
-                            <h4 className="text-lg font-medium text-gray-900 mb-3">Enlace Virtual</h4>
-                            <a
-                              href={event.virtual_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Unirse al evento virtual
-                            </a>
-                          </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="pt-4">
-                          {renderActionButtons()}
-                        </div>
-                      </div>
-
-                      {/* Sidebar */}
-                      <div className="space-y-6">
-                        {/* Date and time */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <div className="flex items-center gap-3 mb-3">
-                            <Calendar className="w-5 h-5 text-gray-500" />
-                            <h4 className="font-medium text-gray-900">Fecha y hora</h4>
-                          </div>
-                          <p className="text-gray-700 text-sm leading-relaxed">
-                            {formatDateRange(event.start_date, event.end_date)}
-                          </p>
-                          {event.start_date && event.end_date && (
-                            <p className="text-gray-500 text-sm mt-1">
-                              Duración: {getDuration(new Date(event.start_date), new Date(event.end_date))}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Location */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <div className="flex items-center gap-3 mb-3">
-                            <MapPin className="w-5 h-5 text-gray-500" />
-                            <h4 className="font-medium text-gray-900">Ubicación</h4>
-                          </div>
-                          <p className="text-gray-700 text-sm">
-                            {getLocation()}
-                          </p>
-                          {getLocationAddress() && (
-                            <p className="text-gray-500 text-sm mt-1">
-                              {getLocationAddress()}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Capacity */}
-                        {event.max_attendees && (
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <h4 className="font-medium text-gray-900 mb-3">Capacidad</h4>
-                            <p className="text-gray-700 text-sm">
-                              Máximo {event.max_attendees} asistentes
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
+            {/* Actions */}
+            <div className="pt-4">
+              {renderActionButtons()}
             </div>
           </div>
-        </Dialog>
-      </Transition>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Date and time */}
+            <div className="bg-neutral-50 rounded-lg p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Calendar className="w-5 h-5 text-neutral-500" />
+                <h4 className="font-medium text-neutral-900">Fecha y hora</h4>
+              </div>
+              <p className="text-neutral-700 text-sm leading-relaxed">
+                {formatDateRange(event.start_date, event.end_date)}
+              </p>
+              {event.start_date && event.end_date && (
+                <p className="text-neutral-500 text-sm mt-1">
+                  Duración: {getDuration(new Date(event.start_date), new Date(event.end_date))}
+                </p>
+              )}
+            </div>
+
+            {/* Location */}
+            <div className="bg-neutral-50 rounded-lg p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <MapPin className="w-5 h-5 text-neutral-500" />
+                <h4 className="font-medium text-neutral-900">Ubicación</h4>
+              </div>
+              <p className="text-neutral-700 text-sm">
+                {getLocation()}
+              </p>
+              {getLocationAddress() && (
+                <p className="text-neutral-500 text-sm mt-1">
+                  {getLocationAddress()}
+                </p>
+              )}
+            </div>
+
+            {/* Capacity */}
+            {event.max_attendees && (
+              <div className="bg-neutral-50 rounded-lg p-4">
+                <h4 className="font-medium text-neutral-900 mb-3">Capacidad</h4>
+                <p className="text-neutral-700 text-sm">
+                  Máximo {event.max_attendees} asistentes
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
 
       {/* Confirm Dialog */}
       <ConfirmDialog

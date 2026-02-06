@@ -6,6 +6,7 @@
 
 'use client';
 
+import { AlertCircle } from 'lucide-react';
 import { FormEvent, ReactNode,useEffect, useState } from 'react';
 
 import { Button } from '@/shared/components/form';
@@ -91,17 +92,11 @@ const isApiError = (error: unknown): error is ApiError => {
 
 // Error alert component
 const ErrorAlert = ({ message }: { message: string }) => (
-  <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-6">
+  <div className="bg-error-50 border border-error-200 rounded-md p-3 mb-6">
     <div className="flex">
-      <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-          clipRule="evenodd"
-        />
-      </svg>
+      <AlertCircle className="w-5 h-5 text-error-500 flex-shrink-0" />
       <div className="ml-3">
-        <p className="text-sm text-red-600">{message}</p>
+        <p className="text-sm text-error-600">{message}</p>
       </div>
     </div>
   </div>
@@ -293,8 +288,6 @@ export function FormModal<T extends FormDataType>({
     onClose();
   };
 
-  if (!isOpen) return null;
-
   // Form render props
   const formRenderProps: FormRenderProps<T> = {
     formData,
@@ -307,7 +300,7 @@ export function FormModal<T extends FormDataType>({
 
   // Form content
   const formContent = (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form id="form-modal-form" onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* API Error Alert */}
       {apiError && <ErrorAlert message={apiError} />}
 
@@ -318,7 +311,7 @@ export function FormModal<T extends FormDataType>({
 
   // Footer buttons
   const footerContent = (
-    <div className="flex justify-end space-x-3">
+    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
       <Button
         type="button"
         variant="outline"
@@ -328,11 +321,11 @@ export function FormModal<T extends FormDataType>({
         Cancelar
       </Button>
       <Button
-        type="button"
+        type="submit"
+        form="form-modal-form"
         variant="primary"
         disabled={isLoading}
         loading={isLoading}
-        onClick={() => handleSubmit()}
       >
         {submitButtonText}
       </Button>
