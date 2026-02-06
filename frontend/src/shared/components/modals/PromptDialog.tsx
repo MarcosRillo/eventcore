@@ -1,11 +1,12 @@
 /**
- * PromptDialog Component - Tucumán Turismo Theme
+ * PromptDialog Component - Minimalist Design System
  * Professional replacement for native prompt() dialogs
  * Integrates with existing Modal, Button, Input and Textarea components
  */
 
 'use client';
 
+import { AlertCircle } from 'lucide-react';
 import { useEffect, useRef,useState } from 'react';
 
 import { Button, Input, Textarea } from '@/shared/components/form';
@@ -67,23 +68,6 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
       }, 100);
     }
   }, [isOpen, defaultValue, multiline]);
-
-  // Handle ESC key
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen && !loading) {
-        onCancel();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onCancel, loading]);
 
   const handleConfirm = () => {
     // Validation
@@ -157,7 +141,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
           {label && (
             <label className="block text-sm font-medium text-foreground">
               {label}
-              {required && <span className="text-red-500 ml-1">*</span>}
+              {required && <span className="text-error-500 ml-1">*</span>}
             </label>
           )}
 
@@ -172,7 +156,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
               placeholder={placeholder}
               maxLength={maxLength}
               disabled={loading}
-              className={error ? 'border-red-500 focus:ring-red-500' : ''}
+              className={error ? 'border-error-500 focus:ring-error-500' : ''}
               rows={4}
             />
           ) : (
@@ -188,7 +172,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
               placeholder={placeholder}
               maxLength={maxLength}
               disabled={loading}
-              className={error ? 'border-red-500 focus:ring-red-500' : ''}
+              className={error ? 'border-error-500 focus:ring-error-500' : ''}
             />
           )}
 
@@ -196,7 +180,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
           {maxLength && (
             <div className="flex justify-between items-center text-xs text-muted">
               <span></span>
-              <span className={value.length > maxLength ? 'text-red-500' : ''}>
+              <span className={value.length > maxLength ? 'text-error-500' : ''}>
                 {value.length} / {maxLength}
               </span>
             </div>
@@ -204,10 +188,8 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
 
           {/* Error message */}
           {error && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            <p className="text-sm text-error-600 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
               {error}
             </p>
           )}

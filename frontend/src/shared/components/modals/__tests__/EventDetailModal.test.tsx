@@ -131,7 +131,7 @@ describe('EventDetailModal', () => {
 
       // Star icon is rendered with yellow classes
       const titleArea = screen.getByTestId('modal-title')
-      const star = titleArea.querySelector('.text-yellow-500')
+      const star = titleArea.querySelector('.text-warning-500')
       expect(star).toBeInTheDocument()
     })
 

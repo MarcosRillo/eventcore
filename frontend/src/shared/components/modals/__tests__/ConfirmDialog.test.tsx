@@ -109,7 +109,7 @@ describe('ConfirmDialog', () => {
       fireEvent.keyDown(document, { key: 'Escape' })
 
       await waitFor(() => {
-        // Modal and component both handle ESC, so it may be called multiple times
+        // HeadlessUI Dialog handles ESC natively via onClose
         expect(onCancel).toHaveBeenCalled()
       })
     })

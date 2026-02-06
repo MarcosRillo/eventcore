@@ -71,7 +71,7 @@ const ShareButtons = ({ event }: { event: Event }) => {
       telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
     };
 
-    window.open(shareUrls[platform as keyof typeof shareUrls], '_blank', 'width=600,height=400');
+    window.open(shareUrls[platform as keyof typeof shareUrls], '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -383,7 +383,7 @@ export const EventDetailModal = ({
       <div className="flex items-center gap-3">
         <span>{event.title}</span>
         {event.is_featured && (
-          <Star className="w-6 h-6 text-yellow-500 flex-shrink-0 fill-yellow-500" />
+          <Star className="w-6 h-6 text-warning-500 flex-shrink-0 fill-warning-500" />
         )}
       </div>
       {(context === 'admin' || context === 'dashboard') && (
@@ -396,7 +396,7 @@ export const EventDetailModal = ({
           <Building2 className="w-4 h-4 text-neutral-500" />
           <span className="text-sm text-neutral-600">{event.organizer.organization || event.organizer.name}</span>
           <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-            isEnteEvent ? 'bg-primary-100 text-primary-700' : 'bg-purple-100 text-purple-700'
+            isEnteEvent ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700'
           }`}>
             {isEnteEvent ? 'Interno' : 'Externo'}
           </span>
@@ -435,7 +435,7 @@ export const EventDetailModal = ({
                   href={event.virtual_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Unirse al evento virtual

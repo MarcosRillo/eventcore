@@ -7,16 +7,18 @@
 
 import { Dialog, Transition } from '@headlessui/react'
 import { X } from 'lucide-react'
-import { Fragment } from 'react'
+import { Fragment, ReactNode } from 'react'
+
+export type ModalSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
 
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  title?: string
+  title?: ReactNode
   description?: string
   children: React.ReactNode
   footer?: React.ReactNode
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+  size?: ModalSize
   showCloseButton?: boolean
   closeOnOverlayClick?: boolean
   className?: string
@@ -35,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({
   className = '',
 }) => {
   // Size variants
-  const sizeClasses: Record<string, string> = {
+  const sizeClasses: Record<ModalSize, string> = {
     xs: 'max-w-xs',
     sm: 'max-w-sm',
     md: 'max-w-md',

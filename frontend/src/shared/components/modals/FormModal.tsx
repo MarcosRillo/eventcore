@@ -10,7 +10,7 @@ import { AlertCircle } from 'lucide-react';
 import { FormEvent, ReactNode,useEffect, useState } from 'react';
 
 import { Button } from '@/shared/components/form';
-import Modal from '@/shared/components/modals/Modal';
+import Modal, { type ModalSize } from '@/shared/components/modals/Modal';
 import { EventFormData } from '@/types/event.types';
 import { EventSubtype,EventType } from '@/types/eventType.types';
 
@@ -60,7 +60,7 @@ export interface FormModalProps<T extends FormDataType> {
   // Form rendering
   children: (props: FormRenderProps<T>) => ReactNode;
   // Modal configuration
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  size?: ModalSize;
   // Advanced options
   resetOnSuccess?: boolean;
   closeOnSuccess?: boolean;
@@ -102,24 +102,7 @@ const ErrorAlert = ({ message }: { message: string }) => (
   </div>
 );
 
-/**
- *
- * @param root0
- * @param root0.isOpen
- * @param root0.onClose
- * @param root0.onSuccess
- * @param root0.title
- * @param root0.submitButtonText
- * @param root0.initialData
- * @param root0.originalData
- * @param root0.validator
- * @param root0.submitHandler
- * @param root0.children
- * @param root0.size
- * @param root0.resetOnSuccess
- * @param root0.closeOnSuccess
- * @param root0.preventCloseWhileLoading
- */
+/** Generic form modal with validation, API error handling, and loading states. */
 export function FormModal<T extends FormDataType>({
   isOpen,
   onClose,
