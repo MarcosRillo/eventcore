@@ -11,6 +11,8 @@ import { useState } from 'react'
 import { EventCard } from '@/features/public-calendar/components/dumb/EventCard'
 import { EventSubtype, EventType, Location,PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 import { LoadingSpinner } from '@/shared/components/feedback'
+import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
+import { PageHeader } from '@/shared/components/layout'
 
 interface PublicCalendarProps {
   events: PublicEvent[]
@@ -72,12 +74,10 @@ export const PublicCalendar = ({
       {/* Header */}
       <div className="bg-white border-b border-neutral-200">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-neutral-900">
-            Eventos en Tucumán
-          </h1>
-          <p className="text-neutral-600 mt-2">
-            Descubrí los mejores eventos turísticos y culturales
-          </p>
+          <PageHeader
+            title="Eventos en Tucumán"
+            subtitle="Descubrí los mejores eventos turísticos y culturales"
+          />
         </div>
       </div>
 
@@ -220,36 +220,22 @@ export const PublicCalendar = ({
 
         {/* Empty State */}
         {!loading && !error && events.length === 0 && (
-          <div className="text-center py-12">
-            <svg
-              className="mx-auto h-12 w-12 text-neutral-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-              />
-            </svg>
-            <h3 className="mt-4 text-lg font-medium text-neutral-900">No hay eventos</h3>
-            <p className="mt-2 text-neutral-600">
-              {hasActiveFilters
-                ? 'No encontramos eventos con los filtros seleccionados'
-                : 'No hay eventos disponibles en este momento'}
-            </p>
-            {hasActiveFilters && onClearFilters && (
+          <EmptyState
+            icon={EmptyStateIcons.calendar}
+            title="No hay eventos"
+            description={hasActiveFilters
+              ? 'No encontramos eventos con los filtros seleccionados'
+              : 'No hay eventos disponibles en este momento'}
+            action={hasActiveFilters && onClearFilters ? (
               <button
                 onClick={onClearFilters}
-                className="mt-4 text-primary-600 hover:text-primary-700 font-medium"
+                className="text-primary-600 hover:text-primary-700 font-medium"
               >
                 Limpiar filtros
               </button>
-            )}
-          </div>
+            ) : undefined}
+            size="md"
+          />
         )}
 
         {/* Event Grid */}

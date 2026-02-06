@@ -18,10 +18,10 @@ jest.mock('@/features/public-calendar/components/smart/PublicCalendarContainer',
 jest.mock('@/features/public-calendar/components/smart/CalendarViewContainer', () => ({
   CalendarViewContainer: () => <div data-testid="calendar-view-container">Calendar View</div>
 }))
-jest.mock('@/features/public-calendar/components/dumb/StatsBar', () => ({
-  StatsBar: ({ stats, loading }: { stats: PublicStats | null; loading: boolean }) => (
+jest.mock('@/shared/components/stats', () => ({
+  StatsBar: ({ items, loading }: { items: { value: number }[]; loading: boolean }) => (
     <div data-testid="stats-bar">
-      {loading ? 'Loading' : stats ? `Stats: ${stats.total_events}` : 'No stats'}
+      {loading ? 'Loading' : items.length > 0 ? `Stats: ${items[0].value}` : 'No stats'}
     </div>
   )
 }))

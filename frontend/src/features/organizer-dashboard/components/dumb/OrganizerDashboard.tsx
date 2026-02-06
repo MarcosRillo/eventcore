@@ -4,16 +4,19 @@
  * Main dashboard UI integrating stats summary, unified filters, and event list.
  */
 
+import { AlertCircle, AlertTriangle, Calendar, CheckCircle2, Clock } from 'lucide-react'
 import Link from 'next/link'
 
 import { OrganizerEventFilters } from '@/features/organizer/components/dumb/OrganizerEventFilters'
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerEventListItemSkeletons } from '@/features/organizer/components/dumb/OrganizerEventListItemSkeleton'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { OrganizerStatsSummary } from '@/features/organizer-dashboard/components/dumb/OrganizerStatsSummary'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
 import { Button } from '@/shared/components/form'
+import { PageHeader } from '@/shared/components/layout'
+import type { StatBarItem } from '@/shared/components/stats'
+import { StatsBar } from '@/shared/components/stats'
 import Pagination from '@/shared/components/tables/Pagination'
 
 interface OrganizerDashboardProps {
@@ -32,6 +35,16 @@ interface OrganizerDashboardProps {
   onSuccess: (deletedEventId?: number) => void
   onEdit: (id: number) => void
   onView: (id: number) => void
+}
+
+function buildStatsItems(stats: OrganizerStats): StatBarItem[] {
+  return [
+    { value: stats.total_events, label: 'Total eventos', icon: <Calendar className="w-5 h-5" /> },
+    { value: stats.upcoming_events, label: 'Proximos', icon: <Clock className="w-5 h-5" /> },
+    { value: stats.past_events, label: 'Pasados', icon: <CheckCircle2 className="w-5 h-5" /> },
+    { value: stats.pending_internal, label: 'Pendientes', icon: <AlertCircle className="w-5 h-5" /> },
+    { value: stats.requires_changes, label: 'Req. cambios', icon: <AlertTriangle className="w-5 h-5" /> },
+  ]
 }
 
 export const OrganizerDashboard = ({
@@ -64,20 +77,27 @@ export const OrganizerDashboard = ({
   return (
     <div>
       {/* Stats Summary Bar */}
-      <OrganizerStatsSummary stats={stats} loading={statsLoading} />
+      <StatsBar
+        items={stats ? buildStatsItems(stats) : []}
+        loading={statsLoading}
+        skeletonCount={5}
+        ariaLabel="Resumen de estadisticas"
+      />
 
       <main className="container mx-auto px-4 max-w-7xl" role="main">
         {/* Header Section */}
-        <div className="flex justify-between items-center mb-6 mt-6">
-          <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Mis Eventos</h1>
-            <p className="text-neutral-600 mt-1">Gestiona tus eventos y su proceso de aprobacion</p>
-          </div>
-          <Link href="/organizer/create" aria-label="Crear nuevo evento">
-            <Button variant="primary" size="lg">
-              + Crear Evento
-            </Button>
-          </Link>
+        <div className="mb-6 mt-6">
+          <PageHeader
+            title="Mis Eventos"
+            subtitle="Gestiona tus eventos y su proceso de aprobacion"
+            action={
+              <Link href="/organizer/create" aria-label="Crear nuevo evento">
+                <Button variant="primary" size="lg">
+                  + Crear Evento
+                </Button>
+              </Link>
+            }
+          />
         </div>
 
         {/* Unified Filters */}

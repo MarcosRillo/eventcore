@@ -6,12 +6,20 @@
 
 'use client'
 
+import { Calendar, Tag, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Suspense,useEffect,useState } from 'react'
 
-import { StatsBar } from '@/features/public-calendar/components/dumb/StatsBar'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
+import {
+  EventType,
+  Location,
+  PublicEvent,
+  PublicStats,
+} from '@/features/public-calendar/types/public-calendar.types'
 import { SkeletonCard } from '@/shared/components/feedback'
+import type { StatBarItem } from '@/shared/components/stats'
+import { StatsBar } from '@/shared/components/stats'
 
 // Lazy load view containers - only the active view is loaded
 const CalendarViewContainer = dynamic(
@@ -34,12 +42,14 @@ const CalendarViewSkeleton = () => (
     </div>
   </div>
 )
-import {
-  EventType,
-  Location,
-  PublicEvent,
-  PublicStats,
-} from '@/features/public-calendar/types/public-calendar.types'
+
+function buildStatsItems(stats: PublicStats): StatBarItem[] {
+  return [
+    { value: stats.total_events, label: 'Eventos publicados', icon: <Calendar className="w-5 h-5" /> },
+    { value: stats.total_event_types, label: 'Tipos de eventos activos', icon: <Tag className="w-5 h-5" /> },
+    { value: stats.events_this_month, label: 'Este mes', icon: <TrendingUp className="w-5 h-5" /> },
+  ]
+}
 
 type ViewMode = 'grid' | 'calendar'
 
@@ -82,7 +92,11 @@ export const CalendarPageContainer = ({
   return (
     <div className="bg-neutral-50">
       {/* Stats Bar */}
-      <StatsBar stats={stats} loading={statsLoading} />
+      <StatsBar
+        items={stats ? buildStatsItems(stats) : []}
+        loading={statsLoading}
+        ariaLabel="Estadísticas del calendario público"
+      />
 
       {/* View Toggle Bar */}
       <div className="bg-white border-b border-neutral-200">
