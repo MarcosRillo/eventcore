@@ -62,7 +62,7 @@ jest.mock('@/features/organizer-dashboard/components/dumb/OrganizerDashboard', (
       <span data-testid="events-count">{Array.isArray((events as { data: unknown[] })?.data) ? (events as { data: unknown[] }).data.length : 0}</span>
       <button onClick={() => onFilterChange('draft')}>Filter Draft</button>
       <button onClick={() => onFilterChange(null)}>Show All</button>
-      <button onClick={onSuccess}>Refresh Data</button>
+      <button onClick={() => onSuccess()}>Refresh Data</button>
       <button onClick={() => onEdit(1)}>Edit Event 1</button>
       <button onClick={() => onView(1)}>View Event 1</button>
     </div>
@@ -110,6 +110,7 @@ describe('OrganizerDashboardContainer', () => {
       statusFilter: null,
       showPast: false,
       handleStatusFilter: mockHandleStatusFilter,
+      optimisticRemove: jest.fn(),
       retry: mockRetry
     })
   })
@@ -141,6 +142,7 @@ describe('OrganizerDashboardContainer', () => {
         statusFilter: null,
         showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
+        optimisticRemove: jest.fn(),
         retry: mockRetry
       })
 
@@ -170,6 +172,7 @@ describe('OrganizerDashboardContainer', () => {
         statusFilter: null,
         showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
+        optimisticRemove: jest.fn(),
         retry: mockRetry
       })
 
@@ -186,6 +189,7 @@ describe('OrganizerDashboardContainer', () => {
         statusFilter: 'draft',
         showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
+        optimisticRemove: jest.fn(),
         retry: mockRetry
       })
 
@@ -260,6 +264,7 @@ describe('OrganizerDashboardContainer', () => {
         statusFilter: null,
         showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
+        optimisticRemove: jest.fn(),
         retry: mockRetry
       })
 
@@ -283,6 +288,7 @@ describe('OrganizerDashboardContainer', () => {
         statusFilter: null,
         showPast: false,
         handleStatusFilter: mockHandleStatusFilter,
+        optimisticRemove: jest.fn(),
         retry: mockRetry
       })
 

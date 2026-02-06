@@ -126,3 +126,8 @@ export const submitForReview = async (id: number): Promise<SubmitEventResponse> 
   return response.data
 }
 
+export const duplicateEvent = async (id: number): Promise<{ data: OrganizerEvent }> => {
+  const response = await apiClient.post(`/organizer/events/${id}/duplicate`)
+  return response.data
+}
+
