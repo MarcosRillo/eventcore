@@ -73,6 +73,7 @@ export const EventActionButtonsContainer = ({
             : `¿Está seguro que desea enviar "${event.title}" a revisión? Una vez enviado, no podrá editarlo hasta recibir una respuesta.`
         }
         confirmLabel="Enviar"
+        variant={validationErrors ? 'warning' : 'info'}
         loading={loading}
       />
 

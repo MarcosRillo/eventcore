@@ -36,6 +36,7 @@ export const PublicCalendarContainer = ({
     locations,
     loading,
     error,
+    filters,
     hasActiveFilters,
     handleEventTypeFilter,
     handleEventSubtypeFilter,
@@ -60,6 +61,9 @@ export const PublicCalendarContainer = ({
       loading={loading}
       error={error}
       hasActiveFilters={hasActiveFilters}
+      selectedEventTypeId={filters.event_type_id}
+      selectedSubtypeId={filters.event_subtype_id}
+      selectedLocationId={filters.location_id}
       onEventTypeFilter={handleEventTypeFilter}
       onEventSubtypeFilter={handleEventSubtypeFilter}
       onLocationFilter={handleLocationFilter}

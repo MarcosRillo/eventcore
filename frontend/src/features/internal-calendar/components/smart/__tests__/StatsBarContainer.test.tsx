@@ -14,16 +14,16 @@ import type { InternalStats } from '@/features/internal-calendar/types/internal-
 // Mock the service
 jest.mock('@/features/internal-calendar/services/internal-calendar-stats.service')
 
-// Mock the dumb component
-jest.mock('@/features/internal-calendar/components/dumb/StatsBar', () => ({
-  StatsBar: ({ stats, loading }: { stats: InternalStats | null; loading: boolean }) => {
+// Mock the shared StatsBar component
+jest.mock('@/shared/components/stats', () => ({
+  StatsBar: ({ items, loading }: { items: { value: number; label: string }[]; loading: boolean }) => {
     if (loading) return <div data-testid="stats-loading">Loading...</div>
-    if (!stats) return null
+    if (items.length === 0) return null
     return (
       <div data-testid="stats-bar">
-        <span>{stats.total_events}</span>
-        <span>{stats.total_event_types}</span>
-        <span>{stats.events_this_month}</span>
+        {items.map((item: { value: number; label: string }, i: number) => (
+          <span key={i}>{item.value}</span>
+        ))}
       </div>
     )
   }

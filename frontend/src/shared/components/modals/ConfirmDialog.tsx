@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useEffect } from 'react'
+import { AlertCircle, AlertTriangle, CheckCircle2, Info } from 'lucide-react'
 
 import { Button } from '@/shared/components/form'
 import Modal from '@/shared/components/modals/Modal'
@@ -33,58 +33,26 @@ const ConfirmDialog = ({
   onCancel,
   loading = false,
 }: ConfirmDialogProps) => {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen && !loading) {
-        onCancel()
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown)
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isOpen, onCancel, loading])
-
   const iconConfig = {
     danger: {
       bg: 'bg-error-50',
       color: 'text-error-500',
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-        </svg>
-      ),
+      icon: <AlertTriangle className="w-6 h-6" />,
     },
     warning: {
       bg: 'bg-warning-50',
       color: 'text-warning-500',
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.007v.008H12v-.008zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      icon: <AlertCircle className="w-6 h-6" />,
     },
     success: {
       bg: 'bg-success-50',
       color: 'text-success-500',
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      icon: <CheckCircle2 className="w-6 h-6" />,
     },
     info: {
       bg: 'bg-primary-50',
       color: 'text-primary-500',
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-        </svg>
-      ),
+      icon: <Info className="w-6 h-6" />,
     },
   }
 
