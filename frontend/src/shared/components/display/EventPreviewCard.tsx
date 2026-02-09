@@ -13,7 +13,7 @@
 
 'use client'
 
-import { Calendar, MapPin, Star } from 'lucide-react'
+import { Calendar, MapPin } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { memo } from 'react'
 
@@ -91,8 +91,7 @@ const EventPreviewCard = memo(function EventPreviewCard({
         {/* Featured overlay - top right */}
         {isFeatured ? (
           <div className="absolute top-3 right-3">
-            <Badge variant="warning" size="sm">
-              <Star className="w-3 h-3 fill-current mr-1" aria-hidden="true" />
+            <Badge variant="warning" size="sm" dot>
               Destacado
             </Badge>
           </div>
