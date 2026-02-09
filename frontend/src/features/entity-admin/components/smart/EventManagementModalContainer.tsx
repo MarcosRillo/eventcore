@@ -57,10 +57,10 @@ export const EventManagementModalContainer = ({
       event={selectedEvent}
       onClose={closeModal}
     >
-      {/* Two-panel layout: Info left, Actions right */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Two-panel layout: Info left (3/5), Actions right (2/5) */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Left Panel: Event Information */}
-        <div className="space-y-4">
+        <div className="lg:col-span-3 space-y-6">
           <EventInfoPanel event={selectedEvent} />
 
           {/* Approval History */}
@@ -70,7 +70,7 @@ export const EventManagementModalContainer = ({
         </div>
 
         {/* Right Panel: Approval Actions */}
-        <div className="lg:border-l lg:border-neutral-200 lg:pl-6">
+        <div className="lg:col-span-2">
           <ApprovalActionPanel
             availableActions={availableActions}
             selectedAction={selectedAction}

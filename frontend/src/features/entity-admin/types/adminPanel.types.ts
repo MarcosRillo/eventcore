@@ -128,6 +128,68 @@ export const QUICK_FILTERS: QuickFilterOption[] = [
 ];
 
 /**
+ * Map EventStatusCode to Badge variant for consistent status display
+ */
+export function getStatusBadgeVariant(
+  status: EventStatusCode,
+): 'default' | 'success' | 'warning' | 'danger' | 'info' {
+  switch (status) {
+    case 'published':
+      return 'success';
+    case 'pending_internal_approval':
+    case 'pending_public_approval':
+      return 'warning';
+    case 'approved_internal':
+      return 'info';
+    case 'requires_changes':
+    case 'rejected':
+      return 'danger';
+    default:
+      return 'default';
+  }
+}
+
+/**
+ * Map ApprovalAction to Badge variant for timeline/history display
+ */
+export function getActionBadgeVariant(
+  action: string,
+): 'default' | 'success' | 'warning' | 'danger' | 'info' {
+  switch (action) {
+    case 'approve_internal':
+      return 'info';
+    case 'request_public':
+    case 'publish':
+      return 'success';
+    case 'request_changes':
+      return 'warning';
+    case 'reject':
+      return 'danger';
+    default:
+      return 'default';
+  }
+}
+
+/**
+ * Map ApprovalAction to confirm Button variant
+ */
+export function getActionButtonVariant(
+  action: ApprovalAction,
+): 'primary' | 'success' | 'warning' | 'danger' {
+  switch (action) {
+    case 'approve_internal':
+      return 'primary';
+    case 'request_public':
+    case 'publish':
+      return 'success';
+    case 'request_changes':
+      return 'warning';
+    case 'reject':
+      return 'danger';
+  }
+}
+
+/**
  * Minimum character count for comments (backend validation)
  */
 export const MIN_COMMENT_LENGTH = 10;

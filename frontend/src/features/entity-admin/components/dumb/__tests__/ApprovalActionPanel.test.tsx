@@ -4,7 +4,7 @@
  * Tests the approval action buttons and comment input.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
 import type { ApprovalAction } from '@/features/entity-admin/types';
@@ -104,8 +104,12 @@ describe('ApprovalActionPanel', () => {
       />
     );
 
-    expect(screen.getByText('Confirmar')).toBeInTheDocument();
-    expect(screen.getByText('Cancelar')).toBeInTheDocument();
+    // Confirm button now shows the action label instead of generic "Confirmar"
+    const buttons = screen.getAllByRole('button');
+    const cancelBtn = buttons.find(btn => btn.textContent?.includes('Cancelar'));
+    const confirmBtn = buttons.find(btn => btn.textContent?.includes('Aprobar para Calendario Interno') && btn.getAttribute('aria-pressed') === null);
+    expect(cancelBtn).toBeInTheDocument();
+    expect(confirmBtn).toBeInTheDocument();
   });
 
   test('calls onConfirm when confirm button is clicked', () => {
@@ -116,7 +120,12 @@ describe('ApprovalActionPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Confirmar'));
+    // The confirm button is the one with the action label in the confirm/cancel section
+    const cancelBtn = screen.getByText('Cancelar');
+    const confirmSection = cancelBtn.closest('div');
+    const confirmBtn = confirmSection?.querySelector('button:last-child');
+    expect(confirmBtn).toBeTruthy();
+    fireEvent.click(confirmBtn!);
 
     expect(defaultProps.onConfirm).toHaveBeenCalled();
   });
@@ -143,8 +152,11 @@ describe('ApprovalActionPanel', () => {
       />
     );
 
-    // When loading, button shows "Procesando..." and is disabled
-    expect(screen.getByText('Procesando...')).toBeDisabled();
+    // All action buttons should be disabled when loading
+    const actionButtons = screen.getAllByRole('button').filter(btn => btn.getAttribute('aria-pressed') !== null);
+    actionButtons.forEach(btn => {
+      expect(btn).toBeDisabled();
+    });
   });
 
   test('renders no actions message when no actions available', () => {
@@ -158,7 +170,7 @@ describe('ApprovalActionPanel', () => {
     expect(screen.getByText(/No hay acciones disponibles/)).toBeInTheDocument();
   });
 
-  test('highlights selected action button', () => {
+  test('highlights selected action button with aria-pressed', () => {
     render(
       <ApprovalActionPanel
         {...defaultProps}
@@ -166,7 +178,10 @@ describe('ApprovalActionPanel', () => {
       />
     );
 
-    const button = screen.getByText('Aprobar para Calendario Interno').closest('button');
-    expect(button).toHaveClass('ring-2');
+    const actionButton = screen.getAllByRole('button').find(
+      btn => btn.getAttribute('aria-pressed') === 'true'
+    );
+    expect(actionButton).toBeTruthy();
+    expect(actionButton).toHaveClass('ring-2');
   });
 });

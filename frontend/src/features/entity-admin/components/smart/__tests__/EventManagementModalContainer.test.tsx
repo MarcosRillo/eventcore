@@ -4,7 +4,7 @@
  * Smart component that composes the event management modal with all panels.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { EventManagementModalContainer } from '@/features/entity-admin/components/smart/EventManagementModalContainer';
 import * as useApprovalManagerModule from '@/features/entity-admin/hooks/useApprovalManager';
@@ -77,9 +77,8 @@ describe('EventManagementModalContainer', () => {
   test('renders modal when open with event', () => {
     render(<EventManagementModalContainer onActionSuccess={jest.fn()} />);
 
-    expect(screen.getByText('Gestionar Evento')).toBeInTheDocument();
-    // Event title appears in multiple places (header and info panel)
-    expect(screen.getAllByText('Test Event').length).toBeGreaterThanOrEqual(1);
+    // Modal title is now the event title (not "Gestionar Evento")
+    expect(screen.getByText('Test Event')).toBeInTheDocument();
   });
 
   test('does not render when modal is closed', () => {
@@ -90,14 +89,13 @@ describe('EventManagementModalContainer', () => {
 
     render(<EventManagementModalContainer onActionSuccess={jest.fn()} />);
 
-    expect(screen.queryByText('Gestionar Evento')).not.toBeInTheDocument();
+    expect(screen.queryByText('Test Event')).not.toBeInTheDocument();
   });
 
   test('renders event info panel with event details', () => {
     render(<EventManagementModalContainer onActionSuccess={jest.fn()} />);
 
-    // Event title appears multiple times
-    expect(screen.getAllByText('Test Event').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Test Event')).toBeInTheDocument();
     expect(screen.getByText(/Test description/)).toBeInTheDocument();
     expect(screen.getByText('Test Location')).toBeInTheDocument();
   });
@@ -126,8 +124,12 @@ describe('EventManagementModalContainer', () => {
 
     render(<EventManagementModalContainer onActionSuccess={jest.fn()} />);
 
-    expect(screen.getByText('Confirmar')).toBeInTheDocument();
+    // Confirm button now shows action label instead of generic "Confirmar"
     expect(screen.getByText('Cancelar')).toBeInTheDocument();
+    const confirmSection = screen.getByText('Cancelar').closest('div');
+    const confirmBtn = confirmSection?.querySelector('button:last-child');
+    expect(confirmBtn).toBeTruthy();
+    expect(confirmBtn?.textContent).toContain('Aprobar para Calendario Interno');
   });
 
   test('calls confirmAction when confirm button is clicked', () => {
@@ -138,7 +140,10 @@ describe('EventManagementModalContainer', () => {
 
     render(<EventManagementModalContainer onActionSuccess={jest.fn()} />);
 
-    fireEvent.click(screen.getByText('Confirmar'));
+    const cancelBtn = screen.getByText('Cancelar');
+    const confirmSection = cancelBtn.closest('div');
+    const confirmBtn = confirmSection?.querySelector('button:last-child');
+    fireEvent.click(confirmBtn!);
 
     expect(mockUseEventManagement.confirmAction).toHaveBeenCalled();
   });
@@ -245,7 +250,10 @@ describe('EventManagementModalContainer', () => {
 
     render(<EventManagementModalContainer onActionSuccess={jest.fn()} />);
 
-    expect(screen.getByText('Procesando...')).toBeInTheDocument();
+    // Button DS component shows spinner with aria-busy when loading
+    const confirmSection = screen.getByText('Cancelar').closest('div');
+    const confirmBtn = confirmSection?.querySelector('button:last-child');
+    expect(confirmBtn).toHaveAttribute('aria-busy', 'true');
   });
 
   test('handles event with no approval history gracefully', () => {

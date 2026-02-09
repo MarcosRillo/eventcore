@@ -16,6 +16,7 @@ import {
   User,
 } from 'lucide-react';
 
+import { Badge, ImagePlaceholder, SafeImage } from '@/shared/components/display';
 import type { Event } from '@/types/event.types';
 
 interface EventInfoPanelProps {
@@ -24,7 +25,6 @@ interface EventInfoPanelProps {
 
 /**
  * Format date for display
- * @param dateString
  */
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -38,7 +38,6 @@ const formatDate = (dateString: string): string => {
 
 /**
  * Format time for display
- * @param dateString
  */
 const formatTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -50,37 +49,50 @@ const formatTime = (dateString: string): string => {
 
 /**
  * Calculate duration in hours
- * @param start
- * @param end
  */
 const calculateDuration = (start: string, end: string): string => {
   const startDate = new Date(start);
   const endDate = new Date(end);
   const hours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
-  return `${hours.toFixed(1)}h`;
+  const rounded = Math.round(hours * 10) / 10;
+  return `${rounded}\u00A0h`;
 };
+
+const imagePlaceholder = <ImagePlaceholder />;
 
 export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
   return (
-    <div className="space-y-6">
-      {/* Title and Featured Badge */}
-      <div>
-        <div className="flex items-start gap-2">
-          <h3 className="text-xl font-bold text-neutral-900 flex-1">
-            {event.title}
-          </h3>
+    <div className="divide-y divide-neutral-100">
+      {/* Event Image */}
+      <div className="pb-5">
+        <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-neutral-100">
+          {event.featured_image ? (
+            <SafeImage
+              src={event.featured_image}
+              alt={event.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 560px"
+              className="object-cover"
+              loading="lazy"
+              fallback={imagePlaceholder}
+            />
+          ) : (
+            imagePlaceholder
+          )}
           {event.is_featured && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-700">
-              <Star className="w-3 h-3" />
-              Destacado
-            </span>
+            <div className="absolute bottom-2 left-2">
+              <Badge variant="warning" size="sm" dot>
+                <Star className="w-3 h-3 mr-1" />
+                Destacado
+              </Badge>
+            </div>
           )}
         </div>
       </div>
 
       {/* Description */}
       {event.description && (
-        <div>
+        <div className="pt-5">
           <h4 className="text-sm font-medium text-neutral-500 mb-2">Descripción</h4>
           <p className="text-neutral-700 whitespace-pre-wrap text-sm">
             {event.description}
@@ -89,7 +101,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
       )}
 
       {/* Date and Time */}
-      <div>
+      <div className="pt-5">
         <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
           <Calendar className="w-4 h-4" />
           Fecha y Hora
@@ -113,7 +125,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
 
       {/* Locations */}
       {event.locations && event.locations.length > 0 && (
-        <div>
+        <div className="pt-5">
           <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
             <MapPin className="w-4 h-4" />
             Ubicación{event.locations.length > 1 ? 'es' : ''}
@@ -136,7 +148,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
 
       {/* Event Type */}
       {(event.event_type || event.event_subtype) && (
-        <div>
+        <div className="pt-5">
           <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
             <Tag className="w-4 h-4" />
             Tipo de Evento
@@ -149,7 +161,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
             )}
             {event.event_subtype && (
               <>
-                <span className="text-neutral-400">›</span>
+                <span className="text-neutral-400">&rsaquo;</span>
                 <span className="px-2 py-1 rounded-md text-sm bg-neutral-100 text-neutral-700">
                   {event.event_subtype.name}
                 </span>
@@ -161,7 +173,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
 
       {/* Contact Information */}
       {(event.contact_email || event.contact_phone || event.website_url) && (
-        <div>
+        <div className="pt-5">
           <h4 className="text-sm font-medium text-neutral-500 mb-2">Contacto</h4>
           <div className="space-y-1">
             {event.contact_email && (
@@ -188,12 +200,12 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
             )}
             {event.website_url && (
               <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <Globe className="w-4 h-4 text-neutral-400" />
+                <Globe className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                 <a
                   href={event.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-primary-600 transition-colors"
+                  className="hover:text-primary-600 transition-colors truncate max-w-xs"
                 >
                   {event.website_url}
                 </a>
@@ -205,7 +217,7 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
 
       {/* Organizer */}
       {event.organizer && (
-        <div>
+        <div className="pt-5">
           <h4 className="text-sm font-medium text-neutral-500 mb-2 flex items-center gap-2">
             <User className="w-4 h-4" />
             Organizador

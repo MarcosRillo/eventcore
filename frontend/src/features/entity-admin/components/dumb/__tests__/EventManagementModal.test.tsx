@@ -31,14 +31,14 @@ describe('EventManagementModal', () => {
     onClose: jest.fn(),
   };
 
-  test('renders modal when open', () => {
+  test('renders modal with event title when open', () => {
     render(
       <EventManagementModal {...defaultProps}>
         <div>Modal content</div>
       </EventManagementModal>
     );
 
-    expect(screen.getByText('Gestionar Evento')).toBeInTheDocument();
+    expect(screen.getByText('Test Event')).toBeInTheDocument();
   });
 
   test('does not render when closed', () => {
@@ -48,17 +48,18 @@ describe('EventManagementModal', () => {
       </EventManagementModal>
     );
 
-    expect(screen.queryByText('Gestionar Evento')).not.toBeInTheDocument();
+    expect(screen.queryByText('Test Event')).not.toBeInTheDocument();
   });
 
-  test('renders event title in header', () => {
+  test('renders event title once in header (no duplication)', () => {
     render(
       <EventManagementModal {...defaultProps}>
         <div>Modal content</div>
       </EventManagementModal>
     );
 
-    expect(screen.getByText('Test Event')).toBeInTheDocument();
+    const titleElements = screen.getAllByText('Test Event');
+    expect(titleElements).toHaveLength(1);
   });
 
   test('renders children content', () => {
@@ -89,6 +90,6 @@ describe('EventManagementModal', () => {
     );
 
     // Should not crash, modal should not render content
-    expect(screen.queryByText('Gestionar Evento')).not.toBeInTheDocument();
+    expect(screen.queryByText('Test Event')).not.toBeInTheDocument();
   });
 });
