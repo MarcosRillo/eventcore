@@ -46,6 +46,17 @@ const actionIcons: Record<ApprovalAction, React.ReactNode> = {
 };
 
 /**
+ * Unselected state styles per action (subtle outline indicating semantic nature)
+ */
+const unselectedStyles: Record<ApprovalAction, string> = {
+  approve_internal: 'border-primary-200 text-primary-700 hover:bg-primary-50 hover:border-primary-300',
+  request_public: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
+  publish: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
+  request_changes: 'border-warning-200 text-warning-700 hover:bg-warning-50 hover:border-warning-300',
+  reject: 'border-error-200 text-error-700 hover:bg-error-50 hover:border-error-300',
+};
+
+/**
  * Selected state styles per action (subtle colored borders + backgrounds)
  */
 const selectedStyles: Record<ApprovalAction, string> = {
@@ -110,11 +121,11 @@ export const ApprovalActionPanel = ({
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/20
                     ${isSelected
                       ? `${selectedStyles[action]} ring-2 ring-offset-1`
-                      : 'border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50'
+                      : unselectedStyles[action]
                     }
                   `}
                 >
-                  <span className={`flex-shrink-0 ${isSelected ? '' : 'text-neutral-400'}`}>
+                  <span className="flex-shrink-0">
                     {actionIcons[action]}
                   </span>
                   <div className="flex-1 min-w-0">

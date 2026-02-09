@@ -16,6 +16,7 @@ import {
   User,
 } from 'lucide-react';
 
+import { DEFAULT_EVENT_COLOR, getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping';
 import { Badge, ImagePlaceholder, SafeImage } from '@/shared/components/display';
 import type { Event } from '@/types/event.types';
 
@@ -155,7 +156,13 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
           </h4>
           <div className="flex items-center gap-2">
             {event.event_type && (
-              <span className="px-2 py-1 rounded-md text-sm bg-neutral-100 text-neutral-700">
+              <span
+                className="px-2 py-1 rounded-md text-sm font-medium"
+                style={{
+                  backgroundColor: event.event_type.color ?? DEFAULT_EVENT_COLOR,
+                  color: getContrastTextColor(event.event_type.color ?? DEFAULT_EVENT_COLOR),
+                }}
+              >
                 {event.event_type.name}
               </span>
             )}
