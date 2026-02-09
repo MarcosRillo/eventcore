@@ -15,5 +15,4 @@ export { AdminDashboard } from '@/features/entity-admin/components/dumb/AdminDas
 export { AdminEventFilters, type AdminStatusCounts } from '@/features/entity-admin/components/dumb/AdminEventFilters'
 export { AdminEventList } from '@/features/entity-admin/components/dumb/AdminEventList'
 export { AdminEventListItem } from '@/features/entity-admin/components/dumb/AdminEventListItem'
-export { AdminEventListItemSkeletons } from '@/features/entity-admin/components/dumb/AdminEventListItemSkeleton'
 export { AdminStatsSummary } from '@/features/entity-admin/components/dumb/AdminStatsSummary'

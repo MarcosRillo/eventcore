@@ -89,4 +89,26 @@ describe('EventGrid', () => {
     const grid = screen.getByRole('region')
     expect(grid.className).toContain('mt-4')
   })
+
+  test('applies xl column class when provided', () => {
+    render(
+      <EventGrid columns={{ sm: 1, md: 2, lg: 3, xl: 4 }}>
+        <div>Card</div>
+      </EventGrid>
+    )
+
+    const grid = screen.getByRole('region')
+    expect(grid.className).toContain('xl:grid-cols-4')
+  })
+
+  test('does not apply xl class when not provided', () => {
+    render(
+      <EventGrid columns={{ sm: 1, md: 2, lg: 3 }}>
+        <div>Card</div>
+      </EventGrid>
+    )
+
+    const grid = screen.getByRole('region')
+    expect(grid.className).not.toMatch(/xl:grid-cols/)
+  })
 })

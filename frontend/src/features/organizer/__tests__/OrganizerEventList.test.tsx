@@ -28,6 +28,15 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/organizer/dashboard',
 }))
 
+// Mock next/image - filter non-DOM props to avoid React warnings
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, className, style, loading }: Record<string, unknown>) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src as string} alt={alt as string} className={className as string} style={style as React.CSSProperties} loading={loading as string} />
+  },
+}))
+
 // Helper to render with providers (SWRConfig + ToastProvider)
 const renderWithProviders = (component: React.ReactElement) => {
   const Wrapper = ({ children }: { children: ReactNode }) => (
@@ -49,9 +58,11 @@ describe('OrganizerEventList', () => {
       // Never resolves — stays loading
       mockedFetcher.mockImplementation(() => new Promise(() => {}))
 
-      renderWithProviders(<OrganizerEventListContainer />)
+      const { container } = renderWithProviders(<OrganizerEventListContainer />)
 
-      expect(screen.getByText(/loading/i)).toBeInTheDocument()
+      // Loading now uses skeleton cards with pulse animation
+      const pulseElements = container.querySelectorAll('.animate-pulse')
+      expect(pulseElements.length).toBeGreaterThan(0)
     })
 
     test('should fetch and display events on mount', async () => {
@@ -111,7 +122,7 @@ describe('OrganizerEventList', () => {
 
       await waitFor(() => {
         expect(screen.getByText(/1.*3/)).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /siguiente/i })).toBeInTheDocument()
       })
     })
 
@@ -159,7 +170,7 @@ describe('OrganizerEventList', () => {
         expect(screen.getByText('Event 1')).toBeInTheDocument()
       })
 
-      fireEvent.click(screen.getByRole('button', { name: /next/i }))
+      fireEvent.click(screen.getByRole('button', { name: /siguiente/i }))
 
       await waitFor(() => {
         expect(screen.getByText('Event 11')).toBeInTheDocument()
@@ -230,8 +241,8 @@ describe('OrganizerEventList', () => {
       renderWithProviders(<OrganizerEventListContainer />)
 
       await waitFor(() => {
-        expect(screen.getByText(/no events yet/i)).toBeInTheDocument()
-        expect(screen.getByText(/create your first event/i)).toBeInTheDocument()
+        expect(screen.getByText(/no tienes eventos/i)).toBeInTheDocument()
+        expect(screen.getByText(/crea tu primer evento/i)).toBeInTheDocument()
       })
     })
 
@@ -272,8 +283,8 @@ describe('OrganizerEventList', () => {
       fireEvent.change(statusSelect, { target: { value: 'rejected' } })
 
       await waitFor(() => {
-        expect(screen.getByText(/no events found/i)).toBeInTheDocument()
-        expect(screen.getByText(/try a different filter/i)).toBeInTheDocument()
+        expect(screen.getByText(/no se encontraron eventos/i)).toBeInTheDocument()
+        expect(screen.getByText(/prueba con un filtro diferente/i)).toBeInTheDocument()
       })
     })
   })
@@ -338,7 +349,7 @@ describe('OrganizerEventList', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Network Error')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument()
       })
     })
   })

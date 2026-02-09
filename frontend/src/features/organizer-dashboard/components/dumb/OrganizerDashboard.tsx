@@ -9,12 +9,12 @@ import Link from 'next/link'
 
 import { OrganizerEventFilters } from '@/features/organizer/components/dumb/OrganizerEventFilters'
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
-import { OrganizerEventListItemSkeletons } from '@/features/organizer/components/dumb/OrganizerEventListItemSkeleton'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
+import { EventPreviewCardSkeletons } from '@/shared/components/display'
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
 import { Button } from '@/shared/components/form'
-import { PageHeader } from '@/shared/components/layout'
+import { EventGrid, PageHeader } from '@/shared/components/layout'
 import type { StatBarItem } from '@/shared/components/stats'
 import { StatsBar } from '@/shared/components/stats'
 import Pagination from '@/shared/components/tables/Pagination'
@@ -110,16 +110,18 @@ export const OrganizerDashboard = ({
         />
 
         {/* Event List Section */}
-        <div className="bg-white rounded-lg shadow">
+        <div>
           {loading ? (
-            <div
-              className="p-4 space-y-2"
-              role="status"
-              aria-live="polite"
-              aria-label="Cargando eventos"
-            >
-              <OrganizerEventListItemSkeletons count={5} />
-            </div>
+            <EventGrid columns={{ sm: 1, md: 2, lg: 3 }} gap={6} className="p-4">
+              <div
+                role="status"
+                aria-live="polite"
+                aria-label="Cargando eventos"
+                className="contents"
+              >
+                <EventPreviewCardSkeletons count={6} />
+              </div>
+            </EventGrid>
           ) : error ? (
             <EmptyState
               icon={EmptyStateIcons.inbox}
@@ -148,25 +150,20 @@ export const OrganizerDashboard = ({
             />
           ) : (
             <>
-              <div className="p-4 space-y-2">
-                {events.map((event, index) => (
-                  <div
+              <EventGrid columns={{ sm: 1, md: 2, lg: 3 }} gap={6} className="p-4">
+                {events.map((event) => (
+                  <OrganizerEventListItem
                     key={event.id}
-                    className="animate-slideInUp"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <OrganizerEventListItem
-                      event={event}
-                      onEdit={() => onEdit(event.id)}
-                      onView={() => onView(event.id)}
-                      onSuccess={onSuccess}
-                    />
-                  </div>
+                    event={event}
+                    onEdit={() => onEdit(event.id)}
+                    onView={() => onView(event.id)}
+                    onSuccess={onSuccess}
+                  />
                 ))}
-              </div>
+              </EventGrid>
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="border-t border-neutral-200 px-4 py-3">
+                <div className="bg-white rounded-lg shadow-sm border-t border-neutral-200 px-4 py-3">
                   <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}

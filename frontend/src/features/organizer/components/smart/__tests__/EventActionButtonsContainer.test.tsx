@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom'
 
-import { act,fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import { EventActionButtonsContainer } from '@/features/organizer/components/smart/EventActionButtonsContainer'
 import * as useEventActionsModule from '@/features/organizer/hooks/useEventActions'
@@ -35,24 +36,27 @@ describe('EventActionButtonsContainer', () => {
     ;(useEventActionsModule.useEventActions as jest.Mock).mockReturnValue(mockUseEventActions)
   })
 
+  const openMenu = async () => {
+    const user = userEvent.setup()
+    const trigger = screen.getByRole('button', { name: /acciones de test event/i })
+    await user.click(trigger)
+    return user
+  }
+
   describe('Rendering', () => {
-    it('should render EventActionButtons with correct props', () => {
+    it('should render overflow menu trigger', () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      expect(screen.getByRole('button', { name: /submit.*review/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /acciones de test event/i })).toBeInTheDocument()
     })
 
-    it('should pass loading state to EventActionButtons', () => {
-      ;(useEventActionsModule.useEventActions as jest.Mock).mockReturnValue({
-        ...mockUseEventActions,
-        loading: true,
-      })
-
+    it('should show menu items when overflow menu is opened', async () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-      expect(submitButton).toBeDisabled()
+      await openMenu()
+
+      expect(screen.getByRole('menuitem', { name: /enviar a revisión/i })).toBeInTheDocument()
+      expect(screen.getByRole('menuitem', { name: /eliminar/i })).toBeInTheDocument()
     })
 
     it('should pass onSuccess callback to useEventActions', () => {
@@ -64,11 +68,12 @@ describe('EventActionButtonsContainer', () => {
   })
 
   describe('Submit action', () => {
-    it('should open submit modal when submit button clicked', () => {
+    it('should open submit modal when submit menu item clicked', async () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-      fireEvent.click(submitButton)
+      const user = await openMenu()
+
+      await user.click(screen.getByRole('menuitem', { name: /enviar a revisión/i }))
 
       expect(mockUseEventActions.openSubmitModal).toHaveBeenCalledWith(mockEvent.id)
     })
@@ -100,7 +105,7 @@ describe('EventActionButtonsContainer', () => {
       const confirmButton = screen.getByRole('button', { name: /enviar$/i })
 
       await act(async () => {
-        fireEvent.click(confirmButton)
+        confirmButton.click()
       })
 
       await waitFor(() => {
@@ -127,7 +132,7 @@ describe('EventActionButtonsContainer', () => {
       const confirmButton = screen.getByRole('button', { name: /enviar$/i })
 
       await act(async () => {
-        fireEvent.click(confirmButton)
+        confirmButton.click()
       })
 
       await waitFor(() => {
@@ -148,7 +153,7 @@ describe('EventActionButtonsContainer', () => {
       const cancelButton = screen.getByRole('button', { name: /cancel/i })
 
       await act(async () => {
-        fireEvent.click(cancelButton)
+        cancelButton.click()
       })
 
       expect(mockUseEventActions.closeSubmitModal).toHaveBeenCalled()
@@ -163,11 +168,12 @@ describe('EventActionButtonsContainer', () => {
   })
 
   describe('Delete action', () => {
-    it('should open delete modal when delete button clicked', () => {
+    it('should open delete modal when delete menu item clicked', async () => {
       render(<EventActionButtonsContainer event={mockEvent} />)
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i })
-      fireEvent.click(deleteButton)
+      const user = await openMenu()
+
+      await user.click(screen.getByRole('menuitem', { name: /eliminar/i }))
 
       expect(mockUseEventActions.openDeleteModal).toHaveBeenCalledWith(mockEvent.id)
     })
@@ -198,7 +204,7 @@ describe('EventActionButtonsContainer', () => {
       const confirmButton = screen.getByRole('button', { name: /^eliminar$/i })
 
       await act(async () => {
-        fireEvent.click(confirmButton)
+        confirmButton.click()
       })
 
       await waitFor(() => {
@@ -225,7 +231,7 @@ describe('EventActionButtonsContainer', () => {
       const confirmButton = screen.getByRole('button', { name: /^eliminar$/i })
 
       await act(async () => {
-        fireEvent.click(confirmButton)
+        confirmButton.click()
       })
 
       await waitFor(() => {
@@ -246,7 +252,7 @@ describe('EventActionButtonsContainer', () => {
       const cancelButton = screen.getByRole('button', { name: /cancel/i })
 
       await act(async () => {
-        fireEvent.click(cancelButton)
+        cancelButton.click()
       })
 
       expect(mockUseEventActions.closeDeleteModal).toHaveBeenCalled()
@@ -261,21 +267,6 @@ describe('EventActionButtonsContainer', () => {
   })
 
   describe('Loading states', () => {
-    it('should disable all buttons when loading', () => {
-      ;(useEventActionsModule.useEventActions as jest.Mock).mockReturnValue({
-        ...mockUseEventActions,
-        loading: true,
-      })
-
-      render(<EventActionButtonsContainer event={mockEvent} />)
-
-      const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-      const deleteButton = screen.getByRole('button', { name: /delete/i })
-
-      expect(submitButton).toBeDisabled()
-      expect(deleteButton).toBeDisabled()
-    })
-
     it('should show loading state in modals when loading', () => {
       ;(useEventActionsModule.useEventActions as jest.Mock).mockReturnValue({
         ...mockUseEventActions,
@@ -307,18 +298,6 @@ describe('EventActionButtonsContainer', () => {
 
       // Check if modal content is rendered (itemName is passed to modal)
       expect(screen.getByText(/eliminar evento/i)).toBeInTheDocument()
-    })
-
-    it('should handle multiple rapid clicks on same button', async () => {
-      render(<EventActionButtonsContainer event={mockEvent} />)
-
-      const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-
-      fireEvent.click(submitButton)
-      fireEvent.click(submitButton)
-      fireEvent.click(submitButton)
-
-      expect(mockUseEventActions.openSubmitModal).toHaveBeenCalledTimes(3)
     })
 
     it('should handle event without onSuccess callback', () => {

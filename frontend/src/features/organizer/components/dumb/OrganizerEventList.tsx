@@ -1,5 +1,9 @@
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+import { EventPreviewCardSkeletons } from '@/shared/components/display'
+import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
+import { Button } from '@/shared/components/form'
+import { EventGrid } from '@/shared/components/layout'
 
 interface OrganizerEventListProps {
   events: OrganizerEvent[]
@@ -37,61 +41,52 @@ export const OrganizerEventList = ({
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Loading events...</div>
-      </div>
+      <EventGrid columns={{ sm: 1, md: 2, lg: 3 }} gap={6}>
+        <EventPreviewCardSkeletons count={6} />
+      </EventGrid>
     )
   }
 
   // Error state
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
-        <button
-          onClick={onRetry}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Retry
-        </button>
-      </div>
+      <EmptyState
+        icon={EmptyStateIcons.inbox}
+        title="Error al cargar eventos"
+        description={error}
+        action={
+          <Button variant="primary" size="sm" onClick={onRetry}>
+            Reintentar
+          </Button>
+        }
+      />
     )
   }
 
   // Empty state - no events at all
   if (events.length === 0 && !statusFilter) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
-          No events yet
-        </h3>
-        <p className="text-gray-500 mb-4">
-          Create your first event to get started
-        </p>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Create Event
-        </button>
-      </div>
+      <EmptyState
+        icon={EmptyStateIcons.calendar}
+        title="Aun no tienes eventos"
+        description="Crea tu primer evento para comenzar"
+      />
     )
   }
 
   // Empty state - no matching filter
   if (events.length === 0 && statusFilter) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
-          No events found
-        </h3>
-        <p className="text-gray-500 mb-4">
-          Try a different filter or create a new event
-        </p>
-        <button
-          onClick={() => onStatusFilter(null)}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-        >
-          Clear Filters
-        </button>
-      </div>
+      <EmptyState
+        icon={EmptyStateIcons.search}
+        title="No se encontraron eventos"
+        description="Prueba con un filtro diferente o crea un nuevo evento"
+        action={
+          <Button variant="outline" size="sm" onClick={() => onStatusFilter(null)}>
+            Limpiar filtros
+          </Button>
+        }
+      />
     )
   }
 
@@ -100,7 +95,7 @@ export const OrganizerEventList = ({
       {/* Filter Controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
+          <label htmlFor="status-filter" className="text-sm font-medium text-neutral-700">
             Filter by status:
           </label>
           <select
@@ -118,13 +113,13 @@ export const OrganizerEventList = ({
           </select>
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-neutral-600">
           Total: {total} events
         </div>
       </div>
 
-      {/* Event List */}
-      <div className="space-y-2">
+      {/* Event Grid */}
+      <EventGrid columns={{ sm: 1, md: 2, lg: 3 }} gap={6}>
         {events.map((event) => (
           <OrganizerEventListItem
             key={event.id}
@@ -135,30 +130,32 @@ export const OrganizerEventList = ({
             disabled={isDeleting}
           />
         ))}
-      </div>
+      </EventGrid>
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Previous
-          </button>
+            Anterior
+          </Button>
 
-          <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
+          <span className="text-sm text-neutral-600">
+            Pagina {currentPage} de {totalPages}
           </span>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Next
-          </button>
+            Siguiente
+          </Button>
         </div>
       )}
 
@@ -166,7 +163,7 @@ export const OrganizerEventList = ({
       {isDeleting && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
-            <p>Deleting event...</p>
+            <p>Eliminando evento...</p>
           </div>
         </div>
       )}

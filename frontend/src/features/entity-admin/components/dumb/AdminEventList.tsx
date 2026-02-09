@@ -1,17 +1,18 @@
 /**
  * AdminEventList Component
  *
- * Container for admin event cards with staggered animations,
- * empty state, and error state handling.
+ * Container for admin event cards using responsive grid layout,
+ * with empty state and error state handling.
  * Dumb component - receives data via props, no business logic.
  */
 
 'use client'
 
 import { AdminEventListItem } from '@/features/entity-admin/components/dumb/AdminEventListItem'
-import { AdminEventListItemSkeletons } from '@/features/entity-admin/components/dumb/AdminEventListItemSkeleton'
+import { EventPreviewCardSkeletons } from '@/shared/components/display'
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
 import { Button } from '@/shared/components/form'
+import { EventGrid } from '@/shared/components/layout'
 import type { Event } from '@/types/event.types'
 
 interface AdminEventListProps {
@@ -41,9 +42,9 @@ export const AdminEventList = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-3 p-4 min-h-[400px]">
-        <AdminEventListItemSkeletons count={5} />
-      </div>
+      <EventGrid columns={{ sm: 1, md: 2, lg: 3, xl: 4 }} gap={6} className="p-4 min-h-[400px]">
+        <EventPreviewCardSkeletons count={6} />
+      </EventGrid>
     )
   }
 
@@ -94,18 +95,17 @@ export const AdminEventList = ({
     )
   }
 
-  // Event list with staggered animations
+  // Event grid
   return (
-    <div className="space-y-3 p-4 min-h-[400px]">
-      {events.map((event, index) => (
+    <EventGrid columns={{ sm: 1, md: 2, lg: 3, xl: 4 }} gap={6} className="p-4 min-h-[400px]">
+      {events.map((event) => (
         <AdminEventListItem
           key={event.id}
           event={event}
-          index={index}
           onManage={() => onManage(event)}
         />
       ))}
-    </div>
+    </EventGrid>
   )
 }
 

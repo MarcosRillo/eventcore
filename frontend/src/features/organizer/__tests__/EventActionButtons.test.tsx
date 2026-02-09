@@ -1,11 +1,12 @@
 /**
  * Tests for EventActionButtons component
  *
- * Tests presentational component that displays action buttons
- * based on event status and handles user clicks.
+ * Tests presentational component that renders contextual actions
+ * via OverflowMenu based on event status.
  */
 
-import { fireEvent,render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import { EventActionButtons } from '@/features/organizer/components/dumb/EventActionButtons'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
@@ -27,8 +28,15 @@ describe('EventActionButtons', () => {
     jest.clearAllMocks()
   })
 
-  describe('Submit Button', () => {
-    test('renders submit button when event status is draft', () => {
+  const openMenu = async () => {
+    const user = userEvent.setup()
+    const trigger = screen.getByRole('button', { name: /acciones de test event/i })
+    await user.click(trigger)
+    return user
+  }
+
+  describe('Submit action', () => {
+    test('renders submit menu item when event status is draft', async () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -36,10 +44,12 @@ describe('EventActionButtons', () => {
         />
       )
 
-      expect(screen.getByRole('button', { name: /submit.*review/i })).toBeInTheDocument()
+      await openMenu()
+
+      expect(screen.getByRole('menuitem', { name: /enviar a revisión/i })).toBeInTheDocument()
     })
 
-    test('renders submit button when event status is requires_changes', () => {
+    test('renders submit menu item when event status is requires_changes', async () => {
       const requiresChangesEvent: OrganizerEvent = {
         ...mockEvent,
         status: { id: 1, status_code: 'requires_changes', status_name: 'Requires Changes' }
@@ -52,26 +62,28 @@ describe('EventActionButtons', () => {
         />
       )
 
-      expect(screen.getByRole('button', { name: /submit.*review/i })).toBeInTheDocument()
+      await openMenu()
+
+      expect(screen.getByRole('menuitem', { name: /enviar a revisión/i })).toBeInTheDocument()
     })
 
-    test('does not render submit button when event is published', () => {
+    test('does not render menu when event is published (no actions)', () => {
       const publishedEvent: OrganizerEvent = {
         ...mockEvent,
         status: { id: 1, status_code: 'published', status_name: 'Published' }
       }
 
-      render(
+      const { container } = render(
         <EventActionButtons
           event={publishedEvent}
           {...mockHandlers}
         />
       )
 
-      expect(screen.queryByRole('button', { name: /submit.*review/i })).not.toBeInTheDocument()
+      expect(container.innerHTML).toBe('')
     })
 
-    test('calls onSubmit with event id when submit button clicked', () => {
+    test('calls onSubmit with event id when submit item clicked', async () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -79,28 +91,17 @@ describe('EventActionButtons', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /submit.*review/i }))
+      const user = await openMenu()
+
+      await user.click(screen.getByRole('menuitem', { name: /enviar a revisión/i }))
 
       expect(mockHandlers.onSubmit).toHaveBeenCalledWith(1)
       expect(mockHandlers.onSubmit).toHaveBeenCalledTimes(1)
     })
-
-    test('disables submit button when loading', () => {
-      render(
-        <EventActionButtons
-          event={mockEvent}
-          {...mockHandlers}
-          loading={true}
-        />
-      )
-
-      const submitButton = screen.getByRole('button', { name: /submit.*review/i })
-      expect(submitButton).toBeDisabled()
-    })
   })
 
-  describe('Delete Button', () => {
-    test('renders delete button only for draft events', () => {
+  describe('Delete action', () => {
+    test('renders delete menu item for draft events', async () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -108,26 +109,30 @@ describe('EventActionButtons', () => {
         />
       )
 
-      expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
+      await openMenu()
+
+      expect(screen.getByRole('menuitem', { name: /eliminar/i })).toBeInTheDocument()
     })
 
-    test('does not render delete button for non-draft events', () => {
-      const publishedEvent: OrganizerEvent = {
+    test('does not render delete menu item for non-draft events', async () => {
+      const requiresChangesEvent: OrganizerEvent = {
         ...mockEvent,
-        status: { id: 1, status_code: 'published', status_name: 'Published' }
+        status: { id: 1, status_code: 'requires_changes', status_name: 'Requires Changes' }
       }
 
       render(
         <EventActionButtons
-          event={publishedEvent}
+          event={requiresChangesEvent}
           {...mockHandlers}
         />
       )
 
-      expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
+      await openMenu()
+
+      expect(screen.queryByRole('menuitem', { name: /eliminar/i })).not.toBeInTheDocument()
     })
 
-    test('calls onDelete with event id when delete button clicked', () => {
+    test('calls onDelete with event id when delete item clicked', async () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -135,13 +140,15 @@ describe('EventActionButtons', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+      const user = await openMenu()
+
+      await user.click(screen.getByRole('menuitem', { name: /eliminar/i }))
 
       expect(mockHandlers.onDelete).toHaveBeenCalledWith(1)
       expect(mockHandlers.onDelete).toHaveBeenCalledTimes(1)
     })
 
-    test('delete button has danger styling', () => {
+    test('delete item has danger styling', async () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -149,26 +156,16 @@ describe('EventActionButtons', () => {
         />
       )
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i })
-      expect(deleteButton.className).toContain('bg-error-500')
-    })
+      await openMenu()
 
-    test('disables delete button when loading', () => {
-      render(
-        <EventActionButtons
-          event={mockEvent}
-          {...mockHandlers}
-          loading={true}
-        />
-      )
-
-      const deleteButton = screen.getByRole('button', { name: /delete/i })
-      expect(deleteButton).toBeDisabled()
+      const deleteItem = screen.getByRole('menuitem', { name: /eliminar/i })
+      const deleteButton = deleteItem.querySelector('button') ?? deleteItem
+      expect(deleteButton.className).toContain('text-error-600')
     })
   })
 
   describe('Accessibility', () => {
-    test('all buttons have accessible labels', () => {
+    test('trigger button has accessible label with event title', () => {
       render(
         <EventActionButtons
           event={mockEvent}
@@ -176,8 +173,13 @@ describe('EventActionButtons', () => {
         />
       )
 
-      expect(screen.getByRole('button', { name: /submit.*review/i })).toHaveAttribute('aria-label')
-      expect(screen.getByRole('button', { name: /delete/i })).toHaveAttribute('aria-label')
+      expect(screen.getByRole('button', { name: /acciones de test event/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('Memoization', () => {
+    test('is memoized', () => {
+      expect(EventActionButtons).toHaveProperty('$$typeof', Symbol.for('react.memo'))
     })
   })
 })
