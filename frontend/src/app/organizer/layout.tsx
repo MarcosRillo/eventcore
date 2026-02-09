@@ -1,39 +1,36 @@
-/**
- * Organizer Layout
- * Layout wrapper for organizer panel with sidebar
- * Route protection handled by middleware.ts
- */
+'use client'
 
-'use client';
+import { Suspense } from 'react'
 
-import { OrganizerSidebar } from '@/components/organizer/OrganizerSidebar';
-import { useAuth } from '@/context/AuthContext';
-import { LoadingSpinner } from '@/shared/components/feedback';
+import { organizerNavConfig } from '@/app/organizer/organizerNavConfig'
+import { useAuth } from '@/context/AuthContext'
+import { LoadingSpinner } from '@/shared/components/feedback'
+import { AppShell } from '@/shared/components/layout'
+
+const PageLoadingFallback = () => (
+  <div className="flex items-center justify-center py-12">
+    <LoadingSpinner size="lg" text="Cargando contenido..." />
+  </div>
+)
 
 interface OrganizerLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export default function OrganizerLayout({ children }: OrganizerLayoutProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth()
 
-  // Show loading while fetching user data
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Cargando..." />
       </div>
-    );
+    )
   }
 
   return (
-    <div className="flex h-screen bg-neutral-50">
-      <OrganizerSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto py-6 px-4">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
+    <AppShell config={organizerNavConfig} user={user} onLogout={logout}>
+      <Suspense fallback={<PageLoadingFallback />}>{children}</Suspense>
+    </AppShell>
+  )
 }
