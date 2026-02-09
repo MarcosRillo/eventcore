@@ -2,13 +2,22 @@
  * Tests for OrganizerEventListItem (Dumb Component)
  *
  * Tests rendering of event item with status, date, location, and action buttons.
- * Updated for new layout with status badge at top, horizontal metadata, and Card wrapper.
+ * Uses EventPreviewCard for vertical card layout with image.
  */
 
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
+
+// Mock next/image - filter non-DOM props to avoid React warnings
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, className, style, loading }: Record<string, unknown>) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src as string} alt={alt as string} className={className as string} style={style as React.CSSProperties} loading={loading as string} />
+  },
+}))
 
 // Mock EventActionButtonsContainer to simplify testing
 jest.mock('@/features/organizer/components/smart/EventActionButtonsContainer', () => ({
@@ -75,7 +84,7 @@ describe('OrganizerEventListItem', () => {
       expect(screen.getByText('Location 1')).toBeInTheDocument()
     })
 
-    test('should render event type name with icon', () => {
+    test('should render event type name', () => {
       render(<OrganizerEventListItem {...defaultProps} />)
 
       expect(screen.getByText('Category 1')).toBeInTheDocument()
@@ -305,14 +314,6 @@ describe('OrganizerEventListItem', () => {
       svgs.forEach(svg => {
         expect(svg).toHaveAttribute('aria-hidden', 'true')
       })
-    })
-
-    test('should have aria-hidden on decorative separators', () => {
-      const { container } = render(<OrganizerEventListItem {...defaultProps} />)
-
-      // Dot separators should have aria-hidden="true"
-      const separators = container.querySelectorAll('[aria-hidden="true"]')
-      expect(separators.length).toBeGreaterThan(0)
     })
   })
 

@@ -1,12 +1,22 @@
 /**
  * EventActionButtons Component (Presentational)
  *
- * Displays action buttons for event: Submit for Review, Delete.
+ * Renders contextual actions (Submit for Review, Delete) as an overflow menu.
  * Buttons visibility depends on event status.
+ *
+ * Best Practices applied:
+ * - memo() to avoid re-renders (rerender-memo)
+ * - Hoisted static JSX (rendering-hoist-jsx)
+ * - Simple boolean expressions, no useMemo (rerender-simple-expression-in-memo)
+ * - Default value is primitive, safe (rerender-memo-with-default-value)
  */
 
+import { Send, Trash2 } from 'lucide-react'
+import { memo } from 'react'
+
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
-import { Button } from '@/shared/components/form'
+import type { OverflowMenuItem } from '@/shared/components/display/OverflowMenu'
+import OverflowMenu from '@/shared/components/display/OverflowMenu'
 
 interface EventActionButtonsProps {
   event: OrganizerEvent
@@ -17,7 +27,6 @@ interface EventActionButtonsProps {
 
 /**
  * Get status code from event status (handles both string and object formats)
- * @param status
  */
 const getStatusCode = (status: OrganizerEvent['status']): string => {
   if (typeof status === 'string') {
@@ -26,41 +35,43 @@ const getStatusCode = (status: OrganizerEvent['status']): string => {
   return status.status_code
 }
 
-export const EventActionButtons = ({
+// Hoisted static JSX (rendering-hoist-jsx)
+const sendIcon = <Send size={16} aria-hidden="true" />
+const trashIcon = <Trash2 size={16} aria-hidden="true" />
+
+export const EventActionButtons = memo(function EventActionButtons({
   event,
   onSubmit,
   onDelete,
-  loading = false
-}: EventActionButtonsProps) => {
+  loading = false,
+}: EventActionButtonsProps) {
   const statusCode = getStatusCode(event.status)
   const canSubmit = statusCode === 'draft' || statusCode === 'requires_changes'
   const canDelete = statusCode === 'draft'
 
-  return (
-    <div className="flex gap-2">
-      {canSubmit && (
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => onSubmit(event.id)}
-          disabled={loading}
-          aria-label={`Submit event ${event.title} for review`}
-        >
-          Enviar a revisión
-        </Button>
-      )}
+  const items: OverflowMenuItem[] = [
+    ...(canSubmit
+      ? [
+          {
+            label: 'Enviar a revisión',
+            onClick: () => onSubmit(event.id),
+            icon: sendIcon,
+            disabled: loading,
+          },
+        ]
+      : []),
+    ...(canDelete
+      ? [
+          {
+            label: 'Eliminar',
+            onClick: () => onDelete(event.id),
+            variant: 'danger' as const,
+            icon: trashIcon,
+            disabled: loading,
+          },
+        ]
+      : []),
+  ]
 
-      {canDelete && (
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={() => onDelete(event.id)}
-          disabled={loading}
-          aria-label={`Delete event ${event.title}`}
-        >
-          Eliminar
-        </Button>
-      )}
-    </div>
-  )
-}
+  return <OverflowMenu items={items} ariaLabel={`Acciones de ${event.title}`} />
+})

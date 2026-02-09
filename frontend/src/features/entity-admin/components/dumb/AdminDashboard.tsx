@@ -123,33 +123,31 @@ export const AdminDashboard = ({
           statusCounts={statusCounts}
         />
 
-        {/* Event List Container */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <AdminEventList
-            events={events}
-            isLoading={eventsLoading}
-            error={eventsError}
-            hasActiveFilter={hasActiveFilter}
-            onManage={onManageEvent}
-            onRetry={onRetry}
-            onClearFilters={onClearFilters}
-          />
+        {/* Event List */}
+        <AdminEventList
+          events={events}
+          isLoading={eventsLoading}
+          error={eventsError}
+          hasActiveFilter={hasActiveFilter}
+          onManage={onManageEvent}
+          onRetry={onRetry}
+          onClearFilters={onClearFilters}
+        />
 
-          {/* Pagination - Always visible when multiple pages exist to prevent layout shift */}
-          {pagination && pagination.last_page > 1 && !eventsError && (
-            <div className={`border-t border-neutral-200 px-4 sm:px-6 transition-opacity duration-200 ${eventsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-              <Pagination
-                currentPage={pagination.current_page}
-                totalPages={pagination.last_page}
-                onPageChange={onPageChange}
-                showInfo={true}
-                totalItems={pagination.total}
-                itemsFrom={pagination.from ?? undefined}
-                itemsTo={pagination.to ?? undefined}
-              />
-            </div>
-          )}
-        </div>
+        {/* Pagination */}
+        {pagination && pagination.last_page > 1 && !eventsError && (
+          <div className={`bg-white rounded-lg shadow-sm border-t border-neutral-200 px-4 sm:px-6 transition-opacity duration-200 ${eventsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+            <Pagination
+              currentPage={pagination.current_page}
+              totalPages={pagination.last_page}
+              onPageChange={onPageChange}
+              showInfo={true}
+              totalItems={pagination.total}
+              itemsFrom={pagination.from ?? undefined}
+              itemsTo={pagination.to ?? undefined}
+            />
+          </div>
+        )}
       </main>
 
       {/* Modal slot for EventManagementModal */}

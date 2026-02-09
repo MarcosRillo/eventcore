@@ -8,7 +8,7 @@ import type { ReactNode } from 'react'
 
 interface EventGridProps {
   children: ReactNode
-  columns?: { sm?: number; md?: number; lg?: number }
+  columns?: { sm?: number; md?: number; lg?: number; xl?: number }
   gap?: number
   ariaLabel?: string
   className?: string
@@ -35,6 +35,13 @@ const LG_COL_CLASSES: Record<number, string> = {
   4: 'lg:grid-cols-4',
 }
 
+const XL_COL_CLASSES: Record<number, string> = {
+  1: 'xl:grid-cols-1',
+  2: 'xl:grid-cols-2',
+  3: 'xl:grid-cols-3',
+  4: 'xl:grid-cols-4',
+}
+
 const GAP_CLASSES: Record<number, string> = {
   2: 'gap-2',
   4: 'gap-4',
@@ -54,6 +61,7 @@ export function EventGrid({
     COL_CLASSES[columns.sm ?? 1],
     MD_COL_CLASSES[columns.md ?? 2],
     LG_COL_CLASSES[columns.lg ?? 3],
+    columns.xl ? XL_COL_CLASSES[columns.xl] : '',
     GAP_CLASSES[gap],
     className,
   ]
