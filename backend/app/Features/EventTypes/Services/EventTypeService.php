@@ -21,7 +21,7 @@ class EventTypeService
      */
     public function getAllEventTypes(array $filters = []): LengthAwarePaginator
     {
-        $query = EventType::query();
+        $query = EventType::query()->withCount('subtypes');
 
         if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
