@@ -42,6 +42,10 @@ interface UseEventManagementReturn {
   setComment: (value: string) => void;
   confirmAction: () => Promise<void>;
   cancelAction: () => void;
+
+  // Featured
+  toggleFeatured: (eventId: number) => Promise<Event | null>;
+  updateSelectedEvent: (event: Event) => void;
 }
 
 /**
@@ -71,6 +75,7 @@ export const useEventManagement = (
     publishEvent,
     requestChanges,
     rejectEvent,
+    toggleFeatured,
   } = useApprovalManager();
 
   // Compute available actions based on selected event
@@ -79,7 +84,7 @@ export const useEventManagement = (
     // Backend EventResource returns 'code', type definition expects 'status_code'
     // Support both formats for compatibility
     const statusCode = typeof selectedEvent.status === 'object'
-      ? (selectedEvent.status.status_code || (selectedEvent.status as { code?: string }).code || '')
+      ? (selectedEvent.status?.status_code || (selectedEvent.status as { code?: string })?.code || '')
       : selectedEvent.status;
     return STATUS_ACTIONS_MAP[statusCode as EventStatusCode] || [];
   }, [selectedEvent]);
@@ -214,6 +219,10 @@ export const useEventManagement = (
     setComment: handleSetComment,
     confirmAction,
     cancelAction,
+
+    // Featured
+    toggleFeatured,
+    updateSelectedEvent: setSelectedEvent,
   };
 };
 

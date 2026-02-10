@@ -152,7 +152,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Estado destacado actualizado',
-            'data' => new EventResource($event->fresh()),
+            'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }
 

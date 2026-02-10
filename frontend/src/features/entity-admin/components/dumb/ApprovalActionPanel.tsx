@@ -5,12 +5,21 @@
  * Dumb component - receives action state via props.
  */
 
-import { CheckCircle, PenSquare,XCircle } from 'lucide-react';
+import { CheckCircle, PenSquare, Star, XCircle } from 'lucide-react';
 
 import type { ApprovalAction } from '@/features/entity-admin/types';
-import { ACTION_CONFIG, MAX_COMMENT_LENGTH,MIN_COMMENT_LENGTH } from '@/features/entity-admin/types';
+import {
+  ACTION_CONFIG,
+  getActionButtonVariant,
+  getStatusBadgeVariant,
+  MAX_COMMENT_LENGTH,
+  MIN_COMMENT_LENGTH,
+} from '@/features/entity-admin/types';
+import { Badge } from '@/shared/components/display';
+import { Button } from '@/shared/components/form';
+import { Textarea } from '@/shared/components/form';
 import type { EventStatusCode } from '@/types/event.types';
-import { EVENT_STATUS_COLORS,EVENT_STATUS_LABELS } from '@/types/event.types';
+import { EVENT_STATUS_LABELS } from '@/types/event.types';
 
 interface ApprovalActionPanelProps {
   availableActions: ApprovalAction[];
@@ -23,6 +32,8 @@ interface ApprovalActionPanelProps {
   onCommentChange: (value: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
+  isFeatured?: boolean;
+  onToggleFeatured?: () => void;
 }
 
 /**
@@ -37,14 +48,25 @@ const actionIcons: Record<ApprovalAction, React.ReactNode> = {
 };
 
 /**
- * Button style mapping for actions
+ * Unselected state styles per action (subtle outline indicating semantic nature)
  */
-const actionButtonStyles: Record<ApprovalAction, string> = {
-  approve_internal: 'bg-primary-600 hover:bg-primary-700 text-white',
-  request_public: 'bg-success-600 hover:bg-success-700 text-white',
-  publish: 'bg-success-600 hover:bg-success-700 text-white',
-  request_changes: 'border-2 border-warning-600 text-warning-700 hover:bg-warning-50',
-  reject: 'border-2 border-error-600 text-error-700 hover:bg-error-50',
+const unselectedStyles: Record<ApprovalAction, string> = {
+  approve_internal: 'border-primary-200 text-primary-700 hover:bg-primary-50 hover:border-primary-300',
+  request_public: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
+  publish: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
+  request_changes: 'border-warning-200 text-warning-700 hover:bg-warning-50 hover:border-warning-300',
+  reject: 'border-error-200 text-error-700 hover:bg-error-50 hover:border-error-300',
+};
+
+/**
+ * Selected state styles per action (subtle colored borders + backgrounds)
+ */
+const selectedStyles: Record<ApprovalAction, string> = {
+  approve_internal: 'border-primary-300 bg-primary-50 text-primary-700 ring-primary-200',
+  request_public: 'border-success-300 bg-success-50 text-success-700 ring-success-200',
+  publish: 'border-success-300 bg-success-50 text-success-700 ring-success-200',
+  request_changes: 'border-warning-300 bg-warning-50 text-warning-700 ring-warning-200',
+  reject: 'border-error-300 bg-error-50 text-error-700 ring-error-200',
 };
 
 export const ApprovalActionPanel = ({
@@ -58,9 +80,10 @@ export const ApprovalActionPanel = ({
   onCommentChange,
   onConfirm,
   onCancel,
+  isFeatured,
+  onToggleFeatured,
 }: ApprovalActionPanelProps) => {
   const statusLabel = EVENT_STATUS_LABELS[currentStatus] || currentStatus;
-  const statusColor = EVENT_STATUS_COLORS[currentStatus] || 'bg-neutral-100 text-neutral-800';
   const requiresComment = selectedAction && ACTION_CONFIG[selectedAction]?.requiresComment;
 
   return (
@@ -68,10 +91,27 @@ export const ApprovalActionPanel = ({
       {/* Current Status */}
       <div>
         <h4 className="text-sm font-medium text-neutral-500 mb-2">Estado Actual</h4>
-        <span className={`inline-flex px-3 py-1.5 rounded-full text-sm font-medium ${statusColor}`}>
+        <Badge variant={getStatusBadgeVariant(currentStatus)} size="lg" dot>
           {statusLabel}
-        </span>
+        </Badge>
       </div>
+
+      {/* Featured Toggle - solo para eventos publicados */}
+      {currentStatus === 'published' && onToggleFeatured && (
+        <div>
+          <h4 className="text-sm font-medium text-neutral-500 mb-3">Destacar</h4>
+          <Button
+            variant={isFeatured ? 'warning' : 'outline'}
+            size="md"
+            onClick={onToggleFeatured}
+            disabled={isLoading}
+            leftIcon={<Star className={`w-4 h-4 ${isFeatured ? 'fill-current' : ''}`} />}
+            fullWidth
+          >
+            {isFeatured ? 'Quitar Destacado' : 'Marcar como Destacado'}
+          </Button>
+        </div>
+      )}
 
       {/* Available Actions */}
       <div>
@@ -86,7 +126,6 @@ export const ApprovalActionPanel = ({
             {availableActions.map((action) => {
               const config = ACTION_CONFIG[action];
               const isSelected = selectedAction === action;
-              const baseStyles = actionButtonStyles[action];
 
               return (
                 <button
@@ -94,16 +133,28 @@ export const ApprovalActionPanel = ({
                   type="button"
                   onClick={() => onActionSelect(action)}
                   disabled={isLoading}
+                  aria-pressed={isSelected}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg
-                    font-medium transition-all duration-150
+                    text-left text-sm font-medium
+                    border transition-colors duration-150
                     disabled:opacity-50 disabled:cursor-not-allowed
-                    ${baseStyles}
-                    ${isSelected ? 'ring-2 ring-offset-2 ring-primary-500' : ''}
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/20
+                    ${isSelected
+                      ? `${selectedStyles[action]} ring-2 ring-offset-1`
+                      : unselectedStyles[action]
+                    }
                   `}
                 >
-                  {actionIcons[action]}
-                  <span className="flex-1 text-left">{config.label}</span>
+                  <span className="flex-shrink-0">
+                    {actionIcons[action]}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p>{config.label}</p>
+                    <p className={`text-xs font-normal mt-0.5 ${isSelected ? 'opacity-80' : 'text-neutral-400'}`}>
+                      {config.description}
+                    </p>
+                  </div>
                 </button>
               );
             })}
@@ -111,74 +162,58 @@ export const ApprovalActionPanel = ({
         )}
       </div>
 
+      {/* Contextual description callout */}
+      {selectedAction && !requiresComment && (
+        <div className="rounded-lg bg-neutral-50 border border-neutral-100 px-4 py-3">
+          <p className="text-sm text-neutral-600">
+            {ACTION_CONFIG[selectedAction].description}
+          </p>
+        </div>
+      )}
+
       {/* Comment Input (for request_changes and reject) */}
       {selectedAction && requiresComment && (
         <div>
-          <label htmlFor="approval-comment" className="block text-sm font-medium text-neutral-700 mb-2">
-            Motivo <span className="text-error-500">*</span>
-          </label>
-          <textarea
-            id="approval-comment"
+          <Textarea
+            label="Motivo"
             value={comment}
             onChange={(e) => onCommentChange(e.target.value)}
             placeholder="Escribe el motivo o feedback para el organizador..."
             rows={4}
             maxLength={MAX_COMMENT_LENGTH}
             disabled={isLoading}
-            className={`
-              w-full px-3 py-2 rounded-lg border
-              text-sm placeholder:text-neutral-400
-              focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
-              disabled:opacity-50 disabled:cursor-not-allowed
-              ${commentError ? 'border-error-500' : 'border-neutral-200'}
-            `}
+            error={commentError || undefined}
+            helperText={`Mínimo ${MIN_COMMENT_LENGTH} caracteres`}
+            required
           />
-          <div className="flex justify-between mt-1">
-            {commentError ? (
-              <p className="text-sm text-error-600">{commentError}</p>
-            ) : (
-              <p className="text-xs text-neutral-400">
-                Mínimo {MIN_COMMENT_LENGTH} caracteres
-              </p>
-            )}
-            <p className="text-xs text-neutral-400">
-              {comment.length}/{MAX_COMMENT_LENGTH}
-            </p>
-          </div>
+          <p className="text-xs text-neutral-400 text-right mt-1 tabular-nums">
+            {comment.length}/{MAX_COMMENT_LENGTH}
+          </p>
         </div>
       )}
 
       {/* Confirm/Cancel Buttons */}
       {selectedAction && (
         <div className="flex gap-3 pt-4 border-t border-neutral-100">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="md"
             onClick={onCancel}
             disabled={isLoading}
-            className="
-              flex-1 px-4 py-2.5 rounded-lg
-              border border-neutral-200 text-neutral-600
-              font-medium text-sm
-              hover:bg-neutral-50 transition-colors
-              disabled:opacity-50 disabled:cursor-not-allowed
-            "
+            fullWidth
           >
             Cancelar
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant={getActionButtonVariant(selectedAction)}
+            size="md"
             onClick={onConfirm}
-            disabled={isLoading}
-            className="
-              flex-1 px-4 py-2.5 rounded-lg
-              bg-primary-600 text-white
-              font-medium text-sm
-              hover:bg-primary-700 transition-colors
-              disabled:opacity-50 disabled:cursor-not-allowed
-            "
+            loading={isLoading}
+            leftIcon={actionIcons[selectedAction]}
+            fullWidth
           >
-            {isLoading ? 'Procesando...' : 'Confirmar'}
-          </button>
+            {ACTION_CONFIG[selectedAction].label}
+          </Button>
         </div>
       )}
     </div>

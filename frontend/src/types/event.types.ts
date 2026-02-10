@@ -70,6 +70,7 @@ export type EventType = EventTypeCode | EventTypeObject;
 export interface EventTypeInfo {
   id: number;
   name: string;
+  color?: string;
   entity_id?: number;
   is_active: boolean;
   created_at?: string;

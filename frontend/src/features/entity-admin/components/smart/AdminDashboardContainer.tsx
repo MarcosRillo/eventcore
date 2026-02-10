@@ -24,7 +24,10 @@ import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
+import type { ApprovalHistoryEntry } from '@/types/event.types';
 import type { Event, EventStatusCode } from '@/types/event.types';
+
+const EMPTY_HISTORY: ApprovalHistoryEntry[] = [];
 
 // Lazy load modal - only loaded when needed
 const EventManagementModal = dynamic(
@@ -39,7 +42,7 @@ const EventManagementModal = dynamic(
 function getStatusCode(event: Event | null): EventStatusCode {
   if (!event) return 'draft';
   if (typeof event.status === 'string') return event.status;
-  return (event.status.status_code || (event.status as { code?: string }).code || 'draft') as EventStatusCode;
+  return (event.status?.status_code || (event.status as { code?: string })?.code || 'draft') as EventStatusCode;
 }
 
 interface AdminDashboardContainerProps {
@@ -83,12 +86,25 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
     setComment,
     confirmAction,
     cancelAction,
+    toggleFeatured,
+    updateSelectedEvent,
   } = useEventManagement({
     onSuccess: () => {
       refetchStats();
       refreshData();
     },
   });
+
+  // Handle toggle featured
+  const handleToggleFeatured = useCallback(async () => {
+    if (!selectedEvent) return;
+    const result = await toggleFeatured(selectedEvent.id);
+    if (result) {
+      updateSelectedEvent(result);
+      refetchStats();
+      refreshData();
+    }
+  }, [selectedEvent, toggleFeatured, updateSelectedEvent, refetchStats, refreshData]);
 
   // Handle filter change from stats bar or filter pills
   const handleFilterChange = useCallback((status: EventStatusCode | null) => {
@@ -167,17 +183,17 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
           event={selectedEvent}
           onClose={closeModal}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Panel: Event Information */}
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Left Panel: Event Information (3/5) */}
+            <div className="lg:col-span-3 space-y-6">
               <EventInfoPanel event={selectedEvent} />
               <ApprovalHistoryTimeline
-                history={selectedEvent.approval_history || []}
+                history={selectedEvent.approval_history || EMPTY_HISTORY}
               />
             </div>
 
-            {/* Right Panel: Approval Actions */}
-            <div className="lg:border-l lg:border-neutral-200 lg:pl-6">
+            {/* Right Panel: Approval Actions (2/5) */}
+            <div className="lg:col-span-2">
               <ApprovalActionPanel
                 availableActions={availableActions}
                 selectedAction={selectedAction}
@@ -189,6 +205,8 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
                 onCommentChange={setComment}
                 onConfirm={confirmAction}
                 onCancel={cancelAction}
+                isFeatured={selectedEvent.is_featured}
+                onToggleFeatured={handleToggleFeatured}
               />
             </div>
           </div>

@@ -8,6 +8,8 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
+import { getActionBadgeVariant } from '@/features/entity-admin/types';
+import { Badge } from '@/shared/components/display';
 import type { ApprovalHistoryEntry } from '@/types/event.types';
 
 interface ApprovalHistoryTimelineProps {
@@ -17,7 +19,6 @@ interface ApprovalHistoryTimelineProps {
 
 /**
  * Format timestamp for display
- * @param timestamp
  */
 const formatTimestamp = (timestamp: string): string => {
   const date = new Date(timestamp);
@@ -43,15 +44,14 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 /**
- * Map action codes to colors
+ * Map action codes to timeline dot colors
  */
-const ACTION_COLORS: Record<string, string> = {
-  approve_internal: 'bg-primary-100 text-primary-700',
-  request_public: 'bg-success-100 text-success-700',
-  publish: 'bg-success-100 text-success-700',
-  request_changes: 'bg-warning-100 text-warning-700',
-  reject: 'bg-error-100 text-error-700',
-  submit: 'bg-neutral-100 text-neutral-700',
+const DOT_COLORS: Record<string, string> = {
+  approve_internal: 'bg-primary-400',
+  request_public: 'bg-success-400',
+  publish: 'bg-success-400',
+  request_changes: 'bg-warning-400',
+  reject: 'bg-error-400',
 };
 
 export const ApprovalHistoryTimeline = ({
@@ -74,6 +74,7 @@ export const ApprovalHistoryTimeline = ({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
         className="
           w-full flex items-center justify-between
           text-sm font-medium text-neutral-600
@@ -94,26 +95,25 @@ export const ApprovalHistoryTimeline = ({
       {/* Timeline Content */}
       {isExpanded && (
         <div className="mt-4 space-y-4">
-          {history.map((entry, index) => {
+          {history.map((entry) => {
             const actionLabel = ACTION_LABELS[entry.action] || entry.action;
-            const actionColor = ACTION_COLORS[entry.action] || 'bg-neutral-100 text-neutral-700';
+            const dotColor = DOT_COLORS[entry.action] || 'bg-neutral-300';
+            const entryKey = `${entry.action}-${entry.timestamp}-${entry.user_id}`;
 
             return (
-              <div key={index} className="relative pl-6">
+              <div key={entryKey} className="relative pl-6">
                 {/* Timeline connector */}
-                {index < history.length - 1 && (
-                  <div className="absolute left-2 top-6 bottom-0 w-px bg-neutral-200" />
-                )}
+                <div className="absolute left-2 top-6 bottom-0 w-px bg-neutral-200" />
 
                 {/* Timeline dot */}
-                <div className="absolute left-0 top-1 w-4 h-4 rounded-full bg-neutral-200 border-2 border-white" />
+                <div className={`absolute left-0 top-1 w-4 h-4 rounded-full border-2 border-white ${dotColor}`} />
 
                 {/* Entry content */}
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${actionColor}`}>
+                    <Badge variant={getActionBadgeVariant(entry.action)} size="sm">
                       {actionLabel}
-                    </span>
+                    </Badge>
                     <span className="text-xs text-neutral-400">
                       {formatTimestamp(entry.timestamp)}
                     </span>

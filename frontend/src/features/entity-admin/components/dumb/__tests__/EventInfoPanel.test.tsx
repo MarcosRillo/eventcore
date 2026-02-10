@@ -37,11 +37,6 @@ describe('EventInfoPanel', () => {
     updated_at: '2025-01-01T00:00:00',
   };
 
-  test('renders event title', () => {
-    render(<EventInfoPanel event={mockEvent} />);
-    expect(screen.getByText('Festival de Tango 2025')).toBeInTheDocument();
-  });
-
   test('renders event description', () => {
     render(<EventInfoPanel event={mockEvent} />);
     expect(screen.getByText(/El festival más importante de tango/)).toBeInTheDocument();
@@ -66,6 +61,19 @@ describe('EventInfoPanel', () => {
     render(<EventInfoPanel event={mockEvent} />);
     expect(screen.getByText('Cultural')).toBeInTheDocument();
     expect(screen.getByText('Danza')).toBeInTheDocument();
+  });
+
+  test('renders event image when featured_image is present', () => {
+    const eventWithImage = { ...mockEvent, featured_image: 'https://example.com/image.jpg' };
+    render(<EventInfoPanel event={eventWithImage} />);
+    const img = screen.getByAltText('Festival de Tango 2025');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', expect.stringContaining('image.jpg'));
+  });
+
+  test('renders image placeholder when no featured_image', () => {
+    render(<EventInfoPanel event={mockEvent} />);
+    expect(screen.queryByAltText('Festival de Tango 2025')).not.toBeInTheDocument();
   });
 
   test('renders featured badge when event is featured', () => {
@@ -102,10 +110,12 @@ describe('EventInfoPanel', () => {
       organizer: undefined,
       event_type: undefined,
       event_subtype: undefined,
+      is_featured: false,
     };
 
     render(<EventInfoPanel event={minimalEvent} />);
-    expect(screen.getByText('Festival de Tango 2025')).toBeInTheDocument();
-    // Should not crash
+    // Title is now displayed in modal header, not in EventInfoPanel
+    // Panel should render without crashing
+    expect(screen.getByText(/Fecha y Hora/i)).toBeInTheDocument();
   });
 });
