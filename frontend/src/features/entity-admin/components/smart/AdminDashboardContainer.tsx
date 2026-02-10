@@ -42,7 +42,7 @@ const EventManagementModal = dynamic(
 function getStatusCode(event: Event | null): EventStatusCode {
   if (!event) return 'draft';
   if (typeof event.status === 'string') return event.status;
-  return (event.status.status_code || (event.status as { code?: string }).code || 'draft') as EventStatusCode;
+  return (event.status?.status_code || (event.status as { code?: string })?.code || 'draft') as EventStatusCode;
 }
 
 interface AdminDashboardContainerProps {
@@ -86,12 +86,25 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
     setComment,
     confirmAction,
     cancelAction,
+    toggleFeatured,
+    updateSelectedEvent,
   } = useEventManagement({
     onSuccess: () => {
       refetchStats();
       refreshData();
     },
   });
+
+  // Handle toggle featured
+  const handleToggleFeatured = useCallback(async () => {
+    if (!selectedEvent) return;
+    const result = await toggleFeatured(selectedEvent.id);
+    if (result) {
+      updateSelectedEvent(result);
+      refetchStats();
+      refreshData();
+    }
+  }, [selectedEvent, toggleFeatured, updateSelectedEvent, refetchStats, refreshData]);
 
   // Handle filter change from stats bar or filter pills
   const handleFilterChange = useCallback((status: EventStatusCode | null) => {
@@ -192,6 +205,8 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
                 onCommentChange={setComment}
                 onConfirm={confirmAction}
                 onCancel={cancelAction}
+                isFeatured={selectedEvent.is_featured}
+                onToggleFeatured={handleToggleFeatured}
               />
             </div>
           </div>

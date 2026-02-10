@@ -29,7 +29,7 @@ export const EventManagementModal = ({
   // Don't render if no event
   if (!event) return null;
 
-  const statusCode = typeof event.status === 'object' ? event.status.status_code : event.status;
+  const statusCode = typeof event.status === 'object' ? (event.status?.status_code ?? 'draft') : (event.status ?? 'draft');
   const statusLabel = EVENT_STATUS_LABELS[statusCode] || statusCode;
   const badgeVariant = getStatusBadgeVariant(statusCode);
 

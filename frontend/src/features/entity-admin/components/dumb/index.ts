@@ -5,8 +5,6 @@
 // Modal components
 export { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel'
 export { ApprovalHistoryTimeline } from '@/features/entity-admin/components/dumb/ApprovalHistoryTimeline'
-export type { ApprovalActionOption, ApprovalFormData, ApprovalFormErrors } from '@/features/entity-admin/components/dumb/ApprovalModal'
-export { ApprovalModal } from '@/features/entity-admin/components/dumb/ApprovalModal'
 export { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInfoPanel'
 export { EventManagementModal } from '@/features/entity-admin/components/dumb/EventManagementModal'
 

@@ -5,7 +5,7 @@
  * Dumb component - receives action state via props.
  */
 
-import { CheckCircle, PenSquare, XCircle } from 'lucide-react';
+import { CheckCircle, PenSquare, Star, XCircle } from 'lucide-react';
 
 import type { ApprovalAction } from '@/features/entity-admin/types';
 import {
@@ -32,6 +32,8 @@ interface ApprovalActionPanelProps {
   onCommentChange: (value: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
+  isFeatured?: boolean;
+  onToggleFeatured?: () => void;
 }
 
 /**
@@ -78,6 +80,8 @@ export const ApprovalActionPanel = ({
   onCommentChange,
   onConfirm,
   onCancel,
+  isFeatured,
+  onToggleFeatured,
 }: ApprovalActionPanelProps) => {
   const statusLabel = EVENT_STATUS_LABELS[currentStatus] || currentStatus;
   const requiresComment = selectedAction && ACTION_CONFIG[selectedAction]?.requiresComment;
@@ -91,6 +95,23 @@ export const ApprovalActionPanel = ({
           {statusLabel}
         </Badge>
       </div>
+
+      {/* Featured Toggle - solo para eventos publicados */}
+      {currentStatus === 'published' && onToggleFeatured && (
+        <div>
+          <h4 className="text-sm font-medium text-neutral-500 mb-3">Destacar</h4>
+          <Button
+            variant={isFeatured ? 'warning' : 'outline'}
+            size="md"
+            onClick={onToggleFeatured}
+            disabled={isLoading}
+            leftIcon={<Star className={`w-4 h-4 ${isFeatured ? 'fill-current' : ''}`} />}
+            fullWidth
+          >
+            {isFeatured ? 'Quitar Destacado' : 'Marcar como Destacado'}
+          </Button>
+        </div>
+      )}
 
       {/* Available Actions */}
       <div>
