@@ -1,74 +1,54 @@
-FROM php:8.2.29-fpm
+# Stage 1: Build - install extensions and compilation dependencies
+FROM php:8.2.29-fpm AS builder
 
-# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
-    unzip \
-    git \
-    curl \
-    libzip-dev \
-    libonig-dev \
-    libpq-dev \
-    procps \
+    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    libzip-dev libonig-dev libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install pdo_pgsql \
-    && docker-php-ext-install mbstring \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install exif \
-    && docker-php-ext-install pcntl \
-    && docker-php-ext-install bcmath \
-    # Instalar PCOV para code coverage (más rápido que Xdebug)
-    && pecl install pcov \
-    && docker-php-ext-enable pcov \
-    # Limpiar caché
-    && apt-get clean \
+    && docker-php-ext-install -j$(nproc) gd pdo_pgsql mbstring zip exif pcntl bcmath \
+    && pecl install pcov && docker-php-ext-enable pcov \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Configuración de PCOV para coverage
-RUN { \
-    echo '[pcov]'; \
-    echo 'pcov.enabled=1'; \
-    echo 'pcov.directory=/var/www/app'; \
-    echo 'pcov.exclude="~vendor|tests|database|bootstrap|storage~"'; \
-    } > /usr/local/etc/php/conf.d/pcov.ini
+# Stage 2: Production - clean image without build tools
+FROM php:8.2.29-fpm
 
-# Configuración PHP personalizada
-RUN { \
-    echo 'memory_limit = 512M'; \
-    echo 'upload_max_filesize = 64M'; \
-    echo 'post_max_size = 64M'; \
-    } > /usr/local/etc/php/conf.d/custom.ini
+# Copy compiled extensions from builder (no build-essential, git, vim, etc.)
+COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
-# Configurar PHP-FPM para escuchar en todas las interfaces
+# Runtime dependencies only (libs, no -dev packages)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpng16-16 libjpeg62-turbo libfreetype6 \
+    libzip4 libonig5 libpq5 procps curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP config
+RUN { echo 'memory_limit = 512M'; echo 'upload_max_filesize = 64M'; echo 'post_max_size = 64M'; } \
+    > /usr/local/etc/php/conf.d/custom.ini
+
+# PCOV config
+RUN { echo '[pcov]'; echo 'pcov.enabled=1'; echo 'pcov.directory=/var/www/app'; \
+    echo 'pcov.exclude="~vendor|tests|database|bootstrap|storage~"'; } \
+    > /usr/local/etc/php/conf.d/pcov.ini
+
+# PHP-FPM listen on all interfaces
 RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
 
-# Instalar Composer
+# Composer (pinned version)
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# Crear usuario del sistema para ejecutar comandos de Composer y Artisan
-RUN groupadd -g 1000 www \
-    && useradd -u 1000 -ms /bin/bash -g www www
+# Non-root user
+RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
 
-# Establecer directorio de trabajo
 WORKDIR /var/www
-
-# Copiar archivos de la aplicación
 COPY --chown=www:www . /var/www
 
-# Cambiar al usuario www
-USER www
+# Entrypoint for storage:link (inline - script is tiny)
+RUN printf '#!/bin/sh\nset -e\nphp artisan storage:link 2>/dev/null || true\nexec "$@"\n' \
+    > /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh
 
-# Exponer puerto 9000 (FastCGI)
+USER www
 EXPOSE 9000
 
-# PHP-FPM como proceso principal (NO artisan serve)
+ENTRYPOINT ["sh", "/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]

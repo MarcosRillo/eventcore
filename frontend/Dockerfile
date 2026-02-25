@@ -1,33 +1,34 @@
-FROM node:20.18-alpine
-
-# Instalar dependencias del sistema
+# Stage 1: Dependencies
+FROM node:20.18-alpine AS deps
 RUN apk add --no-cache libc6-compat
-
-# Establecer directorio de trabajo
 WORKDIR /app
-
-# Copiar archivos de configuración de dependencias
 COPY package*.json ./
-
-# Instalar TODAS las dependencias (incluyendo devDependencies para desarrollo)
 RUN npm ci
 
-# Copiar código fuente
+# Stage 2: Build
+FROM node:20.18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
 
-# Crear usuario no-root
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+# Stage 3: Production runner (minimal image)
+FROM node:20.18-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Cambiar propietario de los archivos
-RUN chown -R nextjs:nodejs /app
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy standalone output + static assets (per Next.js docs)
+# Note: outputFileTracingRoot is set to '../' so standalone output is nested under frontend/
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/frontend ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 USER nextjs
-
-# Exponer puerto 3000
 EXPOSE 3000
-
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-# Comando por defecto (desarrollo)
-CMD ["npm", "run", "dev"]
+ENV PORT=3000 HOSTNAME="0.0.0.0"
+CMD ["node", "server.js"]
