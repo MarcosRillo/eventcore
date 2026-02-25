@@ -3,7 +3,7 @@
 .PHONY: help up down restart logs shell composer artisan npm db-shell redis-cli clean build
 
 # Variables
-DC = docker-compose -f docker-compose.dev.yml --env-file .env.docker
+DC = docker-compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.docker
 BACKEND_CONTAINER = plataforma-calendario-backend
 DB_CONTAINER = plataforma-calendario-db
 REDIS_CONTAINER = plataforma-calendario-redis
@@ -14,10 +14,8 @@ help: ## Muestra esta ayuda
 up: ## Inicia todos los servicios
 	$(DC) up -d
 	@echo "✅ Servicios iniciados"
-	@echo "📦 Backend API: http://localhost:80"
-	@echo "📧 MailHog: http://localhost:8025"
-	@echo "🗄️ PHPMyAdmin: http://localhost:8080"
-	@echo "💻 Frontend: Ejecuta 'npm run dev' en ./frontend"
+	@echo "📦 Backend API: http://localhost:8000"
+	@echo "💻 Frontend: http://localhost:3000"
 
 down: ## Detiene todos los servicios
 	$(DC) down
@@ -61,8 +59,8 @@ tinker: ## Abre Laravel Tinker
 test: ## Ejecuta tests
 	$(DC) exec -u www backend php artisan test
 
-db-shell: ## Accede a MySQL CLI
-	$(DC) exec $(DB_CONTAINER) mysql -u laravel_user -plaravel_password plataforma_calendario
+db-shell: ## Accede a PostgreSQL CLI
+	$(DC) exec db psql -U plataforma_user -d plataforma_calendario
 
 redis-cli: ## Accede a Redis CLI
 	$(DC) exec $(REDIS_CONTAINER) redis-cli
@@ -78,14 +76,12 @@ install: ## Instalación inicial del proyecto
 	@echo "🚀 Instalando proyecto..."
 	$(DC) up -d db
 	@sleep 5
-	$(DC) up -d backend nginx mailhog redis phpmyadmin
+	$(DC) up -d
 	$(DC) exec -u www backend composer install
 	$(DC) exec -u www backend cp .env.example .env
 	$(DC) exec -u www backend php artisan key:generate
 	$(DC) exec -u www backend php artisan migrate --seed
 	$(DC) exec -u www backend php artisan storage:link
 	@echo "✅ Instalación completada"
-	@echo "📦 Backend API: http://localhost:80"
-	@echo "📧 MailHog: http://localhost:8025"
-	@echo "🗄️ PHPMyAdmin: http://localhost:8080"
-	@echo "💻 Ahora ejecuta 'npm install && npm run dev' en ./frontend"
+	@echo "📦 Backend API: http://localhost:8000"
+	@echo "💻 Frontend: http://localhost:3000"
