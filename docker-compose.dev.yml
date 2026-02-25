@@ -1,23 +1,13 @@
+# Development overrides - merged with docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 services:
-  # Base de datos PostgreSQL
+  # Override DB: use env_file instead of required variable
   db:
-    image: postgres:15.13
-    container_name: plataforma-calendario-db
-    restart: unless-stopped
     env_file: .env.docker
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
       - "${DB_PORT:-5432}:5432"
-    networks:
-      - plataforma-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U plataforma_user -d plataforma_calendario"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
-  # Backend Laravel (PHP-FPM)
+  # Override backend: use Dockerfile.dev, artisan serve, volumes
   backend:
     build:
       context: ./backend
@@ -25,40 +15,40 @@ services:
       args:
         USER_ID: ${USER_ID:-1000}
         GROUP_ID: ${GROUP_ID:-1000}
-    container_name: plataforma-calendario-backend
-    restart: unless-stopped
-    working_dir: /var/www
+    env_file: .env.docker
+    environment:
+      - XDEBUG_MODE=${XDEBUG_MODE:-off}
+      - XDEBUG_CONFIG=client_host=host.docker.internal
     volumes:
       - ./backend:/var/www
       - ./docker/backend/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
       - composer_cache:/home/www/.composer
-    env_file: .env.docker
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - APP_URL=http://localhost:8000
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
-      - XDEBUG_MODE=${XDEBUG_MODE:-off}
-      - XDEBUG_CONFIG=client_host=host.docker.internal
-    networks:
-      - plataforma-network
     ports:
       - "8000:8000"
     entrypoint: ["sh", "/usr/local/bin/entrypoint.sh"]
     command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
-    depends_on:
-      db:
-        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
+  # Override nginx: move to port 8080 to avoid conflict with artisan serve on 8000
+  nginx:
+    ports:
+      - "8080:80"
+
+  # Override frontend: dev mode with hot reload
+  frontend:
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
 
 volumes:
-  postgres_data:
-    driver: local
   composer_cache:
     driver: local
-
-networks:
-  plataforma-network:
-    driver: bridge
