@@ -25,8 +25,10 @@ const getBaseUrl = (): string => {
     return '';  // Relative URL, uses Next.js rewrites proxy
   }
 
-  // In server-side (SSR), call backend directly
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  // In server-side (SSR), prefer internal Docker URL for container-to-container communication
+  return process.env.INTERNAL_API_URL
+    || process.env.NEXT_PUBLIC_API_URL
+    || 'http://localhost:8000';
 };
 
 // Token refresh state management (handles race conditions)
