@@ -145,7 +145,16 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         try {
-            $user = $request->user()->load('role');
+            $user = $request->user();
+
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+
+            $user->load('role');
 
             return response()->json([
                 'success' => true,
