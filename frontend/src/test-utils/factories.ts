@@ -5,6 +5,7 @@
 
 import { PaginationLinks,PaginationMeta } from '@/types/api-response.types'
 import { Event, EVENT_STATUS, EVENT_TYPE,EventStatusCode, EventTypeCode } from '@/types/event.types'
+import type { EventSubtype,EventType } from '@/types/eventType.types'
 import { Location } from '@/types/location.types'
 
 /**
@@ -37,6 +38,32 @@ export const createMockLocation = (overrides: Partial<Location> & { id: number; 
   country: 'Argentina',
   is_active: true,
   entity_id: 1,
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
+/**
+ * Creates a valid EventType mock with required fields
+ * @param overrides
+ */
+export const createMockEventType = (overrides: Partial<EventType> & { id: number; name: string }): EventType => ({
+  color: '#3B82F6',
+  entity_id: 1,
+  is_active: true,
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  ...overrides,
+})
+
+/**
+ * Creates a valid EventSubtype mock with required fields
+ * @param overrides
+ */
+export const createMockEventSubtype = (overrides: Partial<EventSubtype> & { id: number; name: string }): EventSubtype => ({
+  event_type_id: 1,
+  entity_id: 1,
+  is_active: true,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z',
   ...overrides,

@@ -9,7 +9,7 @@ import {
   updateLocation,
 } from '@/features/locations/services/location.service'
 import apiClient from '@/services/apiClient'
-import { Location, LocationPagination } from '@/types/location.types'
+import { Location, LocationPagination, LocationPayload } from '@/types/location.types'
 
 
 // Mock apiClient
@@ -186,8 +186,8 @@ describe('location.service', () => {
   describe('getActiveLocations', () => {
     it('should fetch all active locations without pagination', async () => {
       const mockLocations: Location[] = [
-        createMockLocation({ id: 1, name: 'Location 1', address: 'Address 1', city: 'City 1', state: 'Province', max_capacity: 100 }),
-        createMockLocation({ id: 2, name: 'Location 2', address: 'Address 2', city: 'City 2', state: 'Province', max_capacity: 200 }),
+        createMockLocation({ id: 1, name: 'Location 1', address: 'Address 1', city: 'City 1', state: 'Province' }),
+        createMockLocation({ id: 2, name: 'Location 2', address: 'Address 2', city: 'City 2', state: 'Province' }),
       ]
 
       mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockLocations }))
@@ -214,7 +214,6 @@ describe('location.service', () => {
         address: 'Av. Corrientes 1530',
         city: 'CABA',
         state: 'Buenos Aires',
-        max_capacity: 500,
         description: 'Historic theater',
       })
 
@@ -237,16 +236,13 @@ describe('location.service', () => {
 
   describe('createLocation', () => {
     it('should create a new location', async () => {
-      const newLocationData = {
+      const newLocationData: LocationPayload = {
         name: 'New Theater',
         address: 'New Address 123',
         city: 'Mendoza',
         state: 'Mendoza',
         country: 'Argentina',
-        max_capacity: 300,
-        features: [] as string[],
         is_active: true,
-        entity_id: 1,
       }
 
       const createdLocation = createMockLocation({
@@ -255,7 +251,6 @@ describe('location.service', () => {
         address: 'New Address 123',
         city: 'Mendoza',
         state: 'Mendoza',
-        max_capacity: 300,
       })
 
       mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: createdLocation }, 201, 'Created'))
@@ -269,19 +264,14 @@ describe('location.service', () => {
     })
 
     it('should create location with optional fields', async () => {
-      const newLocationData = {
+      const newLocationData: LocationPayload = {
         name: 'Minimal Location',
         address: 'Address',
         city: 'City',
         state: 'Province',
         country: 'Argentina',
-        max_capacity: 50,
         description: 'Optional description',
-        latitude: -34.6037,
-        longitude: -58.3816,
-        features: [] as string[],
         is_active: true,
-        entity_id: 1,
       }
 
       const createdLocation = createMockLocation({
@@ -290,10 +280,7 @@ describe('location.service', () => {
         address: 'Address',
         city: 'City',
         state: 'Province',
-        max_capacity: 50,
         description: 'Optional description',
-        latitude: -34.6037,
-        longitude: -58.3816,
       })
 
       mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: createdLocation }, 201, 'Created'))
@@ -301,21 +288,16 @@ describe('location.service', () => {
       const result = await createLocation(newLocationData)
 
       expect(result.description).toBe('Optional description')
-      expect(result.latitude).toBe(-34.6037)
-      expect(result.longitude).toBe(-58.3816)
     })
 
     it('should handle errors when creating location', async () => {
-      const newLocationData = {
+      const newLocationData: LocationPayload = {
         name: 'Invalid Location',
         address: '',
         city: '',
         state: '',
         country: '',
-        max_capacity: 0,
-        features: [] as string[],
         is_active: true,
-        entity_id: 1,
       }
 
       mockApiClient.post.mockRejectedValueOnce(new Error('Validation failed'))
@@ -326,11 +308,13 @@ describe('location.service', () => {
 
   describe('updateLocation', () => {
     it('should update an existing location with all fields', async () => {
-      const updateData = {
+      const updateData: LocationPayload = {
         name: 'Updated Theater',
         address: 'Updated Address 456',
         city: 'Updated City',
-        max_capacity: 600,
+        state: 'Buenos Aires',
+        country: 'Argentina',
+        is_active: true,
       }
 
       const updatedLocation = createMockLocation({
@@ -339,7 +323,6 @@ describe('location.service', () => {
         address: 'Updated Address 456',
         city: 'Updated City',
         state: 'Buenos Aires',
-        max_capacity: 600,
       })
 
       mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: updatedLocation }))
@@ -349,12 +332,17 @@ describe('location.service', () => {
       expect(mockApiClient.put).toHaveBeenCalledWith('/locations/1', updateData)
       expect(result).toEqual(updatedLocation)
       expect(result.name).toBe('Updated Theater')
-      expect(result.max_capacity).toBe(600)
     })
 
-    it('should update location with partial fields', async () => {
-      const updateData = {
-        max_capacity: 450,
+    it('should update location with description', async () => {
+      const updateData: LocationPayload = {
+        name: 'Teatro San Martín',
+        address: 'Av. Corrientes 1530',
+        city: 'CABA',
+        state: 'Buenos Aires',
+        country: 'Argentina',
+        is_active: true,
+        description: 'Updated description',
       }
 
       const updatedLocation = createMockLocation({
@@ -363,20 +351,29 @@ describe('location.service', () => {
         address: 'Av. Corrientes 1530',
         city: 'CABA',
         state: 'Buenos Aires',
-        max_capacity: 450,
+        description: 'Updated description',
       })
 
       mockApiClient.put.mockResolvedValueOnce(createMockResponse({ data: updatedLocation }))
 
       const result = await updateLocation(1, updateData)
 
-      expect(result.max_capacity).toBe(450)
+      expect(result.description).toBe('Updated description')
     })
 
     it('should handle errors when updating location', async () => {
       mockApiClient.put.mockRejectedValueOnce(new Error('Not found'))
 
-      await expect(updateLocation(999, { name: 'Test' })).rejects.toThrow('Not found')
+      const updateData: LocationPayload = {
+        name: 'Test',
+        address: 'Address',
+        city: 'City',
+        state: 'State',
+        country: 'Country',
+        is_active: true,
+      }
+
+      await expect(updateLocation(999, updateData)).rejects.toThrow('Not found')
     })
   })
 

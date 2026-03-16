@@ -31,6 +31,8 @@ describe('eventType.service', () => {
   const mockEventType: EventType = {
     id: 1,
     name: 'Conferencia',
+    color: '#3B82F6',
+    entity_id: 1,
     is_active: true,
     subtypes_count: 3,
     created_at: '2025-01-01T00:00:00.000Z',
@@ -40,6 +42,8 @@ describe('eventType.service', () => {
   const mockEventType2: EventType = {
     id: 2,
     name: 'Taller',
+    color: '#10B981',
+    entity_id: 1,
     is_active: false,
     subtypes_count: 0,
     created_at: '2025-01-02T00:00:00.000Z',
@@ -48,12 +52,22 @@ describe('eventType.service', () => {
 
   const mockPaginationResponse: EventTypePagination = {
     data: [mockEventType, mockEventType2],
-    current_page: 1,
-    last_page: 2,
-    per_page: 10,
-    total: 15,
-    from: 1,
-    to: 10,
+    meta: {
+      current_page: 1,
+      last_page: 2,
+      per_page: 10,
+      total: 15,
+      from: 1,
+      to: 10,
+      path: 'http://api.example.com/event-types',
+      links: [],
+    },
+    links: {
+      first: 'http://api.example.com/event-types?page=1',
+      last: 'http://api.example.com/event-types?page=2',
+      prev: null,
+      next: 'http://api.example.com/event-types?page=2',
+    },
   }
 
   beforeEach(() => {
@@ -69,7 +83,7 @@ describe('eventType.service', () => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types?')
       expect(result).toEqual(mockPaginationResponse)
       expect(result.data).toHaveLength(2)
-      expect(result.total).toBe(15)
+      expect(result.meta.total).toBe(15)
     })
 
     it('should fetch event types with all query params', async () => {
@@ -89,7 +103,7 @@ describe('eventType.service', () => {
       )
       expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
       expect(result.data).toHaveLength(2)
-      expect(result.current_page).toBe(1)
+      expect(result.meta.current_page).toBe(1)
     })
 
     it('should handle inactive filter', async () => {
@@ -106,19 +120,24 @@ describe('eventType.service', () => {
     it('should handle empty results', async () => {
       const emptyResponse: EventTypePagination = {
         data: [],
-        current_page: 1,
-        last_page: 1,
-        per_page: 10,
-        total: 0,
-        from: 0,
-        to: 0,
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          per_page: 10,
+          total: 0,
+          from: null,
+          to: null,
+          path: 'http://api.example.com/event-types',
+          links: [],
+        },
+        links: { first: null, last: null, prev: null, next: null },
       }
       mockedApiClient.get.mockResolvedValue({ data: emptyResponse })
 
       const result = await getEventTypes({ search: 'nonexistent' })
 
       expect(result.data).toHaveLength(0)
-      expect(result.total).toBe(0)
+      expect(result.meta.total).toBe(0)
     })
 
     it('should handle API error', async () => {
@@ -471,19 +490,24 @@ describe('eventType.service', () => {
     it('should handle empty search results', async () => {
       const emptyResponse: EventTypePagination = {
         data: [],
-        current_page: 1,
-        last_page: 1,
-        per_page: 15,
-        total: 0,
-        from: 0,
-        to: 0,
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          per_page: 15,
+          total: 0,
+          from: null,
+          to: null,
+          path: 'http://api.example.com/event-types',
+          links: [],
+        },
+        links: { first: null, last: null, prev: null, next: null },
       }
       mockedApiClient.get.mockResolvedValue({ data: emptyResponse })
 
       const result = await searchEventTypes('nonexistent')
 
       expect(result.data).toHaveLength(0)
-      expect(result.total).toBe(0)
+      expect(result.meta.total).toBe(0)
     })
   })
 
@@ -593,13 +617,13 @@ describe('eventType.service', () => {
       // Initial list
       mockedApiClient.get.mockResolvedValueOnce({ data: mockPaginationResponse })
       const initial = await getEventTypes()
-      expect(initial.total).toBe(15)
+      expect(initial.meta.total).toBe(15)
 
       // Search
-      const searchResponse = { ...mockPaginationResponse, data: [mockEventType], total: 1 }
+      const searchResponse = { ...mockPaginationResponse, data: [mockEventType], meta: { ...mockPaginationResponse.meta, total: 1 } }
       mockedApiClient.get.mockResolvedValueOnce({ data: searchResponse })
       const searched = await searchEventTypes('Conferencia')
-      expect(searched.total).toBe(1)
+      expect(searched.meta.total).toBe(1)
 
       // Filter active
       mockedApiClient.get.mockResolvedValueOnce({ data: searchResponse })

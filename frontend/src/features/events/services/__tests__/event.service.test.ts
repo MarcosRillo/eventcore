@@ -23,8 +23,6 @@ const mockEvent: Event = {
   end_date: '2025-10-10 12:00:00',
   status: { id: 1, status_code: 'draft', status_name: 'Draft', description: 'Draft', workflow_order: 1, created_at: '', updated_at: '' },
   type: { id: 1, type_code: 'sede_unica', type_name: 'Single Location', description: 'Single location event', created_at: '', updated_at: '' },
-  category_id: 1,
-  category: { id: 1, name: 'Test Category', slug: 'test-category', entity_id: 1, is_active: true, created_at: '', updated_at: '' },
   locations: [],
   created_by: 1,
   is_featured: false,
@@ -42,7 +40,6 @@ const mockEventFormData: EventFormData = {
   end_date: '2025-10-15 12:00:00',
   status: 'draft',
   type: 'sede_unica',
-  category_id: 1,
   location_ids: [1],
   is_featured: false,
   max_attendees: 50,
@@ -63,7 +60,6 @@ describe('Event Service', () => {
     test('getEvents should call API with filters', async () => {
       const filters: EventFilters = {
         status: 'draft',
-        category_id: 2,
         page: 1,
         per_page: 15
       };
@@ -83,7 +79,6 @@ describe('Event Service', () => {
       const callArg = (apiClient.get as jest.Mock).mock.calls[0][0];
       expect(callArg).toContain('/events');
       expect(callArg).toContain('status=draft');
-      expect(callArg).toContain('category_id=2');
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -426,7 +421,6 @@ describe('Event Service', () => {
     test('should handle filters with undefined values', async () => {
       const filters: EventFilters = {
         status: 'draft',
-        category_id: undefined,
         search: ''
       };
       const mockResponse = { data: { data: [], meta: {}, links: {} } };

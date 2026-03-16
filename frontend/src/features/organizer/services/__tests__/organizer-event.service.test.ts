@@ -111,7 +111,6 @@ describe('organizer-event.service', () => {
         description: 'Event Description',
         start_date: '2030-12-01T10:00:00',
         end_date: '2030-12-01T18:00:00',
-        category_id: 1,
         location_ids: [1, 2],
         // Event Type/Subtype (required - Dec 2, 2025)
         event_type_id: 1,
@@ -135,7 +134,6 @@ describe('organizer-event.service', () => {
         title: 'Minimal Event',
         description: 'Description',
         start_date: '2030-12-01T10:00:00',
-        category_id: 1,
         location_ids: [1],
         // Event Type/Subtype (required - Dec 2, 2025)
         event_type_id: 1,
@@ -167,7 +165,6 @@ describe('organizer-event.service', () => {
         title: 'Updated Event',
         description: 'Updated Description',
         start_date: '2030-12-15T10:00:00',
-        category_id: 2,
         location_ids: [3],
         edition_number: '11va Edición',
         virtual_transmission: false,

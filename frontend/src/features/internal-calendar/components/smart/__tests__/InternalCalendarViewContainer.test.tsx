@@ -153,7 +153,7 @@ describe('InternalCalendarViewContainer', () => {
   });
 
   test('should handle empty events array', () => {
-    render(<InternalCalendarViewContainer events={[]} loading={false} error={null} />);
+    render(<InternalCalendarViewContainer events={[]} loading={false} error={null} basePath="/internal-calendar" />);
 
     expect(screen.getByTestId('big-calendar-view')).toBeInTheDocument();
     expect(screen.queryByTestId('calendar-event-1')).not.toBeInTheDocument();

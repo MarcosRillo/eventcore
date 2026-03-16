@@ -15,26 +15,28 @@ jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ src, alt, className, style, loading }: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src as string} alt={alt as string} className={className as string} style={style as React.CSSProperties} loading={loading as string} />
+    return <img src={src as string} alt={alt as string} className={className as string} style={style as React.CSSProperties} loading={loading as "lazy" | "eager" | undefined} />
   },
 }))
 
 describe('AdminEventListItem', () => {
   const mockOnManage = jest.fn()
 
-  const baseEvent: Event = {
+  const baseEvent = {
     id: 1,
     title: 'Test Admin Event',
     description: 'Test description',
     start_date: '2025-06-15',
     end_date: '2025-06-15',
-    type: 'single_location',
+    type: 'sede_unica',
     status: 'draft',
     is_featured: false,
     locations: [{ id: 1, name: 'Centro Cultural' }],
-    event_type: { id: 1, name: 'Festival' },
+    event_type: { id: 1, name: 'Festival', is_active: true },
     approval_history: [],
-  } as Event
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  } as unknown as Event
 
   const defaultProps = {
     event: baseEvent,
