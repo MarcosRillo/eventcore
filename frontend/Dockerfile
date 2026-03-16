@@ -23,9 +23,9 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copy standalone output + static assets (per Next.js docs)
-# Note: outputFileTracingRoot is set to '../' so standalone output is nested under frontend/
+# Note: outputFileTracingRoot resolves to WORKDIR parent, so standalone nests under 'app/'
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/frontend ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/app ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
