@@ -37,7 +37,7 @@ services:
   # Override nginx: move to port 8080 to avoid conflict with artisan serve on 8000
   nginx:
     ports:
-      - "8080:80"
+      - "8081:80"
 
   # Override frontend: dev mode with hot reload
   frontend:
