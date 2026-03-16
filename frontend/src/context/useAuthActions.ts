@@ -56,16 +56,26 @@ export const useAuthActions = (): AuthContextType => {
     hasInitialized.current = true;
 
     const initializeAuth = async () => {
+      // Optimistic check: skip API call if no session indicator exists
+      // The 'user' cookie (non-httpOnly) is set during login alongside httpOnly tokens
+      const hasSessionCookie = document.cookie
+        .split(';')
+        .some(c => c.trim().startsWith('user='));
+
+      if (!hasSessionCookie) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        // Try to get current user (cookie is sent automatically)
+        // Cookie exists — validate session with backend
         const response = await apiClient.get<{ data: User }>('/auth/me');
 
         if (response.data?.data) {
           setUser(response.data.data);
         }
       } catch {
-        // Not authenticated or session expired
-        // This is normal for unauthenticated users
+        // Session expired or invalid — clear state
         handleLogout();
       } finally {
         setIsLoading(false);
