@@ -66,6 +66,19 @@ export const approvalService = {
   },
 
   /**
+   * Approve and publish event in one step (pending_internal_approval → published)
+   * Atomic backend operation: approve_internal + request_public + publish
+   * @param eventId
+   * @param comment
+   */
+  approveAndPublish: async (eventId: number, comment?: string): Promise<Event> => {
+    const response = await apiClient.patch<ApprovalResponse>(`/events/${eventId}/approve-and-publish`, {
+      comment: comment || ''
+    });
+    return response.data.data;
+  },
+
+  /**
    * Reject event (any_state → rejected)
    * @param eventId
    * @param reason

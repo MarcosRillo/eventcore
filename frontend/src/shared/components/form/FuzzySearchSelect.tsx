@@ -80,9 +80,13 @@ export function FuzzySearchSelect({
   }
 
   // Get selected options for display
-  const displayedSelectedOptions = providedSelectedOptions && providedSelectedOptions.length > 0
-    ? providedSelectedOptions.filter(opt => selected.includes(opt.id))
-    : options.filter(opt => selected.includes(opt.id))
+  // Prefer providedSelectedOptions (edit mode cached names), fallback to options (new selections)
+  const displayedSelectedOptions = selected
+    .map(id =>
+      providedSelectedOptions?.find(opt => opt.id === id) ||
+      options.find(opt => opt.id === id)
+    )
+    .filter((opt): opt is FuzzySelectOption => !!opt)
 
   // Handle selection toggle
   const handleSelect = (option: FuzzySelectOption | null) => {

@@ -214,6 +214,39 @@ class ApprovalTest extends EventTestCase
     }
 
     #[Test]
+    public function test_can_approve_and_publish_event(): void
+    {
+        $this->authenticateUser();
+
+        $event = Event::factory()->create([
+            'entity_id' => $this->organization->id,
+            'status_id' => $this->getStatusId('pending_internal_approval'),
+        ]);
+
+        $response = $this->patchJson("/api/v1/events/{$event->id}/approve-and-publish", [
+            'comments' => 'Fast-track for demo',
+        ]);
+
+        // Assert response
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.status.status_code', 'published');
+        $response->assertJsonPath('message', 'Evento aprobado y publicado exitosamente');
+
+        // Assert database state
+        $event->refresh();
+        $this->assertEquals($this->getStatusId('published'), $event->status_id);
+
+        // Assert 3 approval records were created
+        $approvals = \App\Models\EventApproval::where('event_id', $event->id)->get();
+        $this->assertCount(3, $approvals);
+
+        $actions = $approvals->pluck('action')->sort()->values()->toArray();
+        $this->assertContains('approve_internal', $actions);
+        $this->assertContains('request_public', $actions);
+        $this->assertContains('publish', $actions);
+    }
+
+    #[Test]
     public function test_can_get_approval_statistics(): void
     {
         $this->authenticateUser();

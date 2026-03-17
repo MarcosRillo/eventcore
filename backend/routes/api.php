@@ -156,6 +156,7 @@ Route::prefix('v1')->group(function () {
         // Event approval workflow - entity_staff can approve/reject events
         Route::middleware(['role:platform_admin,entity_admin,entity_staff'])->group(function () {
             Route::patch('events/{id}/approve', [ApprovalController::class, 'approve']);
+            Route::patch('events/{id}/approve-and-publish', [ApprovalController::class, 'approveAndPublish']);
             Route::patch('events/{id}/request-public', [ApprovalController::class, 'requestPublicApproval']);
             Route::patch('events/{id}/publish', [ApprovalController::class, 'publish']);
             Route::patch('events/{id}/request-changes', [ApprovalController::class, 'requestChanges']);

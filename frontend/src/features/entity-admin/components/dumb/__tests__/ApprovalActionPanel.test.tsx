@@ -159,6 +159,18 @@ describe('ApprovalActionPanel', () => {
     });
   });
 
+  test('renders publish_directly button for pending_internal_approval status', () => {
+    render(
+      <ApprovalActionPanel
+        {...defaultProps}
+        availableActions={['approve_internal', 'publish_directly', 'request_changes', 'reject']}
+      />
+    );
+
+    expect(screen.getByText('Aprobar y Publicar')).toBeInTheDocument();
+    expect(screen.getByText(/Aprueba internamente y publica directamente/)).toBeInTheDocument();
+  });
+
   test('renders no actions message when no actions available', () => {
     render(
       <ApprovalActionPanel

@@ -24,6 +24,7 @@ interface UseApprovalManagerReturn {
 
   // Double-Level Workflow Actions
   approveInternal: (eventId: number, comment?: string) => Promise<Event | null>;
+  approveAndPublish: (eventId: number, comment?: string) => Promise<Event | null>;
   requestPublicApproval: (eventId: number, comment?: string) => Promise<Event | null>;
   publishEvent: (eventId: number) => Promise<Event | null>;
   requestChanges: (eventId: number, feedback: string) => Promise<Event | null>;
@@ -115,6 +116,17 @@ export const useApprovalManager = (): UseApprovalManagerReturn => {
   }, [executeApprovalOperation]);
 
   /**
+   * Approve and publish event atomically (pending_internal_approval → published)
+   */
+  const approveAndPublish = useCallback(async (eventId: number, comment?: string): Promise<Event | null> => {
+    return executeApprovalOperation(
+      (id: number, comment?: string) => approvalService.approveAndPublish(id, comment),
+      eventId,
+      comment
+    );
+  }, [executeApprovalOperation]);
+
+  /**
    * Request public approval (approved_internal → pending_public_approval)
    */
   const requestPublicApproval = useCallback(async (eventId: number, comment?: string): Promise<Event | null> => {
@@ -198,6 +210,7 @@ export const useApprovalManager = (): UseApprovalManagerReturn => {
 
     // Double-Level Workflow Actions
     approveInternal,
+    approveAndPublish,
     requestPublicApproval,
     publishEvent,
     requestChanges,
