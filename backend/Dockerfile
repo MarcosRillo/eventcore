@@ -43,6 +43,9 @@ RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
 WORKDIR /var/www
 COPY --chown=www:www . /var/www
 
+# Create empty .env so Dotenv doesn't trigger file_get_contents warnings
+RUN touch .env
+
 # Entrypoint for storage:link (inline - script is tiny)
 RUN printf '#!/bin/sh\nset -e\nphp artisan storage:link 2>/dev/null || true\nexec "$@"\n' \
     > /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh

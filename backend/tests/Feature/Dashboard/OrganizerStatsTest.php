@@ -118,7 +118,7 @@ class OrganizerStatsTest extends EventTestCase
         // Assert (>3 assertions)
         $response->assertStatus(401);                                    // Assertion 1
         $response->assertJsonStructure(['message']);                     // Assertion 2
-        $this->assertEquals('Unauthenticated.', $response->json('message')); // Assertion 3
+        $this->assertEquals('Unauthenticated', $response->json('message')); // Assertion 3
         $this->assertNull($response->json('total_events'));              // Assertion 4
     }
 

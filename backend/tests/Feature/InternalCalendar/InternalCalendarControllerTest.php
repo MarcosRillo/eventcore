@@ -198,7 +198,7 @@ class InternalCalendarControllerTest extends TestCase
 
         // Assert: Returns 401 Unauthorized
         $response->assertStatus(401);
-        $response->assertJsonFragment(['message' => 'Unauthenticated.']);
+        $response->assertJsonFragment(['message' => 'Unauthenticated']);
     }
 
     #[Test]
