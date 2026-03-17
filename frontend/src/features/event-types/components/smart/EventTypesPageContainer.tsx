@@ -39,6 +39,7 @@ export function EventTypesPageContainer() {
     eventTypes,
     pagination,
     isLoading,
+    isValidating,
     error,
     searchTerm,
     filterStatus,
@@ -306,7 +307,7 @@ export function EventTypesPageContainer() {
             </div>
           </div>
           {/* Inline loading indicator during search/filter (when data already exists) */}
-          {isLoading && eventTypes.length > 0 && (
+          {isValidating && eventTypes.length > 0 && (
             <div className="mt-4 flex items-center gap-2 text-sm text-neutral-500">
               <LoadingSpinner size="sm" />
               <span>Buscando...</span>
