@@ -1,7 +1,6 @@
 <?php
 
 // Feature Controllers - Dashboard
-use App\Features\Appearance\Controllers\AppearanceController;
 use App\Features\Approval\Controllers\ApprovalController;
 // Feature Controllers - Auth
 use App\Features\Auth\Controllers\AuthController;
@@ -142,11 +141,6 @@ Route::prefix('v1')->group(function () {
                 ->where('subtype', '[0-9]+');
             Route::patch('event-types/{eventType}/subtypes/{subtype}/toggle-status', [EventSubtypeController::class, 'toggleStatus'])
                 ->where('subtype', '[0-9]+');
-
-            // Admin routes
-            Route::prefix('admin')->group(function () {
-                Route::apiResource('appearance', AppearanceController::class);
-            });
 
             // Organizations management (write operations)
             Route::patch('organizations/{id}/status', [OrganizationController::class, 'toggleStatus']);

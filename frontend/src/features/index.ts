@@ -8,6 +8,3 @@ export * as Events from '@/features/events';
 
 // Auth Feature
 export * as Auth from '@/features/auth';
-
-// Appearance Feature
-export * as Appearance from '@/features/appearance';
