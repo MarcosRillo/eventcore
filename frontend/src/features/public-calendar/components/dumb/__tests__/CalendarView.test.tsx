@@ -51,7 +51,7 @@ describe('CalendarView', () => {
         is_featured: false,
         locations: [{ id: 1, name: 'Location 1', city: 'City 1' }],
         event_type: { id: 1, name: 'Cultural' },
-        event_subtype: { id: 1, name: 'Music Festival' }
+        event_subtype: { id: 1, name: 'Music Festival', event_type_id: 1 }
       }
     },
     {
@@ -68,7 +68,7 @@ describe('CalendarView', () => {
         is_featured: false,
         locations: [{ id: 2, name: 'Location 2', city: 'City 2' }],
         event_type: { id: 2, name: 'Business' },
-        event_subtype: { id: 2, name: 'Conference' }
+        event_subtype: { id: 2, name: 'Conference', event_type_id: 2 }
       }
     }
   ]
@@ -196,11 +196,12 @@ describe('CalendarView', () => {
       expect(container).toBeInTheDocument()
     })
 
-    test('should have calendar container with fixed height', () => {
+    test('should have calendar container with responsive height classes', () => {
       render(<CalendarView {...defaultProps} />)
 
       const calendarContainer = document.querySelector('.calendar-container')
-      expect(calendarContainer).toHaveStyle({ height: '800px' })
+      expect(calendarContainer).toBeInTheDocument()
+      expect(calendarContainer).toHaveClass('h-[500px]', 'sm:h-[600px]', 'md:h-[700px]', 'lg:h-[800px]')
     })
   })
 

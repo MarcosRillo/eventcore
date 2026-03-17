@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios'
 
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
-import { EventsResponse, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
+import { EventsResponse, Location, PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 import publicApiClient from '@/services/publicApiClient'
 
 

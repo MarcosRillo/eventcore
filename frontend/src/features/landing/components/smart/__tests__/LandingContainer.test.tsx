@@ -59,11 +59,11 @@ const createMockEvent = (overrides: Partial<PublicEvent> = {}): PublicEvent => (
   end_date: '2025-01-02',
   start_time: '10:00',
   end_time: '18:00',
-  featured_image: null,
-  event_type: { id: 1, name: 'Cultural', slug: 'cultural', icon: 'star', color: '#000' },
-  event_subtype: null,
-  location: { id: 1, name: 'Test Location', address: 'Test Address' },
-  organization: { id: 1, name: 'Test Org' },
+  featured_image: undefined,
+  event_type: { id: 1, name: 'Cultural', color: '#000' },
+  event_subtype: undefined,
+  locations: [{ id: 1, name: 'Test Location', city: 'Test City', address: 'Test Address' }],
+  is_featured: false,
   ...overrides
 })
 
@@ -71,7 +71,6 @@ const createMockEventType = (overrides: Partial<EventType> = {}): EventType => (
   id: 1,
   name: 'Cultural',
   slug: 'cultural',
-  icon: 'star',
   color: '#000',
   is_active: true,
   ...overrides

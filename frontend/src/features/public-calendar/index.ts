@@ -7,7 +7,7 @@
 // Hooks
 export { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
 export { usePublicEvents } from '@/features/public-calendar/hooks/usePublicEvents'
-export { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML'
+export { useSanitizedHTML } from '@/shared/hooks/useSanitizedHTML'
 
 // Services
 export { publicEventsService } from '@/features/public-calendar/services/public-events.service'

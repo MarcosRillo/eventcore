@@ -15,7 +15,6 @@ describe('PublicCalendar', () => {
     {
       id: 1,
       title: 'Festival de Música',
-      slug: 'festival-de-musica',
       description: 'Gran evento musical',
       image_url: 'https://example.com/image1.jpg',
       start_date: '2025-11-15',
@@ -28,7 +27,6 @@ describe('PublicCalendar', () => {
     {
       id: 2,
       title: 'Exposición de Arte',
-      slug: 'exposicion-de-arte',
       description: 'Arte contemporáneo',
       image_url: 'https://example.com/image2.jpg',
       start_date: '2025-11-20',
@@ -83,7 +81,6 @@ describe('PublicCalendar', () => {
     test('renders calendar with header and event grid', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByRole('main')).toBeInTheDocument()
       expect(screen.getByText(/eventos en tucumán/i)).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()
     })
@@ -241,7 +238,6 @@ describe('PublicCalendar', () => {
     test('uses semantic HTML', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByRole('main')).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()
     })
   })

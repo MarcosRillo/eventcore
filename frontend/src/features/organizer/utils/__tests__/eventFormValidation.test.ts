@@ -17,7 +17,6 @@ describe('eventFormValidation', () => {
     frequency_id: null,
     rotation_type_id: null,
     producer_id: null,
-    category_id: 1,
     service_ids: [],
     room_ids: [],
     location_ids: [1],
@@ -231,27 +230,6 @@ describe('eventFormValidation', () => {
         const errors = validateEventForm(formData)
 
         expect(errors.event_subtype_id).toBeUndefined()
-      })
-    })
-
-    describe('category_id validation', () => {
-      // Category is now optional (Dec 2, 2025)
-      it('should not return error when category_id is null (now optional)', () => {
-        const formData = getValidFormData()
-        formData.category_id = null
-
-        const errors = validateEventForm(formData)
-
-        expect(errors.category_id).toBeUndefined()
-      })
-
-      it('should not return error when category_id is valid', () => {
-        const formData = getValidFormData()
-        formData.category_id = 1
-
-        const errors = validateEventForm(formData)
-
-        expect(errors.category_id).toBeUndefined()
       })
     })
 

@@ -28,6 +28,7 @@ describe('EventTypeTableContainer', () => {
     {
       id: 1,
       name: 'Conferencia',
+      color: '#3B82F6',
       entity_id: 1,
       is_active: true,
       subtypes_count: 3,
@@ -37,6 +38,7 @@ describe('EventTypeTableContainer', () => {
     {
       id: 2,
       name: 'Taller',
+      color: '#10B981',
       entity_id: 1,
       is_active: false,
       subtypes_count: 0,
@@ -73,6 +75,8 @@ describe('EventTypeTableContainer', () => {
     total: 15,
     from: 1,
     to: 10,
+    path: 'http://api.example.com/event-types',
+    links: [],
   };
 
   const defaultProps = {

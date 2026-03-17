@@ -193,7 +193,7 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
             </div>
 
             {/* Right Panel: Approval Actions (2/5) */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 lg:sticky lg:top-0 lg:self-start">
               <ApprovalActionPanel
                 availableActions={availableActions}
                 selectedAction={selectedAction}

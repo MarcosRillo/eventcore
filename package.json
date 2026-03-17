@@ -13,7 +13,7 @@
       "npm run lint:fix --prefix frontend"
     ],
     "backend/**/*.php": [
-      "docker compose exec -T backend php vendor/bin/pint --dirty"
+      "docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.docker exec -T -u www backend php vendor/bin/pint --dirty"
     ]
   }
 }

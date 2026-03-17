@@ -7,7 +7,7 @@
 import { fireEvent,render, screen } from '@testing-library/react'
 
 import { CategoriesSection } from '@/features/landing/components/dumb/CategoriesSection'
-import type { EventType } from '@/features/landing/types/landing.types'
+import type { EventType } from '@/features/public-calendar/types/public-calendar.types'
 
 describe('CategoriesSection', () => {
   const mockOnCategoryClick = jest.fn()

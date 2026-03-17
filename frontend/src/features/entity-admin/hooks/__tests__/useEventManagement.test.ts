@@ -35,6 +35,7 @@ describe('useEventManagement', () => {
     isLoading: false,
     error: null,
     approveInternal: jest.fn().mockResolvedValue(mockEvent),
+    approveAndPublish: jest.fn().mockResolvedValue(mockEvent),
     requestPublicApproval: jest.fn().mockResolvedValue(mockEvent),
     publishEvent: jest.fn().mockResolvedValue(mockEvent),
     requestChanges: jest.fn().mockResolvedValue(mockEvent),
@@ -268,12 +269,80 @@ describe('useEventManagement', () => {
       expect(onSuccess).toHaveBeenCalled();
     });
 
-    test('closes modal on successful action', async () => {
+    test('keeps modal open and updates event on forward action (approve_internal)', async () => {
+      const updatedEvent = { ...mockEvent, status: 'approved_internal' };
+      mockApprovalManager.approveInternal.mockResolvedValueOnce(updatedEvent);
+
       const { result } = renderHook(() => useEventManagement());
 
       act(() => {
         result.current.openModal(mockEvent);
         result.current.selectAction('approve_internal');
+      });
+
+      await act(async () => {
+        await result.current.confirmAction();
+      });
+
+      // Modal stays open for forward actions
+      expect(result.current.isOpen).toBe(true);
+      // Event is updated with new status
+      expect(result.current.selectedEvent).toEqual(updatedEvent);
+      // Action selection is reset
+      expect(result.current.selectedAction).toBeNull();
+    });
+
+    test('calls approveAndPublish when confirming publish_directly action', async () => {
+      const publishedEvent = { ...mockEvent, status: 'published' };
+      mockApprovalManager.approveAndPublish.mockResolvedValueOnce(publishedEvent);
+      const onSuccess = jest.fn();
+
+      const { result } = renderHook(() => useEventManagement({ onSuccess }));
+
+      act(() => {
+        result.current.openModal(mockEvent);
+        result.current.selectAction('publish_directly');
+      });
+
+      await act(async () => {
+        await result.current.confirmAction();
+      });
+
+      expect(mockApprovalManager.approveAndPublish).toHaveBeenCalledWith(mockEvent.id);
+      expect(result.current.isOpen).toBe(true);
+      expect(result.current.selectedEvent).toEqual(publishedEvent);
+      expect(onSuccess).toHaveBeenCalled();
+    });
+
+    test('closes modal on negative action (reject)', async () => {
+      const rejectedEvent = { ...mockEvent, status: 'rejected' };
+      mockApprovalManager.rejectEvent.mockResolvedValueOnce(rejectedEvent);
+
+      const { result } = renderHook(() => useEventManagement());
+
+      act(() => {
+        result.current.openModal(mockEvent);
+        result.current.selectAction('reject');
+        result.current.setComment('Event does not meet requirements');
+      });
+
+      await act(async () => {
+        await result.current.confirmAction();
+      });
+
+      expect(result.current.isOpen).toBe(false);
+    });
+
+    test('closes modal on request_changes action', async () => {
+      const changesEvent = { ...mockEvent, status: 'requires_changes' };
+      mockApprovalManager.requestChanges.mockResolvedValueOnce(changesEvent);
+
+      const { result } = renderHook(() => useEventManagement());
+
+      act(() => {
+        result.current.openModal(mockEvent);
+        result.current.selectAction('request_changes');
+        result.current.setComment('Please add more details about the event');
       });
 
       await act(async () => {

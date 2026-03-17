@@ -198,6 +198,49 @@ class ApprovalServiceTest extends TestCase
         $this->assertEquals($this->approver->id, $approval->performed_by);
     }
 
+    // ===== Test: approveAndPublish Atomic Transition =====
+
+    #[Test]
+    public function approve_and_publish_transitions_to_published_with_three_audit_records(): void
+    {
+        $initialApprovalCount = EventApproval::count();
+
+        $this->service->approveAndPublish($this->event, $this->approver, 'Fast-track approval');
+
+        $this->event->refresh();
+        $publishedStatus = EventStatus::where('status_code', 'published')->first();
+        $this->assertEquals($publishedStatus->id, $this->event->status_id);
+
+        // Should create 3 audit records
+        $approvals = EventApproval::where('event_id', $this->event->id)
+            ->orderBy('id')
+            ->get();
+
+        $newApprovals = $approvals->slice($initialApprovalCount);
+        $this->assertCount(3, $newApprovals);
+
+        $actions = $newApprovals->pluck('action')->values()->toArray();
+        $this->assertEquals([
+            EventApproval::ACTION_APPROVE_INTERNAL,
+            EventApproval::ACTION_REQUEST_PUBLIC,
+            EventApproval::ACTION_PUBLISH,
+        ], $actions);
+
+        // First record should have the comment
+        $this->assertEquals('Fast-track approval', $newApprovals->first()->comments);
+    }
+
+    #[Test]
+    public function approve_and_publish_throws_from_invalid_starting_state(): void
+    {
+        $publishedStatus = EventStatus::where('status_code', 'published')->first();
+        $this->event->update(['status_id' => $publishedStatus->id]);
+
+        $this->expectException(InvalidStateTransitionException::class);
+
+        $this->service->approveAndPublish($this->event, $this->approver);
+    }
+
     // ===== Test 4: getApprovalStatistics Uses Single Query =====
 
     #[Test]

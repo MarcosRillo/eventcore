@@ -33,6 +33,7 @@ describe('CreateEventSubtypeModal', () => {
   const mockCreatedSubtype: EventSubtype = {
     id: 1,
     event_type_id: 1,
+    entity_id: 1,
     name: 'Congreso Nacional',
     is_active: true,
     created_at: '2025-01-01T00:00:00.000Z',
@@ -319,6 +320,7 @@ describe('EditEventSubtypeModal', () => {
   const mockEventSubtype: EventSubtype = {
     id: 1,
     event_type_id: 1,
+    entity_id: 1,
     name: 'Congreso Existente',
     is_active: true,
     created_at: '2025-01-01T00:00:00.000Z',

@@ -43,6 +43,7 @@ const actionIcons: Record<ApprovalAction, React.ReactNode> = {
   approve_internal: <CheckCircle className="w-5 h-5" />,
   request_public: <CheckCircle className="w-5 h-5" />,
   publish: <CheckCircle className="w-5 h-5" />,
+  publish_directly: <CheckCircle className="w-5 h-5" />,
   request_changes: <PenSquare className="w-5 h-5" />,
   reject: <XCircle className="w-5 h-5" />,
 };
@@ -54,6 +55,7 @@ const unselectedStyles: Record<ApprovalAction, string> = {
   approve_internal: 'border-primary-200 text-primary-700 hover:bg-primary-50 hover:border-primary-300',
   request_public: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
   publish: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
+  publish_directly: 'border-success-200 text-success-700 hover:bg-success-50 hover:border-success-300',
   request_changes: 'border-warning-200 text-warning-700 hover:bg-warning-50 hover:border-warning-300',
   reject: 'border-error-200 text-error-700 hover:bg-error-50 hover:border-error-300',
 };
@@ -65,6 +67,7 @@ const selectedStyles: Record<ApprovalAction, string> = {
   approve_internal: 'border-primary-300 bg-primary-50 text-primary-700 ring-primary-200',
   request_public: 'border-success-300 bg-success-50 text-success-700 ring-success-200',
   publish: 'border-success-300 bg-success-50 text-success-700 ring-success-200',
+  publish_directly: 'border-success-300 bg-success-50 text-success-700 ring-success-200',
   request_changes: 'border-warning-300 bg-warning-50 text-warning-700 ring-warning-200',
   reject: 'border-error-300 bg-error-50 text-error-700 ring-error-200',
 };

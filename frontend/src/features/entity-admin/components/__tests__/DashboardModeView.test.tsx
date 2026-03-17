@@ -81,8 +81,6 @@ const createMockEvent = (overrides?: Partial<Event>): Event => ({
   end_date: '2025-12-20T18:00:00Z',
   status: EVENT_STATUS.DRAFT,
   type: EVENT_TYPE.SINGLE_LOCATION,
-  event_type_id: 1,
-  event_subtype_id: 1,
   event_type: { id: 1, name: 'Cultural', entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   event_subtype: { id: 1, name: 'Music Festival', event_type_id: 1, entity_id: 1, is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   is_featured: false,
@@ -326,7 +324,7 @@ describe('DashboardModeView', () => {
       const events = [
         createMockEvent({
           id: 1,
-          status: { status_code: 'pending_internal_approval', status_name: 'Pending Internal' },
+          status: { id: 1, status_code: 'pending_internal_approval', status_name: 'Pending Internal', description: 'Pending internal approval', workflow_order: 2, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
         }),
       ]
 

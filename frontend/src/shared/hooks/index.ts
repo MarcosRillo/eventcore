@@ -4,3 +4,4 @@
 
 export type { } from '@/shared/hooks/useGenericModals';
 export { useGenericModals } from '@/shared/hooks/useGenericModals';
+export { useSanitizedHTML } from '@/shared/hooks/useSanitizedHTML';

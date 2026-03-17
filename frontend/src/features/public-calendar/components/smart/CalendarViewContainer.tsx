@@ -52,10 +52,10 @@ export const CalendarViewContainer = ({
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="text-center py-12">
-          <p className="text-red-600">{error}</p>
+          <p className="text-error-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
           >
             Reintentar
           </button>

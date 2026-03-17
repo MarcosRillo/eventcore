@@ -5,6 +5,7 @@
  * and featured badge. Uses Card and Badge UI components.
  */
 
+import { ArrowRight, Calendar, MapPin } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { memo } from 'react'
 
@@ -49,7 +50,7 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
         hover:border-neutral-300 hover:shadow-md
         transition-all duration-150
         cursor-pointer
-        focus:outline-none focus:ring-2 focus:ring-primary-500/20
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/20
       "
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -66,7 +67,7 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
             fill
             loading="lazy"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-300 motion-reduce:transition-none motion-reduce:transform-none"
             fallback={<ImagePlaceholder />}
           />
         ) : (
@@ -105,9 +106,7 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
 
         {/* Date */}
         <div className="flex items-center gap-2 text-sm text-neutral-600 mb-2">
-          <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-          </svg>
+          <Calendar className="w-4 h-4 text-neutral-400" aria-hidden="true" />
           <span>
             {formatDate(event.start_date)}
             {event.end_date && event.end_date !== event.start_date && (
@@ -118,19 +117,14 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
 
         {/* Location */}
         <div className="flex items-center gap-2 text-sm text-neutral-600 mb-3">
-          <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-          </svg>
+          <MapPin className="w-4 h-4 text-neutral-400" aria-hidden="true" />
           <span>{location ? `${location.name}, ${location.city}` : 'Ubicación por confirmar'}</span>
         </div>
 
         {/* CTA */}
         <div className="border-t border-neutral-100 pt-3 flex items-center justify-between">
           <span className="text-xs text-neutral-500">Ver detalles</span>
-          <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
+          <ArrowRight className="w-4 h-4 text-primary-600" aria-hidden="true" />
         </div>
       </div>
     </article>

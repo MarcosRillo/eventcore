@@ -89,6 +89,48 @@ class ApprovalService
     }
 
     /**
+     * Approve and publish event atomically.
+     * Performs: pending_internal_approval → approved_internal → pending_public_approval → published
+     * Creates 3 audit trail entries in a single transaction.
+     *
+     * @throws InvalidStateTransitionException
+     */
+    public function approveAndPublish(Event $event, User $approver, ?string $comments = null): void
+    {
+        $this->stateMachine->validateTransition($event, 'approved_internal');
+
+        DB::transaction(function () use ($event, $approver, $comments) {
+            // Step 1: approved_internal
+            $event->update(['status_id' => $this->getStatusId('approved_internal')]);
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $approver->id,
+                'action' => EventApproval::ACTION_APPROVE_INTERNAL,
+                'comments' => $comments,
+                'performed_at' => now(),
+            ]);
+
+            // Step 2: pending_public_approval
+            $event->update(['status_id' => $this->getStatusId('pending_public_approval')]);
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $approver->id,
+                'action' => EventApproval::ACTION_REQUEST_PUBLIC,
+                'performed_at' => now(),
+            ]);
+
+            // Step 3: published
+            $event->update(['status_id' => $this->getStatusId('published')]);
+            EventApproval::create([
+                'event_id' => $event->id,
+                'performed_by' => $approver->id,
+                'action' => EventApproval::ACTION_PUBLISH,
+                'performed_at' => now(),
+            ]);
+        });
+    }
+
+    /**
      * Request changes on an event.
      *
      * @throws InvalidStateTransitionException

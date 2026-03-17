@@ -71,6 +71,7 @@ export const useEventManagement = (
     isLoading,
     error,
     approveInternal,
+    approveAndPublish,
     requestPublicApproval,
     publishEvent,
     requestChanges,
@@ -163,6 +164,9 @@ export const useEventManagement = (
       case 'approve_internal':
         result = await approveInternal(selectedEvent.id);
         break;
+      case 'publish_directly':
+        result = await approveAndPublish(selectedEvent.id);
+        break;
       case 'request_public':
         result = await requestPublicApproval(selectedEvent.id);
         break;
@@ -178,7 +182,20 @@ export const useEventManagement = (
     }
 
     if (result) {
-      closeModal();
+      const forwardActions: ApprovalAction[] = [
+        'approve_internal', 'request_public', 'publish', 'publish_directly'
+      ];
+
+      if (forwardActions.includes(selectedAction)) {
+        // Keep modal open, update event to show new status + next actions
+        setSelectedEvent(result);
+        setSelectedAction(null);
+        setComment('');
+        setCommentError(null);
+      } else {
+        // Negative actions (reject, request_changes): close modal
+        closeModal();
+      }
       onSuccess?.();
     }
   }, [
@@ -187,6 +204,7 @@ export const useEventManagement = (
     comment,
     validateComment,
     approveInternal,
+    approveAndPublish,
     requestPublicApproval,
     publishEvent,
     requestChanges,

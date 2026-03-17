@@ -103,7 +103,7 @@ describe('AdminDashboardContainer', () => {
       end_date: '2025-03-15T12:00:00Z',
       type: 'sede_unica',
       status: 'pending_internal_approval',
-      locations: [{ id: 1, name: 'Test Location', address: '123 Test St', latitude: 0, longitude: 0 }],
+      locations: [{ id: 1, name: 'Test Location', address: '123 Test St', city: 'CABA', is_active: true, entity_id: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' }],
       is_featured: false,
       approval_history: [],
       created_at: '2025-01-01T00:00:00Z',

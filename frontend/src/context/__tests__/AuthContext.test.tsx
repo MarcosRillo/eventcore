@@ -308,6 +308,9 @@ describe('AuthContext', () => {
     test('should restore session via /auth/me on mount', async () => {
       const mockUser = createMockUser();
 
+      // Set user cookie to trigger /auth/me validation
+      mockCookies.push('user=' + encodeURIComponent(JSON.stringify(mockUser)));
+
       // /auth/me succeeds (valid httpOnly cookie exists)
       mockedApiClient.get.mockResolvedValueOnce({
         data: { data: mockUser },
@@ -325,10 +328,8 @@ describe('AuthContext', () => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/auth/me');
     });
 
-    test('should handle unauthenticated state on mount', async () => {
-      // /auth/me fails
-      mockedApiClient.get.mockRejectedValueOnce(new Error('Unauthenticated'));
-
+    test('should skip /auth/me when no session cookie exists', async () => {
+      // No user cookie → skip API call entirely
       const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
 
       await waitFor(() => {
@@ -337,10 +338,13 @@ describe('AuthContext', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
-      expect(clearTokens).toHaveBeenCalled();
+      expect(mockedApiClient.get).not.toHaveBeenCalled();
     });
 
     test('should handle expired session on mount', async () => {
+      // Set user cookie so /auth/me is attempted
+      mockCookies.push('user=' + encodeURIComponent(JSON.stringify(createMockUser())));
+
       mockedApiClient.get.mockRejectedValueOnce({
         response: { status: 401 },
       });
@@ -353,6 +357,7 @@ describe('AuthContext', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
+      expect(clearTokens).toHaveBeenCalled();
     });
   });
 

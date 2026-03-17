@@ -14,6 +14,7 @@ export type ApprovalAction =
   | 'approve_internal'   // Approve for internal calendar
   | 'request_public'     // Request public calendar approval
   | 'publish'            // Publish to public calendar
+  | 'publish_directly'   // Approve internally + publish in one step
   | 'request_changes'    // Request changes (requires comment)
   | 'reject';            // Reject event (requires comment)
 
@@ -70,7 +71,7 @@ export interface QuickFilterOption {
  */
 export const STATUS_ACTIONS_MAP: Record<EventStatusCode, ApprovalAction[]> = {
   draft: ['approve_internal'],  // Admin can approve draft directly
-  pending_internal_approval: ['approve_internal', 'request_changes', 'reject'],
+  pending_internal_approval: ['approve_internal', 'publish_directly', 'request_changes', 'reject'],
   approved_internal: ['request_public'],
   pending_public_approval: ['publish', 'request_changes', 'reject'],
   published: ['request_changes'],  // Admin can revert published event if issue detected
@@ -98,6 +99,12 @@ export const ACTION_CONFIG: Record<ApprovalAction, ActionButtonConfig> = {
   publish: {
     label: 'Publicar',
     description: 'El evento será visible en el calendario público',
+    variant: 'success',
+    requiresComment: false,
+  },
+  publish_directly: {
+    label: 'Aprobar y Publicar',
+    description: 'Aprueba internamente y publica directamente en el calendario público',
     variant: 'success',
     requiresComment: false,
   },
@@ -160,6 +167,7 @@ export function getActionBadgeVariant(
       return 'info';
     case 'request_public':
     case 'publish':
+    case 'publish_directly':
       return 'success';
     case 'request_changes':
       return 'warning';
@@ -181,6 +189,7 @@ export function getActionButtonVariant(
       return 'primary';
     case 'request_public':
     case 'publish':
+    case 'publish_directly':
       return 'success';
     case 'request_changes':
       return 'warning';

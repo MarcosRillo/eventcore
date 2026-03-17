@@ -44,7 +44,7 @@ class PublicEventService
         $perPage = $this->normalizePerPage($perPage);
 
         $query = Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency', 'status'])
             ->orderBy('start_date', 'asc');
 
         $this->applyFilters($query, $filters);
@@ -62,7 +62,7 @@ class PublicEventService
     public function getPublishedEventById(int $id): Event
     {
         $event = Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'theme', 'frequency', 'rotationType', 'services'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'theme', 'frequency', 'rotationType', 'services', 'status'])
             ->find($id);
 
         if (! $event) {
@@ -118,7 +118,7 @@ class PublicEventService
         $limit = min($limit, self::MAX_PER_PAGE);
 
         return Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'status'])
             ->where('start_date', '>=', now())
             ->orderBy('start_date')
             ->take($limit)
@@ -135,7 +135,7 @@ class PublicEventService
         $limit = min($limit, 20);
 
         return Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'status'])
             ->where('is_featured', true)
             ->where('start_date', '>=', now())
             ->orderBy('start_date')
@@ -158,7 +158,7 @@ class PublicEventService
         $searchTerm = trim($query);
 
         $builder = Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'status'])
             ->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'ilike', "%{$searchTerm}%")
                     ->orWhere('description', 'ilike', "%{$searchTerm}%")

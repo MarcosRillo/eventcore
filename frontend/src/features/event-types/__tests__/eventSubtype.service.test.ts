@@ -31,6 +31,7 @@ describe('eventSubtype.service', () => {
   const mockEventSubtype: EventSubtype = {
     id: 1,
     event_type_id: 1,
+    entity_id: 1,
     name: 'Congreso Nacional',
     is_active: true,
     created_at: '2025-01-01T00:00:00.000Z',
@@ -40,6 +41,7 @@ describe('eventSubtype.service', () => {
   const mockEventSubtype2: EventSubtype = {
     id: 2,
     event_type_id: 1,
+    entity_id: 1,
     name: 'Congreso Internacional',
     is_active: false,
     created_at: '2025-01-02T00:00:00.000Z',
@@ -48,12 +50,22 @@ describe('eventSubtype.service', () => {
 
   const mockPaginationResponse: EventSubtypePagination = {
     data: [mockEventSubtype, mockEventSubtype2],
-    current_page: 1,
-    last_page: 2,
-    per_page: 10,
-    total: 15,
-    from: 1,
-    to: 10,
+    meta: {
+      current_page: 1,
+      last_page: 2,
+      per_page: 10,
+      total: 15,
+      from: 1,
+      to: 10,
+      path: 'http://api.example.com/event-types/1/subtypes',
+      links: [],
+    },
+    links: {
+      first: 'http://api.example.com/event-types/1/subtypes?page=1',
+      last: 'http://api.example.com/event-types/1/subtypes?page=2',
+      prev: null,
+      next: 'http://api.example.com/event-types/1/subtypes?page=2',
+    },
   }
 
   beforeEach(() => {
@@ -69,7 +81,7 @@ describe('eventSubtype.service', () => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/1/subtypes?')
       expect(result).toEqual(mockPaginationResponse)
       expect(result.data).toHaveLength(2)
-      expect(result.total).toBe(15)
+      expect(result.meta.total).toBe(15)
     })
 
     it('should fetch event subtypes with all query params', async () => {
@@ -89,7 +101,7 @@ describe('eventSubtype.service', () => {
       )
       expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
       expect(result.data).toHaveLength(2)
-      expect(result.current_page).toBe(1)
+      expect(result.meta.current_page).toBe(1)
     })
 
     it('should handle inactive filter', async () => {
@@ -111,25 +123,30 @@ describe('eventSubtype.service', () => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/event-types/5/subtypes?')
       expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
       expect(result).toEqual(mockPaginationResponse)
-      expect(result.total).toBe(15)
+      expect(result.meta.total).toBe(15)
     })
 
     it('should handle empty results', async () => {
       const emptyResponse: EventSubtypePagination = {
         data: [],
-        current_page: 1,
-        last_page: 1,
-        per_page: 10,
-        total: 0,
-        from: 0,
-        to: 0,
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          per_page: 10,
+          total: 0,
+          from: null,
+          to: null,
+          path: 'http://api.example.com/event-types/1/subtypes',
+          links: [],
+        },
+        links: { first: null, last: null, prev: null, next: null },
       }
       mockedApiClient.get.mockResolvedValue({ data: emptyResponse })
 
       const result = await getEventSubtypes(1, { search: 'nonexistent' })
 
       expect(result.data).toHaveLength(0)
-      expect(result.total).toBe(0)
+      expect(result.meta.total).toBe(0)
     })
 
     it('should handle API error', async () => {
@@ -505,25 +522,30 @@ describe('eventSubtype.service', () => {
       )
       expect(mockedApiClient.get).toHaveBeenCalledTimes(1)
       expect(result).toEqual(mockPaginationResponse)
-      expect(result.total).toBe(15)
+      expect(result.meta.total).toBe(15)
     })
 
     it('should handle empty search results', async () => {
       const emptyResponse: EventSubtypePagination = {
         data: [],
-        current_page: 1,
-        last_page: 1,
-        per_page: 15,
-        total: 0,
-        from: 0,
-        to: 0,
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          per_page: 15,
+          total: 0,
+          from: null,
+          to: null,
+          path: 'http://api.example.com/event-types/1/subtypes',
+          links: [],
+        },
+        links: { first: null, last: null, prev: null, next: null },
       }
       mockedApiClient.get.mockResolvedValue({ data: emptyResponse })
 
       const result = await searchEventSubtypes(1, 'nonexistent')
 
       expect(result.data).toHaveLength(0)
-      expect(result.total).toBe(0)
+      expect(result.meta.total).toBe(0)
     })
   })
 
@@ -613,7 +635,7 @@ describe('eventSubtype.service', () => {
 
       expect(errors).toHaveLength(0)
       expect(Array.isArray(errors)).toBe(true)
-      expect(validData.name.length).toBe(2)
+      expect(validData.name!.length).toBe(2)
       expect(errors).not.toContain('El nombre debe tener al menos 2 caracteres')
     })
 
@@ -625,7 +647,7 @@ describe('eventSubtype.service', () => {
 
       expect(errors).toHaveLength(0)
       expect(Array.isArray(errors)).toBe(true)
-      expect(validData.name.length).toBe(255)
+      expect(validData.name!.length).toBe(255)
       expect(errors).not.toContain('El nombre no puede exceder 255 caracteres')
     })
   })
@@ -660,13 +682,13 @@ describe('eventSubtype.service', () => {
       // Initial list
       mockedApiClient.get.mockResolvedValueOnce({ data: mockPaginationResponse })
       const initial = await getEventSubtypes(1)
-      expect(initial.total).toBe(15)
+      expect(initial.meta.total).toBe(15)
 
       // Search
-      const searchResponse = { ...mockPaginationResponse, data: [mockEventSubtype], total: 1 }
+      const searchResponse = { ...mockPaginationResponse, data: [mockEventSubtype], meta: { ...mockPaginationResponse.meta, total: 1 } }
       mockedApiClient.get.mockResolvedValueOnce({ data: searchResponse })
       const searched = await searchEventSubtypes(1, 'Nacional')
-      expect(searched.total).toBe(1)
+      expect(searched.meta.total).toBe(1)
 
       // Filter active
       mockedApiClient.get.mockResolvedValueOnce({ data: searchResponse })

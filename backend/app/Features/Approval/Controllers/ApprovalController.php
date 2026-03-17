@@ -4,6 +4,7 @@ namespace App\Features\Approval\Controllers;
 
 use App\Features\Approval\Services\ApprovalService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Approval\ApproveAndPublishEventRequest;
 use App\Http\Requests\Approval\ApproveEventRequest;
 use App\Http\Requests\Approval\PublishEventRequest;
 use App\Http\Requests\Approval\RejectEventRequest;
@@ -34,6 +35,25 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento aprobado internamente',
+            'data' => new EventResource($event->fresh()->load('status')),
+        ]);
+    }
+
+    /**
+     * Approve and publish event atomically (entity_admin, entity_staff).
+     */
+    public function approveAndPublish(ApproveAndPublishEventRequest $request, string $id): JsonResponse
+    {
+        $event = Event::findOrFail($id);
+
+        $this->approvalService->approveAndPublish(
+            $event,
+            $request->user(),
+            $request->input('comments'),
+        );
+
+        return response()->json([
+            'message' => 'Evento aprobado y publicado exitosamente',
             'data' => new EventResource($event->fresh()->load('status')),
         ]);
     }

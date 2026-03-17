@@ -15,7 +15,7 @@ jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ src, alt, className, style, loading }: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src as string} alt={alt as string} className={className as string} style={style as React.CSSProperties} loading={loading as string} />
+    return <img src={src as string} alt={alt as string} className={className as string} style={style as React.CSSProperties} loading={loading as "lazy" | "eager" | undefined} />
   },
 }))
 
@@ -41,7 +41,7 @@ describe('OrganizerEventListItem', () => {
     start_date: '2025-06-15',
     end_date: '2025-06-15',
     status: 'draft',
-    event_type: { id: 1, name: 'Category 1' },
+    event_type: { id: 1, name: 'Category 1', slug: 'category-1', is_active: true },
     locations: [{ id: 1, name: 'Location 1' }]
   }
 
@@ -222,8 +222,8 @@ describe('OrganizerEventListItem', () => {
     test('should render event subtype when available', () => {
       const event = {
         ...baseEvent,
-        event_type: { id: 1, name: 'Main Type' },
-        event_subtype: { id: 2, name: 'Sub Type' }
+        event_type: { id: 1, name: 'Main Type', slug: 'main-type', is_active: true },
+        event_subtype: { id: 2, name: 'Sub Type', slug: 'sub-type', is_active: true, event_type_id: 1 }
       }
       render(<OrganizerEventListItem {...defaultProps} event={event} />)
 

@@ -4,6 +4,7 @@ services:
     image: postgres:15.13
     container_name: plataforma-calendario-db
     restart: unless-stopped
+    env_file: .env.docker
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-plataforma_calendario}
       POSTGRES_USER: ${POSTGRES_USER:-plataforma_user}
@@ -31,6 +32,7 @@ services:
     container_name: plataforma-calendario-backend
     restart: unless-stopped
     working_dir: /var/www
+    env_file: .env.docker
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
@@ -73,12 +75,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        INTERNAL_API_URL: http://nginx:80
     container_name: plataforma-calendario-frontend
     restart: unless-stopped
     working_dir: /app
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      INTERNAL_API_URL: http://nginx:80
     ports:
       - "3000:3000"
     networks:

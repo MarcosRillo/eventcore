@@ -26,16 +26,6 @@ const createMockEvent = (overrides: Partial<Event> & { id: number; title: string
   end_date: '2025-12-01T18:00:00.000Z',
   type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
   status: EVENT_STATUS.DRAFT as EventStatusCode,
-  category_id: 1,
-  category: {
-    id: 1,
-    name: 'Test Category',
-    slug: 'test-category',
-    entity_id: 1,
-    is_active: true,
-    created_at: '2025-01-01T00:00:00.000Z',
-    updated_at: '2025-01-01T00:00:00.000Z',
-  },
   locations: [],
   is_featured: false,
   approval_history: [],
@@ -97,7 +87,6 @@ describe('eventAdminService', () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: EventFilters = {
-        category_id: 1,
         status: 'draft',
         page: 2,
       }
@@ -105,7 +94,6 @@ describe('eventAdminService', () => {
       await eventAdminService.getEvents(filters)
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
-      expect(callUrl).toContain('category_id=1')
       expect(callUrl).toContain('status=draft')
       expect(callUrl).toContain('page=2')
     })
@@ -114,7 +102,6 @@ describe('eventAdminService', () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
       const filters: EventFilters = {
-        category_id: undefined,
         status: undefined,
         search: '',
         page: 1,
@@ -166,7 +153,6 @@ describe('eventAdminService', () => {
         start_date: '2025-12-01',
         end_date: '2025-12-02',
         type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
-        category_id: 1,
         location_ids: [1],
       }
 
@@ -189,7 +175,6 @@ describe('eventAdminService', () => {
         description: 'Single day event description',
         start_date: '2025-12-01',
         type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
-        category_id: 1,
         location_ids: [1],
       }
 
@@ -210,7 +195,6 @@ describe('eventAdminService', () => {
         description: '',
         start_date: '',
         type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
-        category_id: 0,
         location_ids: [],
       }
 
@@ -411,7 +395,6 @@ describe('eventAdminService', () => {
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockBlob))
 
       const filters = {
-        category_id: 1,
         status: 'published' as const,
       }
 
@@ -419,7 +402,6 @@ describe('eventAdminService', () => {
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('/events/export/xlsx?')
-      expect(callUrl).toContain('category_id=1')
       expect(callUrl).toContain('status=published')
       expect(mockApiClient.get).toHaveBeenCalledWith(
         expect.any(String),
@@ -504,13 +486,13 @@ describe('eventAdminApprovalService', () => {
 
       mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
 
-      const filters: EventFilters = { category_id: 1 }
+      const filters: EventFilters = { status: 'published' }
 
       await eventAdminApprovalService.getEventsByStatus('published', filters)
 
       const callUrl = mockApiClient.get.mock.calls[0][0]
       expect(callUrl).toContain('/events/approval-status/published?')
-      expect(callUrl).toContain('category_id=1')
+      expect(callUrl).toContain('status=published')
     })
   })
 

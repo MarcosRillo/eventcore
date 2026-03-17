@@ -48,9 +48,6 @@ describe('InternalEventDetailPageContainer', () => {
       id: 1,
       name: 'Conference',
       color: '#FF0000',
-      active: true,
-      created_at: '',
-      updated_at: '',
     },
     locations: [],
   };

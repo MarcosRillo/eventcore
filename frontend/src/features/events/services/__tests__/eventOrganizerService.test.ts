@@ -15,16 +15,6 @@ const createMockEvent = (overrides: Partial<Event> & { id: number; title: string
   end_date: '2030-12-01T18:00:00.000Z',
   type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
   status: EVENT_STATUS.DRAFT as EventStatusCode,
-  category_id: 1,
-  category: {
-    id: 1,
-    name: 'Test Category',
-    slug: 'test-category',
-    entity_id: 1,
-    is_active: true,
-    created_at: '2025-01-01T00:00:00.000Z',
-    updated_at: '2025-01-01T00:00:00.000Z',
-  },
   locations: [],
   is_featured: false,
   approval_history: [],
@@ -121,7 +111,6 @@ describe('eventOrganizerService', () => {
         start_date: '2030-12-01',
         end_date: '2030-12-02',
         type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
-        category_id: 1,
         location_ids: [1],
       }
 
@@ -142,7 +131,6 @@ describe('eventOrganizerService', () => {
         description: 'Description',
         start_date: '2030-12-01',
         type: EVENT_TYPE.SINGLE_LOCATION as EventTypeCode,
-        category_id: 1,
         location_ids: [1],
       }
 

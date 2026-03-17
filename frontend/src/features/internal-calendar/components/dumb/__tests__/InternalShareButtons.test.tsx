@@ -21,7 +21,7 @@ describe('InternalShareButtons', () => {
 
   // Mock browser APIs
   const mockWindowOpen = jest.fn();
-  const mockClipboardWriteText = jest.fn(() => Promise.resolve());
+  const mockClipboardWriteText = jest.fn<Promise<void>, [string]>((_text: string) => Promise.resolve());
   const mockAddToast = jest.fn();
 
   beforeEach(() => {

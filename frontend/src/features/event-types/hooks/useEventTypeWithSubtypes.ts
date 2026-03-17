@@ -31,6 +31,7 @@ interface UseEventTypeWithSubtypesReturn {
   eventTypes: EventType[];
   pagination: PaginationMeta | null;
   isLoading: boolean;
+  isValidating: boolean;
   error: string | null;
 
   // Filter state
@@ -114,9 +115,10 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
     return eventTypeKeys.list(params.toString());
   }, [isAuthenticated, authLoading, currentPage, debouncedSearch, filterStatus]);
 
-  const { data, error, isLoading, mutate } = useSWR<{ data: EventType[]; meta: PaginationMeta }>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: EventType[]; meta: PaginationMeta }>(
     swrKey,
     apiFetcher,
+    { keepPreviousData: true },
   );
 
   const eventTypes = useMemo(() => data?.data ?? [], [data]);
@@ -384,6 +386,7 @@ export function useEventTypeWithSubtypes(): UseEventTypeWithSubtypesReturn {
     eventTypes,
     pagination,
     isLoading,
+    isValidating,
     error: error?.message ?? null,
     searchTerm,
     filterStatus,

@@ -258,7 +258,7 @@ describe('CalendarViewContainer', () => {
 
       const retryButton = screen.getByText('Reintentar')
       expect(retryButton).toBeInTheDocument()
-      expect(retryButton).toHaveClass('px-4', 'py-2', 'bg-blue-600', 'text-white')
+      expect(retryButton).toHaveClass('px-4', 'py-2', 'bg-primary-600', 'text-white')
     })
   })
 

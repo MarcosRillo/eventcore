@@ -32,7 +32,7 @@ describe('useCalendarEvents', () => {
     end_date: '2025-12-15T18:00:00Z',
     is_featured: true,
     event_type: { id: 1, name: 'Cultural' },
-    event_subtype: { id: 1, name: 'Music Festival' },
+    event_subtype: { id: 1, name: 'Music Festival', event_type_id: 1 },
     locations: [{ id: 1, name: 'Teatro', city: 'City 1' }],
   }
 

@@ -15,8 +15,17 @@
 
 import axios, { AxiosInstance } from 'axios';
 
-// Base API URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Base API URL - use internal Docker URL for server-side, public URL for client-side
+const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    return '';  // Client-side: use Next.js rewrite proxy (relative URLs)
+  }
+  return process.env.INTERNAL_API_URL
+    || process.env.NEXT_PUBLIC_API_URL
+    || 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Create a clean axios instance for public endpoints

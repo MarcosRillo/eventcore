@@ -274,15 +274,25 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .rbc-toolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .rbc-toolbar button {
+  .rbc-btn-group {
+    display: flex;
     width: 100%;
-    justify-content: center;
+  }
+
+  .rbc-btn-group button {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .rbc-btn-group button + button {
+    margin-left: -1px;
   }
 
   .rbc-toolbar-label {

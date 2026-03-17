@@ -64,10 +64,6 @@ const createMockPagination = (overrides: Partial<PaginationMeta> = {}): Paginati
   last_page: 1,
   per_page: 15,
   total: 2,
-  from: 1,
-  to: 2,
-  path: 'http://api.example.com/organizations',
-  links: [],
   ...overrides,
 })
 

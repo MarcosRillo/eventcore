@@ -94,7 +94,7 @@ describe('InternalCalendarGridContainer', () => {
   });
 
   test('should handle empty events array', () => {
-    render(<InternalCalendarGridContainer events={[]} loading={false} error={null} />);
+    render(<InternalCalendarGridContainer events={[]} loading={false} error={null} basePath="/internal-calendar" />);
 
     expect(screen.getByRole('heading', { name: /no hay eventos/i })).toBeInTheDocument();
   });

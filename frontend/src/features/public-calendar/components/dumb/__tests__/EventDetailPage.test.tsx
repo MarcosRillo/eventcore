@@ -58,7 +58,6 @@ describe('EventDetailPage', () => {
         address: 'Av. Aconquija s/n',
         state: 'Tucumán',
         country: 'Argentina',
-        features: [],
         is_active: true,
         entity_id: 1,
         created_at: '2025-01-01',
