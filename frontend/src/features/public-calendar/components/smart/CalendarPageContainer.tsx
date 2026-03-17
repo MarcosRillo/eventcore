@@ -100,9 +100,9 @@ export const CalendarPageContainer = ({
 
       {/* View Toggle Bar */}
       <div className="bg-white border-b border-neutral-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <p className="text-neutral-600">
+        <div className="py-4">
+          <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+            <p className="hidden sm:block text-neutral-600">
               Explorá el calendario de eventos turísticos y culturales
             </p>
 
@@ -110,7 +110,7 @@ export const CalendarPageContainer = ({
             <div className="flex gap-2 bg-neutral-100 p-1 rounded-lg">
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`px-4 py-2 rounded-md transition-colors ${
+                className={`px-4 py-2 rounded-md transition-colors motion-reduce:transition-none ${
                   viewMode === 'calendar'
                     ? 'bg-white text-primary-600 shadow-sm font-semibold'
                     : 'text-neutral-600 hover:text-neutral-900'
@@ -124,7 +124,7 @@ export const CalendarPageContainer = ({
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-md transition-colors ${
+                className={`px-4 py-2 rounded-md transition-colors motion-reduce:transition-none ${
                   viewMode === 'grid'
                     ? 'bg-white text-primary-600 shadow-sm font-semibold'
                     : 'text-neutral-600 hover:text-neutral-900'
@@ -142,7 +142,7 @@ export const CalendarPageContainer = ({
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="py-6">
         <Suspense fallback={<CalendarViewSkeleton />}>
           {viewMode === 'calendar' ? (
             <CalendarViewContainer

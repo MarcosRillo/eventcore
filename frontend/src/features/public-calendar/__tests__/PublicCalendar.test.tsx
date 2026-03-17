@@ -81,7 +81,6 @@ describe('PublicCalendar', () => {
     test('renders calendar with header and event grid', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByRole('main')).toBeInTheDocument()
       expect(screen.getByText(/eventos en tucumán/i)).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()
     })
@@ -239,7 +238,6 @@ describe('PublicCalendar', () => {
     test('uses semantic HTML', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByRole('main')).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()
     })
   })

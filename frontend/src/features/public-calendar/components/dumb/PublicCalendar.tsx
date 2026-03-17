@@ -65,10 +65,10 @@ export const PublicCalendar = ({
   const locationOptions: SelectOption[] = locations.map(l => ({ value: l.id, label: l.name }))
 
   return (
-    <main className="min-h-screen bg-neutral-50" role="main">
+    <div className="bg-neutral-50">
       {/* Header */}
       <div className="bg-white border-b border-neutral-200">
-        <div className="container mx-auto px-4 py-6">
+        <div className="py-6">
           <PageHeader
             title="Eventos en Tucumán"
             subtitle="Descubrí los mejores eventos turísticos y culturales"
@@ -77,7 +77,7 @@ export const PublicCalendar = ({
       </div>
 
       {/* Filters + Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="py-6">
         <FilterBar
           columns={3}
           collapsible
@@ -155,6 +155,6 @@ export const PublicCalendar = ({
           </EventGrid>
         )}
       </div>
-    </main>
+    </div>
   )
 }
