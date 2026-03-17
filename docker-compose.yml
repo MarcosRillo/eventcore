@@ -5,10 +5,6 @@ services:
     container_name: plataforma-calendario-db
     restart: unless-stopped
     env_file: .env.docker
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-plataforma_calendario}
-      POSTGRES_USER: ${POSTGRES_USER:-plataforma_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
