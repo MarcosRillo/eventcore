@@ -1,4 +1,4 @@
-import { useSanitizedHTML } from '@/features/public-calendar/hooks/useSanitizedHTML';
+import { useSanitizedHTML } from '@/shared/hooks/useSanitizedHTML';
 
 /**
  * useSanitizedHTML Hook Tests (CAPA 3 - Frontend Sanitization)

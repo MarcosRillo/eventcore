@@ -18,6 +18,7 @@ import {
 
 import { DEFAULT_EVENT_COLOR, getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping';
 import { Badge, ImagePlaceholder, SafeImage } from '@/shared/components/display';
+import { useSanitizedHTML } from '@/shared/hooks/useSanitizedHTML';
 import type { Event } from '@/types/event.types';
 
 interface EventInfoPanelProps {
@@ -62,6 +63,8 @@ const calculateDuration = (start: string, end: string): string => {
 const imagePlaceholder = <ImagePlaceholder />;
 
 export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
+  const sanitizedDescription = useSanitizedHTML(event.description || '');
+
   return (
     <div className="divide-y divide-neutral-100">
       {/* Event Image */}
@@ -95,9 +98,10 @@ export const EventInfoPanel = ({ event }: EventInfoPanelProps) => {
       {event.description && (
         <div className="pt-5">
           <h4 className="text-sm font-medium text-neutral-500 mb-2">Descripción</h4>
-          <p className="text-neutral-700 whitespace-pre-wrap text-sm">
-            {event.description}
-          </p>
+          <div
+            className="text-neutral-700 text-sm prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
+          />
         </div>
       )}
 

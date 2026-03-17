@@ -82,6 +82,8 @@ const Modal: React.FC<ModalProps> = ({
               <Dialog.Panel
                 className={`
                   w-full ${sizeClasses[size]}
+                  max-h-[calc(100vh-2rem)]
+                  flex flex-col
                   transform overflow-hidden rounded-xl
                   bg-white shadow-xl
                   transition-all
@@ -90,7 +92,7 @@ const Modal: React.FC<ModalProps> = ({
               >
                 {/* Header */}
                 {(title || showCloseButton) && (
-                  <div className="flex items-start justify-between px-6 pt-6 pb-0">
+                  <div className="flex-shrink-0 flex items-start justify-between px-6 pt-6 pb-0">
                     <div className="flex-1 pr-4">
                       {title && (
                         <Dialog.Title
@@ -128,13 +130,13 @@ const Modal: React.FC<ModalProps> = ({
                 )}
 
                 {/* Content */}
-                <div className="px-6 py-5">
+                <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5">
                   {children}
                 </div>
 
                 {/* Footer */}
                 {footer && (
-                  <div className="flex items-center justify-end gap-3 px-6 py-4 bg-neutral-50 border-t border-neutral-100">
+                  <div className="flex-shrink-0 flex items-center justify-end gap-3 px-6 py-4 bg-neutral-50 border-t border-neutral-100">
                     {footer}
                   </div>
                 )}

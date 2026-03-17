@@ -196,11 +196,12 @@ describe('CalendarView', () => {
       expect(container).toBeInTheDocument()
     })
 
-    test('should have calendar container with fixed height', () => {
+    test('should have calendar container with responsive height classes', () => {
       render(<CalendarView {...defaultProps} />)
 
       const calendarContainer = document.querySelector('.calendar-container')
-      expect(calendarContainer).toHaveStyle({ height: '800px' })
+      expect(calendarContainer).toBeInTheDocument()
+      expect(calendarContainer).toHaveClass('h-[500px]', 'sm:h-[600px]', 'md:h-[700px]', 'lg:h-[800px]')
     })
   })
 
