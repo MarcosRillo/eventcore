@@ -5,7 +5,6 @@ import {
   LayoutGrid,
   Mail,
   MapPin,
-  Paintbrush,
   Store,
   Ticket,
   Users,
@@ -36,7 +35,6 @@ export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
       '/users': 'Gestión de Usuarios',
       '/invitations': 'Gestión de Invitaciones',
       '/registration-requests': 'Solicitudes de Registro',
-      '/appearance': 'Personalización de Apariencia',
     },
     navSections: [
       {
@@ -75,12 +73,6 @@ export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
             href: '/registration-requests',
             icon: ClipboardList,
           },
-        ],
-      },
-      {
-        name: 'Configuración',
-        items: [
-          { name: 'Apariencia', href: '/appearance', icon: Paintbrush },
         ],
       },
     ],
