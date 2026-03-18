@@ -6,12 +6,14 @@
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/features/public-calendar/styles/calendar.css'
 
-import { format, getDay,parse, startOfWeek } from 'date-fns'
+import { endOfMonth, endOfWeek, format, getDay, parse, startOfMonth, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 
 import { AgendaEvent } from '@/features/public-calendar/components/dumb/AgendaEvent'
 import { CalendarEvent, CalendarView as CalendarViewType } from '@/features/public-calendar/types/public-calendar.types'
+import { cn } from '@/lib/utils'
 
 // Setup date-fns localizer with Spanish locale
 const locales = {
@@ -43,6 +45,14 @@ const messages = {
   showMore: (total: number) => `+ Ver más (${total})`,
 }
 
+// Month view height calculation
+// Each row needs 140px for 4 event slots: 3 visible events + "+more" link
+// With line-height: 1.2 → eventHeight=24px, headingHeight=37px
+// eventSpace = 140 - 37 = 103, floor(103/24) = 4 slots
+const MONTH_ROW_HEIGHT = 140
+// Generous overhead for toolbar (~56px) + day-of-week header (~38px) + padding
+const MONTH_VIEW_OVERHEAD = 130
+
 interface CalendarViewProps {
   events: CalendarEvent[]
   onSelectEvent: (event: CalendarEvent) => void
@@ -64,6 +74,21 @@ export const CalendarView = ({
 }: CalendarViewProps) => {
   // Default color for events without category color (primary-600 equivalent)
   const DEFAULT_EVENT_COLOR = '#0284C7'
+  const isMonthView = currentView === 'month'
+
+  // Compute exact container height for month view based on weeks shown
+  const monthContainerHeight = useMemo(() => {
+    if (!isMonthView) return undefined
+    const monthStart = startOfMonth(currentDate)
+    const monthEnd = endOfMonth(currentDate)
+    // Use es locale (weekStartsOn: 1 = Monday) to match calendar grid
+    const calStart = startOfWeek(monthStart, { locale: es })
+    const calEnd = endOfWeek(monthEnd, { locale: es })
+    const weeks = Math.round(
+      (calEnd.getTime() - calStart.getTime()) / (7 * 86400000)
+    )
+    return weeks * MONTH_ROW_HEIGHT + MONTH_VIEW_OVERHEAD
+  }, [currentDate, isMonthView])
 
   // Event style getter - color by event type
   const eventStyleGetter = (event: CalendarEvent) => {
@@ -92,7 +117,13 @@ export const CalendarView = ({
         </div>
       )}
 
-      <div className="calendar-container h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px]">
+      <div
+        className={cn(
+          'calendar-container',
+          !isMonthView && 'h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px]'
+        )}
+        style={isMonthView ? { height: monthContainerHeight } : undefined}
+      >
         <Calendar
           localizer={localizer}
           events={events}

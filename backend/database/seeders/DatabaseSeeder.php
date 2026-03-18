@@ -51,8 +51,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('- 1 Primary Entity (Ente de Turismo de Tucumán)');
         $this->command->info('- 2 Event Organizers (Sheraton + La Rural)');
         $this->command->info('- 8 Users: 1 platform_admin, 1 entity_admin, 2 organizer_admin, 4 entity_staff');
-        $this->command->info('- 3 Locations');
-        $this->command->info('- 31 Events (3 internal + 4 from organizers + 24 by type)');
+        $this->command->info('- 60 Locations');
+        $this->command->info('- ~154 Events (all workflow statuses + EventApproval audit trail)');
         $this->command->info('- 1 Suspended user (fernando.ruiz@enteturismo.gov.ar) for testing');
         $this->command->newLine();
     }

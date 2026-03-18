@@ -196,8 +196,18 @@ describe('CalendarView', () => {
       expect(container).toBeInTheDocument()
     })
 
-    test('should have calendar container with responsive height classes', () => {
-      render(<CalendarView {...defaultProps} />)
+    test('should have calendar container with computed pixel height in month view', () => {
+      render(<CalendarView {...defaultProps} currentView="month" />)
+
+      const calendarContainer = document.querySelector('.calendar-container')
+      expect(calendarContainer).toBeInTheDocument()
+      expect(calendarContainer).not.toHaveClass('h-[500px]')
+      // Month view gets a dynamic pixel height based on weeks in the month
+      expect(calendarContainer?.getAttribute('style')).toMatch(/height:\s*\d+px/)
+    })
+
+    test('should have calendar container with responsive height in non-month views', () => {
+      render(<CalendarView {...defaultProps} currentView="week" />)
 
       const calendarContainer = document.querySelector('.calendar-container')
       expect(calendarContainer).toBeInTheDocument()

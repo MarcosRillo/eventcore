@@ -90,6 +90,7 @@ export const useCalendarEvents = (
     params.set('start_date', format(startDate, 'yyyy-MM-dd'))
     params.set('end_date', format(endDate, 'yyyy-MM-dd'))
     params.set('page', '1')
+    params.set('per_page', '100')
     if (selectedEventType) params.set('event_type_id', String(selectedEventType))
     if (selectedLocation) params.set('location_id', String(selectedLocation))
     return publicEventKeys.list(params.toString())
