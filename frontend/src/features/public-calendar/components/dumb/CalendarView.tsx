@@ -12,8 +12,10 @@ import { useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 
 import { AgendaEvent } from '@/features/public-calendar/components/dumb/AgendaEvent'
-import { CalendarEvent, CalendarView as CalendarViewType } from '@/features/public-calendar/types/public-calendar.types'
+import { CalendarEvent, CalendarView as CalendarViewType, EventSubtype, EventType, Location } from '@/features/public-calendar/types/public-calendar.types'
 import { cn } from '@/lib/utils'
+import Select from '@/shared/components/form/Select'
+import { FilterBar } from '@/shared/components/layout/FilterBar'
 
 // Setup date-fns localizer with Spanish locale
 const locales = {
@@ -61,6 +63,17 @@ interface CalendarViewProps {
   currentDate: Date
   currentView: CalendarViewType
   loading?: boolean
+  eventTypes?: EventType[]
+  eventSubtypes?: EventSubtype[]
+  locations?: Location[]
+  selectedEventType?: number | null
+  selectedEventSubtype?: number | null
+  selectedLocation?: number | null
+  onEventTypeFilter?: (id: number | null) => void
+  onEventSubtypeFilter?: (id: number | null) => void
+  onLocationFilter?: (id: number | null) => void
+  onClearFilters?: () => void
+  hasActiveFilters?: boolean
 }
 
 export const CalendarView = ({
@@ -71,6 +84,17 @@ export const CalendarView = ({
   currentDate,
   currentView,
   loading = false,
+  eventTypes,
+  eventSubtypes,
+  locations,
+  selectedEventType,
+  selectedEventSubtype,
+  selectedLocation,
+  onEventTypeFilter,
+  onEventSubtypeFilter,
+  onLocationFilter,
+  onClearFilters,
+  hasActiveFilters,
 }: CalendarViewProps) => {
   // Default color for events without category color (primary-600 equivalent)
   const DEFAULT_EVENT_COLOR = '#0284C7'
@@ -115,6 +139,51 @@ export const CalendarView = ({
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
         </div>
+      )}
+
+      {eventTypes && eventTypes.length > 0 && (
+        <FilterBar
+          collapsible
+          columns={3}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={onClearFilters}
+          className="mb-4"
+        >
+          <Select
+            label="Tipo de evento"
+            value={selectedEventType ?? ''}
+            onChange={(val) => onEventTypeFilter?.(val ? Number(val) : null)}
+            options={[
+              { value: '', label: 'Todos los tipos' },
+              ...eventTypes.map(t => ({ value: t.id, label: t.name }))
+            ]}
+            size="sm"
+            fullWidth
+          />
+          <Select
+            label="Subtipo"
+            value={selectedEventSubtype ?? ''}
+            onChange={(val) => onEventSubtypeFilter?.(val ? Number(val) : null)}
+            options={[
+              { value: '', label: 'Todos los subtipos' },
+              ...(eventSubtypes ?? []).map(s => ({ value: s.id, label: s.name }))
+            ]}
+            disabled={!selectedEventType}
+            size="sm"
+            fullWidth
+          />
+          <Select
+            label="Ubicación"
+            value={selectedLocation ?? ''}
+            onChange={(val) => onLocationFilter?.(val ? Number(val) : null)}
+            options={[
+              { value: '', label: 'Todas las ubicaciones' },
+              ...(locations ?? []).map(l => ({ value: l.id, label: `${l.name} - ${l.city}` }))
+            ]}
+            size="sm"
+            fullWidth
+          />
+        </FilterBar>
       )}
 
       <div

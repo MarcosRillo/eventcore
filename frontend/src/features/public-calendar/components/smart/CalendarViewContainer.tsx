@@ -37,6 +37,17 @@ export const CalendarViewContainer = ({
     currentView,
     handleNavigate,
     handleViewChange,
+    eventTypes,
+    eventSubtypes,
+    locations,
+    selectedEventType,
+    selectedEventSubtype,
+    selectedLocation,
+    handleEventTypeFilter,
+    handleEventSubtypeFilter,
+    handleLocationFilter,
+    clearFilters,
+    hasActiveFilters,
   } = useCalendarEvents({
     initialEvents,
     initialEventTypes,
@@ -73,6 +84,17 @@ export const CalendarViewContainer = ({
       currentDate={currentDate}
       currentView={currentView}
       loading={loading}
+      eventTypes={eventTypes}
+      eventSubtypes={eventSubtypes}
+      locations={locations}
+      selectedEventType={selectedEventType}
+      selectedEventSubtype={selectedEventSubtype}
+      selectedLocation={selectedLocation}
+      onEventTypeFilter={handleEventTypeFilter}
+      onEventSubtypeFilter={handleEventSubtypeFilter}
+      onLocationFilter={handleLocationFilter}
+      onClearFilters={clearFilters}
+      hasActiveFilters={hasActiveFilters}
     />
   )
 }

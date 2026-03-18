@@ -12,6 +12,7 @@ import {
   CalendarEvent,
   CalendarView,
   EventsResponse,
+  EventSubtype,
   EventType,
   Location,
   PublicEvent,
@@ -31,6 +32,7 @@ export interface UseCalendarEventsOptions {
 interface UseCalendarEventsReturn {
   calendarEvents: CalendarEvent[]
   eventTypes: EventType[]
+  eventSubtypes: EventSubtype[]
   locations: Location[]
   loading: boolean
   error: string | null
@@ -39,8 +41,12 @@ interface UseCalendarEventsReturn {
   handleNavigate: (date: Date) => void
   handleViewChange: (view: CalendarView) => void
   handleEventTypeFilter: (eventTypeId: number | null) => void
+  handleEventSubtypeFilter: (eventSubtypeId: number | null) => void
   handleLocationFilter: (locationId: number | null) => void
+  clearFilters: () => void
+  hasActiveFilters: boolean
   selectedEventType: number | null
+  selectedEventSubtype: number | null
   selectedLocation: number | null
 }
 
@@ -64,8 +70,12 @@ export const useCalendarEvents = (
   const { initialEvents, initialEventTypes, initialLocations } = options
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
-  const [currentView, setCurrentView] = useState<CalendarView>('month')
+  const [currentView, setCurrentView] = useState<CalendarView>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return 'agenda'
+    return 'month'
+  })
   const [selectedEventType, setSelectedEventType] = useState<number | null>(null)
+  const [selectedEventSubtype, setSelectedEventSubtype] = useState<number | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
 
   // SWR: Event types (static)
@@ -82,6 +92,12 @@ export const useCalendarEvents = (
     { fallbackData: initialLocations ? { data: initialLocations } : undefined }
   )
 
+  // SWR: Subtypes (conditional on selected event type)
+  const { data: subtypesData } = useSWR<{ data: EventSubtype[] }>(
+    selectedEventType ? publicEventKeys.subtypes(selectedEventType) : null,
+    publicFetcher
+  )
+
   // SWR: Events (dynamic key based on date range + filters)
   const eventsKey = useMemo(() => {
     const startDate = startOfMonth(currentDate)
@@ -92,9 +108,10 @@ export const useCalendarEvents = (
     params.set('page', '1')
     params.set('per_page', '100')
     if (selectedEventType) params.set('event_type_id', String(selectedEventType))
+    if (selectedEventSubtype) params.set('event_subtype_id', String(selectedEventSubtype))
     if (selectedLocation) params.set('location_id', String(selectedLocation))
     return publicEventKeys.list(params.toString())
-  }, [currentDate, selectedEventType, selectedLocation])
+  }, [currentDate, selectedEventType, selectedEventSubtype, selectedLocation])
 
   const { data: eventsData, error: eventsError, isLoading } = useSWR<EventsResponse>(
     eventsKey,
@@ -103,7 +120,9 @@ export const useCalendarEvents = (
   )
 
   const eventTypes = eventTypesData?.data ?? []
+  const eventSubtypes = selectedEventType ? (subtypesData?.data ?? []) : []
   const locations = locationsData?.data ?? []
+  const hasActiveFilters = selectedEventType !== null || selectedEventSubtype !== null || selectedLocation !== null
 
   // Transform events to calendar format
   const calendarEvents = useMemo(
@@ -121,9 +140,15 @@ export const useCalendarEvents = (
     setCurrentView(view)
   }, [])
 
-  // Handle event type filter
+  // Handle event type filter (cascading: reset subtype)
   const handleEventTypeFilter = useCallback((eventTypeId: number | null): void => {
     setSelectedEventType(eventTypeId)
+    setSelectedEventSubtype(null)
+  }, [])
+
+  // Handle event subtype filter
+  const handleEventSubtypeFilter = useCallback((eventSubtypeId: number | null): void => {
+    setSelectedEventSubtype(eventSubtypeId)
   }, [])
 
   // Handle location filter
@@ -131,9 +156,17 @@ export const useCalendarEvents = (
     setSelectedLocation(locationId)
   }, [])
 
+  // Clear all filters
+  const clearFilters = useCallback((): void => {
+    setSelectedEventType(null)
+    setSelectedEventSubtype(null)
+    setSelectedLocation(null)
+  }, [])
+
   return {
     calendarEvents,
     eventTypes,
+    eventSubtypes,
     locations,
     loading: isLoading,
     error: eventsError?.message ?? null,
@@ -142,8 +175,12 @@ export const useCalendarEvents = (
     handleNavigate,
     handleViewChange,
     handleEventTypeFilter,
+    handleEventSubtypeFilter,
     handleLocationFilter,
+    clearFilters,
+    hasActiveFilters,
     selectedEventType,
+    selectedEventSubtype,
     selectedLocation,
   }
 }
