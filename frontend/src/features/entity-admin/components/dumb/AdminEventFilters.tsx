@@ -8,8 +8,10 @@
 
 'use client'
 
-import { FilterPill, SegmentedControl } from '@/shared/components/form'
-import type { EventStatusCode } from '@/types/event.types'
+import { Search } from 'lucide-react'
+
+import { FilterPill, Input, SegmentedControl, Select } from '@/shared/components/form'
+import type { EventStatusCode, EventTypeInfo } from '@/types/event.types'
 
 export interface AdminStatusCounts {
   total: number
@@ -26,6 +28,11 @@ interface AdminEventFiltersProps {
   onStatusChange: (status: EventStatusCode | null) => void
   onTimeScopeChange: (scope: 'upcoming' | 'past') => void
   statusCounts?: AdminStatusCounts | null
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  eventTypes?: EventTypeInfo[]
+  selectedEventTypeId?: number | null
+  onEventTypeChange?: (eventTypeId: number | null) => void
 }
 
 const STATUS_FILTERS = [
@@ -43,9 +50,47 @@ export const AdminEventFilters = ({
   onStatusChange,
   onTimeScopeChange,
   statusCounts,
+  searchValue,
+  onSearchChange,
+  eventTypes,
+  selectedEventTypeId,
+  onEventTypeChange,
 }: AdminEventFiltersProps) => {
   return (
-    <div className="flex flex-wrap items-center gap-4 mb-4">
+    <div className="space-y-4 mb-4">
+      {/* Search + Event Type filter */}
+      {onSearchChange && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 sm:max-w-sm">
+            <Input
+              name="search-events"
+              autoComplete="off"
+              placeholder="Buscar por título o descripción…"
+              value={searchValue || ''}
+              onChange={(e) => onSearchChange(e.target.value)}
+              leftIcon={<Search className="w-4 h-4" />}
+              size="sm"
+            />
+          </div>
+          {onEventTypeChange && (
+            <div className="w-full sm:w-56">
+              <Select
+                value={selectedEventTypeId ?? ''}
+                onChange={(val) => onEventTypeChange(val ? Number(val) : null)}
+                options={[
+                  { value: '', label: 'Todos los tipos' },
+                  ...(eventTypes ?? []).map(t => ({ value: t.id, label: t.name })),
+                ]}
+                placeholder="Tipo de evento"
+                size="sm"
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Status pills + Time scope */}
+      <div className="flex flex-wrap items-center gap-4">
       {/* Status pills */}
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar eventos por estado">
         {STATUS_FILTERS.map((filter) => {
@@ -78,6 +123,7 @@ export const AdminEventFilters = ({
         onChange={onTimeScopeChange}
         ariaLabel="Filtrar por periodo"
       />
+      </div>
     </div>
   )
 }

@@ -17,7 +17,7 @@ class IndexEventsRequest extends PaginationRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'category_id' => 'sometimes|integer|exists:categories,id',
+            'event_type_id' => 'sometimes|integer|exists:event_types,id',
             'status_id' => 'sometimes|integer|exists:event_statuses,id',
             'status' => 'sometimes|string|max:50',
             'is_featured' => 'sometimes|boolean',

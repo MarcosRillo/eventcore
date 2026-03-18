@@ -130,8 +130,9 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (filterState.status) params.set('status', filterState.status as string);
     if (filterState.show_past) params.set('show_past', filterState.show_past);
+    if (filterState.event_type_id) params.set('event_type_id', String(filterState.event_type_id));
     return eventKeys.list(params.toString());
-  }, [isAuthenticated, authLoading, filterState.page, filterState.per_page, debouncedSearch, filterState.status, filterState.show_past]);
+  }, [isAuthenticated, authLoading, filterState.page, filterState.per_page, debouncedSearch, filterState.status, filterState.show_past, filterState.event_type_id]);
 
   const { data, error, isLoading, mutate } = useSWR<{ data: Event[]; meta: PaginationMeta }>(
     swrKey,

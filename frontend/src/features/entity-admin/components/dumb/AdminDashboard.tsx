@@ -21,7 +21,7 @@ import { AdminEventList } from '@/features/entity-admin/components/dumb/AdminEve
 import { AdminStatsSummary } from '@/features/entity-admin/components/dumb/AdminStatsSummary'
 import type { AdminApprovalStats } from '@/features/entity-admin/types'
 import { Pagination } from '@/shared/components/tables'
-import type { Event, EventStatusCode } from '@/types/event.types'
+import type { Event, EventStatusCode, EventTypeInfo } from '@/types/event.types'
 
 interface PaginationData {
   current_page: number
@@ -48,6 +48,13 @@ interface AdminDashboardProps {
 
   // Pagination
   pagination: PaginationData | null
+
+  // Search & type filter
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  eventTypes?: EventTypeInfo[]
+  selectedEventTypeId?: number | null
+  onEventTypeChange?: (eventTypeId: number | null) => void
 
   // Handlers
   onStatClick: (status: EventStatusCode | null) => void
@@ -80,6 +87,13 @@ export const AdminDashboard = ({
   // Pagination
   pagination,
 
+  // Search & type filter
+  searchValue,
+  onSearchChange,
+  eventTypes,
+  selectedEventTypeId,
+  onEventTypeChange,
+
   // Handlers
   onStatClick,
   onStatusFilterChange,
@@ -92,7 +106,7 @@ export const AdminDashboard = ({
   // Modal slot
   children,
 }: AdminDashboardProps) => {
-  const hasActiveFilter = activeStatusFilter !== null || timeScope === 'past'
+  const hasActiveFilter = activeStatusFilter !== null || timeScope === 'past' || !!searchValue || selectedEventTypeId != null
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -121,6 +135,11 @@ export const AdminDashboard = ({
           onStatusChange={onStatusFilterChange}
           onTimeScopeChange={onTimeScopeChange}
           statusCounts={statusCounts}
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
+          eventTypes={eventTypes}
+          selectedEventTypeId={selectedEventTypeId}
+          onEventTypeChange={onEventTypeChange}
         />
 
         {/* Event List */}
