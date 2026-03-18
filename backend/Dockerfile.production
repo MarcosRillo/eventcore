@@ -1,0 +1,86 @@
+# ============================================================
+# Stage 1: Composer dependencies (isolated, cached layer)
+# ============================================================
+FROM composer:2.8 AS vendor
+
+WORKDIR /app
+
+# Install dependencies first (cached unless lock changes)
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist
+
+# Copy full source for autoload generation
+COPY . .
+RUN composer dump-autoload --optimize --classmap-authoritative
+
+# ============================================================
+# Stage 2: Production image with FrankenPHP
+# ============================================================
+FROM dunglas/frankenphp:latest AS production
+
+# --- PHP extensions (matching existing Dockerfile) ---
+RUN install-php-extensions \
+    pdo_pgsql \
+    mbstring \
+    zip \
+    gd \
+    exif \
+    pcntl \
+    bcmath \
+    opcache
+
+# --- PHP production settings ---
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+RUN { \
+    echo 'memory_limit = 512M'; \
+    echo 'upload_max_filesize = 64M'; \
+    echo 'post_max_size = 64M'; \
+    echo 'opcache.enable = 1'; \
+    echo 'opcache.memory_consumption = 256'; \
+    echo 'opcache.interned_strings_buffer = 16'; \
+    echo 'opcache.max_accelerated_files = 10000'; \
+    echo 'opcache.validate_timestamps = 0'; \
+    } > "$PHP_INI_DIR/conf.d/app.ini"
+
+# --- Non-root user ---
+ARG USER=www
+RUN useradd --create-home ${USER} && \
+    setcap -r /usr/local/bin/frankenphp && \
+    chown -R ${USER}:${USER} /data/caddy /config/caddy
+
+# --- Server config ---
+# :80 disables FrankenPHP auto-HTTPS (cloud providers handle TLS termination)
+ENV SERVER_NAME=:80
+
+WORKDIR /app
+
+# --- Copy vendor from stage 1 ---
+COPY --from=vendor --chown=${USER}:${USER} /app/vendor ./vendor
+
+# --- Copy application source ---
+COPY --chown=${USER}:${USER} . .
+
+# --- Laravel requirements ---
+RUN touch .env && \
+    chown -R ${USER}:${USER} storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
+
+# --- Startup script ---
+# 1. storage:link (idempotent symlink)
+# 2. optimize (cache config/routes/views with runtime env vars)
+# 3. exec into FrankenPHP
+RUN printf '#!/bin/sh\nset -e\nphp artisan storage:link 2>/dev/null || true\nphp artisan optimize --force 2>/dev/null || true\nexec "$@"\n' \
+    > /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER ${USER}
+
+EXPOSE 80
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

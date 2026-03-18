@@ -1,0 +1,9 @@
+[build]
+dockerfilePath = "Dockerfile.production"
+
+[deploy]
+startCommand = "php artisan migrate --force && /usr/local/bin/docker-entrypoint.sh frankenphp run --config /etc/caddy/Caddyfile"
+healthcheckPath = "/up"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
