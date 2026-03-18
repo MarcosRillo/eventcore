@@ -238,6 +238,7 @@ export interface EventFilters {
   search?: string;
   status?: EventStatusCode;
   type?: EventTypeCode;
+  event_type_id?: number;
   location_id?: number;
   start_date?: string;
   end_date?: string;

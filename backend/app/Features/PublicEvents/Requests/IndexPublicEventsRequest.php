@@ -14,7 +14,7 @@ class IndexPublicEventsRequest extends PaginationRequest
 {
     public const DEFAULT_PER_PAGE = 15;
 
-    public const MAX_PER_PAGE = 50;
+    public const MAX_PER_PAGE = 100;
 
     /**
      * Get validation rules

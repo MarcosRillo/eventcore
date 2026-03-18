@@ -141,8 +141,8 @@ class PublicEventServiceTest extends TestCase
         ]);
 
         $result = $this->service->getPublishedEvents([
-            'date_from' => now()->addDay()->format('Y-m-d'),
-            'date_to' => now()->addDays(10)->format('Y-m-d'),
+            'start_date' => now()->addDay()->format('Y-m-d'),
+            'end_date' => now()->addDays(10)->format('Y-m-d'),
         ]);
 
         $this->assertEquals(1, $result->total());

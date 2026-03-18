@@ -242,14 +242,25 @@ describe('BigCalendarView', () => {
     expect(screen.getByTestId('event-11')).toBeInTheDocument()
   })
 
-  it('displays calendar with proper container styling', () => {
+  it('has computed pixel height in month view', () => {
     // Act
-    const { container } = render(<BigCalendarView {...defaultProps} />)
+    const { container } = render(<BigCalendarView {...defaultProps} currentView="month" />)
 
     // Assert
     const calendarContainer = container.querySelector('.calendar-container')
     expect(calendarContainer).toBeInTheDocument()
-    expect(calendarContainer).toHaveClass('h-[800px]') // Height class
+    expect(calendarContainer).not.toHaveClass('h-[800px]')
+    expect(calendarContainer?.getAttribute('style')).toMatch(/height:\s*\d+px/)
+  })
+
+  it('has fixed height in non-month views', () => {
+    // Act
+    const { container } = render(<BigCalendarView {...defaultProps} currentView="week" />)
+
+    // Assert
+    const calendarContainer = container.querySelector('.calendar-container')
+    expect(calendarContainer).toBeInTheDocument()
+    expect(calendarContainer).toHaveClass('h-[800px]')
   })
 
   it('handles events with missing event_type gracefully', () => {

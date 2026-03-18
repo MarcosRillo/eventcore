@@ -776,19 +776,19 @@ class PublicEventControllerTest extends TestCase
             ]);
         }
 
-        // Act: Request with per_page exceeding max (100 > 50)
-        $response = $this->getJson('/api/v1/public/events?per_page=100');
+        // Act: Request with per_page exceeding max (101 > 100)
+        $response = $this->getJson('/api/v1/public/events?per_page=101');
 
         // Assert: Validation error returned
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('per_page');
 
-        // Act: Request with per_page at max (50) - should work
-        $responseValid = $this->getJson('/api/v1/public/events?per_page=50');
+        // Act: Request with per_page at max (100) - should work
+        $responseValid = $this->getJson('/api/v1/public/events?per_page=100');
 
-        // Assert: Returns OK with up to 50 events
+        // Assert: Returns OK with up to 100 events
         $responseValid->assertOk();
-        $this->assertLessThanOrEqual(50, count($responseValid->json('data')));
+        $this->assertLessThanOrEqual(100, count($responseValid->json('data')));
     }
 
     #[Test]

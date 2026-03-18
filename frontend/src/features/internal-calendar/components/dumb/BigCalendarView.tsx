@@ -11,14 +11,16 @@
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/features/internal-calendar/styles/calendar.css'
 
-import { format, getDay,parse, startOfWeek } from 'date-fns'
+import { endOfMonth, endOfWeek, format, getDay, parse, startOfMonth, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, type ToolbarProps, type View, Views } from 'react-big-calendar'
 
 import { AgendaEvent } from '@/features/internal-calendar/components/dumb/AgendaEvent'
 import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
 import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
+import { cn } from '@/lib/utils'
 
 // Configure date-fns localizer with Spanish locale
 const localizer = dateFnsLocalizer({
@@ -45,6 +47,10 @@ const messages = {
   noEventsInRange: 'No hay eventos en este rango',
   showMore: (total: number) => `+ Ver más (${total})`,
 }
+
+// Month view height calculation
+const MONTH_ROW_HEIGHT = 140
+const MONTH_VIEW_OVERHEAD = 130
 
 /**
  * BigCalendarView Props
@@ -79,6 +85,20 @@ export function BigCalendarView({
   onNavigate,
   onView,
 }: BigCalendarViewProps) {
+  const isMonthView = currentView === 'month'
+
+  const monthContainerHeight = useMemo(() => {
+    if (!isMonthView) return undefined
+    const monthStart = startOfMonth(currentDate)
+    const monthEnd = endOfMonth(currentDate)
+    const calStart = startOfWeek(monthStart, { locale: es })
+    const calEnd = endOfWeek(monthEnd, { locale: es })
+    const weeks = Math.round(
+      (calEnd.getTime() - calStart.getTime()) / (7 * 86400000)
+    )
+    return weeks * MONTH_ROW_HEIGHT + MONTH_VIEW_OVERHEAD
+  }, [currentDate, isMonthView])
+
   // Show loading state
   if (loading) {
     return (
@@ -112,7 +132,13 @@ export function BigCalendarView({
   }
 
   return (
-    <div className="calendar-container h-[800px] bg-white rounded-lg shadow p-4">
+    <div
+      className={cn(
+        'calendar-container bg-white rounded-lg shadow p-4',
+        !isMonthView && 'h-[800px]'
+      )}
+      style={isMonthView ? { height: monthContainerHeight } : undefined}
+    >
       {events.length === 0 && (
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <p className="text-sm text-blue-700">

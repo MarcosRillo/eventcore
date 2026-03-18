@@ -22,7 +22,7 @@ class PublicEventService
     /**
      * Maximum events per page for pagination
      */
-    private const MAX_PER_PAGE = 50;
+    private const MAX_PER_PAGE = 100;
 
     /**
      * Default events per page
@@ -36,7 +36,7 @@ class PublicEventService
     /**
      * Get paginated list of published events with optional filters.
      *
-     * @param  array  $filters  Available filters: event_type_id, date_from, date_to, search
+     * @param  array  $filters  Available filters: event_type_id, start_date, end_date, search, location_id
      * @param  int  $perPage  Items per page (max 50)
      */
     public function getPublishedEvents(array $filters = [], int $perPage = self::DEFAULT_PER_PAGE): LengthAwarePaginator
@@ -224,12 +224,12 @@ class PublicEventService
             $query->where('event_type_id', $filters['event_type_id']);
         }
 
-        if (! empty($filters['date_from'])) {
-            $query->where('start_date', '>=', $filters['date_from']);
+        if (! empty($filters['start_date'])) {
+            $query->where('start_date', '>=', $filters['start_date']);
         }
 
-        if (! empty($filters['date_to'])) {
-            $query->where('start_date', '<=', $filters['date_to'].' 23:59:59');
+        if (! empty($filters['end_date'])) {
+            $query->where('start_date', '<=', $filters['end_date'].' 23:59:59');
         }
 
         if (! empty($filters['search'])) {
@@ -252,6 +252,11 @@ class PublicEventService
         // Filter by theme
         if (! empty($filters['theme_id'])) {
             $query->where('theme_id', $filters['theme_id']);
+        }
+
+        // Filter by location
+        if (! empty($filters['location_id'])) {
+            $query->whereHas('locations', fn ($q) => $q->where('locations.id', $filters['location_id']));
         }
     }
 

@@ -7,7 +7,7 @@
 import { render, screen } from '@testing-library/react'
 
 import { CalendarView } from '@/features/public-calendar/components/dumb/CalendarView'
-import { CalendarEvent, CalendarView as CalendarViewType } from '@/features/public-calendar/types/public-calendar.types'
+import { CalendarEvent, CalendarView as CalendarViewType, EventType, Location } from '@/features/public-calendar/types/public-calendar.types'
 
 // Mock react-big-calendar
 jest.mock('react-big-calendar', () => ({
@@ -34,6 +34,32 @@ jest.mock('react-big-calendar', () => ({
 // Mock CSS imports
 jest.mock('react-big-calendar/lib/css/react-big-calendar.css', () => ({}))
 jest.mock('@/features/public-calendar/styles/calendar.css', () => ({}))
+
+// Mock FilterBar
+jest.mock('@/shared/components/layout/FilterBar', () => ({
+  FilterBar: ({ children, hasActiveFilters, onClearFilters }: {
+    children: React.ReactNode
+    hasActiveFilters?: boolean
+    onClearFilters?: () => void
+  }) => (
+    <div data-testid="filter-bar">
+      {children}
+      {hasActiveFilters && onClearFilters && (
+        <button onClick={onClearFilters}>Limpiar filtros</button>
+      )}
+    </div>
+  ),
+}))
+
+// Mock Select
+jest.mock('@/shared/components/form/Select', () => ({
+  __esModule: true,
+  default: ({ label, disabled }: { label?: string; disabled?: boolean }) => (
+    <div data-testid={`select-${label?.toLowerCase().replace(/\s+/g, '-')}`} data-disabled={disabled}>
+      {label}
+    </div>
+  ),
+}))
 
 describe('CalendarView', () => {
   const mockEvents: CalendarEvent[] = [
@@ -196,8 +222,18 @@ describe('CalendarView', () => {
       expect(container).toBeInTheDocument()
     })
 
-    test('should have calendar container with responsive height classes', () => {
-      render(<CalendarView {...defaultProps} />)
+    test('should have calendar container with computed pixel height in month view', () => {
+      render(<CalendarView {...defaultProps} currentView="month" />)
+
+      const calendarContainer = document.querySelector('.calendar-container')
+      expect(calendarContainer).toBeInTheDocument()
+      expect(calendarContainer).not.toHaveClass('h-[500px]')
+      // Month view gets a dynamic pixel height based on weeks in the month
+      expect(calendarContainer?.getAttribute('style')).toMatch(/height:\s*\d+px/)
+    })
+
+    test('should have calendar container with responsive height in non-month views', () => {
+      render(<CalendarView {...defaultProps} currentView="week" />)
 
       const calendarContainer = document.querySelector('.calendar-container')
       expect(calendarContainer).toBeInTheDocument()
@@ -220,6 +256,81 @@ describe('CalendarView', () => {
 
       const spinner = document.querySelector('.animate-spin')
       expect(spinner).not.toBeInTheDocument()
+    })
+  })
+
+  describe('filters', () => {
+    const mockEventTypes: EventType[] = [
+      { id: 1, name: 'Cultural', is_active: true },
+      { id: 2, name: 'Business', is_active: true },
+    ]
+
+    const mockLocations: Location[] = [
+      { id: 1, name: 'Teatro', city: 'Montevideo' },
+      { id: 2, name: 'Centro', city: 'Punta del Este' },
+    ]
+
+    test('should render without filter props (backward compat)', () => {
+      render(<CalendarView {...defaultProps} />)
+
+      expect(screen.getByTestId('calendar')).toBeInTheDocument()
+      expect(screen.queryByTestId('filter-bar')).not.toBeInTheDocument()
+    })
+
+    test('should render FilterBar when eventTypes are provided', () => {
+      render(
+        <CalendarView
+          {...defaultProps}
+          eventTypes={mockEventTypes}
+          locations={mockLocations}
+          selectedEventType={null}
+          selectedEventSubtype={null}
+          selectedLocation={null}
+        />
+      )
+
+      expect(screen.getByTestId('filter-bar')).toBeInTheDocument()
+      expect(screen.getByTestId('select-tipo-de-evento')).toBeInTheDocument()
+      expect(screen.getByTestId('select-subtipo')).toBeInTheDocument()
+      expect(screen.getByTestId('select-ubicación')).toBeInTheDocument()
+    })
+
+    test('should not render FilterBar when eventTypes is empty', () => {
+      render(
+        <CalendarView
+          {...defaultProps}
+          eventTypes={[]}
+          locations={mockLocations}
+        />
+      )
+
+      expect(screen.queryByTestId('filter-bar')).not.toBeInTheDocument()
+    })
+
+    test('should disable subtipo select when no event type is selected', () => {
+      render(
+        <CalendarView
+          {...defaultProps}
+          eventTypes={mockEventTypes}
+          locations={mockLocations}
+          selectedEventType={null}
+        />
+      )
+
+      expect(screen.getByTestId('select-subtipo')).toHaveAttribute('data-disabled', 'true')
+    })
+
+    test('should enable subtipo select when event type is selected', () => {
+      render(
+        <CalendarView
+          {...defaultProps}
+          eventTypes={mockEventTypes}
+          locations={mockLocations}
+          selectedEventType={1}
+        />
+      )
+
+      expect(screen.getByTestId('select-subtipo')).not.toHaveAttribute('data-disabled', 'true')
     })
   })
 })

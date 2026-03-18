@@ -6,6 +6,7 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import useSWR from 'swr';
 
 import { AdminDashboardContainer } from '@/features/entity-admin/components/smart/AdminDashboardContainer';
 import * as useAdminStatsModule from '@/features/entity-admin/hooks/useAdminStats';
@@ -17,6 +18,10 @@ import type { Event } from '@/types/event.types';
 jest.mock('@/features/entity-admin/hooks/useAdminStats');
 jest.mock('@/features/entity-admin/hooks/useEventManagement');
 jest.mock('@/features/events/hooks/useEventManager');
+jest.mock('swr', () => {
+  const actual = jest.requireActual('swr');
+  return { ...actual, __esModule: true, default: jest.fn() };
+});
 
 
 describe('AdminDashboardContainer', () => {
@@ -140,11 +145,17 @@ describe('AdminDashboardContainer', () => {
     refreshData: jest.fn(),
   };
 
+  const mockEventTypes = [
+    { id: 1, name: 'Conferencia', is_active: true },
+    { id: 2, name: 'Taller', is_active: true },
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useAdminStatsModule.useAdminStats as jest.Mock).mockReturnValue(mockUseAdminStats);
     (useEventManagementModule.useEventManagement as jest.Mock).mockReturnValue(mockUseEventManagement);
     (useEventManagerModule.useEventManager as jest.Mock).mockReturnValue(mockUseEventManager);
+    (useSWR as jest.Mock).mockReturnValue({ data: { data: mockEventTypes }, error: null, isLoading: false });
   });
 
   test('renders stats summary bar', () => {
@@ -309,5 +320,59 @@ describe('AdminDashboardContainer', () => {
 
     // The onSuccess callback should be defined and will trigger stats refetch
     expect(mockUseAdminStats.refetch).toBeDefined();
+  });
+
+  test('renders search input', () => {
+    render(<AdminDashboardContainer />);
+
+    expect(screen.getByPlaceholderText('Buscar por título o descripción…')).toBeInTheDocument();
+  });
+
+  test('calls updateFilters with search value on search input change', () => {
+    render(<AdminDashboardContainer />);
+
+    const searchInput = screen.getByPlaceholderText('Buscar por título o descripción…');
+    fireEvent.change(searchInput, { target: { value: 'jazz' } });
+
+    expect(mockUseEventManager.updateFilters).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'jazz' })
+    );
+  });
+
+  test('renders event type select with options from SWR', () => {
+    render(<AdminDashboardContainer />);
+
+    // The select button should show the placeholder
+    expect(screen.getByText('Todos los tipos')).toBeInTheDocument();
+  });
+
+  test('clears search and event type when clear filters is clicked', () => {
+    (useEventManagerModule.useEventManager as jest.Mock).mockReturnValue({
+      ...mockUseEventManager,
+      events: [],
+    });
+
+    render(<AdminDashboardContainer />);
+
+    // Type in search first
+    const searchInput = screen.getByPlaceholderText('Buscar por título o descripción…');
+    fireEvent.change(searchInput, { target: { value: 'test' } });
+
+    // Apply a status filter to make clear filters button visible
+    const filterButtons = screen.getAllByText('Pend. Interno');
+    fireEvent.click(filterButtons[0]);
+
+    // Click clear filters
+    const clearButton = screen.getByText('Limpiar filtros');
+    fireEvent.click(clearButton);
+
+    expect(mockUseEventManager.updateFilters).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: undefined,
+        show_past: undefined,
+        search: undefined,
+        event_type_id: undefined,
+      })
+    );
   });
 });

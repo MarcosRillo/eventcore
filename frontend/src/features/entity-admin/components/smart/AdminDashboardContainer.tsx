@@ -15,6 +15,7 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
+import useSWR from 'swr';
 
 import { AdminDashboard } from '@/features/entity-admin/components/dumb/AdminDashboard';
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
@@ -24,8 +25,9 @@ import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
+import { apiFetcher, eventKeys } from '@/lib/swr';
 import type { ApprovalHistoryEntry } from '@/types/event.types';
-import type { Event, EventStatusCode } from '@/types/event.types';
+import type { Event, EventStatusCode, EventTypeInfo } from '@/types/event.types';
 
 const EMPTY_HISTORY: ApprovalHistoryEntry[] = [];
 
@@ -52,6 +54,15 @@ interface AdminDashboardContainerProps {
 export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContainerProps) => {
   const [activeFilter, setActiveFilter] = useState<EventStatusCode | null>(null);
   const [timeScope, setTimeScope] = useState<'upcoming' | 'past'>('upcoming');
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedEventTypeId, setSelectedEventTypeId] = useState<number | null>(null);
+
+  // Fetch event types for filter dropdown
+  const { data: eventTypesData } = useSWR<{ data: EventTypeInfo[] }>(
+    eventKeys.types.active,
+    apiFetcher,
+  );
+  const eventTypes = eventTypesData?.data ?? [];
 
   const {
     stats,
@@ -141,11 +152,25 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
     refreshData();
   }, [refreshData]);
 
+  // Handle search change
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchValue(value);
+    updateFilters({ search: value || undefined });
+  }, [updateFilters]);
+
+  // Handle event type filter change
+  const handleEventTypeChange = useCallback((eventTypeId: number | null) => {
+    setSelectedEventTypeId(eventTypeId);
+    updateFilters({ event_type_id: eventTypeId || undefined });
+  }, [updateFilters]);
+
   // Handle clear filters
   const handleClearFilters = useCallback(() => {
     setActiveFilter(null);
     setTimeScope('upcoming');
-    updateFilters({ status: undefined, show_past: undefined });
+    setSearchValue('');
+    setSelectedEventTypeId(null);
+    updateFilters({ status: undefined, show_past: undefined, search: undefined, event_type_id: undefined });
   }, [updateFilters]);
 
   return (
@@ -166,6 +191,13 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
 
       // Pagination
       pagination={pagination}
+
+      // Search & type filter
+      searchValue={searchValue}
+      onSearchChange={handleSearchChange}
+      eventTypes={eventTypes}
+      selectedEventTypeId={selectedEventTypeId}
+      onEventTypeChange={handleEventTypeChange}
 
       // Handlers
       onStatClick={handleFilterChange}
