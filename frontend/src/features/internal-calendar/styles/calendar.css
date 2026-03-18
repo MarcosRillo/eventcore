@@ -50,13 +50,13 @@
 .rbc-month-view {
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  overflow-y: auto; /* Allow scroll for 6-week months */
+  overflow: hidden;
   background-color: white;
 }
 
 /* Consistent row height across all months */
 .rbc-month-row {
-  min-height: 133px; /* Ensures ~3 events visible regardless of weeks in month */
+  min-height: 140px; /* 4 slots: 3 events + "+more" link */
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -124,6 +124,7 @@
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .rbc-event.rbc-selected {
