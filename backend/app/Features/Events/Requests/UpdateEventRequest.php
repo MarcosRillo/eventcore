@@ -94,9 +94,9 @@ class UpdateEventRequest extends FormRequest
                 Rule::exists('locations', 'id')->where(function ($query) {
                     $user = $this->user();
                     if ($user) {
-                        $organization = $user->organizations()->first();
-                        if ($organization) {
-                            $query->where('entity_id', $organization->id);
+                        $organizationId = $user->organization_id;
+                        if ($organizationId) {
+                            $query->where('entity_id', $organizationId);
                         } else {
                             $query->where('id', null);
                         }

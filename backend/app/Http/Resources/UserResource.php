@@ -19,13 +19,13 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'status' => $this->status,
-            'role' => $this->role ? [
+            'role' => $this->whenLoaded('role', fn () => [
                 'id' => $this->role->id,
                 'role_code' => $this->role->role_code,
                 'role_name' => $this->role->role_name,
                 'description' => $this->role->description,
                 'permissions' => $this->role->permissions ?? [],
-            ] : null,
+            ]),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];

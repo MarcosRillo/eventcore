@@ -55,7 +55,7 @@ class InternalCalendarService
 
         // For planning view: all authenticated users with these roles can see all events
         // This enables organizer_admin to view all organizations' events for date coordination
-        $userRoleCode = $user?->role?->role_code;
+        $userRoleCode = $user?->getRoleCode();
         if ($userRoleCode && in_array($userRoleCode, self::PRIVILEGED_ROLES)) {
             $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
         }
@@ -85,7 +85,7 @@ class InternalCalendarService
 
         // For planning view: all authenticated users with these roles can see all events
         // This enables organizer_admin to view any organization's event details
-        $userRoleCode = $user?->role?->role_code;
+        $userRoleCode = $user?->getRoleCode();
         if ($userRoleCode && in_array($userRoleCode, self::PRIVILEGED_ROLES)) {
             $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
         }

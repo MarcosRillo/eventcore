@@ -73,18 +73,13 @@ class TenantScope implements Scope
     /**
      * Get the user's primary organization ID.
      *
-     * For now, we'll get the first organization the user belongs to.
-     * In the future, this could be enhanced to support multiple organizations
-     * or a "current selected organization" concept.
-     *
-     * @param  User  $user
+     * Delegates to User::getOrganizationIdAttribute() which uses loadMissing()
+     * to cache the organizations collection — avoids repeated queries when
+     * TenantScope is applied to multiple models in the same request.
      */
-    private function getUserOrganizationId($user): ?int
+    private function getUserOrganizationId(User $user): ?int
     {
-        // Get the first organization the user belongs to
-        $organization = $user->organizations()->first();
-
-        return $organization ? $organization->id : null;
+        return $user->organization_id;
     }
 
     /**

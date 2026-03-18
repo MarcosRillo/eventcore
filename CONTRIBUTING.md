@@ -312,6 +312,40 @@ test('displays event title and allows editing', () => {
 })
 ```
 
+### N+1 Query Prevention
+
+**`preventLazyLoading()` is active in development and tests.** Any lazy-loaded relationship
+throws `LazyLoadingViolationException` immediately — the test fails, the dev sees the exact
+model and relation. This is the primary guardrail.
+
+**Rules:**
+1. **Always** use `->with()` to eager-load relations you'll access after the query
+2. **Always** use `whenLoaded()` in API Resources (never access relations directly)
+3. **Never** access `$model->relation` without ensuring it's eager-loaded
+4. **Use** `$user->organization_id` (cached accessor) instead of `$user->organizations()->first()->id`
+5. **Use** `$user->getRoleCode()` instead of `$user->role?->role_code`
+
+**In tests:** Use `assertMaxQueries()` for critical endpoints:
+
+```php
+use Tests\Concerns\AssertsQueryCount;
+
+class MyTest extends TestCase
+{
+    use AssertsQueryCount;
+
+    public function test_endpoint_query_budget(): void
+    {
+        // Seed 20 records, assert constant query count
+        $this->assertMaxQueries(10, function () {
+            $this->getJson('/api/v1/my-endpoint')->assertOk();
+        });
+    }
+}
+```
+
+See `tests/Feature/Performance/QueryCountTest.php` for examples.
+
 ### Test Coverage Targets
 
 - Backend: >60% on Services and Controllers

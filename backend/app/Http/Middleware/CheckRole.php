@@ -25,7 +25,7 @@ class CheckRole
         }
 
         // Obtener el role_code del usuario (identificador interno, no cambia)
-        $userRoleCode = $user->role?->role_code;
+        $userRoleCode = $user->getRoleCode();
 
         if (! $userRoleCode) {
             Log::warning('CheckRole: User has no role', ['user_id' => $user->id]);

@@ -21,15 +21,15 @@ class OrganizationService
      */
     public function getLinkedOrganizations(User $user, array $filters = []): LengthAwarePaginator
     {
-        // Get the user's primary organization (the entity)
-        $entity = $user->organizations()->first();
+        // Get the user's primary organization ID (cached via loadMissing)
+        $entityId = $user->organization_id;
 
-        if (! $entity) {
+        if (! $entityId) {
             throw new \RuntimeException('User is not associated with any organization');
         }
 
         $query = Organization::query()
-            ->where('parent_id', $entity->id)
+            ->where('parent_id', $entityId)
             ->with(['status', 'type', 'users']);
 
         // Add event metrics via subqueries
@@ -68,14 +68,14 @@ class OrganizationService
     public function getOrganizationDetail(int $organizationId, User $user): Organization
     {
         // Verify the organization belongs to the user's entity
-        $entity = $user->organizations()->first();
+        $entityId = $user->organization_id;
 
-        if (! $entity) {
+        if (! $entityId) {
             throw new \RuntimeException('User is not associated with any organization');
         }
 
         $organization = Organization::where('id', $organizationId)
-            ->where('parent_id', $entity->id)
+            ->where('parent_id', $entityId)
             ->with(['status', 'type', 'users.role'])
             ->withCount([
                 'events as events_total',
@@ -108,14 +108,14 @@ class OrganizationService
     {
         return DB::transaction(function () use ($organizationId, $user) {
             // Verify the organization belongs to the user's entity
-            $entity = $user->organizations()->first();
+            $entityId = $user->organization_id;
 
-            if (! $entity) {
+            if (! $entityId) {
                 throw new \RuntimeException('User is not associated with any organization');
             }
 
             $organization = Organization::where('id', $organizationId)
-                ->where('parent_id', $entity->id)
+                ->where('parent_id', $entityId)
                 ->with('status')
                 ->first();
 

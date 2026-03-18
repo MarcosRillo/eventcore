@@ -25,15 +25,18 @@ class RegistrationRequestResource extends JsonResource
             'website' => $this->website,
             'motivation' => $this->motivation,
             'status' => $this->status,
-            'reviewed_by' => $this->reviewer?->name,
+            'reviewed_by' => $this->whenLoaded('reviewer', fn () => $this->reviewer->name),
             'reviewed_at' => $this->reviewed_at?->toIso8601String(),
             'rejection_reason' => $this->rejection_reason,
             'created_at' => $this->created_at->toIso8601String(),
             'user_id' => $this->user_id,
             'organization_id' => $this->organization_id,
-            'user_status' => $this->user?->status,
-            'organization_status' => $this->organization?->status?->status_code ?? null,
-            'is_deleted' => $this->user?->trashed() ?? false,
+            'user_status' => $this->whenLoaded('user', fn () => $this->user->status),
+            'organization_status' => $this->whenLoaded('organization', fn () => $this->organization->relationLoaded('status')
+                ? $this->organization->status?->status_code
+                : null,
+            ),
+            'is_deleted' => $this->whenLoaded('user', fn () => $this->user->trashed(), false),
         ];
     }
 }

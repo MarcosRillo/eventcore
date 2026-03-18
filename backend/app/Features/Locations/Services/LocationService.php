@@ -65,10 +65,10 @@ class LocationService
     {
         try {
             return DB::transaction(function () use ($data, $user) {
-                // Get the user's primary organization
-                $organization = $user->organizations()->first();
+                // Get the user's primary organization ID (cached via loadMissing)
+                $organizationId = $user->organization_id;
 
-                if (! $organization) {
+                if (! $organizationId) {
                     throw new \Exception('User is not associated with any organization');
                 }
 
@@ -86,7 +86,7 @@ class LocationService
                     'phone' => $data['phone'] ?? null,
                     'email' => $data['email'] ?? null,
                     'additional_info' => $data['additional_info'] ?? null,
-                    'entity_id' => $organization->id,
+                    'entity_id' => $organizationId,
                     'is_active' => $data['is_active'] ?? true,
                 ];
 

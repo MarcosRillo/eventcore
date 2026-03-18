@@ -53,15 +53,15 @@ class EventTypeService
     {
         try {
             return DB::transaction(function () use ($data, $user) {
-                $organization = $user->organizations()->first();
+                $organizationId = $user->organization_id;
 
-                if (! $organization) {
+                if (! $organizationId) {
                     throw new \Exception('User is not associated with any organization');
                 }
 
                 $eventTypeData = [
                     'name' => $data['name'],
-                    'entity_id' => $organization->id,
+                    'entity_id' => $organizationId,
                     'color' => $data['color'],
                     'is_active' => $data['is_active'] ?? true,
                 ];

@@ -65,6 +65,8 @@ class InvitationService
             // Store plain token temporarily for email (selector + validator)
             $invitation->plain_token = $selector.$validator;
 
+            $invitation->load(['role', 'inviter']);
+
             Log::info('Invitation sent', [
                 'invitation_id' => $invitation->id,
                 'email' => $invitation->email,
@@ -72,7 +74,7 @@ class InvitationService
                 'invited_by' => $invitedBy->id,
             ]);
 
-            return $invitation->load(['role', 'inviter']);
+            return $invitation;
         });
     }
 
@@ -100,13 +102,14 @@ class InvitationService
 
             // If the inviter belongs to an organization, associate the new user
             $inviter = $invitation->inviter;
-            if ($inviter && $inviter->organizations()->exists()) {
-                $organizationId = $inviter->organizations()->first()->id;
-                $user->organizations()->attach($organizationId);
+            if ($inviter && $inviter->organization_id) {
+                $user->organizations()->attach($inviter->organization_id);
             }
 
             // Mark invitation as accepted
             $invitation->update(['accepted_at' => now()]);
+
+            $user->load('role');
 
             Log::info('Invitation accepted, user created', [
                 'user_id' => $user->id,
@@ -115,7 +118,7 @@ class InvitationService
                 'invitation_id' => $invitation->id,
             ]);
 
-            return $user->load('role');
+            return $user;
         });
     }
 
@@ -209,6 +212,7 @@ class InvitationService
 
             // Send notification with new token
             $plainToken = $selector.$validator;
+            $invitation->load(['role', 'inviter']);
             $invitation->notify(new InvitationNotification($plainToken));
 
             Log::info('Invitation resent', [
@@ -217,7 +221,7 @@ class InvitationService
                 'resent_by' => $requestedBy->id,
             ]);
 
-            return $invitation->fresh()->load(['role', 'inviter']);
+            return $invitation;
         });
     }
 
@@ -251,7 +255,7 @@ class InvitationService
      */
     private function validateInvitationPermission(User $inviter, int $roleId): void
     {
-        $inviterRole = $inviter->role?->role_code;
+        $inviterRole = $inviter->getRoleCode();
         $targetRole = UserRole::find($roleId)?->role_code;
 
         if (! $inviterRole || ! $targetRole) {

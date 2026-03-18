@@ -182,7 +182,7 @@ class ApprovalService
      * Get approval statistics.
      * Uses single query with JOIN and groupBy for O(1) performance.
      *
-     * @param bool $showPast If true, count only past events. If false, count only upcoming events.
+     * @param  bool  $showPast  If true, count only past events. If false, count only upcoming events.
      */
     public function getApprovalStatistics(bool $showPast = false): array
     {

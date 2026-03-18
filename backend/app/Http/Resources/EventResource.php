@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Event Resource
@@ -210,8 +211,10 @@ class EventResource extends JsonResource
 
         return [
             'meta' => [
-                'available_statuses' => \App\Models\EventStatus::all(['id', 'status_name', 'status_code']),
-                'available_formats' => \App\Models\EventFormat::all(['id', 'format_name', 'format_code']),
+                'available_statuses' => Cache::rememberForever('event_statuses', fn () => \App\Models\EventStatus::all(['id', 'status_name', 'status_code']),
+                ),
+                'available_formats' => Cache::rememberForever('event_formats', fn () => \App\Models\EventFormat::all(['id', 'format_name', 'format_code']),
+                ),
             ],
         ];
     }

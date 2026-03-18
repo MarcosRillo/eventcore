@@ -65,11 +65,14 @@ class User extends Authenticatable
 
     /**
      * Get the user's primary organization (first organization).
-     * Helper method for organizer_admin users.
+     * Uses loadMissing to avoid repeated queries — the collection is cached
+     * on the model instance after the first load.
      */
-    public function getOrganizationIdAttribute()
+    public function getOrganizationIdAttribute(): ?int
     {
-        return $this->organizations()->first()?->id;
+        $this->loadMissing('organizations');
+
+        return $this->organizations->first()?->id;
     }
 
     /**
@@ -81,11 +84,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the role_code for this user, eager-loading the role relation if needed.
+     * Uses loadMissing to avoid lazy loading violations and repeated queries.
+     */
+    public function getRoleCode(): ?string
+    {
+        $this->loadMissing('role');
+
+        return $this->role?->role_code;
+    }
+
+    /**
      * Check if the user is a platform admin.
      */
     public function isPlatformAdmin(): bool
     {
-        return $this->role?->role_code === 'platform_admin';
+        return $this->getRoleCode() === 'platform_admin';
     }
 
     /**
@@ -93,7 +107,7 @@ class User extends Authenticatable
      */
     public function isEntityAdmin(): bool
     {
-        return $this->role?->role_code === 'entity_admin';
+        return $this->getRoleCode() === 'entity_admin';
     }
 
     /**
@@ -101,7 +115,7 @@ class User extends Authenticatable
      */
     public function isEntityStaff(): bool
     {
-        return $this->role?->role_code === 'entity_staff';
+        return $this->getRoleCode() === 'entity_staff';
     }
 
     /**
@@ -109,7 +123,7 @@ class User extends Authenticatable
      */
     public function isOrganizerAdmin(): bool
     {
-        return $this->role?->role_code === 'organizer_admin';
+        return $this->getRoleCode() === 'organizer_admin';
     }
 
     /**
@@ -117,7 +131,7 @@ class User extends Authenticatable
      */
     public function hasAdminPrivileges(): bool
     {
-        return in_array($this->role?->role_code, ['platform_admin', 'entity_admin']);
+        return in_array($this->getRoleCode(), ['platform_admin', 'entity_admin']);
     }
 
     /**

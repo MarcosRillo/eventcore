@@ -91,9 +91,9 @@ class StoreEventRequest extends FormRequest
                 Rule::exists('locations', 'id')->where(function ($query) {
                     $user = $this->user();
                     if ($user) {
-                        $organization = $user->organizations()->first();
-                        if ($organization) {
-                            $query->where('entity_id', $organization->id);
+                        $organizationId = $user->organization_id;
+                        if ($organizationId) {
+                            $query->where('entity_id', $organizationId);
                         } else {
                             $query->where('id', null);
                         }
@@ -251,9 +251,9 @@ class StoreEventRequest extends FormRequest
         // Get entity_id from user's organization (same logic as TenantScope)
         $user = $this->user();
         if ($user) {
-            $organization = $user->organizations()->first();
-            if ($organization) {
-                $data['entity_id'] = $organization->id;
+            $organizationId = $user->organization_id;
+            if ($organizationId) {
+                $data['entity_id'] = $organizationId;
             }
         }
 

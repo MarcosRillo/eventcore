@@ -134,7 +134,7 @@ class InternalCalendarStatsService
     private function shouldBypassTenantScope(): bool
     {
         $user = Auth::user();
-        $roleCode = $user?->role?->role_code;
+        $roleCode = $user?->getRoleCode();
 
         return $roleCode && in_array($roleCode, InternalCalendarService::PRIVILEGED_ROLES);
     }

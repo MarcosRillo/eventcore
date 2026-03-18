@@ -227,7 +227,7 @@ class RegistrationRequestService
      */
     public function suspendApprovedRequest(int $id, User $admin): RegistrationRequest
     {
-        $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
+        $request = RegistrationRequest::with(['user', 'organization.status'])->findOrFail($id);
 
         if (! $request->isApproved()) {
             throw ValidationException::withMessages([
@@ -262,7 +262,7 @@ class RegistrationRequestService
                 'admin_id' => $admin->id,
             ]);
 
-            return $request->load(['user', 'organization', 'reviewer']);
+            return $request->load(['user', 'organization.status', 'reviewer']);
         });
     }
 
@@ -271,7 +271,7 @@ class RegistrationRequestService
      */
     public function unsuspendApprovedRequest(int $id, User $admin): RegistrationRequest
     {
-        $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
+        $request = RegistrationRequest::with(['user', 'organization.status'])->findOrFail($id);
 
         if (! $request->isApproved()) {
             throw ValidationException::withMessages([
@@ -306,7 +306,7 @@ class RegistrationRequestService
                 'admin_id' => $admin->id,
             ]);
 
-            return $request->load(['user', 'organization', 'reviewer']);
+            return $request->load(['user', 'organization.status', 'reviewer']);
         });
     }
 
@@ -316,7 +316,7 @@ class RegistrationRequestService
      */
     public function deleteApprovedRequest(int $id, User $admin): void
     {
-        $request = RegistrationRequest::with(['user', 'organization'])->findOrFail($id);
+        $request = RegistrationRequest::with(['user', 'organization.status'])->findOrFail($id);
 
         if (! $request->isApproved()) {
             throw ValidationException::withMessages([

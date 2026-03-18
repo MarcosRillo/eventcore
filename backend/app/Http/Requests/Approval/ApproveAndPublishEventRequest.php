@@ -11,7 +11,7 @@ class ApproveAndPublishEventRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $userRole = $this->user()?->role?->role_code;
+        $userRole = $this->user()?->getRoleCode();
 
         return in_array($userRole, ['entity_admin', 'entity_staff']);
     }

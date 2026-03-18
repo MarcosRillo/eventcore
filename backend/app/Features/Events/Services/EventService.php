@@ -78,11 +78,11 @@ class EventService
 
             // Get the user's primary organization for entity_id if not provided
             if (! isset($data['entity_id'])) {
-                $organization = $user->organizations()->first();
-                if (! $organization) {
+                $organizationId = $user->organization_id;
+                if (! $organizationId) {
                     throw new \Exception('User must belong to an organization to create events.');
                 }
-                $data['entity_id'] = $organization->id;
+                $data['entity_id'] = $organizationId;
             }
 
             // Auto-compute created_by from authenticated user
@@ -161,7 +161,7 @@ class EventService
      */
     public function getEventsByStatus(string $statusCode, array $filters = []): LengthAwarePaginator
     {
-        $query = Event::query();
+        $query = Event::query()->with('status');
 
         // Apply entity filter
         $this->applyScopeFilter($query);
@@ -190,7 +190,7 @@ class EventService
      */
     public function getUpcomingEvents(array $filters = []): LengthAwarePaginator
     {
-        $query = Event::query();
+        $query = Event::query()->with('status');
 
         // Apply entity filter
         $this->applyScopeFilter($query);
@@ -215,7 +215,7 @@ class EventService
      */
     public function getFeaturedEvents(array $filters = []): LengthAwarePaginator
     {
-        $query = Event::query();
+        $query = Event::query()->with('status');
 
         // Apply entity filter
         $this->applyScopeFilter($query);
