@@ -35,7 +35,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento aprobado internamente',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($event->fresh()->load(['status', 'approvals'])),
         ]);
     }
 
@@ -54,7 +54,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento aprobado y publicado exitosamente',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($event->fresh()->load(['status', 'approvals'])),
         ]);
     }
 
@@ -73,7 +73,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Aprobación pública solicitada',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($event->fresh()->load(['status', 'approvals'])),
         ]);
     }
 
@@ -92,7 +92,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento publicado exitosamente',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($event->fresh()->load(['status', 'approvals'])),
         ]);
     }
 
@@ -111,7 +111,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Cambios solicitados',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($event->fresh()->load(['status', 'approvals'])),
         ]);
     }
 
@@ -130,7 +130,7 @@ class ApprovalController extends Controller
 
         return response()->json([
             'message' => 'Evento rechazado',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($event->fresh()->load(['status', 'approvals'])),
         ]);
     }
 

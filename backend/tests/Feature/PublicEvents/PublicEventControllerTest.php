@@ -865,7 +865,7 @@ class PublicEventControllerTest extends TestCase
             ],
         ]);
         // Verify sensitive admin fields are NOT exposed to public
-        $response->assertJsonMissing(['approval_comments', 'approval_history']);
+        $response->assertJsonMissing(['approval_history']);
         $this->assertArrayNotHasKey('status_id', $response->json('data'));
         $this->assertArrayNotHasKey('created_by', $response->json('data'));
         $this->assertArrayNotHasKey('approved_by', $response->json('data'));

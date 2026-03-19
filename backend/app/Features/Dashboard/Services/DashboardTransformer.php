@@ -109,8 +109,14 @@ class DashboardTransformer
             'is_featured' => $event->is_featured,
             'max_attendees' => $event->max_attendees,
             'metadata' => $event->metadata,
-            'approval_comments' => $event->approval_comments,
-            'approval_history' => $event->approval_history,
+            'approval_history' => $event->relationLoaded('approvals')
+                ? $event->approvals->map(fn ($a) => [
+                    'action' => $a->action,
+                    'user_id' => $a->performed_by,
+                    'comment' => $a->comments,
+                    'timestamp' => $a->performed_at->toISOString(),
+                ])->toArray()
+                : [],
             'creator' => $event->creator ? [
                 'id' => $event->creator->id,
                 'name' => $event->creator->name,

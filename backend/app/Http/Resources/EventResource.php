@@ -181,9 +181,13 @@ class EventResource extends JsonResource
                     'rotation_type_id' => $this->rotation_type_id,
                     'producer_id' => $this->producer_id,
 
-                    // Approval workflow
-                    'approval_comments' => $this->approval_comments,
-                    'approval_history' => $this->approval_history,
+                    // Approval workflow (from normalized event_approvals table)
+                    'approval_history' => $this->whenLoaded('approvals', fn () => $this->approvals->map(fn ($a) => [
+                        'action' => $a->action,
+                        'user_id' => $a->performed_by,
+                        'comment' => $a->comments,
+                        'timestamp' => $a->performed_at->toISOString(),
+                    ])),
                     'created_by' => $this->created_by,
                     'approved_by' => $this->approved_by,
                     'approved_at' => $this->approved_at?->toISOString(),

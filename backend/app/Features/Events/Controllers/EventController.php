@@ -82,7 +82,7 @@ class EventController extends Controller
     public function show(Request $request, string $id)
     {
         $event = Event::withoutGlobalScopes()
-            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
+            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations', 'approvals'])
             ->findOrFail($id);
 
         Gate::authorize('view', $event);

@@ -106,7 +106,6 @@ export interface EventDetail extends DashboardEvent {
   cta_text?: string;
   max_attendees?: number;
   metadata?: EventMetadata;
-  approval_comments?: string;
   approval_history?: ApprovalHistoryEntry[];
   creator?: EventUser;
   approver?: EventUser;

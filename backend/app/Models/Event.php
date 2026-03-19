@@ -45,8 +45,6 @@ class Event extends Model
         'event_subtype_id',
 
         // Approval workflow
-        'approval_comments',
-        'approval_history',
         'created_by',
         'approved_by',
         'approved_at',
@@ -89,7 +87,6 @@ class Event extends Model
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'approval_history' => 'array',
         'is_featured' => 'boolean',
         'approved_at' => 'datetime',
         'published_at' => 'datetime',
@@ -536,23 +533,6 @@ class Event extends Model
     public function hasCTA(): bool
     {
         return ! empty($this->cta_link);
-    }
-
-    /**
-     * Add an entry to the approval history.
-     */
-    public function addApprovalHistoryEntry(string $action, int $userId, ?string $comment = null): void
-    {
-        $history = $this->approval_history ?? [];
-
-        $history[] = [
-            'action' => $action,
-            'user_id' => $userId,
-            'comment' => $comment,
-            'timestamp' => now()->toISOString(),
-        ];
-
-        $this->approval_history = $history;
     }
 
     /**

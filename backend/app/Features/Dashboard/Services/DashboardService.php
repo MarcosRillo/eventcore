@@ -110,6 +110,7 @@ class DashboardService
             'locations',
             'creator',
             'approver',
+            'approvals',
         ])->find($eventId);
 
         if (! $event) {

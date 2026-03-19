@@ -175,7 +175,6 @@ export interface Event {
   created_by?: number;
   approved_by?: number;
   approved_at?: string;
-  approval_comments?: string;
   approval_history: ApprovalHistoryEntry[];
   
   // Relationships for approval workflow
