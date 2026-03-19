@@ -46,8 +46,10 @@ Route::prefix('v1')->group(function () {
     // Refresh: 10 attempts per minute (higher than login since it's automated)
     Route::post('/auth/refresh', [AuthController::class, 'refresh'])
         ->middleware('throttle:10,1');
-    Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    Route::get('/auth/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
+    Route::post('/auth/logout', [AuthController::class, 'logout'])
+        ->middleware(['auth:sanctum', 'throttle:authenticated']);
+    Route::get('/auth/me', [AuthController::class, 'me'])
+        ->middleware(['auth:sanctum', 'throttle:authenticated']);
 
     // ===== INVITATIONS (public endpoints) =====
     // Validate: 30 per minute (may be called multiple times during form load)
@@ -75,7 +77,7 @@ Route::prefix('v1')->group(function () {
 
     // Protected routes con roles específicos
     // 'active' middleware blocks suspended users from accessing any protected route
-    Route::middleware(['auth:sanctum', 'active'])->group(function () {
+    Route::middleware(['auth:sanctum', 'active', 'throttle:authenticated'])->group(function () {
 
         // ===== PLATFORM ADMIN + ENTITY ADMIN =====
         // Full CRUD, admin features (NO entity_staff - admin-only operations)
@@ -242,17 +244,22 @@ Route::prefix('v1')->group(function () {
     });
 
     // ===== PUBLIC ROUTES (sin autenticación) =====
-    Route::prefix('public')->group(function () {
-        // Stats
-        Route::get('stats', [PublicEventController::class, 'stats']);
+    // 60 req/min por IP (group-level), 20 req/min para queries costosos (per-route)
+    Route::prefix('public')->middleware('throttle:public')->group(function () {
+        // Stats — heavy query (multiple COUNTs)
+        Route::get('stats', [PublicEventController::class, 'stats'])
+            ->middleware('throttle:public-heavy');
 
         // Events
         Route::get('events', [PublicEventController::class, 'index']);
         Route::get('events/upcoming', [PublicEventController::class, 'upcoming']);
         Route::get('events/featured', [PublicEventController::class, 'featured']);
-        Route::get('events/search', [PublicEventController::class, 'search']);
-        Route::get('events/calendar/{year}/{month}', [PublicEventController::class, 'calendarMonth']);
-        Route::get('events/date-range', [PublicEventController::class, 'dateRange']);
+        Route::get('events/search', [PublicEventController::class, 'search'])
+            ->middleware('throttle:public-heavy');
+        Route::get('events/calendar/{year}/{month}', [PublicEventController::class, 'calendarMonth'])
+            ->middleware('throttle:public-heavy');
+        Route::get('events/date-range', [PublicEventController::class, 'dateRange'])
+            ->middleware('throttle:public-heavy');
         Route::get('events/{id}', [PublicEventController::class, 'show']);
 
         // Locations
@@ -266,5 +273,6 @@ Route::prefix('v1')->group(function () {
     });
 
     // Legacy public routes (keep for backward compatibility)
-    Route::get('events/public', [PublicEventController::class, 'index']);
+    Route::get('events/public', [PublicEventController::class, 'index'])
+        ->middleware('throttle:public');
 });

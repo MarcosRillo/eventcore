@@ -116,7 +116,7 @@ class QueryCountTest extends TestCase
             ]);
         }
 
-        // Higher budget: includes cache queries (rate limiting) + auth + TenantScope + eager loads
+        // Higher budget: auth + TenantScope + eager loads + format/status lookups
         $this->assertMaxQueries(20, function () {
             $this->getJson('/api/v1/internal-calendar/events')
                 ->assertOk();
@@ -134,10 +134,12 @@ class QueryCountTest extends TestCase
 
         $queriesWithFew = 0;
         $this->assertMaxQueries(100, function () use (&$queriesWithFew) {
-            // Count queries for 5 records
+            // Count queries for 5 records (excluding cache infrastructure queries)
             $queries = collect();
             \Illuminate\Support\Facades\DB::listen(function ($q) use ($queries) {
-                $queries->push($q->sql);
+                if (! str_contains($q->sql, '"cache"')) {
+                    $queries->push($q->sql);
+                }
             });
 
             $this->getJson('/api/v1/public/events')->assertOk();
@@ -152,7 +154,9 @@ class QueryCountTest extends TestCase
         $this->assertMaxQueries(100, function () use (&$queriesWithMany) {
             $queries = collect();
             \Illuminate\Support\Facades\DB::listen(function ($q) use ($queries) {
-                $queries->push($q->sql);
+                if (! str_contains($q->sql, '"cache"')) {
+                    $queries->push($q->sql);
+                }
             });
 
             $this->getJson('/api/v1/public/events')->assertOk();
