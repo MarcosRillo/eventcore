@@ -33,6 +33,10 @@ trait AssertsQueryCount
         $queries = new Collection;
 
         DB::listen(function ($query) use ($queries) {
+            // Exclude cache table queries (infrastructure: rate limiting, sessions)
+            if (str_contains($query->sql, '"cache"')) {
+                return;
+            }
             $queries->push($query->sql);
         });
 
