@@ -88,7 +88,41 @@ export default async function EventPage({ params }: EventPageProps) {
     const response = await publicApiClient.get<{data: Event}>(`/public/events/${eventId}`);
     const event = response.data.data;
 
-    return <EventDetailPage event={event} />;
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: event.title,
+      startDate: event.start_date,
+      endDate: event.end_date || event.start_date,
+      description: event.description?.replace(/<[^>]*>/g, '').substring(0, 500) || '',
+      ...(event.featured_image && { image: event.featured_image }),
+      ...(event.location && {
+        location: {
+          '@type': 'Place',
+          name: event.location.name,
+          ...(event.location.address && {
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: event.location.address,
+            },
+          }),
+        },
+      }),
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    };
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+        <EventDetailPage event={event} />
+      </>
+    );
   } catch {
     notFound();
   }

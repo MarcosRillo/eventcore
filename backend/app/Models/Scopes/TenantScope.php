@@ -55,8 +55,12 @@ class TenantScope implements Scope
             ];
 
             if (in_array($modelClass, $entityOwnedModels)) {
-                // Organizadores ven TODOS los recursos del ente (entity_id = 1)
-                $builder->where('entity_id', 1);
+                // Organizadores ven los recursos de su ente (parent entity)
+                $entityId = $this->getEntityIdForOrganizer($user);
+
+                if ($entityId) {
+                    $builder->where('entity_id', $entityId);
+                }
 
                 return;
             }
@@ -80,6 +84,20 @@ class TenantScope implements Scope
     private function getUserOrganizationId(User $user): ?int
     {
         return $user->organization_id;
+    }
+
+    /**
+     * Get the parent entity ID for an organizer's organization.
+     *
+     * Organizer organizations have a parent_id pointing to the entity they belong to.
+     * Uses loadMissing to cache and avoid repeated queries within the same request.
+     */
+    private function getEntityIdForOrganizer(User $user): ?int
+    {
+        $user->loadMissing('organizations.parentEntity');
+        $org = $user->organizations->first();
+
+        return $org?->parent_id ?? $org?->id;
     }
 
     /**
