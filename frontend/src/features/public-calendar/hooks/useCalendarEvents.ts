@@ -4,9 +4,9 @@
  * Supports server-side initial data to avoid waterfall fetching
  */
 
-import { endOfMonth, format, startOfMonth } from 'date-fns'
+import { addMonths, endOfMonth, format, startOfMonth, subMonths } from 'date-fns'
 import { useCallback, useMemo, useState } from 'react'
-import useSWR from 'swr'
+import useSWR, { preload } from 'swr'
 
 import {
   CalendarEvent,
@@ -78,18 +78,18 @@ export const useCalendarEvents = (
   const [selectedEventSubtype, setSelectedEventSubtype] = useState<number | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
 
-  // SWR: Event types (static)
+  // SWR: Event types (quasi-static, 60s dedup)
   const { data: eventTypesData } = useSWR<{ data: EventType[] }>(
     publicEventKeys.types,
     publicFetcher,
-    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined }
+    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined, dedupingInterval: 60000 }
   )
 
-  // SWR: Locations (static)
+  // SWR: Locations (quasi-static, 60s dedup)
   const { data: locationsData } = useSWR<{ data: Location[] }>(
     publicEventKeys.locations,
     publicFetcher,
-    { fallbackData: initialLocations ? { data: initialLocations } : undefined }
+    { fallbackData: initialLocations ? { data: initialLocations } : undefined, dedupingInterval: 60000 }
   )
 
   // SWR: Subtypes (conditional on selected event type)
@@ -130,10 +130,27 @@ export const useCalendarEvents = (
     [eventsData]
   )
 
-  // Handle date navigation
+  // Build events key for a given date (used for preloading)
+  const buildEventsKey = useCallback((date: Date) => {
+    const start = startOfMonth(date)
+    const end = endOfMonth(date)
+    const params = new URLSearchParams()
+    params.set('start_date', format(start, 'yyyy-MM-dd'))
+    params.set('end_date', format(end, 'yyyy-MM-dd'))
+    params.set('page', '1')
+    params.set('per_page', '100')
+    if (selectedEventType) params.set('event_type_id', String(selectedEventType))
+    if (selectedEventSubtype) params.set('event_subtype_id', String(selectedEventSubtype))
+    if (selectedLocation) params.set('location_id', String(selectedLocation))
+    return publicEventKeys.list(params.toString())
+  }, [selectedEventType, selectedEventSubtype, selectedLocation])
+
+  // Handle date navigation — preload adjacent months
   const handleNavigate = useCallback((date: Date): void => {
     setCurrentDate(date)
-  }, [])
+    preload(buildEventsKey(addMonths(date, 1)), publicFetcher)
+    preload(buildEventsKey(subMonths(date, 1)), publicFetcher)
+  }, [buildEventsKey])
 
   // Handle view change
   const handleViewChange = useCallback((view: CalendarView): void => {

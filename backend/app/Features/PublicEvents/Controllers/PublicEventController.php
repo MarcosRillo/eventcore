@@ -152,12 +152,8 @@ class PublicEventController extends Controller
      */
     public function eventTypes(): JsonResponse
     {
-        $eventTypes = EventType::where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'color', 'is_active']);
-
         return response()->json([
-            'data' => $eventTypes,
+            'data' => $this->publicEventService->getActiveEventTypes(),
         ]);
     }
 
@@ -167,13 +163,8 @@ class PublicEventController extends Controller
      */
     public function eventSubtypes(EventType $eventType): JsonResponse
     {
-        $subtypes = $eventType->subtypes()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'event_type_id', 'is_active']);
-
         return response()->json([
-            'data' => $subtypes,
+            'data' => $this->publicEventService->getActiveSubtypes($eventType),
         ]);
     }
 }

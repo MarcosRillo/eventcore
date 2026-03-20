@@ -39,6 +39,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pgrep -x php-fpm > /dev/null || exit 1"]
       interval: 10s
@@ -89,6 +91,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Redis - Cache store
+  redis:
+    image: redis:7-alpine
+    container_name: plataforma-calendario-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    networks:
+      - plataforma-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   # MailHog - SMTP testing server
   mailhog:

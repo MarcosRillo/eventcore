@@ -15,7 +15,6 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
-import useSWR from 'swr';
 
 import { AdminDashboard } from '@/features/entity-admin/components/dumb/AdminDashboard';
 import { ApprovalActionPanel } from '@/features/entity-admin/components/dumb/ApprovalActionPanel';
@@ -24,10 +23,10 @@ import { EventInfoPanel } from '@/features/entity-admin/components/dumb/EventInf
 import { useAdminStats } from '@/features/entity-admin/hooks/useAdminStats';
 import { useEventManagement } from '@/features/entity-admin/hooks/useEventManagement';
 import type { AdminApprovalStats } from '@/features/entity-admin/types';
+import { useActiveEventTypes } from '@/features/event-types/hooks/useActiveEventTypes';
 import { useEventManager } from '@/features/events/hooks/useEventManager';
-import { apiFetcher, eventKeys } from '@/lib/swr';
 import type { ApprovalHistoryEntry } from '@/types/event.types';
-import type { Event, EventStatusCode, EventTypeInfo } from '@/types/event.types';
+import type { Event, EventStatusCode } from '@/types/event.types';
 
 const EMPTY_HISTORY: ApprovalHistoryEntry[] = [];
 
@@ -57,12 +56,8 @@ export const AdminDashboardContainer = ({ initialStats }: AdminDashboardContaine
   const [searchValue, setSearchValue] = useState('');
   const [selectedEventTypeId, setSelectedEventTypeId] = useState<number | null>(null);
 
-  // Fetch event types for filter dropdown
-  const { data: eventTypesData } = useSWR<{ data: EventTypeInfo[] }>(
-    eventKeys.types.active,
-    apiFetcher,
-  );
-  const eventTypes = eventTypesData?.data ?? [];
+  // Fetch event types for filter dropdown (shared hook, 60s dedup)
+  const { eventTypes } = useActiveEventTypes();
 
   const {
     stats,

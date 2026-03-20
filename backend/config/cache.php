@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Rate Limiter Cache Store
+    |--------------------------------------------------------------------------
+    |
+    | Rate limiting uses the database store to minimize Redis commands
+    | (Upstash free tier: 10K commands/day). Rate limiter operations
+    | are high-frequency but don't need Cache::tags().
+    |
+    */
+
+    'limiter' => 'database',
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------
     |

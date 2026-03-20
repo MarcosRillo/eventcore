@@ -59,11 +59,11 @@ export const usePublicEvents = (
     end_date: null
   })
 
-  // SWR: Event types (static)
+  // SWR: Event types (quasi-static, 60s dedup)
   const { data: eventTypesData } = useSWR<{ data: EventType[] }>(
     publicEventKeys.types,
     publicFetcher,
-    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined }
+    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined, dedupingInterval: 60000 }
   )
 
   // SWR: Subtypes (conditional on event_type_id)
@@ -72,11 +72,11 @@ export const usePublicEvents = (
     publicFetcher
   )
 
-  // SWR: Locations (static)
+  // SWR: Locations (quasi-static, 60s dedup)
   const { data: locationsData } = useSWR<{ data: Location[] }>(
     publicEventKeys.locations,
     publicFetcher,
-    { fallbackData: initialLocations ? { data: initialLocations } : undefined }
+    { fallbackData: initialLocations ? { data: initialLocations } : undefined, dedupingInterval: 60000 }
   )
 
   // SWR: Events (dynamic key with filters)

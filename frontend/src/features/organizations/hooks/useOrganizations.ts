@@ -21,6 +21,7 @@ interface UseOrganizationsReturn {
   organizations: Organization[]
   pagination: PaginationMeta | null
   loading: boolean
+  isValidating: boolean
   error: string | null
   filters: OrganizationFilters
   togglingId: number | null
@@ -67,9 +68,10 @@ export const useOrganizations = (): UseOrganizationsReturn => {
     return organizationKeys.list(params.toString())
   }, [isAuthenticated, authLoading, filters.page, filters.per_page, debouncedSearch, filters.status])
 
-  const { data, error: swrError, isLoading, mutate } = useSWR<OrganizationsResponse>(
+  const { data, error: swrError, isLoading, isValidating, mutate } = useSWR<OrganizationsResponse>(
     swrKey,
     apiFetcher,
+    { keepPreviousData: true },
   )
 
   // Derive organizations and pagination from SWR data
@@ -144,6 +146,7 @@ export const useOrganizations = (): UseOrganizationsReturn => {
     organizations,
     pagination,
     loading: isLoading,
+    isValidating,
     error,
     filters,
     togglingId,

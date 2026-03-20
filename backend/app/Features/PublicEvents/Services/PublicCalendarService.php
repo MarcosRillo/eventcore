@@ -2,10 +2,10 @@
 
 namespace App\Features\PublicEvents\Services;
 
+use App\Features\Shared\Traits\CachesWithTags;
 use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Public Calendar Service
@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class PublicCalendarService
 {
+    use CachesWithTags;
+
     /**
      * Cache TTL for calendar data (1 hour)
      */
@@ -36,7 +38,7 @@ class PublicCalendarService
 
         $cacheKey = "calendar.{$year}.{$month}";
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_CALENDAR, function () use ($year, $month) {
+        return $this->taggedRemember(['calendar'], $cacheKey, self::CACHE_TTL_CALENDAR, function () use ($year, $month) {
             $startDate = Carbon::create($year, $month, 1)->startOfDay();
             $endDate = $startDate->copy()->endOfMonth()->endOfDay();
 
@@ -85,7 +87,7 @@ class PublicCalendarService
      */
     public function clearMonthCache(int $year, int $month): void
     {
-        Cache::forget("calendar.{$year}.{$month}");
+        $this->flushTags(['calendar']);
     }
 
     /**

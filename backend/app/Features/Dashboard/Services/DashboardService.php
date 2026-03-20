@@ -2,6 +2,7 @@
 
 namespace App\Features\Dashboard\Services;
 
+use App\Features\Shared\Traits\CachesWithTags;
 use App\Models\Event;
 use Carbon\Carbon;
 
@@ -14,6 +15,8 @@ use Carbon\Carbon;
  */
 class DashboardService
 {
+    use CachesWithTags;
+
     public function __construct(
         private DashboardTransformer $transformer,
     ) {}
@@ -24,33 +27,26 @@ class DashboardService
      */
     public function getEventsSummary(): array
     {
-        $now = Carbon::now();
+        return $this->taggedRemember(['dashboard'], 'dashboard.summary', 120, function () {
+            $now = Carbon::now();
 
-        // Count events requiring action (non-past events with pending/requires_changes status)
-        $requiresAction = Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval', 'requires_changes']),
-        )->where('end_date', '>=', $now)->count();
+            return [
+                'requiere_accion' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval', 'requires_changes']),
+                )->where('end_date', '>=', $now)->count(),
 
-        // Count pending events (non-past events with approved_internal/draft status)
-        $pending = Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['approved_internal', 'draft']),
-        )->where('end_date', '>=', $now)->count();
+                'pendientes' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['approved_internal', 'draft']),
+                )->where('end_date', '>=', $now)->count(),
 
-        // Count published events (non-past events with published status)
-        $published = Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'),
-        )->where('end_date', '>=', $now)->count();
+                'publicados' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'),
+                )->where('end_date', '>=', $now)->count(),
 
-        // Count historic events (past events OR rejected/cancelled regardless of date)
-        $historic = Event::where(function ($q) use ($now) {
-            $q->where('end_date', '<', $now)
-                ->orWhereHas('status', fn ($statusQuery) => $statusQuery->whereIn('status_code', ['rejected', 'cancelled']),
-                );
-        })->count();
-
-        return [
-            'requiere_accion' => $requiresAction,
-            'pendientes' => $pending,
-            'publicados' => $published,
-            'historico' => $historic,
-        ];
+                'historico' => Event::where(function ($q) use ($now) {
+                    $q->where('end_date', '<', $now)
+                        ->orWhereHas('status', fn ($statusQuery) => $statusQuery->whereIn('status_code', ['rejected', 'cancelled']),
+                        );
+                })->count(),
+            ];
+        });
     }
 
     /**

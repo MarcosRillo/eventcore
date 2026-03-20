@@ -202,7 +202,7 @@ describe('useOrganizations', () => {
 
       renderHook(() => useOrganizations())
 
-      expect(mockUseSWR).toHaveBeenCalledWith(null, expect.any(Function))
+      expect(mockUseSWR).toHaveBeenCalledWith(null, expect.any(Function), { keepPreviousData: true })
     })
 
     it('should pass null key when auth is loading', () => {
@@ -210,7 +210,7 @@ describe('useOrganizations', () => {
 
       renderHook(() => useOrganizations())
 
-      expect(mockUseSWR).toHaveBeenCalledWith(null, expect.any(Function))
+      expect(mockUseSWR).toHaveBeenCalledWith(null, expect.any(Function), { keepPreviousData: true })
     })
   })
 

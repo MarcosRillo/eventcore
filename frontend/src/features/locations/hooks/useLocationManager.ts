@@ -21,6 +21,7 @@ interface UseLocationManagerReturn {
   locations: Location[];
   pagination: PaginationMeta | null;
   isLoading: boolean;
+  isValidating: boolean;
   error: string | null;
 
   // Filter state
@@ -76,9 +77,10 @@ export function useLocationManager(): UseLocationManagerReturn {
     return locationKeys.list(params.toString());
   }, [isAuthenticated, authLoading, currentPage, debouncedSearch, filterStatus]);
 
-  const { data, error, isLoading, mutate } = useSWR<{ data: Location[]; meta: PaginationMeta }>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: Location[]; meta: PaginationMeta }>(
     swrKey,
     apiFetcher,
+    { keepPreviousData: true },
   );
 
   const locations = useMemo(() => data?.data ?? [], [data]);
@@ -198,6 +200,7 @@ export function useLocationManager(): UseLocationManagerReturn {
     locations,
     pagination,
     isLoading,
+    isValidating,
     error: error?.message ?? null,
     searchTerm,
     filterStatus,

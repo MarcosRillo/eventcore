@@ -2,6 +2,7 @@
 
 namespace App\Features\PublicEvents\Services;
 
+use App\Features\Shared\Traits\CachesWithTags;
 use App\Models\Event;
 use App\Models\EventType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
  */
 class PublicEventService
 {
+    use CachesWithTags;
+
     /**
      * Maximum events per page for pagination
      */
@@ -199,18 +202,46 @@ class PublicEventService
      */
     public function getStats(): array
     {
-        $totalEvents = Event::published()->count();
-        $totalEventTypes = EventType::where('is_active', true)->count();
-        $eventsThisMonth = Event::published()
-            ->whereMonth('start_date', now()->month)
-            ->whereYear('start_date', now()->year)
-            ->count();
+        return $this->taggedRemember(['public-stats'], 'public.stats', 300, function () {
+            return [
+                'total_events' => Event::published()->count(),
+                'total_event_types' => EventType::where('is_active', true)->count(),
+                'events_this_month' => Event::published()
+                    ->whereMonth('start_date', now()->month)
+                    ->whereYear('start_date', now()->year)
+                    ->count(),
+            ];
+        });
+    }
 
-        return [
-            'total_events' => $totalEvents,
-            'total_event_types' => $totalEventTypes,
-            'events_this_month' => $eventsThisMonth,
-        ];
+    /**
+     * Get active event types for public consumption.
+     * Cached for 1 hour — event types change rarely.
+     */
+    public function getActiveEventTypes(): Collection
+    {
+        return $this->taggedRemember(['event-types'], 'public.event-types', 3600, function () {
+            return EventType::where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'color', 'is_active']);
+        });
+    }
+
+    /**
+     * Get active subtypes for a specific event type.
+     * Cached for 1 hour.
+     */
+    public function getActiveSubtypes(EventType $eventType): Collection
+    {
+        return $this->taggedRemember(
+            ['event-subtypes'],
+            "public.subtypes.{$eventType->id}",
+            3600,
+            fn () => $eventType->subtypes()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'event_type_id', 'is_active']),
+        );
     }
 
     /**

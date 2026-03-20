@@ -55,9 +55,10 @@ export const useOrganizerEvents = () => {
     return organizerEventKeys.list(params.toString())
   }, [currentPage, statusFilter, showPast])
 
-  const { data, error, isLoading, mutate } = useSWR<EventListResponse>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<EventListResponse>(
     swrKey,
     apiFetcher,
+    { keepPreviousData: true },
   )
 
   // Memoize events array to maintain referential stability
@@ -125,6 +126,7 @@ export const useOrganizerEvents = () => {
     statusFilter,
     showPast,
     isDeleting: isDeletingState,
+    isValidating,
     handlePageChange,
     handleStatusFilter,
     handleShowPastToggle,

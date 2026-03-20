@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Event;
+use App\Models\EventType;
+use App\Observers\EventCacheObserver;
+use App\Observers\EventTypeCacheObserver;
 use App\Policies\EventPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Register policies
         Gate::policy(Event::class, EventPolicy::class);
+
+        // Cache invalidation observers
+        Event::observe(EventCacheObserver::class);
+        EventType::observe(EventTypeCacheObserver::class);
 
         // Rate limiters
         $this->configureRateLimiting();

@@ -32,7 +32,8 @@ RUN install-php-extensions \
     exif \
     pcntl \
     bcmath \
-    opcache
+    opcache \
+    redis
 
 # --- PHP production settings ---
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
