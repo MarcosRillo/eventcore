@@ -11,6 +11,22 @@ class SubmitRegistrationRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $fields = ['first_name', 'last_name', 'organization_name', 'organization_sector', 'motivation'];
+
+        $sanitized = [];
+        foreach ($fields as $field) {
+            if ($this->has($field) && ! empty($this->input($field))) {
+                $sanitized[$field] = strip_tags($this->input($field));
+            }
+        }
+
+        if (! empty($sanitized)) {
+            $this->merge($sanitized);
+        }
+    }
+
     public function rules(): array
     {
         return [

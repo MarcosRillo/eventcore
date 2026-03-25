@@ -17,8 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'active' => \App\Http\Middleware\CheckActiveUser::class,
+            'role'                  => \App\Http\Middleware\CheckRole::class,
+            'active'                => \App\Http\Middleware\CheckActiveUser::class,
+            'disable-in-production' => \App\Http\Middleware\DisableInProduction::class,
         ]);
 
         // Inject httpOnly cookie tokens into Authorization header for Sanctum

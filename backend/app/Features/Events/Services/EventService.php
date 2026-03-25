@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Mews\Purifier\Facades\Purifier;
+use App\Services\HtmlSanitizer;
 
 class EventService
 {
@@ -308,6 +308,6 @@ class EventService
      */
     private function sanitizeDescription(string $description): string
     {
-        return Purifier::clean($description);
+        return HtmlSanitizer::clean($description);
     }
 }

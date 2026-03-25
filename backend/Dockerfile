@@ -1,5 +1,5 @@
 # Stage 1: Build - install extensions and compilation dependencies
-FROM php:8.2-fpm-bookworm AS builder
+FROM php:8.3-fpm-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Stage 2: Production - clean image without build tools
-FROM php:8.2-fpm-bookworm
+FROM php:8.3-fpm-bookworm
 
 # Copy compiled extensions from builder (no build-essential, git, vim, etc.)
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/

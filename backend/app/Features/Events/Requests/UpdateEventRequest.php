@@ -5,7 +5,7 @@ namespace App\Features\Events\Requests;
 use App\Models\Event;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Mews\Purifier\Facades\Purifier;
+use App\Services\HtmlSanitizer;
 
 /**
  * Update Event Request
@@ -33,7 +33,7 @@ class UpdateEventRequest extends FormRequest
     {
         if ($this->has('description') && ! empty($this->input('description'))) {
             $this->merge([
-                'description' => Purifier::clean($this->input('description')),
+                'description' => HtmlSanitizer::clean($this->input('description')),
             ]);
         }
     }

@@ -9,6 +9,12 @@ use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -33,11 +39,11 @@ class EventTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     #[Test]
@@ -170,7 +176,7 @@ class EventTest extends TestCase
         $locations = $event->locations;
 
         // Assert (6 assertions)
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $locations); // 1
+        $this->assertInstanceOf(Collection::class, $locations); // 1
         $this->assertCount(2, $locations);                               // 2
         $this->assertTrue($locations->contains($location1));             // 3
         $this->assertTrue($locations->contains($location2));             // 4
@@ -194,7 +200,7 @@ class EventTest extends TestCase
         $locations = $event->locations;
 
         // Assert (3 assertions)
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $locations); // 1
+        $this->assertInstanceOf(Collection::class, $locations); // 1
         $this->assertCount(0, $locations);                               // 2
         $this->assertEmpty($locations);                                  // 3
     }

@@ -498,7 +498,7 @@ class Event extends Model
      */
     public function hasMultipleLocations(): bool
     {
-        return $this->type?->allows_multiple_locations ?? false;
+        return $this->eventType?->allows_multiple_locations ?? false;
     }
 
     /**

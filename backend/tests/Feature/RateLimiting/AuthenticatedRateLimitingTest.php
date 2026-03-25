@@ -3,6 +3,7 @@
 namespace Tests\Feature\RateLimiting;
 
 use App\Models\User;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,7 +16,7 @@ class AuthenticatedRateLimitingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
     }
 
     #[Test]

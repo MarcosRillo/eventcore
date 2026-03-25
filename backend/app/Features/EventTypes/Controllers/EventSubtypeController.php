@@ -82,13 +82,7 @@ class EventSubtypeController extends Controller
      */
     public function show(EventType $eventType, EventSubtype $subtype): JsonResponse
     {
-        // Verify subtype belongs to event type
-        if ($subtype->event_type_id !== $eventType->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subtype does not belong to this event type',
-            ], 404);
-        }
+        $this->verifySubtypeOwnership($eventType, $subtype);
 
         return response()->json([
             'success' => true,
@@ -102,13 +96,7 @@ class EventSubtypeController extends Controller
      */
     public function update(UpdateEventSubtypeRequest $request, EventType $eventType, EventSubtype $subtype): JsonResponse
     {
-        // Verify subtype belongs to event type
-        if ($subtype->event_type_id !== $eventType->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subtype does not belong to this event type',
-            ], 404);
-        }
+        $this->verifySubtypeOwnership($eventType, $subtype);
 
         try {
             $updatedSubtype = $this->eventSubtypeService->updateEventSubtype(
@@ -141,13 +129,7 @@ class EventSubtypeController extends Controller
      */
     public function destroy(EventType $eventType, EventSubtype $subtype): JsonResponse
     {
-        // Verify subtype belongs to event type
-        if ($subtype->event_type_id !== $eventType->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subtype does not belong to this event type',
-            ], 404);
-        }
+        $this->verifySubtypeOwnership($eventType, $subtype);
 
         try {
             $message = $this->eventSubtypeService->deleteEventSubtype($subtype);
@@ -176,13 +158,7 @@ class EventSubtypeController extends Controller
      */
     public function toggleStatus(EventType $eventType, EventSubtype $subtype): JsonResponse
     {
-        // Verify subtype belongs to event type
-        if ($subtype->event_type_id !== $eventType->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subtype does not belong to this event type',
-            ], 404);
-        }
+        $this->verifySubtypeOwnership($eventType, $subtype);
 
         $updatedSubtype = $this->eventSubtypeService->toggleEventSubtypeStatus($subtype);
 
@@ -205,5 +181,18 @@ class EventSubtypeController extends Controller
             'message' => 'Active event subtypes retrieved successfully',
             'data' => EventSubtypeResource::collection($activeSubtypes),
         ]);
+    }
+
+    /**
+     * Abort with 404 JSON if the subtype does not belong to the given event type.
+     */
+    private function verifySubtypeOwnership(EventType $eventType, EventSubtype $subtype): void
+    {
+        if ($subtype->event_type_id !== $eventType->id) {
+            abort(response()->json([
+                'success' => false,
+                'message' => 'Subtype does not belong to this event type',
+            ], 404));
+        }
     }
 }

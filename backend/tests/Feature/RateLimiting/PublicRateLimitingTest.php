@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\RateLimiting;
 
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class PublicRateLimitingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
     }
 
     #[Test]

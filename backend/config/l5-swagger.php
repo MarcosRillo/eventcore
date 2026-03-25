@@ -67,7 +67,7 @@ return [
             'middleware' => [
                 'api' => [],
                 'asset' => [],
-                'docs' => [],
+                'docs' => ['disable-in-production'],
                 'oauth2_callback' => [],
             ],
 
