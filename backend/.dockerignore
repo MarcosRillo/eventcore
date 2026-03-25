@@ -13,4 +13,5 @@ docker-compose*
 .git
 .gitignore
 README.md
+bootstrap/cache/*.php
 .DS_Store

@@ -1,644 +1,369 @@
 # Frontend Architecture - Plataforma Calendario
 
-**Version:** 2.0.0
-**Stack:** Next.js 15.5.4 + React 19.2.0 + TypeScript 5.9.3
-**Estado:** Production Ready
-**Última actualización:** Octubre 29, 2025
-**Tests:** 128/128 passing ✅
+---
+
+## 1. Resumen General
+
+Aplicacion frontend de gestion de eventos y calendario construida con Next.js 15 App Router, React 19 y TypeScript strict. Sigue una arquitectura basada en **Features** con separacion clara de responsabilidades mediante el patron Smart/Dumb, service layer para comunicacion con la API, y SWR para data fetching optimizado.
+
+El proyecto cuenta con 14 features, 189 componentes, 38 hooks, 26 services, 27 paginas y 2882 tests pasando.
 
 ---
 
-## 📋 Tabla de Contenidos
+## 2. Stack Tecnologico
 
-1. [Overview](#overview)
-2. [Arquitectura Features](#arquitectura-features)
-3. [Estructura del Proyecto](#estructura-del-proyecto)
-4. [Patrones de Diseño](#patrones-de-diseño)
-5. [Stack Tecnológico](#stack-tecnológico)
-6. [Métricas del Proyecto](#métricas-del-proyecto)
-7. [Rutas y Navegación](#rutas-y-navegación)
-8. [Estado y Contextos](#estado-y-contextos)
-9. [Componentes Compartidos](#componentes-compartidos)
-10. [Guía de Desarrollo](#guía-de-desarrollo)
+| Tecnologia | Version | Proposito |
+|------------|---------|-----------|
+| **Next.js** | 15.5.9 | Framework React con App Router |
+| **React** | 19.2.3 | Biblioteca UI |
+| **TypeScript** | 5.9.3 | Tipado estatico (strict mode) |
+| **Tailwind CSS** | 4 | Estilos utility-first |
+| **Jest** | 30.2.0 | Testing framework |
+| **SWR** | - | Data fetching y cache |
 
 ---
 
-## Overview
+## 3. Arquitectura Features
 
-Aplicación frontend de gestión de eventos y calendario construida con Next.js 15 App Router, React 19 y TypeScript. Sigue una arquitectura basada en **Features** con separación clara de responsabilidades.
+El proyecto esta organizado en 14 features, cada una encapsulando su dominio completo:
 
-### Características Principales
+| Feature | Descripcion |
+|---------|-------------|
+| **auth** | Autenticacion, login, reset de password, aceptacion de invitaciones |
+| **entity-admin** | Administracion de entidades del sistema |
+| **event-types** | Gestion de tipos de eventos |
+| **events** | Gestion de eventos (CRUD, aprobacion) |
+| **internal-calendar** | Calendario interno para usuarios autenticados |
+| **invitations** | Gestion de invitaciones a la plataforma |
+| **landing** | Pagina de inicio publica |
+| **locations** | Gestion de ubicaciones |
+| **organizations** | Gestion de organizaciones |
+| **organizer** | Panel del organizador (eventos, calendario, CRUD) |
+| **organizer-dashboard** | Dashboard con estadisticas del organizador |
+| **public-calendar** | Calendario publico y detalle de eventos |
+| **registration-requests** | Solicitudes de registro a la plataforma |
+| **users** | Gestion de usuarios del sistema |
 
-- ✅ Arquitectura Features 100% implementada
-- ✅ TypeScript estricto sin errores
-- ✅ Build optimizado (1.4s)
-- ✅ 11 rutas generadas con SSR/SSG
-- ✅ 0 warnings de ESLint en código fuente
-- ✅ Componentes Smart/Dumb pattern
-- ✅ Custom hooks para lógica reutilizable
-- ✅ Service layer para API calls
-
----
-
-## Arquitectura Features
-
-### Organización por Dominio
-
-Cada feature encapsula toda su funcionalidad relacionada:
+Cada feature sigue la estructura interna:
 
 ```
-src/features/
-├── appearance/         # Configuración de apariencia
-│   ├── hooks/         # useAppearanceForm
-│   └── services/      # appearanceService
-├── auth/              # Autenticación
-│   ├── components/    # LoginForm, PermissionGate
-│   └── hooks/         # useAuth, usePermissions
-├── categories/        # Gestión de categorías
-│   ├── components/
-│   │   ├── dumb/     # CategoryTable (presentacional)
-│   │   └── smart/    # CategoryTableContainer (lógica)
-│   ├── hooks/        # useCategoryManager
-│   └── services/     # categoryService
-├── events/            # Gestión de eventos
-│   ├── components/
-│   │   ├── dumb/     # EventCard, EventTable
-│   │   └── smart/    # EventCardContainer, ApprovalModalContainer
-│   ├── hooks/        # useEventManager, useApprovalManager
-│   └── services/     # eventService, approvalService
-├── locations/         # Gestión de ubicaciones
-│   └── services/      # locationService
-└── organizer/         # Panel del organizador
-    ├── components/
-    │   └── dumb/     # OrganizerStatsCard, OrganizerEventList, OrganizerEventForm
-    ├── hooks/        # useOrganizerStats, useEventManager
-    └── services/     # organizerStatsService
+features/[feature]/
+├── components/
+│   ├── smart/      # Contenedores con logica (hooks, estado)
+│   └── dumb/       # Componentes presentacionales puros
+├── hooks/          # Custom hooks del dominio
+├── services/       # Llamadas a la API
+├── types/          # Definiciones de tipos TypeScript
+└── index.ts        # Barrel export
 ```
-
-### Métricas Globales (Verified October 29, 2025)
-
-| Métrica | Cantidad |
-|---------|----------|
-| **Features** | 6 (appearance, auth, categories, events, locations, organizer) |
-| **Components (.tsx)** | 78 |
-| **Custom Hooks** | 23 |
-| **Services** | 14 |
-| **Test Files** | 9 |
-| **Tests** | 128/128 passing ✅ |
-| **Test Suites** | 9 suites passing ✅ |
 
 ---
 
-## Estructura del Proyecto
+## 4. Estructura del Proyecto
 
 ```
 frontend/
 ├── src/
-│   ├── app/                    # Next.js 15 App Router
-│   │   ├── (admin)/           # Rutas protegidas (layout común)
-│   │   │   ├── appearance/
-│   │   │   ├── categories/
+│   ├── app/                        # Next.js 15 App Router
+│   │   ├── (auth)/                 # Rutas de autenticacion
+│   │   │   ├── login/
+│   │   │   ├── forgot-password/
+│   │   │   ├── reset-password/
+│   │   │   └── accept-invitation/
+│   │   ├── (admin)/                # Rutas protegidas (admin)
+│   │   │   ├── event-types/
 │   │   │   ├── events/
-│   │   │   ├── layout.tsx
-│   │   │   └── page.tsx
-│   │   ├── (auth)/            # Rutas de autenticación
-│   │   │   └── login/
-│   │   └── (public)/          # Rutas públicas
-│   │       └── calendar/
-│   ├── components/            # Componentes compartidos
-│   │   ├── ui/               # 14 componentes UI base
-│   │   ├── layout/           # Header, Sidebar
-│   │   └── auth/             # PermissionGate
-│   ├── context/              # Contextos React
-│   │   ├── AuthContext.tsx
-│   │   └── useAuthActions.ts
-│   ├── features/             # Ver sección Features
-│   ├── hooks/                # Custom hooks compartidos
-│   ├── lib/                  # Utilidades
-│   ├── services/             # API client base
-│   └── test/                 # Configuración de tests
-├── public/                   # Assets estáticos
-├── audit-outputs/            # Reportes de auditoría
-├── docs/                     # Documentación
-└── [config files]
+│   │   │   ├── internal-calendar/
+│   │   │   ├── invitations/
+│   │   │   ├── locations/
+│   │   │   ├── organizations/
+│   │   │   ├── registration-requests/
+│   │   │   ├── users/
+│   │   │   └── layout.tsx
+│   │   ├── (organizer)/            # Rutas del organizador
+│   │   │   ├── dashboard/
+│   │   │   ├── events/
+│   │   │   ├── calendar/
+│   │   │   └── layout.tsx
+│   │   └── (public)/               # Rutas publicas
+│   │       ├── landing/
+│   │       ├── calendar/
+│   │       ├── register-request/
+│   │       └── layout.tsx
+│   ├── features/                   # 14 features (ver seccion 3)
+│   ├── shared/
+│   │   ├── components/             # 80 componentes compartidos
+│   │   │   ├── alerts/
+│   │   │   ├── display/
+│   │   │   ├── event/
+│   │   │   ├── feedback/
+│   │   │   ├── form/
+│   │   │   ├── layout/
+│   │   │   ├── modals/
+│   │   │   ├── stats/
+│   │   │   └── tables/
+│   │   └── hooks/                  # Hooks compartidos (shared)
+│   ├── hooks/                      # Hooks compartidos (globales)
+│   ├── services/                   # Services compartidos (API client base)
+│   ├── context/                    # Contextos React
+│   │   └── AuthContext.tsx
+│   └── types/                      # Definiciones de tipos globales
+├── public/                         # Assets estaticos
+└── [archivos de configuracion]
 ```
-
-### Total del Proyecto
-
-- **Total LOC:** 17,832 líneas
-- **Features:** 5
-- **Componentes:** 40 (16 features + 24 compartidos)
-- **Hooks:** 24
-- **Services:** 16
-- **Interfaces:** 75
-- **Types:** 9
 
 ---
 
-## Patrones de Diseño
+## 5. Patrones de Diseno
 
-### 1. Smart/Dumb Components
+### 5.1 Smart/Dumb Components
 
 **Dumb (Presentational):**
 - Solo reciben props
-- No manejan estado complejo
-- Enfocados en UI
-- Altamente reutilizables
-
-```typescript
-// src/features/categories/components/dumb/CategoryTable.tsx
-export const CategoryTable = ({
-  categories,
-  onEdit,
-  onDelete
-}: CategoryTableProps) => {
-  // Solo renderiza UI
-}
-```
+- No manejan estado complejo ni efectos
+- Enfocados en renderizado de UI
+- Altamente reutilizables y testeables
 
 **Smart (Container):**
-- Manejan lógica de negocio
-- Conectan con hooks y services
-- Obtienen y transforman datos
-- Pasan props a componentes dumb
+- Manejan logica de negocio via hooks
+- Conectan con services para obtener datos
+- Transforman y pasan datos a componentes dumb
+- Usan la directiva `'use client'`
+
+### 5.2 Service Layer
+
+Centraliza toda la comunicacion con la API backend. Cada feature tiene sus propios services, y existen 5 services compartidos a nivel global (apiClient, authService, etc.).
+
+### 5.3 SWR para Data Fetching
+
+Se utiliza SWR con las siguientes optimizaciones:
+- `keepPreviousData` para evitar flashes de contenido vacio
+- `dedupingInterval` para deduplicar requests simultaneos
+- Cache automatico y revalidacion
+
+### 5.4 Path Aliases
+
+Todos los imports usan el prefijo `@/`. No se permiten imports relativos (`../`):
 
 ```typescript
-// src/features/categories/components/smart/CategoryTableContainer.tsx
-export const CategoryTableContainer = () => {
-  const { categories, loading, handleEdit, handleDelete } = useCategoryManager()
-
-  return <CategoryTable
-    categories={categories}
-    onEdit={handleEdit}
-    onDelete={handleDelete}
-  />
-}
-```
-
-### 2. Custom Hooks Pattern
-
-Encapsulan lógica reutilizable:
-
-```typescript
-// src/features/events/hooks/useEventManager.ts
-export const useEventManager = () => {
-  const [events, setEvents] = useState<Event[]>([])
-  const [loading, setLoading] = useState(false)
-
-  const fetchEvents = async () => {
-    setLoading(true)
-    const data = await eventService.getAll()
-    setEvents(data)
-    setLoading(false)
-  }
-
-  return { events, loading, fetchEvents }
-}
-```
-
-### 3. Service Layer Pattern
-
-Centraliza comunicación con API:
-
-```typescript
-// src/features/events/services/eventService.ts
-export const eventService = {
-  getAll: () => apiClient.get<Event[]>('/events'),
-  getById: (id: number) => apiClient.get<Event>(`/events/${id}`),
-  create: (data: CreateEventDto) => apiClient.post<Event>('/events', data),
-  // ...
-}
-```
-
-### 4. Path Aliases
-
-Usa `@/*` en lugar de imports relativos:
-
-```typescript
-// ✅ Correcto
+// Correcto
 import { eventService } from '@/features/events/services/eventService'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/shared/components/form/Button'
 
-// ❌ Evitar
+// No permitido
 import { eventService } from '../../../features/events/services/eventService'
 ```
 
-**Nota:** Actualmente 21 archivos usan imports relativos y requieren refactoring.
+### 5.5 Barrel Exports
+
+Cada feature expone su API publica a traves de un archivo `index.ts` en la raiz de la feature.
+
+### 5.6 Tokens de Diseno Semanticos
+
+El sistema de diseno usa tokens semanticos en lugar de colores directos:
+- `primary-*`, `secondary-*` para la marca
+- `neutral-*` para fondos y textos
+- `error-*`, `warning-*`, `success-*` para estados
 
 ---
 
-## Stack Tecnológico
+## 6. Componentes
 
-### Core
+### 6.1 Componentes por Feature (109)
 
-| Tecnología | Versión | Propósito |
-|------------|---------|-----------|
-| **Next.js** | 15.5.4 | Framework React con SSR/SSG |
-| **React** | 19.1.0 | Biblioteca UI |
-| **TypeScript** | 5.x | Tipado estático |
-| **Tailwind CSS** | 3.x | Estilos utility-first |
+| Feature | Smart | Dumb | Total |
+|---------|-------|------|-------|
+| auth | 2 | 0 | 2 |
+| entity-admin | 1 | 9 | 10 |
+| event-types | 2 | 1 | 3 |
+| events | 1 | 1 | 2 |
+| internal-calendar | 5 | 11 | 16 |
+| invitations | 2 | 4 | 6 |
+| landing | 1 | 6 | 7 |
+| locations | 2 | 1 | 3 |
+| organizations | 1 | 2 | 3 |
+| organizer | 6 | 14 | 20 |
+| organizer-dashboard | 1 | 1 | 2 |
+| public-calendar | 3 | 6 | 9 |
+| registration-requests | 3 | 8 | 11 |
+| users | 3 | 2 | 5 |
+| **Total** | **33** | **66** | **109** |
 
-### Bibliotecas UI
+### 6.2 Componentes Compartidos (80)
 
-- **@headlessui/react** (2.2.7): Componentes accesibles
-- **@heroicons/react** (2.2.0): Iconos SVG
-- **lucide-react** (0.543.0): Iconos adicionales
-- **clsx** (2.1.1): Utilidad para clases CSS
+Organizados en `shared/components/` por categoria:
 
-### Utilidades
+| Categoria | Proposito |
+|-----------|-----------|
+| alerts | Alertas y notificaciones |
+| display | Componentes de visualizacion de datos |
+| event | Componentes reutilizables de eventos |
+| feedback | Indicadores de carga, estados vacios |
+| form | Inputs, selects, botones, formularios |
+| layout | Header, sidebar, contenedores |
+| modals | Modales genericos y de formulario |
+| stats | Tarjetas y graficos de estadisticas |
+| tables | Tablas, paginacion, ordenamiento |
 
-- **axios** (1.11.0): Cliente HTTP
-- **date-fns** (4.1.0): Manipulación de fechas
-- **moment** (2.30.1): Fechas (legacy, considerar migrar a date-fns)
-
-### Desarrollo
-
-- **ESLint** (9.x): Linting
-- **TypeScript ESLint**: Reglas TypeScript
-- **PostCSS**: Procesamiento CSS
-
----
-
-## Métricas del Proyecto
-
-### Distribución de Código
-
-```
-LOC por Capa:
-├── Features:     6,887 líneas (38.6%)
-├── Componentes:  3,550 líneas (19.9%)
-├── Services:     2,444 líneas (13.7%)
-├── Hooks:        2,425 líneas (13.6%)
-└── Otros:        2,526 líneas (14.2%)
-────────────────────────────────
-TOTAL:           17,832 líneas
-```
-
-### Build Output
-
-```
-Next.js 15.5.4
-✓ Compiled successfully in 1.4s
-✓ 11 rutas generadas
-✓ Shared JS: 102 kB
-
-Rutas más pesadas:
-  /calendar        → 59.3 kB
-  /events          → 25.5 kB
-  /categories      → 4.88 kB
-```
-
-### Calidad de Código
-
-- ✅ **TypeScript:** 0 errores
-- ✅ **ESLint (src/):** 0 warnings, 0 errores
-- ✅ **Archivos obsoletos:** 0
-- ✅ **TODO/FIXME:** 0
-- ⚠️ **Imports relativos:** 21 archivos requieren refactor
+### 6.3 Total: 189 componentes (109 feature + 80 shared)
 
 ---
 
-## Rutas y Navegación
+## 7. Hooks
 
-### App Router (Next.js 15)
+### 7.1 Hooks Compartidos (7)
 
-| Ruta | Tipo | Tamaño | Descripción |
-|------|------|--------|-------------|
-| `/` | Static | 553 B | Dashboard principal |
-| `/login` | Static | 3.03 kB | Página de login |
-| `/appearance` | Static | 3.24 kB | Configuración de apariencia |
-| `/categories` | Static | 4.88 kB | Gestión de categorías |
-| `/events` | Static | 25.5 kB | Gestión de eventos |
-| `/calendar` | Static | 59.3 kB | Vista de calendario público |
-| `/calendar/[slug]` | Dynamic | 5.25 kB | Detalle de evento por slug |
-| `/admin/categories` | Static | 342 B | Categorías (admin) |
+Hooks reutilizables disponibles para todas las features:
 
-**Total:** 11 rutas (10 estáticas, 1 dinámica)
+| Hook | Proposito |
+|------|-----------|
+| useDebounce | Debounce de valores para busqueda |
+| useEventActions | Acciones comunes sobre eventos |
+| useModal | Control de apertura/cierre de modales |
+| usePagination | Logica de paginacion |
+| usePermissions | Verificacion de permisos del usuario |
+| useTableSelection | Seleccion de filas en tablas |
+| useTableSorting | Ordenamiento de columnas en tablas |
 
-### Layouts
+### 7.2 Hooks por Feature (31)
 
-```
-(admin)/layout.tsx    → Sidebar + Header para rutas admin
-(auth)/layout.tsx     → Layout limpio para login
-(public)/layout.tsx   → Layout público sin auth
-```
+Cada feature define sus propios hooks especificos de dominio en su directorio `hooks/`.
+
+### 7.3 Total: 38 hooks (7 shared + 31 feature)
 
 ---
 
-## Estado y Contextos
+## 8. Services
 
-### AuthContext
+### 8.1 Services Compartidos (5)
 
-Maneja autenticación global:
+Services globales que proveen funcionalidad base:
 
-```typescript
-// src/context/AuthContext.tsx
-interface AuthContextType {
-  user: User | null
-  login: (credentials: LoginDto) => Promise<void>
-  logout: () => void
-  isAuthenticated: boolean
-  hasPermission: (permission: string) => boolean
-}
-```
+| Service | Proposito |
+|---------|-----------|
+| apiClient | Cliente HTTP base (Axios) con interceptores |
+| publicApiClient | Cliente para endpoints publicos sin auth |
+| authService | Login, logout, registro, gestion de sesion |
+| eventApprovalService | Aprobacion/rechazo de eventos |
+| tokenUtils | Utilidades para manejo de tokens |
 
-**Uso:**
-```typescript
-const { user, isAuthenticated, logout } = useAuth()
-```
+### 8.2 Services por Feature (21)
 
-### Hooks de Contexto
+Cada feature define sus propios services para comunicarse con los endpoints especificos de la API.
 
-- `useAuth()`: Acceso a contexto de autenticación
-- `useAuthActions()`: Acciones de autenticación (login, logout)
+### 8.3 Total: 26 services (5 shared + 21 feature)
 
 ---
 
-## Componentes Compartidos
+## 9. Rutas
 
-### UI Components (14)
+### 27 paginas organizadas en 4 secciones:
 
-Componentes base reutilizables en `src/components/ui/`:
+### 9.1 Auth (4 paginas)
 
-| Componente | Propósito |
-|------------|-----------|
-| `Button` | Botón con variantes |
-| `Input` | Campo de texto |
-| `Select` | Selector dropdown |
-| `Textarea` | Campo multilínea |
-| `Checkbox` | Casilla de verificación |
-| `RadioGroup` | Grupo de radio buttons |
-| `Modal` | Modal genérico |
-| `FormModal` | Modal con formulario |
-| `Table` | Tabla genérica |
-| `Card` | Tarjeta contenedora |
-| `Badge` | Etiqueta de estado |
-| `Toast` | Notificación temporal |
-| `LoadingSpinner` | Indicador de carga |
-| `Pagination` | Paginación |
+| Ruta | Descripcion |
+|------|-------------|
+| `/login` | Inicio de sesion |
+| `/forgot-password` | Solicitud de restablecimiento |
+| `/reset-password` | Restablecimiento de contrasena |
+| `/accept-invitation` | Aceptacion de invitacion |
 
-### Layout Components (2)
+### 9.2 Admin (9 paginas)
 
-- `Header`: Barra superior con navegación
-- `Sidebar`: Menú lateral admin
+| Ruta | Descripcion |
+|------|-------------|
+| `/event-types` | Gestion de tipos de eventos |
+| `/events` | Gestion de eventos |
+| `/internal-calendar` | Calendario interno |
+| `/internal-calendar/[id]` | Detalle de evento interno |
+| `/invitations` | Gestion de invitaciones |
+| `/locations` | Gestion de ubicaciones |
+| `/organizations` | Gestion de organizaciones |
+| `/registration-requests` | Solicitudes de registro |
+| `/users` | Gestion de usuarios |
 
-### Auth Components (1)
+### 9.3 Public (4 paginas)
 
-- `PermissionGate`: HOC para proteger componentes por permisos
+| Ruta | Descripcion |
+|------|-------------|
+| `/` | Landing page |
+| `/calendar` | Calendario publico |
+| `/calendar/[id]` | Detalle de evento publico |
+| `/register-request` | Formulario de solicitud de registro |
 
----
+### 9.4 Organizer (10 paginas)
 
-## Guía de Desarrollo
-
-### Setup Inicial
-
-```bash
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-cp .env.example .env.local
-
-# Ejecutar en desarrollo
-npm run dev
-
-# Build para producción
-npm run build
-
-# Iniciar producción
-npm start
-```
-
-### Variables de Entorno
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-NEXT_PUBLIC_APP_NAME=Plataforma Calendario
-```
-
-### Comandos Disponibles
-
-```bash
-npm run dev          # Desarrollo (port 3000)
-npm run build        # Build optimizado
-npm run start        # Servidor producción
-npm run lint         # ESLint
-npm run type-check   # TypeScript check
-```
-
-### Crear Nueva Feature
-
-1. **Estructura básica:**
-
-```bash
-mkdir -p src/features/nueva-feature/{components/{dumb,smart},hooks,services}
-```
-
-2. **Service:**
-
-```typescript
-// src/features/nueva-feature/services/nuevaFeatureService.ts
-import { apiClient } from '@/services/apiClient'
-
-export const nuevaFeatureService = {
-  getAll: () => apiClient.get('/nueva-feature'),
-  create: (data) => apiClient.post('/nueva-feature', data),
-}
-```
-
-3. **Hook:**
-
-```typescript
-// src/features/nueva-feature/hooks/useNuevaFeature.ts
-import { useState, useEffect } from 'react'
-import { nuevaFeatureService } from '../services/nuevaFeatureService'
-
-export const useNuevaFeature = () => {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(false)
-
-  const fetchItems = async () => {
-    setLoading(true)
-    const data = await nuevaFeatureService.getAll()
-    setItems(data)
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    fetchItems()
-  }, [])
-
-  return { items, loading, fetchItems }
-}
-```
-
-4. **Componente Dumb:**
-
-```typescript
-// src/features/nueva-feature/components/dumb/ItemList.tsx
-interface ItemListProps {
-  items: Item[]
-  onItemClick: (id: number) => void
-}
-
-export const ItemList = ({ items, onItemClick }: ItemListProps) => {
-  return (
-    <div>
-      {items.map(item => (
-        <div key={item.id} onClick={() => onItemClick(item.id)}>
-          {item.name}
-        </div>
-      ))}
-    </div>
-  )
-}
-```
-
-5. **Componente Smart:**
-
-```typescript
-// src/features/nueva-feature/components/smart/ItemListContainer.tsx
-import { ItemList } from '../dumb/ItemList'
-import { useNuevaFeature } from '../../hooks/useNuevaFeature'
-
-export const ItemListContainer = () => {
-  const { items, loading } = useNuevaFeature()
-
-  const handleItemClick = (id: number) => {
-    console.log('Item clicked:', id)
-  }
-
-  if (loading) return <LoadingSpinner />
-
-  return <ItemList items={items} onItemClick={handleItemClick} />
-}
-```
-
-6. **Página:**
-
-```typescript
-// src/app/(admin)/nueva-feature/page.tsx
-import { ItemListContainer } from '@/features/nueva-feature/components/smart/ItemListContainer'
-
-export default function NuevaFeaturePage() {
-  return (
-    <div>
-      <h1>Nueva Feature</h1>
-      <ItemListContainer />
-    </div>
-  )
-}
-```
-
-### Buenas Prácticas
-
-1. **Usar path aliases** (`@/`) en lugar de imports relativos
-2. **Separar componentes** en smart/dumb cuando sea apropiado
-3. **Extraer lógica** a custom hooks cuando se repite
-4. **Tipar todo** con TypeScript (evitar `any`)
-5. **Manejar errores** en services y mostrar feedback al usuario
-6. **Validar props** con TypeScript interfaces
-7. **Usar async/await** en lugar de `.then()` para promesas
-8. **Loading states** para mejorar UX
-9. **Error boundaries** para capturar errores de renderizado
-10. **Comentar código complejo** pero evitar comentarios obvios
-
-### TypeScript
-
-```typescript
-// ✅ Interfaces para props
-interface ButtonProps {
-  onClick: () => void
-  label: string
-  disabled?: boolean
-}
-
-// ✅ Types para unions
-type ButtonVariant = 'primary' | 'secondary' | 'danger'
-
-// ✅ Generics para funciones reutilizables
-function fetchData<T>(url: string): Promise<T> {
-  return apiClient.get<T>(url)
-}
-
-// ❌ Evitar any
-const data: any = {}  // ❌
-const data: unknown = {}  // ✅ (luego hacer type guard)
-```
-
-### Manejo de Errores
-
-```typescript
-// En services
-export const eventService = {
-  async create(data: CreateEventDto) {
-    try {
-      const response = await apiClient.post('/events', data)
-      return response
-    } catch (error) {
-      console.error('Error creating event:', error)
-      throw error
-    }
-  }
-}
-
-// En hooks
-export const useEventManager = () => {
-  const [error, setError] = useState<string | null>(null)
-
-  const createEvent = async (data: CreateEventDto) => {
-    try {
-      setError(null)
-      await eventService.create(data)
-    } catch (err) {
-      setError('Error al crear evento')
-    }
-  }
-
-  return { createEvent, error }
-}
-
-// En componentes
-const { createEvent, error } = useEventManager()
-
-{error && <Toast message={error} type="error" />}
-```
+| Ruta | Descripcion |
+|------|-------------|
+| `/dashboard` | Dashboard con estadisticas |
+| `/events` | Listado de eventos del organizador |
+| `/events/create` | Creacion de evento |
+| `/events/[id]` | Detalle de evento |
+| `/events/[id]/edit` | Edicion de evento |
+| `/calendar` | Calendario del organizador |
+| `/calendar/[id]` | Detalle de evento en calendario |
+| `/create` | Creacion rapida |
+| `/[id]` | Vista de recurso |
+| `/[id]/edit` | Edicion de recurso |
 
 ---
 
-## Próximos Pasos
+## 10. Estado y Contextos
 
-### Refactoring Pendiente
+### 10.1 AuthContext (1 context provider)
 
-1. **Imports relativos:** Refactorizar 21 archivos para usar path aliases
-   - Script disponible: `refactor-imports.sh`
-   - Ejecutar: `bash refactor-imports.sh`
+Contexto global que maneja el estado de autenticacion del usuario:
+- Estado del usuario autenticado
+- Funciones de login y logout
+- Verificacion de autenticacion
+- Verificacion de permisos por rol
 
-2. **Migración moment → date-fns:** Eliminar dependencia de moment
-   - date-fns ya está instalado
-   - Buscar usos de moment: `grep -r "import.*moment" src/`
+### 10.2 Middleware (1)
 
-### Mejoras Sugeridas
-
-1. **Testing:** Implementar tests con Jest + React Testing Library
-2. **Storybook:** Documentar componentes UI
-3. **Performance:** Implementar lazy loading para rutas pesadas
-4. **SEO:** Agregar metadata a páginas públicas
-5. **i18n:** Internacionalización si se requiere multi-idioma
-6. **Error Boundary:** Componente global para errores
-7. **Analytics:** Integrar Google Analytics o similar
+Middleware de Next.js para proteccion de rutas basado en el rol del usuario. Redirige a los usuarios no autenticados y valida que tengan el rol necesario para acceder a cada seccion (admin, organizer, public).
 
 ---
 
-## Referencias
+## 11. Testing
 
-- [Next.js 15 Docs](https://nextjs.org/docs)
-- [React 19 Docs](https://react.dev)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS](https://tailwindcss.com/docs)
+### Herramientas
+
+- **Jest 30.2.0** como test runner
+- **React Testing Library** para testing de componentes
+- Politica estricta de consola: console.error/warn/log inesperados hacen fallar el test
+
+### Metricas
+
+| Metrica | Valor |
+|---------|-------|
+| Archivos de test | 160 |
+| Tests pasando | 2882 |
+
+### Cobertura
+
+Los tests cubren:
+- Componentes (smart y dumb)
+- Hooks personalizados
+- Services
+- Integracion de features completas
 
 ---
 
-**Mantenido por:** Equipo de Desarrollo
-**Última auditoría:** Octubre 2025
-**Estado:** Production Ready ✅
+## 12. Metricas Resumen
+
+| Metrica | Valor |
+|---------|-------|
+| Features | 14 |
+| Componentes totales | 189 (109 feature + 80 shared) |
+| Hooks totales | 38 (7 shared + 31 feature) |
+| Services totales | 26 (5 shared + 21 feature) |
+| Archivos de tipos | 21 |
+| Paginas/Rutas | 27 |
+| Archivos de test | 160 |
+| Tests pasando | 2882 |
+| Context providers | 1 (AuthContext) |
+| Middleware | 1 (proteccion de rutas por rol) |
+
+---
+
+## 13. Ultima actualizacion: 25 de marzo de 2026

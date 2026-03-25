@@ -56,8 +56,9 @@ RUN useradd --create-home ${USER} && \
     chown -R ${USER}:${USER} /data/caddy /config/caddy
 
 # --- Server config ---
-# :80 disables FrankenPHP auto-HTTPS (cloud providers handle TLS termination)
-ENV SERVER_NAME=:80
+# SERVER_NAME is set dynamically at runtime by docker-entrypoint.sh
+# to respect the PORT env var assigned by cloud providers (Render, Railway, etc.)
+# Falls back to :80 for local Docker usage
 
 WORKDIR /app
 
@@ -76,7 +77,7 @@ RUN touch .env && \
 # 1. storage:link (idempotent symlink)
 # 2. optimize (cache config/routes/views with runtime env vars)
 # 3. exec into FrankenPHP
-RUN printf '#!/bin/sh\nset -e\nphp artisan storage:link 2>/dev/null || true\nphp artisan optimize --force 2>/dev/null || true\nexec "$@"\n' \
+RUN printf '#!/bin/sh\nset -e\nexport SERVER_NAME=":${PORT:-80}"\nphp artisan storage:link 2>/dev/null || true\nphp artisan migrate --force 2>/dev/null || true\nphp artisan optimize --force 2>/dev/null || true\nexec "$@"\n' \
     > /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER ${USER}

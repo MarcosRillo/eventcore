@@ -90,22 +90,6 @@ class Organization extends Model
     }
 
     /**
-     * Get the sections for this organization.
-     */
-    public function sections(): HasMany
-    {
-        return $this->hasMany(Section::class, 'entity_id');
-    }
-
-    /**
-     * Get the custom fields for this organization.
-     */
-    public function customFields(): HasMany
-    {
-        return $this->hasMany(CustomField::class, 'entity_id');
-    }
-
-    /**
      * Get the events for this organization.
      */
     public function events(): HasMany

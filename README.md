@@ -1,294 +1,238 @@
-# Plataforma de Eventos Turísticos - Tucumán
+# Plataforma de Eventos Turisticos - Tucuman
 
-> Sistema multi-tenant de gestión de eventos turísticos para Argentina
+> Multi-tenant event management platform for tourism in Argentina
 
-[![Tests](https://img.shields.io/badge/tests-164%2F164%20passing-brightgreen)]()
-[![Backend](https://img.shields.io/badge/Laravel-12.24.0-red)]()
-[![Frontend](https://img.shields.io/badge/Next.js-15-black)]()
-[![PHP](https://img.shields.io/badge/PHP-8.2.29-blue)]()
+[![Tests](https://img.shields.io/badge/tests-3409%20passing-brightgreen)]()
+[![Backend](https://img.shields.io/badge/Laravel-12-red)]()
+[![Frontend](https://img.shields.io/badge/Next.js-15.5.9-black)]()
+[![PHP](https://img.shields.io/badge/PHP-8.2-blue)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)]()
 
 ---
 
-## 🎯 Overview
+## Overview
 
-Plataforma profesional para la gestión centralizada de eventos turísticos con sistema de aprobación y publicación multi-tenant.
+Professional platform for centralized management of tourism events with multi-tenant approval and publication workflow.
 
-**Cliente Principal:** Ente de Turismo de Tucumán
-**Modelo:** Multi-tenant (gobiernos, hoteles, restaurantes, organizadores)
-**Arquitectura:** Monorepo con Features-based architecture
+**Client:** Ente de Turismo de Tucuman
+**Model:** Multi-tenant (government entities, hotels, restaurants, organizers)
+**Architecture:** Monorepo with Features-based architecture
 
 ---
 
-## 🏗️ Stack Tecnológico
+## Stack
 
 ### Backend
-- **Framework:** Laravel 12.24.0
-- **PHP:** 8.2.29
-- **Database:** PostgreSQL 15 (Docker)
-- **Testing:** PHPUnit (36 tests, 153 assertions)
-- **API:** RESTful, versionada (/api/v1/)
+- **Framework:** Laravel 12, PHP 8.2, Sanctum 4.2
+- **Database:** PostgreSQL 15
+- **Cache:** Redis (Upstash in production)
+- **Testing:** PHPUnit (527 tests, 2172 assertions)
+- **API:** RESTful, versioned (/api/v1/), 97 endpoints
 
 ### Frontend
-- **Framework:** Next.js 15.5.4 (App Router)
-- **React:** 19.2.0
-- **TypeScript:** 5.9.3 (strict mode)
-- **Styling:** Tailwind CSS 4.1
-- **Testing:** Jest + React Testing Library (128 tests)
-- **Node:** v22.15.1
+- **Framework:** Next.js 15.5.9 (App Router)
+- **React:** 19.2.3, TypeScript 5.9.3 (strict mode)
+- **Styling:** Tailwind CSS 4
+- **Testing:** Jest 30.2.0 + React Testing Library (2882 tests)
 
 ### Infrastructure
-- **Containerization:** Docker + Docker Compose
-- **Database:** PostgreSQL 15 (port 5432)
-- **Backend Server:** PHP 8.2 (port 8000)
-- **Frontend Server:** Next.js dev server (port 3000)
+- **Backend Deploy:** Render (Docker/FrankenPHP)
+- **Frontend Deploy:** Vercel
+- **Database:** Neon PostgreSQL (serverless)
+- **Cache:** Upstash Redis
+- **Dev:** Docker Compose (PostgreSQL 15 + Redis 7 + Nginx + MailHog)
 
 ---
 
-## 📊 Métricas del Proyecto
+## Metrics
 
-### Backend (verified 2025-10-29)
-- **Features:** 9 (Appearance, Approval, Auth, Categories, Dashboard, Events, Locations, Organizer, PublicEvents)
-- **Controllers:** 10
-- **Services:** 7
-- **Models:** 13
-- **Migrations:** 20
-- **API Endpoints:** 61
-- **Tests:** 36/36 passing ✅ (100%)
+### Backend (verified 2026-03-25)
+| Category | Count |
+|----------|-------|
+| Features | 12 (Approval, Auth, Dashboard, EventTypes, Events, InternalCalendar, Locations, Organizations, Organizer, PublicEvents, Shared, Users) |
+| Controllers | 18 |
+| Services | 24 |
+| Models | 21 |
+| Migrations | 46 |
+| API Routes | 97 (GET:48, POST:21, PUT:6, PATCH:14, DELETE:8) |
+| Form Requests | 29 |
+| Tests | 527 passing (40 test files) |
 
-### Frontend (verified 2025-10-29)
-- **Features:** 6 (appearance, auth, categories, events, locations, organizer)
-- **Components:** 78
-- **Custom Hooks:** 23
-- **Services:** 14
-- **Tests:** 128/128 passing ✅ (100%)
+### Frontend (verified 2026-03-25)
+| Category | Count |
+|----------|-------|
+| Features | 14 (auth, entity-admin, event-types, events, internal-calendar, invitations, landing, locations, organizations, organizer, organizer-dashboard, public-calendar, registration-requests, users) |
+| Components | 189 (109 feature + 80 shared) |
+| Hooks | 38 (7 shared + 31 feature) |
+| Services | 26 (5 shared + 21 feature) |
+| Pages/Routes | 27 |
+| Tests | 2882 passing (160 test files) |
 
-**Total Tests:** 164/164 passing (100%) 🎉
+**Total Tests: 3409 passing (100%)**
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker Desktop
+- Node.js 22+
 - Git
 
 ### Installation
 
-1. **Clone repository:**
 ```bash
-git clone https://github.com/MarcosRillo/plataforma-calendario-monorepo.git
+git clone https://github.com/MarcosRillo/plataforma-calendario.git
 cd plataforma-calendario
+
+# Start backend services
+make install    # First time: builds, migrates, seeds
+# OR
+make up         # Subsequent runs
+
+# Start frontend
+cd frontend && npm install && npm run dev
 ```
 
-2. **Start Docker containers:**
-```bash
-docker compose up -d
-```
-
-3. **Install frontend dependencies:**
-```bash
-npm install
-```
-
-4. **Access the application:**
+### Access
 - **Frontend:** http://localhost:3000
 - **Backend API:** http://localhost:8000/api/v1/
-- **Database:** localhost:5432 (PostgreSQL)
+- **Database:** localhost:5432
 
 ### Running Tests
 
-**Backend (in Docker):**
 ```bash
+# Backend (Docker required)
 docker compose exec backend php artisan test
-```
 
-**Frontend:**
-```bash
-npm test
-```
+# Frontend
+cd frontend && npm test
 
-**Run all tests:**
-```bash
-npm test && docker compose exec backend php artisan test
+# Code style
+docker compose exec backend vendor/bin/pint --test
+cd frontend && npm run lint
 ```
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 plataforma-calendario/
-├── src/                           # Frontend (Next.js + React)
-│   ├── app/                       # Next.js App Router pages
-│   ├── features/                  # Feature-based organization
-│   │   ├── appearance/
-│   │   ├── auth/
-│   │   ├── categories/
-│   │   ├── events/
-│   │   ├── locations/
-│   │   └── organizer/
-│   ├── components/                # Shared components
-│   ├── context/                   # React Context providers
-│   └── hooks/                     # Custom React hooks
+├── frontend/                      # Next.js 15 + React 19
+│   └── src/
+│       ├── app/                   # App Router (27 pages)
+│       ├── features/              # 14 feature modules
+│       │   ├── auth/
+│       │   ├── entity-admin/
+│       │   ├── event-types/
+│       │   ├── events/
+│       │   ├── internal-calendar/
+│       │   ├── invitations/
+│       │   ├── landing/
+│       │   ├── locations/
+│       │   ├── organizations/
+│       │   ├── organizer/
+│       │   ├── organizer-dashboard/
+│       │   ├── public-calendar/
+│       │   ├── registration-requests/
+│       │   └── users/
+│       ├── shared/                # 80 shared components
+│       └── context/               # AuthContext
 │
-├── backend/ (Docker)              # Backend (Laravel + PostgreSQL)
-│   ├── app/
-│   │   ├── Features/              # Feature-based architecture
-│   │   │   ├── Appearance/
-│   │   │   ├── Approval/
-│   │   │   ├── Auth/
-│   │   │   ├── Categories/
-│   │   │   ├── Dashboard/
-│   │   │   ├── Events/
-│   │   │   ├── Locations/
-│   │   │   ├── Organizer/
-│   │   │   └── PublicEvents/
-│   │   └── Models/
-│   ├── database/
-│   │   ├── migrations/
-│   │   └── seeders/
-│   └── tests/
+├── backend/                       # Laravel 12 + PHP 8.2
+│   └── app/
+│       ├── Features/              # 12 feature modules
+│       │   ├── Approval/
+│       │   ├── Auth/
+│       │   ├── Dashboard/
+│       │   ├── EventTypes/
+│       │   ├── Events/
+│       │   ├── InternalCalendar/
+│       │   ├── Locations/
+│       │   ├── Organizations/
+│       │   ├── Organizer/
+│       │   ├── PublicEvents/
+│       │   ├── Shared/
+│       │   └── Users/
+│       └── Models/                # 21 Eloquent models
 │
-├── docs/                          # Documentation
-│   ├── backend/
-│   │   ├── ARCHITECTURE.md
-│   │   └── CHANGELOG.md
-│   └── frontend/
-│       ├── ARCHITECTURE.md
-│       └── CHANGELOG.md
-│
-├── docker-compose.yml
-├── claude.md                      # AI Assistant instructions
-└── README.md                      # This file
+├── docs/                          # Architecture & changelogs
+├── docker-compose.yml             # Dev environment
+├── render.yaml                    # Render deploy config
+└── Makefile                       # Dev automation
 ```
 
 ---
 
-## 🏛️ Architecture
+## Architecture
 
-### Features-Based Organization
+Both backend and frontend follow a **Features-based architecture**, organizing code by business domain rather than technical layers. Each feature encapsulates its own controllers, services, components, hooks, and tests.
 
-Both backend and frontend follow a **domain-driven Features architecture**, organizing code by business functionality rather than technical layers.
-
-**Benefits:**
-- Clear separation of concerns
-- Easy to locate related code
-- Scalable for large teams
-- Feature-level testing
-
-See detailed architecture documentation:
+See detailed documentation:
 - [Backend Architecture](docs/backend/ARCHITECTURE.md)
 - [Frontend Architecture](docs/frontend/ARCHITECTURE.md)
 
 ---
 
-## 🔑 Key Features
+## Key Features
 
-### For Tourism Board (Entity Admin)
-- ✅ Approve/reject/request changes on events
-- ✅ View all pending events
-- ✅ Publish approved events to public calendar
-- ✅ Analytics dashboard
+### Entity Admin (Tourism Board)
+- Approve/reject/request changes on events
+- Manage organizations, users, invitations
+- Internal calendar with stats dashboard
+- Event type and location management
 
-### For Organizers (Hotels, Restaurants, etc.)
-- ✅ Create and manage events
-- ✅ View approval status
-- ✅ Statistics dashboard (pending, approved, published)
-- ✅ Event list with filters
+### Organizers (Hotels, Restaurants, etc.)
+- Create and manage events with image upload
+- Track approval workflow status
+- Statistics dashboard
+- Calendar view of own events
 
-### For Public Users (Tourists)
-- 🚧 Browse public calendar
-- 🚧 Filter events by category, location, date
-- 🚧 View event details
+### Public (Tourists)
+- Browse public event calendar
+- Filter by type, location, date range
+- Search events
+- View event details with QR codes
 
-**Legend:** ✅ Implemented | 🚧 In Progress | ⏳ Planned
-
----
-
-## 🧪 Testing Strategy
-
-**Philosophy:** Quality over speed. TDD approach for all new features.
-
-- **Backend:** PHPUnit for Feature and Unit tests
-- **Frontend:** Jest + React Testing Library
-- **E2E:** (Planned) Cypress
-- **Coverage Target:** >60% backend, >50% frontend
-
-**Current Coverage:** 100% test pass rate (164/164 tests)
+### Platform Security
+- Role-based access control (4 roles)
+- API rate limiting (3 named limiters)
+- Redis caching with tag invalidation
+- CORS with credentials whitelist
+- HTML sanitization (XSS prevention)
+- Multi-tenant data isolation (TenantScope)
 
 ---
 
-## 📚 Documentation
+## Testing
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guidelines and setup
-- **[docs/API.md](docs/API.md)** - API endpoints documentation
-- **[docs/backend/ARCHITECTURE.md](docs/backend/ARCHITECTURE.md)** - Backend architecture deep dive
-- **[docs/frontend/ARCHITECTURE.md](docs/frontend/ARCHITECTURE.md)** - Frontend architecture deep dive
-- **[claude.md](claude.md)** - AI assistant instructions and coding standards
+- **Backend:** PHPUnit with RefreshDatabase, SQLite in-memory for isolation
+- **Frontend:** Jest + React Testing Library, strict console policy
+- **CI:** GitHub Actions (test + lint + security audit)
 
----
+**Current: 3409/3409 tests passing (100%)**
 
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
-
-**Quick guidelines:**
-- Follow Features-based architecture
-- Write tests before code (TDD)
-- Use TypeScript strict mode (no `any` types)
-- Wrap DB operations in transactions
-- Run tests before committing
+Note: Backend tests must run in Docker (PostgreSQL required for full migration compatibility).
 
 ---
 
-## 📦 Dependencies
+## Documentation
 
-### Backend
-- Laravel 12.24.0
-- PostgreSQL 15
-- JWT Auth (Sanctum)
-- 84 Composer packages
-
-### Frontend
-- Next.js 15.5.4
-- React 19.2.0
-- TypeScript 5.9.3
-- Tailwind CSS 4.1.14
-- 28 npm packages (11 prod + 17 dev)
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Development guidelines
+- [Backend Architecture](docs/backend/ARCHITECTURE.md)
+- [Frontend Architecture](docs/frontend/ARCHITECTURE.md)
+- [Backend Changelog](docs/backend/CHANGELOG.md)
+- [Frontend Changelog](docs/frontend/CHANGELOG.md)
 
 ---
 
-## 🐛 Known Issues
+## License
 
-None currently. All 164 tests passing.
-
-**Note:** Backend tests must be run in Docker (not locally with SQLite) to ensure all migrations are applied correctly.
+Proprietary - Ente de Turismo de Tucuman
 
 ---
-
-## 📄 License
-
-Proprietary - Ente de Turismo de Tucumán
-
----
-
-## 👥 Team
 
 **Lead Developer:** Marcos Rillo Cabanne
-**Client:** Ente de Turismo de Tucumán
-
----
-
-## 📞 Support
-
-For development questions or issues, please refer to:
-- [CONTRIBUTING.md](CONTRIBUTING.md) for setup help
-- [docs/API.md](docs/API.md) for API documentation
-- [claude.md](claude.md) for coding standards
-
----
-
-**Last Updated:** October 29, 2025
-**Version:** 2.0.0
-**Status:** Active Development (MVP 90% complete)
+**Last Updated:** March 25, 2026
+**Version:** 2.1.0

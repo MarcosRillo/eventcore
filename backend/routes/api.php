@@ -15,7 +15,6 @@ use App\Features\Dashboard\Controllers\OrganizerStatsController;
 // Feature Controllers - InternalCalendar
 use App\Features\Events\Controllers\EventController as FeatureEventController;
 use App\Features\EventTypes\Controllers\EventSubtypeController;
-// Feature Controllers - Appearance
 use App\Features\EventTypes\Controllers\EventTypeController;
 // Feature Controllers - SIMPLE
 use App\Features\InternalCalendar\Controllers\InternalCalendarController;

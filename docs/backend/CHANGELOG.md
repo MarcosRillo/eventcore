@@ -9,11 +9,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Future Features
-- Increased test coverage (>80%)
-- API rate limiting
-- Redis caching layer
+### Planned
 - Event sourcing for audit trail
+- Increased test coverage (>80%)
+
+---
+
+## [2.1.0] - 2026-03-25
+
+### Performance & Infrastructure Overhaul
+
+This version includes all optimizations from the P1-P4 audit, deploy migration
+from Railway to Render, and comprehensive cleanup of dead code.
+
+#### Added
+
+**API Rate Limiting**
+- 3 named limiters: public (60/min), public-heavy (20/min), authenticated (120/min)
+- Per-route throttle middleware on all 97 endpoints
+- Rate limiter uses database store to minimize Upstash Redis commands
+
+**Redis Caching with Tag Invalidation**
+- EventCacheObserver and EventTypeCacheObserver for automatic cache invalidation
+- Cache tags for granular invalidation (events, event-types, public-events)
+- Redis for caching, database for rate limiting (cost optimization for Upstash free tier)
+
+**Database Performance**
+- 13 database indexes added for critical query paths
+- 2 partial PostgreSQL indexes (WHERE deleted_at IS NULL) for filtered queries
+- preventLazyLoading enabled in non-production environments
+- N+1 query elimination across all controllers with eager loading
+
+**SEO**
+- robots.txt via MetadataRoute.Robots
+- sitemap.xml via MetadataRoute.Sitemap
+- JSON-LD structured data for events
+
+**Security**
+- TenantScope global scope with dynamic entity_id resolution
+- HTML sanitization via Purifier::clean in Form Requests
+- httpOnly cookie tokens with configurable SameSite attribute
+- CORS whitelist with FRONTEND_URL and supports_credentials
+
+**Deploy Configuration**
+- Dockerfile.production with FrankenPHP and OPcache optimization
+- render.yaml for Render Blueprint (IaC)
+- Dynamic PORT binding for cloud providers
+- Migrations in entrypoint (idempotent, for Render free tier without pre-deploy hooks)
+- Neon PostgreSQL support with sslmode=require
+
+**Testing**
+- Test isolation: SQLite in-memory with forced env vars (CACHE_STORE=array, LOG_CHANNEL=null)
+- Tests grew from 36 to 527 (40 test files, 2172 assertions)
+
+#### Changed
+
+**Event Approvals Normalization**
+- Replaced legacy approval_history JSON column with normalized event_approvals table (3NF)
+- EventApproval model with proper relations
+
+**Auth Cookies**
+- SameSite attribute now configurable via config('session.same_site') for cross-domain deploy
+
+#### Removed
+- Appearance feature (fully removed: controller, requests, migration, routes)
+- CustomField and Section models (no tables, no usage)
+- Dead code cleanup: 23 files removed (scripts, reports, unused hooks/services)
 
 ---
 

@@ -47,8 +47,8 @@ class AuthController extends Controller
                 ],
                 'message' => 'Login successful',
             ])
-                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
-                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
+                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'))
+                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'));
         } catch (AuthenticationException $e) {
             // Return specific message for suspended users
             $message = str_contains($e->getMessage(), 'suspendida')
@@ -105,8 +105,8 @@ class AuthController extends Controller
                 ],
                 'message' => 'Token refreshed successfully',
             ])
-                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, 'strict')
-                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, 'strict');
+                ->cookie('access_token', $result['access_token'], $accessTokenMinutes, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'))
+                ->cookie('refresh_token', $result['refresh_token'], $refreshTokenMinutes, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'));
         } catch (\Exception) {
             return response()->json([
                 'success' => false,
@@ -128,8 +128,8 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Logout successful',
             ])
-                ->cookie('access_token', '', -1, '/', null, config('session.secure'), true, false, 'strict')
-                ->cookie('refresh_token', '', -1, '/', null, config('session.secure'), true, false, 'strict');
+                ->cookie('access_token', '', -1, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'))
+                ->cookie('refresh_token', '', -1, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'));
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

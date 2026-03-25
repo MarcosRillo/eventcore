@@ -476,8 +476,8 @@ docker compose exec backend ./vendor/bin/pint
 - [ ] Documentation update
 
 ## Testing
-- [ ] Backend tests pass (36/36)
-- [ ] Frontend tests pass (128/128)
+- [ ] Backend tests pass (527+)
+- [ ] Frontend tests pass (2882+)
 - [ ] Manual testing completed
 
 ## Checklist
@@ -555,5 +555,5 @@ If you encounter issues:
 
 ---
 
-**Last Updated:** October 29, 2025
+**Last Updated:** March 25, 2026
 **Maintained by:** Marcos Rillo Cabanne

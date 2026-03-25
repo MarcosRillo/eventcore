@@ -1,0 +1,69 @@
+# render.yaml - Render Blueprint for backend API
+# Docs: https://docs.render.com/blueprint-spec
+# Frontend deploys separately on Vercel (no config needed here)
+
+services:
+  - type: web
+    name: plataforma-calendario-api
+    runtime: docker
+    plan: free
+    branch: main
+    dockerfilePath: ./backend/Dockerfile.production
+    dockerContext: ./backend
+    healthCheckPath: /up
+    envVars:
+      # --- App ---
+      - key: APP_NAME
+        value: PlataformaCalendario
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false # Set in dashboard: https://xxx.onrender.com
+      - key: APP_KEY
+        sync: false # Generate: php artisan key:generate --show
+
+      # --- Database (Neon PostgreSQL) ---
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false # Neon host: ep-xxx.neon.tech
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        sync: false # Neon database name
+      - key: DB_USERNAME
+        sync: false # Neon username
+      - key: DB_PASSWORD
+        sync: false # Neon password
+      - key: DB_SSLMODE
+        value: require
+
+      # --- Redis (Upstash) ---
+      - key: REDIS_URL
+        sync: false # Upstash URL: rediss://default:xxx@xxx.upstash.io:6379
+      - key: REDIS_CLIENT
+        value: phpredis
+      - key: CACHE_STORE
+        value: redis
+
+      # --- CORS / Sanctum ---
+      - key: FRONTEND_URL
+        sync: false # Vercel URL: https://xxx.vercel.app
+      - key: SANCTUM_STATEFUL_DOMAINS
+        sync: false # Vercel domain: xxx.vercel.app
+
+      # --- Session ---
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: SESSION_SAME_SITE
+        value: none
+
+      # --- Logging ---
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning

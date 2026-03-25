@@ -6,9 +6,68 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.
 
 ---
 
+## [2.1.0] - 2026-03-25
+
+### Expansion de features, optimizaciones y limpieza
+
+Version que incluye la expansion masiva de features (6 a 14), optimizaciones de
+rendimiento con SWR, design system con tokens semanticos, y limpieza de codigo muerto.
+
+#### Added
+
+**8 nuevos features:**
+- entity-admin: gestion de organizaciones, usuarios, invitaciones, solicitudes
+- event-types: CRUD de tipos y subtipos de eventos
+- internal-calendar: calendario interno con estadisticas
+- invitations: sistema de invitaciones por email con tokens
+- landing: pagina publica con calendario y buscador
+- organizer-dashboard: dashboard de estadisticas del organizador
+- public-calendar: calendario publico con filtros y busqueda
+- registration-requests: solicitudes de registro con workflow de aprobacion
+- organizations: gestion de organizaciones
+- users: gestion de usuarios con suspension/activacion
+
+**SWR Optimizations:**
+- keepPreviousData en 7 hooks para transiciones suaves
+- dedupingInterval: 60000 para datos estaticos (tipos, ubicaciones)
+- revalidateOnFocus: false globalmente
+
+**Design System:**
+- Semantic tokens: primary-*, secondary-*, neutral-*, error-*, warning-*, success-*
+- Button variants: primary, secondary, outline, ghost, danger, success, warning
+- Icons: lucide-react (eliminados SVGs inline)
+
+**Route Protection:**
+- Middleware de Next.js para proteccion de rutas por rol
+- Validacion de token con buffer de 30 segundos
+- Soporte para 4 roles: platform_admin, entity_admin, entity_staff, organizer_admin
+
+**27 paginas/rutas:**
+- Auth: 4 (login, forgot-password, reset-password, accept-invitation)
+- Admin: 9 (events, event-types, locations, organizations, users, invitations, registration-requests, internal-calendar, internal-calendar/[id])
+- Public: 4 (landing, calendar, calendar/[id], register-request)
+- Organizer: 10 (dashboard, events, events/create, events/[id], events/[id]/edit, calendar, calendar/[id], create, [id], [id]/edit)
+
+#### Changed
+
+**Crecimiento de metricas:**
+- Features: 6 -> 14
+- Components: 78 -> 189 (109 feature + 80 shared)
+- Hooks: 23 -> 38 (7 shared + 31 feature)
+- Services: 14 -> 26 (5 shared + 21 feature)
+- Tests: 128 -> 2882 (160 test files)
+
+#### Removed
+- Feature appearance (eliminada completamente)
+- 7 archivos de codigo muerto (hooks, services, utils sin uso)
+- 8 archivos residuales de auditorias anteriores (ESLint reports, TS errors, scripts)
+- PROJECT-CONTEXT.md (snapshot obsoleto de Oct 2025)
+
+---
+
 ## [2.0.0] - 2025-10-02
 
-### 🎯 Migración a Arquitectura Features - COMPLETA
+### Migracion a Arquitectura Features - COMPLETA
 
 Refactorización exhaustiva del frontend de Next.js a arquitectura basada en Features con separación clara de responsabilidades.
 

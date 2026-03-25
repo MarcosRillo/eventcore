@@ -60,7 +60,7 @@ test: ## Ejecuta tests
 	$(DC) exec -u www backend php artisan test
 
 db-shell: ## Accede a PostgreSQL CLI
-	$(DC) exec db psql -U plataforma_user -d plataforma_calendario
+	$(DC) exec db psql -U $${POSTGRES_USER:-plataforma_user} -d $${POSTGRES_DB:-plataforma_calendario}
 
 redis-cli: ## Accede a Redis CLI
 	$(DC) exec $(REDIS_CONTAINER) redis-cli

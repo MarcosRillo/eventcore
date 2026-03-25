@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Security benefits:
  * - HttpOnly cookies are not accessible via JavaScript (XSS protection)
- * - SameSite=Strict prevents CSRF attacks
+ * - SameSite attribute follows session config (Strict locally, None cross-domain)
  * - Maintains existing Sanctum authentication flow
  */
 class CookieTokenMiddleware
