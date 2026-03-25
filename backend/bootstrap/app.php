@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckActiveUser;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CookieTokenMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,13 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->alias([
-            'role'                  => \App\Http\Middleware\CheckRole::class,
-            'active'                => \App\Http\Middleware\CheckActiveUser::class,
-            'disable-in-production' => \App\Http\Middleware\DisableInProduction::class,
+            'role' => CheckRole::class,
+            'active' => CheckActiveUser::class,
         ]);
 
         // Inject httpOnly cookie tokens into Authorization header for Sanctum
-        $middleware->append(\App\Http\Middleware\CookieTokenMiddleware::class);
+        $middleware->append(CookieTokenMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthenticationException $e, Request $request) {

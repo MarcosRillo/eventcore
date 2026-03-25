@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use HTMLPurifier;
-use HTMLPurifier_Config;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer as SymfonyHtmlSanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
+use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitizerInterface;
 
 class HtmlSanitizer
 {
@@ -13,24 +14,72 @@ class HtmlSanitizer
             return '';
         }
 
-        $cacheKey = 'html_purifier.'.$profile.'.'.md5($input);
+        $cacheKey = 'html_sanitizer.'.$profile.'.'.md5($input);
 
-        return cache()->remember($cacheKey, now()->addHour(), function () use ($input, $profile) {
-            $settings = config("purifier.settings.{$profile}", []);
-            $phpConfig = HTMLPurifier_Config::createDefault();
+        return cache()->remember($cacheKey, now()->addHour(), function () use ($input) {
+            $cssSanitizer = new class implements AttributeSanitizerInterface
+            {
+                private const ALLOWED_PROPERTIES = [
+                    'font', 'font-size', 'font-weight', 'font-style', 'font-family',
+                    'text-decoration', 'color', 'background-color', 'text-align',
+                ];
 
-            foreach ($settings as $key => $value) {
-                $phpConfig->set($key, $value);
-            }
+                public function getSupportedElements(): ?array
+                {
+                    return null;
+                }
 
-            $phpConfig->set('Core.Encoding', config('purifier.encoding', 'UTF-8'));
+                public function getSupportedAttributes(): ?array
+                {
+                    return ['style'];
+                }
 
-            $cachePath = config('purifier.cachePath', storage_path('app/purifier'));
-            if ($cachePath) {
-                $phpConfig->set('Cache.SerializerPath', $cachePath);
-            }
+                public function sanitizeAttribute(
+                    string $element,
+                    string $attribute,
+                    string $value,
+                    HtmlSanitizerConfig $config,
+                ): ?string {
+                    $safe = [];
 
-            return (new HTMLPurifier($phpConfig))->purify($input);
+                    foreach (explode(';', $value) as $declaration) {
+                        $declaration = trim($declaration);
+
+                        if ($declaration === '') {
+                            continue;
+                        }
+
+                        [$property] = explode(':', $declaration, 2) + ['', ''];
+
+                        if (in_array(trim($property), self::ALLOWED_PROPERTIES, true)) {
+                            $safe[] = $declaration;
+                        }
+                    }
+
+                    return $safe ? implode('; ', $safe) : null;
+                }
+            };
+
+            $config = (new HtmlSanitizerConfig)
+                ->allowElement('p')
+                ->allowElement('b')
+                ->allowElement('i')
+                ->allowElement('u')
+                ->allowElement('strong')
+                ->allowElement('em')
+                ->allowElement('a', ['href', 'title'])
+                ->allowElement('ul')
+                ->allowElement('ol')
+                ->allowElement('li')
+                ->allowElement('br')
+                ->allowElement('span', ['style'])
+                ->allowElement('div', ['class'])
+                ->allowElement('h2')
+                ->allowElement('h3')
+                ->allowElement('h4')
+                ->withAttributeSanitizer($cssSanitizer);
+
+            return (new SymfonyHtmlSanitizer($config))->sanitize($input);
         });
     }
 }
