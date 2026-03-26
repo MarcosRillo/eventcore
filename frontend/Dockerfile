@@ -1,19 +1,21 @@
 # Stage 1: Dependencies
 FROM node:20.18-alpine AS deps
 RUN apk add --no-cache libc6-compat
+RUN corepack enable
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Stage 2: Build
 FROM node:20.18-alpine AS builder
+RUN corepack enable
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG INTERNAL_API_URL
 ENV INTERNAL_API_URL=${INTERNAL_API_URL}
-RUN npm run build
+RUN pnpm run build
 
 # Stage 3: Production runner (minimal image)
 FROM node:20.18-alpine AS runner
