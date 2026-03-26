@@ -1,10 +1,13 @@
+# syntax=docker/dockerfile:1
+
 # Stage 1: Dependencies
 FROM node:20.18-alpine AS deps
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
 # Stage 2: Build
 FROM node:20.18-alpine AS builder

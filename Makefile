@@ -1,6 +1,6 @@
 # Makefile para gestión de Docker en desarrollo
 
-.PHONY: help up down restart logs shell composer artisan npm db-shell redis-cli clean build
+.PHONY: help up down restart logs shell composer artisan db-shell redis-cli clean build
 
 # Variables
 DC = docker-compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.docker
