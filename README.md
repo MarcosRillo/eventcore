@@ -91,7 +91,7 @@ make install    # First time: builds, migrates, seeds
 make up         # Subsequent runs
 
 # Start frontend
-cd frontend && npm install && npm run dev
+cd frontend && pnpm install && pnpm dev
 ```
 
 ### Access
@@ -106,11 +106,11 @@ cd frontend && npm install && npm run dev
 docker compose exec backend php artisan test
 
 # Frontend
-cd frontend && npm test
+cd frontend && pnpm test
 
 # Code style
 docker compose exec backend vendor/bin/pint --test
-cd frontend && npm run lint
+cd frontend && pnpm run lint
 ```
 
 ---

@@ -1693,9 +1693,9 @@ export const APPROVAL_CONFIG = {
 - [ ] All props have interfaces
 
 ### Post-Implementation
-- [ ] Run tests: `npm test` → 12+ new tests passing
-- [ ] Run linter: `npm run lint` → 0 errors, 0 warnings
-- [ ] TypeScript check: `npm run type-check` → 0 errors
+- [ ] Run tests: `pnpm test` → 12+ new tests passing
+- [ ] Run linter: `pnpm run lint` → 0 errors, 0 warnings
+- [ ] TypeScript check: `pnpm run type-check` → 0 errors
 - [ ] Manual testing: Test all approval actions
 - [ ] Test modals with keyboard navigation
 - [ ] Test responsive layout
@@ -1714,19 +1714,19 @@ export const APPROVAL_CONFIG = {
 
 **After RED Phase:**
 ```bash
-npm test approval
+pnpm test approval
 # Expected: 12+ tests, all failing ❌
 ```
 
 **After GREEN Phase:**
 ```bash
-npm test approval
+pnpm test approval
 # Expected: 12+ tests, all passing ✅
 ```
 
 **Full Suite:**
 ```bash
-npm test
+pnpm test
 # Expected: 160+ tests passing (148 existing + 12 new)
 ```
 

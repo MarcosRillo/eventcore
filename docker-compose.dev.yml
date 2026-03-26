@@ -47,7 +47,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
-    command: npm run dev
+    command: pnpm run dev
 
 volumes:
   composer_cache:

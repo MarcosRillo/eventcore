@@ -980,9 +980,9 @@ export const ACTION_MESSAGES = {
 - [ ] All props have interfaces
 
 ### Post-Implementation
-- [ ] Run tests: `npm test` → 12+ new tests passing
-- [ ] Run linter: `npm run lint` → 0 errors, 0 warnings
-- [ ] TypeScript check: `npm run type-check` → 0 errors
+- [ ] Run tests: `pnpm test` → 12+ new tests passing
+- [ ] Run linter: `pnpm run lint` → 0 errors, 0 warnings
+- [ ] TypeScript check: `pnpm run type-check` → 0 errors
 - [ ] Manual testing: Test each action in browser
 - [ ] Accessibility check: Test with keyboard only
 - [ ] Mobile responsive check
@@ -1001,19 +1001,19 @@ export const ACTION_MESSAGES = {
 
 **After RED Phase:**
 ```bash
-npm test EventActionButtons
+pnpm test EventActionButtons
 # Expected: 12 tests, 12 failing ❌
 ```
 
 **After GREEN Phase:**
 ```bash
-npm test EventActionButtons
+pnpm test EventActionButtons
 # Expected: 12 tests, 12 passing ✅
 ```
 
 **Full Suite:**
 ```bash
-npm test
+pnpm test
 # Expected: 140 tests passing (128 existing + 12 new)
 ```
 

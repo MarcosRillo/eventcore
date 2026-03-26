@@ -1,6 +1,7 @@
 {
   "name": "plataforma-calendario",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "prepare": "husky"
   },
@@ -10,7 +11,7 @@
   },
   "lint-staged": {
     "frontend/**/*.{ts,tsx}": [
-      "npm run lint:fix --prefix frontend"
+      "pnpm --dir frontend run lint:fix"
     ],
     "backend/**/*.php": [
       "docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.docker exec -T -u www backend php vendor/bin/pint --dirty"

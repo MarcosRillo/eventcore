@@ -215,8 +215,8 @@ Después de implementar, verificar:
 - [ ] Focus rings se ven al tabular (azul)
 
 ### Technical (DevTools)
-- [ ] `npm test` → 271/271 passing ✅
-- [ ] `npm run build` → success ✅
+- [ ] `pnpm test` → 271/271 passing ✅
+- [ ] `pnpm run build` → success ✅
 - [ ] TypeScript errors: 0 ✅
 - [ ] ESLint warnings: 0 ✅
 - [ ] Lighthouse Accessibility: ≥90 ✅
@@ -319,7 +319,7 @@ Si algo falla durante implementación:
 1. **Rollback rápido:**
    ```bash
    git revert HEAD
-   npm run build
+   pnpm run build
    ```
 
 2. **Consultar:**
@@ -328,13 +328,13 @@ Si algo falla durante implementación:
 
 3. **Testing:**
    ```bash
-   npm test -- --watch
-   npm run build
+   pnpm test -- --watch
+   pnpm run build
    ```
 
 4. **Debug Tailwind:**
    ```bash
-   npm run dev
+   pnpm run dev
    # Ver si colores se aplican en browser
    # Inspect element > Computed styles
    ```

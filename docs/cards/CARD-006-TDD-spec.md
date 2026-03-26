@@ -999,9 +999,9 @@ function handleFilterChange(status: FilterStatus): void {
 - [ ] All props have interfaces
 
 ### Post-Implementation
-- [ ] Run tests: `npm test` → 8-10 new tests passing
-- [ ] Run linter: `npm run lint` → 0 errors, 0 warnings
-- [ ] TypeScript check: `npm run type-check` → 0 errors
+- [ ] Run tests: `pnpm test` → 8-10 new tests passing
+- [ ] Run linter: `pnpm run lint` → 0 errors, 0 warnings
+- [ ] TypeScript check: `pnpm run type-check` → 0 errors
 - [ ] Manual testing: Navigate to /organizer/dashboard
 - [ ] Test all filters work correctly
 - [ ] Test create modal opens/closes
@@ -1024,19 +1024,19 @@ function handleFilterChange(status: FilterStatus): void {
 
 **After RED Phase:**
 ```bash
-npm test OrganizerDashboard
+pnpm test OrganizerDashboard
 # Expected: 8-10 tests, all failing ❌
 ```
 
 **After GREEN Phase:**
 ```bash
-npm test OrganizerDashboard
+pnpm test OrganizerDashboard
 # Expected: 8-10 tests, all passing ✅
 ```
 
 **Full Suite:**
 ```bash
-npm test
+pnpm test
 # Expected: 148-150 tests passing (140 existing + 8-10 new)
 ```
 

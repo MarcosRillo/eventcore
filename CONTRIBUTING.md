@@ -23,7 +23,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 - **Docker Desktop** (required for backend)
 - **Git**
 - **Node.js v22.15.1** (use nvm: `nvm use 22`)
-- **npm 11.4.2**
+- **pnpm 10.33.0**
 
 ### Initial Setup
 
@@ -44,7 +44,7 @@ This starts:
 
 3. **Install frontend dependencies:**
 ```bash
-npm install
+pnpm install
 ```
 
 4. **Verify setup:**
@@ -53,10 +53,10 @@ npm install
 docker compose exec backend php artisan test
 
 # Frontend tests
-npm test
+pnpm test
 
 # Frontend dev server
-npm run dev
+pnpm run dev
 ```
 
 5. **Access the application:**
@@ -77,7 +77,7 @@ git pull origin main
 2. **Start services:**
 ```bash
 docker compose up -d
-npm run dev
+pnpm run dev
 ```
 
 3. **Create a feature branch:**
@@ -92,7 +92,7 @@ git checkout -b feature/your-feature-name
 
 5. **Run tests before committing:**
 ```bash
-npm test
+pnpm test
 docker compose exec backend php artisan test
 ```
 
@@ -289,7 +289,7 @@ test('creates event with all required fields and saves to database', function ()
 
 **Run tests:**
 ```bash
-npm test
+pnpm test
 ```
 
 **Test Requirements:**
@@ -386,7 +386,7 @@ try {
 
 - **ESLint + Prettier**
 - **TypeScript strict mode**
-- Run linter: `npm run lint`
+- Run linter: `pnpm run lint`
 
 **Strict Rules:**
 - ZERO `any` types (use `unknown` + type guards)
@@ -451,13 +451,13 @@ test(events): add integration tests for event creation
 
 1. **Ensure all tests pass:**
 ```bash
-npm test
+pnpm test
 docker compose exec backend php artisan test
 ```
 
 2. **Run linters:**
 ```bash
-npm run lint
+pnpm run lint
 docker compose exec backend ./vendor/bin/pint
 ```
 
@@ -518,7 +518,7 @@ docker compose exec backend php artisan [command]
 
 ### Frontend
 
-**View dev server logs:** Check terminal where `npm run dev` is running
+**View dev server logs:** Check terminal where `pnpm run dev` is running
 
 **Debug in browser:** Use React DevTools and browser DevTools
 

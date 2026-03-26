@@ -1617,9 +1617,9 @@ const debouncedSearch = useDebouncedCallback(
 - [ ] All props have interfaces
 
 ### Post-Implementation
-- [ ] Run tests: `npm test` → 10+ new tests passing
-- [ ] Run linter: `npm run lint` → 0 errors, 0 warnings
-- [ ] TypeScript check: `npm run type-check` → 0 errors
+- [ ] Run tests: `pnpm test` → 10+ new tests passing
+- [ ] Run linter: `pnpm run lint` → 0 errors, 0 warnings
+- [ ] TypeScript check: `pnpm run type-check` → 0 errors
 - [ ] Manual testing: Test filters and search
 - [ ] Test on mobile devices
 - [ ] Check SEO with Lighthouse
@@ -1639,19 +1639,19 @@ const debouncedSearch = useDebouncedCallback(
 
 **After RED Phase:**
 ```bash
-npm test public-calendar
+pnpm test public-calendar
 # Expected: 10+ tests, all failing ❌
 ```
 
 **After GREEN Phase:**
 ```bash
-npm test public-calendar
+pnpm test public-calendar
 # Expected: 10+ tests, all passing ✅
 ```
 
 **Full Suite:**
 ```bash
-npm test
+pnpm test
 # Expected: 170+ tests passing (160 existing + 10 new)
 ```
 

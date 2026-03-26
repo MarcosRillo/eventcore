@@ -21,19 +21,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - name: Audit npm packages
-        run: npm audit --audit-level=high
+      - name: Audit packages
+        run: pnpm audit --audit-level=high
         continue-on-error: true
 
       - name: Check for outdated packages
-        run: npm outdated || true
+        run: pnpm outdated || true
 
   backend-security:
     name: Backend Security Audit

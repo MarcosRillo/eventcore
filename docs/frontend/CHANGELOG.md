@@ -394,12 +394,12 @@ Si estás trabajando en una branch antigua:
 
 4. **Instalar dependencias:**
    ```bash
-   npm install
+   pnpm install
    ```
 
 5. **Verificar build:**
    ```bash
-   npm run build
+   pnpm run build
    ```
 
 ### Path Alias Configuration
