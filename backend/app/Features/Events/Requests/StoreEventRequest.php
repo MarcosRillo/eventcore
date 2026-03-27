@@ -152,12 +152,8 @@ class StoreEventRequest extends FormRequest
             'responsive_image_url' => 'nullable|string|max:500',
             'is_featured' => 'nullable|boolean',
 
-            // Entity/Organization
-            'entity_id' => [
-                'required',
-                'integer',
-                Rule::exists('organizations', 'id'),
-            ],
+            // Organization (entity_id is set by EventService from authenticated user)
+
             'organization_id' => [
                 'nullable',
                 'integer',
@@ -234,22 +230,4 @@ class StoreEventRequest extends FormRequest
         }
     }
 
-    /**
-     * Get validated data with computed entity_id.
-     */
-    public function getValidatedDataWithEntity(): array
-    {
-        $data = $this->validated();
-
-        // Get entity_id from user's organization (same logic as TenantScope)
-        $user = $this->user();
-        if ($user) {
-            $organizationId = $user->organization_id;
-            if ($organizationId) {
-                $data['entity_id'] = $organizationId;
-            }
-        }
-
-        return $data;
-    }
 }

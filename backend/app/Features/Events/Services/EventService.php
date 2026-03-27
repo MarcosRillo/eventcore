@@ -76,14 +76,12 @@ class EventService
                 $data['description'] = $this->sanitizeDescription($data['description']);
             }
 
-            // Get the user's primary organization for entity_id if not provided
-            if (! isset($data['entity_id'])) {
-                $organizationId = $user->organization_id;
-                if (! $organizationId) {
-                    throw new \Exception('User must belong to an organization to create events.');
-                }
-                $data['entity_id'] = $organizationId;
+            // Force entity_id from authenticated user — users cannot set entity directly
+            $organizationId = $user->organization_id;
+            if (! $organizationId) {
+                throw new \Exception('User must belong to an organization to create events.');
             }
+            $data['entity_id'] = $organizationId;
 
             // Extract location_ids for pivot table handling
             $locationIds = $data['location_ids'] ?? [];
