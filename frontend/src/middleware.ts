@@ -267,15 +267,12 @@ export function middleware(request: NextRequest) {
 
   // Not authenticated - redirect to login
   if (!user) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('from', pathname);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // Token expired - redirect to login with expired flag
   if (isTokenExpired(request)) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('from', pathname);
     loginUrl.searchParams.set('expired', '1');
     return NextResponse.redirect(loginUrl);
   }

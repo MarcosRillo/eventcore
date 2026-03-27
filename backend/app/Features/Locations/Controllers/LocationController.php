@@ -95,14 +95,11 @@ class LocationController extends Controller
     /**
      * Remove the specified location.
      */
-    public function destroy(Location $location): JsonResponse
+    public function destroy(Location $location): \Illuminate\Http\Response
     {
-        $result = $this->locationService->deleteLocation($location);
+        $this->locationService->deleteLocation($location);
 
-        return response()->json([
-            'success' => true,
-            'message' => $result,
-        ]);
+        return response()->noContent();
     }
 
     /**

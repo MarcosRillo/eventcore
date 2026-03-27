@@ -89,7 +89,7 @@ class OrganizerController extends Controller
     /**
      * Delete event (draft status only).
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse|\Illuminate\Http\Response
     {
         $event = Event::findOrFail($id);
         Gate::authorize('delete', $event);
@@ -98,12 +98,12 @@ class OrganizerController extends Controller
             return response()->json([
                 'error' => 'Can only delete draft events',
                 'current_status' => $event->status->status_code,
-            ], 403);
+            ], 422);
         }
 
         $this->organizerService->deleteEvent($event, $request->user());
 
-        return response()->json(['message' => 'Event deleted successfully']);
+        return response()->noContent();
     }
 
     /**

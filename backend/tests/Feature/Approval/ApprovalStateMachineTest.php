@@ -112,13 +112,13 @@ class ApprovalStateMachineTest extends TestCase
     }
 
     #[Test]
-    public function test_same_state_transition_is_always_valid(): void
+    public function test_same_state_transition_is_never_valid(): void
     {
         $states = $this->stateMachine->getAllStatuses();
 
         foreach ($states as $state) {
             $result = $this->stateMachine->canTransition($state, $state);
-            $this->assertTrue($result, "Same state transition should be valid for {$state}");
+            $this->assertFalse($result, "Same state transition should not be valid for {$state}");
         }
     }
 
