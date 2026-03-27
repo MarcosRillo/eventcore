@@ -217,9 +217,9 @@ export const DashboardModeView = ({
     return (
       <div className="space-y-6">
         <div className="text-center py-4">
-          <h2 className="text-lg font-medium text-neutral-900">
+          <h1 className="text-lg font-medium text-neutral-900">
             {user ? 'Eventos Publicados' : 'Todos los Eventos'}
-          </h2>
+          </h1>
           <p className="text-sm text-neutral-600">
             {user
               ? 'Eventos aprobados y visibles al público'

@@ -90,7 +90,7 @@ export function generateICS(events: InternalCalendarEvent[]): string {
  */
 export function downloadICS(events: InternalCalendarEvent[], filename = 'calendario-eventos.ics'): void {
   const icsContent = generateICS(events);
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const blob = new Blob(['\uFEFF', icsContent], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement('a');
