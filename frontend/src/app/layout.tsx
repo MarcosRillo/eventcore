@@ -22,11 +22,6 @@ export const metadata: Metadata = {
   description: "Sistema completo de gestión de calendario y eventos con multi-tenancy",
 };
 
-/**
- *
- * @param root0
- * @param root0.children
- */
 export default function RootLayout({
   children,
 }: Readonly<{

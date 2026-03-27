@@ -173,6 +173,15 @@ function isPublicRoute(pathname: string): boolean {
   return ROUTE_CONFIG.prefixes.some(prefix => matchesPrefix(normalized, prefix));
 }
 
+/**
+ * Add CSP and nonce headers to a response
+ */
+function addCspHeaders(response: NextResponse, nonce: string, csp: string): NextResponse {
+  response.headers.set('x-nonce', nonce);
+  response.headers.set('Content-Security-Policy', csp);
+  return response;
+}
+
 // Helper function to get user from cookies with robust validation
 function getUserFromCookies(request: NextRequest): User | null {
   const token = request.cookies.get('access_token')?.value;
@@ -217,6 +226,18 @@ function getRoleCode(user: User): UserRoleCode | null {
  * @param request
  */
 export function middleware(request: NextRequest) {
+  // Generate a per-request nonce for CSP
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const cspHeader = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'self'",
+  ].join('; ');
+
   const { pathname } = request.nextUrl;
 
   // Allow public routes (no authentication required)
@@ -232,7 +253,10 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/internal-calendar', request.url));
       }
     }
-    return NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-nonce', nonce);
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    return addCspHeaders(response, nonce, cspHeader);
   }
 
   // Get user from cookies
@@ -306,7 +330,10 @@ export function middleware(request: NextRequest) {
   }
 
   // All checks passed - allow access
-  return NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  return addCspHeaders(response, nonce, cspHeader);
 }
 
 // Configure which routes to run middleware on
