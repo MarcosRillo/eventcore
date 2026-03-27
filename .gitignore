@@ -92,7 +92,6 @@ backend/bootstrap/cache/*
 
 # Composer
 backend/composer.phar
-backend/composer.lock
 
 # PHPUnit
 backend/coverage/

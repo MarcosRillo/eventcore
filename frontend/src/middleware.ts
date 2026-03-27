@@ -321,7 +321,6 @@ export function middleware(request: NextRequest) {
       '/event-types/edit',
       '/locations/create',
       '/locations/edit',
-      '/admin',
     ];
 
     if (readOnlyRestrictions.some(path => pathname.startsWith(path))) {
