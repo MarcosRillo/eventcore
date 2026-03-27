@@ -7,7 +7,7 @@ import type { HeroSectionProps } from '@/features/landing/types/landing.types'
 
 export const HeroSection = ({ onExploreClick }: HeroSectionProps) => {
   return (
-    <section className="relative min-h-[600px] flex items-center justify-center bg-gradient-to-b from-primary-50 to-white">
+    <section className="relative min-h-[450px] md:min-h-[600px] flex items-center justify-center overflow-hidden bg-gradient-to-b from-primary-50 to-white">
       {/* Subtle decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100/50 rounded-full blur-3xl" />
@@ -20,12 +20,12 @@ export const HeroSection = ({ onExploreClick }: HeroSectionProps) => {
           Calendario de Eventos
         </span>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
           Descubrí los eventos de{' '}
           <span className="text-primary-500">Tucumán</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-neutral-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-neutral-600 mb-6 md:mb-10 max-w-2xl mx-auto leading-relaxed">
           Explorá los mejores eventos turísticos y culturales de la provincia.
           Festivales, conciertos, gastronomía y más.
         </p>
@@ -34,6 +34,7 @@ export const HeroSection = ({ onExploreClick }: HeroSectionProps) => {
           <button
             onClick={onExploreClick}
             className="
+              w-full sm:w-auto
               px-8 py-4 rounded-lg
               bg-primary-500 text-white
               text-base font-medium
@@ -50,6 +51,7 @@ export const HeroSection = ({ onExploreClick }: HeroSectionProps) => {
           <button
             onClick={onExploreClick}
             className="
+              w-full sm:w-auto
               px-8 py-4 rounded-lg
               bg-white text-neutral-700
               text-base font-medium

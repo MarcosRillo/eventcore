@@ -64,6 +64,12 @@
   border-bottom: 0;
 }
 
+@media (max-width: 640px) {
+  .rbc-month-row {
+    min-height: 90px;
+  }
+}
+
 .rbc-header {
   background-color: #f9fafb;
   border-bottom: 1px solid #e5e7eb;

@@ -90,10 +90,10 @@ export function EventDetailBody({
       </div>
 
       {/* Event Header */}
-      <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
               {event.title}
             </h1>
             {headerActions}
@@ -101,7 +101,7 @@ export function EventDetailBody({
         </div>
 
         {/* Event Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-8">
           {/* Date and Time */}
           <div className="space-y-4">
             <div className="flex items-start gap-3">
@@ -180,11 +180,11 @@ export function EventDetailBody({
 
       {/* Description */}
       {event.description && (
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 mb-6">
           <h2 className="text-2xl font-bold text-neutral-900 mb-4">Descripción</h2>
           {descriptionMode === 'html' ? (
             <div
-              className="prose prose-lg max-w-none text-neutral-700"
+              className="prose sm:prose-lg max-w-none text-neutral-700"
               dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
             />
           ) : (
@@ -195,7 +195,7 @@ export function EventDetailBody({
 
       {/* Website and CTA */}
       {(event.website_url || (event.cta_text && event.cta_link)) && (
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 mb-6">
           <h2 className="text-2xl font-bold text-neutral-900 mb-4">Enlaces relacionados</h2>
           <div className="space-y-4">
             {event.website_url && (

@@ -118,7 +118,7 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
         {/* Location */}
         <div className="flex items-center gap-2 text-sm text-neutral-600 mb-3">
           <MapPin className="w-4 h-4 text-neutral-400" aria-hidden="true" />
-          <span>{location ? `${location.name}, ${location.city}` : 'Ubicación por confirmar'}</span>
+          <span className="truncate">{location ? `${location.name}, ${location.city}` : 'Ubicación por confirmar'}</span>
         </div>
 
         {/* CTA */}

@@ -37,7 +37,7 @@ export const PublicHeader = () => {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-xl font-bold text-neutral-900 hover:text-primary-600 transition-colors"
+            className="flex items-center gap-2 text-lg md:text-xl font-bold text-neutral-900 hover:text-primary-600 transition-colors"
           >
             <svg
               className="w-8 h-8 text-primary-500"

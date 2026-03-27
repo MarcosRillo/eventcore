@@ -24,9 +24,9 @@ interface FilterBarProps {
 
 const GRID_COL_CLASSES: Record<number, string> = {
   1: 'grid-cols-1 md:grid-cols-1',
-  2: 'grid-cols-1 md:grid-cols-2',
-  3: 'grid-cols-1 md:grid-cols-3',
-  4: 'grid-cols-1 md:grid-cols-4',
+  2: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3',
+  4: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4',
 }
 
 export function FilterBar({
@@ -91,7 +91,7 @@ export function FilterBar({
               <div className="mt-4 pt-4 border-t border-neutral-100">
                 <button
                   onClick={onClearFilters}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium py-2 -my-2"
                 >
                   Limpiar filtros
                 </button>

@@ -15,11 +15,11 @@ export const FeaturedEventsSection = ({
   onViewAllClick
 }: FeaturedEventsSectionProps) => {
   return (
-    <section className="py-20 bg-neutral-50">
+    <section className="py-12 md:py-20 bg-neutral-50">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Section Header */}
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+        <div className="text-center mb-8 md:mb-14">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
             Próximos Eventos Destacados
           </h2>
           <p className="text-lg text-neutral-500 max-w-xl mx-auto">
@@ -37,7 +37,7 @@ export const FeaturedEventsSection = ({
         {/* Events Grid */}
         {!loading && events.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 md:mb-12">
               {events.slice(0, 6).map(event => (
                 <EventCard key={event.id} event={event} onClick={onEventClick} />
               ))}

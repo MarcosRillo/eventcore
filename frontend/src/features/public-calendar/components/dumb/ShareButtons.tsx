@@ -82,10 +82,10 @@ export function ShareButtons({ event }: ShareButtonsProps) {
   )
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
       <Button
         variant="outline"
-        size="sm"
+        size="md"
         onClick={() => handleShare('facebook')}
         leftIcon={FacebookIcon}
         className="text-primary-600 border-primary-200 hover:bg-primary-50"
@@ -95,7 +95,7 @@ export function ShareButtons({ event }: ShareButtonsProps) {
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="md"
         onClick={() => handleShare('twitter')}
         leftIcon={TwitterIcon}
         className="text-primary-600 border-primary-200 hover:bg-primary-50"
@@ -105,7 +105,7 @@ export function ShareButtons({ event }: ShareButtonsProps) {
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="md"
         onClick={() => handleShare('whatsapp')}
         leftIcon={WhatsAppIcon}
         className="text-success-600 border-success-200 hover:bg-success-50"
@@ -115,7 +115,7 @@ export function ShareButtons({ event }: ShareButtonsProps) {
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="md"
         onClick={handleCopyLink}
         leftIcon={LinkIcon}
         className="text-neutral-600 border-neutral-200 hover:bg-neutral-50"

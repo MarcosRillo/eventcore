@@ -9,9 +9,9 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-neutral-900 text-white py-16">
+    <footer className="bg-neutral-900 text-white py-10 md:py-16">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 mb-6 md:mb-10">
           {/* About Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Eventos Tucumán</h3>
@@ -28,7 +28,7 @@ export const Footer = () => {
               <li>
                 <Link
                   href="/calendar"
-                  className="text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
+                  className="py-1.5 -my-1.5 text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
                 >
                   Ver Eventos
                 </Link>
@@ -36,7 +36,7 @@ export const Footer = () => {
               <li>
                 <Link
                   href="/register-request"
-                  className="text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
+                  className="py-1.5 -my-1.5 text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
                 >
                   Registrar mi Organización
                 </Link>
@@ -44,7 +44,7 @@ export const Footer = () => {
               <li>
                 <Link
                   href="/login"
-                  className="text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
+                  className="py-1.5 -my-1.5 text-neutral-400 hover:text-white transition-colors duration-150 text-sm"
                 >
                   Acceso Organizadores
                 </Link>
