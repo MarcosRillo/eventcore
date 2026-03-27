@@ -132,7 +132,7 @@ class UpdateEventRequest extends FormRequest
             'room_ids.*' => 'exists:event_rooms,id',
 
             // Location info
-            'maps_url' => 'nullable|string',
+            'maps_url' => 'nullable|url|max:500',
             'previous_venue' => 'nullable|string|max:255',
             'next_venue' => 'nullable|string|max:255',
 
