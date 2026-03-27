@@ -30,8 +30,6 @@ services:
     working_dir: /var/www
     env_file: .env.docker
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
       APP_URL: http://localhost:8000
       FRONTEND_URL: http://localhost:3000
     networks:
@@ -67,6 +65,16 @@ services:
       - plataforma-network
     depends_on:
       - backend
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
 
   # Frontend Next.js
   frontend:
@@ -91,17 +99,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
 
   # Redis - Cache store
   redis:
     image: redis:7-alpine
     container_name: plataforma-calendario-redis
     restart: unless-stopped
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-redis_dev_password}
     networks:
       - plataforma-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_dev_password}", "--no-auth-warning", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -109,17 +122,6 @@ services:
       resources:
         limits:
           memory: 256M
-
-  # MailHog - SMTP testing server
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    container_name: plataforma-calendario-mailhog
-    restart: unless-stopped
-    ports:
-      - "1025:1025"  # SMTP port
-      - "8025:8025"  # Web UI port
-    networks:
-      - plataforma-network
 
 volumes:
   db_data:

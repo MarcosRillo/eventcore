@@ -447,8 +447,8 @@ class ApprovalAuditTest extends TestCase
         $response = $this->actingAs($this->entityAdmin)
             ->patchJson("/api/v1/events/{$this->event->id}/approve");
 
-        // 409 Conflict is returned for invalid state transitions
-        $response->assertStatus(409);
+        // 403 Forbidden — policy rejects approval on non-pending events
+        $response->assertStatus(403);
 
         // Verify no approval record was created
         $approval = EventApproval::where('event_id', $this->event->id)->first();
@@ -462,8 +462,8 @@ class ApprovalAuditTest extends TestCase
         $response = $this->actingAs($this->entityAdmin)
             ->patchJson("/api/v1/events/{$this->event->id}/publish");
 
-        // 409 Conflict is returned for invalid state transitions
-        $response->assertStatus(409);
+        // 403 Forbidden — policy rejects publish on non-approved events
+        $response->assertStatus(403);
 
         // Verify no approval record was created
         $approval = EventApproval::where('event_id', $this->event->id)

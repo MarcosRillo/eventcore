@@ -182,7 +182,7 @@ describe('UserTableContainer', () => {
 
       const searchInput = screen.getByPlaceholderText('Buscar por nombre o email...');
       fireEvent.change(searchInput, { target: { value: 'patricia' } });
-      fireEvent.keyPress(searchInput, { key: 'Enter', code: 13, charCode: 13 });
+      fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter', charCode: 13 });
 
       expect(defaultHookReturn.setFilters).toHaveBeenCalledWith({ search: 'patricia', page: 1 });
     });

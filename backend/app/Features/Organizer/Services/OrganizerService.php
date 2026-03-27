@@ -52,6 +52,7 @@ class OrganizerService
 
             $eventData = $this->prepareEventData($data, $user, $draftStatus->id, $formatId);
             $event = Event::create($eventData);
+            $event->forceFill(['created_by' => $user->id])->save();
 
             if (! empty($data['location_ids']) && is_array($data['location_ids'])) {
                 $event->locations()->sync($data['location_ids']);
@@ -247,31 +248,33 @@ class OrganizerService
      */
     public function getDashboardStats(int $organizationId): array
     {
-        $baseQuery = Event::where('organization_id', $organizationId);
+        $sql = "
+            SELECT
+                COUNT(*) AS total_events,
+                COUNT(*) FILTER (WHERE es.status_code = 'draft') AS draft,
+                COUNT(*) FILTER (WHERE es.status_code = 'pending_internal_approval') AS pending_approval,
+                COUNT(*) FILTER (WHERE es.status_code = 'approved_internal') AS approved_internal,
+                COUNT(*) FILTER (WHERE es.status_code = 'published') AS published,
+                COUNT(*) FILTER (WHERE es.status_code = 'requires_changes') AS requires_changes,
+                COUNT(*) FILTER (WHERE es.status_code = 'rejected') AS rejected,
+                COUNT(*) FILTER (WHERE es.status_code = 'cancelled') AS archived
+            FROM events e
+            JOIN event_statuses es ON es.id = e.status_id
+            WHERE e.deleted_at IS NULL
+              AND e.organization_id = :organization_id
+        ";
+
+        $row = DB::selectOne($sql, ['organization_id' => $organizationId]);
 
         return [
-            'total_events' => (clone $baseQuery)->count(),
-            'draft' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'draft'))
-                ->count(),
-            'pending_approval' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'pending_internal_approval'))
-                ->count(),
-            'approved_internal' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'approved_internal'))
-                ->count(),
-            'published' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'published'))
-                ->count(),
-            'requires_changes' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'requires_changes'))
-                ->count(),
-            'rejected' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'rejected'))
-                ->count(),
-            'archived' => (clone $baseQuery)
-                ->whereHas('status', fn ($q) => $q->where('status_code', 'cancelled'))
-                ->count(),
+            'total_events'     => (int) $row->total_events,
+            'draft'            => (int) $row->draft,
+            'pending_approval' => (int) $row->pending_approval,
+            'approved_internal'=> (int) $row->approved_internal,
+            'published'        => (int) $row->published,
+            'requires_changes' => (int) $row->requires_changes,
+            'rejected'         => (int) $row->rejected,
+            'archived'         => (int) $row->archived,
         ];
     }
 }

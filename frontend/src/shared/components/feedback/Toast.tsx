@@ -6,7 +6,7 @@
  */
 
 import { Transition } from '@headlessui/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { ToastWithId } from '@/shared/context/ToastContext'
 
@@ -20,12 +20,21 @@ interface ToastProps {
 
 function Toast({ message, type, duration = 5000, onClose }: ToastProps) {
   const [isVisible, setIsVisible] = useState(true)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) {
+        clearTimeout(closeTimerRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
         setIsVisible(false)
-        setTimeout(onClose, 200)
+        closeTimerRef.current = setTimeout(onClose, 200)
       }, duration)
 
       return () => clearTimeout(timer)
@@ -120,7 +129,7 @@ function Toast({ message, type, duration = 5000, onClose }: ToastProps) {
               `}
               onClick={() => {
                 setIsVisible(false)
-                setTimeout(onClose, 200)
+                closeTimerRef.current = setTimeout(onClose, 200)
               }}
             >
               <span className="sr-only">Cerrar</span>

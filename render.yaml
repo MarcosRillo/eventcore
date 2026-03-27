@@ -11,6 +11,8 @@ services:
     dockerfilePath: ./backend/Dockerfile.production
     dockerContext: ./backend
     healthCheckPath: /up
+    # Run migrations BEFORE the container starts serving traffic
+    preDeployCommand: "php artisan migrate --force --isolated"
     envVars:
       # --- App ---
       - key: APP_NAME
@@ -57,6 +59,8 @@ services:
       # --- Session ---
       - key: SESSION_DRIVER
         value: database
+      - key: SESSION_ENCRYPT
+        value: "true"
       - key: SESSION_SECURE_COOKIE
         value: "true"
       - key: SESSION_SAME_SITE

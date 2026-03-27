@@ -3,7 +3,6 @@ import { createElement, type ReactNode } from 'react'
 import { SWRConfig } from 'swr'
 
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'
-import * as organizerEventService from '@/features/organizer/services/organizer-event.service'
 import { EventListResponse } from '@/features/organizer/types/event.types'
 
 // Mock Next.js navigation hooks
@@ -271,73 +270,6 @@ describe('useOrganizerEvents', () => {
 
       await waitFor(() => {
         expect(result.current.currentPage).toBe(1)
-      })
-    })
-  })
-
-  describe('handleDelete', () => {
-    it('should delete event when user confirms', async () => {
-      ;(window.confirm as jest.Mock).mockReturnValueOnce(true)
-      ;(organizerEventService.deleteEvent as jest.Mock).mockResolvedValueOnce(undefined)
-
-      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Delete event
-      await act(async () => {
-        await result.current.handleDelete(1)
-      })
-
-      expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this event?')
-      expect(organizerEventService.deleteEvent).toHaveBeenCalledWith(1)
-    })
-
-    it('should not delete event when user cancels', async () => {
-      ;(window.confirm as jest.Mock).mockReturnValueOnce(false)
-
-      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Try to delete event
-      await act(async () => {
-        await result.current.handleDelete(1)
-      })
-
-      expect(window.confirm).toHaveBeenCalled()
-      expect(organizerEventService.deleteEvent).not.toHaveBeenCalled()
-    })
-
-    it('should set isDeleting state during deletion', async () => {
-      ;(window.confirm as jest.Mock).mockReturnValueOnce(true)
-      ;(organizerEventService.deleteEvent as jest.Mock).mockImplementationOnce(
-        () => new Promise((resolve) => setTimeout(() => resolve(undefined), 100))
-      )
-
-      const { result } = renderHook(() => useOrganizerEvents(), { wrapper })
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Start deletion (without await to check intermediate state)
-      act(() => {
-        result.current.handleDelete(1)
-      })
-
-      // Should be deleting
-      await waitFor(() => {
-        expect(result.current.isDeleting).toBe(true)
-      })
-
-      // Wait for deletion to complete
-      await waitFor(() => {
-        expect(result.current.isDeleting).toBe(false)
       })
     })
   })

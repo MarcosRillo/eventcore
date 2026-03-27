@@ -53,7 +53,7 @@ class InvitationService
             $selector = $this->generateSelector();
             $validator = $this->generateValidator();
 
-            $invitation = Invitation::create([
+            $invitation = (new Invitation)->forceFill([
                 'email' => $data['email'],
                 'selector' => $selector,
                 'token' => Hash::make($validator), // Store hashed validator
@@ -61,6 +61,7 @@ class InvitationService
                 'invited_by' => $invitedBy->id,
                 'expires_at' => now()->addHours(24),
             ]);
+            $invitation->save();
 
             // Store plain token temporarily for email (selector + validator)
             $invitation->plain_token = $selector.$validator;
@@ -204,11 +205,11 @@ class InvitationService
             $selector = $this->generateSelector();
             $validator = $this->generateValidator();
 
-            $invitation->update([
+            $invitation->forceFill([
                 'selector' => $selector,
                 'token' => Hash::make($validator),
                 'expires_at' => now()->addHours(24),
-            ]);
+            ])->save();
 
             // Send notification with new token
             $plainToken = $selector.$validator;
@@ -228,7 +229,7 @@ class InvitationService
     /**
      * Get pending invitations for a user.
      */
-    public function getPendingInvitations(User $user): \Illuminate\Database\Eloquent\Collection
+    public function getPendingInvitations(User $user): \Illuminate\Pagination\LengthAwarePaginator
     {
         $query = Invitation::valid()->with(['role', 'inviter']);
 
@@ -237,7 +238,7 @@ class InvitationService
             $query->where('invited_by', $user->id);
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        return $query->orderBy('created_at', 'desc')->paginate(50);
     }
 
     /**

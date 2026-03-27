@@ -192,6 +192,35 @@ class AuthService
     }
 
     /**
+     * Issue a fresh access token + refresh token pair for a given user.
+     * Used when a new account is created (e.g. invitation acceptance) and
+     * the caller needs a fully authenticated session without going through login.
+     *
+     * @return array{access_token: string, refresh_token: string, expires_at: string}
+     */
+    public function issueTokensForUser(User $user): array
+    {
+        return DB::transaction(function () use ($user) {
+            // Revoke any existing access tokens
+            $user->tokens()->delete();
+
+            // Create access token with expiration
+            $accessTokenExpiration = config('tokens.access_token_expiration', 15);
+            $expiresAt = Carbon::now()->addMinutes($accessTokenExpiration);
+            $accessToken = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
+
+            // Create refresh token in a new family
+            $refreshTokenPlain = $this->createRefreshToken($user);
+
+            return [
+                'access_token' => $accessToken,
+                'refresh_token' => $refreshTokenPlain,
+                'expires_at' => $expiresAt->toISOString(),
+            ];
+        });
+    }
+
+    /**
      * Revoke all refresh tokens for a user (used during password reset).
      */
     public function revokeAllRefreshTokens(User $user): void

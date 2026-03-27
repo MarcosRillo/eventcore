@@ -132,8 +132,8 @@ class LocationTest extends EventTestCase
         // Act: Delete location
         $response = $this->deleteJson("/api/v1/locations/{$location->id}");
 
-        // Assert: Verify soft deletion (200 is valid for delete with response body)
-        $response->assertStatus(200);
+        // Assert: Verify soft deletion
+        $response->assertNoContent();
         // With SoftDeletes, the record exists but has deleted_at set
         $this->assertSoftDeleted('locations', [
             'id' => $location->id,

@@ -29,7 +29,7 @@ class OrganizerStatsTest extends EventTestCase
     /**
      * Override to add organization attachment for organizer stats tests
      */
-    protected function authenticateUser(string $role = 'entity_admin'): User
+    protected function authenticateUser(string $role = 'organizer_admin'): User
     {
         $user = parent::authenticateUser($role);
         $this->organization = \App\Models\Organization::factory()->create();

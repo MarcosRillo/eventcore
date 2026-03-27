@@ -3,12 +3,13 @@
 namespace App\Features\Locations\Controllers;
 
 use App\Features\Locations\Requests\IndexLocationsRequest;
+use App\Features\Locations\Requests\StoreLocationRequest;
+use App\Features\Locations\Requests\UpdateLocationRequest;
 use App\Features\Locations\Services\LocationService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationResource;
 use App\Models\Location;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
  * Location Controller
@@ -50,17 +51,9 @@ class LocationController extends Controller
     /**
      * Store a newly created location.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreLocationRequest $request): JsonResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'required|string|max:500',
-            'city' => 'required|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:1000',
-            'is_active' => 'nullable|boolean',
-        ]);
+        $validatedData = $request->validated();
 
         $location = $this->locationService->createLocation($validatedData, $request->user());
 
@@ -86,17 +79,9 @@ class LocationController extends Controller
     /**
      * Update the specified location.
      */
-    public function update(Request $request, Location $location): JsonResponse
+    public function update(UpdateLocationRequest $request, Location $location): JsonResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'address' => 'sometimes|required|string|max:500',
-            'city' => 'sometimes|required|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:1000',
-            'is_active' => 'nullable|boolean',
-        ]);
+        $validatedData = $request->validated();
 
         $updatedLocation = $this->locationService->updateLocation($location, $validatedData);
 
@@ -110,14 +95,11 @@ class LocationController extends Controller
     /**
      * Remove the specified location.
      */
-    public function destroy(Location $location): JsonResponse
+    public function destroy(Location $location): \Illuminate\Http\Response
     {
-        $result = $this->locationService->deleteLocation($location);
+        $this->locationService->deleteLocation($location);
 
-        return response()->json([
-            'success' => true,
-            'message' => $result,
-        ]);
+        return response()->noContent();
     }
 
     /**

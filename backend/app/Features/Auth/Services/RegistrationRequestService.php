@@ -33,7 +33,7 @@ class RegistrationRequestService
                 $logoPath = $data['organization_logo']->store('registration-requests/logos', 'public');
             }
 
-            return RegistrationRequest::create([
+            $registrationRequest = RegistrationRequest::create([
                 'dni' => $data['dni'],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -46,8 +46,11 @@ class RegistrationRequestService
                 'organization_logo' => $logoPath,
                 'website' => $data['website'] ?? null,
                 'motivation' => $data['motivation'],
-                'status' => 'pending',
             ]);
+
+            $registrationRequest->forceFill(['status' => 'pending'])->save();
+
+            return $registrationRequest;
         });
     }
 
@@ -114,13 +117,13 @@ class RegistrationRequestService
             $user->organizations()->attach($organization->id);
 
             // Update request status with references to created entities
-            $request->update([
+            $request->forceFill([
                 'status' => 'approved',
                 'reviewed_by' => $reviewer->id,
                 'reviewed_at' => now(),
                 'user_id' => $user->id,
                 'organization_id' => $organization->id,
-            ]);
+            ])->save();
 
             Log::info('Registration request approved', [
                 'request_id' => $request->id,
@@ -161,12 +164,12 @@ class RegistrationRequestService
         }
 
         return DB::transaction(function () use ($request, $reviewer, $reason) {
-            $request->update([
+            $request->forceFill([
                 'status' => 'rejected',
                 'reviewed_by' => $reviewer->id,
                 'reviewed_at' => now(),
                 'rejection_reason' => $reason,
-            ]);
+            ])->save();
 
             Log::info('Registration request rejected', [
                 'request_id' => $request->id,

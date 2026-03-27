@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -131,9 +133,7 @@ class EventController extends Controller
             $event->delete();
         });
 
-        return response()->json([
-            'message' => 'Evento eliminado exitosamente',
-        ], 200);
+        return response()->noContent();
     }
 
     /**
@@ -175,16 +175,84 @@ class EventController extends Controller
 
     /**
      * Get event statistics.
+     * Single query with conditional aggregation; cached per tenant for 60 seconds.
      */
     public function statistics()
     {
-        $stats = [
-            'total' => Event::count(),
-            'published' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'))->count(),
-            'pending' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval']))->count(),
-            'draft' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'draft'))->count(),
-        ];
+        $bindings = [];
+        $tenantClause = $this->buildTenantClause($bindings);
+
+        // Cache key is tenant-aware so different users get their own stats
+        $user = Auth::user();
+        $cacheKey = 'events.statistics.' . ($user?->organization_id ?? 'global');
+
+        $stats = Cache::remember($cacheKey, 60, function () use ($bindings, $tenantClause) {
+            $row = DB::selectOne("
+                SELECT
+                    COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE es.status_code = 'published') AS published,
+                    COUNT(*) FILTER (WHERE es.status_code IN ('pending_internal_approval', 'pending_public_approval')) AS pending,
+                    COUNT(*) FILTER (WHERE es.status_code = 'draft') AS draft
+                FROM events e
+                JOIN event_statuses es ON es.id = e.status_id
+                WHERE e.deleted_at IS NULL
+                {$tenantClause}
+            ", $bindings);
+
+            return [
+                'total'     => (int) $row->total,
+                'published' => (int) $row->published,
+                'pending'   => (int) $row->pending,
+                'draft'     => (int) $row->draft,
+            ];
+        });
 
         return response()->json(['data' => $stats]);
+    }
+
+    /**
+     * Build the tenant WHERE clause fragment and register its bindings.
+     *
+     * Safety note: this method interpolates only static SQL keywords
+     * (e.g. `AND e.entity_id = :tenant_id`). All user-supplied values
+     * are passed as named PDO parameters via the $bindings array and
+     * never concatenated into the query string, so there is no SQL
+     * injection risk.
+     */
+    private function buildTenantClause(array &$bindings): string
+    {
+        if (! Auth::check()) {
+            return '';
+        }
+
+        $user = Auth::user();
+
+        if ($user->isPlatformAdmin()) {
+            return '';
+        }
+
+        if ($user->isEntityAdmin() || $user->isEntityStaff()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.entity_id = :tenant_id';
+            }
+
+            return '';
+        }
+
+        if ($user->isOrganizerAdmin()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.organization_id = :tenant_id';
+            }
+        }
+
+        return '';
     }
 }

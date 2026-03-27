@@ -2,6 +2,7 @@
 
 namespace App\Features\Users\Controllers;
 
+use App\Features\Users\Requests\IndexUsersRequest;
 use App\Features\Users\Requests\UpdateUserRequest;
 use App\Features\Users\Services\UserService;
 use App\Http\Controllers\Controller;
@@ -19,9 +20,9 @@ class UserController extends Controller
     /**
      * List entity_staff users.
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexUsersRequest $request): JsonResponse
     {
-        $filters = $request->only(['search', 'status', 'per_page', 'page']);
+        $filters = $request->validated();
         $users = $this->userService->getUsers($request->user(), $filters);
 
         return response()->json([

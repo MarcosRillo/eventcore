@@ -118,15 +118,12 @@ class EventTypeController extends Controller
     /**
      * Remove the specified event type.
      */
-    public function destroy(EventType $eventType): JsonResponse
+    public function destroy(EventType $eventType): JsonResponse|\Illuminate\Http\Response
     {
         try {
-            $message = $this->eventTypeService->deleteEventType($eventType);
+            $this->eventTypeService->deleteEventType($eventType);
 
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-            ]);
+            return response()->noContent();
         } catch (QueryException $e) {
             Log::error('Database error deleting event type', ['id' => $eventType->id, 'error' => $e->getMessage()]);
 

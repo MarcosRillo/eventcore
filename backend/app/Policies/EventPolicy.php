@@ -111,6 +111,108 @@ class EventPolicy
     }
 
     /**
+     * Determine if the user can approve the event.
+     *
+     * Approval can be done by entity admins when event is pending approval.
+     * Event must be in pending_internal_approval or pending_public_approval status.
+     */
+    public function approve(User $user, Event $event): bool
+    {
+        if (! $this->canAccessEvent($user, $event)) {
+            return false;
+        }
+
+        // Event must be in approval-eligible status
+        // Includes approved_internal for requestPublicApproval action
+        $statusCode = $event->status?->status_code;
+
+        return in_array($statusCode, [
+            'pending_internal_approval',
+            'pending_public_approval',
+            'approved_internal',
+        ]);
+    }
+
+    /**
+     * Determine if the user can reject the event.
+     *
+     * Rejection can be done by entity admins when event is in approval workflow.
+     * Event must be in pending_internal_approval or pending_public_approval status.
+     */
+    public function reject(User $user, Event $event): bool
+    {
+        if (! $this->canAccessEvent($user, $event)) {
+            return false;
+        }
+
+        // Event must be in approval workflow
+        $statusCode = $event->status?->status_code;
+
+        return in_array($statusCode, [
+            'pending_internal_approval',
+            'pending_public_approval',
+        ]);
+    }
+
+    /**
+     * Determine if the user can publish the event.
+     *
+     * Publishing can be done by entity admins when event is approved internally
+     * or pending public approval.
+     */
+    public function publish(User $user, Event $event): bool
+    {
+        if (! $this->canAccessEvent($user, $event)) {
+            return false;
+        }
+
+        // Event must be ready for publishing
+        $statusCode = $event->status?->status_code;
+
+        return in_array($statusCode, [
+            'approved_internal',
+            'pending_public_approval',
+        ]);
+    }
+
+    /**
+     * Determine if the user can submit the event for review.
+     *
+     * Only the event's organizer can submit, and only from draft or requires_changes status.
+     */
+    public function submit(User $user, Event $event): bool
+    {
+        if (! $this->canAccessEvent($user, $event)) {
+            return false;
+        }
+
+        $statusCode = $event->status?->status_code;
+
+        return in_array($statusCode, ['draft', 'requires_changes']);
+    }
+
+    /**
+     * Determine if the user can request changes on the event.
+     *
+     * Requesting changes can be done by entity admins or staff when event
+     * is in the approval workflow.
+     */
+    public function requestChanges(User $user, Event $event): bool
+    {
+        if (! $this->canAccessEvent($user, $event)) {
+            return false;
+        }
+
+        // Event must be in approval workflow
+        $statusCode = $event->status?->status_code;
+
+        return in_array($statusCode, [
+            'pending_internal_approval',
+            'pending_public_approval',
+        ]);
+    }
+
+    /**
      * Core access check - determines if user can access an event at all.
      *
      * Rules:

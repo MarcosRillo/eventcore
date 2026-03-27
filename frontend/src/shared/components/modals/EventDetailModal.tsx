@@ -206,12 +206,12 @@ export const EventDetailModal = ({
   // Export handlers
   const handleAddToGoogleCalendar = () => {
     const url = eventPublicExportService.getGoogleCalendarUrl(event);
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleAddToOutlookCalendar = () => {
     const url = eventPublicExportService.getOutlookCalendarUrl(event);
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownloadICS = async () => {

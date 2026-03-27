@@ -70,12 +70,6 @@ class UpdateEventRequest extends FormRequest
                 'date',
                 'after:start_date',
             ],
-            'status_id' => [
-                'sometimes',
-                'required',
-                'integer',
-                Rule::exists('event_statuses', 'id'),
-            ],
             'format_id' => [
                 'sometimes',
                 'required',
@@ -124,7 +118,6 @@ class UpdateEventRequest extends FormRequest
             ],
 
             // Normalized FKs (Nov 30, 2025)
-            'subtype_id' => 'nullable|exists:event_subtypes,id',
             'origin_id' => 'nullable|exists:event_origins,id',
             'theme_id' => 'nullable|exists:event_themes,id',
             'frequency_id' => 'nullable|exists:event_frequencies,id',
@@ -138,7 +131,7 @@ class UpdateEventRequest extends FormRequest
             'room_ids.*' => 'exists:event_rooms,id',
 
             // Location info
-            'maps_url' => 'nullable|string',
+            'maps_url' => 'nullable|url|max:500',
             'previous_venue' => 'nullable|string|max:255',
             'next_venue' => 'nullable|string|max:255',
 
@@ -148,9 +141,9 @@ class UpdateEventRequest extends FormRequest
             'async_dates.*.notes' => 'nullable|string|max:500',
 
             // Attendance
-            'local_attendance' => 'nullable|integer|min:0',
-            'national_attendance' => 'nullable|integer|min:0',
-            'international_attendance' => 'nullable|integer|min:0',
+            'local_attendance' => 'nullable|integer|min:0|max:10000000',
+            'national_attendance' => 'nullable|integer|min:0|max:10000000',
+            'international_attendance' => 'nullable|integer|min:0|max:10000000',
             'virtual_transmission' => 'nullable|boolean',
 
             // Additional info
@@ -179,7 +172,6 @@ class UpdateEventRequest extends FormRequest
             'start_date.required' => 'La fecha de inicio es obligatoria.',
             'end_date.required' => 'La fecha de fin es obligatoria.',
             'end_date.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
-            'status_id.exists' => 'El estado seleccionado no es válido.',
             'format_id.exists' => 'El formato de evento seleccionado no es válido.',
             'location_ids.array' => 'Las ubicaciones deben ser un array.',
             'location_ids.max' => 'No puede seleccionar más de 10 ubicaciones.',

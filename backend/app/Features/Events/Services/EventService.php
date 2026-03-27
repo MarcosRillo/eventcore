@@ -76,29 +76,25 @@ class EventService
                 $data['description'] = $this->sanitizeDescription($data['description']);
             }
 
-            // Get the user's primary organization for entity_id if not provided
-            if (! isset($data['entity_id'])) {
-                $organizationId = $user->organization_id;
-                if (! $organizationId) {
-                    throw new \Exception('User must belong to an organization to create events.');
-                }
-                $data['entity_id'] = $organizationId;
+            // Force entity_id from authenticated user — users cannot set entity directly
+            $organizationId = $user->organization_id;
+            if (! $organizationId) {
+                throw new \Exception('User must belong to an organization to create events.');
             }
-
-            // Auto-compute created_by from authenticated user
-            $data['created_by'] = $user->id;
-
-            // Ensure default status_id if not provided
-            if (! isset($data['status_id'])) {
-                $data['status_id'] = $this->getStatusId('draft');
-            }
+            $data['entity_id'] = $organizationId;
 
             // Extract location_ids for pivot table handling
             $locationIds = $data['location_ids'] ?? [];
             unset($data['location_ids']); // Remove from mass assignment data
 
-            // Create the event
+            // Force draft status - users cannot set status directly
+            // This ensures the approval workflow is always followed
+            $data['status_id'] = $this->getStatusId('draft');
+
+            // Create the event, then set created_by via forceFill
+            // (created_by is excluded from $fillable for security)
             $event = Event::create($data);
+            $event->forceFill(['created_by' => $user->id])->save();
 
             // Handle location relationships if provided
             if (! empty($locationIds) && is_array($locationIds)) {
@@ -130,6 +126,11 @@ class EventService
             // Extract location_ids for pivot table handling
             $locationIds = $data['location_ids'] ?? null;
             unset($data['location_ids']); // Remove from mass assignment data
+
+            // Force draft status for organizer_admin - status changes go through the approval workflow
+            if ($user->isOrganizerAdmin()) {
+                $data['status_id'] = $this->getStatusId('draft');
+            }
 
             // Update the event
             $event->update($data);

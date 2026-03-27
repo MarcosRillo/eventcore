@@ -44,12 +44,6 @@ class Event extends Model
         'event_type_id',
         'event_subtype_id',
 
-        // Approval workflow
-        'created_by',
-        'approved_by',
-        'approved_at',
-        'published_at',
-
         // Display
         'featured_image',
         'is_featured',
@@ -71,7 +65,6 @@ class Event extends Model
         'international_attendance',
 
         // Foreign keys (normalized - Nov 30, 2025)
-        'subtype_id',
         'origin_id',
         'theme_id',
         'frequency_id',
@@ -96,7 +89,6 @@ class Event extends Model
         'local_attendance' => 'integer',
         'national_attendance' => 'integer',
         'international_attendance' => 'integer',
-        'subtype_id' => 'integer',
         'origin_id' => 'integer',
         'theme_id' => 'integer',
         'frequency_id' => 'integer',

@@ -84,11 +84,18 @@ class OrganizerControllerValidationTest extends TestCase
     }
 
     /**
-     * Create minimal valid payload for event creation
+     * Create minimal valid payload for event creation.
+     * Locations must use the parent entity id (parent_id of the user's org),
+     * because the location_ids validation scopes to entity_id = parent entity.
      */
     private function getMinimalPayload(User $user): array
     {
-        $location = Location::factory()->create(['entity_id' => $user->organization_id]);
+        $orgId = $user->organization_id;
+        $parentEntityId = $orgId
+            ? \App\Models\Organization::where('id', $orgId)->value('parent_id') ?? $orgId
+            : null;
+
+        $location = Location::factory()->create(['entity_id' => $parentEntityId]);
         $eventTypeIds = $this->getValidEventTypeIds();
 
         return [

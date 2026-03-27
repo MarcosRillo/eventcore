@@ -13,6 +13,7 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ApprovalController extends Controller
 {
@@ -26,6 +27,7 @@ class ApprovalController extends Controller
     public function approve(ApproveEventRequest $request, string $id): JsonResponse
     {
         $event = Event::findOrFail($id);
+        Gate::authorize('approve', $event);
 
         $this->approvalService->approveInternal(
             $event,
@@ -45,6 +47,7 @@ class ApprovalController extends Controller
     public function approveAndPublish(ApproveAndPublishEventRequest $request, string $id): JsonResponse
     {
         $event = Event::findOrFail($id);
+        Gate::authorize('approve', $event);
 
         $this->approvalService->approveAndPublish(
             $event,
@@ -63,8 +66,8 @@ class ApprovalController extends Controller
      */
     public function requestPublicApproval(Request $request, string $id): JsonResponse
     {
-        // Authorization checked in middleware
         $event = Event::findOrFail($id);
+        Gate::authorize('approve', $event);
 
         $this->approvalService->requestPublicApproval(
             $event,
@@ -83,6 +86,7 @@ class ApprovalController extends Controller
     public function publish(PublishEventRequest $request, string $id): JsonResponse
     {
         $event = Event::findOrFail($id);
+        Gate::authorize('publish', $event);
 
         $this->approvalService->publishEvent(
             $event,
@@ -102,6 +106,7 @@ class ApprovalController extends Controller
     public function requestChanges(RequestChangesRequest $request, string $id): JsonResponse
     {
         $event = Event::findOrFail($id);
+        Gate::authorize('requestChanges', $event);
 
         $this->approvalService->requestChanges(
             $event,
@@ -121,6 +126,7 @@ class ApprovalController extends Controller
     public function reject(RejectEventRequest $request, string $id): JsonResponse
     {
         $event = Event::findOrFail($id);
+        Gate::authorize('reject', $event);
 
         $this->approvalService->reject(
             $event,

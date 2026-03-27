@@ -5,7 +5,7 @@ services:
   db:
     env_file: .env.docker
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
 
   # Override backend: use Dockerfile.dev, artisan serve, volumes
   backend:
@@ -17,6 +17,8 @@ services:
         GROUP_ID: ${GROUP_ID:-1000}
     env_file: .env.docker
     environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
       - XDEBUG_MODE=${XDEBUG_MODE:-off}
       - XDEBUG_CONFIG=client_host=host.docker.internal
     volumes:
@@ -24,7 +26,7 @@ services:
       - ./docker/backend/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
       - composer_cache:/home/www/.composer
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     entrypoint: ["sh", "/usr/local/bin/entrypoint.sh"]
     command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
     healthcheck:
@@ -48,6 +50,16 @@ services:
       - /app/node_modules
       - /app/.next
     command: pnpm run dev
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: plataforma-calendario-mailhog
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    networks:
+      - plataforma-network
 
 volumes:
   composer_cache:

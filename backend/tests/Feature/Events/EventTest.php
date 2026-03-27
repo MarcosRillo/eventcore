@@ -169,7 +169,7 @@ class EventTest extends EventTestCase
 
         $response = $this->deleteJson("/api/v1/events/{$event->id}");
 
-        $response->assertStatus(200);
+        $response->assertNoContent();
 
         // With SoftDeletes, the record exists but has deleted_at set
         $this->assertSoftDeleted('events', [

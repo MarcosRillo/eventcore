@@ -29,9 +29,8 @@ const isValidEmail = (email: string): boolean => {
 };
 
 export const useForgotPassword = (): UseForgotPasswordReturn => {
-  // React 19 transition for non-blocking UI
-  const [, startTransition] = useTransition();
-  const [isLoadingState, setIsLoadingState] = useState(false);
+  // React 19 transition for non-blocking UI — isPending replaces manual isLoadingState
+  const [isPending, startTransition] = useTransition();
   const { addToast } = useToast();
 
   const [email, setEmail] = useState('');
@@ -48,7 +47,6 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
       return;
     }
 
-    setIsLoadingState(true);
     setError(null);
 
     startTransition(async () => {
@@ -72,8 +70,6 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
           type: 'error',
           duration: 5000,
         });
-      } finally {
-        setIsLoadingState(false);
       }
     });
   }, [email, isValid, startTransition, addToast]);
@@ -82,16 +78,12 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
     setEmail('');
     setError(null);
     setSuccess(false);
-    setIsLoadingState(false);
   }, []);
-
-  // Backward compatibility
-  const isLoading = isLoadingState;
 
   return {
     email,
     setEmail,
-    isLoading,
+    isLoading: isPending,
     error,
     success,
     isValid,

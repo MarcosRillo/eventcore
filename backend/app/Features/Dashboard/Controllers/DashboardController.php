@@ -8,6 +8,7 @@ use App\Features\Dashboard\Requests\IndexDashboardEventsRequest;
 use App\Features\Dashboard\Services\DashboardService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Dashboard Controller
@@ -35,10 +36,12 @@ class DashboardController extends Controller
                 'message' => 'Events summary retrieved successfully',
             ]);
         } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve events summary',
-                'error' => $e->getMessage(),
+                'error' => 'Internal server error',
             ], 500);
         }
     }
@@ -63,10 +66,12 @@ class DashboardController extends Controller
                 'message' => 'Events retrieved successfully',
             ]);
         } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve events',
-                'error' => $e->getMessage(),
+                'error' => 'Internal server error',
             ], 500);
         }
     }
@@ -92,10 +97,12 @@ class DashboardController extends Controller
                 'message' => 'Event detail retrieved successfully',
             ]);
         } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve event detail',
-                'error' => $e->getMessage(),
+                'error' => 'Internal server error',
             ], 500);
         }
     }

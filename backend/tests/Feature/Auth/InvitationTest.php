@@ -239,7 +239,7 @@ class InvitationTest extends TestCase
 
         $response->assertStatus(201);
         $response->assertJsonPath('success', true);
-        $response->assertJsonStructure(['data' => ['user' => ['id', 'name', 'email', 'role'], 'token']]);
+        $response->assertJsonStructure(['data' => ['user' => ['id', 'name', 'email', 'role'], 'access_token', 'refresh_token', 'expires_at']]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'newuser@example.com',
@@ -322,7 +322,7 @@ class InvitationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('success', true);
 
-        $this->assertDatabaseMissing('invitations', ['id' => $invitation->id]);
+        $this->assertSoftDeleted('invitations', ['id' => $invitation->id]);
     }
 
     #[Test]

@@ -420,11 +420,13 @@ describe('useEventManager Hook', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.createEvent(mockEventFormData);
-        });
-      }).rejects.toThrow('API Error: Cannot create event');
+      await act(async () => {
+        await result.current.createEvent(mockEventFormData);
+      });
+
+      await waitFor(() => {
+        expect(result.current.mutationError).toBe('API Error: Cannot create event');
+      });
     });
 
     test('should handle update event error gracefully', async () => {
@@ -437,11 +439,13 @@ describe('useEventManager Hook', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.updateEvent(1, { title: 'Updated' });
-        });
-      }).rejects.toThrow('API Error: Cannot update event');
+      await act(async () => {
+        await result.current.updateEvent(1, { title: 'Updated' });
+      });
+
+      await waitFor(() => {
+        expect(result.current.mutationError).toBe('API Error: Cannot update event');
+      });
     });
 
     test('should handle delete event error', async () => {

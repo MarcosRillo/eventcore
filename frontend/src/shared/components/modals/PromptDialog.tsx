@@ -7,7 +7,7 @@
 'use client';
 
 import { AlertCircle } from 'lucide-react';
-import { useEffect, useRef,useState } from 'react';
+import { useEffect, useId, useRef,useState } from 'react';
 
 import { Button, Input, Textarea } from '@/shared/components/form';
 import Modal from '@/shared/components/modals/Modal';
@@ -52,6 +52,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputId = useId();
 
   // Reset value when dialog opens/closes
   useEffect(() => {
@@ -59,13 +60,14 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
       setValue(defaultValue);
       setError('');
       // Focus input when dialog opens
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (multiline) {
           textareaRef.current?.focus();
         } else {
           inputRef.current?.focus();
         }
       }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isOpen, defaultValue, multiline]);
 
@@ -85,7 +87,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
     onConfirm(value);
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !multiline && !loading) {
       event.preventDefault();
       handleConfirm();
@@ -139,7 +141,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
 
         <div className="space-y-2">
           {label && (
-            <label className="block text-sm font-medium text-foreground">
+            <label htmlFor={inputId} className="block text-sm font-medium text-foreground">
               {label}
               {required && <span className="text-error-500 ml-1">*</span>}
             </label>
@@ -147,6 +149,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
 
           {multiline ? (
             <Textarea
+              id={inputId}
               ref={textareaRef}
               value={value}
               onChange={(e) => {
@@ -161,6 +164,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
             />
           ) : (
             <Input
+              id={inputId}
               ref={inputRef}
               type="text"
               value={value}
@@ -168,7 +172,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
                 setValue(e.target.value);
                 setError(''); // Clear error on change
               }}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder={placeholder}
               maxLength={maxLength}
               disabled={loading}

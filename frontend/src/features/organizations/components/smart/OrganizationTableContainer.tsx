@@ -119,7 +119,7 @@ export const OrganizationTableContainer: React.FC = () => {
               placeholder="Buscar por nombre o CUIT..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              onKeyPress={handleSearchKeyPress}
+              onKeyDown={handleSearchKeyPress}
               fullWidth
             />
             <Button variant="primary" onClick={handleSearch}>

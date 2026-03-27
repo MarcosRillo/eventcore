@@ -2,6 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from 'next/headers';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { SWRProvider } from '@/lib/swr';
@@ -18,20 +19,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://eventostucuman.gob.ar'),
   title: "Plataforma Calendario - Gestión de Eventos",
   description: "Sistema completo de gestión de calendario y eventos con multi-tenancy",
 };
 
-/**
- *
- * @param root0
- * @param root0.children
- */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get('x-nonce') ?? '';
+  void nonce; // nonce is read to make this layout dynamic (per-request CSP)
   return (
     <html lang="es">
       <body

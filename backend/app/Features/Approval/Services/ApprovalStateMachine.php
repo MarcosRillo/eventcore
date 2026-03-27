@@ -65,9 +65,9 @@ class ApprovalStateMachine
      */
     public function canTransition(string $currentStatus, string $targetStatus): bool
     {
-        // Same state is always valid (no-op)
+        // Same-state transitions are never valid business actions
         if ($currentStatus === $targetStatus) {
-            return true;
+            return false;
         }
 
         $allowedTransitions = self::TRANSITIONS[$currentStatus] ?? [];

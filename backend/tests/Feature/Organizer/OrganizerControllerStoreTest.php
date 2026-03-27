@@ -35,14 +35,17 @@ class OrganizerControllerStoreTest extends TestCase
         $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
         $this->seed(\Database\Seeders\EventLookupSeeder::class);
 
-        // Create tourism entity (id=1) that owns shared resources
+        // Create tourism entity (id=1) that owns shared resources.
+        // Must use primary_entity type so OrganizationFactory::getOrCreatePrimaryEntity()
+        // finds this record and uses id=1 as parent_id for child orgs.
+        // Location validation scopes to parent entity id, so locations with entity_id=1 must match.
         \DB::table('organizations')->insertOrIgnore([
             'id' => 1,
             'name' => 'Ente de Turismo de Tucumán',
             'slug' => 'ente-turismo-tucuman',
             'cuit' => '30-12345678-9',
             'description' => 'Ente principal de turismo',
-            'type_id' => \DB::table('organization_types')->value('id'),
+            'type_id' => \DB::table('organization_types')->where('type_code', 'primary_entity')->value('id'),
             'status_id' => \DB::table('organization_statuses')->value('id'),
             'parent_id' => null,
             'trust_level' => 5,
@@ -317,7 +320,7 @@ class OrganizerControllerStoreTest extends TestCase
         $user = $this->createAuthenticatedUser();
         $userOrganization = $user->organization_id;
         $otherOrganization = Organization::factory()->create();
-        $location = Location::factory()->create();
+        $location = Location::factory()->create(['entity_id' => 1]);
         $formatId = $this->getValidFormatId();
         $eventTypeIds = $this->getValidEventTypeIds();
 

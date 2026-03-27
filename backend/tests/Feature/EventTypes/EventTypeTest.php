@@ -370,8 +370,7 @@ class EventTypeTest extends EventTestCase
         $response = $this->deleteJson("/api/v1/event-types/{$eventType->id}");
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJsonPath('success', true);
+        $response->assertNoContent();
 
         $this->assertSoftDeleted('event_types', [
             'id' => $eventType->id,

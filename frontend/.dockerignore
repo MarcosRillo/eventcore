@@ -13,3 +13,11 @@ coverage
 .coverage
 .coverage-final.json
 .DS_Store
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+jest.config.*
+jest.setup.*
+__tests__/
+coverage/

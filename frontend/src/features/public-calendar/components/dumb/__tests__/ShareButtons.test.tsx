@@ -78,7 +78,7 @@ describe('ShareButtons', () => {
       expect(mockOpen).toHaveBeenCalledWith(
         expect.stringContaining('facebook.com/sharer/sharer.php'),
         '_blank',
-        'width=600,height=400'
+        'noopener,noreferrer'
       )
     })
 
@@ -105,7 +105,7 @@ describe('ShareButtons', () => {
       expect(mockOpen).toHaveBeenCalledWith(
         expect.stringContaining('twitter.com/intent/tweet'),
         '_blank',
-        'width=600,height=400'
+        'noopener,noreferrer'
       )
     })
 
@@ -140,7 +140,7 @@ describe('ShareButtons', () => {
       expect(mockOpen).toHaveBeenCalledWith(
         expect.stringContaining('api.whatsapp.com/send'),
         '_blank',
-        'width=600,height=400'
+        'noopener,noreferrer'
       )
     })
 
@@ -283,7 +283,7 @@ describe('ShareButtons', () => {
 
       mockOpen.mock.calls.forEach(call => {
         expect(call[1]).toBe('_blank')
-        expect(call[2]).toBe('width=600,height=400')
+        expect(call[2]).toBe('noopener,noreferrer')
       })
     })
   })

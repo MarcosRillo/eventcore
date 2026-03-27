@@ -31,9 +31,8 @@ interface UseEventActionsReturn {
 export const useEventActions = (
   onSuccess?: (deletedEventId?: number) => void
 ): UseEventActionsReturn => {
-  // React 19 transition for non-blocking UI
-  const [, startTransition] = useTransition()
-  const [isLoading, setIsLoading] = useState(false)
+  // React 19 transition for non-blocking UI — isPending replaces manual isLoading
+  const [isPending, startTransition] = useTransition()
 
   const [submitModalOpen, setSubmitModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -68,7 +67,6 @@ export const useEventActions = (
   }
 
   const submitForReview = async (eventId: number): Promise<void> => {
-    setIsLoading(true)
     setValidationErrors(null)
     startTransition(async () => {
       try {
@@ -100,37 +98,31 @@ export const useEventActions = (
             type: 'error'
           })
         }
-      } finally {
-        setIsLoading(false)
       }
     })
   }
 
   const deleteEvent = async (eventId: number): Promise<void> => {
-    setIsLoading(true)
-    try {
-      await organizerEventService.deleteEvent(eventId)
-      addToast({
-        message: 'Evento eliminado exitosamente',
-        type: 'success'
-      })
-      closeDeleteModal()
-      onSuccessRef.current?.(eventId)
-    } catch {
-      addToast({
-        message: 'Error al eliminar evento',
-        type: 'error'
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    startTransition(async () => {
+      try {
+        await organizerEventService.deleteEvent(eventId)
+        addToast({
+          message: 'Evento eliminado exitosamente',
+          type: 'success'
+        })
+        closeDeleteModal()
+        onSuccessRef.current?.(eventId)
+      } catch {
+        addToast({
+          message: 'Error al eliminar evento',
+          type: 'error'
+        })
+      }
+    })
   }
 
-  // Backward compatibility
-  const loading = isLoading
-
   return {
-    loading,
+    loading: isPending,
     submitModalOpen,
     deleteModalOpen,
     selectedEventId,

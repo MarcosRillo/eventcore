@@ -209,8 +209,8 @@ class OrganizerSubmitTest extends TestCase
         $response = $this->actingAs($this->user)
             ->postJson("/api/v1/organizer/events/{$event->id}/submit");
 
-        $response->assertStatus(403)
-            ->assertJson(['error' => 'Only draft events can be submitted']);
+        // Policy denies submit for non-draft/requires_changes events
+        $response->assertStatus(403);
     }
 
     #[Test]

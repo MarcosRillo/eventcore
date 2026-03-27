@@ -67,6 +67,7 @@ export function InternalEventDetailPage({
                   <span
                     className="inline-block w-3 h-3 rounded-full"
                     style={{ backgroundColor: event.event_type.color }}
+                    aria-hidden="true"
                   />
                   <span className="text-sm font-medium text-neutral-600">
                     {event.event_type.name}

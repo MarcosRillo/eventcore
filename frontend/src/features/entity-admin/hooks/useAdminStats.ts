@@ -28,7 +28,7 @@ export const useAdminStats = (options: UseAdminStatsOptions = {}): UseAdminStats
   const { data, error, isLoading, mutate } = useSWR<{ data: AdminApprovalStats }>(
     adminKeys.stats(showPast),
     apiFetcher,
-    { fallbackData: initialStats ? { data: initialStats } : undefined }
+    { fallbackData: initialStats ? { data: initialStats } : undefined, refreshInterval: 30000 }
   );
 
   const stats = data?.data ?? null;

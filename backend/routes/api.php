@@ -164,6 +164,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware(['role:organizer_admin'])->group(function () {
             Route::prefix('organizer')->group(function () {
                 Route::get('dashboard/stats', [OrganizerController::class, 'dashboardStats']);
+                Route::get('stats', [OrganizerStatsController::class, 'index']);
                 Route::get('events', [OrganizerController::class, 'index']);
                 Route::post('events', [OrganizerController::class, 'store']);
                 Route::get('events/{id}', [OrganizerController::class, 'show']);
@@ -172,9 +173,6 @@ Route::prefix('v1')->group(function () {
                 Route::post('events/{id}/submit', [OrganizerController::class, 'submit']);
             });
         });
-
-        // ===== ORGANIZER STATS (any authenticated user) =====
-        Route::get('organizer/stats', [OrganizerStatsController::class, 'index']);
 
         // ===== PLATFORM ADMIN + ENTITY ADMIN + ENTITY STAFF =====
         // Dashboard del Ente + read-only events
@@ -272,6 +270,31 @@ Route::prefix('v1')->group(function () {
     });
 
     // Legacy public routes (keep for backward compatibility)
-    Route::get('events/public', [PublicEventController::class, 'index'])
-        ->middleware('throttle:public');
+    Route::get('events/public', function (\Illuminate\Http\Request $request) {
+        $response = app()->call([app(PublicEventController::class), 'index'], ['request' => $request]);
+
+        return $response
+            ->header('Deprecation', 'true')
+            ->header('Sunset', 'Thu, 01 Jul 2026 00:00:00 GMT');
+    })->middleware('throttle:public');
+});
+
+// ===== HEALTH CHECK (public, no auth, outside v1 prefix) =====
+Route::get('health', function () {
+    $checks = [];
+    try {
+        \DB::select('SELECT 1');
+        $checks['database'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['database'] = 'fail';
+    }
+    try {
+        \Cache::store('redis')->set('__health', 1, 5);
+        $checks['cache'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['cache'] = 'fail';
+    }
+    $allOk = ! in_array('fail', $checks);
+
+    return response()->json(['status' => $allOk ? 'ok' : 'degraded', 'checks' => $checks], $allOk ? 200 : 503);
 });

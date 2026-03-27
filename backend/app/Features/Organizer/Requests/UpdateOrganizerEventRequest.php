@@ -3,6 +3,7 @@
 namespace App\Features\Organizer\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Form Request for updating organizer events.
@@ -39,7 +40,26 @@ class UpdateOrganizerEventRequest extends FormRequest
 
             // Location: require either existing locations OR custom location
             'location_ids' => 'nullable|array',
-            'location_ids.*' => 'exists:locations,id',
+            'location_ids.*' => [
+                'integer',
+                Rule::exists('locations', 'id')->where(function ($query) {
+                    $user = $this->user();
+                    if ($user) {
+                        // Organizer's org has a parent_id pointing to the entity that owns the locations
+                        $organizationId = $user->organization_id;
+                        $parentEntityId = $organizationId
+                            ? \App\Models\Organization::where('id', $organizationId)->value('parent_id')
+                            : null;
+                        if ($parentEntityId) {
+                            $query->where('entity_id', $parentEntityId);
+                        } else {
+                            $query->where('id', null);
+                        }
+                    } else {
+                        $query->where('id', null);
+                    }
+                }),
+            ],
             'custom_location_name' => 'nullable|string|max:255|required_without:location_ids',
 
             // Basic information
@@ -63,19 +83,19 @@ class UpdateOrganizerEventRequest extends FormRequest
             'room_ids.*' => 'exists:event_rooms,id',
 
             // Location info
-            'maps_url' => 'nullable|string',
+            'maps_url' => 'nullable|url|max:500',
             'previous_venue' => 'nullable|string|max:255',
             'next_venue' => 'nullable|string|max:255',
 
             // Asynchronous dates (normalized to separate table)
-            'async_dates' => 'nullable|array',
+            'async_dates' => 'nullable|array|max:50',
             'async_dates.*.date' => 'required_with:async_dates|date',
             'async_dates.*.notes' => 'nullable|string|max:500',
 
             // Attendance
-            'local_attendance' => 'nullable|integer|min:0',
-            'national_attendance' => 'nullable|integer|min:0',
-            'international_attendance' => 'nullable|integer|min:0',
+            'local_attendance' => 'nullable|integer|min:0|max:10000000',
+            'national_attendance' => 'nullable|integer|min:0|max:10000000',
+            'international_attendance' => 'nullable|integer|min:0|max:10000000',
             'virtual_transmission' => 'nullable|boolean',
 
             // Additional information
@@ -87,9 +107,9 @@ class UpdateOrganizerEventRequest extends FormRequest
             'responsive_image_url' => 'nullable|string|max:500',
 
             // Images (File uploads)
-            'logo_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
-            'featured_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
-            'responsive_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            'logo_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:min_width=1,min_height=1',
+            'featured_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:min_width=1,min_height=1',
+            'responsive_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:min_width=1,min_height=1',
         ];
     }
 }

@@ -40,7 +40,7 @@ class SubmitRegistrationRequest extends FormRequest
                 'unique:registration_requests,email,NULL,id,status,pending',
             ],
             'whatsapp' => ['required', 'string', 'max:20'],
-            'profile_photo' => ['nullable', 'image', 'max:2048'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048', 'dimensions:min_width=1,min_height=1'],
             'organization_name' => ['required', 'string', 'max:255'],
             'organization_cuit' => [
                 'required',
@@ -50,7 +50,7 @@ class SubmitRegistrationRequest extends FormRequest
                 'unique:registration_requests,organization_cuit,NULL,id,status,pending',
             ],
             'organization_sector' => ['required', 'string', 'max:100'],
-            'organization_logo' => ['nullable', 'image', 'max:2048'],
+            'organization_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048', 'dimensions:min_width=1,min_height=1'],
             'website' => ['nullable', 'url', 'max:255'],
             'motivation' => ['required', 'string', 'min:50', 'max:1000'],
         ];
