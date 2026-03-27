@@ -85,9 +85,6 @@ class EventService
                 $data['entity_id'] = $organizationId;
             }
 
-            // Auto-compute created_by from authenticated user
-            $data['created_by'] = $user->id;
-
             // Extract location_ids for pivot table handling
             $locationIds = $data['location_ids'] ?? [];
             unset($data['location_ids']); // Remove from mass assignment data
@@ -96,8 +93,10 @@ class EventService
             // This ensures the approval workflow is always followed
             $data['status_id'] = $this->getStatusId('draft');
 
-            // Create the event
+            // Create the event, then set created_by via forceFill
+            // (created_by is excluded from $fillable for security)
             $event = Event::create($data);
+            $event->forceFill(['created_by' => $user->id])->save();
 
             // Handle location relationships if provided
             if (! empty($locationIds) && is_array($locationIds)) {

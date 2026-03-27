@@ -52,6 +52,7 @@ class OrganizerService
 
             $eventData = $this->prepareEventData($data, $user, $draftStatus->id, $formatId);
             $event = Event::create($eventData);
+            $event->forceFill(['created_by' => $user->id])->save();
 
             if (! empty($data['location_ids']) && is_array($data['location_ids'])) {
                 $event->locations()->sync($data['location_ids']);

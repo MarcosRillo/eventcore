@@ -122,12 +122,14 @@ class EventPolicy
             return false;
         }
 
-        // Event must be pending approval
+        // Event must be in approval-eligible status
+        // Includes approved_internal for requestPublicApproval action
         $statusCode = $event->status?->status_code;
 
         return in_array($statusCode, [
             'pending_internal_approval',
             'pending_public_approval',
+            'approved_internal',
         ]);
     }
 
