@@ -322,7 +322,7 @@ class InvitationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('success', true);
 
-        $this->assertDatabaseMissing('invitations', ['id' => $invitation->id]);
+        $this->assertSoftDeleted('invitations', ['id' => $invitation->id]);
     }
 
     #[Test]

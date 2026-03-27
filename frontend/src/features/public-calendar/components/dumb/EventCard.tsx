@@ -54,8 +54,6 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
       "
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
       aria-label={`Ver evento: ${event.title}`}
     >
       {/* Image */}
