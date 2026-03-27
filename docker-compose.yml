@@ -67,6 +67,11 @@ services:
       - plataforma-network
     depends_on:
       - backend
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
 
   # Frontend Next.js
   frontend:
@@ -91,6 +96,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
 
   # Redis - Cache store
   redis:
@@ -109,17 +119,6 @@ services:
       resources:
         limits:
           memory: 256M
-
-  # MailHog - SMTP testing server
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    container_name: plataforma-calendario-mailhog
-    restart: unless-stopped
-    ports:
-      - "1025:1025"  # SMTP port
-      - "8025:8025"  # Web UI port
-    networks:
-      - plataforma-network
 
 volumes:
   db_data:
