@@ -3,6 +3,7 @@
 namespace App\Features\Organizer\Controllers;
 
 use App\Features\Events\Services\EventValidationService;
+use App\Features\Organizer\Requests\IndexOrganizerEventRequest;
 use App\Features\Organizer\Requests\StoreOrganizerEventRequest;
 use App\Features\Organizer\Requests\UpdateOrganizerEventRequest;
 use App\Features\Organizer\Services\OrganizerService;
@@ -12,6 +13,7 @@ use App\Models\EventStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class OrganizerController extends Controller
 {
@@ -23,14 +25,9 @@ class OrganizerController extends Controller
     /**
      * Get paginated list of organization's events with filters.
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexOrganizerEventRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'search' => 'sometimes|string|max:255',
-            'status' => 'sometimes|string',
-            'show_past' => 'sometimes|string|in:0,1',
-            'per_page' => 'sometimes|integer|min:1|max:100',
-        ]);
+        $validated = $request->validated();
 
         $filters = [
             'search' => $validated['search'] ?? null,
@@ -75,10 +72,10 @@ class OrganizerController extends Controller
      */
     public function update(UpdateOrganizerEventRequest $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        $event = $this->getOrganizerEvent($id, $user);
+        $event = Event::findOrFail($id);
+        Gate::authorize('update', $event);
 
-        $updatedEvent = $this->organizerService->updateEvent($event, $request->validated(), $user);
+        $updatedEvent = $this->organizerService->updateEvent($event, $request->validated(), $request->user());
 
         return response()->json([
             'message' => 'Event updated successfully',
@@ -91,8 +88,8 @@ class OrganizerController extends Controller
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        $event = $this->getOrganizerEvent($id, $user);
+        $event = Event::findOrFail($id);
+        Gate::authorize('delete', $event);
 
         if ($event->status->status_code !== 'draft') {
             return response()->json([
@@ -101,7 +98,7 @@ class OrganizerController extends Controller
             ], 403);
         }
 
-        $this->organizerService->deleteEvent($event, $user);
+        $this->organizerService->deleteEvent($event, $request->user());
 
         return response()->json(['message' => 'Event deleted successfully']);
     }
@@ -127,13 +124,8 @@ class OrganizerController extends Controller
      */
     public function submit(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-        $event = $this->getOrganizerEvent($id, $user, ['status', 'locations']);
-
-        $submittableStatuses = ['draft', 'requires_changes'];
-        if (! in_array($event->status->status_code, $submittableStatuses)) {
-            return response()->json(['error' => 'Only draft events can be submitted'], 403);
-        }
+        $event = Event::with(['status', 'locations'])->findOrFail($id);
+        Gate::authorize('submit', $event);
 
         $validationResult = $this->validationService->validateForInternalApproval($event);
         if (! $validationResult->isValid()) {
@@ -155,16 +147,5 @@ class OrganizerController extends Controller
                 'event' => $event,
             ]);
         });
-    }
-
-    /**
-     * Get event belonging to user's organization.
-     */
-    private function getOrganizerEvent(int $id, $user, array $with = ['status']): Event
-    {
-        return Event::where('id', $id)
-            ->where('organization_id', $user->organization_id)
-            ->with($with)
-            ->firstOrFail();
     }
 }

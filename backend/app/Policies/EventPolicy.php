@@ -176,6 +176,22 @@ class EventPolicy
     }
 
     /**
+     * Determine if the user can submit the event for review.
+     *
+     * Only the event's organizer can submit, and only from draft or requires_changes status.
+     */
+    public function submit(User $user, Event $event): bool
+    {
+        if (! $this->canAccessEvent($user, $event)) {
+            return false;
+        }
+
+        $statusCode = $event->status?->status_code;
+
+        return in_array($statusCode, ['draft', 'requires_changes']);
+    }
+
+    /**
      * Determine if the user can request changes on the event.
      *
      * Requesting changes can be done by entity admins or staff when event
