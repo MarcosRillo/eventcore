@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -175,15 +176,29 @@ class EventController extends Controller
 
     /**
      * Get event statistics.
+     * Single query with conditional aggregation; cached for 60 seconds.
      */
     public function statistics()
     {
-        $stats = [
-            'total' => Event::count(),
-            'published' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'))->count(),
-            'pending' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval']))->count(),
-            'draft' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'draft'))->count(),
-        ];
+        $stats = Cache::remember('events.statistics', 60, function () {
+            $row = DB::selectOne("
+                SELECT
+                    COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE es.status_code = 'published') AS published,
+                    COUNT(*) FILTER (WHERE es.status_code IN ('pending_internal_approval', 'pending_public_approval')) AS pending,
+                    COUNT(*) FILTER (WHERE es.status_code = 'draft') AS draft
+                FROM events e
+                JOIN event_statuses es ON es.id = e.status_id
+                WHERE e.deleted_at IS NULL
+            ");
+
+            return [
+                'total'     => (int) $row->total,
+                'published' => (int) $row->published,
+                'pending'   => (int) $row->pending,
+                'draft'     => (int) $row->draft,
+            ];
+        });
 
         return response()->json(['data' => $stats]);
     }

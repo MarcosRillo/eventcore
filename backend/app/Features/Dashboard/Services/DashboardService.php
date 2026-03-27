@@ -57,6 +57,15 @@ class DashboardService
         });
     }
 
+    /**
+     * Build the tenant WHERE clause fragment and register its bindings.
+     *
+     * Safety note: this method interpolates only static SQL keywords
+     * (e.g. `AND e.entity_id = :tenant_id`). All user-supplied values
+     * are passed as named PDO parameters via the $bindings array and
+     * never concatenated into the query string, so there is no SQL
+     * injection risk.
+     */
     private function buildTenantClause(array &$bindings): string
     {
         if (! Auth::check()) {
