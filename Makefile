@@ -74,8 +74,7 @@ status: ## Muestra el estado de los servicios
 
 install: ## Instalación inicial del proyecto
 	@echo "🚀 Instalando proyecto..."
-	$(DC) up -d db
-	@sleep 5
+	$(DC) up -d db --wait
 	$(DC) up -d
 	$(DC) exec -u www backend composer install
 	$(DC) exec -u www backend cp .env.example .env

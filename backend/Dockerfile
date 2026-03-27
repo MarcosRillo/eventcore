@@ -36,7 +36,7 @@ RUN { echo '[pcov]'; echo 'pcov.enabled=1'; echo 'pcov.directory=/var/www/app'; 
 RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
 
 # Composer (pinned version)
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
 # Non-root user
 RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
