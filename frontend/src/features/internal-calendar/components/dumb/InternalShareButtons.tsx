@@ -75,6 +75,11 @@ export function InternalShareButtons({
         message: 'Enlace copiado al portapapeles',
         type: 'success',
       });
+    }).catch(() => {
+      addToast({
+        message: 'No se pudo copiar el enlace',
+        type: 'error',
+      });
     });
   };
 

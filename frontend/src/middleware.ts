@@ -236,6 +236,9 @@ export function middleware(request: NextRequest) {
     "font-src 'self'",
     `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || ''}`.trim(),
     "frame-ancestors 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
   ].join('; ');
 
   const { pathname } = request.nextUrl;

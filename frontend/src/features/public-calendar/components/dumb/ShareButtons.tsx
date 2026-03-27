@@ -27,6 +27,7 @@ type SocialPlatform = 'facebook' | 'twitter' | 'whatsapp'
  */
 export function ShareButtons({ event }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState(false)
 
   const handleShare = (platform: SocialPlatform): void => {
     const url = typeof window !== 'undefined' ? window.location.href : ''
@@ -45,9 +46,15 @@ export function ShareButtons({ event }: ShareButtonsProps) {
 
   const handleCopyLink = async (): Promise<void> => {
     const url = typeof window !== 'undefined' ? window.location.href : ''
-    await navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setCopyError(false)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 2000)
+    }
   }
 
   const FacebookIcon = (
@@ -114,7 +121,7 @@ export function ShareButtons({ event }: ShareButtonsProps) {
         className="text-neutral-600 border-neutral-200 hover:bg-neutral-50"
         aria-label="Copiar enlace del evento"
       >
-        {copied ? '¡Copiado!' : 'Copiar enlace'}
+        {copied ? '¡Copiado!' : copyError ? 'Error al copiar' : 'Copiar enlace'}
       </Button>
     </div>
   )

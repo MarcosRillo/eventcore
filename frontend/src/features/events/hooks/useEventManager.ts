@@ -44,6 +44,7 @@ interface UseEventManagerReturn {
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
+  mutationError: string | null;
 
   // Modal state
   isCreateModalOpen: boolean;
@@ -146,6 +147,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   // Event-specific state
   const [statistics, setStatistics] = useState<EventStatistics | null>(null);
   const [approvalStatistics, setApprovalStatistics] = useState<ApprovalStatistics | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   // React 19 transitions for non-blocking UI
   const [, startCreateTransition] = useTransition();
@@ -244,6 +246,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     if (!eventServiceInstance.createEvent) {
       throw new Error('Create event not available in current context');
     }
+    setMutationError(null);
     setIsCreatingState(true);
     startCreateTransition(async () => {
       try {
@@ -252,7 +255,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
         closeAllModals();
         mutate();
       } catch (err) {
-        throw err;
+        setMutationError(err instanceof Error ? err.message : 'Error al crear el evento');
       } finally {
         setIsCreatingState(false);
       }
@@ -263,6 +266,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     if (!eventServiceInstance.updateEvent) {
       throw new Error('Update event not available in current context');
     }
+    setMutationError(null);
     setIsUpdatingState(true);
     startUpdateTransition(async () => {
       try {
@@ -270,7 +274,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
         updateEventInList(id, updatedEvent);
         closeAllModals();
       } catch (err) {
-        throw err;
+        setMutationError(err instanceof Error ? err.message : 'Error al actualizar el evento');
       } finally {
         setIsUpdatingState(false);
       }
@@ -372,7 +376,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
       const stats = await eventServiceInstance.getStatistics();
       setStatistics(stats);
     } catch {
-      // Handle error silently for statistics
+      // statistics are non-critical; silently ignore
     }
   }, [eventServiceInstance]);
 
@@ -383,12 +387,12 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
         setApprovalStatistics(stats);
       }
     } catch {
-      // Handle error silently for statistics
+      // statistics are non-critical; silently ignore
     }
   }, [eventServiceInstance]);
 
   const clearError = useCallback(() => {
-    // SWR handles error state automatically
+    setMutationError(null);
   }, []);
 
   return {
@@ -403,6 +407,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     isCreating: isCreatingState,
     isUpdating: isUpdatingState,
     isDeleting: isDeletingState,
+    mutationError,
     isCreateModalOpen,
     isEditModalOpen,
     isDeleteModalOpen,
