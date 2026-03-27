@@ -22,7 +22,7 @@ class EventImageService
      */
     public function storeImage(UploadedFile $file, int $organizationId, string $field): string
     {
-        $extension = $file->getClientOriginalExtension();
+        $extension = $file->guessExtension() ?? $file->getClientOriginalExtension();
         $filename = $field.'_'.time().'_'.uniqid().'.'.$extension;
         $path = $file->storeAs("events/{$organizationId}", $filename, 'public');
 

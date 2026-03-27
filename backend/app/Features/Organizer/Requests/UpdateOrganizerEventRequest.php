@@ -87,9 +87,9 @@ class UpdateOrganizerEventRequest extends FormRequest
             'responsive_image_url' => 'nullable|string|max:500',
 
             // Images (File uploads)
-            'logo_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
-            'featured_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
-            'responsive_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            'logo_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:min_width=1,min_height=1',
+            'featured_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:min_width=1,min_height=1',
+            'responsive_image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:min_width=1,min_height=1',
         ];
     }
 }
