@@ -37,7 +37,7 @@ export const useSanitizedHTML = (
       'a', 'ul', 'ol', 'li', 'h2', 'h3', 'h4',
       'span', 'div'
     ],
-    ALLOWED_ATTR: ['href', 'title', 'class', 'style'],
+    ALLOWED_ATTR: ['href', 'title', 'class'],
     ALLOW_DATA_ATTR: false,
     FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],

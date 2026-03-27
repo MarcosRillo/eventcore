@@ -91,7 +91,7 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
       {/* Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }}
       />
 
       <div className="bg-neutral-50">
