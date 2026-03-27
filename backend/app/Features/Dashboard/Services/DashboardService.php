@@ -5,6 +5,8 @@ namespace App\Features\Dashboard\Services;
 use App\Features\Shared\Traits\CachesWithTags;
 use App\Models\Event;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Dashboard Service
@@ -23,30 +25,73 @@ class DashboardService
 
     /**
      * Get events summary with counters for each dashboard tab
-     * Uses database-level counting for performance.
+     * Uses a single query with conditional aggregation for performance.
      */
     public function getEventsSummary(): array
     {
         return $this->taggedRemember(['dashboard'], 'dashboard.summary', 120, function () {
-            $now = Carbon::now();
+            $now = now();
+            $bindings = ['now' => $now, 'now2' => $now, 'now3' => $now, 'now4' => $now];
+            $tenantClause = $this->buildTenantClause($bindings);
+
+            $sql = "
+                SELECT
+                    COUNT(*) FILTER (WHERE es.status_code IN ('pending_internal_approval', 'pending_public_approval', 'requires_changes') AND e.end_date >= :now) AS requiere_accion,
+                    COUNT(*) FILTER (WHERE es.status_code IN ('approved_internal', 'draft') AND e.end_date >= :now2) AS pendientes,
+                    COUNT(*) FILTER (WHERE es.status_code = 'published' AND e.end_date >= :now3) AS publicados,
+                    COUNT(*) FILTER (WHERE es.status_code IN ('rejected', 'cancelled') OR e.end_date < :now4) AS historico
+                FROM events e
+                JOIN event_statuses es ON es.id = e.status_id
+                WHERE e.deleted_at IS NULL
+                {$tenantClause}
+            ";
+
+            $row = DB::selectOne($sql, $bindings);
 
             return [
-                'requiere_accion' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['pending_internal_approval', 'pending_public_approval', 'requires_changes']),
-                )->where('end_date', '>=', $now)->count(),
-
-                'pendientes' => Event::whereHas('status', fn ($q) => $q->whereIn('status_code', ['approved_internal', 'draft']),
-                )->where('end_date', '>=', $now)->count(),
-
-                'publicados' => Event::whereHas('status', fn ($q) => $q->where('status_code', 'published'),
-                )->where('end_date', '>=', $now)->count(),
-
-                'historico' => Event::where(function ($q) use ($now) {
-                    $q->where('end_date', '<', $now)
-                        ->orWhereHas('status', fn ($statusQuery) => $statusQuery->whereIn('status_code', ['rejected', 'cancelled']),
-                        );
-                })->count(),
+                'requiere_accion' => (int) $row->requiere_accion,
+                'pendientes'      => (int) $row->pendientes,
+                'publicados'      => (int) $row->publicados,
+                'historico'       => (int) $row->historico,
             ];
         });
+    }
+
+    private function buildTenantClause(array &$bindings): string
+    {
+        if (! Auth::check()) {
+            return '';
+        }
+
+        $user = Auth::user();
+
+        if ($user->isPlatformAdmin()) {
+            return '';
+        }
+
+        if ($user->isEntityAdmin() || $user->isEntityStaff()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.entity_id = :tenant_id';
+            }
+
+            return '';
+        }
+
+        if ($user->isOrganizerAdmin()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.organization_id = :tenant_id';
+            }
+        }
+
+        return '';
     }
 
     /**
