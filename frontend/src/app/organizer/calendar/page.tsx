@@ -22,7 +22,7 @@ export const metadata: Metadata = {
  */
 export default function CalendarPage() {
   return (
-    <Suspense>
+    <Suspense fallback={null}>
       <InternalCalendarPageContainer basePath="/organizer/calendar" />
     </Suspense>
   )

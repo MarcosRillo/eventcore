@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useCallback,useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { DashboardTab,EventsFilterTabs, EventsList } from '@/features/events/components';
@@ -66,132 +66,96 @@ export const DashboardModeView = ({
     return userRole === 'entity_admin' || userRole === 'entity_staff';
   }, [user?.role?.role_code]);
 
-  // Filter events based on active tab using real status_code values
-  const filterEventsByTab = (events: Event[], tab: DashboardTab): Event[] => {
-    if (!events) {
-      return [];
-    }
-
-    let filtered: Event[] = [];
-
-    switch (tab) {
-      case 'requires-action':
-        // Events that need immediate action from administrators
-        filtered = events.filter(event => {
-          const statusCode = typeof event.status === 'string' ? event.status : event.status?.status_code;
-          return (
-            statusCode === 'pending_internal_approval' ||  // Need internal approval
-            statusCode === 'pending_public_approval' ||    // Need public approval
-            statusCode === 'requires_changes'              // Need changes from submitter
-          );
-        });
-        break;
-
-      case 'pending':
-        // Events approved internally but not yet in public calendar
-        filtered = events.filter(event => {
-          const statusCode = typeof event.status === 'string' ? event.status : event.status?.status_code;
-          return (
-            statusCode === 'approved_internal' ||  // Ready for public request
-            statusCode === 'draft'                 // Still being drafted
-          );
-        });
-        break;
-
-      case 'published':
-        // Events that are live and visible to public calendar
-        filtered = events.filter(event => {
-          const statusCode = typeof event.status === 'string' ? event.status : event.status?.status_code;
-          return statusCode === 'published';
-        });
-        break;
-
-      case 'historic':
-        // Events that are finished, rejected, or cancelled
-        filtered = events.filter(event => {
-          const statusCode = typeof event.status === 'string' ? event.status : event.status?.status_code;
-          const isRejectedOrCancelled =
-            statusCode === 'rejected' ||
-            statusCode === 'cancelled';
-
-          const hasEnded = new Date(event.end_date) < new Date();
-
-          return isRejectedOrCancelled || hasEnded;
-        });
-        break;
-
-      default:
-        filtered = events;
-        break;
-    }
-
-    return filtered;
-  };
-
-  // Calculate tab counters
-  const calculateCounters = useCallback((events: Event[]): TabCounters => {
-    if (!events) {
-      return {
-        'requires-action': 0,
-        'pending': 0,
-        'published': 0,
-        'historic': 0,
-      };
-    }
-
-    return {
-      'requires-action': filterEventsByTab(events, 'requires-action').length,
-      'pending': filterEventsByTab(events, 'pending').length,
-      'published': filterEventsByTab(events, 'published').length,
-      'historic': filterEventsByTab(events, 'historic').length,
+  /**
+   * Single-pass grouping: iterates events once to build all tab buckets
+   * and counters simultaneously, avoiding 5 separate array passes.
+   */
+  const { grouped, counters: computedCounters } = useMemo(() => {
+    const now = new Date();
+    const grouped: Record<DashboardTab, Event[]> = {
+      'requires-action': [],
+      'pending': [],
+      'published': [],
+      'historic': [],
     };
-  }, []);
+
+    if (events) {
+      for (const event of events) {
+        const statusCode = typeof event.status === 'string' ? event.status : event.status?.status_code;
+
+        if (
+          statusCode === 'pending_internal_approval' ||
+          statusCode === 'pending_public_approval' ||
+          statusCode === 'requires_changes'
+        ) {
+          grouped['requires-action'].push(event);
+        } else if (statusCode === 'approved_internal' || statusCode === 'draft') {
+          grouped['pending'].push(event);
+        } else if (statusCode === 'published') {
+          grouped['published'].push(event);
+        }
+
+        // Historic: rejected/cancelled OR has ended (can overlap with other buckets)
+        const isRejectedOrCancelled = statusCode === 'rejected' || statusCode === 'cancelled';
+        const hasEnded = new Date(event.end_date) < now;
+        if (isRejectedOrCancelled || hasEnded) {
+          grouped['historic'].push(event);
+        }
+      }
+    }
+
+    const counters: TabCounters = {
+      'requires-action': grouped['requires-action'].length,
+      'pending': grouped['pending'].length,
+      'published': grouped['published'].length,
+      'historic': grouped['historic'].length,
+    };
+
+    return { grouped, counters };
+  }, [events]);
 
   // Handler functions for event actions - pass through to parent handlers
-  const handleApproveInternal = (event: Event) => {
+  const handleApproveInternal = useCallback((event: Event) => {
     onApproveInternal?.(event);
-  };
+  }, [onApproveInternal]);
 
-  const handleRequestPublicApproval = (event: Event) => {
+  const handleRequestPublicApproval = useCallback((event: Event) => {
     onRequestPublicApproval?.(event);
-  };
+  }, [onRequestPublicApproval]);
 
-  const handlePublishEvent = (event: Event) => {
+  const handlePublishEvent = useCallback((event: Event) => {
     onPublishEvent?.(event);
-  };
+  }, [onPublishEvent]);
 
-  const handleRequestChanges = (event: Event) => {
+  const handleRequestChanges = useCallback((event: Event) => {
     onRequestChanges?.(event);
-  };
+  }, [onRequestChanges]);
 
-  const handleRejectEvent = (event: Event) => {
+  const handleRejectEvent = useCallback((event: Event) => {
     onRejectEvent?.(event);
-  };
+  }, [onRejectEvent]);
 
   // Legacy handler for backward compatibility
-  const handleApproveEvent = (event: Event) => {
+  const handleApproveEvent = useCallback((event: Event) => {
     if (onApproveEvent) {
       onApproveEvent(event);
     } else if (onApproveInternal) {
       onApproveInternal(event);
     }
-  };
+  }, [onApproveEvent, onApproveInternal]);
 
   // Update filtered events and counters when events or activeTab changes
   useEffect(() => {
     if (events) {
-      const filtered = filterEventsByTab(events, activeTab);
-      const newCounters = calculateCounters(events);
-
-      setFilteredEvents(filtered);
-      setCounters(newCounters);
+      setFilteredEvents(grouped[activeTab]);
+      setCounters(computedCounters);
     }
-  }, [events, activeTab, calculateCounters]);
+  }, [events, activeTab, grouped, computedCounters]);
 
   // Set initial tab based on user role and available events
   useEffect(() => {
     if (shouldShowDashboardMode() && events && events.length > 0) {
-      const newCounters = calculateCounters(events);
+      const newCounters = computedCounters;
 
       // Default to tab with highest priority that has events
       if (newCounters['requires-action'] > 0) {
@@ -207,7 +171,7 @@ export const DashboardModeView = ({
       // For non-admin users, default to published events
       setActiveTab('published');
     }
-  }, [events, user, calculateCounters, shouldShowDashboardMode]);
+  }, [events, user, computedCounters, shouldShowDashboardMode]);
 
   // If not dashboard mode, show all events (fallback for users without admin roles or when auth is not loaded)
   if (!shouldShowDashboardMode()) {

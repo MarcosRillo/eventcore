@@ -67,12 +67,11 @@ const isValidImageType = (file: File | null): boolean => {
 }
 
 export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
-  // React 19 transition for non-blocking UI
-  const [, startTransition] = useTransition()
+  // React 19 transition for non-blocking UI — isPending replaces manual isSubmitting
+  const [isPending, startTransition] = useTransition()
 
   const [formData, setFormData] = useState<RegistrationRequestFormData>(initialFormData)
   const [formErrors, setFormErrors] = useState<RegistrationRequestFormErrors>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
 
   /**
@@ -218,7 +217,6 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
       return
     }
 
-    setIsSubmitting(true)
     setFormErrors({})
 
     startTransition(async () => {
@@ -265,8 +263,6 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
         } else {
           setFormErrors({ general: 'Error al enviar la solicitud. Por favor, intenta nuevamente.' })
         }
-      } finally {
-        setIsSubmitting(false)
       }
     })
   }, [formData, validateForm])
@@ -287,13 +283,10 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
     setFormErrors({})
   }, [])
 
-  // Backward compatibility
-  const submitting = isSubmitting
-
   return {
     formData,
     formErrors,
-    submitting,
+    submitting: isPending,
     success,
     updateField,
     submitForm,
