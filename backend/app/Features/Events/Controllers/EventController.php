@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -176,11 +177,18 @@ class EventController extends Controller
 
     /**
      * Get event statistics.
-     * Single query with conditional aggregation; cached for 60 seconds.
+     * Single query with conditional aggregation; cached per tenant for 60 seconds.
      */
     public function statistics()
     {
-        $stats = Cache::remember('events.statistics', 60, function () {
+        $bindings = [];
+        $tenantClause = $this->buildTenantClause($bindings);
+
+        // Cache key is tenant-aware so different users get their own stats
+        $user = Auth::user();
+        $cacheKey = 'events.statistics.' . ($user?->organization_id ?? 'global');
+
+        $stats = Cache::remember($cacheKey, 60, function () use ($bindings, $tenantClause) {
             $row = DB::selectOne("
                 SELECT
                     COUNT(*) AS total,
@@ -190,7 +198,8 @@ class EventController extends Controller
                 FROM events e
                 JOIN event_statuses es ON es.id = e.status_id
                 WHERE e.deleted_at IS NULL
-            ");
+                {$tenantClause}
+            ", $bindings);
 
             return [
                 'total'     => (int) $row->total,
@@ -201,5 +210,51 @@ class EventController extends Controller
         });
 
         return response()->json(['data' => $stats]);
+    }
+
+    /**
+     * Build the tenant WHERE clause fragment and register its bindings.
+     *
+     * Safety note: this method interpolates only static SQL keywords
+     * (e.g. `AND e.entity_id = :tenant_id`). All user-supplied values
+     * are passed as named PDO parameters via the $bindings array and
+     * never concatenated into the query string, so there is no SQL
+     * injection risk.
+     */
+    private function buildTenantClause(array &$bindings): string
+    {
+        if (! Auth::check()) {
+            return '';
+        }
+
+        $user = Auth::user();
+
+        if ($user->isPlatformAdmin()) {
+            return '';
+        }
+
+        if ($user->isEntityAdmin() || $user->isEntityStaff()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.entity_id = :tenant_id';
+            }
+
+            return '';
+        }
+
+        if ($user->isOrganizerAdmin()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.organization_id = :tenant_id';
+            }
+        }
+
+        return '';
     }
 }

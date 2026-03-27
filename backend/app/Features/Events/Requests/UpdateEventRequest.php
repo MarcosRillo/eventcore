@@ -142,9 +142,9 @@ class UpdateEventRequest extends FormRequest
             'async_dates.*.notes' => 'nullable|string|max:500',
 
             // Attendance
-            'local_attendance' => 'nullable|integer|min:0',
-            'national_attendance' => 'nullable|integer|min:0',
-            'international_attendance' => 'nullable|integer|min:0',
+            'local_attendance' => 'nullable|integer|min:0|max:10000000',
+            'national_attendance' => 'nullable|integer|min:0|max:10000000',
+            'international_attendance' => 'nullable|integer|min:0|max:10000000',
             'virtual_transmission' => 'nullable|boolean',
 
             // Additional info

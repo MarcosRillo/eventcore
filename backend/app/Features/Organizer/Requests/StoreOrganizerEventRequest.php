@@ -88,14 +88,14 @@ class StoreOrganizerEventRequest extends FormRequest
             'next_venue' => 'nullable|string|max:255',
 
             // Asynchronous dates (normalized to separate table)
-            'async_dates' => 'nullable|array',
+            'async_dates' => 'nullable|array|max:50',
             'async_dates.*.date' => 'required_with:async_dates|date',
             'async_dates.*.notes' => 'nullable|string|max:500',
 
             // Attendance
-            'local_attendance' => 'nullable|integer|min:0',
-            'national_attendance' => 'nullable|integer|min:0',
-            'international_attendance' => 'nullable|integer|min:0',
+            'local_attendance' => 'nullable|integer|min:0|max:10000000',
+            'national_attendance' => 'nullable|integer|min:0|max:10000000',
+            'international_attendance' => 'nullable|integer|min:0|max:10000000',
             'virtual_transmission' => 'nullable|boolean',
 
             // Additional information

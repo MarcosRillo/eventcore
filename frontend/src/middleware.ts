@@ -234,7 +234,7 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self'",
-    "connect-src 'self'",
+    `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || ''}`.trim(),
     "frame-ancestors 'self'",
   ].join('; ');
 
