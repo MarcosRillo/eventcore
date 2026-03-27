@@ -6,9 +6,13 @@
  */
 
 import { fireEvent,render, screen } from '@testing-library/react'
+import type { ComponentProps } from 'react'
+import React from 'react'
 
 import EventDetailPage from '@/features/public-calendar/components/dumb/EventDetailPage'
 import { Event } from '@/types/event.types'
+
+type NextImageProps = ComponentProps<typeof import('next/image').default>
 
 // Mock Next.js Image - filter out non-HTML props to avoid React warnings
 jest.mock('next/image', () => ({
@@ -19,10 +23,9 @@ jest.mock('next/image', () => ({
     placeholder: _placeholder,
     blurDataURL: _blurDataURL,
     ...props
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }: any) => {
+  }: Partial<NextImageProps>) => {
     // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-    return <img {...props} />
+    return <img {...(props as React.ImgHTMLAttributes<HTMLImageElement>)} />
   }
 }))
 

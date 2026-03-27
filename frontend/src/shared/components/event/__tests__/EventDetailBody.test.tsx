@@ -6,9 +6,13 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 
 import { EventDetailBody } from '@/shared/components/event/EventDetailBody';
 import type { EventDetailData } from '@/shared/components/event/EventDetailBody.types';
+
+type NextImageProps = ComponentProps<typeof import('next/image').default>;
 
 // Mock Next.js Image
 jest.mock('next/image', () => ({
@@ -19,10 +23,9 @@ jest.mock('next/image', () => ({
     placeholder: _placeholder,
     blurDataURL: _blurDataURL,
     ...props
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }: any) => {
+  }: Partial<NextImageProps>) => {
     // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-    return <img {...props} />;
+    return <img {...(props as React.ImgHTMLAttributes<HTMLImageElement>)} />;
   },
 }));
 
