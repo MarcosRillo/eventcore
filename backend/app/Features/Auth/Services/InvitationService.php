@@ -229,7 +229,7 @@ class InvitationService
     /**
      * Get pending invitations for a user.
      */
-    public function getPendingInvitations(User $user): \Illuminate\Database\Eloquent\Collection
+    public function getPendingInvitations(User $user): \Illuminate\Pagination\LengthAwarePaginator
     {
         $query = Invitation::valid()->with(['role', 'inviter']);
 
@@ -238,7 +238,7 @@ class InvitationService
             $query->where('invited_by', $user->id);
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        return $query->orderBy('created_at', 'desc')->paginate(50);
     }
 
     /**

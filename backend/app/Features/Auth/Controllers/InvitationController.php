@@ -60,7 +60,7 @@ class InvitationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $invitations->map(fn ($inv) => [
+            'data' => collect($invitations->items())->map(fn ($inv) => [
                 'id' => $inv->id,
                 'email' => $inv->email,
                 'role' => $inv->role->role_name,
@@ -68,6 +68,12 @@ class InvitationController extends Controller
                 'expires_at' => $inv->expires_at->toIso8601String(),
                 'created_at' => $inv->created_at->toIso8601String(),
             ]),
+            'meta' => [
+                'current_page' => $invitations->currentPage(),
+                'last_page' => $invitations->lastPage(),
+                'per_page' => $invitations->perPage(),
+                'total' => $invitations->total(),
+            ],
         ]);
     }
 

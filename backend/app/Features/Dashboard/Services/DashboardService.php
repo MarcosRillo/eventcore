@@ -29,7 +29,11 @@ class DashboardService
      */
     public function getEventsSummary(): array
     {
-        return $this->taggedRemember(['dashboard'], 'dashboard.summary', 120, function () {
+        $user = Auth::user();
+        $tenantSuffix = $user?->organization_id ?? 'global';
+        $cacheKey = "dashboard.summary.{$tenantSuffix}";
+
+        return $this->taggedRemember(['dashboard'], $cacheKey, 120, function () {
             $now = now();
             $bindings = ['now' => $now, 'now2' => $now, 'now3' => $now, 'now4' => $now];
             $tenantClause = $this->buildTenantClause($bindings);
