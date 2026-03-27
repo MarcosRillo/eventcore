@@ -68,11 +68,6 @@ class StoreEventRequest extends FormRequest
                 'date',
                 'after:start_date',
             ],
-            'status_id' => [
-                'required',
-                'integer',
-                Rule::exists('event_statuses', 'id'),
-            ],
             'format_id' => [
                 'required',
                 'integer',
@@ -187,8 +182,6 @@ class StoreEventRequest extends FormRequest
             'start_date.after' => 'La fecha de inicio debe ser posterior a la fecha actual.',
             'end_date.required' => 'La fecha de fin es obligatoria.',
             'end_date.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
-            'status_id.required' => 'El estado del evento es obligatorio.',
-            'status_id.exists' => 'El estado seleccionado no es válido.',
             'format_id.required' => 'El formato de evento es obligatorio.',
             'format_id.exists' => 'El formato de evento seleccionado no es válido.',
             'location_ids.required' => 'Debe seleccionar al menos una ubicación.',

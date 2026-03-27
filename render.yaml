@@ -11,6 +11,8 @@ services:
     dockerfilePath: ./backend/Dockerfile.production
     dockerContext: ./backend
     healthCheckPath: /up
+    # Run migrations BEFORE the container starts serving traffic
+    preDeployCommand: "php artisan migrate --force"
     envVars:
       # --- App ---
       - key: APP_NAME

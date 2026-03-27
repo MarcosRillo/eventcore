@@ -88,14 +88,13 @@ class EventService
             // Auto-compute created_by from authenticated user
             $data['created_by'] = $user->id;
 
-            // Ensure default status_id if not provided
-            if (! isset($data['status_id'])) {
-                $data['status_id'] = $this->getStatusId('draft');
-            }
-
             // Extract location_ids for pivot table handling
             $locationIds = $data['location_ids'] ?? [];
             unset($data['location_ids']); // Remove from mass assignment data
+
+            // Force draft status - users cannot set status directly
+            // This ensures the approval workflow is always followed
+            $data['status_id'] = $this->getStatusId('draft');
 
             // Create the event
             $event = Event::create($data);
@@ -130,6 +129,11 @@ class EventService
             // Extract location_ids for pivot table handling
             $locationIds = $data['location_ids'] ?? null;
             unset($data['location_ids']); // Remove from mass assignment data
+
+            // Force draft status - users cannot set status directly
+            // This ensures the approval workflow is always followed
+            // even if someone bypasses the request validation
+            $data['status_id'] = $this->getStatusId('draft');
 
             // Update the event
             $event->update($data);

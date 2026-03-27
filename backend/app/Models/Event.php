@@ -44,12 +44,6 @@ class Event extends Model
         'event_type_id',
         'event_subtype_id',
 
-        // Approval workflow
-        'created_by',
-        'approved_by',
-        'approved_at',
-        'published_at',
-
         // Display
         'featured_image',
         'is_featured',
