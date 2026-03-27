@@ -6,6 +6,7 @@ use App\Features\Dashboard\Services\OrganizerStatsService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * OrganizerStatsController
@@ -44,9 +45,11 @@ class OrganizerStatsController extends Controller
 
             return response()->json(['data' => $stats]);
         } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return response()->json([
                 'message' => 'Error fetching stats',
-                'error' => $e->getMessage(),
+                'error' => 'Internal server error',
             ], 500);
         }
     }

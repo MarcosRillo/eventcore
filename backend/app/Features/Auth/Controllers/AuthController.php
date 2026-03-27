@@ -10,6 +10,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Authentication Controller
@@ -131,10 +132,12 @@ class AuthController extends Controller
                 ->cookie('access_token', '', -1, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'))
                 ->cookie('refresh_token', '', -1, '/', null, config('session.secure'), true, false, config('session.same_site', 'lax'));
         } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Logout failed',
-                'error' => $e->getMessage(),
+                'error' => 'Internal server error',
             ], 500);
         }
     }
@@ -162,10 +165,12 @@ class AuthController extends Controller
                 'message' => 'User profile retrieved successfully',
             ]);
         } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve user profile',
-                'error' => $e->getMessage(),
+                'error' => 'Internal server error',
             ], 500);
         }
     }
