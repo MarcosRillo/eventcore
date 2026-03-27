@@ -33,7 +33,6 @@ jobs:
 
       - name: Audit packages
         run: pnpm audit --audit-level=high
-        continue-on-error: true
 
       - name: Check for outdated packages
         run: pnpm outdated || true
@@ -52,7 +51,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           tools: composer
 
       - name: Get Composer cache directory
@@ -71,7 +70,6 @@ jobs:
 
       - name: Security check with Composer
         run: composer audit
-        continue-on-error: true
 
       - name: Check for outdated packages
         run: composer outdated --direct || true
@@ -87,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript-typescript']
+        language: ['javascript-typescript', 'php']
 
     steps:
       - name: Checkout repository
