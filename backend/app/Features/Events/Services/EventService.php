@@ -127,10 +127,10 @@ class EventService
             $locationIds = $data['location_ids'] ?? null;
             unset($data['location_ids']); // Remove from mass assignment data
 
-            // Force draft status - users cannot set status directly
-            // This ensures the approval workflow is always followed
-            // even if someone bypasses the request validation
-            $data['status_id'] = $this->getStatusId('draft');
+            // Force draft status for organizer_admin - status changes go through the approval workflow
+            if ($user->isOrganizerAdmin()) {
+                $data['status_id'] = $this->getStatusId('draft');
+            }
 
             // Update the event
             $event->update($data);

@@ -2,6 +2,7 @@
 
 namespace App\Features\Organizer\Controllers;
 
+use App\Features\Approval\Services\ApprovalStateMachine;
 use App\Features\Events\Services\EventValidationService;
 use App\Features\Organizer\Requests\IndexOrganizerEventRequest;
 use App\Features\Organizer\Requests\StoreOrganizerEventRequest;
@@ -20,6 +21,7 @@ class OrganizerController extends Controller
     public function __construct(
         private OrganizerService $organizerService,
         private EventValidationService $validationService,
+        private ApprovalStateMachine $stateMachine,
     ) {}
 
     /**
@@ -135,6 +137,8 @@ class OrganizerController extends Controller
                 'errors' => $validationResult->getErrors(),
             ], 422);
         }
+
+        $this->stateMachine->validateTransition($event, 'pending_internal_approval');
 
         $pendingStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
 
