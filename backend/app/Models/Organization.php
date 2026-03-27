@@ -26,7 +26,6 @@ class Organization extends Model
         'type_id',
         'parent_id',
         'slug',
-        'trust_level',
     ];
 
     /**
