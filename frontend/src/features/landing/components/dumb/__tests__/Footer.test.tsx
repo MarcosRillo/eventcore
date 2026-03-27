@@ -54,7 +54,6 @@ describe('Footer', () => {
 
       expect(screen.getByText('Contacto')).toBeInTheDocument()
       expect(screen.getByText(/info@eventostucuman.gob.ar/i)).toBeInTheDocument()
-      expect(screen.getByText(/\+54 381 XXX-XXXX/i)).toBeInTheDocument()
       expect(screen.getByText(/San Miguel de Tucumán/i)).toBeInTheDocument()
     })
 
@@ -99,14 +98,10 @@ describe('Footer', () => {
     })
 
     test('should render phone contact with icon', () => {
+      // Phone placeholder was removed from the component
       render(<Footer />)
 
-      const phoneText = screen.getByText(/\+54 381 XXX-XXXX/i)
-      expect(phoneText).toBeInTheDocument()
-
-      // Check parent li element has correct classes
-      const phoneItem = phoneText.closest('li')
-      expect(phoneItem).toHaveClass('flex', 'items-center', 'gap-2')
+      expect(screen.queryByText(/\+54 381 XXX-XXXX/i)).not.toBeInTheDocument()
     })
 
     test('should render address contact with icon', () => {
@@ -120,14 +115,14 @@ describe('Footer', () => {
       expect(addressItem).toHaveClass('flex', 'items-center', 'gap-2')
     })
 
-    test('should render exactly 3 contact SVG icons', () => {
+    test('should render exactly 2 contact SVG icons', () => {
       render(<Footer />)
 
       // Query all SVGs in the contact section
       const contactHeading = screen.getByText('Contacto')
       const contactSection = contactHeading.parentElement
       const icons = contactSection?.querySelectorAll('svg')
-      expect(icons?.length).toBe(3)
+      expect(icons?.length).toBe(2)
     })
   })
 

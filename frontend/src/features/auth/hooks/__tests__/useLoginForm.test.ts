@@ -142,7 +142,7 @@ describe('useLoginForm', () => {
   })
 
   describe('Form Submission', () => {
-    it('should call login with trimmed credentials on valid submit', async () => {
+    it('should call login with trimmed email and raw password on valid submit', async () => {
       mockLogin.mockResolvedValueOnce(true)
 
       const { result } = renderHook(() => useLoginForm())
@@ -158,7 +158,7 @@ describe('useLoginForm', () => {
 
       expect(mockLogin).toHaveBeenCalledWith({
         email: 'test@example.com',
-        password: 'password123',
+        password: '  password123  ',
       })
     })
 

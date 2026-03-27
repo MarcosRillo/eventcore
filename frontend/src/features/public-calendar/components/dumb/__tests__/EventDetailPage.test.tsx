@@ -215,7 +215,7 @@ describe('EventDetailPage', () => {
       const googleButton = screen.getByRole('button', { name: /google calendar/i })
       fireEvent.click(googleButton)
 
-      expect(mockOpen).toHaveBeenCalledWith('https://calendar.google.com/event', '_blank')
+      expect(mockOpen).toHaveBeenCalledWith('https://calendar.google.com/event', '_blank', 'noopener,noreferrer')
     })
 
     test('Outlook button opens correct URL', () => {
@@ -227,7 +227,7 @@ describe('EventDetailPage', () => {
       const outlookButton = screen.getByRole('button', { name: /outlook/i })
       fireEvent.click(outlookButton)
 
-      expect(mockOpen).toHaveBeenCalledWith('https://outlook.com/event', '_blank')
+      expect(mockOpen).toHaveBeenCalledWith('https://outlook.com/event', '_blank', 'noopener,noreferrer')
     })
   })
 

@@ -79,7 +79,7 @@ describe('InternalShareButtons', () => {
     expect(callArgs[0]).toContain('https://www.facebook.com/sharer/sharer.php?u=');
     expect(callArgs[0]).toContain(`internal-calendar%2F${mockEventId}`);
     expect(callArgs[1]).toBe('_blank');
-    expect(callArgs[2]).toBe('width=600,height=400');
+    expect(callArgs[2]).toBe('noopener,noreferrer');
   });
 
   test('Twitter button opens share window with correct URL', () => {
@@ -101,7 +101,7 @@ describe('InternalShareButtons', () => {
     expect(callArgs[0]).toContain(`internal-calendar%2F${mockEventId}`);
     expect(callArgs[0]).toContain(`text=${encodeURIComponent(mockEventTitle)}`);
     expect(callArgs[1]).toBe('_blank');
-    expect(callArgs[2]).toBe('width=600,height=400');
+    expect(callArgs[2]).toBe('noopener,noreferrer');
   });
 
   test('WhatsApp button opens share window with correct URL', () => {
