@@ -5,6 +5,7 @@ namespace App\Features\Auth\Controllers;
 use App\Features\Auth\Notifications\InvitationNotification;
 use App\Features\Auth\Requests\AcceptInvitationRequest;
 use App\Features\Auth\Requests\SendInvitationRequest;
+use App\Features\Auth\Services\AuthService;
 use App\Features\Auth\Services\InvitationService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,7 @@ class InvitationController extends Controller
 {
     public function __construct(
         private InvitationService $invitationService,
+        private AuthService $authService,
     ) {}
 
     /**
@@ -168,8 +170,8 @@ class InvitationController extends Controller
                 $request->validated(),
             );
 
-            // Generate auth token for the new user
-            $token = $user->createToken('auth_token')->plainTextToken;
+            // Generate access + refresh token pair for the new user (matches login flow)
+            $tokens = $this->authService->issueTokensForUser($user);
 
             return response()->json([
                 'success' => true,
@@ -181,7 +183,9 @@ class InvitationController extends Controller
                         'email' => $user->email,
                         'role' => $user->role->role_name,
                     ],
-                    'token' => $token,
+                    'access_token' => $tokens['access_token'],
+                    'refresh_token' => $tokens['refresh_token'],
+                    'expires_at' => $tokens['expires_at'],
                 ],
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {

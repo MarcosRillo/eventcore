@@ -3,6 +3,7 @@
 namespace App\Features\Organizer\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Form Request for updating organizer events.
@@ -39,7 +40,26 @@ class UpdateOrganizerEventRequest extends FormRequest
 
             // Location: require either existing locations OR custom location
             'location_ids' => 'nullable|array',
-            'location_ids.*' => 'exists:locations,id',
+            'location_ids.*' => [
+                'integer',
+                Rule::exists('locations', 'id')->where(function ($query) {
+                    $user = $this->user();
+                    if ($user) {
+                        // Organizer's org has a parent_id pointing to the entity that owns the locations
+                        $organizationId = $user->organization_id;
+                        $parentEntityId = $organizationId
+                            ? \App\Models\Organization::where('id', $organizationId)->value('parent_id')
+                            : null;
+                        if ($parentEntityId) {
+                            $query->where('entity_id', $parentEntityId);
+                        } else {
+                            $query->where('id', null);
+                        }
+                    } else {
+                        $query->where('id', null);
+                    }
+                }),
+            ],
             'custom_location_name' => 'nullable|string|max:255|required_without:location_ids',
 
             // Basic information
