@@ -6,7 +6,7 @@
  */
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 
 import { acceptInvitation,validateInvitationToken } from '@/features/invitations/services/invitation.service'
 import type { AcceptInvitationData } from '@/features/invitations/types/invitation.types'
@@ -61,6 +61,15 @@ const initialFormData: FormData = {
 
 export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
   const router = useRouter()
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current !== null) {
+        clearTimeout(redirectTimerRef.current)
+      }
+    }
+  }, [])
 
   // React 19 transitions for non-blocking UI
   const [, startValidatingTransition] = useTransition()
@@ -190,7 +199,7 @@ export const useAcceptInvitation = (): UseAcceptInvitationReturn => {
           setSuccess(true)
 
           // Redirect to login after short delay
-          setTimeout(() => {
+          redirectTimerRef.current = setTimeout(() => {
             router.push('/login?registered=true')
           }, 2000)
         } catch (error: unknown) {
