@@ -70,12 +70,6 @@ class UpdateEventRequest extends FormRequest
                 'date',
                 'after:start_date',
             ],
-            'status_id' => [
-                'sometimes',
-                'required',
-                'integer',
-                Rule::exists('event_statuses', 'id'),
-            ],
             'format_id' => [
                 'sometimes',
                 'required',
@@ -179,7 +173,6 @@ class UpdateEventRequest extends FormRequest
             'start_date.required' => 'La fecha de inicio es obligatoria.',
             'end_date.required' => 'La fecha de fin es obligatoria.',
             'end_date.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
-            'status_id.exists' => 'El estado seleccionado no es válido.',
             'format_id.exists' => 'El formato de evento seleccionado no es válido.',
             'location_ids.array' => 'Las ubicaciones deben ser un array.',
             'location_ids.max' => 'No puede seleccionar más de 10 ubicaciones.',

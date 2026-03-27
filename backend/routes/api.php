@@ -164,6 +164,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware(['role:organizer_admin'])->group(function () {
             Route::prefix('organizer')->group(function () {
                 Route::get('dashboard/stats', [OrganizerController::class, 'dashboardStats']);
+                Route::get('stats', [OrganizerStatsController::class, 'index']);
                 Route::get('events', [OrganizerController::class, 'index']);
                 Route::post('events', [OrganizerController::class, 'store']);
                 Route::get('events/{id}', [OrganizerController::class, 'show']);
@@ -172,9 +173,6 @@ Route::prefix('v1')->group(function () {
                 Route::post('events/{id}/submit', [OrganizerController::class, 'submit']);
             });
         });
-
-        // ===== ORGANIZER STATS (any authenticated user) =====
-        Route::get('organizer/stats', [OrganizerStatsController::class, 'index']);
 
         // ===== PLATFORM ADMIN + ENTITY ADMIN + ENTITY STAFF =====
         // Dashboard del Ente + read-only events

@@ -50,6 +50,7 @@ class OrganizerController extends Controller
     public function show(Request $request, int $id): JsonResponse
     {
         $event = $this->organizerService->getEventById($id, $request->user());
+        Gate::authorize('view', $event);
 
         return response()->json($event);
     }
