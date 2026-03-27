@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo_pgsql mbstring zip exif pcntl bcmath \
     && pecl install redis && docker-php-ext-enable redis \
-    && pecl install pcov && docker-php-ext-enable pcov \
+    && pecl install pcov && docker-php-ext-enable pcov `# NOTE: PCOV is included so the same image can run tests in CI; move to a test-only stage if production image size becomes a concern` \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Stage 2: Production - clean image without build tools
