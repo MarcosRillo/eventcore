@@ -21,7 +21,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 # ============================================================
 # Stage 2: Production image with FrankenPHP
 # ============================================================
-FROM dunglas/frankenphp:latest AS production
+FROM dunglas/frankenphp:1-php8.3 AS production
 
 # --- PHP extensions (matching existing Dockerfile) ---
 RUN install-php-extensions \
