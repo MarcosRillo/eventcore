@@ -49,7 +49,7 @@ export function InternalShareButtons({
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       '_blank',
-      'width=600,height=400'
+      'noopener,noreferrer'
     );
   };
 
@@ -57,14 +57,15 @@ export function InternalShareButtons({
     window.open(
       `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
       '_blank',
-      'width=600,height=400'
+      'noopener,noreferrer'
     );
   };
 
   const handleWhatsAppShare = () => {
     window.open(
       `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-      '_blank'
+      '_blank',
+      'noopener,noreferrer'
     );
   };
 

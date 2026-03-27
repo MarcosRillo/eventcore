@@ -40,7 +40,7 @@ export function ShareButtons({ event }: ShareButtonsProps) {
       whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`
     }
 
-    window.open(shareUrls[platform], '_blank', 'width=600,height=400')
+    window.open(shareUrls[platform], '_blank', 'noopener,noreferrer')
   }
 
   const handleCopyLink = async (): Promise<void> => {
