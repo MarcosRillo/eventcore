@@ -118,7 +118,6 @@ class UpdateEventRequest extends FormRequest
             ],
 
             // Normalized FKs (Nov 30, 2025)
-            'subtype_id' => 'nullable|exists:event_subtypes,id',
             'origin_id' => 'nullable|exists:event_origins,id',
             'theme_id' => 'nullable|exists:event_themes,id',
             'frequency_id' => 'nullable|exists:event_frequencies,id',
