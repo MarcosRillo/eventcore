@@ -148,7 +148,7 @@ export const useLoginForm = (): UseLoginFormReturnExtended => {
 
     const credentials: LoginCredentials = {
       email: email.trim(),
-      password: password.trim(),
+      password,
     };
 
     const success = await login(credentials);

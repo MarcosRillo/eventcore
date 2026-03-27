@@ -6,7 +6,7 @@
  * Supports drag-and-drop, preview, and recommended dimensions display
  */
 
-import { ChangeEvent, DragEvent, useId, useRef, useState } from 'react'
+import { ChangeEvent, DragEvent, useEffect, useId, useRef, useState } from 'react'
 
 export interface ImageUploadFieldProps {
   label: string
@@ -147,8 +147,15 @@ const ImageUploadField = ({
     }
   }
 
-  // Get preview URL
-  const previewUrl = file ? URL.createObjectURL(file) : value || null
+  // Get preview URL — useEffect ensures blob is revoked on cleanup (no memory leak)
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file) { setBlobUrl(null); return; }
+    const url = URL.createObjectURL(file);
+    setBlobUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  const previewUrl = blobUrl ?? value ?? null;
 
   // Determine if there's an error to display
   const displayError = error || fileError

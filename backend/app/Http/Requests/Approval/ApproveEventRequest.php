@@ -11,10 +11,10 @@ class ApproveEventRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Only entity_admin and entity_staff can approve events
+        // Only entity_admin, entity_staff and platform_admin can approve events
         $userRole = $this->user()?->getRoleCode();
 
-        return in_array($userRole, ['entity_admin', 'entity_staff']);
+        return in_array($userRole, ['entity_admin', 'entity_staff', 'platform_admin']);
     }
 
     /**

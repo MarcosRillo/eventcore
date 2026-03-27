@@ -11,10 +11,10 @@ class RequestChangesRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Only entity_admin and entity_staff can request changes
+        // Only entity_admin, entity_staff and platform_admin can request changes
         $userRole = $this->user()?->getRoleCode();
 
-        return in_array($userRole, ['entity_admin', 'entity_staff']);
+        return in_array($userRole, ['entity_admin', 'entity_staff', 'platform_admin']);
     }
 
     /**
