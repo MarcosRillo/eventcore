@@ -2,6 +2,8 @@ import { endOfMonth,format, startOfMonth } from 'date-fns'
 import { Metadata } from 'next'
 
 import { CalendarPageContainer } from '@/features/public-calendar/components/smart/CalendarPageContainer'
+
+export const revalidate = 30
 import * as cachedEvents from '@/features/public-calendar/services/public-events.cached'
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 

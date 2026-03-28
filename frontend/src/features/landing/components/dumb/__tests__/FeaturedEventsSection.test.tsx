@@ -29,7 +29,7 @@ describe('FeaturedEventsSection', () => {
       ...e,
       slug: `event-${e.id}`,
       description: 'Test Description',
-      image_url: 'https://example.com/image.jpg',
+      featured_image: 'https://example.com/image.jpg',
       event_type: { id: 1, name: 'Test Category' },
       start_date: '2023-01-01',
       end_date: '2023-01-02',

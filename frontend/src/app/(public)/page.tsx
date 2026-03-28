@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 
 import { LandingContainer } from '@/features/landing/components/smart/LandingContainer'
+
+export const revalidate = 60
 import * as cachedEvents from '@/features/public-calendar/services/public-events.cached'
 
 export const metadata: Metadata = {

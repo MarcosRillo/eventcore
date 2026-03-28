@@ -43,7 +43,6 @@ export interface PublicEvent {
     address?: string
   }>
   is_featured: boolean
-  image_url?: string
   featured_image?: string
 }
 
