@@ -110,8 +110,8 @@ export const useAuthActions = (): AuthContextType => {
       // This cookie only contains non-sensitive user info
       const expiresAtTime = new Date(expires_at).getTime();
       const maxAgeSeconds = Math.max(0, Math.floor((expiresAtTime - Date.now()) / 1000));
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
-      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
+      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
 
       // Update state
       setUser(userData);
@@ -191,7 +191,7 @@ export const useAuthActions = (): AuthContextType => {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
         const maxAgeSeconds = 7 * 24 * 60 * 60;
-        document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=strict`;
+        document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
         return true;
       }
       return false;
