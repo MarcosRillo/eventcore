@@ -12,7 +12,7 @@ services:
     dockerContext: ./backend
     healthCheckPath: /up
     # Run migrations BEFORE the container starts serving traffic
-    preDeployCommand: "php artisan migrate --force --isolated"
+    preDeployCommand: "php artisan optimize:clear && php artisan migrate --force --isolated"
     envVars:
       # --- App ---
       - key: APP_NAME
