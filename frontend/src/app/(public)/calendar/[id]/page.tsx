@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -123,7 +124,10 @@ export default async function EventPage({ params }: EventPageProps) {
         <EventDetailPage event={event} />
       </>
     );
-  } catch {
-    notFound();
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      notFound();
+    }
+    throw error;
   }
 }

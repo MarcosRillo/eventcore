@@ -31,10 +31,22 @@ class EventResource extends JsonResource
             'end_date' => $this->end_date->toISOString(),
 
             // Display
-            'featured_image' => $this->featured_image,
+            'featured_image' => $this->featured_image
+                ? (str_starts_with($this->featured_image, 'http')
+                    ? $this->featured_image
+                    : config('app.url') . $this->featured_image)
+                : null,
             'is_featured' => $this->is_featured,
-            'logo_url' => $this->logo_url,
-            'responsive_image_url' => $this->responsive_image_url,
+            'logo_url' => $this->logo_url
+                ? (str_starts_with($this->logo_url, 'http')
+                    ? $this->logo_url
+                    : config('app.url') . $this->logo_url)
+                : null,
+            'responsive_image_url' => $this->responsive_image_url
+                ? (str_starts_with($this->responsive_image_url, 'http')
+                    ? $this->responsive_image_url
+                    : config('app.url') . $this->responsive_image_url)
+                : null,
 
             // Event info
             'edition_number' => $this->edition_number,

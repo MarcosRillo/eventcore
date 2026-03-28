@@ -80,7 +80,7 @@ const apiClient: AxiosInstance = axios.create({
     'Accept': 'application/json',
   },
   withCredentials: true,  // CRITICAL: Send httpOnly cookies with requests
-  timeout: 10000,
+  timeout: 35000,
 });
 
 // Request interceptor - only add API prefix

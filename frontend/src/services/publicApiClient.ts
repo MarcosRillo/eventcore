@@ -40,7 +40,7 @@ const publicApiClient: AxiosInstance = axios.create({
   // IMPORTANT: Don't send credentials for public routes
   // This allows SSR to work without browser cookies
   withCredentials: false,
-  timeout: 10000,
+  timeout: 35000,
 });
 
 // Request interceptor: only add API prefix
