@@ -227,12 +227,11 @@ function getRoleCode(user: User): UserRoleCode | null {
  * @param request
  */
 export function middleware(request: NextRequest) {
-  // Generate a per-request nonce for CSP (skip in development — HMR needs eval)
-  const isDev = process.env.NODE_ENV === 'development';
-  const nonce = isDev ? '' : Buffer.from(crypto.randomUUID()).toString('base64');
-  const cspHeader = isDev ? '' : [
+  // CSP nonces are incompatible with ISR (cached HTML has stale nonces).
+  // Using a permissive CSP without nonces until we move to fully dynamic admin pages.
+  const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self'",
@@ -242,6 +241,7 @@ export function middleware(request: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
   ].join('; ');
+  const nonce = '';
 
   const { pathname } = request.nextUrl;
 
