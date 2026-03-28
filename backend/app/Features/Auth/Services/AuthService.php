@@ -24,7 +24,7 @@ class AuthService
         }
 
         /** @var User $user */
-        $user = User::where('email', $credentials['email'])->firstOrFail();
+        $user = User::with('role')->where('email', $credentials['email'])->firstOrFail();
 
         // Check if user account is suspended
         if ($user->isSuspended()) {

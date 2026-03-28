@@ -252,10 +252,16 @@ export function middleware(request: NextRequest) {
       const user = getUserFromCookies(request);
       if (user && !isTokenExpired(request)) {
         const roleCode = getRoleCode(user);
+        // Only redirect if we have a valid role — prevents infinite loop
+        // when user cookie is missing role data (e.g. login response didn't load role)
         if (roleCode === 'organizer_admin') {
           return NextResponse.redirect(new URL('/organizer/dashboard', request.url));
         }
-        return NextResponse.redirect(new URL('/internal-calendar', request.url));
+        if (roleCode) {
+          return NextResponse.redirect(new URL('/internal-calendar', request.url));
+        }
+        // No role in cookie — let them through to /login so client-side
+        // auth can refresh user data with role from /auth/me
       }
     }
     const requestHeaders = new Headers(request.headers);
