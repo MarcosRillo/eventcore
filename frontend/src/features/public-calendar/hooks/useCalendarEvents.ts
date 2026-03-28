@@ -82,14 +82,14 @@ export const useCalendarEvents = (
   const { data: eventTypesData } = useSWR<{ data: EventType[] }>(
     publicEventKeys.types,
     publicFetcher,
-    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined, dedupingInterval: 60000, revalidateOnMount: !initialEventTypes }
+    { fallbackData: initialEventTypes ? { data: initialEventTypes } : undefined, dedupingInterval: 60000 }
   )
 
   // SWR: Locations (quasi-static, 60s dedup)
   const { data: locationsData } = useSWR<{ data: Location[] }>(
     publicEventKeys.locations,
     publicFetcher,
-    { fallbackData: initialLocations ? { data: initialLocations } : undefined, dedupingInterval: 60000, revalidateOnMount: !initialLocations }
+    { fallbackData: initialLocations ? { data: initialLocations } : undefined, dedupingInterval: 60000 }
   )
 
   // SWR: Subtypes (conditional on selected event type)
@@ -116,7 +116,7 @@ export const useCalendarEvents = (
   const { data: eventsData, error: eventsError, isLoading } = useSWR<EventsResponse>(
     eventsKey,
     publicFetcher,
-    { fallbackData: initialEvents ? { data: initialEvents, meta: { current_page: 1, total: initialEvents.length, per_page: 100 } } : undefined, revalidateOnMount: !initialEvents, dedupingInterval: 30000 }
+    { fallbackData: initialEvents ? { data: initialEvents, meta: { current_page: 1, total: initialEvents.length, per_page: 100 } } : undefined, dedupingInterval: 30000 }
   )
 
   const eventTypes = eventTypesData?.data ?? []
