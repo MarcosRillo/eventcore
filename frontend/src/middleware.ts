@@ -177,7 +177,7 @@ function isPublicRoute(pathname: string): boolean {
  * Add CSP and nonce headers to a response
  */
 function addCspHeaders(response: NextResponse, nonce: string, csp: string): NextResponse {
-  if (!csp) return response;
+  if (csp === '') return response;
   response.headers.set('x-nonce', nonce);
   response.headers.set('Content-Security-Policy', csp);
   return response;
@@ -259,7 +259,7 @@ export function middleware(request: NextRequest) {
       }
     }
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-nonce', nonce);
+    if (nonce) requestHeaders.set('x-nonce', nonce);
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     return addCspHeaders(response, nonce, cspHeader);
   }
@@ -332,7 +332,7 @@ export function middleware(request: NextRequest) {
 
   // All checks passed - allow access
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
+  if (nonce) requestHeaders.set('x-nonce', nonce);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   return addCspHeaders(response, nonce, cspHeader);
 }
