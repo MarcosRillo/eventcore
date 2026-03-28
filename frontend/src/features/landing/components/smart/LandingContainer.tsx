@@ -51,7 +51,7 @@ export const LandingContainer = ({
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <HeroSection onExploreClick={handleExploreClick} />
 
@@ -72,6 +72,6 @@ export const LandingContainer = ({
 
       {/* Organizers CTA Section */}
       <OrganizersSection />
-    </main>
+    </div>
   )
 }

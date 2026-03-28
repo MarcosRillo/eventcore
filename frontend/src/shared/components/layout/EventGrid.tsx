@@ -14,11 +14,11 @@ interface EventGridProps {
   className?: string
 }
 
-const COL_CLASSES: Record<number, string> = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-2',
-  3: 'grid-cols-3',
-  4: 'grid-cols-4',
+const SM_COL_CLASSES: Record<number, string> = {
+  1: 'sm:grid-cols-1',
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-3',
+  4: 'sm:grid-cols-4',
 }
 
 const MD_COL_CLASSES: Record<number, string> = {
@@ -58,7 +58,8 @@ export function EventGrid({
 }: EventGridProps) {
   const classes = [
     'grid',
-    COL_CLASSES[columns.sm ?? 1],
+    'grid-cols-1',
+    SM_COL_CLASSES[columns.sm ?? 1],
     MD_COL_CLASSES[columns.md ?? 2],
     LG_COL_CLASSES[columns.lg ?? 3],
     columns.xl ? XL_COL_CLASSES[columns.xl] : '',

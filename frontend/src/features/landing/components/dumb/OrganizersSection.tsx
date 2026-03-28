@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export const OrganizersSection = () => {
   return (
-    <section className="bg-primary-600 py-16">
+    <section className="bg-primary-600 py-10 md:py-16">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center">
           {/* Icon */}
@@ -28,18 +28,18 @@ export const OrganizersSection = () => {
           </div>
 
           {/* Title */}
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
             ¿Organizás eventos en Tucumán?
           </h2>
 
           {/* Description */}
-          <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-primary-100 mb-8 max-w-2xl mx-auto leading-relaxed">
             Sumá tu organización a la plataforma oficial de eventos turísticos y culturales
             de la provincia. Llegá a miles de turistas y residentes interesados en tus eventos.
           </p>
 
           {/* Benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 md:mb-10">
             <div className="bg-white/10 rounded-lg p-4">
               <div className="text-white font-semibold mb-2">Mayor Visibilidad</div>
               <p className="text-sm text-primary-100">
@@ -64,13 +64,13 @@ export const OrganizersSection = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/register-request"
-              className="px-8 py-4 bg-white text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-600"
+              className="w-full sm:w-auto px-8 py-4 bg-white text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-600"
             >
               Solicitar Registro
             </Link>
             <Link
               href="/login"
-              className="px-8 py-4 bg-transparent text-white font-medium border border-white/30 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="w-full sm:w-auto px-8 py-4 bg-transparent text-white font-medium border border-white/30 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
             >
               Ya tengo cuenta
             </Link>

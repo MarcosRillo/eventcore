@@ -52,7 +52,7 @@ const messages = {
 // With line-height: 1.2 → eventHeight=24px, headingHeight=37px
 // eventSpace = 140 - 37 = 103, floor(103/24) = 4 slots
 const MONTH_ROW_HEIGHT = 140
-// Generous overhead for toolbar (~56px) + day-of-week header (~38px) + padding
+const MONTH_ROW_HEIGHT_MOBILE = 90 // matches @media (max-width: 640px) in calendar.css
 const MONTH_VIEW_OVERHEAD = 130
 
 interface CalendarViewProps {
@@ -101,17 +101,20 @@ export const CalendarView = ({
   const isMonthView = currentView === 'month'
 
   // Compute exact container height for month view based on weeks shown
+  // Uses mobile row height (90px) on small screens, desktop (140px) otherwise
   const monthContainerHeight = useMemo(() => {
     if (!isMonthView) return undefined
     const monthStart = startOfMonth(currentDate)
     const monthEnd = endOfMonth(currentDate)
-    // Use es locale (weekStartsOn: 1 = Monday) to match calendar grid
     const calStart = startOfWeek(monthStart, { locale: es })
     const calEnd = endOfWeek(monthEnd, { locale: es })
     const weeks = Math.round(
       (calEnd.getTime() - calStart.getTime()) / (7 * 86400000)
     )
-    return weeks * MONTH_ROW_HEIGHT + MONTH_VIEW_OVERHEAD
+    const rowHeight = typeof window !== 'undefined' && window.innerWidth <= 640
+      ? MONTH_ROW_HEIGHT_MOBILE
+      : MONTH_ROW_HEIGHT
+    return weeks * rowHeight + MONTH_VIEW_OVERHEAD
   }, [currentDate, isMonthView])
 
   // Event style getter - color by event type
@@ -134,7 +137,7 @@ export const CalendarView = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
       {loading && (
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />

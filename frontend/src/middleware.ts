@@ -177,6 +177,7 @@ function isPublicRoute(pathname: string): boolean {
  * Add CSP and nonce headers to a response
  */
 function addCspHeaders(response: NextResponse, nonce: string, csp: string): NextResponse {
+  if (csp === '') return response;
   response.headers.set('x-nonce', nonce);
   response.headers.set('Content-Security-Policy', csp);
   return response;
@@ -226,9 +227,10 @@ function getRoleCode(user: User): UserRoleCode | null {
  * @param request
  */
 export function middleware(request: NextRequest) {
-  // Generate a per-request nonce for CSP
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  const cspHeader = [
+  // Generate a per-request nonce for CSP (skip in development — HMR needs eval)
+  const isDev = process.env.NODE_ENV === 'development';
+  const nonce = isDev ? '' : Buffer.from(crypto.randomUUID()).toString('base64');
+  const cspHeader = isDev ? '' : [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src 'self' 'unsafe-inline'",
@@ -257,7 +259,7 @@ export function middleware(request: NextRequest) {
       }
     }
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-nonce', nonce);
+    if (nonce) requestHeaders.set('x-nonce', nonce);
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     return addCspHeaders(response, nonce, cspHeader);
   }
@@ -330,7 +332,7 @@ export function middleware(request: NextRequest) {
 
   // All checks passed - allow access
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
+  if (nonce) requestHeaders.set('x-nonce', nonce);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   return addCspHeaders(response, nonce, cspHeader);
 }

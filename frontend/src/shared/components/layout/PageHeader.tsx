@@ -17,7 +17,7 @@ export function PageHeader({ title, subtitle, action, className = '' }: PageHead
   return (
     <div className={`flex justify-between items-center ${className}`}>
       <div>
-        <h1 className="text-3xl font-bold text-neutral-900">{title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">{title}</h1>
         {subtitle ? (
           <p className="text-neutral-600 mt-1">{subtitle}</p>
         ) : null}

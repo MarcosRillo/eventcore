@@ -35,7 +35,7 @@ const PublicCalendarContainer = dynamic(
 const CalendarViewSkeleton = () => (
   <div className="space-y-4">
     <div className="h-12 bg-neutral-200 rounded-lg animate-pulse" />
-    <div className="grid grid-cols-7 gap-1">
+    <div className="grid grid-cols-4 sm:grid-cols-7 gap-1">
       {Array.from({ length: 35 }).map((_, i) => (
         <SkeletonCard key={i} className="aspect-square" />
       ))}
@@ -110,7 +110,7 @@ export const CalendarPageContainer = ({
             <div className="flex gap-2 bg-neutral-100 p-1 rounded-lg">
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`px-4 py-2 rounded-md transition-colors motion-reduce:transition-none ${
+                className={`px-4 py-2 min-h-[44px] rounded-md transition-colors motion-reduce:transition-none ${
                   viewMode === 'calendar'
                     ? 'bg-white text-primary-600 shadow-sm font-semibold'
                     : 'text-neutral-600 hover:text-neutral-900'
@@ -124,7 +124,7 @@ export const CalendarPageContainer = ({
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-md transition-colors motion-reduce:transition-none ${
+                className={`px-4 py-2 min-h-[44px] rounded-md transition-colors motion-reduce:transition-none ${
                   viewMode === 'grid'
                     ? 'bg-white text-primary-600 shadow-sm font-semibold'
                     : 'text-neutral-600 hover:text-neutral-900'
