@@ -29,7 +29,7 @@ describe('EventCard', () => {
       }
     ],
     is_featured: true,
-    image_url: 'https://example.com/image.jpg'
+    featured_image: 'https://example.com/image.jpg'
   }
 
   const mockHandlers = {
@@ -86,7 +86,7 @@ describe('EventCard', () => {
   })
 
   describe('Image Display', () => {
-    test('displays event image when image_url is provided', () => {
+    test('displays event image when featured_image is provided', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
       const image = screen.getByRole('img', { name: /Festival de Música/i })
@@ -97,8 +97,8 @@ describe('EventCard', () => {
       expect(image.getAttribute('src')).toContain('example.com')
     })
 
-    test('displays placeholder when image_url is not provided', () => {
-      const eventWithoutImage = { ...mockEvent, image_url: undefined }
+    test('displays placeholder when featured_image is not provided', () => {
+      const eventWithoutImage = { ...mockEvent, featured_image: undefined }
 
       render(<EventCard event={eventWithoutImage} {...mockHandlers} />)
 

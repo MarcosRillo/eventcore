@@ -7,6 +7,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 
 import { CalendarView } from '@/features/public-calendar/components/dumb/CalendarView'
 import { useCalendarEvents } from '@/features/public-calendar/hooks/useCalendarEvents'
@@ -29,6 +30,7 @@ export const CalendarViewContainer = ({
   initialLocations,
 }: CalendarViewContainerProps) => {
   const router = useRouter()
+  const [, startTransition] = useTransition()
   const {
     calendarEvents,
     loading,
@@ -56,7 +58,7 @@ export const CalendarViewContainer = ({
 
   // Handle event click - navigate to event detail page
   const handleSelectEvent = (event: CalendarEvent): void => {
-    router.push(`/calendar/${event.id}`)
+    startTransition(() => router.push(`/calendar/${event.id}`))
   }
 
   if (error) {

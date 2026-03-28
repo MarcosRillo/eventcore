@@ -17,9 +17,10 @@ import ImagePlaceholder from '@/shared/components/display/ImagePlaceholder'
 interface EventCardProps {
   event: PublicEvent
   onClick?: (eventId: number) => void
+  priority?: boolean
 }
 
-export const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
+export const EventCard = memo(function EventCard({ event, onClick, priority = false }: EventCardProps) {
   const handleClick = (): void => {
     onClick?.(event.id)
   }
@@ -40,7 +41,7 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
     })
   }
 
-  const imageUrl = event.featured_image || event.image_url
+  const imageUrl = event.featured_image
   const location = event.locations && event.locations.length > 0 ? event.locations[0] : null
 
   return (
@@ -65,7 +66,8 @@ export const EventCard = memo(function EventCard({ event, onClick }: EventCardPr
             src={imageUrl}
             alt={event.title}
             fill
-            loading="lazy"
+            priority={priority}
+            loading={priority ? undefined : 'lazy'}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300 motion-reduce:transition-none motion-reduce:transform-none"
             fallback={<ImagePlaceholder />}

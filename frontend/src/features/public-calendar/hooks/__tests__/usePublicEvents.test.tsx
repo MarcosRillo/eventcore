@@ -31,7 +31,7 @@ describe('usePublicEvents', () => {
       id: 1,
       title: 'Event 1',
       description: 'Description 1',
-      image_url: 'https://example.com/image1.jpg',
+      featured_image: 'https://example.com/image1.jpg',
       start_date: '2025-12-10',
       end_date: '2025-12-10',
       is_featured: false,

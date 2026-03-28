@@ -2,7 +2,6 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from 'next/headers';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { SWRProvider } from '@/lib/swr';
@@ -24,13 +23,11 @@ export const metadata: Metadata = {
   description: "Sistema completo de gestión de calendario y eventos con multi-tenancy",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nonce = (await headers()).get('x-nonce') ?? '';
-  void nonce; // nonce is read to make this layout dynamic (per-request CSP)
   return (
     <html lang="es">
       <body

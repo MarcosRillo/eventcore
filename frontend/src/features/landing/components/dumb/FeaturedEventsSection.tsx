@@ -38,8 +38,8 @@ export const FeaturedEventsSection = ({
         {!loading && events.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 md:mb-12">
-              {events.slice(0, 6).map(event => (
-                <EventCard key={event.id} event={event} onClick={onEventClick} />
+              {events.slice(0, 6).map((event, index) => (
+                <EventCard key={event.id} event={event} onClick={onEventClick} priority={index < 3} />
               ))}
             </div>
 
