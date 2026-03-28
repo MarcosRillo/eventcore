@@ -191,7 +191,7 @@ export const CalendarView = ({
           'calendar-container',
           !isMonthView && 'h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px]'
         )}
-        style={isMonthView ? { minHeight: monthContainerHeight } : undefined}
+        style={isMonthView ? { height: monthContainerHeight } : undefined}
       >
         <Calendar
           localizer={localizer}
