@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * EventType Table Container - Smart Component
  * Uses ExpandableTable with inline subtypes display

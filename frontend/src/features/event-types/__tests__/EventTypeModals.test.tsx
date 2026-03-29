@@ -10,8 +10,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
-import CreateEventTypeModal from '@/features/event-types/components/CreateEventTypeModal'
-import EditEventTypeModal from '@/features/event-types/components/EditEventTypeModal'
+import CreateEventTypeModal from '@/features/event-types/components/dumb/CreateEventTypeModal'
+import EditEventTypeModal from '@/features/event-types/components/smart/EditEventTypeModal'
 import * as eventTypeService from '@/features/event-types/services/eventType.service'
 import type { EventType } from '@/types/eventType.types'
 

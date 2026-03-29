@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * InvitationTable - Dumb Component using GenericTable
  * Uses GenericTable with custom column renderers for invitations

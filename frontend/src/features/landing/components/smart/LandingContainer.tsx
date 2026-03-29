@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Landing Container
  * Smart component that renders landing page with server-fetched data

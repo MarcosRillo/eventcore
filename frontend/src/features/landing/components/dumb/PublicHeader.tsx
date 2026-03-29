@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Public Header Component - Global Navigation for Public Pages
  * Provides consistent navigation across all public-facing pages

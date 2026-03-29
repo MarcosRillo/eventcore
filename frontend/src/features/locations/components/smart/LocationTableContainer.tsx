@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * LocationTableContainer - Smart Component
  * Uses GenericTable with custom column renderers for locations

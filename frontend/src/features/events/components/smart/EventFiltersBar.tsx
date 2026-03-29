@@ -61,10 +61,10 @@ export const EventFiltersBar = ({
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {isExpanded ? 'Ocultar' : 'Mostrar'} filtros avanzados
-            <svg 
+            <svg
               className={`ml-1 w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

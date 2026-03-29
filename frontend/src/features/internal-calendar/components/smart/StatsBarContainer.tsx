@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * StatsBarContainer - Smart Component (Internal Calendar)
  *

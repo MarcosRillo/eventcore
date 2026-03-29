@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * SubtypeRowsContent Component (Dumb/Presentational)
  * Renders subtypes within an expanded event type row

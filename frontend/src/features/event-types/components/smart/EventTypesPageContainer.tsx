@@ -19,10 +19,10 @@ import {
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import CreateEventSubtypeModal from '@/features/event-types/components/CreateEventSubtypeModal';
-import CreateEventTypeModal from '@/features/event-types/components/CreateEventTypeModal';
-import EditEventSubtypeModal from '@/features/event-types/components/EditEventSubtypeModal';
-import EditEventTypeModal from '@/features/event-types/components/EditEventTypeModal';
+import CreateEventSubtypeModal from '@/features/event-types/components/dumb/CreateEventSubtypeModal';
+import CreateEventTypeModal from '@/features/event-types/components/dumb/CreateEventTypeModal';
+import EditEventSubtypeModal from '@/features/event-types/components/smart/EditEventSubtypeModal';
+import EditEventTypeModal from '@/features/event-types/components/smart/EditEventTypeModal';
 import { EventTypeTableContainer } from '@/features/event-types/components/smart/EventTypeTableContainer';
 import { useEventTypeWithSubtypes } from '@/features/event-types/hooks/useEventTypeWithSubtypes';
 import { LoadingSpinner } from '@/shared/components/feedback';

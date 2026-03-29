@@ -6,7 +6,7 @@
 
 import { fireEvent,render, screen } from '@testing-library/react'
 
-import { EventFiltersBar } from '@/features/events/components/EventFiltersBar'
+import { EventFiltersBar } from '@/features/events/components/smart/EventFiltersBar'
 import { EVENT_TYPE,EventFilters } from '@/types/event.types'
 
 // Mock UI components

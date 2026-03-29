@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Organizer Dashboard Container (Smart)
  *
