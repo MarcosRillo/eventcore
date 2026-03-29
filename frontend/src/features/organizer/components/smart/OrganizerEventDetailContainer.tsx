@@ -229,25 +229,6 @@ export function OrganizerEventDetailContainer({ eventId }: OrganizerEventDetailC
             )}
           </div>
 
-          {/* Additional Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-neutral-100">
-            {event.origin && (
-              <div>
-                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1">
-                  Origen
-                </h3>
-                <p className="text-neutral-900">{event.origin.name}</p>
-              </div>
-            )}
-            {event.frequency && (
-              <div>
-                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1">
-                  Frecuencia
-                </h3>
-                <p className="text-neutral-900">{event.frequency.name}</p>
-              </div>
-            )}
-          </div>
 
           {/* Attendance */}
           {(event.local_attendance || event.national_attendance || event.international_attendance) && (
