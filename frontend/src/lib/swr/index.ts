@@ -12,6 +12,7 @@ export {
   organizerKeys,
   publicEventKeys,
   registrationRequestKeys,
+  sectorKeys,
   userKeys,
 } from '@/lib/swr/keys'
 export { SWRProvider } from '@/lib/swr/SWRProvider'

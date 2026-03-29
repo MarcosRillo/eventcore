@@ -52,6 +52,7 @@ class TenantScope implements Scope
                 \App\Models\EventStatus::class,
                 \App\Models\EventType::class,
                 \App\Models\EventSubtype::class,
+                \App\Models\Sector::class,
             ];
 
             if (in_array($modelClass, $entityOwnedModels)) {

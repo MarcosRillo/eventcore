@@ -1,4 +1,5 @@
 import {
+  Briefcase,
   Calendar,
   ClipboardList,
   Home,
@@ -31,6 +32,7 @@ export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
       '/events': 'Gestión de Eventos',
       '/event-types': 'Gestión de Tipos de Evento',
       '/locations': 'Gestión de Ubicaciones',
+      '/sectors': 'Gestión de Sectores',
       '/organizations': 'Gestión de Organizaciones',
       '/users': 'Gestión de Usuarios',
       '/invitations': 'Gestión de Invitaciones',
@@ -58,6 +60,7 @@ export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
             icon: LayoutGrid,
           },
           { name: 'Ubicaciones', href: '/locations', icon: MapPin },
+          { name: 'Sectores', href: '/sectors', icon: Briefcase },
         ],
       },
       {

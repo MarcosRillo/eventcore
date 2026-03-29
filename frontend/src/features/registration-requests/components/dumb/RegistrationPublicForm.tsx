@@ -2,11 +2,13 @@
 
 import { AlertCircle, Building2, CheckCircle, FileText,Loader2, User } from 'lucide-react'
 import Link from 'next/link'
+import useSWR from 'swr'
 
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
 } from '@/features/registration-requests/types/registration-request.types'
+import { publicEventKeys, publicFetcher } from '@/lib/swr'
 
 // Type aliases for simpler usage
 type RegistrationFormData = Omit<RegistrationRequestFormData, 'profile_photo' | 'organization_logo'>
@@ -136,6 +138,11 @@ const TextAreaField = ({
   </div>
 )
 
+interface ActiveSector {
+  id: number;
+  name: string;
+}
+
 export const RegistrationForm = ({
   formData,
   errors,
@@ -149,6 +156,11 @@ export const RegistrationForm = ({
     e.preventDefault()
     onSubmit()
   }
+
+  const { data: activeSectors } = useSWR<ActiveSector[]>(
+    publicEventKeys.sectors,
+    publicFetcher
+  )
 
   if (success) {
     return (
@@ -289,17 +301,37 @@ export const RegistrationForm = ({
               disabled={loading}
               onChange={(v) => onFieldChange('organization_cuit', v)}
             />
-            <InputField
-              id="organization_sector"
-              label="Rubro / Sector"
-              value={formData.organization_sector}
-              error={errors.organization_sector}
-              placeholder="Eventos y Exposiciones"
-              required
-              disabled={loading}
-              maxLength={100}
-              onChange={(v) => onFieldChange('organization_sector', v)}
-            />
+            <div>
+              <label htmlFor="organization_sector" className="block text-sm font-medium text-neutral-700 mb-1.5">
+                Rubro / Sector <span className="text-error-500 ml-0.5">*</span>
+              </label>
+              <select
+                id="organization_sector"
+                name="organization_sector"
+                value={formData.organization_sector}
+                onChange={(e) => onFieldChange('organization_sector', e.target.value)}
+                disabled={loading}
+                required
+                className={`w-full h-10 px-3 text-sm bg-white border rounded-md text-neutral-900 transition-all duration-150 ease-in-out focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed ${
+                  errors.organization_sector
+                    ? 'border-error-300 focus:border-error-500 focus:ring-error-500/10 bg-error-50/50'
+                    : 'border-neutral-200'
+                }`}
+                data-testid="input-organization_sector"
+              >
+                <option value="">Seleccionar sector…</option>
+                {activeSectors?.map((s) => (
+                  <option key={s.id} value={String(s.id)}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              {errors.organization_sector && (
+                <p className="mt-1.5 text-sm text-error-600" data-testid="error-organization_sector">
+                  {errors.organization_sector}
+                </p>
+              )}
+            </div>
             <InputField
               id="website"
               label="Sitio Web"
