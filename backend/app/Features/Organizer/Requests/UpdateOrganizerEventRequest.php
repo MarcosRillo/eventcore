@@ -67,13 +67,7 @@ class UpdateOrganizerEventRequest extends FormRequest
             'format_id' => 'nullable|exists:event_formats,id',
 
             // Normalized FKs (Nov 30, 2025)
-            'origin_id' => 'nullable|exists:event_origins,id',
-            'frequency_id' => 'nullable|exists:event_frequencies,id',
             'producer_id' => 'nullable|exists:organizations,id',
-
-            // Services (array of service IDs)
-            'service_ids' => 'nullable|array',
-            'service_ids.*' => 'exists:event_services,id',
 
             // Rooms (array of room IDs)
             'room_ids' => 'nullable|array',

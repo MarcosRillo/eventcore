@@ -4,7 +4,6 @@ namespace Tests\Feature\Events;
 
 use App\Features\Events\Services\EventValidationService;
 use App\Models\Event;
-use App\Models\EventOrigin;
 use App\Models\EventStatus;
 use App\Models\EventSubtype;
 use App\Models\EventType;
@@ -41,8 +40,6 @@ class EventValidationServiceTest extends TestCase
 
     private int $formatId;
 
-    private ?EventOrigin $origin;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -71,7 +68,6 @@ class EventValidationServiceTest extends TestCase
         ]);
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
         $this->formatId = \DB::table('event_formats')->value('id') ?? 1;
-        $this->origin = EventOrigin::where('code', 'national')->first();
     }
 
     // ==========================================
@@ -316,17 +312,6 @@ class EventValidationServiceTest extends TestCase
         $this->assertTrue($result->isValid());
     }
 
-    #[Test]
-    public function validates_public_without_origin_id_returns_error(): void
-    {
-        $event = $this->createEventWithAllPublicFields(['origin_id' => null]);
-
-        $result = $this->service->validateForPublicApproval($event);
-
-        $this->assertFalse($result->isValid());
-        $this->assertArrayHasKey('origin_id', $result->getErrors());
-    }
-
     // ==========================================
     // getMissingFields TESTS
     // ==========================================
@@ -396,7 +381,6 @@ class EventValidationServiceTest extends TestCase
             // Explicitly null out public fields
             'description' => null,
             'featured_image' => null,
-            'origin_id' => null,
             'local_attendance' => null,
             'national_attendance' => null,
             'international_attendance' => null,
@@ -433,7 +417,6 @@ class EventValidationServiceTest extends TestCase
             // Public fields
             'description' => 'Descripción completa del evento de prueba',
             'featured_image' => 'https://example.com/image.jpg',
-            'origin_id' => $this->origin?->id,
             'local_attendance' => 500,
             'national_attendance' => 200,
             'international_attendance' => 100,

@@ -39,12 +39,9 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     // FK references (IDs)
     type_id: null,
     subtype_id: null,
-    origin_id: null,
-    frequency_id: null,
     producer_id: null,
 
-    // Services and Rooms (arrays of IDs)
-    service_ids: [],
+    // Rooms (array of IDs)
     room_ids: [],
 
     // Location info
@@ -140,12 +137,9 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
       // FK references (IDs)
       type_id: existingEvent.type_id || null,
       subtype_id: existingEvent.subtype_id || null,
-      origin_id: existingEvent.origin_id || null,
-      frequency_id: existingEvent.frequency_id || null,
       producer_id: existingEvent.producer_id || null,
 
-      // Services and Rooms (arrays of IDs)
-      service_ids: existingEvent.services?.map((s: { id: number }) => s.id) || [],
+      // Rooms (array of IDs)
       room_ids: existingEvent.rooms?.map((r: { id: number }) => r.id) || [],
 
       // Location info
@@ -341,12 +335,9 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
           type_id: formData.type_id || undefined,
           edition_number: formData.edition_number || undefined,
           subtype_id: formData.subtype_id || undefined,
-          origin_id: formData.origin_id || undefined,
-          frequency_id: formData.frequency_id || undefined,
           producer_id: formData.producer_id || undefined,
 
-          // Services and Rooms
-          service_ids: formData.service_ids.length > 0 ? formData.service_ids : undefined,
+          // Rooms
           room_ids: formData.room_ids.length > 0 ? formData.room_ids : undefined,
 
           // Location info

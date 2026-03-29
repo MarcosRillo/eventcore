@@ -9,22 +9,6 @@
 // LOOKUP TABLE TYPES (3NF Normalized)
 // ==========================================
 
-export interface EventOrigin {
-  id: number
-  code: string
-  name: string
-  is_active: boolean
-  display_order: number
-}
-
-export interface EventFrequency {
-  id: number
-  code: string
-  name: string
-  is_active: boolean
-  display_order: number
-}
-
 export interface EventSubtype {
   id: number
   code: string
@@ -61,14 +45,6 @@ export interface EventSubtypeHierarchical {
   event_type?: EventTypeHierarchical
   created_at?: string
   updated_at?: string
-}
-
-export interface EventService {
-  id: number
-  code: string
-  name: string
-  is_active: boolean
-  display_order: number
 }
 
 export interface EventRoom {
@@ -129,8 +105,6 @@ export interface OrganizerEvent {
   type_id?: number
   edition_number?: string
   subtype_id?: number
-  origin_id?: number
-  frequency_id?: number
   producer_id?: number
 
   // Event Type/Subtype (hierarchical categorization - Dec 2, 2025)
@@ -138,8 +112,6 @@ export interface OrganizerEvent {
   event_subtype_id?: number
 
   // Loaded relations
-  origin?: EventOrigin
-  frequency?: EventFrequency
   subtype?: EventSubtype
   producer?: EventProducer
 
@@ -147,8 +119,7 @@ export interface OrganizerEvent {
   event_type?: EventTypeHierarchical
   event_subtype?: EventSubtypeHierarchical
 
-  // Services and rooms (many-to-many)
-  services?: EventService[]
+  // Rooms (many-to-many)
   rooms?: EventRoom[]
 
   // Location info (kept in events)
@@ -223,12 +194,9 @@ export interface CreateEventDto {
 
   // Normalized FK fields (optional, nullable in DB)
   subtype_id?: number
-  origin_id?: number
-  frequency_id?: number
   producer_id?: number
 
-  // Services and Rooms (many-to-many via pivot tables)
-  service_ids?: number[]
+  // Rooms (many-to-many via pivot table)
   room_ids?: number[]
 
   // Location info (kept in events)
@@ -288,12 +256,9 @@ export interface EventFormData {
   // FK references (IDs)
   type_id: number | null
   subtype_id: number | null
-  origin_id: number | null
-  frequency_id: number | null
   producer_id: number | null
 
-  // Services and Rooms (arrays of IDs)
-  service_ids: number[]
+  // Rooms (array of IDs)
   room_ids: number[]
 
   // Location info
@@ -339,8 +304,6 @@ export interface EventFormErrors {
   // FK references
   type_id?: string
   subtype_id?: string
-  origin_id?: string
-  frequency_id?: string
   producer_id?: string
 
   // Location
@@ -393,9 +356,6 @@ export interface SubmitEventError {
  * Lookup tables data for forms
  */
 export interface EventLookupTables {
-  origins: EventOrigin[]
-  frequencies: EventFrequency[]
   subtypes: EventSubtype[]
-  services: EventService[]
   rooms: EventRoom[]
 }

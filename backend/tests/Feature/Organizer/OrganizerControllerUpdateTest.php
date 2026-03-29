@@ -3,7 +3,6 @@
 namespace Tests\Feature\Organizer;
 
 use App\Models\Event;
-use App\Models\EventOrigin;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Location;
@@ -163,7 +162,6 @@ class OrganizerControllerUpdateTest extends TestCase
         $newLocation1 = Location::factory()->create(['entity_id' => 1]);
         $newLocation2 = Location::factory()->create(['entity_id' => 1]);
         $producer = Organization::factory()->create(['name' => 'Producer Org']);
-        $originId = EventOrigin::where('code', 'national')->first()->id;
         $eventTypeIds = $this->getValidEventTypeIds();
 
         // Update payload with normalized fields
@@ -179,7 +177,6 @@ class OrganizerControllerUpdateTest extends TestCase
 
             // Normalized FK fields
             'edition_number' => '16va Edición',
-            'origin_id' => $originId,
             'producer_id' => $producer->id,
 
             // Location info (kept in events)
@@ -224,7 +221,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'title' => 'Updated: Congreso Internacional de Turismo 2025',
             'description' => 'Updated: Evento anual renovado',
             'edition_number' => '16va Edición',
-            'origin_id' => $originId,
             'producer_id' => $producer->id,
             'maps_url' => 'https://maps.google.com/?q=-34.6037,-58.3816',
             'local_attendance' => 800,
@@ -662,7 +658,6 @@ class OrganizerControllerUpdateTest extends TestCase
 
         $location = Location::factory()->create(['entity_id' => 1]);
         $newProducer = Organization::factory()->create(['name' => 'New Producer']);
-        $originId = EventOrigin::where('code', 'international')->first()->id;
         $eventTypeIds = $this->getValidEventTypeIds();
 
         $updatePayload = [
@@ -673,7 +668,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'event_subtype_id' => $eventTypeIds['event_subtype_id'],
             'location_ids' => [$location->id],
             'producer_id' => $newProducer->id,
-            'origin_id' => $originId,
         ];
 
         // Act
@@ -685,11 +679,9 @@ class OrganizerControllerUpdateTest extends TestCase
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
             'producer_id' => $newProducer->id,
-            'origin_id' => $originId,
         ]);
 
-        $updatedEvent = Event::with(['producer', 'origin'])->find($event->id);
+        $updatedEvent = Event::with(['producer'])->find($event->id);
         $this->assertEquals('New Producer', $updatedEvent->producer->name);
-        $this->assertEquals('international', $updatedEvent->origin->code);
     }
 }

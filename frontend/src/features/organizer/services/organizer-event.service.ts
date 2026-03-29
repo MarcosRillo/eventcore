@@ -40,10 +40,6 @@ const buildFormData = (data: CreateEventDto | UpdateEventDto, files: ImageFiles)
       value.forEach((id, index) => {
         formData.append(`location_ids[${index}]`, String(id))
       })
-    } else if (key === 'service_ids' && Array.isArray(value)) {
-      value.forEach((id, index) => {
-        formData.append(`service_ids[${index}]`, String(id))
-      })
     } else if (key === 'room_ids' && Array.isArray(value)) {
       value.forEach((id, index) => {
         formData.append(`room_ids[${index}]`, String(id))

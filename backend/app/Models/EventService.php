@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class EventService extends Model
 {
@@ -22,16 +21,6 @@ class EventService extends Model
         'is_active' => 'boolean',
         'display_order' => 'integer',
     ];
-
-    /**
-     * Get events that have this service.
-     */
-    public function events(): BelongsToMany
-    {
-        return $this->belongsToMany(Event::class, 'event_service', 'service_id', 'event_id')
-            ->withPivot(['is_included', 'notes'])
-            ->withTimestamps();
-    }
 
     /**
      * Scope for active records only.

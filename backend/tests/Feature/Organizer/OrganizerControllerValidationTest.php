@@ -3,7 +3,6 @@
 namespace Tests\Feature\Organizer;
 
 use App\Models\Event;
-use App\Models\EventOrigin;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Location;
@@ -378,32 +377,6 @@ class OrganizerControllerValidationTest extends TestCase
     // ==================== FK VALIDATIONS (3NF NORMALIZED) ====================
 
     #[Test]
-    public function test_validation_fails_for_invalid_origin_id(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['origin_id'] = 99999; // Non-existent origin
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['origin_id']);
-    }
-
-    #[Test]
-    public function test_validation_passes_for_valid_origin_id(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $payload = $this->getMinimalPayload($user);
-        $payload['origin_id'] = EventOrigin::where('code', 'national')->first()->id;
-        $payload['format_id'] = $this->getValidFormatId();
-
-        $response = $this->postJson('/api/v1/organizer/events', $payload);
-
-        $response->assertStatus(201);
-    }
-
-    #[Test]
     public function test_validation_fails_for_invalid_producer_id(): void
     {
         $user = $this->createAuthenticatedUser();
@@ -479,9 +452,6 @@ class OrganizerControllerValidationTest extends TestCase
 
         // Explicitly set all optional FK fields to null
         $payload['edition_number'] = null;
-        $payload['origin_id'] = null;
-        $payload['theme_id'] = null;
-        $payload['frequency_id'] = null;
         $payload['producer_id'] = null;
         $payload['maps_url'] = null;
         $payload['previous_venue'] = null;
@@ -501,7 +471,6 @@ class OrganizerControllerValidationTest extends TestCase
 
         $event = Event::find($response->json('event.id'));
         $this->assertNull($event->edition_number);
-        $this->assertNull($event->origin_id);
         // producer_id is auto-filled with organization_id even when explicitly set to null (Dec 2, 2025)
         $this->assertEquals($user->organization_id, $event->producer_id);
     }
@@ -521,6 +490,5 @@ class OrganizerControllerValidationTest extends TestCase
 
         $event = Event::find($response->json('event.id'));
         $this->assertNull($event->edition_number);
-        $this->assertNull($event->origin_id);
     }
 }

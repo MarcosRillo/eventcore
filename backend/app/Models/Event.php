@@ -70,8 +70,6 @@ class Event extends Model
         'international_attendance',
 
         // Foreign keys (normalized - Nov 30, 2025)
-        'origin_id',
-        'frequency_id',
         'producer_id',
     ];
 
@@ -90,8 +88,6 @@ class Event extends Model
         'local_attendance' => 'integer',
         'national_attendance' => 'integer',
         'international_attendance' => 'integer',
-        'origin_id' => 'integer',
-        'frequency_id' => 'integer',
         'producer_id' => 'integer',
     ];
 
@@ -182,37 +178,11 @@ class Event extends Model
     // =====================================================
 
     /**
-     * Get the origin of this event.
-     */
-    public function origin(): BelongsTo
-    {
-        return $this->belongsTo(EventOrigin::class, 'origin_id');
-    }
-
-    /**
-     * Get the frequency of this event.
-     */
-    public function frequency(): BelongsTo
-    {
-        return $this->belongsTo(EventFrequency::class, 'frequency_id');
-    }
-
-    /**
      * Get the producer (organization) of this event.
      */
     public function producer(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'producer_id');
-    }
-
-    /**
-     * Get the services for this event.
-     */
-    public function services(): BelongsToMany
-    {
-        return $this->belongsToMany(EventService::class, 'event_service', 'event_id', 'service_id')
-            ->withPivot(['is_included', 'notes'])
-            ->withTimestamps();
     }
 
     /**
@@ -363,14 +333,6 @@ class Event extends Model
     }
 
     /**
-     * Scope a query to filter events by origin.
-     */
-    public function scopeByOrigin($query, $originCode)
-    {
-        return $query->whereHas('origin', fn ($q) => $q->where('code', $originCode));
-    }
-
-    /**
      * Scope to filter upcoming and ongoing events.
      * Events where end_date is today or in the future.
      */
@@ -439,44 +401,11 @@ class Event extends Model
     }
 
     /**
-     * Check if the event has virtual transmission.
-     *
-     * Derived from the event_service pivot (service code 'virtual').
-     * The denormalized virtual_transmission column was dropped in
-     * migration 2026_03_29_000001.
-     */
-    public function isVirtual(): bool
-    {
-        return $this->hasService('virtual');
-    }
-
-    /**
      * Check if the event has multiple locations.
      */
     public function hasMultipleLocations(): bool
     {
         return $this->eventType?->allows_multiple_locations ?? false;
-    }
-
-    /**
-     * Check if the event has a specific service.
-     *
-     * Uses the already-loaded services collection when available to avoid N+1 queries.
-     * Falls back to a database query only when the relation has not been eager-loaded.
-     */
-    public function hasService(string $serviceCode): bool
-    {
-        if ($this->relationLoaded('services')) {
-            return $this->services
-                ->where('code', $serviceCode)
-                ->where('pivot.is_included', true)
-                ->isNotEmpty();
-        }
-
-        return $this->services()
-            ->where('code', $serviceCode)
-            ->wherePivot('is_included', true)
-            ->exists();
     }
 
     /**

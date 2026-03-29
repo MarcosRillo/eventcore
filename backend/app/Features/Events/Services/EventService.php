@@ -23,7 +23,7 @@ class EventService
     public function getAllEvents(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Event::query()
-            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations', 'services']);
+            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations']);
 
         // Apply search filter
         if (! empty($filters['search'])) {

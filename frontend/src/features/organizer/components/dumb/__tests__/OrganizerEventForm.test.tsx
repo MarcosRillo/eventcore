@@ -45,10 +45,7 @@ describe('OrganizerEventForm', () => {
     // FK references
     type_id: null,
     subtype_id: null,
-    origin_id: null,
-    frequency_id: null,
     producer_id: null,
-    service_ids: [],
     room_ids: [],
     location_ids: [],
     has_custom_location: false,
