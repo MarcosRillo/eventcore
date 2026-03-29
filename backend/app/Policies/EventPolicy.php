@@ -221,6 +221,10 @@ class EventPolicy
      */
     private function canAccessEvent(User $user, Event $event): bool
     {
+        if (!$user->organization_id) {
+            return false;
+        }
+
         $userOrgId = $user->organization_id;
 
         // Entity admin/staff: can access events in their entity

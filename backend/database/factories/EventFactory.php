@@ -82,7 +82,6 @@ class EventFactory extends Factory
             'previous_venue' => null,
             'next_venue' => null,
             'event_website' => $this->faker->optional(0.3)->url(),
-            'virtual_transmission' => $this->faker->boolean(20),
 
             // Attendance
             'local_attendance' => $this->faker->optional(0.8)->numberBetween(50, 500),
@@ -90,7 +89,6 @@ class EventFactory extends Factory
             'international_attendance' => $this->faker->optional(0.2)->numberBetween(5, 50),
 
             // Foreign keys (normalized)
-            'subtype_id' => null,
             'origin_id' => fn () => EventOrigin::inRandomOrder()->first()?->id,
             'theme_id' => fn () => EventTheme::inRandomOrder()->first()?->id,
             'frequency_id' => fn () => EventFrequency::inRandomOrder()->first()?->id,
@@ -173,12 +171,6 @@ class EventFactory extends Factory
         ]);
     }
 
-    public function withVirtualTransmission(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'virtual_transmission' => true,
-        ]);
-    }
 
     // =====================================================
     // ORIGIN STATES

@@ -6,9 +6,10 @@
  */
 
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { withMask } from 'use-mask-input'
 
+import { useImagePreview } from '@/features/registration-requests/hooks/useImagePreview'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
@@ -58,36 +59,12 @@ export function RegistrationRequestForm({
   onFieldChange,
   onSubmit,
 }: RegistrationRequestFormProps) {
-  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const profilePhotoPreview = useImagePreview(formData.profile_photo)
+  const logoPreview = useImagePreview(formData.organization_logo)
 
   // CUIT mask ref using use-mask-input
   const cuitInputRef = useRef<HTMLInputElement>(null)
   const cuitMaskRef = withMask('99-99999999-9')
-
-  // Generate previews when files change
-  useEffect(() => {
-    const urls: { profile?: string; logo?: string } = {}
-
-    if (formData.profile_photo) {
-      urls.profile = URL.createObjectURL(formData.profile_photo)
-      setProfilePhotoPreview(urls.profile)
-    } else {
-      setProfilePhotoPreview(null)
-    }
-
-    if (formData.organization_logo) {
-      urls.logo = URL.createObjectURL(formData.organization_logo)
-      setLogoPreview(urls.logo)
-    } else {
-      setLogoPreview(null)
-    }
-
-    return () => {
-      if (urls.profile) URL.revokeObjectURL(urls.profile)
-      if (urls.logo) URL.revokeObjectURL(urls.logo)
-    }
-  }, [formData.profile_photo, formData.organization_logo])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>

@@ -29,9 +29,7 @@ class InvitationController extends Controller
                 $request->user(),
             );
 
-            // Send notification email with plain token (selector + validator)
             $invitation->notify(new InvitationNotification($invitation->plain_token));
-
             return response()->json([
                 'success' => true,
                 'message' => 'Invitación enviada exitosamente.',
@@ -110,7 +108,6 @@ class InvitationController extends Controller
     {
         try {
             $invitation = $this->invitationService->resendInvitation($id, $request->user());
-
             return response()->json([
                 'success' => true,
                 'message' => 'Invitación reenviada exitosamente.',
@@ -141,7 +138,7 @@ class InvitationController extends Controller
     }
 
     /**
-     * Validate an invitation token (public endpoint).
+     * Validate an invitation token.
      */
     public function validateToken(string $token): JsonResponse
     {
@@ -166,7 +163,7 @@ class InvitationController extends Controller
     }
 
     /**
-     * Accept an invitation and create account (public endpoint).
+     * Accept an invitation and create account.
      */
     public function accept(AcceptInvitationRequest $request): JsonResponse
     {
@@ -176,9 +173,7 @@ class InvitationController extends Controller
                 $request->validated(),
             );
 
-            // Generate access + refresh token pair for the new user (matches login flow)
             $tokens = $this->authService->issueTokensForUser($user);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Cuenta creada exitosamente.',

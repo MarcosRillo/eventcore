@@ -364,7 +364,6 @@ class EventSeeder extends Seeder
                 'edition_number' => '6',
                 'local_attendance' => 80,
                 'international_attendance' => 5,
-                'virtual_transmission' => false,
             ]);
 
             if ($ubicacionesTurismo->count() > 0) {
@@ -1611,7 +1610,6 @@ class EventSeeder extends Seeder
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
-            'virtual_transmission' => true,
             'event_website' => 'https://turismodigital.tucuman.gob.ar',
         ]);
         $loc = $getLocation($locationIndex++);
@@ -1721,7 +1719,6 @@ class EventSeeder extends Seeder
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
-            'virtual_transmission' => true,
         ]);
         $loc = $getLocation($locationIndex++);
         if ($loc) {
@@ -2539,7 +2536,6 @@ class EventSeeder extends Seeder
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '3',
-            'virtual_transmission' => true,
         ]);
         $loc = $getLocation($locationIndex++);
         if ($loc) {

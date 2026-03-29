@@ -97,7 +97,6 @@ trait EventDataPreparation
 
             // Normalized FKs (Nov 30, 2025)
             // Note: producer_id is handled in getSystemFields (auto-fills with organization_id)
-            'subtype_id' => $data['subtype_id'] ?? null,
             'origin_id' => $data['origin_id'] ?? null,
             'theme_id' => $data['theme_id'] ?? null,
             'frequency_id' => $data['frequency_id'] ?? null,
@@ -112,7 +111,6 @@ trait EventDataPreparation
             'local_attendance' => $data['local_attendance'] ?? null,
             'national_attendance' => $data['national_attendance'] ?? null,
             'international_attendance' => $data['international_attendance'] ?? null,
-            'virtual_transmission' => $data['virtual_transmission'] ?? false,
 
             // Additional information
             'event_website' => $data['event_website'] ?? null,

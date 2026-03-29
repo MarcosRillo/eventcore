@@ -59,7 +59,7 @@ class OrganizerSubmitTest extends TestCase
             'type_id' => \DB::table('organization_types')->value('id'),
             'status_id' => \DB::table('organization_statuses')->value('id'),
             'parent_id' => null,
-            'trust_level' => 5,
+            'trust_level' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

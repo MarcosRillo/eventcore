@@ -50,7 +50,7 @@ class PublicEventService
 
         return $this->taggedRemember(['public-events'], $cacheKey, 60, function () use ($filters, $perPage, $page) {
             $query = Event::published()
-                ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency', 'status'])
+                ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency', 'status', 'services'])
                 ->orderBy('start_date', 'asc');
 
             $this->applyFilters($query, $filters);

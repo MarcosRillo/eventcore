@@ -55,7 +55,6 @@ class EventResource extends JsonResource
             'previous_venue' => $this->previous_venue,
             'next_venue' => $this->next_venue,
             'event_website' => $this->event_website,
-            'virtual_transmission' => $this->virtual_transmission,
 
             // Attendance
             'local_attendance' => $this->local_attendance,
@@ -186,7 +185,6 @@ class EventResource extends JsonResource
                     'format_id' => $this->format_id,
                     'entity_id' => $this->entity_id,
                     'organization_id' => $this->organization_id,
-                    'subtype_id' => $this->subtype_id,
                     'origin_id' => $this->origin_id,
                     'theme_id' => $this->theme_id,
                     'frequency_id' => $this->frequency_id,
@@ -201,8 +199,6 @@ class EventResource extends JsonResource
                         'timestamp' => $a->performed_at->toISOString(),
                     ])),
                     'created_by' => $this->created_by,
-                    'approved_by' => $this->approved_by,
-                    'approved_at' => $this->approved_at?->toISOString(),
                 ],
             ),
 

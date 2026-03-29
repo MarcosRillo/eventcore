@@ -91,7 +91,7 @@ class DashboardService
                 return 'AND e.entity_id = :tenant_id';
             }
 
-            return '';
+            return 'AND 1 = 0';
         }
 
         if ($user->isOrganizerAdmin()) {
@@ -163,7 +163,6 @@ class DashboardService
             'eventSubtype',
             'locations',
             'creator',
-            'approver',
             'approvals',
         ])->find($eventId);
 

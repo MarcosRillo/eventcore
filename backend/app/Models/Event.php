@@ -52,12 +52,17 @@ class Event extends Model
 
         // Event info
         'edition_number',
+        // maps_url: per-event Google Maps link, not a venue property.
+        // Each edition of a recurring event can have a different URL even at the same venue
+        // (e.g. specific hall, floor, or temporary pin). Stays on events — not a 3NF violation.
         'maps_url',
         'custom_location_name',
+        // previous_venue / next_venue: free-text display fields filled by organizers
+        // (e.g. "Buenos Aires 2024", "Córdoba 2026"). These are editorial context, not
+        // FK references to a locations entity. No normalization needed.
         'previous_venue',
         'next_venue',
         'event_website',
-        'virtual_transmission',
 
         // Attendance (integers)
         'local_attendance',
@@ -81,11 +86,9 @@ class Event extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'is_featured' => 'boolean',
-        'approved_at' => 'datetime',
         'published_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'virtual_transmission' => 'boolean',
         'local_attendance' => 'integer',
         'national_attendance' => 'integer',
         'international_attendance' => 'integer',
@@ -165,14 +168,6 @@ class Event extends Model
     }
 
     /**
-     * Get the user who approved this event.
-     */
-    public function approver(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    /**
      * Get the locations associated with this event.
      */
     public function locations(): BelongsToMany
@@ -189,14 +184,6 @@ class Event extends Model
     // =====================================================
     // RELATIONSHIPS - Normalized (Nov 30, 2025)
     // =====================================================
-
-    /**
-     * Get the subtype of this event.
-     */
-    public function subtype(): BelongsTo
-    {
-        return $this->belongsTo(EventSubtype::class, 'subtype_id');
-    }
 
     /**
      * Get the origin of this event.
@@ -481,10 +468,14 @@ class Event extends Model
 
     /**
      * Check if the event has virtual transmission.
+     *
+     * Derived from the event_service pivot (service code 'virtual').
+     * The denormalized virtual_transmission column was dropped in
+     * migration 2026_03_29_000001.
      */
     public function isVirtual(): bool
     {
-        return $this->virtual_transmission === true;
+        return $this->hasService('virtual');
     }
 
     /**
@@ -497,9 +488,19 @@ class Event extends Model
 
     /**
      * Check if the event has a specific service.
+     *
+     * Uses the already-loaded services collection when available to avoid N+1 queries.
+     * Falls back to a database query only when the relation has not been eager-loaded.
      */
     public function hasService(string $serviceCode): bool
     {
+        if ($this->relationLoaded('services')) {
+            return $this->services
+                ->where('code', $serviceCode)
+                ->where('pivot.is_included', true)
+                ->isNotEmpty();
+        }
+
         return $this->services()
             ->where('code', $serviceCode)
             ->wherePivot('is_included', true)

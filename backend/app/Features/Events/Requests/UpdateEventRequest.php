@@ -144,7 +144,6 @@ class UpdateEventRequest extends FormRequest
             'local_attendance' => 'nullable|integer|min:0|max:10000000',
             'national_attendance' => 'nullable|integer|min:0|max:10000000',
             'international_attendance' => 'nullable|integer|min:0|max:10000000',
-            'virtual_transmission' => 'nullable|boolean',
 
             // Additional info
             'event_website' => 'nullable|url|max:500',

@@ -17,6 +17,14 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
+     * status valid values (enforced by DB CHECK constraint chk_user_status):
+     *   'active'    — account is active and can log in
+     *   'suspended' — account is suspended and cannot log in
+     */
+    public const STATUS_ACTIVE    = 'active';
+    public const STATUS_SUSPENDED = 'suspended';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

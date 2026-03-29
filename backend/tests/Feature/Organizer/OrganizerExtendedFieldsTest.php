@@ -48,7 +48,7 @@ class OrganizerExtendedFieldsTest extends TestCase
             'type_id' => \DB::table('organization_types')->value('id'),
             'status_id' => \DB::table('organization_statuses')->value('id'),
             'parent_id' => null,
-            'trust_level' => 5,
+            'trust_level' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -91,7 +91,6 @@ class OrganizerExtendedFieldsTest extends TestCase
     public function test_events_table_has_normalized_fk_columns(): void
     {
         // Assert: Verify FK columns exist in events table
-        $this->assertTrue(Schema::hasColumn('events', 'subtype_id'));
         $this->assertTrue(Schema::hasColumn('events', 'origin_id'));
         $this->assertTrue(Schema::hasColumn('events', 'theme_id'));
         $this->assertTrue(Schema::hasColumn('events', 'frequency_id'));
@@ -270,7 +269,6 @@ class OrganizerExtendedFieldsTest extends TestCase
     public function test_nullable_fk_fields_accept_null(): void
     {
         $event = Event::factory()->create([
-            'subtype_id' => null,
             'origin_id' => null,
             'theme_id' => null,
             'frequency_id' => null,
@@ -279,7 +277,6 @@ class OrganizerExtendedFieldsTest extends TestCase
         ]);
 
         // Assert: All FK fields are nullable
-        $this->assertNull($event->subtype_id);
         $this->assertNull($event->origin_id);
         $this->assertNull($event->theme_id);
         $this->assertNull($event->frequency_id);
@@ -302,22 +299,6 @@ class OrganizerExtendedFieldsTest extends TestCase
         $this->assertTrue(Schema::hasColumn('events', 'local_attendance'));
         $this->assertTrue(Schema::hasColumn('events', 'national_attendance'));
         $this->assertTrue(Schema::hasColumn('events', 'international_attendance'));
-        $this->assertTrue(Schema::hasColumn('events', 'virtual_transmission'));
-    }
-
-    #[Test]
-    public function test_virtual_transmission_defaults_to_false(): void
-    {
-        // Create event explicitly setting virtual_transmission to false
-        $event = Event::factory()->create([
-            'virtual_transmission' => false,
-        ]);
-
-        // Database default is false (NOT NULL DEFAULT FALSE)
-        $this->assertFalse((bool) $event->virtual_transmission);
-
-        // Verify the column default behavior via raw insert
-        $this->assertTrue(Schema::hasColumn('events', 'virtual_transmission'));
     }
 
     #[Test]
