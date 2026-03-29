@@ -31,6 +31,7 @@ export const publicEventKeys = {
   types: '/public/event-types',
   subtypes: (typeId: number) => `/public/event-types/${typeId}/subtypes`,
   locations: '/public/locations/active',
+  sectors: '/public/sectors/active',
 }
 
 export const internalCalendarKeys = {
@@ -64,4 +65,9 @@ export const registrationRequestKeys = {
 export const invitationKeys = {
   list: '/invitations',
   roles: '/roles/assignable',
+}
+
+export const sectorKeys = {
+  list: (params: string) => `/sectors?${params}`,
+  active: '/sectors/active',
 }

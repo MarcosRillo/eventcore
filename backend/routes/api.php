@@ -16,6 +16,8 @@ use App\Features\Dashboard\Controllers\OrganizerStatsController;
 use App\Features\Events\Controllers\EventController as FeatureEventController;
 use App\Features\EventTypes\Controllers\EventSubtypeController;
 use App\Features\EventTypes\Controllers\EventTypeController;
+// Feature Controllers - Sectors
+use App\Features\Sectors\Controllers\SectorController;
 // Feature Controllers - SIMPLE
 use App\Features\InternalCalendar\Controllers\InternalCalendarController;
 use App\Features\InternalCalendar\Controllers\InternalCalendarStatsController;
@@ -143,6 +145,12 @@ Route::prefix('v1')->group(function () {
             Route::patch('event-types/{eventType}/subtypes/{subtype}/toggle-status', [EventSubtypeController::class, 'toggleStatus'])
                 ->where('subtype', '[0-9]+');
 
+            // Sectors CRUD (write operations only - read is in shared section below)
+            Route::post('sectors', [SectorController::class, 'store']);
+            Route::put('sectors/{sector}', [SectorController::class, 'update']);
+            Route::delete('sectors/{sector}', [SectorController::class, 'destroy']);
+            Route::patch('sectors/{sector}/toggle-status', [SectorController::class, 'toggleStatus']);
+
             // Organizations management (write operations)
             Route::patch('organizations/{id}/status', [OrganizationController::class, 'toggleStatus']);
         });
@@ -237,6 +245,11 @@ Route::prefix('v1')->group(function () {
             // Note: This route is safe here because show route uses ->where('subtype', '[0-9]+')
             // which prevents 'active' from being matched as an ID parameter
             Route::get('event-types/{eventType}/subtypes/active', [EventSubtypeController::class, 'active']);
+
+            // Sectors - read only (necesario para formularios de registro)
+            Route::get('sectors', [SectorController::class, 'index']);
+            Route::get('sectors/active', [SectorController::class, 'active']);
+            Route::get('sectors/{sector}', [SectorController::class, 'show']);
         });
     });
 
@@ -262,6 +275,9 @@ Route::prefix('v1')->group(function () {
 
         // Locations
         Route::get('locations/active', [LocationController::class, 'active']);
+
+        // Sectors (public - for registration forms, no tenant scope)
+        Route::get('sectors/active', [SectorController::class, 'publicActive']);
 
         // Event Types (public - for landing and calendar filters)
         Route::get('event-types', [PublicEventController::class, 'eventTypes'])

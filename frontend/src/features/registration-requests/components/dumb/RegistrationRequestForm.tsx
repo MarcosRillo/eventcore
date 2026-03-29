@@ -7,6 +7,7 @@
 
 import Image from 'next/image'
 import { useRef } from 'react'
+import useSWR from 'swr'
 import { withMask } from 'use-mask-input'
 
 import { useImagePreview } from '@/features/registration-requests/hooks/useImagePreview'
@@ -14,6 +15,7 @@ import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors,
 } from '@/features/registration-requests/types/registration-request.types'
+import { publicEventKeys, publicFetcher } from '@/lib/swr'
 import Button from '@/shared/components/form/Button'
 import Checkbox from '@/shared/components/form/Checkbox'
 import Input from '@/shared/components/form/Input'
@@ -28,20 +30,10 @@ interface RegistrationRequestFormProps {
   onSubmit: () => void
 }
 
-const ORGANIZATION_SECTORS = [
-  { value: '', label: 'Seleccionar sector…' },
-  { value: 'hotel', label: 'Hotel' },
-  { value: 'restaurant', label: 'Restaurante' },
-  { value: 'tourism_agency', label: 'Agencia de Turismo' },
-  { value: 'museum', label: 'Museo' },
-  { value: 'cultural_center', label: 'Centro Cultural' },
-  { value: 'entertainment', label: 'Entretenimiento' },
-  { value: 'sports', label: 'Deportes' },
-  { value: 'education', label: 'Educación' },
-  { value: 'government', label: 'Gobierno' },
-  { value: 'ngo', label: 'ONG' },
-  { value: 'other', label: 'Otro' },
-]
+interface ActiveSector {
+  id: number;
+  name: string;
+}
 
 /**
  *
@@ -61,6 +53,15 @@ export function RegistrationRequestForm({
 }: RegistrationRequestFormProps) {
   const profilePhotoPreview = useImagePreview(formData.profile_photo)
   const logoPreview = useImagePreview(formData.organization_logo)
+
+  const { data: activeSectors } = useSWR<ActiveSector[]>(
+    publicEventKeys.sectors,
+    publicFetcher
+  )
+
+  const sectorOptions = activeSectors
+    ? activeSectors.map((s) => ({ value: String(s.id), label: s.name }))
+    : []
 
   // CUIT mask ref using use-mask-input
   const cuitInputRef = useRef<HTMLInputElement>(null)
@@ -267,7 +268,7 @@ export function RegistrationRequestForm({
             name="organization_sector"
             value={formData.organization_sector}
             onChange={(value) => onFieldChange('organization_sector', String(value))}
-            options={ORGANIZATION_SECTORS.filter(s => s.value !== '').map(s => ({ value: s.value, label: s.label }))}
+            options={sectorOptions}
             placeholder="Seleccionar sector…"
             error={formErrors.organization_sector}
             required
