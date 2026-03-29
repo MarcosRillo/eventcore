@@ -122,7 +122,7 @@ class OrganizerSubmitTest extends TestCase
             ->assertJsonStructure([
                 'message',
                 'status',
-                'event' => ['id', 'title', 'status_id'],
+                'event' => ['id', 'title', 'status'],
             ]);
     }
 

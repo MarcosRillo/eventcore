@@ -338,7 +338,7 @@ export function middleware(request: NextRequest) {
   if (roleCode === 'organizer_admin') {
     // Allow: /organizer/*, /calendar/* (public), NO /internal-calendar
     const allowedPaths = ['/organizer', '/calendar'];
-    const isAllowed = allowedPaths.some(path => pathname.startsWith(path));
+    const isAllowed = allowedPaths.some(path => matchesPrefix(pathname, path));
 
     // Block internal calendar for organizers
     if (pathname.startsWith('/internal-calendar')) {

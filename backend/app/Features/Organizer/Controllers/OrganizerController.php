@@ -9,6 +9,7 @@ use App\Features\Organizer\Requests\StoreOrganizerEventRequest;
 use App\Features\Organizer\Requests\UpdateOrganizerEventRequest;
 use App\Features\Organizer\Services\OrganizerService;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EventResource;
 use App\Models\Event;
 use App\Models\EventStatus;
 use Illuminate\Http\JsonResponse;
@@ -43,7 +44,7 @@ class OrganizerController extends Controller
             $validated['per_page'] ?? 10,
         );
 
-        return response()->json($events);
+        return response()->json(EventResource::collection($events)->response()->getData(true));
     }
 
     /**
@@ -54,7 +55,7 @@ class OrganizerController extends Controller
         $event = $this->organizerService->getEventById($id, $request->user());
         Gate::authorize('view', $event);
 
-        return response()->json($event);
+        return (new EventResource($event))->response();
     }
 
     /**
@@ -66,7 +67,7 @@ class OrganizerController extends Controller
 
         return response()->json([
             'message' => 'Event created successfully',
-            'event' => $event,
+            'event' => new EventResource($event),
         ], 201);
     }
 
@@ -82,7 +83,7 @@ class OrganizerController extends Controller
 
         return response()->json([
             'message' => 'Event updated successfully',
-            'event' => $updatedEvent,
+            'event' => new EventResource($updatedEvent),
         ]);
     }
 
@@ -149,7 +150,7 @@ class OrganizerController extends Controller
             return response()->json([
                 'message' => 'Event submitted for review',
                 'status' => 'pending_internal_approval',
-                'event' => $event,
+                'event' => new EventResource($event),
             ]);
         });
     }
