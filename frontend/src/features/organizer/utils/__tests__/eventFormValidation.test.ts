@@ -13,7 +13,6 @@ describe('eventFormValidation', () => {
     type_id: null,
     subtype_id: null,
     origin_id: null,
-    theme_id: null,
     frequency_id: null,
     rotation_type_id: null,
     producer_id: null,

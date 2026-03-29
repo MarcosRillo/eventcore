@@ -98,7 +98,6 @@ trait EventDataPreparation
             // Normalized FKs (Nov 30, 2025)
             // Note: producer_id is handled in getSystemFields (auto-fills with organization_id)
             'origin_id' => $data['origin_id'] ?? null,
-            'theme_id' => $data['theme_id'] ?? null,
             'frequency_id' => $data['frequency_id'] ?? null,
             'rotation_type_id' => $data['rotation_type_id'] ?? null,
 

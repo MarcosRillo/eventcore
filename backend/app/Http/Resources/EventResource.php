@@ -128,12 +128,6 @@ class EventResource extends JsonResource
                 'name' => $this->origin->name,
             ]),
 
-            'theme' => $this->whenLoaded('theme', fn () => [
-                'id' => $this->theme->id,
-                'code' => $this->theme->code,
-                'name' => $this->theme->name,
-            ]),
-
             'frequency' => $this->whenLoaded('frequency', fn () => [
                 'id' => $this->frequency->id,
                 'code' => $this->frequency->code,
@@ -186,7 +180,6 @@ class EventResource extends JsonResource
                     'entity_id' => $this->entity_id,
                     'organization_id' => $this->organization_id,
                     'origin_id' => $this->origin_id,
-                    'theme_id' => $this->theme_id,
                     'frequency_id' => $this->frequency_id,
                     'rotation_type_id' => $this->rotation_type_id,
                     'producer_id' => $this->producer_id,

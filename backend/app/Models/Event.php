@@ -71,7 +71,6 @@ class Event extends Model
 
         // Foreign keys (normalized - Nov 30, 2025)
         'origin_id',
-        'theme_id',
         'frequency_id',
         'rotation_type_id',
         'producer_id',
@@ -93,7 +92,6 @@ class Event extends Model
         'national_attendance' => 'integer',
         'international_attendance' => 'integer',
         'origin_id' => 'integer',
-        'theme_id' => 'integer',
         'frequency_id' => 'integer',
         'rotation_type_id' => 'integer',
         'producer_id' => 'integer',
@@ -191,14 +189,6 @@ class Event extends Model
     public function origin(): BelongsTo
     {
         return $this->belongsTo(EventOrigin::class, 'origin_id');
-    }
-
-    /**
-     * Get the theme of this event.
-     */
-    public function theme(): BelongsTo
-    {
-        return $this->belongsTo(EventTheme::class, 'theme_id');
     }
 
     /**
@@ -388,14 +378,6 @@ class Event extends Model
     public function scopeByOrigin($query, $originCode)
     {
         return $query->whereHas('origin', fn ($q) => $q->where('code', $originCode));
-    }
-
-    /**
-     * Scope a query to filter events by theme.
-     */
-    public function scopeByTheme($query, $themeCode)
-    {
-        return $query->whereHas('theme', fn ($q) => $q->where('code', $themeCode));
     }
 
     /**

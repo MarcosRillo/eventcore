@@ -7,7 +7,6 @@ use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRoom;
 use App\Models\EventService;
-use App\Models\EventTheme;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -66,7 +65,6 @@ class OrganizerExtendedFieldsTest extends TestCase
     {
         // Assert: Verify all lookup tables exist
         $this->assertTrue(Schema::hasTable('event_origins'));
-        $this->assertTrue(Schema::hasTable('event_themes'));
         $this->assertTrue(Schema::hasTable('event_frequencies'));
         $this->assertTrue(Schema::hasTable('event_rotation_types'));
         $this->assertTrue(Schema::hasTable('event_subtypes'));
@@ -92,7 +90,6 @@ class OrganizerExtendedFieldsTest extends TestCase
     {
         // Assert: Verify FK columns exist in events table
         $this->assertTrue(Schema::hasColumn('events', 'origin_id'));
-        $this->assertTrue(Schema::hasColumn('events', 'theme_id'));
         $this->assertTrue(Schema::hasColumn('events', 'frequency_id'));
         $this->assertTrue(Schema::hasColumn('events', 'rotation_type_id'));
         $this->assertTrue(Schema::hasColumn('events', 'producer_id'));
@@ -133,14 +130,6 @@ class OrganizerExtendedFieldsTest extends TestCase
     }
 
     #[Test]
-    public function test_event_themes_seeded(): void
-    {
-        // Assert: Verify themes are seeded
-        $this->assertGreaterThan(0, EventTheme::count());
-        $this->assertDatabaseHas('event_themes', ['code' => 'cultural']);
-    }
-
-    #[Test]
     public function test_event_frequencies_seeded(): void
     {
         // Assert: Verify frequencies are seeded
@@ -166,20 +155,6 @@ class OrganizerExtendedFieldsTest extends TestCase
         $this->assertNotNull($event->origin);
         $this->assertEquals('national', $event->origin->code);
         $this->assertEquals('Nacional', $event->origin->name);
-    }
-
-    #[Test]
-    public function test_event_can_have_theme_relationship(): void
-    {
-        $theme = EventTheme::first();
-
-        $event = Event::factory()->create([
-            'theme_id' => $theme->id,
-        ]);
-
-        // Assert: Verify relationship works
-        $this->assertNotNull($event->theme);
-        $this->assertEquals($theme->code, $event->theme->code);
     }
 
     #[Test]
@@ -270,7 +245,6 @@ class OrganizerExtendedFieldsTest extends TestCase
     {
         $event = Event::factory()->create([
             'origin_id' => null,
-            'theme_id' => null,
             'frequency_id' => null,
             'rotation_type_id' => null,
             'producer_id' => null,
@@ -278,14 +252,12 @@ class OrganizerExtendedFieldsTest extends TestCase
 
         // Assert: All FK fields are nullable
         $this->assertNull($event->origin_id);
-        $this->assertNull($event->theme_id);
         $this->assertNull($event->frequency_id);
         $this->assertNull($event->rotation_type_id);
         $this->assertNull($event->producer_id);
 
         // Relationships return null
         $this->assertNull($event->origin);
-        $this->assertNull($event->theme);
         $this->assertNull($event->producer);
     }
 

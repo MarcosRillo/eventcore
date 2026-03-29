@@ -239,14 +239,6 @@ export function OrganizerEventDetailContainer({ eventId }: OrganizerEventDetailC
                 <p className="text-neutral-900">{event.origin.name}</p>
               </div>
             )}
-            {event.theme && (
-              <div>
-                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1">
-                  Temática
-                </h3>
-                <p className="text-neutral-900">{event.theme.name}</p>
-              </div>
-            )}
             {event.frequency && (
               <div>
                 <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1">
