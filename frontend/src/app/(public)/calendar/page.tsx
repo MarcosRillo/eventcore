@@ -16,7 +16,8 @@ export const metadata: Metadata = {
     title: 'Eventos en Tucumán',
     description: 'Calendario de eventos turísticos y culturales',
     type: 'website',
-    locale: 'es_AR'
+    locale: 'es_AR',
+    images: ['https://res.cloudinary.com/dgosruiim/image/upload/v1774742936/events/seed/seed_1.jpg'],
   },
   twitter: {
     card: 'summary_large_image',

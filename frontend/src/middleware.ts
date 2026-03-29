@@ -140,6 +140,39 @@ const ROUTE_CONFIG: RouteConfig = {
 } as const;
 
 /**
+ * Check if route is a known protected route (requires authentication)
+ *
+ * Used to prevent unknown URLs from being redirected to /login.
+ * Unknown routes should fall through to Next.js 404 handler.
+ *
+ * @param pathname - Raw pathname from request.nextUrl.pathname
+ * @returns true if the route is known to require authentication
+ */
+function isProtectedRoute(pathname: string): boolean {
+  const normalized = normalizePath(pathname);
+
+  // Authenticated prefixes are explicitly protected routes
+  if (ROUTE_CONFIG.authenticatedPrefixes.some(prefix => matchesPrefix(normalized, prefix))) {
+    return true;
+  }
+
+  // Well-known protected top-level areas (not listed in authenticatedPrefixes but recognised)
+  const knownProtectedPrefixes = [
+    '/organizer',
+    '/internal-calendar',
+    '/events',
+    '/event-types',
+    '/locations',
+    '/users',
+    '/entities',
+    '/approvals',
+    '/dashboard',
+  ];
+
+  return knownProtectedPrefixes.some(prefix => matchesPrefix(normalized, prefix));
+}
+
+/**
  * Check if route is public (no authentication required)
  *
  * Security-first design:
@@ -273,6 +306,13 @@ export function middleware(request: NextRequest) {
   // Get user from cookies
   const user = getUserFromCookies(request);
 
+  // Unknown route (not public, not a known protected route) — let Next.js return 404
+  // This prevents mystery URLs being silently redirected to /login
+  if (!isProtectedRoute(pathname)) {
+    const requestHeaders = new Headers(request.headers);
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   // Not authenticated - redirect to login
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url));
@@ -351,8 +391,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico (favicon file)
+     * - sitemap.xml / robots.txt (SEO crawlers must never be redirected)
      * - public files (public folder)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

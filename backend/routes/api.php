@@ -257,7 +257,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:public-heavy');
         Route::get('events/date-range', [PublicEventController::class, 'dateRange'])
             ->middleware('throttle:public-heavy');
-        Route::get('events/{id}', [PublicEventController::class, 'show']);
+        Route::get('events/{id}', [PublicEventController::class, 'show'])
+            ->where('id', '[0-9]+');
 
         // Locations
         Route::get('locations/active', [LocationController::class, 'active']);
@@ -277,24 +278,4 @@ Route::prefix('v1')->group(function () {
             ->header('Deprecation', 'true')
             ->header('Sunset', 'Thu, 01 Jul 2026 00:00:00 GMT');
     })->middleware('throttle:public');
-});
-
-// ===== HEALTH CHECK (public, no auth, outside v1 prefix) =====
-Route::get('health', function () {
-    $checks = [];
-    try {
-        \DB::select('SELECT 1');
-        $checks['database'] = 'ok';
-    } catch (\Throwable $e) {
-        $checks['database'] = 'fail';
-    }
-    try {
-        \Cache::store('redis')->set('__health', 1, 5);
-        $checks['cache'] = 'ok';
-    } catch (\Throwable $e) {
-        $checks['cache'] = 'fail';
-    }
-    $allOk = ! in_array('fail', $checks);
-
-    return response()->json(['status' => $allOk ? 'ok' : 'degraded', 'checks' => $checks], $allOk ? 200 : 503);
 });

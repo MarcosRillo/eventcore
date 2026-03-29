@@ -45,6 +45,14 @@ class PaginationRequest extends FormRequest
     }
 
     /**
+     * Get validated page number with fallback to 1.
+     */
+    public function getPage(): int
+    {
+        return $this->validated('page', 1) ?? 1;
+    }
+
+    /**
      * Custom error messages for validation failures.
      *
      * @return array<string, string>

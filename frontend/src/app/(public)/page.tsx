@@ -17,7 +17,8 @@ export const metadata: Metadata = {
       'Descubrí los mejores eventos turísticos y culturales de Tucumán',
     type: 'website',
     locale: 'es_AR',
-    siteName: 'Eventos Tucumán'
+    siteName: 'Eventos Tucumán',
+    images: ['https://res.cloudinary.com/dgosruiim/image/upload/v1774742936/events/seed/seed_1.jpg'],
   },
   twitter: {
     card: 'summary_large_image',
