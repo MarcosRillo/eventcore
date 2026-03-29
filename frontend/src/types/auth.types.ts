@@ -178,7 +178,9 @@ export const RESOURCE_PERMISSIONS: Record<string, Permission[]> = {
  * Role permissions - MUST match backend user_roles.permissions
  * Source: database/seeders/UserRolesSeeder.php
  *
- * This is used as fallback when permissions are not included in user response
+ * Fallback when permissions are not included in user response.
+ * Primary source is user.role.permissions from the backend API.
+ * These values MUST match backend user_roles seeder — update both together.
  */
 export const ROLE_PERMISSIONS: Record<UserRoleCode, Permission[]> = {
   'platform_admin': [

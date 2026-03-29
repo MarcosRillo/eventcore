@@ -35,17 +35,6 @@ interface ActiveSector {
   name: string;
 }
 
-const FALLBACK_SECTORS = [
-  { value: 'hotel', label: 'Hotel' },
-  { value: 'restaurante', label: 'Restaurante' },
-  { value: 'agencia_turismo', label: 'Agencia de Turismo' },
-  { value: 'transporte', label: 'Transporte' },
-  { value: 'cultura', label: 'Cultura y Arte' },
-  { value: 'deporte', label: 'Deporte y Recreación' },
-  { value: 'educacion', label: 'Educación' },
-  { value: 'comercio', label: 'Comercio' },
-  { value: 'otro', label: 'Otro' },
-]
 
 /**
  *
@@ -71,9 +60,7 @@ export function RegistrationRequestForm({
     publicFetcher
   )
 
-  const sectorOptions = sectorsError
-    ? FALLBACK_SECTORS
-    : activeSectors
+  const sectorOptions = activeSectors
     ? activeSectors.map((s) => ({ value: String(s.id), label: s.name }))
     : []
 
@@ -289,10 +276,10 @@ export function RegistrationRequestForm({
             value={formData.organization_sector}
             onChange={(value) => onFieldChange('organization_sector', String(value))}
             options={sectorOptions}
-            placeholder={sectorsLoading ? 'Cargando sectores...' : 'Seleccionar sector…'}
+            placeholder={sectorsLoading ? 'Cargando sectores...' : sectorsError ? 'Error al cargar sectores — reintentá más tarde' : 'Seleccionar sector…'}
             error={formErrors.organization_sector}
             required
-            disabled={submitting || sectorsLoading}
+            disabled={submitting || sectorsLoading || !!sectorsError}
             fullWidth
           />
           <Input
