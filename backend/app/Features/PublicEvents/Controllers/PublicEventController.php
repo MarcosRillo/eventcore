@@ -33,8 +33,9 @@ class PublicEventController extends Controller
     {
         $filters = $request->getFilters();
         $perPage = $request->getPerPage();
+        $page = $request->getPage();
 
-        $events = $this->publicEventService->getPublishedEvents($filters, $perPage);
+        $events = $this->publicEventService->getPublishedEvents($filters, $perPage, $page);
 
         return response()->json($events);
     }

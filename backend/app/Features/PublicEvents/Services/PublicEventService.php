@@ -42,17 +42,21 @@ class PublicEventService
      * @param  array  $filters  Available filters: event_type_id, start_date, end_date, search, location_id
      * @param  int  $perPage  Items per page (max 50)
      */
-    public function getPublishedEvents(array $filters = [], int $perPage = self::DEFAULT_PER_PAGE): LengthAwarePaginator
+    public function getPublishedEvents(array $filters = [], int $perPage = self::DEFAULT_PER_PAGE, int $page = 1): LengthAwarePaginator
     {
         $perPage = $this->normalizePerPage($perPage);
 
-        $query = Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency', 'status'])
-            ->orderBy('start_date', 'asc');
+        $cacheKey = 'public.events.'.md5(serialize($filters)).'.'.$perPage.'.'.$page;
 
-        $this->applyFilters($query, $filters);
+        return $this->taggedRemember(['public-events'], $cacheKey, 60, function () use ($filters, $perPage, $page) {
+            $query = Event::published()
+                ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'theme', 'frequency', 'status'])
+                ->orderBy('start_date', 'asc');
 
-        return $query->paginate($perPage);
+            $this->applyFilters($query, $filters);
+
+            return $query->paginate($perPage, ['*'], 'page', $page);
+        });
     }
 
     /**
@@ -73,15 +77,6 @@ class PublicEventService
         }
 
         return $event;
-    }
-
-    /**
-     * @deprecated Categories removed - use event types instead (Dec 2, 2025)
-     * Returns empty collection for backward compatibility
-     */
-    public function getPublicCategories(): \Illuminate\Support\Collection
-    {
-        return collect([]);
     }
 
     /**

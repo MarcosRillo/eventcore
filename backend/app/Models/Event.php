@@ -307,7 +307,9 @@ class Event extends Model
      */
     public function scopePublished($query)
     {
-        return $query->whereHas('status', fn ($q) => $q->where('status_code', 'published'));
+        $publishedId = \App\Models\EventStatus::where('status_code', 'published')->value('id');
+
+        return $query->where('status_id', $publishedId);
     }
 
     /**

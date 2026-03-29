@@ -152,6 +152,9 @@ class QueryCountTest extends TestCase
 
         $queriesWithMany = 0;
         $this->assertMaxQueries(100, function () use (&$queriesWithMany) {
+            // Flush cache so the second request hits the DB (not the cache from the first run)
+            \Illuminate\Support\Facades\Cache::flush();
+
             $queries = collect();
             \Illuminate\Support\Facades\DB::listen(function ($q) use ($queries) {
                 if (! str_contains($q->sql, '"cache"')) {

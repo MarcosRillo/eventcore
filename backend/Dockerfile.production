@@ -21,7 +21,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 # ============================================================
 # Stage 2: Production image with FrankenPHP
 # ============================================================
-FROM dunglas/frankenphp:1-php8.3 AS production
+FROM dunglas/frankenphp:1-php8.3@sha256:d43dc97b4c2eaf6dbaad4ae3ed42e379a75b9db8e2f09ab29b014a264c71a3a3 AS production
 
 # --- PHP extensions (matching existing Dockerfile) ---
 RUN install-php-extensions \
@@ -47,6 +47,7 @@ RUN { \
     echo 'opcache.interned_strings_buffer = 16'; \
     echo 'opcache.max_accelerated_files = 10000'; \
     echo 'opcache.validate_timestamps = 0'; \
+    echo 'expose_php = Off'; \
     } > "$PHP_INI_DIR/conf.d/app.ini"
 
 # --- Non-root user ---
