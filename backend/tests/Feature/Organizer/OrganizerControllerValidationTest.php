@@ -482,7 +482,6 @@ class OrganizerControllerValidationTest extends TestCase
         $payload['origin_id'] = null;
         $payload['theme_id'] = null;
         $payload['frequency_id'] = null;
-        $payload['rotation_type_id'] = null;
         $payload['producer_id'] = null;
         $payload['maps_url'] = null;
         $payload['previous_venue'] = null;

@@ -41,7 +41,6 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
     subtype_id: null,
     origin_id: null,
     frequency_id: null,
-    rotation_type_id: null,
     producer_id: null,
 
     // Services and Rooms (arrays of IDs)
@@ -143,7 +142,6 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
       subtype_id: existingEvent.subtype_id || null,
       origin_id: existingEvent.origin_id || null,
       frequency_id: existingEvent.frequency_id || null,
-      rotation_type_id: existingEvent.rotation_type_id || null,
       producer_id: existingEvent.producer_id || null,
 
       // Services and Rooms (arrays of IDs)
@@ -345,7 +343,6 @@ export const useEventForm = ({ eventId, onSuccess, onError, onCancel }: UseEvent
           subtype_id: formData.subtype_id || undefined,
           origin_id: formData.origin_id || undefined,
           frequency_id: formData.frequency_id || undefined,
-          rotation_type_id: formData.rotation_type_id || undefined,
           producer_id: formData.producer_id || undefined,
 
           // Services and Rooms

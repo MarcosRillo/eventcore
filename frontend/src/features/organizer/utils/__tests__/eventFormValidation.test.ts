@@ -14,7 +14,6 @@ describe('eventFormValidation', () => {
     subtype_id: null,
     origin_id: null,
     frequency_id: null,
-    rotation_type_id: null,
     producer_id: null,
     service_ids: [],
     room_ids: [],

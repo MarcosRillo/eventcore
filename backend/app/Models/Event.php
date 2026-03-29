@@ -72,7 +72,6 @@ class Event extends Model
         // Foreign keys (normalized - Nov 30, 2025)
         'origin_id',
         'frequency_id',
-        'rotation_type_id',
         'producer_id',
     ];
 
@@ -93,7 +92,6 @@ class Event extends Model
         'international_attendance' => 'integer',
         'origin_id' => 'integer',
         'frequency_id' => 'integer',
-        'rotation_type_id' => 'integer',
         'producer_id' => 'integer',
     ];
 
@@ -197,14 +195,6 @@ class Event extends Model
     public function frequency(): BelongsTo
     {
         return $this->belongsTo(EventFrequency::class, 'frequency_id');
-    }
-
-    /**
-     * Get the rotation type of this event.
-     */
-    public function rotationType(): BelongsTo
-    {
-        return $this->belongsTo(EventRotationType::class, 'rotation_type_id');
     }
 
     /**

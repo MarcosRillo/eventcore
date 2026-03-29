@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\EventFrequency;
 use App\Models\EventOrigin;
-use App\Models\EventRotationType;
 use App\Models\EventService;
 use App\Models\EventSubtype;
 use App\Models\EventType;
@@ -22,7 +21,6 @@ class EventLookupSeeder extends Seeder
         DB::transaction(function () {
             $this->seedOrigins();
             $this->seedFrequencies();
-            $this->seedRotationTypes();
             $this->seedServices();
             $this->seedSubtypes();
         });
@@ -66,25 +64,6 @@ class EventLookupSeeder extends Seeder
             EventFrequency::updateOrCreate(
                 ['code' => $frequency['code']],
                 $frequency,
-            );
-        }
-    }
-
-    /**
-     * Seed event rotation types.
-     */
-    private function seedRotationTypes(): void
-    {
-        $rotationTypes = [
-            ['code' => 'fijo', 'name' => 'Fijo', 'description' => 'Evento que se realiza siempre en el mismo lugar', 'display_order' => 1],
-            ['code' => 'rotativo', 'name' => 'Rotativo', 'description' => 'Evento que rota entre diferentes sedes', 'display_order' => 2],
-            ['code' => 'itinerante', 'name' => 'Itinerante', 'description' => 'Evento que viaja por diferentes ubicaciones', 'display_order' => 3],
-        ];
-
-        foreach ($rotationTypes as $rotationType) {
-            EventRotationType::updateOrCreate(
-                ['code' => $rotationType['code']],
-                $rotationType,
             );
         }
     }

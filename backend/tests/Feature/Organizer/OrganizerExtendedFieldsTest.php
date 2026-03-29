@@ -66,7 +66,6 @@ class OrganizerExtendedFieldsTest extends TestCase
         // Assert: Verify all lookup tables exist
         $this->assertTrue(Schema::hasTable('event_origins'));
         $this->assertTrue(Schema::hasTable('event_frequencies'));
-        $this->assertTrue(Schema::hasTable('event_rotation_types'));
         $this->assertTrue(Schema::hasTable('event_subtypes'));
         $this->assertTrue(Schema::hasTable('event_services'));
         $this->assertTrue(Schema::hasTable('event_rooms'));
@@ -91,7 +90,6 @@ class OrganizerExtendedFieldsTest extends TestCase
         // Assert: Verify FK columns exist in events table
         $this->assertTrue(Schema::hasColumn('events', 'origin_id'));
         $this->assertTrue(Schema::hasColumn('events', 'frequency_id'));
-        $this->assertTrue(Schema::hasColumn('events', 'rotation_type_id'));
         $this->assertTrue(Schema::hasColumn('events', 'producer_id'));
     }
 
@@ -104,7 +102,6 @@ class OrganizerExtendedFieldsTest extends TestCase
         $this->assertFalse(Schema::hasColumn('events', 'origin'));
         $this->assertFalse(Schema::hasColumn('events', 'theme'));
         $this->assertFalse(Schema::hasColumn('events', 'frequency'));
-        $this->assertFalse(Schema::hasColumn('events', 'rotation_type'));
         $this->assertFalse(Schema::hasColumn('events', 'producer'));
         $this->assertFalse(Schema::hasColumn('events', 'city'));
         $this->assertFalse(Schema::hasColumn('events', 'venue'));
@@ -246,14 +243,12 @@ class OrganizerExtendedFieldsTest extends TestCase
         $event = Event::factory()->create([
             'origin_id' => null,
             'frequency_id' => null,
-            'rotation_type_id' => null,
             'producer_id' => null,
         ]);
 
         // Assert: All FK fields are nullable
         $this->assertNull($event->origin_id);
         $this->assertNull($event->frequency_id);
-        $this->assertNull($event->rotation_type_id);
         $this->assertNull($event->producer_id);
 
         // Relationships return null

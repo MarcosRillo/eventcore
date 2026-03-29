@@ -120,7 +120,6 @@ class UpdateEventRequest extends FormRequest
             // Normalized FKs (Nov 30, 2025)
             'origin_id' => 'nullable|exists:event_origins,id',
             'frequency_id' => 'nullable|exists:event_frequencies,id',
-            'rotation_type_id' => 'nullable|exists:event_rotation_types,id',
             'producer_id' => 'nullable|exists:organizations,id',
 
             // Services and Rooms (many-to-many)

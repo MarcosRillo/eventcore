@@ -25,14 +25,6 @@ export interface EventFrequency {
   display_order: number
 }
 
-export interface EventRotationType {
-  id: number
-  code: string
-  name: string
-  is_active: boolean
-  display_order: number
-}
-
 export interface EventSubtype {
   id: number
   code: string
@@ -139,7 +131,6 @@ export interface OrganizerEvent {
   subtype_id?: number
   origin_id?: number
   frequency_id?: number
-  rotation_type_id?: number
   producer_id?: number
 
   // Event Type/Subtype (hierarchical categorization - Dec 2, 2025)
@@ -149,7 +140,6 @@ export interface OrganizerEvent {
   // Loaded relations
   origin?: EventOrigin
   frequency?: EventFrequency
-  rotation_type?: EventRotationType
   subtype?: EventSubtype
   producer?: EventProducer
 
@@ -235,7 +225,6 @@ export interface CreateEventDto {
   subtype_id?: number
   origin_id?: number
   frequency_id?: number
-  rotation_type_id?: number
   producer_id?: number
 
   // Services and Rooms (many-to-many via pivot tables)
@@ -301,7 +290,6 @@ export interface EventFormData {
   subtype_id: number | null
   origin_id: number | null
   frequency_id: number | null
-  rotation_type_id: number | null
   producer_id: number | null
 
   // Services and Rooms (arrays of IDs)
@@ -353,7 +341,6 @@ export interface EventFormErrors {
   subtype_id?: string
   origin_id?: string
   frequency_id?: string
-  rotation_type_id?: string
   producer_id?: string
 
   // Location
@@ -408,7 +395,6 @@ export interface SubmitEventError {
 export interface EventLookupTables {
   origins: EventOrigin[]
   frequencies: EventFrequency[]
-  rotation_types: EventRotationType[]
   subtypes: EventSubtype[]
   services: EventService[]
   rooms: EventRoom[]
