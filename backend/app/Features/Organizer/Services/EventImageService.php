@@ -2,63 +2,94 @@
 
 namespace App\Features\Organizer\Services;
 
+use Cloudinary\Cloudinary;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Service for handling event image uploads.
- * Stores images in storage/app/public/events/{organization_id}/
+ * Stores images in Cloudinary under events/{organization_id}/
  */
 class EventImageService
 {
+    private function cloudinary(): Cloudinary
+    {
+        return new Cloudinary([
+            'cloud' => [
+                'cloud_name' => config('cloudinary.cloud_name'),
+                'api_key' => config('cloudinary.api_key'),
+                'api_secret' => config('cloudinary.api_secret'),
+            ],
+            'url' => ['secure' => true],
+        ]);
+    }
+
     /**
-     * Store an uploaded image file.
+     * Store an uploaded image file in Cloudinary.
      *
      * @param  UploadedFile  $file  The uploaded file
      * @param  int  $organizationId  The organization ID for namespacing
      * @param  string  $field  The field name (logo, featured_image, responsive_image)
-     * @return string The public URL path to the stored image
+     * @return string The secure Cloudinary URL
      */
     public function storeImage(UploadedFile $file, int $organizationId, string $field): string
     {
-        $extension = $file->guessExtension() ?? $file->getClientOriginalExtension();
-        $filename = $field.'_'.time().'_'.bin2hex(random_bytes(16)).'.'.$extension;
-        $path = $file->storeAs("events/{$organizationId}", $filename, 'public');
+        $result = $this->cloudinary()->uploadApi()->upload($file->getRealPath(), [
+            'folder' => "events/{$organizationId}",
+            'public_id' => $field.'_'.bin2hex(random_bytes(8)),
+            'resource_type' => 'image',
+            'overwrite' => true,
+        ]);
 
-        Log::info('Event image stored', [
+        $url = $result['secure_url'];
+
+        Log::info('Event image uploaded to Cloudinary', [
             'organization_id' => $organizationId,
             'field' => $field,
-            'path' => $path,
+            'url' => $url,
+            'public_id' => $result['public_id'],
             'original_name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),
         ]);
 
-        return '/storage/'.$path;
+        return $url;
     }
 
     /**
-     * Delete an image from storage.
+     * Delete an image from Cloudinary.
      *
-     * @param  string  $imagePath  The full storage path (e.g., /storage/events/1/logo_123.jpg)
+     * @param  string  $imageUrl  The full Cloudinary URL or legacy /storage/ path
      * @return bool True if deleted, false otherwise
      */
-    public function deleteImage(string $imagePath): bool
+    public function deleteImage(string $imageUrl): bool
     {
-        // Extract the relative path from the full URL
-        $relativePath = str_replace('/storage/', '', $imagePath);
-
-        if (Storage::disk('public')->exists($relativePath)) {
-            Storage::disk('public')->delete($relativePath);
-
-            Log::info('Event image deleted', [
-                'path' => $relativePath,
-            ]);
-
-            return true;
+        // Legacy local storage paths are skipped — files no longer exist on ephemeral disk
+        if (! str_starts_with($imageUrl, 'http')) {
+            return false;
         }
 
-        return false;
+        // Extract public_id from Cloudinary URL
+        // Format: https://res.cloudinary.com/{cloud}/image/upload/{version}/{public_id}.{ext}
+        // or:     https://res.cloudinary.com/{cloud}/image/upload/{public_id}.{ext}
+        $publicId = $this->extractPublicId($imageUrl);
+
+        if ($publicId === null) {
+            Log::warning('Could not extract public_id from Cloudinary URL', ['url' => $imageUrl]);
+
+            return false;
+        }
+
+        $result = $this->cloudinary()->uploadApi()->destroy($publicId);
+
+        $deleted = ($result['result'] === 'ok');
+
+        Log::info('Event image deleted from Cloudinary', [
+            'url' => $imageUrl,
+            'public_id' => $publicId,
+            'result' => $result['result'],
+        ]);
+
+        return $deleted;
     }
 
     /**
@@ -81,11 +112,11 @@ class EventImageService
 
         foreach ($fileFields as $fileField => $urlField) {
             if (isset($data[$fileField]) && $data[$fileField] instanceof UploadedFile) {
-                // Delete existing image if present and it's a local file
+                // Delete existing image if it is a Cloudinary URL
                 if (
                     $existingImages &&
                     isset($existingImages[$urlField]) &&
-                    str_starts_with($existingImages[$urlField], '/storage/')
+                    str_starts_with($existingImages[$urlField], 'http')
                 ) {
                     $this->deleteImage($existingImages[$urlField]);
                 }
@@ -100,5 +131,19 @@ class EventImageService
         }
 
         return $imageUrls;
+    }
+
+    /**
+     * Extract the Cloudinary public_id from a secure URL.
+     * Handles both versioned and non-versioned URLs.
+     */
+    private function extractPublicId(string $url): ?string
+    {
+        // Match: /image/upload/ optionally followed by v\d+/ then capture public_id (no ext)
+        if (preg_match('#/image/upload/(?:v\d+/)?(.+)\.[^.]+$#', $url, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }
