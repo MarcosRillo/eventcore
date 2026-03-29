@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Approval;
+namespace App\Features\Approval\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PublishEventRequest extends FormRequest
+class ApproveEventRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        // Only entity_admin, entity_staff and platform_admin can publish events
+        // Only entity_admin, entity_staff and platform_admin can approve events
         $userRole = $this->user()?->getRoleCode();
 
         return in_array($userRole, ['entity_admin', 'entity_staff', 'platform_admin']);
@@ -25,7 +25,7 @@ class PublishEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'scheduled_at' => ['nullable', 'date', 'after:now'],
+            'comments' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -37,8 +37,7 @@ class PublishEventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'scheduled_at.date' => 'La fecha programada debe ser una fecha válida.',
-            'scheduled_at.after' => 'La fecha programada debe ser futura.',
+            'comments.max' => 'Los comentarios no pueden exceder 1000 caracteres.',
         ];
     }
 }

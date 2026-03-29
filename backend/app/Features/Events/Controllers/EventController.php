@@ -10,9 +10,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class EventController extends Controller
@@ -27,37 +24,11 @@ class EventController extends Controller
      */
     public function index(IndexEventsRequest $request)
     {
-        $query = Event::query()
-            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations'])
-            ->when($request->validated('search'), function ($query, $search) {
-                $query->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            })
-            ->when($request->validated('event_type_id'), function ($query, $eventTypeId) {
-                $query->where('event_type_id', $eventTypeId);
-            })
-            ->when($request->validated('status_id'), function ($query, $statusId) {
-                $query->where('status_id', $statusId);
-            })
-            ->when($request->validated('status'), function ($query, $statusCode) {
-                $query->whereHas('status', function ($subQuery) use ($statusCode) {
-                    $subQuery->where('status_code', $statusCode);
-                });
-            })
-            ->when($request->has('is_featured'), function ($query) use ($request) {
-                $query->where('is_featured', $request->validated('is_featured'));
-            });
-
-        // Apply date filtering and ordering
-        if ($request->validated('show_past') === '1') {
-            // Show only past events, ordered by end_date DESC (most recent first)
-            $query->past();
-            $events = $query->orderBy('end_date', 'desc')->paginate($request->getPerPage());
-        } else {
-            // Show only upcoming events (default), ordered by start_date ASC (closest first)
-            $query->upcoming();
-            $events = $query->orderBy('start_date', 'asc')->paginate($request->getPerPage());
-        }
+        $events = $this->eventService->getAllEvents(
+            $request->user(),
+            $request->validated(),
+            $request->getPerPage(),
+        );
 
         return EventResource::collection($events);
     }
@@ -129,9 +100,7 @@ class EventController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($event) {
-            $event->delete();
-        });
+        $this->eventService->deleteEvent($event);
 
         return response()->noContent();
     }
@@ -146,13 +115,11 @@ class EventController extends Controller
 
         Gate::authorize('toggleFeatured', $event);
 
-        DB::transaction(function () use ($event) {
-            $event->update(['is_featured' => ! $event->is_featured]);
-        });
+        $updated = $this->eventService->toggleFeatured($event);
 
         return response()->json([
             'message' => 'Estado destacado actualizado',
-            'data' => new EventResource($event->fresh()->load('status')),
+            'data' => new EventResource($updated),
         ]);
     }
 
@@ -177,82 +144,8 @@ class EventController extends Controller
      * Get event statistics.
      * Single query with conditional aggregation; cached per tenant for 60 seconds.
      */
-    public function statistics()
+    public function statistics(Request $request)
     {
-        $bindings = [];
-        $tenantClause = $this->buildTenantClause($bindings);
-
-        // Cache key is tenant-aware so different users get their own stats
-        $user = Auth::user();
-        $cacheKey = 'events.statistics.' . ($user?->organization_id ?? 'global');
-
-        $stats = Cache::remember($cacheKey, 60, function () use ($bindings, $tenantClause) {
-            $row = DB::selectOne("
-                SELECT
-                    COUNT(*) AS total,
-                    COUNT(*) FILTER (WHERE es.status_code = 'published') AS published,
-                    COUNT(*) FILTER (WHERE es.status_code IN ('pending_internal_approval', 'pending_public_approval')) AS pending,
-                    COUNT(*) FILTER (WHERE es.status_code = 'draft') AS draft
-                FROM events e
-                JOIN event_statuses es ON es.id = e.status_id
-                WHERE e.deleted_at IS NULL
-                {$tenantClause}
-            ", $bindings);
-
-            return [
-                'total'     => (int) $row->total,
-                'published' => (int) $row->published,
-                'pending'   => (int) $row->pending,
-                'draft'     => (int) $row->draft,
-            ];
-        });
-
-        return response()->json(['data' => $stats]);
-    }
-
-    /**
-     * Build the tenant WHERE clause fragment and register its bindings.
-     *
-     * Safety note: this method interpolates only static SQL keywords
-     * (e.g. `AND e.entity_id = :tenant_id`). All user-supplied values
-     * are passed as named PDO parameters via the $bindings array and
-     * never concatenated into the query string, so there is no SQL
-     * injection risk.
-     */
-    private function buildTenantClause(array &$bindings): string
-    {
-        if (! Auth::check()) {
-            return '';
-        }
-
-        $user = Auth::user();
-
-        if ($user->isPlatformAdmin()) {
-            return '';
-        }
-
-        if ($user->isEntityAdmin() || $user->isEntityStaff()) {
-            $organizationId = $user->organization_id;
-
-            if ($organizationId) {
-                $bindings['tenant_id'] = $organizationId;
-
-                return 'AND e.entity_id = :tenant_id';
-            }
-
-            return '';
-        }
-
-        if ($user->isOrganizerAdmin()) {
-            $organizationId = $user->organization_id;
-
-            if ($organizationId) {
-                $bindings['tenant_id'] = $organizationId;
-
-                return 'AND e.organization_id = :tenant_id';
-            }
-        }
-
-        return '';
+        return response()->json(['data' => $this->eventService->getStatistics($request->user())]);
     }
 }

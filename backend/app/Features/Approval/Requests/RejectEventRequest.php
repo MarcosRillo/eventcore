@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Requests\Approval;
+namespace App\Features\Approval\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ApproveAndPublishEventRequest extends FormRequest
+class RejectEventRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
+        // Only entity_admin, entity_staff and platform_admin can reject events
         $userRole = $this->user()?->getRoleCode();
 
-        return in_array($userRole, ['entity_admin', 'entity_staff']);
+        return in_array($userRole, ['entity_admin', 'entity_staff', 'platform_admin']);
     }
 
     /**
@@ -24,7 +25,7 @@ class ApproveAndPublishEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comments' => ['nullable', 'string', 'max:1000'],
+            'reason' => ['required', 'string', 'min:10', 'max:1000'],
         ];
     }
 
@@ -36,7 +37,9 @@ class ApproveAndPublishEventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'comments.max' => 'Los comentarios no pueden exceder 1000 caracteres.',
+            'reason.required' => 'Debe proporcionar una razón para rechazar el evento.',
+            'reason.min' => 'La razón debe tener al menos 10 caracteres.',
+            'reason.max' => 'La razón no puede exceder 1000 caracteres.',
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Features\Organizer\Services;
 
+use App\Features\Approval\Services\ApprovalStateMachine;
 use App\Features\Organizer\Traits\EventDataPreparation;
 use App\Models\Event;
 use App\Models\EventStatus;
@@ -24,6 +25,7 @@ class OrganizerService
     public function __construct(
         private EventValidator $validator,
         private EventImageService $imageService,
+        private ApprovalStateMachine $stateMachine,
     ) {}
 
     /**
@@ -238,6 +240,23 @@ class OrganizerService
                 'notes' => $dateData['notes'] ?? null,
             ]);
         }
+    }
+
+    /**
+     * Submit an event for internal approval.
+     */
+    public function submitEvent(Event $event): Event
+    {
+        $this->stateMachine->validateTransition($event, 'pending_internal_approval');
+
+        $pendingStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
+
+        return DB::transaction(function () use ($event, $pendingStatus) {
+            $event->update(['status_id' => $pendingStatus->id]);
+            $event->load('status');
+
+            return $event;
+        });
     }
 
     /**

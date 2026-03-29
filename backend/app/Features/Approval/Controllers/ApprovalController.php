@@ -4,11 +4,11 @@ namespace App\Features\Approval\Controllers;
 
 use App\Features\Approval\Services\ApprovalService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Approval\ApproveAndPublishEventRequest;
-use App\Http\Requests\Approval\ApproveEventRequest;
-use App\Http\Requests\Approval\PublishEventRequest;
-use App\Http\Requests\Approval\RejectEventRequest;
-use App\Http\Requests\Approval\RequestChangesRequest;
+use App\Features\Approval\Requests\ApproveAndPublishEventRequest;
+use App\Features\Approval\Requests\ApproveEventRequest;
+use App\Features\Approval\Requests\PublishEventRequest;
+use App\Features\Approval\Requests\RejectEventRequest;
+use App\Features\Approval\Requests\RequestChangesRequest;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;

@@ -2,7 +2,6 @@
 
 namespace App\Features\Organizer\Controllers;
 
-use App\Features\Approval\Services\ApprovalStateMachine;
 use App\Features\Events\Services\EventValidationService;
 use App\Features\Organizer\Requests\IndexOrganizerEventRequest;
 use App\Features\Organizer\Requests\StoreOrganizerEventRequest;
@@ -11,10 +10,8 @@ use App\Features\Organizer\Services\OrganizerService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
-use App\Models\EventStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class OrganizerController extends Controller
@@ -22,7 +19,6 @@ class OrganizerController extends Controller
     public function __construct(
         private OrganizerService $organizerService,
         private EventValidationService $validationService,
-        private ApprovalStateMachine $stateMachine,
     ) {}
 
     /**
@@ -139,19 +135,12 @@ class OrganizerController extends Controller
             ], 422);
         }
 
-        $this->stateMachine->validateTransition($event, 'pending_internal_approval');
+        $event = $this->organizerService->submitEvent($event);
 
-        $pendingStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
-
-        return DB::transaction(function () use ($event, $pendingStatus) {
-            $event->update(['status_id' => $pendingStatus->id]);
-            $event->load('status');
-
-            return response()->json([
-                'message' => 'Event submitted for review',
-                'status' => 'pending_internal_approval',
-                'event' => new EventResource($event),
-            ]);
-        });
+        return response()->json([
+            'message' => 'Event submitted for review',
+            'status' => 'pending_internal_approval',
+            'event' => new EventResource($event),
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Organizer;
 
+use App\Features\Approval\Services\ApprovalStateMachine;
 use App\Features\Organizer\Services\EventImageService;
 use App\Features\Organizer\Services\EventValidator;
 use App\Features\Organizer\Services\OrganizerService;
@@ -28,6 +29,8 @@ class OrganizerServiceTest extends TestCase
 
     private EventImageService $imageService;
 
+    private ApprovalStateMachine $stateMachine;
+
     private User $user;
 
     private Organization $organization;
@@ -53,7 +56,8 @@ class OrganizerServiceTest extends TestCase
 
         $this->validator = new EventValidator;
         $this->imageService = new EventImageService;
-        $this->service = new OrganizerService($this->validator, $this->imageService);
+        $this->stateMachine = new ApprovalStateMachine;
+        $this->service = new OrganizerService($this->validator, $this->imageService, $this->stateMachine);
 
         // Create organization
         $this->organization = Organization::factory()->create();
