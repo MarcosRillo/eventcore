@@ -13,7 +13,6 @@ use App\Http\Resources\EventResource;
 use App\Models\EventType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 
 /**
  * Public Event Controller

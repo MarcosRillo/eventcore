@@ -3,11 +3,9 @@
 /**
  *
  * @param root0
- * @param root0.error
  * @param root0.reset
  */
 export default function Error({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }
@@ -16,10 +14,10 @@ export default function Error({
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
       <h2 className="text-2xl font-bold text-neutral-900 mb-4">
-        Algo salió mal
+        No pudimos cargar el evento
       </h2>
       <p className="text-neutral-600 mb-6">
-        {process.env.NODE_ENV === 'development' ? error.message : 'Por favor, intentá de nuevo más tarde.'}
+        Por favor, intentá de nuevo más tarde.
       </p>
       <button
         onClick={reset}

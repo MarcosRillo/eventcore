@@ -25,8 +25,7 @@ class PasswordResetService
         $user = User::where('email', $email)->first();
 
         if (! $user) {
-            // Return true even if user doesn't exist (security best practice)
-            // This prevents email enumeration attacks
+            Hash::make(Str::random(32)); // normalize timing — prevent email enumeration via response time
             return true;
         }
 

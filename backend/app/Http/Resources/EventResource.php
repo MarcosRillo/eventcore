@@ -248,7 +248,6 @@ class EventResource extends JsonResource
 
         return $user->isPlatformAdmin()
             || $user->isEntityAdmin()
-            || $user->isEntityStaff()
-            || $user->isOrganizerAdmin();
+            || $user->isEntityStaff();
     }
 }
