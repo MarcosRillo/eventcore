@@ -18,6 +18,7 @@ import {
   SuspendResultResponse,
 } from '@/features/registration-requests/types/registration-request.types'
 import apiClient from '@/services/apiClient'
+import publicApiClient from '@/services/publicApiClient'
 
 // ============================================
 // Public Endpoints (No Auth Required)
@@ -57,7 +58,7 @@ export const createRegistrationRequest = async (
     formData.append('organization_logo', data.organization_logo)
   }
 
-  const response = await apiClient.post<CreateRequestResponse>(
+  const response = await publicApiClient.post<CreateRequestResponse>(
     '/auth/register-request',
     formData,
     {
