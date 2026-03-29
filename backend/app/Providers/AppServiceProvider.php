@@ -46,17 +46,23 @@ class AppServiceProvider extends ServiceProvider
     {
         // Public endpoints — IP based (no auth available)
         RateLimiter::for('public', function (Request $request) {
-            return Limit::perMinute(60)->by($request->ip());
+            $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+
+            return Limit::perMinute(60)->by($ip);
         });
 
         // Public heavy endpoints — tighter limit for expensive queries (search, stats, calendar)
         RateLimiter::for('public-heavy', function (Request $request) {
-            return Limit::perMinute(20)->by($request->ip());
+            $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+
+            return Limit::perMinute(20)->by($ip);
         });
 
         // Authenticated endpoints — user ID based with IP fallback
         RateLimiter::for('authenticated', function (Request $request) {
-            return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
+            $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+
+            return Limit::perMinute(120)->by($request->user()?->id ?: $ip);
         });
     }
 }

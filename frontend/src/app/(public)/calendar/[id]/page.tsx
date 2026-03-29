@@ -6,6 +6,8 @@ import EventDetailPage from '@/features/public-calendar/components/dumb/EventDet
 import publicApiClient from '@/services/publicApiClient';
 import { Event } from '@/types/event.types';
 
+export const revalidate = 60;
+
 interface EventPageProps {
   params: Promise<{
     id: string;
