@@ -551,8 +551,8 @@ class PublicEventControllerTest extends TestCase
         // Assert: Returns 15 events with pagination metadata
         $responsePage1->assertOk();
         $this->assertEquals(15, count($responsePage1->json('data')));
-        $this->assertEquals(25, $responsePage1->json('total'));
-        $this->assertEquals(1, $responsePage1->json('current_page'));
+        $this->assertEquals(25, $responsePage1->json('meta.total'));
+        $this->assertEquals(1, $responsePage1->json('meta.current_page'));
 
         // Act: Request with custom per_page (10)
         $responseCustom = $this->getJson('/api/v1/public/events?per_page=10');
@@ -560,7 +560,7 @@ class PublicEventControllerTest extends TestCase
         // Assert: Returns 10 events
         $responseCustom->assertOk();
         $this->assertEquals(10, count($responseCustom->json('data')));
-        $this->assertEquals(25, $responseCustom->json('total'));
+        $this->assertEquals(25, $responseCustom->json('meta.total'));
 
         // Act: Request second page
         $responsePage2 = $this->getJson('/api/v1/public/events?page=2&per_page=10');
@@ -568,7 +568,7 @@ class PublicEventControllerTest extends TestCase
         // Assert: Returns 10 events from second page
         $responsePage2->assertOk();
         $this->assertEquals(10, count($responsePage2->json('data')));
-        $this->assertEquals(2, $responsePage2->json('current_page'));
+        $this->assertEquals(2, $responsePage2->json('meta.current_page'));
     }
 
     #[Test]
@@ -610,7 +610,7 @@ class PublicEventControllerTest extends TestCase
         // Assert: Only Cultural events returned
         $response->assertOk();
         $this->assertEquals(3, count($response->json('data')));
-        $this->assertEquals(3, $response->json('total'));
+        $this->assertEquals(3, $response->json('meta.total'));
 
         // Verify all events have the correct type
         foreach ($response->json('data') as $event) {
@@ -694,7 +694,7 @@ class PublicEventControllerTest extends TestCase
         // Verify all returned events have published status
         foreach ($response->json('data') as $event) {
             $this->assertStringContainsString('Published Event', $event['title']);
-            $this->assertEquals($this->publishedStatus->id, $event['status_id']);
+            $this->assertEquals('published', $event['status']['status_code']);
         }
 
         // Verify draft events are NOT in response

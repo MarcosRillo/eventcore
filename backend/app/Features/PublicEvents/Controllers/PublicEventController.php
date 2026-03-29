@@ -13,6 +13,7 @@ use App\Http\Resources\EventResource;
 use App\Models\EventType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 /**
  * Public Event Controller
@@ -37,7 +38,7 @@ class PublicEventController extends Controller
 
         $events = $this->publicEventService->getPublishedEvents($filters, $perPage, $page);
 
-        return response()->json($events);
+        return EventResource::collection($events)->response();
     }
 
     /**
