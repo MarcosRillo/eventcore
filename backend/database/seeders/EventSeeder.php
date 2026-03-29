@@ -16,10 +16,9 @@ use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
 use Carbon\Carbon;
+use Cloudinary\Cloudinary;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 
 class EventSeeder extends Seeder
 {
@@ -43,35 +42,41 @@ class EventSeeder extends Seeder
     }
 
     /**
-     * Download seed images from Lorem Picsum before the transaction.
+     * Upload seed images from Lorem Picsum to Cloudinary before the transaction.
      */
     private function downloadSeedImages(int $count = 15): void
     {
-        $disk = Storage::disk('public');
-        $disk->deleteDirectory('events/seed');
-        $disk->makeDirectory('events/seed');
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => config('cloudinary.cloud_name'),
+                'api_key' => config('cloudinary.api_key'),
+                'api_secret' => config('cloudinary.api_secret'),
+            ],
+            'url' => ['secure' => true],
+        ]);
 
         for ($i = 0; $i < $count; $i++) {
             try {
-                $response = Http::timeout(10)
-                    ->connectTimeout(5)
-                    ->get('https://picsum.photos/480/360.webp');
-
-                if ($response->successful()) {
-                    $filename = "seed_{$i}.webp";
-                    $disk->put("events/seed/{$filename}", $response->body());
-                    $this->seedImagePool[] = "/storage/events/seed/{$filename}";
-                }
+                $result = $cloudinary->uploadApi()->upload(
+                    "https://picsum.photos/seed/event{$i}/800/450",
+                    [
+                        'folder' => 'events/seed',
+                        'public_id' => "seed_{$i}",
+                        'overwrite' => true,
+                    ],
+                );
+                $this->seedImagePool[] = $result['secure_url'];
             } catch (\Exception $e) {
-                if ($i === 0) {
-                    $this->command->warn('Could not download seed images from picsum.photos — events will have no images.');
+                // Fallback: use picsum direct URL
+                $this->seedImagePool[] = "https://picsum.photos/seed/event{$i}/800/450";
 
-                    return;
+                if ($i === 0) {
+                    $this->command->warn('Could not upload seed images to Cloudinary — falling back to picsum direct URLs.');
                 }
             }
         }
 
-        $this->command->info("Downloaded {$count} seed images from picsum.photos");
+        $this->command->info("Uploaded {$count} seed images to Cloudinary");
     }
 
     /**

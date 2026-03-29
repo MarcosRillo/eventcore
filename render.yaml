@@ -66,6 +66,14 @@ services:
       - key: SESSION_SAME_SITE
         value: none
 
+      # --- Cloudinary Image Storage ---
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
       # --- Logging ---
       - key: LOG_CHANNEL
         value: stderr
