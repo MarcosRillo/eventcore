@@ -46,10 +46,22 @@ class UserService
 
     /**
      * Get a single user with relationships.
+     * entity_admin can only fetch users from their own organization.
      */
-    public function getUser(int $userId): User
+    public function getUser(int $userId, User $currentUser): User
     {
-        return User::with(['role', 'organizations'])->findOrFail($userId);
+        $user = User::with(['role', 'organizations'])->findOrFail($userId);
+
+        if ($currentUser->isEntityAdmin()) {
+            $currentOrgIds = $currentUser->organizations->pluck('id')->toArray();
+            $targetOrgIds = $user->organizations->pluck('id')->toArray();
+
+            if (empty(array_intersect($currentOrgIds, $targetOrgIds))) {
+                throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+            }
+        }
+
+        return $user;
     }
 
     /**
