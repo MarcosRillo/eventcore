@@ -31,7 +31,7 @@ export function UsersPageContainer() {
                 </p>
               </div>
             </div>
-            <Link href="/invitations">
+            <Link href="/organizations">
               <Button variant="primary">
                 Invitar Usuario
               </Button>
