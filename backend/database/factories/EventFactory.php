@@ -7,7 +7,6 @@ use App\Models\EventFrequency;
 use App\Models\EventOrigin;
 use App\Models\EventRotationType;
 use App\Models\EventSubtype;
-use App\Models\EventTheme;
 use App\Models\EventType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -90,7 +89,6 @@ class EventFactory extends Factory
 
             // Foreign keys (normalized)
             'origin_id' => fn () => EventOrigin::inRandomOrder()->first()?->id,
-            'theme_id' => fn () => EventTheme::inRandomOrder()->first()?->id,
             'frequency_id' => fn () => EventFrequency::inRandomOrder()->first()?->id,
             'rotation_type_id' => fn () => EventRotationType::inRandomOrder()->first()?->id,
             'producer_id' => null,
@@ -215,21 +213,4 @@ class EventFactory extends Factory
         ]);
     }
 
-    // =====================================================
-    // THEME STATES
-    // =====================================================
-
-    public function cultural(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'theme_id' => fn () => EventTheme::where('code', 'cultural')->first()?->id,
-        ]);
-    }
-
-    public function business(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'theme_id' => fn () => EventTheme::where('code', 'negocios')->first()?->id,
-        ]);
-    }
 }

@@ -7,7 +7,6 @@ use App\Models\EventOrigin;
 use App\Models\EventRotationType;
 use App\Models\EventService;
 use App\Models\EventSubtype;
-use App\Models\EventTheme;
 use App\Models\EventType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +21,6 @@ class EventLookupSeeder extends Seeder
     {
         DB::transaction(function () {
             $this->seedOrigins();
-            $this->seedThemes();
             $this->seedFrequencies();
             $this->seedRotationTypes();
             $this->seedServices();
@@ -45,30 +43,6 @@ class EventLookupSeeder extends Seeder
             EventOrigin::updateOrCreate(
                 ['code' => $origin['code']],
                 $origin,
-            );
-        }
-    }
-
-    /**
-     * Seed event themes.
-     */
-    private function seedThemes(): void
-    {
-        $themes = [
-            ['code' => 'cultural', 'name' => 'Cultural', 'description' => 'Eventos culturales y artísticos', 'display_order' => 1],
-            ['code' => 'deportivo', 'name' => 'Deportivo', 'description' => 'Eventos deportivos y competencias', 'display_order' => 2],
-            ['code' => 'negocios', 'name' => 'Negocios/Congresos', 'description' => 'Congresos, ferias y eventos empresariales', 'display_order' => 3],
-            ['code' => 'gastronomico', 'name' => 'Gastronómico', 'description' => 'Festivales gastronómicos y culinarios', 'display_order' => 4],
-            ['code' => 'religioso', 'name' => 'Religioso', 'description' => 'Eventos religiosos y espirituales', 'display_order' => 5],
-            ['code' => 'musical', 'name' => 'Musical/Conciertos', 'description' => 'Conciertos y eventos musicales', 'display_order' => 6],
-            ['code' => 'academico', 'name' => 'Académico', 'description' => 'Seminarios, talleres y eventos educativos', 'display_order' => 7],
-            ['code' => 'social', 'name' => 'Social', 'description' => 'Eventos sociales y comunitarios', 'display_order' => 8],
-        ];
-
-        foreach ($themes as $theme) {
-            EventTheme::updateOrCreate(
-                ['code' => $theme['code']],
-                $theme,
             );
         }
     }

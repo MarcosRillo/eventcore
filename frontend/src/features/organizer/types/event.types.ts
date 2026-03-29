@@ -17,14 +17,6 @@ export interface EventOrigin {
   display_order: number
 }
 
-export interface EventTheme {
-  id: number
-  code: string
-  name: string
-  is_active: boolean
-  display_order: number
-}
-
 export interface EventFrequency {
   id: number
   code: string
@@ -146,7 +138,6 @@ export interface OrganizerEvent {
   edition_number?: string
   subtype_id?: number
   origin_id?: number
-  theme_id?: number
   frequency_id?: number
   rotation_type_id?: number
   producer_id?: number
@@ -157,7 +148,6 @@ export interface OrganizerEvent {
 
   // Loaded relations
   origin?: EventOrigin
-  theme?: EventTheme
   frequency?: EventFrequency
   rotation_type?: EventRotationType
   subtype?: EventSubtype
@@ -244,7 +234,6 @@ export interface CreateEventDto {
   // Normalized FK fields (optional, nullable in DB)
   subtype_id?: number
   origin_id?: number
-  theme_id?: number
   frequency_id?: number
   rotation_type_id?: number
   producer_id?: number
@@ -311,7 +300,6 @@ export interface EventFormData {
   type_id: number | null
   subtype_id: number | null
   origin_id: number | null
-  theme_id: number | null
   frequency_id: number | null
   rotation_type_id: number | null
   producer_id: number | null
@@ -364,7 +352,6 @@ export interface EventFormErrors {
   type_id?: string
   subtype_id?: string
   origin_id?: string
-  theme_id?: string
   frequency_id?: string
   rotation_type_id?: string
   producer_id?: string
@@ -420,7 +407,6 @@ export interface SubmitEventError {
  */
 export interface EventLookupTables {
   origins: EventOrigin[]
-  themes: EventTheme[]
   frequencies: EventFrequency[]
   rotation_types: EventRotationType[]
   subtypes: EventSubtype[]

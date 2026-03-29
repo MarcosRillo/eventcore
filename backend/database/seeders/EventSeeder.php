@@ -10,7 +10,6 @@ use App\Models\EventOrigin;
 use App\Models\EventRotationType;
 use App\Models\EventStatus;
 use App\Models\EventSubtype;
-use App\Models\EventTheme;
 use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
@@ -111,9 +110,6 @@ class EventSeeder extends Seeder
         $originLocal = EventOrigin::where('code', 'local')->first();
         $originNational = EventOrigin::where('code', 'national')->first();
 
-        $themeGastronomico = EventTheme::where('code', 'gastronomico')->first();
-        $themeDeportivo = EventTheme::where('code', 'deportivo')->first();
-        $themeNegocios = EventTheme::where('code', 'negocios')->first();
 
         $frequencyUnico = EventFrequency::where('code', 'unico')->first();
         $frequencyAnual = EventFrequency::where('code', 'anual')->first();
@@ -146,8 +142,6 @@ class EventSeeder extends Seeder
         // Get locations
         $ubicacionesTurismo = Location::where('entity_id', $enteDeturismo->id)->get();
 
-        // Get academic theme for workshops
-        $themeAcademico = DB::table('event_themes')->where('name', 'academico')->first();
 
         // =====================================================
         // EVENTOS PROPIOS DEL ENTE DE TURISMO (3)
@@ -168,7 +162,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '15',
@@ -198,7 +191,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -225,7 +217,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
@@ -258,8 +249,7 @@ class EventSeeder extends Seeder
                 'event_type_id' => $festivalesType->id,
                 'event_subtype_id' => $gastronomicoSubtype->id,
                 'origin_id' => $originLocal->id,
-                'theme_id' => $themeGastronomico->id,
-                'frequency_id' => $frequencyAnual->id,
+                    'frequency_id' => $frequencyAnual->id,
                 'rotation_type_id' => $rotationFijo->id,
                 'edition_number' => '10',
             ]);
@@ -291,8 +281,7 @@ class EventSeeder extends Seeder
                 'event_type_id' => $turismoType->id,
                 'event_subtype_id' => $rutaTuristicaSubtype->id,
                 'origin_id' => $originNational->id,
-                'theme_id' => $themeNegocios->id,
-                'frequency_id' => $frequencyAnual->id,
+                    'frequency_id' => $frequencyAnual->id,
                 'rotation_type_id' => $rotationRotativo->id,
                 'edition_number' => '42',
             ]);
@@ -323,8 +312,7 @@ class EventSeeder extends Seeder
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
                 'origin_id' => $originLocal->id,
-                'theme_id' => $themeAcademico?->id,
-                'frequency_id' => $frequencyUnico->id,
+                    'frequency_id' => $frequencyUnico->id,
                 'rotation_type_id' => $rotationFijo->id,
                 'edition_number' => '1',
                 'local_attendance' => 50,
@@ -358,8 +346,7 @@ class EventSeeder extends Seeder
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
                 'origin_id' => $originLocal->id,
-                'theme_id' => $themeGastronomico->id,
-                'frequency_id' => $frequencyAnual->id,
+                    'frequency_id' => $frequencyAnual->id,
                 'rotation_type_id' => $rotationRotativo->id,
                 'edition_number' => '6',
                 'local_attendance' => 80,
@@ -428,14 +415,6 @@ class EventSeeder extends Seeder
         ?User $entityAdminTurismo,
         $ubicacionesTurismo,
     ): void {
-        // Get themes
-        $themeCultural = EventTheme::where('code', 'cultural')->first();
-        $themeMusical = EventTheme::where('code', 'musical')->first();
-        $themeDeportivo = EventTheme::where('code', 'deportivo')->first();
-        $themeGastronomico = EventTheme::where('code', 'gastronomico')->first();
-        $themeNegocios = EventTheme::where('code', 'negocios')->first();
-        $themeAcademico = EventTheme::where('code', 'academico')->first();
-        $themeSocial = EventTheme::where('code', 'social')->first();
 
         // Use pending_public_approval for some types, pending_internal for others
         $pendingStatusForDeportes = $pendingPublicStatus ?? $pendingInternalStatus;
@@ -479,7 +458,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
@@ -505,7 +483,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '45',
@@ -531,7 +508,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '52',
@@ -557,7 +533,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '12',
@@ -589,7 +564,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '15',
@@ -615,7 +589,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '7',
@@ -641,7 +614,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -667,7 +639,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -699,7 +670,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '5',
@@ -725,7 +695,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '10',
@@ -751,7 +720,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '25',
@@ -777,7 +745,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -809,7 +776,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '20',
@@ -835,7 +801,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '4',
@@ -861,7 +826,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '6',
@@ -887,7 +851,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -919,7 +882,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '18',
@@ -945,7 +907,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '32',
@@ -971,7 +932,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
@@ -997,7 +957,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '4',
@@ -1029,7 +988,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '5',
@@ -1055,7 +1013,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -1081,7 +1038,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1107,7 +1063,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1143,15 +1098,6 @@ class EventSeeder extends Seeder
         $originNational = EventOrigin::where('code', 'national')->first();
         $originInternational = EventOrigin::where('code', 'international')->first();
 
-        // Get themes
-        $themeCultural = EventTheme::where('code', 'cultural')->first();
-        $themeMusical = EventTheme::where('code', 'musical')->first();
-        $themeDeportivo = EventTheme::where('code', 'deportivo')->first();
-        $themeGastronomico = EventTheme::where('code', 'gastronomico')->first();
-        $themeNegocios = EventTheme::where('code', 'negocios')->first();
-        $themeAcademico = EventTheme::where('code', 'academico')->first();
-        $themeSocial = EventTheme::where('code', 'social')->first();
-        $themeReligioso = EventTheme::where('code', 'religioso')->first();
 
         // Get frequencies
         $frequencyUnico = EventFrequency::where('code', 'unico')->first();
@@ -1223,7 +1169,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '24',
@@ -1249,7 +1194,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '5',
@@ -1275,7 +1219,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -1303,7 +1246,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '30',
@@ -1329,7 +1271,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '12',
@@ -1359,7 +1300,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '2',
@@ -1388,7 +1328,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '18',
@@ -1414,7 +1353,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '36',
@@ -1440,7 +1378,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '10',
@@ -1470,7 +1407,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '7',
@@ -1496,7 +1432,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '6',
@@ -1524,7 +1459,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '3',
@@ -1550,7 +1484,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '48',
@@ -1580,7 +1513,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1606,7 +1538,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1633,7 +1564,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '52',
@@ -1659,7 +1589,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1685,7 +1614,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '15',
@@ -1715,7 +1643,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1741,7 +1668,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '20',
@@ -1767,7 +1693,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1793,7 +1718,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1819,7 +1743,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '2',
@@ -1849,7 +1772,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '4',
@@ -1875,7 +1797,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1901,7 +1822,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '8',
@@ -1927,7 +1847,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '12',
@@ -1957,7 +1876,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -1983,7 +1901,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -2009,7 +1926,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '36',
@@ -2039,7 +1955,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '5',
@@ -2077,15 +1992,6 @@ class EventSeeder extends Seeder
         $originNational = EventOrigin::where('code', 'national')->first();
         $originInternational = EventOrigin::where('code', 'international')->first();
 
-        // Get themes
-        $themeCultural = EventTheme::where('code', 'cultural')->first();
-        $themeMusical = EventTheme::where('code', 'musical')->first();
-        $themeDeportivo = EventTheme::where('code', 'deportivo')->first();
-        $themeGastronomico = EventTheme::where('code', 'gastronomico')->first();
-        $themeNegocios = EventTheme::where('code', 'negocios')->first();
-        $themeAcademico = EventTheme::where('code', 'academico')->first();
-        $themeSocial = EventTheme::where('code', 'social')->first();
-        $themeReligioso = EventTheme::where('code', 'religioso')->first();
 
         // Get frequencies
         $frequencyUnico = EventFrequency::where('code', 'unico')->first();
@@ -2159,7 +2065,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '18',
@@ -2185,7 +2090,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '12',
@@ -2214,7 +2118,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '36',
@@ -2240,7 +2143,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '5',
@@ -2268,7 +2170,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '10',
@@ -2294,7 +2195,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '30',
@@ -2320,7 +2220,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '8',
@@ -2346,7 +2245,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '7',
@@ -2372,7 +2270,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '15',
@@ -2398,7 +2295,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyTrimestral?->id ?? $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '4',
@@ -2428,7 +2324,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '6',
@@ -2454,7 +2349,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '20',
@@ -2480,7 +2374,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '22',
@@ -2506,7 +2399,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '10',
@@ -2532,7 +2424,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '3',
@@ -2558,7 +2449,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '14',
@@ -2584,7 +2474,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '15',
@@ -2610,7 +2499,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -2636,7 +2524,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '9',
@@ -2666,7 +2553,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '12',
@@ -2692,7 +2578,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
@@ -2718,7 +2603,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencySemestral?->id ?? $frequencyAnual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '5',
@@ -2744,7 +2628,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '14',
@@ -2770,7 +2653,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '12',
@@ -2796,7 +2678,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '7',
@@ -2822,7 +2703,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '25',
@@ -2848,7 +2728,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '6',
@@ -2878,7 +2757,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -2904,7 +2782,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -2930,7 +2807,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '6',
@@ -2956,7 +2832,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '28',
@@ -2982,7 +2857,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '4',
@@ -3008,7 +2882,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3034,7 +2907,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '9',
@@ -3060,7 +2932,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '5',
@@ -3086,7 +2957,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemestral?->id ?? $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '6',
@@ -3112,7 +2982,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '12',
@@ -3142,7 +3011,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '1',
@@ -3168,7 +3036,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3194,7 +3061,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3220,7 +3086,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '2',
@@ -3246,7 +3111,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '35',
@@ -3272,7 +3136,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3298,7 +3161,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyTrimestral?->id ?? $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '8',
@@ -3324,7 +3186,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '4',
@@ -3350,7 +3211,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3376,7 +3236,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeNegocios->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3406,7 +3265,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '7',
@@ -3432,7 +3290,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3458,7 +3315,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -3484,7 +3340,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencySemanal->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '20',
@@ -3510,7 +3365,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationRotativo->id,
             'edition_number' => '11',
@@ -3536,7 +3390,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyMensual->id,
             'rotation_type_id' => $rotationItinerante->id,
             'edition_number' => '12',
@@ -3562,7 +3415,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeReligioso->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '40',
@@ -3588,7 +3440,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeAcademico->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '32',
@@ -3618,7 +3469,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3644,7 +3494,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeMusical->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3670,7 +3519,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '2',
@@ -3696,7 +3544,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'origin_id' => $originNational->id,
-            'theme_id' => $themeDeportivo->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3722,7 +3569,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originInternational->id,
-            'theme_id' => $themeGastronomico->id,
             'frequency_id' => $frequencyUnico->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '1',
@@ -3752,7 +3598,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeSocial->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '3',
@@ -3778,7 +3623,6 @@ class EventSeeder extends Seeder
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'origin_id' => $originLocal->id,
-            'theme_id' => $themeCultural->id,
             'frequency_id' => $frequencyAnual->id,
             'rotation_type_id' => $rotationFijo->id,
             'edition_number' => '10',
@@ -3806,13 +3650,6 @@ class EventSeeder extends Seeder
         $originLocal = EventOrigin::where('code', 'local')->first();
         $originNational = EventOrigin::where('code', 'national')->first();
 
-        $themeCultural = EventTheme::where('code', 'cultural')->first();
-        $themeMusical = EventTheme::where('code', 'musical')->first();
-        $themeDeportivo = EventTheme::where('code', 'deportivo')->first();
-        $themeGastronomico = EventTheme::where('code', 'gastronomico')->first();
-        $themeNegocios = EventTheme::where('code', 'negocios')->first();
-        $themeAcademico = EventTheme::where('code', 'academico')->first();
-        $themeSocial = EventTheme::where('code', 'social')->first();
 
         $frequencyUnico = EventFrequency::where('code', 'unico')->first();
         $frequencyAnual = EventFrequency::where('code', 'anual')->first();
@@ -3862,51 +3699,51 @@ class EventSeeder extends Seeder
         // 30 demo events: days 30-60, alternating published/approved_internal
         $demoEvents = [
             // === FESTIVALES (5) ===
-            ['Noche de las Peñas Tucumanas', 'Gran encuentro de peñas folclóricas con música en vivo, empanadas y vino patero en la Plaza Independencia.', 30, 18, 31, 2, $festivalesType, 'Festival Folclórico', $themeMusical, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Escenario principal Plaza Independencia'],
-            ['Festival de la Empanada Artesanal', 'Concurso de la mejor empanada tucumana con degustación libre, shows en vivo y feria de productores locales.', 33, 11, 34, 22, $festivalesType, 'Festival Gastronómico', $themeGastronomico, $frequencyAnual, $rotationFijo, $originLocal, $multiSedeFormat, 1, 'Zona de degustación'],
-            ['Festival de Jazz del NOA', 'Tres días de jazz con bandas nacionales e internacionales en el Teatro San Martín y espacios al aire libre.', 35, 20, 37, 23, $festivalesType, 'Festival de Música', $themeMusical, $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 2, 'Escenario Teatro San Martín'],
-            ['Fiesta del Limón Tucumano', 'Celebración de la cosecha citrícola con carrozas, elección de la reina y espectáculos folclóricos en Famaillá.', 45, 10, 47, 22, $festivalesType, 'Festival Cultural', $themeCultural, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Ruta del Limón - Famaillá'],
-            ['Encuentro Nacional de Folklore', 'Festival folclórico con delegaciones de todo el país, peñas, artesanías y gastronomía regional.', 55, 18, 57, 23, $festivalesType, 'Festival Folclórico', $themeMusical, $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 1, 'Anfiteatro Municipal'],
+            ['Noche de las Peñas Tucumanas', 'Gran encuentro de peñas folclóricas con música en vivo, empanadas y vino patero en la Plaza Independencia.', 30, 18, 31, 2, $festivalesType, 'Festival Folclórico', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Escenario principal Plaza Independencia'],
+            ['Festival de la Empanada Artesanal', 'Concurso de la mejor empanada tucumana con degustación libre, shows en vivo y feria de productores locales.', 33, 11, 34, 22, $festivalesType, 'Festival Gastronómico', $frequencyAnual, $rotationFijo, $originLocal, $multiSedeFormat, 1, 'Zona de degustación'],
+            ['Festival de Jazz del NOA', 'Tres días de jazz con bandas nacionales e internacionales en el Teatro San Martín y espacios al aire libre.', 35, 20, 37, 23, $festivalesType, 'Festival de Música', $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 2, 'Escenario Teatro San Martín'],
+            ['Fiesta del Limón Tucumano', 'Celebración de la cosecha citrícola con carrozas, elección de la reina y espectáculos folclóricos en Famaillá.', 45, 10, 47, 22, $festivalesType, 'Festival Cultural', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Ruta del Limón - Famaillá'],
+            ['Encuentro Nacional de Folklore', 'Festival folclórico con delegaciones de todo el país, peñas, artesanías y gastronomía regional.', 55, 18, 57, 23, $festivalesType, 'Festival Folclórico', $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 1, 'Anfiteatro Municipal'],
 
             // === DEPORTES (5) ===
-            ['Maratón Cerro San Javier', 'Carrera de montaña de 21km por los senderos del Cerro San Javier con categorías amateur y profesional.', 31, 6, 31, 14, $deportesType, 'Maratón', $themeDeportivo, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Punto de largada: base del cerro'],
-            ['Torneo Interprovincial de Vóley Playa', 'Competencia de vóley playa con equipos del NOA en las canchas del Parque 9 de Julio.', 35, 9, 36, 19, $deportesType, 'Torneo', $themeDeportivo, $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 0, 'Canchas Parque 9 de Julio'],
-            ['Exhibición de Artes Marciales', 'Demostración de karate, judo, taekwondo y artes marciales mixtas con maestros invitados.', 42, 16, 42, 21, $deportesType, 'Exhibición Deportiva', $themeDeportivo, $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Gimnasio Municipal'],
-            ['Competencia de Mountain Bike Yungas', 'Circuito de mountain bike por las Yungas tucumanas, 45km de senderos naturales.', 50, 7, 50, 16, $deportesType, 'Competencia', $themeDeportivo, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Sendero de las Yungas'],
-            ['Copa Tucumán de Natación', 'Torneo de natación en pileta olímpica con categorías infantil, juvenil y adultos.', 53, 8, 54, 18, $deportesType, 'Torneo', $themeDeportivo, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Natatorio Provincial'],
+            ['Maratón Cerro San Javier', 'Carrera de montaña de 21km por los senderos del Cerro San Javier con categorías amateur y profesional.', 31, 6, 31, 14, $deportesType, 'Maratón', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Punto de largada: base del cerro'],
+            ['Torneo Interprovincial de Vóley Playa', 'Competencia de vóley playa con equipos del NOA en las canchas del Parque 9 de Julio.', 35, 9, 36, 19, $deportesType, 'Torneo', $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 0, 'Canchas Parque 9 de Julio'],
+            ['Exhibición de Artes Marciales', 'Demostración de karate, judo, taekwondo y artes marciales mixtas con maestros invitados.', 42, 16, 42, 21, $deportesType, 'Exhibición Deportiva', $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Gimnasio Municipal'],
+            ['Competencia de Mountain Bike Yungas', 'Circuito de mountain bike por las Yungas tucumanas, 45km de senderos naturales.', 50, 7, 50, 16, $deportesType, 'Competencia', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Sendero de las Yungas'],
+            ['Copa Tucumán de Natación', 'Torneo de natación en pileta olímpica con categorías infantil, juvenil y adultos.', 53, 8, 54, 18, $deportesType, 'Torneo', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Natatorio Provincial'],
 
             // === CULTURA (5) ===
-            ['Exposición Pintores del NOA', 'Muestra colectiva de artistas plásticos del Noroeste Argentino en el Museo Timoteo Navarro.', 35, 10, 50, 20, $culturaType, 'Exposición de Arte', $themeCultural, $frequencyAnual, $rotationFijo, $originNational, $sedeUnicaFormat, 1, 'Sala principal del museo'],
-            ['Noche de Teatro Independiente', 'Ciclo de obras cortas de compañías independientes tucumanas en el Teatro Alberdi.', 37, 21, 37, 23, $culturaType, 'Teatro', $themeCultural, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Teatro Alberdi - Sala A'],
-            ['Concierto Sinfónica de Tucumán', 'Programa especial con obras de Ginastera, Piazzolla y Guastavino interpretado por la Orquesta Sinfónica.', 35, 20, 35, 22, $culturaType, 'Concierto', $themeMusical, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Teatro San Martín - Sala Principal'],
-            ['Festival de Danza Contemporánea', 'Presentaciones de danza contemporánea y ballet con compañías locales y nacionales invitadas.', 50, 19, 51, 22, $culturaType, 'Danza', $themeCultural, $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
-            ['Muestra Fotográfica Tucumán Antiguo', 'Fotografías históricas de Tucumán del siglo XIX y XX con piezas de archivo nunca antes exhibidas.', 56, 10, 60, 18, $culturaType, 'Exposición de Arte', $themeCultural, $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Casa de Gobierno - Salón Blanco'],
+            ['Exposición Pintores del NOA', 'Muestra colectiva de artistas plásticos del Noroeste Argentino en el Museo Timoteo Navarro.', 35, 10, 50, 20, $culturaType, 'Exposición de Arte', $frequencyAnual, $rotationFijo, $originNational, $sedeUnicaFormat, 1, 'Sala principal del museo'],
+            ['Noche de Teatro Independiente', 'Ciclo de obras cortas de compañías independientes tucumanas en el Teatro Alberdi.', 37, 21, 37, 23, $culturaType, 'Teatro', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Teatro Alberdi - Sala A'],
+            ['Concierto Sinfónica de Tucumán', 'Programa especial con obras de Ginastera, Piazzolla y Guastavino interpretado por la Orquesta Sinfónica.', 35, 20, 35, 22, $culturaType, 'Concierto', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Teatro San Martín - Sala Principal'],
+            ['Festival de Danza Contemporánea', 'Presentaciones de danza contemporánea y ballet con compañías locales y nacionales invitadas.', 50, 19, 51, 22, $culturaType, 'Danza', $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
+            ['Muestra Fotográfica Tucumán Antiguo', 'Fotografías históricas de Tucumán del siglo XIX y XX con piezas de archivo nunca antes exhibidas.', 56, 10, 60, 18, $culturaType, 'Exposición de Arte', $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Casa de Gobierno - Salón Blanco'],
 
             // === TURISMO (5) ===
-            ['Ruta de los Artesanos de Tafí', 'Recorrido guiado por talleres artesanales de Tafí del Valle con demostraciones de tejido y cerámica.', 34, 9, 34, 17, $turismoType, 'Ruta Turística', $themeCultural, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Punto de salida: Plaza de Tafí'],
-            ['Excursión Ruinas de Quilmes', 'Visita guiada a la Ciudad Sagrada de los Quilmes con guías especializados en historia precolombina.', 39, 8, 39, 18, $turismoType, 'Excursión', $themeCultural, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Ruinas de Quilmes'],
-            ['Tour Gastronómico Yerba Buena', 'Recorrido por restaurantes y bodegas de Yerba Buena con degustación de platos regionales y vinos.', 44, 12, 44, 20, $turismoType, 'Experiencia Gastronómica', $themeGastronomico, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Zona gastronómica Yerba Buena'],
-            ['Avistaje de Aves en Reserva Horco Molle', 'Excursión de avistaje con guías ornitólogos en la Reserva Natural de Horco Molle, binoculares incluidos.', 50, 6, 50, 12, $turismoType, 'Tour Guiado', $themeDeportivo, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Entrada Reserva Horco Molle'],
-            ['Trekking Cascada del Río Noque', 'Caminata guiada de dificultad media hasta la cascada del Río Noque con almuerzo campestre.', 58, 7, 58, 17, $turismoType, 'Excursión', $themeDeportivo, $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Base del sendero Río Noque'],
+            ['Ruta de los Artesanos de Tafí', 'Recorrido guiado por talleres artesanales de Tafí del Valle con demostraciones de tejido y cerámica.', 34, 9, 34, 17, $turismoType, 'Ruta Turística', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Punto de salida: Plaza de Tafí'],
+            ['Excursión Ruinas de Quilmes', 'Visita guiada a la Ciudad Sagrada de los Quilmes con guías especializados en historia precolombina.', 39, 8, 39, 18, $turismoType, 'Excursión', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Ruinas de Quilmes'],
+            ['Tour Gastronómico Yerba Buena', 'Recorrido por restaurantes y bodegas de Yerba Buena con degustación de platos regionales y vinos.', 44, 12, 44, 20, $turismoType, 'Experiencia Gastronómica', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Zona gastronómica Yerba Buena'],
+            ['Avistaje de Aves en Reserva Horco Molle', 'Excursión de avistaje con guías ornitólogos en la Reserva Natural de Horco Molle, binoculares incluidos.', 50, 6, 50, 12, $turismoType, 'Tour Guiado', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Entrada Reserva Horco Molle'],
+            ['Trekking Cascada del Río Noque', 'Caminata guiada de dificultad media hasta la cascada del Río Noque con almuerzo campestre.', 58, 7, 58, 17, $turismoType, 'Excursión', $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Base del sendero Río Noque'],
 
             // === FERIAS (5) ===
-            ['Feria de Artesanías del Norte', 'Artesanos de Tucumán, Salta y Jujuy exhiben y venden sus creaciones en madera, cuero y tejidos.', 35, 10, 36, 20, $feriasType, 'Feria Artesanal', $themeCultural, $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 2, 'Paseo de artesanos'],
-            ['Expo Vinos del NOA', 'Feria de bodegas del Noroeste con cata de vinos, maridajes y charlas con enólogos reconocidos.', 40, 11, 41, 21, $feriasType, 'Expo Comercial', $themeGastronomico, $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 0, 'Centro de Convenciones'],
-            ['Feria del Libro Tucumán', 'Edición anual de la feria del libro con presentaciones de autores locales, talleres y actividades infantiles.', 50, 10, 52, 20, $feriasType, 'Feria del Libro', $themeAcademico, $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
-            ['Mercado Productivo Regional', 'Feria de productores locales con frutas, verduras, dulces artesanales, quesos y miel de la región.', 51, 8, 51, 16, $feriasType, 'Feria Productiva', $themeGastronomico, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Mercado del Norte'],
-            ['Expo Turismo Tucumán', 'Feria de turismo con stands de prestadores, sorteos de paquetes turísticos y shows en vivo.', 59, 10, 60, 20, $feriasType, 'Expo Comercial', $themeNegocios, $frequencyAnual, $rotationFijo, $originNational, $multiSedeFormat, 0, 'Centro de Convenciones Tucumán'],
+            ['Feria de Artesanías del Norte', 'Artesanos de Tucumán, Salta y Jujuy exhiben y venden sus creaciones en madera, cuero y tejidos.', 35, 10, 36, 20, $feriasType, 'Feria Artesanal', $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 2, 'Paseo de artesanos'],
+            ['Expo Vinos del NOA', 'Feria de bodegas del Noroeste con cata de vinos, maridajes y charlas con enólogos reconocidos.', 40, 11, 41, 21, $feriasType, 'Expo Comercial', $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 0, 'Centro de Convenciones'],
+            ['Feria del Libro Tucumán', 'Edición anual de la feria del libro con presentaciones de autores locales, talleres y actividades infantiles.', 50, 10, 52, 20, $feriasType, 'Feria del Libro', $frequencyAnual, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
+            ['Mercado Productivo Regional', 'Feria de productores locales con frutas, verduras, dulces artesanales, quesos y miel de la región.', 51, 8, 51, 16, $feriasType, 'Feria Productiva', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Mercado del Norte'],
+            ['Expo Turismo Tucumán', 'Feria de turismo con stands de prestadores, sorteos de paquetes turísticos y shows en vivo.', 59, 10, 60, 20, $feriasType, 'Expo Comercial', $frequencyAnual, $rotationFijo, $originNational, $multiSedeFormat, 0, 'Centro de Convenciones Tucumán'],
 
             // === CONFERENCIAS (5) ===
-            ['Congreso de Innovación Turística', 'Congreso con ponencias sobre tecnología aplicada al turismo, marketing digital y sostenibilidad.', 33, 9, 34, 18, $conferenciasType, 'Congreso', $themeNegocios, $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 1, 'Hotel Sheraton - Salón Imperial'],
-            ['Seminario de Gastronomía Sustentable', 'Seminario sobre cocina con productos locales, reducción de desperdicios y cadenas de valor cortas.', 50, 10, 50, 18, $conferenciasType, 'Seminario', $themeGastronomico, $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Universidad Nacional de Tucumán'],
-            ['Workshop Fotografía de Naturaleza', 'Taller práctico de fotografía de paisajes y fauna en las Yungas con fotógrafos profesionales.', 47, 9, 47, 17, $conferenciasType, 'Workshop', $themeAcademico, $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Reserva Experimental Horco Molle'],
-            ['Charla: Historia Viva de Tucumán', 'Ciclo de charlas sobre la historia de Tucumán desde la independencia hasta la actualidad.', 50, 19, 50, 21, $conferenciasType, 'Charla', $themeAcademico, $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Casa Histórica de la Independencia'],
-            ['Congreso Patrimonio Cultural del NOA', 'Encuentro de especialistas en preservación del patrimonio cultural e histórico del Noroeste Argentino.', 57, 9, 58, 18, $conferenciasType, 'Congreso', $themeAcademico, $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 2, 'Facultad de Filosofía y Letras'],
+            ['Congreso de Innovación Turística', 'Congreso con ponencias sobre tecnología aplicada al turismo, marketing digital y sostenibilidad.', 33, 9, 34, 18, $conferenciasType, 'Congreso', $frequencyAnual, $rotationRotativo, $originNational, $sedeUnicaFormat, 1, 'Hotel Sheraton - Salón Imperial'],
+            ['Seminario de Gastronomía Sustentable', 'Seminario sobre cocina con productos locales, reducción de desperdicios y cadenas de valor cortas.', 50, 10, 50, 18, $conferenciasType, 'Seminario', $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 2, 'Universidad Nacional de Tucumán'],
+            ['Workshop Fotografía de Naturaleza', 'Taller práctico de fotografía de paisajes y fauna en las Yungas con fotógrafos profesionales.', 47, 9, 47, 17, $conferenciasType, 'Workshop', $frequencyUnico, $rotationFijo, $originLocal, $sedeUnicaFormat, 0, 'Reserva Experimental Horco Molle'],
+            ['Charla: Historia Viva de Tucumán', 'Ciclo de charlas sobre la historia de Tucumán desde la independencia hasta la actualidad.', 50, 19, 50, 21, $conferenciasType, 'Charla', $frequencyMensual, $rotationFijo, $originLocal, $sedeUnicaFormat, 1, 'Casa Histórica de la Independencia'],
+            ['Congreso Patrimonio Cultural del NOA', 'Encuentro de especialistas en preservación del patrimonio cultural e histórico del Noroeste Argentino.', 57, 9, 58, 18, $conferenciasType, 'Congreso', $frequencyAnual, $rotationRotativo, $originNational, $multiSedeFormat, 2, 'Facultad de Filosofía y Letras'],
         ];
 
         $eventIndex = 0;
         foreach ($demoEvents as $data) {
-            [$title, $description, $startDay, $startHour, $endDay, $endHour, $type, $subtypeName, $theme, $frequency, $rotation, $origin, $format, $orgIdx, $locationNote] = $data;
+            [$title, $description, $startDay, $startHour, $endDay, $endHour, $type, $subtypeName, $frequency, $rotation, $origin, $format, $orgIdx, $locationNote] = $data;
 
             $org = $orgs[$orgIdx];
             $status = $statuses[$eventIndex % 2]; // alternating published / approved_internal
@@ -3926,7 +3763,6 @@ class EventSeeder extends Seeder
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => $entityAdminTurismo->id,
                 'origin_id' => $origin->id,
-                'theme_id' => $theme->id,
                 'frequency_id' => $frequency->id,
                 'rotation_type_id' => $rotation->id,
                 'edition_number' => (string) rand(1, 12),
