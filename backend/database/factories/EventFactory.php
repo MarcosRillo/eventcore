@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Event;
 use App\Models\EventFrequency;
 use App\Models\EventOrigin;
-use App\Models\EventRotationType;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\User;
@@ -90,7 +89,6 @@ class EventFactory extends Factory
             // Foreign keys (normalized)
             'origin_id' => fn () => EventOrigin::inRandomOrder()->first()?->id,
             'frequency_id' => fn () => EventFrequency::inRandomOrder()->first()?->id,
-            'rotation_type_id' => fn () => EventRotationType::inRandomOrder()->first()?->id,
             'producer_id' => null,
         ];
     }

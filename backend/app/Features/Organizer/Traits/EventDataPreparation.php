@@ -99,7 +99,6 @@ trait EventDataPreparation
             // Note: producer_id is handled in getSystemFields (auto-fills with organization_id)
             'origin_id' => $data['origin_id'] ?? null,
             'frequency_id' => $data['frequency_id'] ?? null,
-            'rotation_type_id' => $data['rotation_type_id'] ?? null,
 
             // Location info
             'maps_url' => $data['maps_url'] ?? null,

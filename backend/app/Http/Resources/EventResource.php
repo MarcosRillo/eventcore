@@ -134,12 +134,6 @@ class EventResource extends JsonResource
                 'name' => $this->frequency->name,
             ]),
 
-            'rotation_type' => $this->whenLoaded('rotationType', fn () => [
-                'id' => $this->rotationType->id,
-                'code' => $this->rotationType->code,
-                'name' => $this->rotationType->name,
-            ]),
-
             'producer' => $this->whenLoaded('producer', fn () => [
                 'id' => $this->producer->id,
                 'name' => $this->producer->name,
@@ -181,7 +175,6 @@ class EventResource extends JsonResource
                     'organization_id' => $this->organization_id,
                     'origin_id' => $this->origin_id,
                     'frequency_id' => $this->frequency_id,
-                    'rotation_type_id' => $this->rotation_type_id,
                     'producer_id' => $this->producer_id,
 
                     // Approval workflow (from normalized event_approvals table)

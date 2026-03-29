@@ -69,7 +69,7 @@ class PublicEventService
     public function getPublishedEventById(int $id): Event
     {
         $event = Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'frequency', 'rotationType', 'services', 'status'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'frequency', 'services', 'status'])
             ->find($id);
 
         if (! $event) {
