@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * UserTable - Dumb Component using GenericTable
  * Uses GenericTable with custom column renderers for users

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * ShareButtons - Dumb Component
  * Social media sharing buttons for public event pages

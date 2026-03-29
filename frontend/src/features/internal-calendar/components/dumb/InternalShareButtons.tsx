@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * InternalShareButtons - Dumb Component
  *

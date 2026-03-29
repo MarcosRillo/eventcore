@@ -5,7 +5,7 @@
 
 import { fireEvent,render, screen, waitFor } from '@testing-library/react'
 
-import { DashboardModeView } from '@/features/entity-admin/components/DashboardModeView'
+import { DashboardModeView } from '@/features/entity-admin/components/smart/DashboardModeView'
 import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
 
 // Mock dependencies

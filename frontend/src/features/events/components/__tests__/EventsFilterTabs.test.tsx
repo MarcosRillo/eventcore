@@ -7,7 +7,7 @@
 import { fireEvent,render, screen } from '@testing-library/react'
 
 import { useAuth } from '@/context/AuthContext'
-import { DashboardTab,EventsFilterTabs } from '@/features/events/components/EventsFilterTabs'
+import { DashboardTab,EventsFilterTabs } from '@/features/events/components/smart/EventsFilterTabs'
 
 // Mock useAuth hook
 jest.mock('@/context/AuthContext', () => ({

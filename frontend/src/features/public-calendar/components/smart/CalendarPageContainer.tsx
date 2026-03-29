@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Calendar Page Container
  * Manages view toggle between Grid and Calendar views

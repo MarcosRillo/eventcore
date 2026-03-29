@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 
-import { CreateLocationModal } from '@/features/locations/components/CreateLocationModal'
+import { CreateLocationModal } from '@/features/locations/components/dumb/CreateLocationModal'
 import * as locationService from '@/features/locations/services/location.service'
 
 // Mock the location service

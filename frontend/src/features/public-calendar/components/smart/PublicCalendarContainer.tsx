@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Public Calendar Container
  *

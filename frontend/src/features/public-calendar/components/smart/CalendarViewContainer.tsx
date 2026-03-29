@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Calendar View Container
  * Smart component that connects useCalendarEvents hook with CalendarView component

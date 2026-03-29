@@ -9,8 +9,8 @@
 import { MapPin, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
-import { CreateLocationModal } from '@/features/locations/components/CreateLocationModal';
-import { EditLocationModal } from '@/features/locations/components/EditLocationModal';
+import { CreateLocationModal } from '@/features/locations/components/dumb/CreateLocationModal';
+import { EditLocationModal } from '@/features/locations/components/dumb/EditLocationModal';
 import { LocationTableContainer } from '@/features/locations/components/smart/LocationTableContainer';
 import { useLocationManager } from '@/features/locations/hooks/useLocationManager';
 import { LoadingSpinner } from '@/shared/components/feedback';

@@ -4,3 +4,5 @@
  */
 
 export { EventCardContainer } from '@/features/events/components/smart/EventCardContainer';
+export { EventFiltersBar } from '@/features/events/components/smart/EventFiltersBar';
+export { EventsFilterTabs } from '@/features/events/components/smart/EventsFilterTabs';

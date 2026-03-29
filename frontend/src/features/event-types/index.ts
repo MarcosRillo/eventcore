@@ -43,7 +43,7 @@ export { EventTypeTableContainer } from '@/features/event-types/components/smart
 export { SubtypeRowsContent } from '@/features/event-types/components/dumb/SubtypeRowsContent';
 
 // Components - Modals
-export { default as CreateEventSubtypeModal } from '@/features/event-types/components/CreateEventSubtypeModal';
-export { default as CreateEventTypeModal } from '@/features/event-types/components/CreateEventTypeModal';
-export { default as EditEventSubtypeModal } from '@/features/event-types/components/EditEventSubtypeModal';
-export { default as EditEventTypeModal } from '@/features/event-types/components/EditEventTypeModal';
+export { default as CreateEventSubtypeModal } from '@/features/event-types/components/dumb/CreateEventSubtypeModal';
+export { default as CreateEventTypeModal } from '@/features/event-types/components/dumb/CreateEventTypeModal';
+export { default as EditEventSubtypeModal } from '@/features/event-types/components/smart/EditEventSubtypeModal';
+export { default as EditEventTypeModal } from '@/features/event-types/components/smart/EditEventTypeModal';
