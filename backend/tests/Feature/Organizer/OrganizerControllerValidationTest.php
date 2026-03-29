@@ -338,15 +338,11 @@ class OrganizerControllerValidationTest extends TestCase
     {
         $user = $this->createAuthenticatedUser();
         $payload = $this->getMinimalPayload($user);
-        $payload['virtual_transmission'] = true;
         $payload['format_id'] = $this->getValidFormatId();
 
         $response = $this->postJson('/api/v1/organizer/events', $payload);
 
         $response->assertStatus(201);
-
-        $event = Event::find($response->json('event.id'));
-        $this->assertTrue($event->virtual_transmission);
     }
 
     // ==================== ARRAY VALIDATIONS ====================
@@ -483,7 +479,6 @@ class OrganizerControllerValidationTest extends TestCase
 
         // Explicitly set all optional FK fields to null
         $payload['edition_number'] = null;
-        $payload['subtype_id'] = null;
         $payload['origin_id'] = null;
         $payload['theme_id'] = null;
         $payload['frequency_id'] = null;
@@ -528,6 +523,5 @@ class OrganizerControllerValidationTest extends TestCase
         $event = Event::find($response->json('event.id'));
         $this->assertNull($event->edition_number);
         $this->assertNull($event->origin_id);
-        $this->assertFalse($event->virtual_transmission);
     }
 }

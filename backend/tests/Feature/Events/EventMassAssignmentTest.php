@@ -77,32 +77,6 @@ class EventMassAssignmentTest extends TestCase
     }
 
     #[Test]
-    public function mass_assignment_ignores_approved_by(): void
-    {
-        $organization = Organization::factory()->create();
-
-        $event = Event::factory()->create([
-            'entity_id' => $organization->id,
-        ]);
-
-        $event->fill(['approved_by' => 99999]);
-        $this->assertNotEquals(99999, $event->approved_by);
-    }
-
-    #[Test]
-    public function mass_assignment_ignores_approved_at(): void
-    {
-        $organization = Organization::factory()->create();
-
-        $event = Event::factory()->create([
-            'entity_id' => $organization->id,
-        ]);
-
-        $event->fill(['approved_at' => now()]);
-        $this->assertNull($event->approved_at);
-    }
-
-    #[Test]
     public function mass_assignment_ignores_published_at(): void
     {
         $organization = Organization::factory()->create();

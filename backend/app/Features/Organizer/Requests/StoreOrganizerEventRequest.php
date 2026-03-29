@@ -67,7 +67,6 @@ class StoreOrganizerEventRequest extends FormRequest
             'format_id' => 'nullable|exists:event_formats,id',
 
             // Normalized FKs (Nov 30, 2025)
-            'subtype_id' => 'nullable|exists:event_subtypes,id',
             'origin_id' => 'nullable|exists:event_origins,id',
             'theme_id' => 'nullable|exists:event_themes,id',
             'frequency_id' => 'nullable|exists:event_frequencies,id',
@@ -96,7 +95,6 @@ class StoreOrganizerEventRequest extends FormRequest
             'local_attendance' => 'nullable|integer|min:0|max:10000000',
             'national_attendance' => 'nullable|integer|min:0|max:10000000',
             'international_attendance' => 'nullable|integer|min:0|max:10000000',
-            'virtual_transmission' => 'nullable|boolean',
 
             // Additional information
             'event_website' => 'nullable|url|max:500',

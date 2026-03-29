@@ -122,12 +122,6 @@ class DashboardTransformer
                 'name' => $event->creator->name,
                 'email' => $event->creator->email,
             ] : null,
-            'approver' => $event->approver ? [
-                'id' => $event->approver->id,
-                'name' => $event->approver->name,
-                'email' => $event->approver->email,
-            ] : null,
-            'approved_at' => $event->approved_at?->format('Y-m-d H:i:s'),
             'created_at' => $event->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $event->updated_at->format('Y-m-d H:i:s'),
             'current_state_duration' => $this->calculateCurrentStateDuration($event),

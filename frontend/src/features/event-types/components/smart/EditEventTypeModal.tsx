@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * EditEventTypeModal Component
  * Uses unified FormModal component for consistent form handling

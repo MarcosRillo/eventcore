@@ -23,7 +23,7 @@ class EventService
     public function getAllEvents(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Event::query()
-            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations']);
+            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations', 'services']);
 
         // Apply search filter
         if (! empty($filters['search'])) {
@@ -225,7 +225,7 @@ class EventService
                 return 'AND e.entity_id = :tenant_id';
             }
 
-            return '';
+            return 'AND 1 = 0';
         }
 
         if ($user->isOrganizerAdmin()) {
@@ -329,8 +329,6 @@ class EventService
             $replica->title = $event->title.' (Copia)';
             $replica->status_id = $this->getStatusId('draft');
             $replica->is_featured = false;
-            $replica->approved_at = null;
-            $replica->approved_by = null;
             $replica->published_at = null;
             $replica->save();
 

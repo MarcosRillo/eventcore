@@ -40,6 +40,16 @@ class Organization extends Model
     ];
 
     /**
+     * trust_level valid values (enforced by DB CHECK constraint chk_trust_level):
+     *   1 = Nuevo     — newly registered organization, limited permissions
+     *   2 = Confiable — verified organization, standard permissions
+     *   3 = Premium   — trusted partner, full permissions
+     */
+    public const TRUST_LEVEL_NUEVO     = 1;
+    public const TRUST_LEVEL_CONFIABLE = 2;
+    public const TRUST_LEVEL_PREMIUM   = 3;
+
+    /**
      * Get the parent entity that owns this organization.
      */
     public function parentEntity(): BelongsTo

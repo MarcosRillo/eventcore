@@ -50,7 +50,7 @@ class InternalCalendarService
         $user = Auth::user();
 
         $query = Event::internalCalendar()
-            ->with(['status', 'eventType', 'eventSubtype', 'locations', 'organization'])
+            ->with(['status', 'eventType', 'eventSubtype', 'locations', 'organization', 'services'])
             ->orderBy('start_date', 'asc');
 
         // For planning view: all authenticated users with these roles can see all events

@@ -48,7 +48,7 @@ class OrganizerControllerUpdateTest extends TestCase
             'type_id' => \DB::table('organization_types')->where('type_code', 'primary_entity')->value('id'),
             'status_id' => \DB::table('organization_statuses')->value('id'),
             'parent_id' => null,
-            'trust_level' => 5,
+            'trust_level' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -197,7 +197,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'local_attendance' => 800,
             'national_attendance' => 300,
             'international_attendance' => 150,
-            'virtual_transmission' => true,
 
             // Additional info
             'event_website' => 'https://turismo-actualizado.gob.ar',
@@ -231,7 +230,6 @@ class OrganizerControllerUpdateTest extends TestCase
             'local_attendance' => 800,
             'national_attendance' => 300,
             'international_attendance' => 150,
-            'virtual_transmission' => true,
         ]);
 
         // Assert: Verify async dates in normalized table
@@ -292,7 +290,6 @@ class OrganizerControllerUpdateTest extends TestCase
         $this->assertNull($updatedEvent->edition_number);
         // producer_id is preserved when not provided in update (auto-filled behavior)
         $this->assertEquals($producer->id, $updatedEvent->producer_id);
-        $this->assertFalse($updatedEvent->virtual_transmission);
         $this->assertEquals(1, $updatedEvent->locations()->count());
     }
 
