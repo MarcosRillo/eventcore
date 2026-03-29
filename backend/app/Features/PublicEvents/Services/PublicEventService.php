@@ -50,7 +50,7 @@ class PublicEventService
 
         return $this->taggedRemember(['public-events'], $cacheKey, 60, function () use ($filters, $perPage, $page) {
             $query = Event::published()
-                ->with(['eventType', 'eventSubtype', 'locations', 'origin', 'frequency', 'status', 'services'])
+                ->with(['eventType', 'eventSubtype', 'locations', 'status'])
                 ->orderBy('start_date', 'asc');
 
             $this->applyFilters($query, $filters);
@@ -69,7 +69,7 @@ class PublicEventService
     public function getPublishedEventById(int $id): Event
     {
         $event = Event::published()
-            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'origin', 'frequency', 'services', 'status'])
+            ->with(['eventType', 'eventSubtype', 'locations', 'creator', 'status'])
             ->find($id);
 
         if (! $event) {
@@ -268,11 +268,6 @@ class PublicEventService
                             ->orWhere('city', 'ilike', "%{$search}%");
                     });
             });
-        }
-
-        // Filter by origin
-        if (! empty($filters['origin_id'])) {
-            $query->where('origin_id', $filters['origin_id']);
         }
 
         // Filter by location

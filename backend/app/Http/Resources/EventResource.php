@@ -68,7 +68,6 @@ class EventResource extends JsonResource
             'is_happening' => $this->isHappening(),
             'has_ended' => $this->hasEnded(),
             'is_upcoming' => $this->isUpcoming(),
-            'is_virtual' => $this->isVirtual(),
             'has_multiple_locations' => $this->hasMultipleLocations(),
 
             // Core relationships
@@ -122,30 +121,10 @@ class EventResource extends JsonResource
                 'name' => $this->subtype->name,
             ]),
 
-            'origin' => $this->whenLoaded('origin', fn () => [
-                'id' => $this->origin->id,
-                'code' => $this->origin->code,
-                'name' => $this->origin->name,
-            ]),
-
-            'frequency' => $this->whenLoaded('frequency', fn () => [
-                'id' => $this->frequency->id,
-                'code' => $this->frequency->code,
-                'name' => $this->frequency->name,
-            ]),
-
             'producer' => $this->whenLoaded('producer', fn () => [
                 'id' => $this->producer->id,
                 'name' => $this->producer->name,
             ]),
-
-            'services' => $this->whenLoaded('services', fn () => $this->services->map(fn ($service) => [
-                'id' => $service->id,
-                'code' => $service->code,
-                'name' => $service->name,
-                'is_included' => $service->pivot->is_included,
-                'notes' => $service->pivot->notes,
-            ])),
 
             'rooms' => $this->whenLoaded('rooms', fn () => $this->rooms->map(fn ($room) => [
                 'id' => $room->id,
@@ -173,8 +152,6 @@ class EventResource extends JsonResource
                     'format_id' => $this->format_id,
                     'entity_id' => $this->entity_id,
                     'organization_id' => $this->organization_id,
-                    'origin_id' => $this->origin_id,
-                    'frequency_id' => $this->frequency_id,
                     'producer_id' => $this->producer_id,
 
                     // Approval workflow (from normalized event_approvals table)

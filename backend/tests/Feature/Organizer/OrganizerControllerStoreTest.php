@@ -3,7 +3,6 @@
 namespace Tests\Feature\Organizer;
 
 use App\Models\Event;
-use App\Models\EventOrigin;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Location;
@@ -109,7 +108,6 @@ class OrganizerControllerStoreTest extends TestCase
         $location1 = Location::factory()->create(['entity_id' => 1]);
         $location2 = Location::factory()->create(['entity_id' => 1]);
         $formatId = $this->getValidFormatId();
-        $originId = EventOrigin::where('code', 'national')->first()->id;
         $producer = Organization::factory()->create(['name' => 'Event Producer Org']);
         $eventTypeIds = $this->getValidEventTypeIds();
 
@@ -126,7 +124,6 @@ class OrganizerControllerStoreTest extends TestCase
 
             // Normalized FK fields
             'edition_number' => '15va Edición',
-            'origin_id' => $originId,
             'producer_id' => $producer->id,
 
             // Location info (kept in events)
@@ -171,7 +168,6 @@ class OrganizerControllerStoreTest extends TestCase
             'id' => $eventId,
             'title' => 'Congreso Internacional de Turismo 2025',
             'edition_number' => '15va Edición',
-            'origin_id' => $originId,
             'producer_id' => $producer->id,
             'maps_url' => 'https://maps.google.com/?q=-26.8241,-65.2226',
             'local_attendance' => 500,
@@ -220,7 +216,6 @@ class OrganizerControllerStoreTest extends TestCase
 
         // Verify optional fields are null or auto-filled
         $this->assertNull($event->edition_number);
-        $this->assertNull($event->origin_id);
         // producer_id is now auto-filled with organization_id (Dec 2, 2025)
         $this->assertEquals($user->organization_id, $event->producer_id);
         $this->assertEquals(1, $event->locations()->count());

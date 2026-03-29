@@ -12,10 +12,7 @@ describe('eventFormValidation', () => {
     // FK references
     type_id: null,
     subtype_id: null,
-    origin_id: null,
-    frequency_id: null,
     producer_id: null,
-    service_ids: [],
     room_ids: [],
     location_ids: [1],
     has_custom_location: false,

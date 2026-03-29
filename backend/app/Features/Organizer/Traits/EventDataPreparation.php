@@ -95,11 +95,6 @@ trait EventDataPreparation
             // Basic information
             'edition_number' => $data['edition_number'] ?? null,
 
-            // Normalized FKs (Nov 30, 2025)
-            // Note: producer_id is handled in getSystemFields (auto-fills with organization_id)
-            'origin_id' => $data['origin_id'] ?? null,
-            'frequency_id' => $data['frequency_id'] ?? null,
-
             // Location info
             'maps_url' => $data['maps_url'] ?? null,
             'previous_venue' => $data['previous_venue'] ?? null,
@@ -118,22 +113,6 @@ trait EventDataPreparation
             'featured_image' => $data['featured_image'] ?? null,
             'responsive_image_url' => $data['responsive_image_url'] ?? null,
         ];
-    }
-
-    /**
-     * Sync event services (pivot table).
-     *
-     * @param  Event  $event  The event
-     * @param  array  $serviceIds  Array of service IDs
-     */
-    protected function syncEventServices(Event $event, array $serviceIds): void
-    {
-        // Sync services with is_included = true
-        $services = collect($serviceIds)->mapWithKeys(fn ($id) => [
-            $id => ['is_included' => true],
-        ])->toArray();
-
-        $event->services()->sync($services);
     }
 
     /**
@@ -179,11 +158,6 @@ trait EventDataPreparation
         // Sync locations
         if (isset($data['location_ids'])) {
             $event->locations()->sync($data['location_ids']);
-        }
-
-        // Sync services
-        if (isset($data['service_ids'])) {
-            $this->syncEventServices($event, $data['service_ids']);
         }
 
         // Sync rooms

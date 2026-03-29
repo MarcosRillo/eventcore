@@ -34,12 +34,10 @@ class EventValidationService
     /**
      * Additional fields required for public calendar approval
      * Note: city/venue are now obtained from locations relation
-     * Note: origin is now origin_id (FK)
      */
     private const PUBLIC_ADDITIONAL_FIELDS = [
         'description',
         'featured_image',
-        'origin_id',  // FK to event_origins (normalized)
     ];
 
     /**

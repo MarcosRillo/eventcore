@@ -128,7 +128,6 @@ class DashboardTransformer
             'is_happening' => $event->isHappening(),
             'has_ended' => $event->hasEnded(),
             'is_upcoming' => $event->isUpcoming(),
-            'is_virtual' => $event->isVirtual(),
             'has_multiple_locations' => $event->hasMultipleLocations(),
             'has_cta' => $event->hasCTA(),
             'is_in_approval_workflow' => $event->isInApprovalWorkflow(),

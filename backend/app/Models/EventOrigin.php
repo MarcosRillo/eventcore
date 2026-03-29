@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EventOrigin extends Model
 {
@@ -22,14 +21,6 @@ class EventOrigin extends Model
         'is_active' => 'boolean',
         'display_order' => 'integer',
     ];
-
-    /**
-     * Get events with this origin.
-     */
-    public function events(): HasMany
-    {
-        return $this->hasMany(Event::class, 'origin_id');
-    }
 
     /**
      * Scope for active records only.

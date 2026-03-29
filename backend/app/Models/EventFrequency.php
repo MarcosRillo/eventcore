@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EventFrequency extends Model
 {
@@ -22,14 +21,6 @@ class EventFrequency extends Model
         'is_active' => 'boolean',
         'display_order' => 'integer',
     ];
-
-    /**
-     * Get events with this frequency.
-     */
-    public function events(): HasMany
-    {
-        return $this->hasMany(Event::class, 'frequency_id');
-    }
 
     /**
      * Scope for active records only.

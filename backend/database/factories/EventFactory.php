@@ -3,8 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Event;
-use App\Models\EventFrequency;
-use App\Models\EventOrigin;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\User;
@@ -87,8 +85,6 @@ class EventFactory extends Factory
             'international_attendance' => $this->faker->optional(0.2)->numberBetween(5, 50),
 
             // Foreign keys (normalized)
-            'origin_id' => fn () => EventOrigin::inRandomOrder()->first()?->id,
-            'frequency_id' => fn () => EventFrequency::inRandomOrder()->first()?->id,
             'producer_id' => null,
         ];
     }
@@ -167,48 +163,5 @@ class EventFactory extends Factory
         ]);
     }
 
-
-    // =====================================================
-    // ORIGIN STATES
-    // =====================================================
-
-    public function local(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'origin_id' => fn () => EventOrigin::where('code', 'local')->first()?->id,
-        ]);
-    }
-
-    public function national(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'origin_id' => fn () => EventOrigin::where('code', 'national')->first()?->id,
-        ]);
-    }
-
-    public function international(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'origin_id' => fn () => EventOrigin::where('code', 'international')->first()?->id,
-        ]);
-    }
-
-    // =====================================================
-    // FREQUENCY STATES
-    // =====================================================
-
-    public function unique(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'frequency_id' => fn () => EventFrequency::where('code', 'unico')->first()?->id,
-        ]);
-    }
-
-    public function annual(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'frequency_id' => fn () => EventFrequency::where('code', 'anual')->first()?->id,
-        ]);
-    }
 
 }
