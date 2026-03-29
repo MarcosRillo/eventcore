@@ -1,10 +1,8 @@
 import {
   Briefcase,
   Calendar,
-  ClipboardList,
   Home,
   LayoutGrid,
-  Mail,
   MapPin,
   Store,
   Ticket,
@@ -35,8 +33,6 @@ export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
       '/sectors': 'Gestión de Sectores',
       '/organizations': 'Gestión de Organizaciones',
       '/users': 'Gestión de Usuarios',
-      '/invitations': 'Gestión de Invitaciones',
-      '/registration-requests': 'Solicitudes de Registro',
     },
     navSections: [
       {
@@ -70,12 +66,6 @@ export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
           ...(options.canManageUsers
             ? [{ name: 'Usuarios', href: '/users', icon: Users }]
             : []),
-          { name: 'Invitaciones', href: '/invitations', icon: Mail },
-          {
-            name: 'Solicitudes',
-            href: '/registration-requests',
-            icon: ClipboardList,
-          },
         ],
       },
     ],
