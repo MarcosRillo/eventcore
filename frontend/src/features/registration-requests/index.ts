@@ -18,7 +18,6 @@ export {
 export { useRegistrationRequests } from '@/features/registration-requests/hooks/useRegistrationRequests'
 
 // Components
-export { RegistrationForm as RegistrationPublicForm } from '@/features/registration-requests/components/dumb/RegistrationPublicForm'
 export { RegistrationRequestDetailPanel } from '@/features/registration-requests/components/dumb/RegistrationRequestDetail'
 export { RegistrationRequestTable } from '@/features/registration-requests/components/dumb/RegistrationRequestTable'
 export { RejectRequestModal } from '@/features/registration-requests/components/dumb/RejectRequestModal'

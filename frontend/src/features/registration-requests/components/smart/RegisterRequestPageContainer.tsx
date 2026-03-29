@@ -18,6 +18,7 @@ export function RegisterRequestPageContainer() {
     formErrors,
     submitting,
     success,
+    submittedEmail,
     updateField,
     submitForm,
   } = useRegistrationRequest()
@@ -39,6 +40,11 @@ export function RegisterRequestPageContainer() {
                 Tu solicitud ha sido recibida exitosamente. Nuestro equipo la revisará
                 y te contactaremos por email con el resultado.
               </p>
+              {submittedEmail && (
+                <p className="mt-2 text-sm text-neutral-600">
+                  Te contactaremos a <strong>{submittedEmail}</strong>
+                </p>
+              )}
               <p className="mt-4 text-sm text-neutral-500">
                 El proceso de revisión puede tomar hasta 48 horas hábiles.
               </p>

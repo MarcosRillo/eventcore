@@ -5,6 +5,7 @@
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { Check, ChevronsUpDown } from 'lucide-react'
+import { useId } from 'react'
 
 export interface SelectOption {
   value: string | number
@@ -43,6 +44,8 @@ const Select = ({
   required = false,
   name,
 }: SelectProps) => {
+  const selectId = useId()
+
   // Size variants
   const sizeClasses: Record<string, string> = {
     sm: 'h-8 pl-3 pr-8 text-sm',
@@ -78,14 +81,14 @@ const Select = ({
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className={`block text-sm font-medium mb-1.5 ${error ? 'text-error-600' : 'text-neutral-700'}`}>
+        <label htmlFor={selectId} className={`block text-sm font-medium mb-1.5 ${error ? 'text-error-600' : 'text-neutral-700'}`}>
           {label}
           {required && <span className="text-error-500 ml-0.5">*</span>}
         </label>
       )}
 
       <Listbox value={value ?? ''} onChange={onChange} disabled={disabled}>
-        <ListboxButton className={buttonClasses} name={name}>
+        <ListboxButton id={selectId} className={buttonClasses} name={name}>
           <span className={`block truncate ${!selectedOption ? 'text-neutral-400' : 'text-neutral-900'}`}>
             {displayValue}
           </span>

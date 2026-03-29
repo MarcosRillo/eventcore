@@ -35,6 +35,18 @@ interface ActiveSector {
   name: string;
 }
 
+const FALLBACK_SECTORS = [
+  { value: 'hotel', label: 'Hotel' },
+  { value: 'restaurante', label: 'Restaurante' },
+  { value: 'agencia_turismo', label: 'Agencia de Turismo' },
+  { value: 'transporte', label: 'Transporte' },
+  { value: 'cultura', label: 'Cultura y Arte' },
+  { value: 'deporte', label: 'Deporte y Recreación' },
+  { value: 'educacion', label: 'Educación' },
+  { value: 'comercio', label: 'Comercio' },
+  { value: 'otro', label: 'Otro' },
+]
+
 /**
  *
  * @param root0
@@ -54,12 +66,14 @@ export function RegistrationRequestForm({
   const profilePhotoPreview = useImagePreview(formData.profile_photo)
   const logoPreview = useImagePreview(formData.organization_logo)
 
-  const { data: activeSectors } = useSWR<ActiveSector[]>(
+  const { data: activeSectors, error: sectorsError, isLoading: sectorsLoading } = useSWR<ActiveSector[]>(
     publicEventKeys.sectors,
     publicFetcher
   )
 
-  const sectorOptions = activeSectors
+  const sectorOptions = sectorsError
+    ? FALLBACK_SECTORS
+    : activeSectors
     ? activeSectors.map((s) => ({ value: String(s.id), label: s.name }))
     : []
 
@@ -95,7 +109,9 @@ export function RegistrationRequestForm({
     onSubmit()
   }
 
-  const characterCount = formData.motivation.length
+  // Fix 9: counter is neutral at 0 chars (untouched), red only after user has typed something short
+  const motivationLength = formData.motivation.length
+  const isCounterError = motivationLength > 0 && motivationLength < 50
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit}>
@@ -184,7 +200,7 @@ export function RegistrationRequestForm({
             error={formErrors.whatsapp}
           />
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="profile_photo" className="block text-sm font-medium text-neutral-700 mb-1">
               Foto de Perfil (opcional)
             </label>
             {profilePhotoPreview ? (
@@ -197,17 +213,19 @@ export function RegistrationRequestForm({
                   className="rounded-full object-cover border border-neutral-200"
                   unoptimized
                 />
+                {/* Fix 11: adequate touch target for Eliminar button */}
                 <button
                   type="button"
                   onClick={() => handleRemoveFile('profile_photo')}
                   disabled={submitting}
-                  className="text-sm text-error-600 hover:text-error-700 disabled:opacity-50"
+                  className="py-2 px-3 min-h-[44px] text-sm text-error-600 hover:text-error-700 disabled:opacity-50"
                 >
                   Eliminar
                 </button>
               </div>
             ) : (
               <input
+                id="profile_photo"
                 type="file"
                 accept="image/*"
                 onChange={(e) => handleFileChange(e, 'profile_photo')}
@@ -245,6 +263,7 @@ export function RegistrationRequestForm({
             disabled={submitting}
             error={formErrors.organization_name}
           />
+          {/* Fix 15: CUIT helper text hint */}
           <Input
             ref={(el) => {
               // Combine refs: store element ref and apply mask
@@ -262,6 +281,7 @@ export function RegistrationRequestForm({
             required
             disabled={submitting}
             error={formErrors.organization_cuit}
+            helperText="Formato: XX-XXXXXXXX-X"
           />
           <Select
             label="Sector"
@@ -269,10 +289,10 @@ export function RegistrationRequestForm({
             value={formData.organization_sector}
             onChange={(value) => onFieldChange('organization_sector', String(value))}
             options={sectorOptions}
-            placeholder="Seleccionar sector…"
+            placeholder={sectorsLoading ? 'Cargando sectores...' : 'Seleccionar sector…'}
             error={formErrors.organization_sector}
             required
-            disabled={submitting}
+            disabled={submitting || sectorsLoading}
             fullWidth
           />
           <Input
@@ -287,7 +307,7 @@ export function RegistrationRequestForm({
             error={formErrors.website}
           />
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="organization_logo" className="block text-sm font-medium text-neutral-700 mb-1">
               Logo de la Organización (opcional)
             </label>
             {logoPreview ? (
@@ -300,17 +320,19 @@ export function RegistrationRequestForm({
                   className="rounded-lg object-contain border border-neutral-200 bg-white p-1"
                   unoptimized
                 />
+                {/* Fix 11: adequate touch target for Eliminar button */}
                 <button
                   type="button"
                   onClick={() => handleRemoveFile('organization_logo')}
                   disabled={submitting}
-                  className="text-sm text-error-600 hover:text-error-700 disabled:opacity-50"
+                  className="py-2 px-3 min-h-[44px] text-sm text-error-600 hover:text-error-700 disabled:opacity-50"
                 >
                   Eliminar
                 </button>
               </div>
             ) : (
               <input
+                id="organization_logo"
                 type="file"
                 accept="image/*"
                 onChange={(e) => handleFileChange(e, 'organization_logo')}
@@ -348,18 +370,17 @@ export function RegistrationRequestForm({
             placeholder="Describe brevemente por qué tu organización quiere publicar eventos en la plataforma de turismo…"
             fullWidth
           />
+          {/* Fix 9: counter is neutral gray at 0 chars, red only after user starts typing (< 50) */}
           <p
             className={`mt-1 text-xs ${
-              characterCount < 50
-                ? 'text-error-500'
-                : characterCount > 1000
+              isCounterError || motivationLength > 1000
                 ? 'text-error-500'
                 : 'text-neutral-500'
             }`}
           >
-            {characterCount < 50
-              ? `${50 - characterCount} caracteres más requeridos`
-              : `${1000 - characterCount} caracteres restantes`}
+            {motivationLength < 50
+              ? `${50 - motivationLength} caracteres más requeridos`
+              : `${1000 - motivationLength} caracteres restantes`}
           </p>
         </div>
       </div>
@@ -376,15 +397,15 @@ export function RegistrationRequestForm({
           required
           label={
             <>
-              Acepto los{' '}
+              Acepto los{" "}
               <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 underline">
                 términos y condiciones
               </a>
-              {' '}y la{' '}
+              {" "}y la{" "}
               <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 underline">
                 política de privacidad
               </a>
-              {' '}de la plataforma
+              {" "}de la plataforma
             </>
           }
         />

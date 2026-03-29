@@ -20,6 +20,7 @@ interface UseRegistrationRequestReturn {
   formErrors: RegistrationRequestFormErrors
   submitting: boolean
   success: boolean
+  submittedEmail: string
 
   // Actions
   updateField: (field: keyof RegistrationRequestFormData, value: string | File | null | boolean) => void
@@ -73,6 +74,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
   const [formData, setFormData] = useState<RegistrationRequestFormData>(initialFormData)
   const [formErrors, setFormErrors] = useState<RegistrationRequestFormErrors>({})
   const [success, setSuccess] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState('')
 
   /**
    * Scroll to and focus the first field with an error
@@ -125,6 +127,8 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
     // WhatsApp validation
     if (!formData.whatsapp.trim()) {
       errors.whatsapp = 'El WhatsApp es requerido'
+    } else if (!/^[\d\s\-+()]+$/.test(formData.whatsapp)) {
+      errors.whatsapp = 'Ingresá solo números, espacios, + o -'
     } else if (formData.whatsapp.length > 20) {
       errors.whatsapp = 'El WhatsApp no puede exceder 20 caracteres'
     }
@@ -238,6 +242,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
         }
 
         await createRegistrationRequest(requestData)
+        setSubmittedEmail(formData.email.trim())
         setSuccess(true)
       } catch (error: unknown) {
         // Handle API errors
@@ -274,6 +279,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
     setFormData(initialFormData)
     setFormErrors({})
     setSuccess(false)
+    setSubmittedEmail('')
   }, [])
 
   /**
@@ -288,6 +294,7 @@ export const useRegistrationRequest = (): UseRegistrationRequestReturn => {
     formErrors,
     submitting: isPending,
     success,
+    submittedEmail,
     updateField,
     submitForm,
     resetForm,
