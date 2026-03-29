@@ -7,6 +7,8 @@ use App\Models\Event;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Services\HtmlSanitizer;
 
@@ -18,26 +20,14 @@ class EventService
      * Get all events with optional filters and pagination.
      * This method ALWAYS returns a LengthAwarePaginator object for consistent API responses.
      */
-    public function getAllEvents(array $filters = []): LengthAwarePaginator
+    public function getAllEvents(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Event::query();
-
-        // Apply entity filter - scope to current user's organization
-        $this->applyScopeFilter($query);
+        $query = Event::query()
+            ->with(['eventType', 'eventSubtype', 'organization', 'status', 'format', 'locations']);
 
         // Apply search filter
         if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
-        }
-
-        // Apply status filter
-        if (! empty($filters['status_id'])) {
-            $query->where('status_id', $filters['status_id']);
-        }
-
-        // Apply format filter
-        if (! empty($filters['format_id'])) {
-            $query->where('format_id', $filters['format_id']);
         }
 
         // Apply event type filter
@@ -45,22 +35,31 @@ class EventService
             $query->where('event_type_id', $filters['event_type_id']);
         }
 
-        // Apply date range filter
-        if (! empty($filters['start_date'])) {
-            $query->where('start_date', '>=', $filters['start_date']);
+        // Apply status_id filter
+        if (! empty($filters['status_id'])) {
+            $query->where('status_id', $filters['status_id']);
         }
 
-        if (! empty($filters['end_date'])) {
-            $query->where('end_date', '<=', $filters['end_date']);
+        // Apply status code filter via relationship
+        if (! empty($filters['status'])) {
+            $statusCode = $filters['status'];
+            $query->whereHas('status', function ($subQuery) use ($statusCode) {
+                $subQuery->where('status_code', $statusCode);
+            });
         }
 
-        // Apply default ordering (newest first)
-        $query->orderBy('created_at', 'desc');
+        // Apply is_featured filter
+        if (array_key_exists('is_featured', $filters)) {
+            $query->where('is_featured', $filters['is_featured']);
+        }
 
-        // Apply pagination - ALWAYS paginate to ensure consistent API response structure
-        $perPage = $this->getPerPageValue($filters);
+        // Apply date filtering and ordering
+        if (isset($filters['show_past']) && $filters['show_past'] === '1') {
+            $query->past()->orderBy('end_date', 'desc');
+        } else {
+            $query->upcoming()->orderBy('start_date', 'asc');
+        }
 
-        // CRITICAL: This method MUST always return paginated results
         return $query->paginate($perPage);
     }
 
@@ -155,6 +154,91 @@ class EventService
         return DB::transaction(function () use ($event) {
             return $event->delete();
         });
+    }
+
+    /**
+     * Toggle the featured status of an event.
+     */
+    public function toggleFeatured(Event $event): Event
+    {
+        return DB::transaction(function () use ($event) {
+            $event->update(['is_featured' => ! $event->is_featured]);
+
+            return $event->fresh()->load('status');
+        });
+    }
+
+    /**
+     * Get event statistics for the current user's tenant scope.
+     * Single query with conditional aggregation; cached per tenant for 60 seconds.
+     */
+    public function getStatistics(User $user): array
+    {
+        $cacheKey = 'events.statistics.' . ($user->organization_id ?? 'global');
+
+        return Cache::remember($cacheKey, 60, function () use ($user) {
+            $bindings = [];
+            $tenantClause = $this->buildTenantClause($user, $bindings);
+
+            $row = DB::selectOne("
+                SELECT
+                    COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE es.status_code = 'published') AS published,
+                    COUNT(*) FILTER (WHERE es.status_code IN ('pending_internal_approval', 'pending_public_approval')) AS pending,
+                    COUNT(*) FILTER (WHERE es.status_code = 'draft') AS draft
+                FROM events e
+                JOIN event_statuses es ON es.id = e.status_id
+                WHERE e.deleted_at IS NULL
+                {$tenantClause}
+            ", $bindings);
+
+            return [
+                'total'     => (int) $row->total,
+                'published' => (int) $row->published,
+                'pending'   => (int) $row->pending,
+                'draft'     => (int) $row->draft,
+            ];
+        });
+    }
+
+    /**
+     * Build the tenant WHERE clause fragment and register its bindings.
+     *
+     * Safety note: this method interpolates only static SQL keywords
+     * (e.g. `AND e.entity_id = :tenant_id`). All user-supplied values
+     * are passed as named PDO parameters via the $bindings array and
+     * never concatenated into the query string, so there is no SQL
+     * injection risk.
+     */
+    private function buildTenantClause(User $user, array &$bindings): string
+    {
+        if ($user->isPlatformAdmin()) {
+            return '';
+        }
+
+        if ($user->isEntityAdmin() || $user->isEntityStaff()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.entity_id = :tenant_id';
+            }
+
+            return '';
+        }
+
+        if ($user->isOrganizerAdmin()) {
+            $organizationId = $user->organization_id;
+
+            if ($organizationId) {
+                $bindings['tenant_id'] = $organizationId;
+
+                return 'AND e.organization_id = :tenant_id';
+            }
+        }
+
+        return '';
     }
 
     /**

@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Approval;
+namespace App\Features\Approval\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RequestChangesRequest extends FormRequest
+class RejectEventRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        // Only entity_admin, entity_staff and platform_admin can request changes
+        // Only entity_admin, entity_staff and platform_admin can reject events
         $userRole = $this->user()?->getRoleCode();
 
         return in_array($userRole, ['entity_admin', 'entity_staff', 'platform_admin']);
@@ -37,7 +37,7 @@ class RequestChangesRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason.required' => 'Debe proporcionar una razón para solicitar cambios.',
+            'reason.required' => 'Debe proporcionar una razón para rechazar el evento.',
             'reason.min' => 'La razón debe tener al menos 10 caracteres.',
             'reason.max' => 'La razón no puede exceder 1000 caracteres.',
         ];

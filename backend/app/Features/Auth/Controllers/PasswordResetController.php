@@ -4,10 +4,10 @@ namespace App\Features\Auth\Controllers;
 
 use App\Features\Auth\Requests\ForgotPasswordRequest;
 use App\Features\Auth\Requests\ResetPasswordRequest;
+use App\Features\Auth\Requests\ValidatePasswordResetTokenRequest;
 use App\Features\Auth\Services\PasswordResetService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class PasswordResetController extends Controller
 {
@@ -32,13 +32,8 @@ class PasswordResetController extends Controller
     /**
      * Validate reset token (for frontend pre-validation).
      */
-    public function validateToken(Request $request): JsonResponse
+    public function validateToken(ValidatePasswordResetTokenRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'token' => ['required', 'string'],
-        ]);
-
         $valid = $this->passwordResetService->validateToken(
             $request->email,
             $request->token,

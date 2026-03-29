@@ -85,7 +85,7 @@ class EventServiceTest extends TestCase
             'status_id' => $this->draftStatus->id,
         ]);
 
-        $result = $this->service->getAllEvents();
+        $result = $this->service->getAllEvents($this->user);
 
         $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $result);
         $this->assertGreaterThanOrEqual(5, $result->total());
@@ -107,7 +107,7 @@ class EventServiceTest extends TestCase
             'title' => 'Feria de Artesanías',
         ]);
 
-        $result = $this->service->getAllEvents(['search' => 'Jazz']);
+        $result = $this->service->getAllEvents($this->user, ['search' => 'Jazz']);
 
         $this->assertEquals(1, $result->total());
         $this->assertEquals('Festival de Jazz Tucumán', $result->items()[0]->title);
@@ -136,7 +136,7 @@ class EventServiceTest extends TestCase
             'event_type_id' => $otherEventType->id,
         ]);
 
-        $result = $this->service->getAllEvents(['event_type_id' => $this->eventType->id]);
+        $result = $this->service->getAllEvents($this->user, ['event_type_id' => $this->eventType->id]);
 
         $this->assertEquals(3, $result->total());
         foreach ($result->items() as $event) {
@@ -157,7 +157,7 @@ class EventServiceTest extends TestCase
             'status_id' => $this->publishedStatus->id,
         ]);
 
-        $result = $this->service->getAllEvents(['status_id' => $this->publishedStatus->id]);
+        $result = $this->service->getAllEvents($this->user, ['status_id' => $this->publishedStatus->id]);
 
         $this->assertEquals(3, $result->total());
         foreach ($result->items() as $event) {
@@ -166,9 +166,9 @@ class EventServiceTest extends TestCase
     }
 
     #[Test]
-    public function test_get_all_events_filters_by_date_range(): void
+    public function test_get_all_events_excludes_past_events_by_default(): void
     {
-        // Event in the past
+        // Event in the past — should NOT appear in default (upcoming) results
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
@@ -176,30 +176,29 @@ class EventServiceTest extends TestCase
             'end_date' => now()->subDays(25),
         ]);
 
-        // Event in target range
+        // Upcoming events — should appear
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'title' => 'Target Event',
+            'title' => 'Upcoming Event A',
             'start_date' => now()->addDays(5),
             'end_date' => now()->addDays(7),
         ]);
 
-        // Event in the future
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
+            'title' => 'Upcoming Event B',
             'start_date' => now()->addDays(60),
             'end_date' => now()->addDays(65),
         ]);
 
-        $result = $this->service->getAllEvents([
-            'start_date' => now()->format('Y-m-d'),
-            'end_date' => now()->addDays(30)->format('Y-m-d'),
-        ]);
+        $result = $this->service->getAllEvents($this->user);
 
-        $this->assertEquals(1, $result->total());
-        $this->assertEquals('Target Event', $result->items()[0]->title);
+        $this->assertEquals(2, $result->total());
+        $titles = collect($result->items())->pluck('title');
+        $this->assertTrue($titles->contains('Upcoming Event A'));
+        $this->assertTrue($titles->contains('Upcoming Event B'));
     }
 
     #[Test]
@@ -232,7 +231,7 @@ class EventServiceTest extends TestCase
             'end_date' => now()->addDays(7),
         ]);
 
-        $result = $this->service->getAllEvents([
+        $result = $this->service->getAllEvents($this->user, [
             'search' => 'XYZZY123',
             'status_id' => $this->publishedStatus->id,
         ]);
