@@ -259,21 +259,6 @@ export function OrganizerEventDetailContainer({ eventId }: OrganizerEventDetailC
             </div>
           )}
 
-          {/* Services */}
-          {event.services && event.services.length > 0 && (
-            <div className="pt-4 border-t border-neutral-100">
-              <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-2">
-                Servicios Incluidos
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {event.services.map(service => (
-                  <Badge key={service.id} variant="default" size="sm">
-                    {service.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Website */}
           {event.event_website && (
