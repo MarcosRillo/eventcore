@@ -1,0 +1,132 @@
+import { expect, test } from '@playwright/test';
+
+// This project uses entity-admin storageState (injected by playwright.config.ts)
+//
+// NOTE: All tests in this file require production URL.
+// In local dev, Next.js Turbopack uses eval() which is blocked by the app's CSP
+// (script-src 'self' 'unsafe-inline' without 'unsafe-eval'). This prevents the
+// client bundle from executing, leaving a blank page. Run with BASE_URL pointing
+// to production to execute these tests.
+
+test.describe('Admin CRUD Pages', () => {
+  test.beforeEach(async ({}, testInfo) => {
+    testInfo.skip(
+      !process.env.BASE_URL || process.env.BASE_URL.includes('localhost'),
+      'Requires production URL — CSP blocks eval() in dev mode'
+    );
+  });
+
+  test('event types page loads with heading', async ({ page }) => {
+    test.slow();
+    await page.goto('/event-types');
+
+    // EventTypesPageContainer renders "Gestión de Tipos de Evento"
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+  });
+
+  test('event types page has search input', async ({ page }) => {
+    test.slow();
+    await page.goto('/event-types');
+
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+
+    await expect(page.getByPlaceholder('Buscar por nombre...')).toBeVisible();
+  });
+
+  test('event types page has Nuevo Tipo button', async ({ page }) => {
+    test.slow();
+    await page.goto('/event-types');
+
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+
+    await expect(page.getByRole('button', { name: /Nuevo Tipo/i })).toBeVisible();
+  });
+
+  test('locations page loads with heading', async ({ page }) => {
+    test.slow();
+    await page.goto('/locations');
+
+    // LocationsPageContainer renders "Gestión de Ubicaciones"
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+  });
+
+  test('locations page has search input', async ({ page }) => {
+    test.slow();
+    await page.goto('/locations');
+
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+
+    await expect(page.getByPlaceholder('Buscar por nombre o ciudad…')).toBeVisible();
+  });
+
+  test('locations page has Nueva Ubicación button', async ({ page }) => {
+    test.slow();
+    await page.goto('/locations');
+
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+
+    await expect(page.getByRole('button', { name: /Nueva Ubicación/i })).toBeVisible();
+  });
+
+  test('sectors page loads with heading', async ({ page }) => {
+    test.slow();
+    await page.goto('/sectors');
+
+    // SectorsPageContainer renders "Gestión de Sectores"
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Sectores/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+  });
+
+  test('sectors page has Nuevo Sector button', async ({ page }) => {
+    test.slow();
+    await page.goto('/sectors');
+
+    await expect(
+      page.getByRole('heading', { name: /Gestión de Sectores/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+
+    await expect(page.getByRole('button', { name: /Nuevo Sector/i })).toBeVisible();
+  });
+
+  test('users page loads with heading', async ({ page }) => {
+    test.slow();
+    await page.goto('/users');
+
+    // UsersPageContainer renders "Usuarios del Equipo"
+    await expect(
+      page.getByRole('heading', { name: /Usuarios del Equipo/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+  });
+
+  test('users page has Invitar Usuario button', async ({ page }) => {
+    test.slow();
+    await page.goto('/users');
+
+    await expect(
+      page.getByRole('heading', { name: /Usuarios del Equipo/i, level: 1 })
+    ).toBeVisible({ timeout: 60_000 });
+
+    await expect(page.getByRole('link', { name: /Invitar Usuario/i })).toBeVisible();
+  });
+
+  test('internal calendar page loads', async ({ page }) => {
+    test.slow();
+    await page.goto('/internal-calendar');
+
+    // Should load without redirecting to login
+    await expect(page).toHaveURL(/internal-calendar/, { timeout: 60_000 });
+  });
+});
