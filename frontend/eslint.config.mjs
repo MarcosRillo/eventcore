@@ -173,6 +173,15 @@ const eslintConfig = [
       // Block ALL console.* in tests - no debugging statements allowed
       "no-console": "error"
     }
+  },
+  {
+    files: ["e2e/**"],
+    rules: {
+      // Allow console in E2E setup/tests (Playwright global-setup needs logging)
+      "no-console": "off",
+      // E2E tests use Playwright's own import patterns
+      "simple-import-sort/imports": "off"
+    }
   }
 ];
 
