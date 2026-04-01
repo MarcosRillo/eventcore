@@ -3,7 +3,7 @@
 # Stage 1: Dependencies
 FROM node:20.18-alpine AS deps
 RUN apk add --no-cache libc6-compat
-RUN corepack enable
+RUN npm install -g pnpm@10.33.0
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
@@ -11,7 +11,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
 
 # Stage 2: Build
 FROM node:20.18-alpine AS builder
-RUN corepack enable
+RUN npm install -g pnpm@10.33.0
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -20,7 +20,16 @@ ARG INTERNAL_API_URL
 ENV INTERNAL_API_URL=${INTERNAL_API_URL}
 RUN pnpm run build
 
-# Stage 3: Production runner (minimal image)
+# Stage 3: Development runner (hot reload via volume mounts)
+FROM node:20.18-alpine AS dev
+RUN npm install -g pnpm@10.33.0
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+EXPOSE 3000
+ENV NODE_ENV=development NEXT_TELEMETRY_DISABLED=1
+CMD ["pnpm", "run", "dev"]
+
+# Stage 4: Production runner (minimal image)
 FROM node:20.18-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production

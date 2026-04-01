@@ -16,23 +16,25 @@ test.describe('Organizations Management', () => {
     );
   });
 
+  // AppHeader (banner) also renders an h1 with the page title.
+  // Scope heading locators to #main-content to avoid strict-mode violations
+  // from duplicate h1 elements.
+  const mainHeading = (page: Parameters<Parameters<typeof test>[1]>[0]['page']) =>
+    page.locator('#main-content').getByRole('heading', { name: 'Organizaciones', level: 1 });
+
   test('organizations page renders heading', async ({ page }) => {
     test.slow();
     await page.goto('/organizations');
 
-    // OrganizationsPage renders an h1 "Organizaciones"
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    // OrganizationsPage renders an h1 "Organizaciones" inside #main-content
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
   });
 
   test('unified view has 3 tabs: Organizaciones, Solicitudes, Invitaciones', async ({ page }) => {
     test.slow();
     await page.goto('/organizations');
 
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     // UnifiedOrganizationsContainer renders 3 tab buttons
     await expect(page.getByRole('button', { name: /Organizaciones/ })).toBeVisible();
@@ -44,9 +46,7 @@ test.describe('Organizations Management', () => {
     test.slow();
     await page.goto('/organizations');
 
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     // Default tab is 'organizations' — OrganizationTableContainer is mounted
     await expect(page.getByRole('button', { name: /Organizaciones/ })).toBeVisible();
@@ -56,41 +56,31 @@ test.describe('Organizations Management', () => {
     test.slow();
     await page.goto('/organizations');
 
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole('button', { name: /Solicitudes/ }).click();
 
     // After clicking, page should still render without crash
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible();
+    await expect(mainHeading(page)).toBeVisible();
   });
 
   test('clicking Invitaciones tab switches content', async ({ page }) => {
     test.slow();
     await page.goto('/organizations');
 
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole('button', { name: /Invitaciones/ }).click();
 
     // Page renders without crash
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible();
+    await expect(mainHeading(page)).toBeVisible();
   });
 
   test('organizations tab shows description text on load', async ({ page }) => {
     test.slow();
     await page.goto('/organizations');
 
-    await expect(
-      page.getByRole('heading', { name: 'Organizaciones', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     // The description text is also present
     await expect(

@@ -16,13 +16,17 @@ test.describe('Admin CRUD Pages', () => {
     );
   });
 
+  // AppHeader (banner) also renders an h1 with the page title.
+  // Scope heading locators to #main-content to avoid strict-mode violations
+  // from duplicate h1 elements.
+
   test('event types page loads with heading', async ({ page }) => {
     test.slow();
     await page.goto('/event-types');
 
     // EventTypesPageContainer renders "Gestión de Tipos de Evento"
     await expect(
-      page.getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
   });
 
@@ -31,7 +35,7 @@ test.describe('Admin CRUD Pages', () => {
     await page.goto('/event-types');
 
     await expect(
-      page.getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
 
     await expect(page.getByPlaceholder('Buscar por nombre...')).toBeVisible();
@@ -42,7 +46,7 @@ test.describe('Admin CRUD Pages', () => {
     await page.goto('/event-types');
 
     await expect(
-      page.getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Tipos de Evento/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
 
     await expect(page.getByRole('button', { name: /Nuevo Tipo/i })).toBeVisible();
@@ -54,7 +58,7 @@ test.describe('Admin CRUD Pages', () => {
 
     // LocationsPageContainer renders "Gestión de Ubicaciones"
     await expect(
-      page.getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
   });
 
@@ -63,7 +67,7 @@ test.describe('Admin CRUD Pages', () => {
     await page.goto('/locations');
 
     await expect(
-      page.getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
 
     await expect(page.getByPlaceholder('Buscar por nombre o ciudad…')).toBeVisible();
@@ -74,7 +78,7 @@ test.describe('Admin CRUD Pages', () => {
     await page.goto('/locations');
 
     await expect(
-      page.getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Ubicaciones/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
 
     await expect(page.getByRole('button', { name: /Nueva Ubicación/i })).toBeVisible();
@@ -86,7 +90,7 @@ test.describe('Admin CRUD Pages', () => {
 
     // SectorsPageContainer renders "Gestión de Sectores"
     await expect(
-      page.getByRole('heading', { name: /Gestión de Sectores/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Sectores/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
   });
 
@@ -95,7 +99,7 @@ test.describe('Admin CRUD Pages', () => {
     await page.goto('/sectors');
 
     await expect(
-      page.getByRole('heading', { name: /Gestión de Sectores/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Gestión de Sectores/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
 
     await expect(page.getByRole('button', { name: /Nuevo Sector/i })).toBeVisible();
@@ -107,7 +111,7 @@ test.describe('Admin CRUD Pages', () => {
 
     // UsersPageContainer renders "Usuarios del Equipo"
     await expect(
-      page.getByRole('heading', { name: /Usuarios del Equipo/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Usuarios del Equipo/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
   });
 
@@ -116,7 +120,7 @@ test.describe('Admin CRUD Pages', () => {
     await page.goto('/users');
 
     await expect(
-      page.getByRole('heading', { name: /Usuarios del Equipo/i, level: 1 })
+      page.locator('#main-content').getByRole('heading', { name: /Usuarios del Equipo/i, level: 1 })
     ).toBeVisible({ timeout: 60_000 });
 
     await expect(page.getByRole('link', { name: /Invitar Usuario/i })).toBeVisible();

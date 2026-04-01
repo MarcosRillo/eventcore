@@ -23,7 +23,7 @@ test.describe('Authentication', () => {
     await expect(page.getByRole('textbox', { name: /Correo electrónico/i })).toBeEnabled({ timeout: 30_000 });
 
     await page.getByRole('textbox', { name: /Correo electrónico/i }).fill('ana.garcia@enteturismo.gov.ar');
-    await page.getByLabel(/Contraseña/i).fill('password123');
+    await page.getByPlaceholder('Tu contraseña…').fill('password123');
     await page.getByRole('button', { name: /Iniciar Sesión/i }).click();
 
     // Entity admin lands on /internal-calendar or /events
@@ -42,7 +42,7 @@ test.describe('Authentication', () => {
     await expect(page.getByRole('textbox', { name: /Correo electrónico/i })).toBeEnabled({ timeout: 30_000 });
 
     await page.getByRole('textbox', { name: /Correo electrónico/i }).fill('ana.garcia@enteturismo.gov.ar');
-    await page.getByLabel(/Contraseña/i).fill('wrongpassword_e2e');
+    await page.getByPlaceholder('Tu contraseña…').fill('wrongpassword_e2e');
     await page.getByRole('button', { name: /Iniciar Sesión/i }).click();
 
     // Error toast: "Credenciales incorrectas. Verifica tu email y contraseña."

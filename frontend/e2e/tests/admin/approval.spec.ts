@@ -16,13 +16,17 @@ test.describe('Approval Workflow', () => {
     );
   });
 
+  // AppHeader (banner) also renders an h1 with the page title.
+  // Scope heading locators to #main-content to avoid strict-mode violations
+  // from duplicate h1 elements.
+  const mainHeading = (page: Parameters<Parameters<typeof test>[1]>[0]['page']) =>
+    page.locator('#main-content').getByRole('heading', { name: 'Gestión de Eventos', level: 1 });
+
   test('events page has Pend. Interno filter for pending approval', async ({ page }) => {
     test.slow();
     await page.goto('/events');
 
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     const filterGroup = page.getByRole('group', { name: 'Filtrar eventos por estado' });
 
@@ -34,42 +38,32 @@ test.describe('Approval Workflow', () => {
     test.slow();
     await page.goto('/events');
 
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     const filterGroup = page.getByRole('group', { name: 'Filtrar eventos por estado' });
     await filterGroup.getByText('Pend. Interno').click();
 
     // Page should still render without error
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible();
+    await expect(mainHeading(page)).toBeVisible();
   });
 
   test('clicking Req. Cambios filter shows events requiring changes', async ({ page }) => {
     test.slow();
     await page.goto('/events');
 
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     const filterGroup = page.getByRole('group', { name: 'Filtrar eventos por estado' });
     await filterGroup.getByText('Req. Cambios').click();
 
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible();
+    await expect(mainHeading(page)).toBeVisible();
   });
 
   test('event management modal has approval action panel', async ({ page }) => {
     test.slow();
     await page.goto('/events');
 
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     // Open first event
     const gestionarButtons = page.getByRole('button', { name: /gestionar/i });
@@ -84,9 +78,7 @@ test.describe('Approval Workflow', () => {
       await expect(dialog).toBeVisible();
     } else {
       // No events — verify empty state or no-event message is shown
-      await expect(
-        page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-      ).toBeVisible();
+      await expect(mainHeading(page)).toBeVisible();
     }
   });
 
@@ -94,9 +86,7 @@ test.describe('Approval Workflow', () => {
     test.slow();
     await page.goto('/events');
 
-    await expect(
-      page.getByRole('heading', { name: 'Gestión de Eventos', level: 1 })
-    ).toBeVisible({ timeout: 60_000 });
+    await expect(mainHeading(page)).toBeVisible({ timeout: 60_000 });
 
     const filterGroup = page.getByRole('group', { name: 'Filtrar eventos por estado' });
     await expect(filterGroup.getByText('Pend. Público')).toBeVisible();
