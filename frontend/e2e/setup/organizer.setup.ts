@@ -48,6 +48,18 @@ setup('authenticate as organizer', async ({ request, browser }) => {
       sameSite: 'Lax' as const,
     });
   }
+  if (body.data?.expires_at) {
+    mappedCookies.push({
+      name: 'token_expires_at',
+      value: encodeURIComponent(body.data.expires_at),
+      domain: frontendUrl.hostname,
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: frontendUrl.protocol === 'https:',
+      sameSite: 'Lax' as const,
+    });
+  }
 
   await context.addCookies(mappedCookies);
   await context.storageState({ path: 'e2e/.auth/organizer.json' });

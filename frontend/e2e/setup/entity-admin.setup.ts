@@ -43,12 +43,23 @@ setup('authenticate as entity admin', async ({ request, browser }) => {
     httpOnly: cookie.httpOnly,
   }));
 
-  // Also inject the non-httpOnly 'user' cookie that the middleware uses
-  // for role-based routing. Extract from the login response body.
+  // Inject the non-httpOnly cookies the middleware needs for role-based routing
   if (body.data?.user) {
     mappedCookies.push({
       name: 'user',
       value: encodeURIComponent(JSON.stringify(body.data.user)),
+      domain: frontendUrl.hostname,
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: frontendUrl.protocol === 'https:',
+      sameSite: 'Lax' as const,
+    });
+  }
+  if (body.data?.expires_at) {
+    mappedCookies.push({
+      name: 'token_expires_at',
+      value: encodeURIComponent(body.data.expires_at),
       domain: frontendUrl.hostname,
       path: '/',
       expires: -1,
