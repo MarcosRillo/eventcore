@@ -258,6 +258,11 @@ function getRoleCode(user: User): UserRoleCode | null {
   return user?.role?.role_code || null;
 }
 
+// Helper: check if refresh_token cookie exists (client can attempt token refresh)
+function hasRefreshToken(request: NextRequest): boolean {
+  return !!request.cookies.get('refresh_token')?.value;
+}
+
 /**
  *
  * @param request
@@ -316,13 +321,25 @@ export function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // Not authenticated - redirect to login
+  // Not authenticated - redirect to login (unless refresh token exists)
   if (!user) {
+    if (hasRefreshToken(request)) {
+      // Let through — client-side Axios interceptor will refresh the access token
+      const requestHeaders = new Headers(request.headers);
+      const response = NextResponse.next({ request: { headers: requestHeaders } });
+      return addCspHeaders(response, nonce, cspHeader);
+    }
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Token expired - redirect to login with expired flag
+  // Token expired - redirect to login with expired flag (unless refresh token exists)
   if (isTokenExpired(request)) {
+    if (hasRefreshToken(request)) {
+      // Let through — client-side Axios interceptor will refresh the access token
+      const requestHeaders = new Headers(request.headers);
+      const response = NextResponse.next({ request: { headers: requestHeaders } });
+      return addCspHeaders(response, nonce, cspHeader);
+    }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('expired', '1');
     return NextResponse.redirect(loginUrl);
