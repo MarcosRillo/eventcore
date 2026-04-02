@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense } from 'react'
+import { useRouter } from 'next/navigation'
+import { Suspense, useEffect } from 'react'
 
 import { organizerNavConfig } from '@/app/organizer/organizerNavConfig'
 import { useAuth } from '@/context/AuthContext'
@@ -19,11 +20,26 @@ interface OrganizerLayoutProps {
 
 export default function OrganizerLayout({ children }: OrganizerLayoutProps) {
   const { user, isLoading, logout } = useAuth()
+  const router = useRouter()
 
-  if (isLoading || !user) {
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [isLoading, user, router])
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Cargando..." />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Redirigiendo..." />
       </div>
     )
   }
