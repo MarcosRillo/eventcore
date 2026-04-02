@@ -26,7 +26,7 @@ import {
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -63,10 +63,10 @@ export const useAuthActions = (): AuthContextType => {
         .some(c => c.trim().startsWith('user='));
 
       if (!hasSessionCookie) {
-        setIsLoading(false);
         return;
       }
 
+      setIsLoading(true);
       try {
         // Cookie exists — validate session with backend
         const response = await apiClient.get<{ data: User }>('/auth/me');
@@ -108,10 +108,10 @@ export const useAuthActions = (): AuthContextType => {
 
       // Set non-httpOnly user cookie for Next.js middleware (role checks)
       // This cookie only contains non-sensitive user info
-      const expiresAtTime = new Date(expires_at).getTime();
-      const maxAgeSeconds = Math.max(0, Math.floor((expiresAtTime - Date.now()) / 1000));
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
-      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
+      // max-age matches refresh_token TTL (7 days) so the cookie survives access_token rotation
+      const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 604800 seconds — matches refresh_token httpOnly cookie
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+      document.cookie = `token_expires_at=${encodeURIComponent(expires_at)}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
 
       // Update state
       setUser(userData);

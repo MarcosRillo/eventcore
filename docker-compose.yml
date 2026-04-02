@@ -76,8 +76,9 @@ services:
           memory: 128M
           cpus: '0.5'
 
-  # Frontend Next.js
+  # Frontend Next.js — opt-in via: docker compose --profile frontend-docker up
   frontend:
+    profiles: ["frontend-docker"]
     build:
       context: ./frontend
       dockerfile: Dockerfile

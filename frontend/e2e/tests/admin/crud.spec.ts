@@ -1,20 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 // This project uses entity-admin storageState (injected by playwright.config.ts)
-//
-// NOTE: All tests in this file require production URL.
-// In local dev, Next.js Turbopack uses eval() which is blocked by the app's CSP
-// (script-src 'self' 'unsafe-inline' without 'unsafe-eval'). This prevents the
-// client bundle from executing, leaving a blank page. Run with BASE_URL pointing
-// to production to execute these tests.
 
 test.describe('Admin CRUD Pages', () => {
-  test.beforeEach(async ({}, testInfo) => {
-    testInfo.skip(
-      !process.env.BASE_URL || process.env.BASE_URL.includes('localhost'),
-      'Requires production URL — CSP blocks eval() in dev mode'
-    );
-  });
 
   // AppHeader (banner) also renders an h1 with the page title.
   // Scope heading locators to #main-content to avoid strict-mode violations

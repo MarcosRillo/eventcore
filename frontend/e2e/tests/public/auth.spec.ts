@@ -8,14 +8,7 @@ test.describe('Authentication', () => {
     await expect(page.getByRole('textbox', { name: /Correo electrónico/i })).toBeAttached();
   });
 
-  test('login with valid credentials redirects to internal area (production only)', async ({ page }) => {
-    // NOTE: In local dev, Next.js uses eval() for HMR which is blocked by the app's
-    // CSP (no 'unsafe-eval'). This prevents useAuthActions from initializing, keeping
-    // the form in isLoading=true permanently. Run against production to test login flow.
-    test.skip(
-      !process.env.BASE_URL || process.env.BASE_URL.includes('localhost'),
-      'Requires production URL — CSP blocks eval() in local dev mode'
-    );
+  test('login with valid credentials redirects to internal area', async ({ page }) => {
     test.slow();
     await page.goto('/login');
 
@@ -30,12 +23,7 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL(/internal-calendar|events/, { timeout: 30_000 });
   });
 
-  test('login with wrong password shows error message (production only)', async ({ page }) => {
-    // NOTE: Same CSP limitation — requires production URL
-    test.skip(
-      !process.env.BASE_URL || process.env.BASE_URL.includes('localhost'),
-      'Requires production URL — CSP blocks eval() in local dev mode'
-    );
+  test('login with wrong password shows error message', async ({ page }) => {
     test.slow();
     await page.goto('/login');
 

@@ -1,20 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 // This project uses organizer storageState (injected by playwright.config.ts)
-//
-// NOTE: All tests in this file require production URL.
-// In local dev, Next.js Turbopack uses eval() which is blocked by the app's CSP
-// (script-src 'self' 'unsafe-inline' without 'unsafe-eval'). This prevents the
-// client bundle from executing, leaving a blank page. Run with BASE_URL pointing
-// to production to execute these tests.
 
 test.describe('Organizer Dashboard', () => {
-  test.beforeEach(async ({}, testInfo) => {
-    testInfo.skip(
-      !process.env.BASE_URL || process.env.BASE_URL.includes('localhost'),
-      'Requires production URL — CSP blocks eval() in dev mode'
-    );
-  });
 
   test('dashboard loads with Mis Eventos heading', async ({ page }) => {
     test.slow();

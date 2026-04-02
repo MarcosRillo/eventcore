@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo } from 'react'
 
 import { getAdminNavConfig } from '@/app/(admin)/adminNavConfig'
 import { useAuth } from '@/context/AuthContext'
@@ -21,6 +22,7 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, isLoading, logout } = useAuth()
   const { hasRole } = usePermissions()
+  const router = useRouter()
 
   const config = useMemo(() => {
     const canManageUsers =
@@ -29,10 +31,24 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     return getAdminNavConfig({ canManageUsers })
   }, [hasRole])
 
-  if (isLoading || !user) {
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [isLoading, user, router])
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Cargando..." />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Redirigiendo..." />
       </div>
     )
   }
