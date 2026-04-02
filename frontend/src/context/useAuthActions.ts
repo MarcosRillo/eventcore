@@ -75,9 +75,14 @@ export const useAuthActions = (): AuthContextType => {
         if (response.data?.data) {
           setUser(response.data.data);
         }
-      } catch {
-        // Session expired or invalid — clear state
-        handleLogout();
+      } catch (error) {
+        // Only logout on auth failures (401/403). Network errors and 5xx
+        // MUST NOT clear the session — they are transient, not auth failures.
+        const axiosError = error as AxiosError;
+        const status = axiosError.response?.status;
+        if (status === 401 || status === 403) {
+          handleLogout();
+        }
       } finally {
         setIsLoading(false);
       }
