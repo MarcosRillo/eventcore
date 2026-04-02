@@ -26,7 +26,7 @@ import {
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -63,6 +63,7 @@ export const useAuthActions = (): AuthContextType => {
         .some(c => c.trim().startsWith('user='));
 
       if (!hasSessionCookie) {
+        setIsLoading(false);
         return;
       }
 
