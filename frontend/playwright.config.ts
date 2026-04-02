@@ -4,7 +4,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 export default defineConfig({
   testDir: './e2e/tests',
-  timeout: 90_000,  // 90s — Render free tier cold starts
+  timeout: 120_000,  // 2 min — covers Render cold start + browser login flow
   expect: { timeout: 10_000 },
   fullyParallel: false,  // Sequential for Render stability
   forbidOnly: !!process.env.CI,
@@ -58,9 +58,9 @@ export default defineConfig({
     },
   ],
   webServer: process.env.CI ? undefined : {
-    command: 'pnpm dev',
+    command: 'pnpm build && pnpm start',
     url: 'http://localhost:3000',
-    timeout: 120_000,
+    timeout: 180_000,
     reuseExistingServer: true,
   },
 });

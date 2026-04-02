@@ -1,75 +1,37 @@
 import { expect, test as setup } from '@playwright/test';
 
-const API_URL = process.env.API_URL || 'https://plataforma-calendario-monorepo.onrender.com';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 /**
  * Entity Admin authentication setup.
  *
- * Calls the backend API directly to get auth tokens, then injects the resulting
- * cookies into both the API origin and the frontend origin (BASE_URL) so that
- * Playwright's storageState works whether we run against localhost or production.
- *
- * The middleware reads `access_token` from the browser cookie jar on the
- * frontend domain. The Next.js rewrite proxy forwards API calls with credentials,
- * but browser cookies are domain-scoped, so we must set them for localhost too.
+ * Uses browser UI login instead of direct API calls to avoid token expiration
+ * issues (API tokens expire in 15 min; tests take ~11 min). The frontend
+ * handles token refresh automatically, and storageState is saved only after
+ * the page confirms the authenticated redirect — ensuring cookies are valid
+ * and the auth check has resolved before tests begin.
  */
-setup('authenticate as entity admin', async ({ request, browser }) => {
-  const response = await request.post(`${API_URL}/api/v1/auth/login`, {
-    data: {
-      email: 'ana.garcia@enteturismo.gov.ar',
-      password: 'password123',
-    },
-  });
+setup('authenticate as entity admin', async ({ page }) => {
+  await page.goto(`${BASE_URL}/login`);
 
-  expect(response.ok()).toBeTruthy();
-  const body = await response.json();
-  expect(body.success).toBe(true);
+  // Wait for the login form to be ready (backend cold start can delay /auth/me)
+  const emailInput = page.locator('input[name="email"]');
+  await expect(emailInput).toBeEnabled({ timeout: 90_000 });
 
-  // Extract cookies from the API response
-  const responseCookies = await request.storageState();
+  await emailInput.fill('ana.garcia@enteturismo.gov.ar');
 
-  // Create a browser context to inject cookies for the frontend domain
-  const context = await browser.newContext();
+  // Password field uses a separate PasswordInput component — use name selector
+  // to avoid timing issues with getByLabel after email fill triggers re-render
+  const passwordInput = page.locator('input[name="password"]');
+  await expect(passwordInput).toBeVisible({ timeout: 10_000 });
+  await passwordInput.fill('password123');
 
-  // Re-map cookies to the frontend domain so the middleware can read them
-  const frontendUrl = new URL(BASE_URL);
-  const mappedCookies = responseCookies.cookies.map((cookie) => ({
-    ...cookie,
-    domain: frontendUrl.hostname,
-    // For localhost, secure must be false and sameSite Lax
-    secure: frontendUrl.protocol === 'https:',
-    sameSite: 'Lax' as const,
-    httpOnly: cookie.httpOnly,
-  }));
+  const loginButton = page.getByRole('button', { name: /iniciar sesión/i });
+  await expect(loginButton).toBeEnabled({ timeout: 10_000 });
+  await loginButton.click();
 
-  // Inject the non-httpOnly cookies the middleware needs for role-based routing
-  if (body.data?.user) {
-    mappedCookies.push({
-      name: 'user',
-      value: encodeURIComponent(JSON.stringify(body.data.user)),
-      domain: frontendUrl.hostname,
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: frontendUrl.protocol === 'https:',
-      sameSite: 'Lax' as const,
-    });
-  }
-  if (body.data?.expires_at) {
-    mappedCookies.push({
-      name: 'token_expires_at',
-      value: encodeURIComponent(body.data.expires_at),
-      domain: frontendUrl.hostname,
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: frontendUrl.protocol === 'https:',
-      sameSite: 'Lax' as const,
-    });
-  }
+  // Wait for redirect to the authenticated area — entity-admin lands on internal calendar
+  await page.waitForURL(/internal-calendar|events|organizations/, { timeout: 90_000 });
 
-  await context.addCookies(mappedCookies);
-  await context.storageState({ path: 'e2e/.auth/entity-admin.json' });
-  await context.close();
+  await page.context().storageState({ path: 'e2e/.auth/entity-admin.json' });
 });

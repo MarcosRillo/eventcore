@@ -1,6 +1,6 @@
 # Makefile para gestión de Docker en desarrollo
 
-.PHONY: help up down restart logs shell composer artisan db-shell redis-cli clean build
+.PHONY: help up down restart logs shell composer artisan db-shell redis-cli clean build e2e
 
 # Variables
 DC = docker-compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.docker
@@ -15,7 +15,7 @@ up: ## Inicia todos los servicios
 	$(DC) up -d
 	@echo "✅ Servicios iniciados"
 	@echo "📦 Backend API: http://localhost:8000"
-	@echo "💻 Frontend: http://localhost:3000"
+	@echo "💻 Frontend: ejecutá 'cd frontend && pnpm dev' en el host"
 
 down: ## Detiene todos los servicios
 	$(DC) down
@@ -83,4 +83,8 @@ install: ## Instalación inicial del proyecto
 	$(DC) exec -u www backend php artisan storage:link
 	@echo "✅ Instalación completada"
 	@echo "📦 Backend API: http://localhost:8000"
-	@echo "💻 Frontend: http://localhost:3000"
+	@echo "💻 Frontend: ejecutá 'cd frontend && pnpm dev' en el host"
+
+e2e: ## Ejecuta tests E2E con Playwright (ej: make e2e args="--grep @login")
+	@$(DC) ps --services --filter "status=running" | grep -q "backend" || (echo "❌ Backend no está corriendo. Ejecutá 'make up' primero." && exit 1)
+	cd frontend && pnpm exec playwright test $(args)

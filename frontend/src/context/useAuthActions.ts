@@ -26,7 +26,7 @@ import {
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -63,10 +63,10 @@ export const useAuthActions = (): AuthContextType => {
         .some(c => c.trim().startsWith('user='));
 
       if (!hasSessionCookie) {
-        setIsLoading(false);
         return;
       }
 
+      setIsLoading(true);
       try {
         // Cookie exists — validate session with backend
         const response = await apiClient.get<{ data: User }>('/auth/me');

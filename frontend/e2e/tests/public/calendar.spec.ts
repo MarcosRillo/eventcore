@@ -16,17 +16,7 @@ test.describe('Public Calendar', () => {
     ).toBeVisible();
   });
 
-  test('calendar toolbar renders with react-big-calendar (production only)', async ({ page }) => {
-    // NOTE: This test only passes against the Vercel production URL.
-    // In local dev, Next.js dev mode uses eval() for HMR which is blocked by
-    // the app's CSP header (no 'unsafe-eval'), preventing dynamic() chunks
-    // from executing. Set BASE_URL=https://plataforma-calendario-monorepo.vercel.app
-    // to run against production.
-    test.skip(
-      !process.env.BASE_URL || process.env.BASE_URL.includes('localhost'),
-      'Requires production URL — CSP blocks eval() in dev mode'
-    );
-
+  test('calendar toolbar renders with react-big-calendar', async ({ page }) => {
     await page.goto('/calendar');
 
     // Wait for react-big-calendar to mount
