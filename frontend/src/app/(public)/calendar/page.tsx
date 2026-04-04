@@ -33,8 +33,11 @@ export const metadata: Metadata = {
  * Public Calendar Page
  * Server Component - fetches data server-side for SEO and performance
  */
-export default async function CalendarPage() {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ event_type_id?: string }> }) {
   const now = new Date()
+  const params = await searchParams
+  const rawId = Number(params.event_type_id)
+  const initialEventTypeId = Number.isFinite(rawId) && rawId > 0 ? rawId : null
 
   // Fetch all data server-side in parallel with React.cache for request deduplication
   const [statsResponse, eventsResponse, eventTypesResponse, locationsResponse] =
@@ -44,6 +47,7 @@ export default async function CalendarPage() {
         .getAll({
           start_date: format(startOfMonth(now), 'yyyy-MM-dd'),
           end_date: format(endOfMonth(now), 'yyyy-MM-dd'),
+          ...(initialEventTypeId !== null && { event_type_id: initialEventTypeId }),
         })
         .catch(() => ({ data: [] })),
       cachedEvents.getEventTypes().catch(() => ({ data: [] })),
@@ -56,6 +60,7 @@ export default async function CalendarPage() {
       initialEvents={eventsResponse.data}
       initialEventTypes={eventTypesResponse.data}
       initialLocations={locationsResponse.data}
+      initialEventTypeId={initialEventTypeId}
     />
   )
 }

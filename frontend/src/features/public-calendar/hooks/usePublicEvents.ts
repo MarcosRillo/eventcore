@@ -27,6 +27,7 @@ export interface UsePublicEventsOptions {
   initialEvents?: PublicEvent[]
   initialEventTypes?: EventType[]
   initialLocations?: Location[]
+  initialEventTypeId?: number | null
 }
 
 interface UsePublicEventsReturn {
@@ -49,10 +50,10 @@ interface UsePublicEventsReturn {
 export const usePublicEvents = (
   options: UsePublicEventsOptions = {}
 ): UsePublicEventsReturn => {
-  const { initialEvents, initialEventTypes, initialLocations } = options
+  const { initialEvents, initialEventTypes, initialLocations, initialEventTypeId } = options
 
   const [filters, setFilters] = useState<EventFilters>({
-    event_type_id: null,
+    event_type_id: initialEventTypeId ?? null,
     event_subtype_id: null,
     location_id: null,
     start_date: null,

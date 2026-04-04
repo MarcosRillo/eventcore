@@ -23,12 +23,14 @@ interface PublicCalendarContainerProps {
   initialEvents?: PublicEvent[]
   initialEventTypes?: EventType[]
   initialLocations?: Location[]
+  initialEventTypeId?: number | null
 }
 
 export const PublicCalendarContainer = ({
   initialEvents,
   initialEventTypes,
   initialLocations,
+  initialEventTypeId,
 }: PublicCalendarContainerProps) => {
   const router = useRouter()
   const {
@@ -48,6 +50,7 @@ export const PublicCalendarContainer = ({
     initialEvents,
     initialEventTypes,
     initialLocations,
+    initialEventTypeId,
   })
 
   const handleEventClick = (eventId: number): void => {

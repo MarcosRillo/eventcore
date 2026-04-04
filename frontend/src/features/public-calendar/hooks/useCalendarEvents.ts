@@ -27,6 +27,7 @@ export interface UseCalendarEventsOptions {
   initialEvents?: PublicEvent[]
   initialEventTypes?: EventType[]
   initialLocations?: Location[]
+  initialEventTypeId?: number | null
 }
 
 interface UseCalendarEventsReturn {
@@ -67,14 +68,14 @@ const transformToCalendarEvent = (event: PublicEvent): CalendarEvent => {
 export const useCalendarEvents = (
   options: UseCalendarEventsOptions = {}
 ): UseCalendarEventsReturn => {
-  const { initialEvents, initialEventTypes, initialLocations } = options
+  const { initialEvents, initialEventTypes, initialLocations, initialEventTypeId } = options
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [currentView, setCurrentView] = useState<CalendarView>(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) return 'agenda'
     return 'month'
   })
-  const [selectedEventType, setSelectedEventType] = useState<number | null>(null)
+  const [selectedEventType, setSelectedEventType] = useState<number | null>(initialEventTypeId ?? null)
   const [selectedEventSubtype, setSelectedEventSubtype] = useState<number | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
 

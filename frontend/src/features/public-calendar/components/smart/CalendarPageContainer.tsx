@@ -60,6 +60,7 @@ interface CalendarPageContainerProps {
   initialEvents?: PublicEvent[]
   initialEventTypes?: EventType[]
   initialLocations?: Location[]
+  initialEventTypeId?: number | null
 }
 
 export const CalendarPageContainer = ({
@@ -67,6 +68,7 @@ export const CalendarPageContainer = ({
   initialEvents,
   initialEventTypes,
   initialLocations,
+  initialEventTypeId,
 }: CalendarPageContainerProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('calendar')
   const [stats, setStats] = useState<PublicStats | null>(initialStats ?? null)
@@ -151,12 +153,14 @@ export const CalendarPageContainer = ({
               initialEvents={initialEvents}
               initialEventTypes={initialEventTypes}
               initialLocations={initialLocations}
+              initialEventTypeId={initialEventTypeId}
             />
           ) : (
             <PublicCalendarContainer
               initialEvents={initialEvents}
               initialEventTypes={initialEventTypes}
               initialLocations={initialLocations}
+              initialEventTypeId={initialEventTypeId}
             />
           )}
         </Suspense>

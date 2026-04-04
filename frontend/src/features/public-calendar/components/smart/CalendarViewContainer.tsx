@@ -24,12 +24,14 @@ interface CalendarViewContainerProps {
   initialEvents?: PublicEvent[]
   initialEventTypes?: EventType[]
   initialLocations?: Location[]
+  initialEventTypeId?: number | null
 }
 
 export const CalendarViewContainer = ({
   initialEvents,
   initialEventTypes,
   initialLocations,
+  initialEventTypeId,
 }: CalendarViewContainerProps) => {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -56,6 +58,7 @@ export const CalendarViewContainer = ({
     initialEvents,
     initialEventTypes,
     initialLocations,
+    initialEventTypeId,
   })
 
   // Handle event click - navigate to event detail page
