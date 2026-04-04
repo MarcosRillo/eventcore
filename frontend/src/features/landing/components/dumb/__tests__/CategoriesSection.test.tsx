@@ -37,7 +37,7 @@ describe('CategoriesSection', () => {
       expect(screen.getByText('Encuentra eventos según tus intereses')).toBeInTheDocument()
 
       const heading = screen.getByRole('heading', { name: /explorar eventos/i })
-      expect(heading).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold')
+      expect(heading).toHaveClass('text-2xl', 'md:text-3xl', 'font-bold')
     })
 
     test('should render loading spinner when loading is true', () => {

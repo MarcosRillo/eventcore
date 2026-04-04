@@ -42,7 +42,7 @@ describe('PublicHeader', () => {
       const logoLink = screen.getByRole('link', { name: /eventos tucumán/i })
       expect(logoLink).toBeInTheDocument()
       expect(logoLink).toHaveAttribute('href', '/')
-      expect(logoLink).toHaveClass('text-xl', 'font-bold')
+      expect(logoLink).toHaveClass('text-lg', 'font-bold')
     })
 
     test('should render desktop navigation links', () => {

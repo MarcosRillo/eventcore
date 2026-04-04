@@ -50,7 +50,7 @@ describe('PageHeader', () => {
     render(<PageHeader title="Styled Title" />)
 
     const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading).toHaveClass('text-3xl', 'font-bold', 'text-neutral-900')
+    expect(heading).toHaveClass('text-2xl', 'font-bold', 'text-neutral-900')
   })
 
   it('has correct subtitle styling', () => {

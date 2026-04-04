@@ -16,11 +16,14 @@ import registrationRequestService, {
 } from '@/features/registration-requests/services/registration-request.service'
 import { RegistrationRequest, RegistrationRequestDetail } from '@/features/registration-requests/types/registration-request.types'
 import apiClient from '@/services/apiClient'
+import publicApiClient from '@/services/publicApiClient'
 
 
 jest.mock('@/services/apiClient')
+jest.mock('@/services/publicApiClient')
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
+const mockPublicApiClient = publicApiClient as jest.Mocked<typeof publicApiClient>
 
 const createMockResponse = <T>(data: T): AxiosResponse<T> => ({
   data,
@@ -92,11 +95,11 @@ describe('registrationRequestService', () => {
           status: 'pending' as const,
         },
       }
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse(mockResponse))
+      mockPublicApiClient.post.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       const result = await createRegistrationRequest(createData)
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
+      expect(mockPublicApiClient.post).toHaveBeenCalledWith(
         '/auth/register-request',
         expect.any(FormData),
         { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -124,11 +127,11 @@ describe('registrationRequestService', () => {
         message: 'Solicitud enviada',
         data: { id: 2, email: 'juan@example.com', status: 'pending' as const },
       }
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse(mockResponse))
+      mockPublicApiClient.post.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       await createRegistrationRequest(createData)
 
-      const formDataCall = mockApiClient.post.mock.calls[0][1] as FormData
+      const formDataCall = mockPublicApiClient.post.mock.calls[0][1] as FormData
       expect(formDataCall.get('website')).toBe('https://turismo.com')
     })
 
@@ -151,11 +154,11 @@ describe('registrationRequestService', () => {
         message: 'Solicitud enviada',
         data: { id: 3, email: 'juan@example.com', status: 'pending' as const },
       }
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse(mockResponse))
+      mockPublicApiClient.post.mockResolvedValueOnce(createMockResponse(mockResponse))
 
       await createRegistrationRequest(createData)
 
-      const formDataCall = mockApiClient.post.mock.calls[0][1] as FormData
+      const formDataCall = mockPublicApiClient.post.mock.calls[0][1] as FormData
       expect(formDataCall.get('profile_photo')).toBe(mockFile)
     })
 
@@ -171,7 +174,7 @@ describe('registrationRequestService', () => {
         organization_sector: 'hotel',
         motivation: 'Test',
       }
-      mockApiClient.post.mockRejectedValueOnce(new Error('Validation failed'))
+      mockPublicApiClient.post.mockRejectedValueOnce(new Error('Validation failed'))
 
       await expect(createRegistrationRequest(createData)).rejects.toThrow('Validation failed')
     })
@@ -188,7 +191,7 @@ describe('registrationRequestService', () => {
         organization_sector: 'hotel',
         motivation: 'Motivaci�n',
       }
-      mockApiClient.post.mockRejectedValueOnce(new Error('Network error'))
+      mockPublicApiClient.post.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(createRegistrationRequest(createData)).rejects.toThrow('Network error')
     })

@@ -293,8 +293,8 @@ describe('ShareButtons', () => {
       const { container } = render(<ShareButtons event={mockEvent} />)
 
       const buttonContainer = container.firstChild
-      expect(buttonContainer).toHaveClass('flex')
-      expect(buttonContainer).toHaveClass('flex-wrap')
+      expect(buttonContainer).toHaveClass('grid')
+      expect(buttonContainer).toHaveClass('sm:flex')
       expect(buttonContainer).toHaveClass('gap-3')
     })
 

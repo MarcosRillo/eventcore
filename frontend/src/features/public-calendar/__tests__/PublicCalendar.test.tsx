@@ -109,14 +109,14 @@ describe('PublicCalendar', () => {
       render(<PublicCalendar {...defaultProps} />)
 
       expect(screen.getByText('Tipo de Evento')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /todos los tipos/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Tipo de Evento/i })).toBeInTheDocument()
     })
 
     test('renders event type options in dropdown', () => {
       render(<PublicCalendar {...defaultProps} />)
 
       // Open the listbox
-      fireEvent.click(screen.getByRole('button', { name: /todos los tipos/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Tipo de Evento/i }))
 
       expect(screen.getByRole('option', { name: 'Música' })).toBeInTheDocument()
       expect(screen.getByRole('option', { name: 'Arte' })).toBeInTheDocument()
@@ -127,13 +127,13 @@ describe('PublicCalendar', () => {
       render(<PublicCalendar {...defaultProps} />)
 
       expect(screen.getByText('Subtipo (Opcional)')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /todos los subtipos/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Subtipo/i })).toBeInTheDocument()
     })
 
     test('renders subtype options in dropdown', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /todos los subtipos/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Subtipo/i }))
 
       expect(screen.getByRole('option', { name: 'Festival' })).toBeInTheDocument()
       expect(screen.getByRole('option', { name: 'Concierto' })).toBeInTheDocument()
@@ -143,13 +143,13 @@ describe('PublicCalendar', () => {
       render(<PublicCalendar {...defaultProps} />)
 
       expect(screen.getByText('Ubicación')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /todas las ubicaciones/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Ubicación/i })).toBeInTheDocument()
     })
 
     test('renders location options in dropdown', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /todas las ubicaciones/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Ubicación/i }))
 
       expect(screen.getByRole('option', { name: /Teatro San Martín/i })).toBeInTheDocument()
       expect(screen.getByRole('option', { name: /Museo Provincial/i })).toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('PublicCalendar', () => {
     test('calls onEventTypeFilter when event type is selected', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /todos los tipos/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Tipo de Evento/i }))
       fireEvent.click(screen.getByRole('option', { name: 'Música' }))
 
       expect(mockHandlers.onEventTypeFilter).toHaveBeenCalledWith(1)
@@ -167,7 +167,7 @@ describe('PublicCalendar', () => {
     test('calls onEventSubtypeFilter when subtype is selected', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /todos los subtipos/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Subtipo/i }))
       fireEvent.click(screen.getByRole('option', { name: 'Festival' }))
 
       expect(mockHandlers.onEventSubtypeFilter).toHaveBeenCalledWith(1)
@@ -176,7 +176,7 @@ describe('PublicCalendar', () => {
     test('calls onLocationFilter when location is selected', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      fireEvent.click(screen.getByRole('button', { name: /todas las ubicaciones/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Ubicación/i }))
       fireEvent.click(screen.getByRole('option', { name: /Teatro San Martín/i }))
 
       expect(mockHandlers.onLocationFilter).toHaveBeenCalledWith(1)
@@ -185,7 +185,7 @@ describe('PublicCalendar', () => {
     test('disables subtype filter when no subtypes available', () => {
       render(<PublicCalendar {...defaultProps} eventSubtypes={[]} />)
 
-      const subtypeButton = screen.getByRole('button', { name: /todos los subtipos/i })
+      const subtypeButton = screen.getByRole('button', { name: /Subtipo/i })
       expect(subtypeButton).toBeDisabled()
     })
   })

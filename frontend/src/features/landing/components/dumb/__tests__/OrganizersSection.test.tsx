@@ -28,7 +28,7 @@ describe('OrganizersSection', () => {
 
       const section = container.querySelector('section')
       expect(section).toBeInTheDocument()
-      expect(section).toHaveClass('bg-primary-600', 'py-16')
+      expect(section).toHaveClass('bg-primary-600', 'py-10')
     })
 
     test('should render icon container with SVG', () => {
@@ -47,7 +47,7 @@ describe('OrganizersSection', () => {
 
       const title = screen.getByText(/¿Organizás eventos en Tucumán?/i)
       expect(title).toBeInTheDocument()
-      expect(title).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold', 'text-white')
+      expect(title).toHaveClass('text-2xl', 'md:text-3xl', 'font-bold', 'text-white')
     })
 
     test('should render description text', () => {
@@ -55,7 +55,7 @@ describe('OrganizersSection', () => {
 
       const description = screen.getByText(/Sumá tu organización a la plataforma oficial/i)
       expect(description).toBeInTheDocument()
-      expect(description).toHaveClass('text-lg', 'text-primary-100')
+      expect(description).toHaveClass('text-base', 'text-primary-100')
     })
 
     test('should apply correct container and max-width classes', () => {
@@ -88,7 +88,7 @@ describe('OrganizersSection', () => {
 
       const benefitsGrid = container.querySelector('.grid.grid-cols-1.md\\:grid-cols-3')
       expect(benefitsGrid).toBeInTheDocument()
-      expect(benefitsGrid).toHaveClass('gap-6', 'mb-10')
+      expect(benefitsGrid).toHaveClass('gap-6', 'mb-6')
     })
 
     test('should style benefit cards with semi-transparent background', () => {

@@ -61,7 +61,7 @@ describe('Footer', () => {
       const { container } = render(<Footer />)
 
       const grid = container.querySelector('.grid')
-      expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-3', 'gap-10')
+      expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-3', 'gap-6')
     })
   })
 
@@ -183,7 +183,7 @@ describe('Footer', () => {
       const { container } = render(<Footer />)
 
       const footer = container.querySelector('footer')
-      expect(footer).toHaveClass('bg-neutral-900', 'text-white', 'py-16')
+      expect(footer).toHaveClass('bg-neutral-900', 'text-white', 'py-10')
     })
   })
 })

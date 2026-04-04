@@ -6,12 +6,17 @@
  */
 
 import { fireEvent,render, screen } from '@testing-library/react'
+import useSWR from 'swr'
 
 import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors
 } from '@/features/registration-requests/types/registration-request.types'
+
+// Mock SWR to provide sector options without network calls
+jest.mock('swr')
+const mockUseSWR = useSWR as jest.Mock
 
 // Mock Next.js Image component
 jest.mock('next/image', () => ({
@@ -55,6 +60,17 @@ describe('RegistrationRequestForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    // Mock SWR sectors response — returns Hotel, Restaurante, Museo, Entretenimiento
+    mockUseSWR.mockReturnValue({
+      data: [
+        { id: 1, name: 'Hotel' },
+        { id: 2, name: 'Restaurante' },
+        { id: 3, name: 'Museo' },
+        { id: 4, name: 'Entretenimiento' },
+      ],
+      error: undefined,
+      isLoading: false,
+    })
     // Reset URL.createObjectURL mock
     global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
     global.URL.revokeObjectURL = jest.fn()
@@ -134,8 +150,8 @@ describe('RegistrationRequestForm', () => {
     test('calls onFieldChange when sector is selected', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
-      // Sector uses Headless UI Listbox - click to open and select
-      const sectorButton = screen.getByText(/seleccionar sector/i)
+      // Sector uses Headless UI Listbox - accessible name is the label text
+      const sectorButton = screen.getByRole('button', { name: /Sector/i })
       expect(sectorButton).toBeInTheDocument()
       fireEvent.click(sectorButton)
 
@@ -143,7 +159,7 @@ describe('RegistrationRequestForm', () => {
       const hotelOption = screen.getByText('Hotel')
       fireEvent.click(hotelOption)
 
-      expect(mockOnFieldChange).toHaveBeenCalledWith('organization_sector', 'hotel')
+      expect(mockOnFieldChange).toHaveBeenCalledWith('organization_sector', '1')
     })
 
     test('calls onFieldChange when motivation textarea is filled', () => {
@@ -177,8 +193,8 @@ describe('RegistrationRequestForm', () => {
     test('renders all organization sectors', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
-      // Open the dropdown
-      const sectorButton = screen.getByText(/seleccionar sector/i)
+      // Open the dropdown — button accessible name is the label text
+      const sectorButton = screen.getByRole('button', { name: /Sector/i })
       fireEvent.click(sectorButton)
 
       // Check that options are visible
@@ -191,8 +207,8 @@ describe('RegistrationRequestForm', () => {
     test('has default placeholder option', () => {
       render(<RegistrationRequestForm {...defaultProps} />)
 
-      // Placeholder is shown in the button
-      expect(screen.getByText(/seleccionar sector/i)).toBeInTheDocument()
+      // Sector button is accessible via label text
+      expect(screen.getByRole('button', { name: /Sector/i })).toBeInTheDocument()
     })
   })
 
@@ -529,7 +545,7 @@ describe('RegistrationRequestForm', () => {
       expect(checkbox).toBeDisabled()
       // Sector select uses Listbox which doesn't have a native disabled state queryable as 'combobox'
       // Check the button has disabled opacity class instead
-      const sectorButton = screen.getByText(/seleccionar sector/i).closest('button')
+      const sectorButton = screen.getByRole('button', { name: /Sector/i })
       expect(sectorButton).toHaveClass('disabled:opacity-50')
     })
 

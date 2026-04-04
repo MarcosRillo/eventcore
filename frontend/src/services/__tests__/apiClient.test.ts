@@ -23,7 +23,7 @@ describe('apiClient', () => {
       expect(apiClient.defaults.baseURL).toBeDefined()
       expect(apiClient.defaults.headers['Content-Type']).toBe('application/json')
       expect(apiClient.defaults.headers['Accept']).toBe('application/json')
-      expect(apiClient.defaults.timeout).toBe(10000)
+      expect(apiClient.defaults.timeout).toBe(35000)
     })
 
     it('should have withCredentials enabled for cookie-based auth', () => {

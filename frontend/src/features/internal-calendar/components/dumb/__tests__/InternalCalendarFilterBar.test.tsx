@@ -46,8 +46,8 @@ describe('InternalCalendarFilterBar', () => {
     expect(screen.getByText('Hasta')).toBeInTheDocument();
 
     // Verify select triggers (Headless UI Listbox buttons)
-    expect(screen.getByRole('button', { name: /Todos los tipos/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Todos los estados/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tipo de Evento/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Estado/ })).toBeInTheDocument();
 
     // Verify date inputs (Input shared component has htmlFor)
     expect(screen.getByLabelText('Desde')).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const trigger = screen.getByRole('button', { name: /Todos los tipos/ });
+    const trigger = screen.getByRole('button', { name: /Tipo de Evento/ });
 
     // Should be disabled when loading
     expect(trigger).toBeDisabled();
@@ -82,7 +82,7 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    const trigger = screen.getByRole('button', { name: /Todos los tipos/ });
+    const trigger = screen.getByRole('button', { name: /Tipo de Evento/ });
 
     // Should not be disabled
     expect(trigger).not.toBeDisabled();
@@ -109,7 +109,7 @@ describe('InternalCalendarFilterBar', () => {
     );
 
     // Open the event type dropdown and select "Taller" (id: 2)
-    fireEvent.click(screen.getByRole('button', { name: /Todos los tipos/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Tipo de Evento/ }));
     fireEvent.click(screen.getByRole('option', { name: 'Taller' }));
 
     // Should call onFiltersChange with event_type_id
@@ -130,7 +130,7 @@ describe('InternalCalendarFilterBar', () => {
     );
 
     // Open the status dropdown and select "Aprobado Interno"
-    fireEvent.click(screen.getByRole('button', { name: /Todos los estados/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Estado/ }));
     fireEvent.click(screen.getByRole('option', { name: 'Aprobado Interno' }));
 
     // Should call onFiltersChange with status
@@ -151,7 +151,7 @@ describe('InternalCalendarFilterBar', () => {
     );
 
     // Open the status dropdown
-    fireEvent.click(screen.getByRole('button', { name: /Todos los estados/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Estado/ }));
 
     // Should have 3 status options (placeholder is in the button, not an option)
     const options = screen.getAllByRole('option');
@@ -172,7 +172,7 @@ describe('InternalCalendarFilterBar', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: /Todos los estados/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Estado/ })).toBeDisabled();
   });
 
   test('calls onFiltersChange when dates selected', () => {
