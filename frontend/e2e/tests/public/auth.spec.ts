@@ -15,7 +15,7 @@ test.describe('Authentication', () => {
     // Wait for auth init to complete — inputs become enabled when isLoading=false
     await expect(page.getByRole('textbox', { name: /Correo electrónico/i })).toBeEnabled({ timeout: 30_000 });
 
-    await page.getByRole('textbox', { name: /Correo electrónico/i }).fill('ana.garcia@enteturismo.gov.ar');
+    await page.getByRole('textbox', { name: /Correo electrónico/i }).fill('marcos@plataforma.com');
     await page.getByPlaceholder('Tu contraseña…').fill('password123');
     await page.getByRole('button', { name: /Iniciar Sesión/i }).click();
 
@@ -29,7 +29,7 @@ test.describe('Authentication', () => {
 
     await expect(page.getByRole('textbox', { name: /Correo electrónico/i })).toBeEnabled({ timeout: 30_000 });
 
-    await page.getByRole('textbox', { name: /Correo electrónico/i }).fill('ana.garcia@enteturismo.gov.ar');
+    await page.getByRole('textbox', { name: /Correo electrónico/i }).fill('marcos@plataforma.com');
     await page.getByPlaceholder('Tu contraseña…').fill('wrongpassword_e2e');
     await page.getByRole('button', { name: /Iniciar Sesión/i }).click();
 
