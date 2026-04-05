@@ -63,6 +63,7 @@ class EventTypeService
                     'name' => $data['name'],
                     'entity_id' => $organizationId,
                     'color' => $data['color'],
+                    'icon' => $data['icon'] ?? null,
                     'is_active' => $data['is_active'] ?? true,
                 ];
 

@@ -218,7 +218,7 @@ class PublicEventService
         return $this->taggedRemember(['event-types'], 'public.event-types', 3600, function () {
             return EventType::where('is_active', true)
                 ->orderBy('name')
-                ->get(['id', 'name', 'color', 'is_active']);
+                ->get(['id', 'name', 'color', 'icon', 'is_active']);
         });
     }
 

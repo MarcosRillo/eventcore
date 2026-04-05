@@ -23,6 +23,7 @@ class EventTypeFactory extends Factory
         return [
             'name' => fake()->words(2, true),
             'entity_id' => Organization::factory(),
+            'icon' => fake()->randomElement(['music', 'trophy', 'palette', 'map-pin', 'store', 'presentation', null]),
             'is_active' => true,
         ];
     }

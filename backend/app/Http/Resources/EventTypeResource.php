@@ -18,6 +18,7 @@ class EventTypeResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'color' => $this->color,
+            'icon' => $this->icon,
             'is_active' => $this->is_active,
             'subtypes_count' => $this->whenCounted('subtypes'),
             'created_at' => $this->created_at,

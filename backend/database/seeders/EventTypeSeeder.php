@@ -35,6 +35,7 @@ class EventTypeSeeder extends Seeder
         $typesWithSubtypes = [
             'Festivales' => [
                 'color' => '#8B5CF6',  // Purple
+                'icon' => 'party-popper',
                 'subtypes' => [
                     'Festival de Música',
                     'Festival Gastronómico',
@@ -44,6 +45,7 @@ class EventTypeSeeder extends Seeder
             ],
             'Deportes' => [
                 'color' => '#10B981',  // Green
+                'icon' => 'trophy',
                 'subtypes' => [
                     'Competencia',
                     'Maratón',
@@ -53,6 +55,7 @@ class EventTypeSeeder extends Seeder
             ],
             'Cultura' => [
                 'color' => '#F59E0B',  // Orange
+                'icon' => 'palette',
                 'subtypes' => [
                     'Exposición de Arte',
                     'Teatro',
@@ -62,6 +65,7 @@ class EventTypeSeeder extends Seeder
             ],
             'Turismo' => [
                 'color' => '#3B82F6',  // Blue
+                'icon' => 'map-pin',
                 'subtypes' => [
                     'Tour Guiado',
                     'Excursión',
@@ -71,6 +75,7 @@ class EventTypeSeeder extends Seeder
             ],
             'Ferias' => [
                 'color' => '#EF4444',  // Red
+                'icon' => 'store',
                 'subtypes' => [
                     'Feria Artesanal',
                     'Feria del Libro',
@@ -80,6 +85,7 @@ class EventTypeSeeder extends Seeder
             ],
             'Conferencias' => [
                 'color' => '#6366F1',  // Indigo
+                'icon' => 'presentation',
                 'subtypes' => [
                     'Congreso',
                     'Seminario',
@@ -98,6 +104,7 @@ class EventTypeSeeder extends Seeder
                 'name' => $typeName,
                 'entity_id' => $enteTurismo->id,
                 'color' => $typeData['color'],
+                'icon' => $typeData['icon'] ?? null,
                 'is_active' => true,
             ]);
             $typesCreated++;

@@ -21,6 +21,7 @@ class EventType extends Model
         'name',
         'entity_id',
         'color',
+        'icon',
         'is_active',
     ];
 
