@@ -22,6 +22,7 @@ const customJestConfig = {
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)'
   ],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/e2e/'],
   // Worker and timeout configuration to prevent hanging
   maxWorkers: process.env.CI ? 2 : '50%', // Use fewer workers in CI, 50% of cores locally
   testTimeout: 10000, // 10 second timeout per test
