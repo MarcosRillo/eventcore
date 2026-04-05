@@ -42,6 +42,16 @@ class EventSeeder extends Seeder
      */
     private function downloadSeedImages(int $count = 15): void
     {
+        if (empty(config('cloudinary.cloud_name'))) {
+            $this->command->warn('CLOUDINARY_CLOUD_NAME not set — using picsum.photos direct URLs for seed images.');
+
+            for ($i = 0; $i < $count; $i++) {
+                $this->seedImagePool[] = "https://picsum.photos/seed/event{$i}/800/450";
+            }
+
+            return;
+        }
+
         $cloudinary = new Cloudinary([
             'cloud' => [
                 'cloud_name' => config('cloudinary.cloud_name'),
