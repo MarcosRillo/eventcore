@@ -33,11 +33,11 @@ describe('CategoriesSection', () => {
     test('should render section header with title and description', () => {
       render(<CategoriesSection {...defaultProps} />)
 
-      expect(screen.getByText('Explorar Eventos')).toBeInTheDocument()
-      expect(screen.getByText('Encuentra eventos según tus intereses')).toBeInTheDocument()
+      expect(screen.getByText('¿Qué estás buscando?')).toBeInTheDocument()
+      expect(screen.getByText('Elegí una categoría y encontrá eventos en Tucumán')).toBeInTheDocument()
 
-      const heading = screen.getByRole('heading', { name: /explorar eventos/i })
-      expect(heading).toHaveClass('text-2xl', 'md:text-3xl', 'font-bold')
+      const heading = screen.getByRole('heading', { name: /qué estás buscando/i })
+      expect(heading).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold')
     })
 
     test('should render loading spinner when loading is true', () => {
@@ -68,73 +68,73 @@ describe('CategoriesSection', () => {
       const { container } = render(<CategoriesSection {...defaultProps} />)
 
       const grid = container.querySelector('.grid')
-      expect(grid).toHaveClass('grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4')
+      expect(grid).toHaveClass('grid-cols-2', 'sm:grid-cols-3')
     })
   })
 
   describe('icon mapping', () => {
-    test('should display music icon for Música category', () => {
-      const musicTypes: EventType[] = [{ id: 1, name: 'Música', is_active: true }]
+    test('should render an SVG icon for Música category', () => {
+      const musicTypes: EventType[] = [{ id: 1, name: 'Música', is_active: true, icon: 'music' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={musicTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('🎵')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should display culture icon for Cultura/Arte category', () => {
-      const cultureTypes: EventType[] = [{ id: 1, name: 'Cultura y Arte', is_active: true }]
+    test('should render an SVG icon for Cultura/Arte category', () => {
+      const cultureTypes: EventType[] = [{ id: 1, name: 'Cultura y Arte', is_active: true, icon: 'palette' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={cultureTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('🎭')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should display food icon for Gastronomía category', () => {
-      const foodTypes: EventType[] = [{ id: 1, name: 'Gastronomía', is_active: true }]
+    test('should render an SVG icon for Gastronomía category', () => {
+      const foodTypes: EventType[] = [{ id: 1, name: 'Gastronomía', is_active: true, icon: 'utensils' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={foodTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('🍴')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should display sports icon for Deportes category', () => {
-      const sportsTypes: EventType[] = [{ id: 1, name: 'Deportes', is_active: true }]
+    test('should render an SVG icon for Deportes category', () => {
+      const sportsTypes: EventType[] = [{ id: 1, name: 'Deportes', is_active: true, icon: 'trophy' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={sportsTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('⚽')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should display festival icon for Festival category', () => {
-      const festivalTypes: EventType[] = [{ id: 1, name: 'Festival de Cine', is_active: true }]
+    test('should render an SVG icon for Festival category', () => {
+      const festivalTypes: EventType[] = [{ id: 1, name: 'Festival de Cine', is_active: true, icon: 'party-popper' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={festivalTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('🎉')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should display tourism icon for Turismo category', () => {
-      const tourismTypes: EventType[] = [{ id: 1, name: 'Turismo Aventura', is_active: true }]
+    test('should render an SVG icon for Turismo category', () => {
+      const tourismTypes: EventType[] = [{ id: 1, name: 'Turismo Aventura', is_active: true, icon: 'mountain' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={tourismTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('🏔️')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should display default calendar icon for unknown category', () => {
-      const unknownTypes: EventType[] = [{ id: 1, name: 'Conferencias', is_active: true }]
+    test('should render a default SVG icon when icon is not set', () => {
+      const unknownTypes: EventType[] = [{ id: 1, name: 'Conferencias', is_active: true, icon: null }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={unknownTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('📅')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
 
-    test('should handle case-insensitive category name matching', () => {
-      const mixedCaseTypes: EventType[] = [{ id: 1, name: 'MÚSICA CLÁSICA', is_active: true }]
+    test('should render an SVG icon regardless of category name casing', () => {
+      const mixedCaseTypes: EventType[] = [{ id: 1, name: 'MÚSICA CLÁSICA', is_active: true, icon: 'music' }]
       const { container } = render(<CategoriesSection {...defaultProps} eventTypes={mixedCaseTypes} />)
 
-      const iconElement = container.querySelector('[aria-hidden="true"]')
-      expect(iconElement?.textContent).toBe('🎵')
+      const svgIcon = container.querySelector('svg[aria-hidden="true"]')
+      expect(svgIcon).toBeInTheDocument()
     })
   })
 
@@ -163,11 +163,12 @@ describe('CategoriesSection', () => {
       expect(mockOnCategoryClick).toHaveBeenCalledTimes(2)
     })
 
-    test('should apply hover styles on button', () => {
+    test('should apply hover-related transition classes on button', () => {
       render(<CategoriesSection {...defaultProps} />)
 
       const button = screen.getByRole('button', { name: /ver eventos de música/i })
-      expect(button).toHaveClass('hover:bg-white', 'hover:border-neutral-200', 'hover:shadow-md')
+      // Hover state is managed via inline styles + JS state — verify transition class is present
+      expect(button).toHaveClass('transition-all', 'hover:-translate-y-0.5')
     })
   })
 
@@ -193,7 +194,7 @@ describe('CategoriesSection', () => {
       render(<CategoriesSection {...defaultProps} />)
 
       const button = screen.getByRole('button', { name: /ver eventos de música/i })
-      expect(button).toHaveClass('focus:outline-none', 'focus:ring-2', 'focus:ring-primary-500/20')
+      expect(button).toHaveClass('focus:outline-none', 'focus-visible:ring-2', 'focus-visible:ring-primary-500')
     })
   })
 

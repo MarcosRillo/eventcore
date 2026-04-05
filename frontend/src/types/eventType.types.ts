@@ -20,6 +20,7 @@ export interface EventType {
   id: number;
   name: string;
   color: string;
+  icon?: string | null;
   entity_id: number;
   is_active: boolean;
   created_at: string;
@@ -49,7 +50,7 @@ export interface EventSubtype {
 /**
  * Form data for creating/editing an EventType
  */
-export type EventTypeFormData = Partial<Pick<EventType, 'name' | 'color' | 'is_active'>>;
+export type EventTypeFormData = Partial<Pick<EventType, 'name' | 'color' | 'is_active' | 'icon'>>;
 
 /**
  * Form data for creating/editing an EventSubtype

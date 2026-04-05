@@ -7,6 +7,7 @@ export interface EventType {
   name: string
   slug?: string
   color?: string
+  icon?: string | null
   is_active: boolean
 }
 
@@ -30,6 +31,7 @@ export interface PublicEvent {
     id: number
     name: string
     color?: string
+    icon?: string | null
   }
   event_subtype?: {
     id: number

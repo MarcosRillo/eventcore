@@ -196,6 +196,7 @@ describe('eventType.service', () => {
       expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types', {
         name: 'Seminario',
         is_active: true,
+        icon: null,
       })
       expect(result.name).toBe('Seminario')
       expect(result.is_active).toBe(true)
@@ -214,6 +215,7 @@ describe('eventType.service', () => {
       expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types', {
         name: 'Borrador',
         is_active: false,
+        icon: null,
       })
       expect(result.is_active).toBe(false)
     })
@@ -231,6 +233,7 @@ describe('eventType.service', () => {
       expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types', {
         name: 'Activo',
         is_active: true,
+        icon: null,
       })
       expect(result.is_active).toBe(true)
     })
@@ -243,6 +246,7 @@ describe('eventType.service', () => {
       expect(mockedApiClient.post).toHaveBeenCalledWith('/event-types', {
         name: '',
         is_active: true,
+        icon: null,
       })
       expect(mockedApiClient.post).toHaveBeenCalledTimes(1)
     })

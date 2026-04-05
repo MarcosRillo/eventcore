@@ -120,6 +120,7 @@ describe('CreateEventTypeModal', () => {
           name: 'Nueva Conferencia',
           color: '#3B82F6',
           is_active: true,
+          icon: null,
         })
       })
     })
@@ -169,6 +170,7 @@ describe('CreateEventTypeModal', () => {
           name: 'Inactive Type',
           color: '#3B82F6',
           is_active: false,
+          icon: null,
         })
       })
     })
@@ -187,6 +189,7 @@ describe('CreateEventTypeModal', () => {
           name: 'Trimmed Name',
           color: '#3B82F6',
           is_active: true,
+          icon: null,
         })
       })
     })
@@ -262,6 +265,7 @@ describe('CreateEventTypeModal', () => {
           name: 'Tipo Sin Callback',
           color: '#3B82F6',
           is_active: true,
+          icon: null,
         })
       })
 
@@ -397,6 +401,7 @@ describe('EditEventTypeModal', () => {
           name: 'Updated Conferencia',
           color: '#3B82F6',
           is_active: true,
+          icon: null,
         })
       })
     })
@@ -449,6 +454,7 @@ describe('EditEventTypeModal', () => {
           name: 'Conferencia Existente',
           color: '#3B82F6',
           is_active: false,
+          icon: null,
         })
       })
     })
@@ -471,6 +477,7 @@ describe('EditEventTypeModal', () => {
           name: 'Trimmed Update',
           color: '#3B82F6',
           is_active: true,
+          icon: null,
         })
       })
     })
@@ -591,6 +598,7 @@ describe('EditEventTypeModal', () => {
           name: 'Nombre Actualizado',
           color: '#3B82F6',
           is_active: true,
+          icon: null,
         })
       })
 

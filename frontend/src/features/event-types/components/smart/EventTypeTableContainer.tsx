@@ -14,6 +14,7 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
+import { EventTypeIcon } from '@/features/event-types/components/dumb/EventTypeIcon';
 import { SubtypeRowsContent } from '@/features/event-types/components/dumb/SubtypeRowsContent';
 import {
   ConfirmDialogData,
@@ -125,10 +126,9 @@ export const EventTypeTableContainer = ({
         key: 'name',
         label: 'Tipo de Evento',
         render: (eventType) => (
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-900">
-              {eventType.name}
-            </span>
+          <div className="flex items-center gap-2">
+            <EventTypeIcon icon={eventType.icon} className="w-5 h-5 shrink-0" />
+            <span className="font-medium text-neutral-900">{eventType.name}</span>
           </div>
         ),
       },

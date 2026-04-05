@@ -71,6 +71,7 @@ export interface EventTypeInfo {
   id: number;
   name: string;
   color?: string;
+  icon?: string | null;
   entity_id?: number;
   is_active: boolean;
   created_at?: string;

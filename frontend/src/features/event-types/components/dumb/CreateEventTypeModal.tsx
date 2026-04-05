@@ -5,6 +5,7 @@
  * Created: December 2, 2025
  */
 
+import { IconPicker } from '@/features/event-types/components/dumb/IconPicker';
 import {
   createEventType,
   validateEventTypeData,
@@ -25,6 +26,7 @@ const initialData: CreateEventTypeData = {
   name: '',
   color: '#3B82F6',
   is_active: true,
+  icon: null as string | null,
 };
 
 // Form validator using existing validation service
@@ -46,6 +48,7 @@ const CreateEventTypeModal: React.FC<CreateEventTypeModalProps> = ({
       name: formData.name?.trim(),
       color: formData.color,
       is_active: formData.is_active,
+      icon: formData.icon ?? null,
     });
 
     // Notify parent component
@@ -98,6 +101,18 @@ const CreateEventTypeModal: React.FC<CreateEventTypeModalProps> = ({
               value={formData.color || '#3B82F6'}
               onChange={(value) => handleFieldChange('color', value)}
               disabled={isLoading}
+            />
+          </div>
+
+          {/* Icon Field */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
+              Icono (opcional)
+            </label>
+            <IconPicker
+              value={formData.icon ?? null}
+              onChange={(icon) => handleFieldChange('icon', icon)}
+              accentColor={formData.color || '#3B82F6'}
             />
           </div>
 

@@ -70,6 +70,7 @@ export const createEventType = async (
       color: eventTypeData.color,
       is_active:
         eventTypeData.is_active !== undefined ? eventTypeData.is_active : true,
+      icon: eventTypeData.icon ?? null,
     }
   );
 
@@ -92,6 +93,7 @@ export const updateEventType = async (
       name: eventTypeData.name,
       color: eventTypeData.color,
       is_active: eventTypeData.is_active,
+      icon: eventTypeData.icon,
     }
   );
 

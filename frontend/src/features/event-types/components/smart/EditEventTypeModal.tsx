@@ -9,6 +9,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { IconPicker } from '@/features/event-types/components/dumb/IconPicker';
 import {
   updateEventType,
   validateEventTypeData,
@@ -42,6 +43,7 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
     name: '',
     color: '#3B82F6',
     is_active: true,
+    icon: null as string | null,
   });
 
   // Update initial data when eventType changes
@@ -51,6 +53,7 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
         name: eventType.name,
         color: eventType.color,
         is_active: eventType.is_active,
+        icon: eventType.icon ?? null,
       });
     }
   }, [eventType]);
@@ -65,6 +68,7 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
       name: formData.name?.trim(),
       color: formData.color,
       is_active: formData.is_active,
+      icon: formData.icon,
     });
 
     // Notify parent component
@@ -121,6 +125,18 @@ const EditEventTypeModal: React.FC<EditEventTypeModalProps> = ({
               value={formData.color || '#3B82F6'}
               onChange={(value) => handleFieldChange('color', value)}
               disabled={isLoading}
+            />
+          </div>
+
+          {/* Icon Field */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
+              Icono (opcional)
+            </label>
+            <IconPicker
+              value={formData.icon ?? null}
+              onChange={(icon) => handleFieldChange('icon', icon)}
+              accentColor={formData.color || '#3B82F6'}
             />
           </div>
 

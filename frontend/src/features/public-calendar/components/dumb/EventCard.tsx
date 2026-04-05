@@ -9,6 +9,7 @@ import { ArrowRight, Calendar, MapPin } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { memo } from 'react'
 
+import { EventTypeIcon } from '@/features/event-types/components/dumb/EventTypeIcon'
 import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 import { Badge, SafeImage } from '@/shared/components/display'
@@ -91,12 +92,13 @@ export const EventCard = memo(function EventCard({ event, onClick, priority = fa
         {/* Event Type */}
         <div className="mb-2">
           <span
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium"
             style={{
               backgroundColor: event.event_type.color || '#3B82F6',
               color: getContrastTextColor(event.event_type.color || '#3B82F6')
             }}
           >
+            <EventTypeIcon icon={event.event_type.icon} className="w-3.5 h-3.5" />
             {event.event_type.name}
           </span>
         </div>
