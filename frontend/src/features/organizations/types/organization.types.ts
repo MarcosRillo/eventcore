@@ -2,6 +2,10 @@
  * Organization types for the organizations feature
  */
 
+import type { PaginationMeta } from '@/types/api-response.types'
+
+export type { PaginationMeta }
+
 export interface OrganizationStatus {
   id: number
   status_code: string
@@ -58,13 +62,6 @@ export interface OrganizationFilters {
   status?: 'all' | 'active' | 'suspended'
   per_page?: number
   page?: number
-}
-
-export interface PaginationMeta {
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
 }
 
 export interface OrganizationsResponse {

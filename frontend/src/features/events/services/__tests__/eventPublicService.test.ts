@@ -2,7 +2,8 @@ import { AxiosResponse } from 'axios'
 
 import { combinedEventPublicService,eventPublicExportService, eventPublicService } from '@/features/events/services/eventPublicService'
 import publicApiClient from '@/services/publicApiClient'
-import { Event, EVENT_STATUS, EVENT_TYPE,EventPagination } from '@/types/event.types'
+import type { PaginatedResponse } from '@/types/api-response.types'
+import { Event, EVENT_STATUS, EVENT_TYPE } from '@/types/event.types'
 import { PublicEventFilters } from '@/types/filter.types'
 import { Location } from '@/types/location.types'
 
@@ -63,7 +64,7 @@ describe('eventPublicService', () => {
     is_featured: true,
   })
 
-  const mockPagination: EventPagination = {
+  const mockPagination: PaginatedResponse<Event> = {
     data: [mockEvent],
     meta: createMockMeta({ current_page: 1, last_page: 1, per_page: 15, total: 1, from: 1, to: 1 }),
     links: {
@@ -184,7 +185,7 @@ describe('eventPublicService', () => {
     })
 
     it('should handle empty results', async () => {
-      const emptyPagination: EventPagination = {
+      const emptyPagination: PaginatedResponse<Event> = {
         data: [],
         meta: createMockMeta({ current_page: 1, last_page: 1, per_page: 15, total: 0, from: null, to: null }),
         links: {
@@ -262,7 +263,7 @@ describe('eventPublicService', () => {
     })
 
     it('should handle empty search results', async () => {
-      const emptyPagination: EventPagination = {
+      const emptyPagination: PaginatedResponse<Event> = {
         data: [],
         meta: createMockMeta({ current_page: 1, last_page: 1, per_page: 15, total: 0, from: null, to: null }),
         links: {

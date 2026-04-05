@@ -3,9 +3,6 @@
  * Standardized response interfaces for all API services
  */
 
-import { User } from '@/types/auth.types';
-import { Event } from '@/types/event.types';
-
 /**
  * Core pagination interfaces - essential for API responses
  */
@@ -38,10 +35,6 @@ export interface PaginatedResponse<T> {
   links: PaginationLinks;
 }
 
-// DEPRECATED: Use PaginatedResponse<T> directly
-export type EventsResponse = PaginatedResponse<Event>;
-export type UsersResponse = PaginatedResponse<User>;
-
 // API error interface
 export interface ApiError {
   message: string;
@@ -49,9 +42,6 @@ export interface ApiError {
   details?: Record<string, string[]>;
   field_errors?: Record<string, string[]>;
 }
-
-// Backward compatibility alias
-export type ApiErrorResponse = ApiError;
 
 // Generic API response wrapper
 export interface ApiResponse<T> {

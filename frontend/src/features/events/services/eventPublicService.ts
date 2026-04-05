@@ -5,13 +5,11 @@
  * Provides read-only access to published events with public-focused features.
  */
 
-import { PublicEventService } from '@/features/events/services/types';
+import type { PublicEventService } from '@/features/events/services/types';
 import publicApiClient from '@/services/publicApiClient';
-import {
-  Event,
-  EventPagination,
-} from '@/types/event.types';
-import { PublicEventFilters } from '@/types/filter.types';
+import type { PaginatedResponse } from '@/types/api-response.types';
+import type { Event } from '@/types/event.types';
+import type { PublicEventFilters } from '@/types/filter.types';
 
 // ExtendedPublicEventFilters eliminated - consolidated into PublicEventFilters in filter.types.ts
 
@@ -23,7 +21,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * Get paginated list of events (alias for public events)
    * @param filters
    */
-  async getEvents(filters: PublicEventFilters = {}): Promise<EventPagination> {
+  async getEvents(filters: PublicEventFilters = {}): Promise<PaginatedResponse<Event>> {
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -50,7 +48,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * Uses new public events endpoint without authentication
    * @param filters
    */
-  async getPublicEvents(filters: PublicEventFilters = {}): Promise<EventPagination> {
+  async getPublicEvents(filters: PublicEventFilters = {}): Promise<PaginatedResponse<Event>> {
     const params = new URLSearchParams();
     
     // Map public filters to public API parameters
@@ -78,7 +76,7 @@ export const eventPublicService: Omit<PublicEventService, 'export'> = {
    * @param query
    * @param filters
    */
-  async searchEvents(query: string, filters: PublicEventFilters = {}): Promise<EventPagination> {
+  async searchEvents(query: string, filters: PublicEventFilters = {}): Promise<PaginatedResponse<Event>> {
     const params = new URLSearchParams();
     params.append('q', query);
     

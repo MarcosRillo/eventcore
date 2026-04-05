@@ -2,6 +2,10 @@
  * User types for the users management feature
  */
 
+import type { PaginationMeta } from '@/types/api-response.types'
+
+export type { PaginationMeta }
+
 export interface UserRole {
   id: number
   role_code: string
@@ -25,13 +29,6 @@ export interface UserFilters {
   status?: 'all' | 'active' | 'suspended'
   per_page?: number
   page?: number
-}
-
-export interface PaginationMeta {
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
 }
 
 export interface UsersResponse {

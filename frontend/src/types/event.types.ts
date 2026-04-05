@@ -3,8 +3,8 @@
  * Type definitions for event-related data structures
  */
 
-import type { PaginatedResponse } from '@/types/api-response.types';
 import type { User } from '@/types/auth.types';
+import type { EventSubtype as CanonicalEventSubtype, EventType as CanonicalEventType } from '@/types/eventType.types';
 import type { EntityStats } from '@/types/generic-infrastructure.types';
 import type { Location } from '@/types/location.types';
 import type { EventOperation } from '@/types/operations.types';
@@ -67,30 +67,23 @@ export type EventType = EventTypeCode | EventTypeObject;
  * Event Type Resource from backend (3NF structure)
  * This is what EventResource returns for the event_type relationship
  */
-export interface EventTypeInfo {
-  id: number;
-  name: string;
+export type EventTypeInfo = Pick<CanonicalEventType, 'id' | 'name' | 'is_active'> & {
   color?: string;
   icon?: string | null;
   entity_id?: number;
-  is_active: boolean;
   created_at?: string;
   updated_at?: string;
-}
+};
 
 /**
  * Event Subtype Resource from backend (3NF structure)
  * This is what EventResource returns for the event_subtype relationship
  */
-export interface EventSubtypeInfo {
-  id: number;
-  name: string;
-  event_type_id: number;
+export type EventSubtypeInfo = Pick<CanonicalEventSubtype, 'id' | 'name' | 'event_type_id' | 'is_active'> & {
   entity_id?: number;
-  is_active: boolean;
   created_at?: string;
   updated_at?: string;
-}
+};
 
 /**
  * Event Status Resource from backend (3NF structure)
@@ -231,28 +224,6 @@ export interface EventFormData {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Event filters for API queries
- */
-export interface EventFilters {
-  search?: string;
-  status?: EventStatusCode;
-  type?: EventTypeCode;
-  event_type_id?: number;
-  location_id?: number;
-  start_date?: string;
-  end_date?: string;
-  is_featured?: boolean;
-  created_by?: number;
-  show_past?: string; // '1' to show past events, undefined for upcoming
-  page?: number;
-  per_page?: number;
-}
-
-/**
- * Event pagination - DEPRECATED: Use PaginatedResponse<Event> directly
- */
-export type EventPagination = PaginatedResponse<Event>;
 
 /**
  * Event statistics - matches backend EventService statistics

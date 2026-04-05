@@ -7,7 +7,8 @@
 import { fireEvent,render, screen } from '@testing-library/react'
 
 import { EventFiltersBar } from '@/features/events/components/smart/EventFiltersBar'
-import { EVENT_TYPE,EventFilters } from '@/types/event.types'
+import { EVENT_TYPE } from '@/types/event.types'
+import type { EventFilters } from '@/types/filter.types'
 
 // Mock UI components
 jest.mock('@/shared/components/form', () => ({

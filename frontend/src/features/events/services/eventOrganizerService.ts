@@ -5,15 +5,16 @@
  * Provides limited CRUD operations for organizers to manage only their own events.
  */
 
-import { OrganizerEventService } from '@/features/events/services/types';
+import type { OrganizerEventService } from '@/features/events/services/types';
 import apiClient from '@/services/apiClient';
-import {
+import type { PaginatedResponse } from '@/types/api-response.types';
+import type {
   Event,
   EventFormData,
   EventMessage,
-  EventPagination,
-  EventTemplate} from '@/types/event.types';
-import { OrganizerEventFilters } from '@/types/filter.types';
+  EventTemplate
+} from '@/types/event.types';
+import type { OrganizerEventFilters } from '@/types/filter.types';
 
 // ExtendedOrganizerEventFilters eliminated - consolidated into OrganizerEventFilters
 
@@ -51,14 +52,14 @@ export interface OrganizerStatistics {
  * Organizer event service operations
  */
 export const eventOrganizerService: Omit<OrganizerEventService, 'communication' | 'getEvents' | 'getEvent'> & {
-  getMyEvents: (filters?: OrganizerEventFilters) => Promise<EventPagination>;
+  getMyEvents: (filters?: OrganizerEventFilters) => Promise<PaginatedResponse<Event>>;
   getMyEvent: (id: number) => Promise<Event>;
 } = {
   /**
    * Get organizer's own events
    * @param filters
    */
-  async getMyEvents(filters: OrganizerEventFilters = {}): Promise<EventPagination> {
+  async getMyEvents(filters: OrganizerEventFilters = {}): Promise<PaginatedResponse<Event>> {
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {

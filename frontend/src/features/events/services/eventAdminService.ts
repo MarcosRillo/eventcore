@@ -5,17 +5,17 @@
  * Provides complete CRUD operations, approval workflow, and administrative features.
  */
 
-import { AdminEventService } from '@/features/events/services/types';
+import type { AdminEventService } from '@/features/events/services/types';
 import apiClient from '@/services/apiClient';
-import {
+import type { PaginatedResponse } from '@/types/api-response.types';
+import type {
   ApprovalStatistics,
   Event,
-  EventFilters,
   EventFormData,
-  EventPagination,
   EventStatistics,
   EventStatus
 } from '@/types/event.types';
+import type { EventFilters } from '@/types/filter.types';
 
 /**
  * Admin-level event CRUD operations
@@ -25,7 +25,7 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
    * Get paginated list of all events in organization with advanced filters
    * @param filters
    */
-  async getEvents(filters: EventFilters = {}): Promise<EventPagination> {
+  async getEvents(filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
@@ -168,7 +168,7 @@ export const eventAdminApprovalService = {
    * @param status
    * @param filters
    */
-  async getEventsByStatus(status: EventStatus, filters: EventFilters = {}): Promise<EventPagination> {
+  async getEventsByStatus(status: EventStatus, filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
@@ -300,7 +300,7 @@ export const eventAdminApprovalService = {
    * Get events pending admin approval
    * @param filters
    */
-  async getPendingApprovals(filters: EventFilters = {}): Promise<EventPagination> {
+  async getPendingApprovals(filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
     return this.getEventsByStatus('pending_internal_approval', filters);
   },
 
@@ -308,7 +308,7 @@ export const eventAdminApprovalService = {
    * Get events pending public approval
    * @param filters
    */
-  async getPendingPublicApprovals(filters: EventFilters = {}): Promise<EventPagination> {
+  async getPendingPublicApprovals(filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
     return this.getEventsByStatus('pending_public_approval', filters);
   },
 

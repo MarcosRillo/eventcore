@@ -4,4 +4,3 @@
  */
 
 export { EventCard } from '@/features/events/components/dumb/EventCard';
-export { EventsList } from '@/features/events/components/dumb/EventsList';

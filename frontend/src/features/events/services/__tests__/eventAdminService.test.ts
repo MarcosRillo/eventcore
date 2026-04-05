@@ -2,7 +2,9 @@ import { AxiosResponse } from 'axios'
 
 import { combinedEventAdminService,eventAdminApprovalService, eventAdminService } from '@/features/events/services/eventAdminService'
 import apiClient from '@/services/apiClient'
-import { ApprovalStatistics, Event, EVENT_STATUS, EVENT_TYPE, EventFilters, EventFormData, EventPagination, EventStatistics, EventStatus, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import type { PaginatedResponse } from '@/types/api-response.types'
+import { ApprovalStatistics, Event, EVENT_STATUS, EVENT_TYPE, EventFormData, EventStatistics, EventStatus, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import type { EventFilters } from '@/types/filter.types'
 
 
 // Mock apiClient
@@ -57,7 +59,7 @@ const createMockMeta = (overrides: Partial<{
 describe('eventAdminService', () => {
   const mockEvent = createMockEvent({ id: 1, title: 'Admin Event', description: 'Admin Description' })
 
-  const mockPagination: EventPagination = {
+  const mockPagination: PaginatedResponse<Event> = {
     data: [mockEvent],
     meta: createMockMeta({ total: 1, from: 1, to: 1 }),
     links: {
@@ -463,7 +465,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('getEventsByStatus', () => {
     it('should get events by status without filters', async () => {
-      const mockPagination: EventPagination = {
+      const mockPagination: PaginatedResponse<Event> = {
         data: [mockEvent],
         meta: createMockMeta({ total: 1, from: 1, to: 1 }),
         links: { first: null, last: null, prev: null, next: null },
@@ -478,7 +480,7 @@ describe('eventAdminApprovalService', () => {
     })
 
     it('should get events by status with filters', async () => {
-      const mockPagination: EventPagination = {
+      const mockPagination: PaginatedResponse<Event> = {
         data: [],
         meta: createMockMeta({ total: 0, from: null, to: null }),
         links: { first: null, last: null, prev: null, next: null },
@@ -656,7 +658,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('getPendingApprovals', () => {
     it('should get pending internal approvals', async () => {
-      const mockPagination: EventPagination = {
+      const mockPagination: PaginatedResponse<Event> = {
         data: [mockEvent],
         meta: createMockMeta({ total: 1, from: 1, to: 1 }),
         links: { first: null, last: null, prev: null, next: null },
@@ -673,7 +675,7 @@ describe('eventAdminApprovalService', () => {
 
   describe('getPendingPublicApprovals', () => {
     it('should get pending public approvals', async () => {
-      const mockPagination: EventPagination = {
+      const mockPagination: PaginatedResponse<Event> = {
         data: [],
         meta: createMockMeta({ total: 0, from: null, to: null }),
         links: { first: null, last: null, prev: null, next: null },
