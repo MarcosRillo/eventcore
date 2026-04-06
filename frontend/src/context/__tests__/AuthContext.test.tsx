@@ -9,10 +9,17 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
+import axios from 'axios';
 import { ReactNode } from 'react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiClient';
+
+// Mock axios for isCancel control
+jest.mock('axios', () => ({
+  ...jest.requireActual('axios'),
+  isCancel: jest.fn(),
+}));
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -74,6 +81,9 @@ describe('AuthContext', () => {
     // Reset mock implementations
     mockedApiClient.get.mockReset();
     mockedApiClient.post.mockReset();
+
+    // Reset axios.isCancel to return false by default
+    (axios.isCancel as jest.Mock).mockReturnValue(false);
   });
 
   // Helper to create standard mock responses
@@ -316,7 +326,7 @@ describe('AuthContext', () => {
       expect(result.current.user).toEqual(mockUser);
       expect(result.current.isAuthenticated).toBe(true);
       expect(result.current.token).toBeNull();
-      expect(mockedApiClient.get).toHaveBeenCalledWith('/auth/me');
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/auth/me', expect.objectContaining({ signal: expect.any(AbortSignal) }));
     });
 
     test('should skip /auth/me when no session cookie exists', async () => {
@@ -348,6 +358,120 @@ describe('AuthContext', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
+    });
+
+    test('should abort and logout when /auth/me hangs past timeout', async () => {
+      jest.useFakeTimers();
+
+      // Set user cookie to trigger /auth/me
+      mockCookies.push('user=' + encodeURIComponent(JSON.stringify(createMockUser())));
+
+      // Return a promise that rejects when the AbortController signal fires
+      mockedApiClient.get.mockImplementationOnce((_url: string, config?: { signal?: AbortSignal }) => {
+        return new Promise<never>((_resolve, reject) => {
+          if (config?.signal) {
+            config.signal.addEventListener('abort', () => {
+              const canceledError = new Error('canceled');
+              canceledError.name = 'CanceledError';
+              reject(canceledError);
+            });
+          }
+        });
+      });
+
+      // Make axios.isCancel return true for CanceledError
+      (axios.isCancel as jest.Mock).mockImplementation((error: unknown) => {
+        return error instanceof Error && error.name === 'CanceledError';
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+      // Advance timers past the 5000ms timeout
+      await act(async () => {
+        jest.advanceTimersByTime(5001);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.user).toBeNull();
+      expect(result.current.isAuthenticated).toBe(false);
+
+      jest.useRealTimers();
+    });
+
+    test('should logout on 403 during initialization', async () => {
+      // Set user cookie to trigger /auth/me
+      mockCookies.push('user=' + encodeURIComponent(JSON.stringify(createMockUser())));
+
+      // /auth/me rejects with 403
+      mockedApiClient.get.mockRejectedValueOnce({
+        response: { status: 403 },
+      });
+
+      // axios.isCancel returns false for non-cancel errors
+      (axios.isCancel as jest.Mock).mockReturnValue(false);
+
+      const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.user).toBeNull();
+      expect(result.current.isAuthenticated).toBe(false);
+    });
+
+    test('should preserve session on 5xx during initialization', async () => {
+      // Set user cookie to trigger /auth/me
+      mockCookies.push('user=' + encodeURIComponent(JSON.stringify(createMockUser())));
+
+      // /auth/me rejects with 500 (server error — transient, not an auth failure)
+      mockedApiClient.get.mockRejectedValueOnce({
+        response: { status: 500 },
+      });
+
+      // axios.isCancel returns false for non-cancel errors
+      (axios.isCancel as jest.Mock).mockReturnValue(false);
+
+      const cookiesBefore = [...mockCookies];
+
+      const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      // user is null (no data set from failed /auth/me), but session cookie is preserved
+      expect(result.current.user).toBeNull();
+      // The user cookie must NOT have been cleared by handleLogout
+      expect(document.cookie).toContain('user=');
+      expect(mockCookies).toEqual(cookiesBefore);
+    });
+
+    test('should clear timeout after successful /auth/me', async () => {
+      const mockUser = createMockUser();
+
+      // Set user cookie to trigger /auth/me
+      mockCookies.push('user=' + encodeURIComponent(JSON.stringify(mockUser)));
+
+      // /auth/me succeeds
+      mockedApiClient.get.mockResolvedValueOnce({
+        data: { data: mockUser },
+      });
+
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+
+      const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(clearTimeoutSpy).toHaveBeenCalled();
+
+      clearTimeoutSpy.mockRestore();
     });
   });
 

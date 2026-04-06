@@ -12,6 +12,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
  * and the auth check has resolved before tests begin.
  */
 setup('authenticate as entity admin', async ({ page }) => {
+  await page.context().clearCookies();
   await page.goto(`${BASE_URL}/login`);
 
   // Wait for the login form to be ready (backend cold start can delay /auth/me)

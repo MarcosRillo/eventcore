@@ -7,7 +7,7 @@
  * - Authentication state is validated by calling /auth/me
  */
 
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import { useCallback,useEffect, useRef, useState } from 'react';
 
@@ -22,6 +22,8 @@ import {
   User,
   UserRoleCode,
 } from '@/types/auth.types';
+
+const AUTH_ME_TIMEOUT_MS = 5000;
 
 export const useAuthActions = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
@@ -73,22 +75,29 @@ export const useAuthActions = (): AuthContextType => {
       }
 
       setIsLoading(true);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), AUTH_ME_TIMEOUT_MS);
       try {
         // Cookie exists — validate session with backend
-        const response = await apiClient.get<{ data: User }>('/auth/me');
+        const response = await apiClient.get<{ data: User }>('/auth/me', { signal: controller.signal });
 
         if (response.data?.data) {
           setUser(response.data.data);
         }
       } catch (error) {
-        // Only logout on auth failures (401/403). Network errors and 5xx
+        // Only logout on auth failures (401/403) or timeout. Network errors and 5xx
         // MUST NOT clear the session — they are transient, not auth failures.
-        const axiosError = error as AxiosError;
-        const status = axiosError.response?.status;
-        if (status === 401 || status === 403) {
+        if (axios.isCancel(error)) {
           handleLogout();
+        } else {
+          const axiosError = error as AxiosError;
+          const status = axiosError.response?.status;
+          if (status === 401 || status === 403) {
+            handleLogout();
+          }
         }
       } finally {
+        clearTimeout(timeoutId);
         setIsLoading(false);
       }
     };
