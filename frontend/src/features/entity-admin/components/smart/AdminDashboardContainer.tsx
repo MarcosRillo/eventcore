@@ -13,8 +13,6 @@
  * - Event cards (AdminEventList)
  */
 
-'use client';
-
 import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
 

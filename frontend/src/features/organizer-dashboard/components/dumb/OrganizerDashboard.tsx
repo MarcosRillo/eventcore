@@ -8,7 +8,7 @@ import { AlertCircle, AlertTriangle, Calendar, CheckCircle2, Clock } from 'lucid
 import Link from 'next/link'
 
 import { OrganizerEventFilters } from '@/features/organizer/components/dumb/OrganizerEventFilters'
-import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
+import { OrganizerEventListItem } from '@/features/organizer/components/smart/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { OrganizerStats } from '@/features/organizer-dashboard/types/organizerStats.types'
 import { EventPreviewCardSkeletons } from '@/shared/components/display'

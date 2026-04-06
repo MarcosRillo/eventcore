@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react'
 
-import { PermissionGate } from '@/components/auth/PermissionGate'
+import { PermissionGate } from '@/shared/components/auth/PermissionGate'
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'
 import Skeleton from '@/shared/components/feedback/Skeleton'
 import { Button } from '@/shared/components/form'

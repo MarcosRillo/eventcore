@@ -9,21 +9,17 @@
  * Created following TDD methodology.
  */
 
-'use client';
-
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
-import { getEventTypes } from '@/features/event-types/services/eventType.service';
 import { InternalCalendarFilterBar } from '@/features/internal-calendar/components/dumb/InternalCalendarFilterBar';
 import { InternalCalendarGridContainer } from '@/features/internal-calendar/components/smart/InternalCalendarGridContainer';
 import { InternalCalendarViewContainer } from '@/features/internal-calendar/components/smart/InternalCalendarViewContainer';
 import { StatsBarContainer } from '@/features/internal-calendar/components/smart/StatsBarContainer';
 import { useInternalCalendarEvents } from '@/features/internal-calendar/hooks/useInternalCalendarEvents';
-import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
+import { useInternalCalendarFilters } from '@/features/internal-calendar/hooks/useInternalCalendarFilters';
 import type {
-  EventType,
   InternalCalendarFilters,
   InternalCalendarStatusCode,
   ViewMode,
@@ -54,11 +50,9 @@ export function InternalCalendarPageContainer({ basePath }: InternalCalendarPage
 
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [filters, setFilters] = useState<InternalCalendarFilters>(initialFilters);
-  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
-  const [eventTypesLoading, setEventTypesLoading] = useState(false);
-  const [statuses, setStatuses] = useState<InternalCalendarStatusCode[]>([]);
-  const [statusesLoading, setStatusesLoading] = useState(false);
   const { token } = useAuth();
+
+  const { eventTypes, eventTypesLoading, statuses, statusesLoading } = useInternalCalendarFilters();
 
   // Fetch events at page level for export functionality
   const { events, loading: eventsLoading, error: eventsError } = useInternalCalendarEvents(filters);
@@ -87,36 +81,6 @@ export function InternalCalendarPageContainer({ basePath }: InternalCalendarPage
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname);
   }, [pathname, router, filters]);
-
-  // Fetch event types and statuses in parallel
-  useEffect(() => {
-    const fetchEventTypes = async () => {
-      setEventTypesLoading(true);
-      try {
-        const data = await getEventTypes({ active: true, per_page: 100 });
-        setEventTypes(data.data);
-      } catch {
-        setEventTypes([]);
-      } finally {
-        setEventTypesLoading(false);
-      }
-    };
-
-    const fetchStatuses = async () => {
-      setStatusesLoading(true);
-      try {
-        const data = await internalCalendarService.getAvailableStatuses();
-        setStatuses(data);
-      } catch {
-        setStatuses([]);
-      } finally {
-        setStatusesLoading(false);
-      }
-    };
-
-    fetchEventTypes();
-    fetchStatuses();
-  }, []);
 
   return (
     <div className="min-h-screen bg-neutral-50">

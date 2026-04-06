@@ -3,9 +3,9 @@
 import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 
-import { EventTypeIcon } from '@/features/event-types/components/dumb/EventTypeIcon'
 import type { CategoriesSectionProps } from '@/features/landing/types/landing.types'
 import type { EventType } from '@/features/public-calendar/types/public-calendar.types'
+import { EventTypeIcon } from '@/shared/components/event-types/EventTypeIcon'
 import { EmptyState, EmptyStateIcons, LoadingSpinner } from '@/shared/components/feedback'
 
 function hexToRgb(hex: string): string {

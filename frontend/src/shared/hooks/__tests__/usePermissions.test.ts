@@ -13,7 +13,7 @@
 import { renderHook } from '@testing-library/react';
 
 import { useAuth } from '@/context/AuthContext';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 import { AuthContextType,Permission, User, UserRoleCode } from '@/types/auth.types';
 
 // Mock AuthContext

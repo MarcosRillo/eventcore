@@ -8,8 +8,8 @@ import useSWR from 'swr';
 
 import { useAuth } from '@/context/AuthContext';
 import { deleteEventType } from '@/features/event-types/services/eventType.service';
-import { useDebounce } from '@/hooks/useDebounce';
 import { apiFetcher, eventTypeKeys } from '@/lib/swr';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { PaginationMeta } from '@/types/api-response.types';
 import {
   EventType,

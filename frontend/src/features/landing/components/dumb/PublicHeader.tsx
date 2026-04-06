@@ -5,8 +5,6 @@
  * Provides consistent navigation across all public-facing pages
  */
 
-'use client'
-
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'

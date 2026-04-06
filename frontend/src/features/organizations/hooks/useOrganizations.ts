@@ -14,8 +14,8 @@ import type {
   OrganizationsResponse,
   PaginationMeta,
 } from '@/features/organizations/types/organization.types'
-import { useDebounce } from '@/hooks/useDebounce'
 import { apiFetcher, organizationKeys } from '@/lib/swr'
+import { useDebounce } from '@/shared/hooks/useDebounce'
 
 interface UseOrganizationsReturn {
   organizations: Organization[]

@@ -7,7 +7,7 @@
 
 import { ReactNode } from 'react';
 
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 import { Permission,UserRoleCode } from '@/types/auth.types';
 
 interface PermissionGateProps {

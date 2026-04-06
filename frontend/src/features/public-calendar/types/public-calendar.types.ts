@@ -2,21 +2,17 @@
  * TypeScript interfaces for public calendar
  */
 
-export interface EventType {
-  id: number
-  name: string
+import type { EventSubtype as CanonicalEventSubtype, EventType as CanonicalEventType } from '@/types/eventType.types'
+import type { Location as CanonicalLocation } from '@/types/location.types'
+
+export type EventType = Pick<CanonicalEventType, 'id' | 'name' | 'is_active'> & {
   slug?: string
   color?: string
   icon?: string | null
-  is_active: boolean
 }
 
-export interface EventSubtype {
-  id: number
-  name: string
+export type EventSubtype = Pick<CanonicalEventSubtype, 'id' | 'name' | 'event_type_id' | 'is_active'> & {
   slug?: string
-  event_type_id: number
-  is_active: boolean
 }
 
 export interface PublicEvent {
@@ -57,13 +53,9 @@ export interface EventsResponse {
   }
 }
 
-export interface Location {
-  id: number
-  name: string
-  city: string
-}
+export type Location = Pick<CanonicalLocation, 'id' | 'name' | 'city'>
 
-export interface EventFilters {
+export interface PublicCalendarFilters {
   event_type_id?: number | null
   event_subtype_id?: number | null
   location_id?: number | null
@@ -71,6 +63,9 @@ export interface EventFilters {
   end_date?: string | null
   search?: string | null
 }
+
+// Backward compatibility alias
+export type EventFilters = PublicCalendarFilters
 
 /**
  * Calendar Event for react-big-calendar

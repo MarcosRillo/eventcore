@@ -5,7 +5,7 @@
  */
 import { useCallback, useState, useTransition } from 'react';
 
-import { forgotPassword } from '@/services/authService';
+import { forgotPassword } from '@/features/auth/services/authService';
 import { useToast } from '@/shared/context';
 
 interface UseForgotPasswordReturn {

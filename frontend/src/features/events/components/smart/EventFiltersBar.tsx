@@ -3,7 +3,8 @@
 import { useState } from 'react';
 
 import { Button, Input, Select } from '@/shared/components/form';
-import { EVENT_STATUS, EVENT_TYPE,EventFilters } from '@/types/event.types';
+import { EVENT_STATUS, EVENT_TYPE } from '@/types/event.types';
+import type { EventFilters } from '@/types/filter.types';
 
 // Define Section interface for type safety
 interface Section {

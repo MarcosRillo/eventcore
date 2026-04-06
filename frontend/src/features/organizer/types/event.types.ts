@@ -9,13 +9,16 @@
 // LOOKUP TABLE TYPES (3NF Normalized)
 // ==========================================
 
-export interface EventSubtype {
+export interface OrganizerEventSubtype {
   id: number
   code: string
   name: string
   is_active: boolean
   display_order: number
 }
+
+/** @deprecated Use OrganizerEventSubtype instead */
+export type EventSubtype = OrganizerEventSubtype
 
 /**
  * EventType - Hierarchical event categorization (Dec 2, 2025)
@@ -112,7 +115,7 @@ export interface OrganizerEvent {
   event_subtype_id?: number
 
   // Loaded relations
-  subtype?: EventSubtype
+  subtype?: OrganizerEventSubtype
   producer?: EventProducer
 
   // Event Type/Subtype relations (Dec 2, 2025)
@@ -356,6 +359,6 @@ export interface SubmitEventError {
  * Lookup tables data for forms
  */
 export interface EventLookupTables {
-  subtypes: EventSubtype[]
+  subtypes: OrganizerEventSubtype[]
   rooms: EventRoom[]
 }

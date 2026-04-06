@@ -15,8 +15,8 @@ import {
   updateEventSubtype,
 } from '@/features/event-types/services/eventSubtype.service';
 import { deleteEventType } from '@/features/event-types/services/eventType.service';
-import { useDebounce } from '@/hooks/useDebounce';
 import { apiFetcher, eventTypeKeys } from '@/lib/swr';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { PaginationMeta } from '@/types/api-response.types';
 import {
   CreateEventSubtypeData,

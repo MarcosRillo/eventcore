@@ -14,18 +14,18 @@ import {
   type EventServiceContext,
   getEventServiceForContext,
 } from '@/features/events/services/event.service';
-import { useDebounce } from '@/hooks/useDebounce';
-import { usePermissions } from '@/hooks/usePermissions';
 import { apiFetcher, eventKeys } from '@/lib/swr';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { useGenericModals } from '@/shared/hooks/useGenericModals';
-import { PaginationMeta } from '@/types/api-response.types';
-import {
+import { usePermissions } from '@/shared/hooks/usePermissions';
+import type { PaginationMeta } from '@/types/api-response.types';
+import type {
   ApprovalStatistics,
   Event,
-  EventFilters,
   EventFormData,
   EventStatistics,
 } from '@/types/event.types';
+import type { EventFilters } from '@/types/filter.types';
 
 interface UseEventManagerReturn {
   // Data state from generic hook
@@ -123,6 +123,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   const debouncedSearch = useDebounce(filterState.search || '', 300);
 
   // Build SWR key
+  const filterShowPast = filterState['show_past'];
   const swrKey = useMemo(() => {
     if (!isAuthenticated || authLoading) return null;
     const params = new URLSearchParams();
@@ -130,10 +131,10 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     if (filterState.per_page) params.set('per_page', String(filterState.per_page));
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (filterState.status) params.set('status', filterState.status as string);
-    if (filterState.show_past) params.set('show_past', filterState.show_past);
+    if (filterShowPast) params.set('show_past', String(filterShowPast));
     if (filterState.event_type_id) params.set('event_type_id', String(filterState.event_type_id));
     return eventKeys.list(params.toString());
-  }, [isAuthenticated, authLoading, filterState.page, filterState.per_page, debouncedSearch, filterState.status, filterState.show_past, filterState.event_type_id]);
+  }, [isAuthenticated, authLoading, filterState, debouncedSearch, filterShowPast]);
 
   const { data, error, isLoading, mutate } = useSWR<{ data: Event[]; meta: PaginationMeta }>(
     swrKey,
@@ -146,7 +147,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
 
   // Event-specific state
   const [statistics, setStatistics] = useState<EventStatistics | null>(null);
-  const [approvalStatistics, setApprovalStatistics] = useState<ApprovalStatistics | null>(null);
+  const [approvalStatistics, _setApprovalStatistics] = useState<ApprovalStatistics | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
 
   // React 19 transitions for non-blocking UI
@@ -331,7 +332,7 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
 
   const requestPublic = useCallback(async (eventId: number, comment?: string) => {
     if ('approval' in eventServiceInstance) {
-      const updatedEvent = await eventServiceInstance.approval.requestPublic(eventId, comment);
+      const updatedEvent = await eventServiceInstance.approval.requestPublicApproval(eventId, comment);
       updateEventInList(eventId, updatedEvent);
       closeAllModals();
     } else {
@@ -339,9 +340,9 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
     }
   }, [updateEventInList, eventServiceInstance, closeAllModals]);
 
-  const approvePublic = useCallback(async (eventId: number, comment?: string) => {
+  const approvePublic = useCallback(async (eventId: number) => {
     if ('approval' in eventServiceInstance) {
-      const updatedEvent = await eventServiceInstance.approval.approvePublic(eventId, comment);
+      const updatedEvent = await eventServiceInstance.approval.publishEvent(eventId);
       updateEventInList(eventId, updatedEvent);
       closeAllModals();
     } else {
@@ -381,15 +382,9 @@ export function useEventManager(options: UseEventManagerOptions = {}): UseEventM
   }, [eventServiceInstance]);
 
   const loadApprovalStatistics = useCallback(async () => {
-    try {
-      if ('approval' in eventServiceInstance) {
-        const stats = await eventServiceInstance.approval.getApprovalStatistics();
-        setApprovalStatistics(stats);
-      }
-    } catch {
-      // statistics are non-critical; silently ignore
-    }
-  }, [eventServiceInstance]);
+    // getApprovalStatistics is not available in the consolidated approvalService
+    // This is a no-op kept for interface compatibility
+  }, []);
 
   const clearError = useCallback(() => {
     setMutationError(null);

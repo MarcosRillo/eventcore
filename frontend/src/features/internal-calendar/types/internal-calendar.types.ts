@@ -5,6 +5,11 @@
  * Used by entity_admin, entity_staff, and organizer_admin roles.
  */
 
+import type { Organization as CanonicalOrganization } from '@/types/auth.types'
+import type { EventStatusInfo } from '@/types/event.types'
+import type { EventSubtype as CanonicalEventSubtype, EventType as CanonicalEventType } from '@/types/eventType.types'
+import type { Location as CanonicalLocation } from '@/types/location.types'
+
 /**
  * Event status codes visible in internal calendar
  */
@@ -16,46 +21,27 @@ export type InternalCalendarStatusCode =
 /**
  * Event status object
  */
-export interface EventStatus {
-  id: number;
-  status_code: string;
-  status_name: string;
-  description: string;
-}
+export type EventStatus = Pick<EventStatusInfo, 'id' | 'status_code' | 'status_name' | 'description'>
 
 /**
  * Organization object
  */
-export interface Organization {
-  id: number;
-  name: string;
-}
+export type Organization = Pick<CanonicalOrganization, 'id' | 'name'>
 
 /**
  * Event type object
  */
-export interface EventType {
-  id: number;
-  name: string;
-  color: string; // Hex color code (e.g., "#FF5733")
-}
+export type EventType = Pick<CanonicalEventType, 'id' | 'name' | 'color'>
 
 /**
  * Event subtype object
  */
-export interface EventSubtype {
-  id: number;
-  name: string;
-}
+export type EventSubtype = Pick<CanonicalEventSubtype, 'id' | 'name'>
 
 /**
  * Location object
  */
-export interface Location {
-  id: number;
-  name: string;
-  city: string;
-}
+export type Location = Pick<CanonicalLocation, 'id' | 'name' | 'city'>
 
 /**
  * Internal calendar event

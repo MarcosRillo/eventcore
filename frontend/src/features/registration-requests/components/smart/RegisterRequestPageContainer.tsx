@@ -8,7 +8,7 @@
 import { Building2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
-import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
+import { RegistrationRequestForm } from '@/features/registration-requests/components/smart/RegistrationRequestForm'
 import { useRegistrationRequest } from '@/features/registration-requests/hooks/useRegistrationRequest'
 import { Button } from '@/shared/components/form'
 

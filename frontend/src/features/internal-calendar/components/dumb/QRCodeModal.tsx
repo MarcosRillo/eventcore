@@ -7,8 +7,6 @@
  * Allows downloading the QR code as an image.
  */
 
-'use client';
-
 import { QRCodeSVG } from 'qrcode.react';
 import { useRef } from 'react';
 

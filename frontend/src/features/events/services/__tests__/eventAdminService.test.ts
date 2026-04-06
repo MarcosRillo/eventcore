@@ -1,8 +1,10 @@
 import { AxiosResponse } from 'axios'
 
-import { combinedEventAdminService,eventAdminApprovalService, eventAdminService } from '@/features/events/services/eventAdminService'
+import { combinedEventAdminService, eventAdminService } from '@/features/events/services/eventAdminService'
 import apiClient from '@/services/apiClient'
-import { ApprovalStatistics, Event, EVENT_STATUS, EVENT_TYPE, EventFilters, EventFormData, EventPagination, EventStatistics, EventStatus, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import type { PaginatedResponse } from '@/types/api-response.types'
+import { Event, EVENT_STATUS, EVENT_TYPE, EventFormData, EventStatistics, EventStatusCode, EventTypeCode } from '@/types/event.types'
+import type { EventFilters } from '@/types/filter.types'
 
 
 // Mock apiClient
@@ -57,7 +59,7 @@ const createMockMeta = (overrides: Partial<{
 describe('eventAdminService', () => {
   const mockEvent = createMockEvent({ id: 1, title: 'Admin Event', description: 'Admin Description' })
 
-  const mockPagination: EventPagination = {
+  const mockPagination: PaginatedResponse<Event> = {
     data: [mockEvent],
     meta: createMockMeta({ total: 1, from: 1, to: 1 }),
     links: {
@@ -449,263 +451,6 @@ describe('eventAdminService', () => {
   })
 })
 
-describe('eventAdminApprovalService', () => {
-  const mockEvent = createMockEvent({
-    id: 1,
-    title: 'Test Event',
-    description: 'Test',
-    status: EVENT_STATUS.PENDING_INTERNAL_APPROVAL as EventStatusCode,
-  })
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  describe('getEventsByStatus', () => {
-    it('should get events by status without filters', async () => {
-      const mockPagination: EventPagination = {
-        data: [mockEvent],
-        meta: createMockMeta({ total: 1, from: 1, to: 1 }),
-        links: { first: null, last: null, prev: null, next: null },
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
-
-      const result = await eventAdminApprovalService.getEventsByStatus('pending_internal_approval')
-
-      expect(mockApiClient.get).toHaveBeenCalledWith('/events/approval-status/pending_internal_approval?')
-      expect(result.data).toHaveLength(1)
-    })
-
-    it('should get events by status with filters', async () => {
-      const mockPagination: EventPagination = {
-        data: [],
-        meta: createMockMeta({ total: 0, from: null, to: null }),
-        links: { first: null, last: null, prev: null, next: null },
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
-
-      const filters: EventFilters = { status: 'published' }
-
-      await eventAdminApprovalService.getEventsByStatus('published', filters)
-
-      const callUrl = mockApiClient.get.mock.calls[0][0]
-      expect(callUrl).toContain('/events/approval-status/published?')
-      expect(callUrl).toContain('status=published')
-    })
-  })
-
-  describe('getApprovalStatistics', () => {
-    it('should get approval statistics', async () => {
-      const mockStats: ApprovalStatistics = {
-        total: 20,
-        pending_internal_approval: 5,
-        approved_internal: 3,
-        pending_public_approval: 2,
-        published: 4,
-        requires_changes: 1,
-        rejected: 2,
-        draft: 2,
-        cancelled: 1,
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockStats))
-
-      const result = await eventAdminApprovalService.getApprovalStatistics()
-
-      expect(mockApiClient.get).toHaveBeenCalledWith('/events/approval/statistics')
-      expect(result.pending_internal_approval).toBe(5)
-      expect(result.pending_public_approval).toBe(2)
-    })
-  })
-
-  describe('approveInternal', () => {
-    it('should approve event internally without comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'approved_internal' } }))
-
-      const result = await eventAdminApprovalService.approveInternal(1)
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/1/approve-internal', {})
-      expect(result.status).toBe('approved_internal')
-    })
-
-    it('should approve event internally with comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'approved_internal' } }))
-
-      await eventAdminApprovalService.approveInternal(1, 'Looks good')
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/1/approve-internal', { comment: 'Looks good' })
-    })
-  })
-
-  describe('requestPublic', () => {
-    it('should request public approval', async () => {
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'pending_public_approval' } }))
-
-      const result = await eventAdminApprovalService.requestPublic(1, 'Ready for public')
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/1/request-public', { comment: 'Ready for public' })
-      expect(result.status).toBe('pending_public_approval')
-    })
-  })
-
-  describe('approvePublic', () => {
-    it('should approve event for public', async () => {
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'published' } }))
-
-      const result = await eventAdminApprovalService.approvePublic(1)
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/1/approve-public', {})
-      expect(result.status).toBe('published')
-    })
-  })
-
-  describe('requestChanges', () => {
-    it('should request changes with comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'requires_changes' } }))
-
-      const result = await eventAdminApprovalService.requestChanges(1, 'Please fix the date')
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/1/request-changes', { comment: 'Please fix the date' })
-      expect(result.status).toBe('requires_changes')
-    })
-  })
-
-  describe('rejectEvent', () => {
-    it('should reject event with comment', async () => {
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: { ...mockEvent, status: 'rejected' } }))
-
-      const result = await eventAdminApprovalService.rejectEvent(1, 'Does not meet criteria')
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/1/reject', { comment: 'Does not meet criteria' })
-      expect(result.status).toBe('rejected')
-    })
-  })
-
-  describe('bulkApproveInternal', () => {
-    it('should bulk approve events internally', async () => {
-      const mockEvents = [
-        { ...mockEvent, id: 1, status: 'approved_internal' as EventStatus },
-        { ...mockEvent, id: 2, status: 'approved_internal' as EventStatus },
-      ]
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvents }))
-
-      const result = await eventAdminApprovalService.bulkApproveInternal([1, 2], 'Batch approved')
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/bulk-approve-internal', {
-        event_ids: [1, 2],
-        comment: 'Batch approved',
-      })
-      expect(result).toHaveLength(2)
-    })
-  })
-
-  describe('bulkApprovePublic', () => {
-    it('should bulk approve events for public', async () => {
-      const mockEvents = [{ ...mockEvent, status: 'published' as EventStatus }]
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvents }))
-
-      await eventAdminApprovalService.bulkApprovePublic([1])
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/bulk-approve-public', {
-        event_ids: [1],
-        comment: undefined,
-      })
-    })
-  })
-
-  describe('bulkReject', () => {
-    it('should bulk reject events', async () => {
-      const mockEvents = [{ ...mockEvent, status: 'rejected' as EventStatus }]
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse({ data: mockEvents }))
-
-      await eventAdminApprovalService.bulkReject([1, 2], 'Rejected for review')
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/bulk-reject', {
-        event_ids: [1, 2],
-        comment: 'Rejected for review',
-      })
-    })
-  })
-
-  describe('getApprovalHistory', () => {
-    it('should get approval history for event', async () => {
-      const mockHistory = [
-        {
-          id: 1,
-          event_id: 1,
-          action: 'approve_internal',
-          status_from: 'pending_internal_approval' as EventStatus,
-          status_to: 'approved_internal' as EventStatus,
-          comment: 'Approved',
-          user: { id: 1, name: 'Admin' },
-          created_at: '2025-11-01',
-        },
-      ]
-
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse({ data: mockHistory }))
-
-      const result = await eventAdminApprovalService.getApprovalHistory(1)
-
-      expect(mockApiClient.get).toHaveBeenCalledWith('/events/1/approval-history')
-      expect(result).toHaveLength(1)
-      expect(result[0].action).toBe('approve_internal')
-    })
-  })
-
-  describe('getPendingApprovals', () => {
-    it('should get pending internal approvals', async () => {
-      const mockPagination: EventPagination = {
-        data: [mockEvent],
-        meta: createMockMeta({ total: 1, from: 1, to: 1 }),
-        links: { first: null, last: null, prev: null, next: null },
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
-
-      const result = await eventAdminApprovalService.getPendingApprovals()
-
-      expect(mockApiClient.get).toHaveBeenCalledWith('/events/approval-status/pending_internal_approval?')
-      expect(result.data).toHaveLength(1)
-    })
-  })
-
-  describe('getPendingPublicApprovals', () => {
-    it('should get pending public approvals', async () => {
-      const mockPagination: EventPagination = {
-        data: [],
-        meta: createMockMeta({ total: 0, from: null, to: null }),
-        links: { first: null, last: null, prev: null, next: null },
-      }
-
-      mockApiClient.get.mockResolvedValueOnce(createMockResponse(mockPagination))
-
-      await eventAdminApprovalService.getPendingPublicApprovals()
-
-      expect(mockApiClient.get).toHaveBeenCalledWith('/events/approval-status/pending_public_approval?')
-    })
-  })
-
-  describe('autoApprove', () => {
-    it('should auto-approve events based on criteria', async () => {
-      const mockResult = { approved: 5, skipped: 2 }
-      mockApiClient.post.mockResolvedValueOnce(createMockResponse(mockResult))
-
-      const criteria = {
-        category_ids: [1, 2],
-        max_days_old: 7,
-      }
-
-      const result = await eventAdminApprovalService.autoApprove(criteria)
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/events/auto-approve', criteria)
-      expect(result.approved).toBe(5)
-      expect(result.skipped).toBe(2)
-    })
-  })
-})
-
 describe('combinedEventAdminService', () => {
   it('should combine eventAdminService and approval service', () => {
     expect(combinedEventAdminService).toHaveProperty('getEvents')
@@ -714,6 +459,8 @@ describe('combinedEventAdminService', () => {
     expect(combinedEventAdminService).toHaveProperty('deleteEvent')
     expect(combinedEventAdminService).toHaveProperty('approval')
     expect(combinedEventAdminService.approval).toHaveProperty('approveInternal')
-    expect(combinedEventAdminService.approval).toHaveProperty('getApprovalStatistics')
+    expect(combinedEventAdminService.approval).toHaveProperty('requestPublicApproval')
+    expect(combinedEventAdminService.approval).toHaveProperty('publishEvent')
+    expect(combinedEventAdminService.approval).toHaveProperty('rejectEvent')
   })
 })

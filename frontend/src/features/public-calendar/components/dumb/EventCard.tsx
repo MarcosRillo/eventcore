@@ -9,11 +9,11 @@ import { ArrowRight, Calendar, MapPin } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { memo } from 'react'
 
-import { EventTypeIcon } from '@/features/event-types/components/dumb/EventTypeIcon'
-import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import { PublicEvent } from '@/features/public-calendar/types/public-calendar.types'
 import { Badge, SafeImage } from '@/shared/components/display'
 import ImagePlaceholder from '@/shared/components/display/ImagePlaceholder'
+import { EventTypeIcon } from '@/shared/components/event-types/EventTypeIcon'
+import { getContrastTextColor } from '@/shared/utils/colorUtils'
 
 interface EventCardProps {
   event: PublicEvent

@@ -7,8 +7,6 @@
  * Uses project's Toast system for notifications.
  */
 
-'use client';
-
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 

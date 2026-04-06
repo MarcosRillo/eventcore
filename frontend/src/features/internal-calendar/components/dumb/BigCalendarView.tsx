@@ -19,8 +19,8 @@ import { Calendar, dateFnsLocalizer, type ToolbarProps, type View, Views } from 
 import { AgendaEvent } from '@/features/internal-calendar/components/dumb/AgendaEvent'
 import { CalendarToolbar } from '@/features/internal-calendar/components/dumb/CalendarToolbar'
 import type { BigCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types'
-import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import { cn } from '@/lib/utils'
+import { getContrastTextColor } from '@/shared/utils/colorUtils'
 
 // Configure date-fns localizer with Spanish locale
 const localizer = dateFnsLocalizer({

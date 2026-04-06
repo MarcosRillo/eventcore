@@ -9,13 +9,11 @@
  * Updated: January 2026 - Migrated to ExpandableTable with subtypes
  */
 
-'use client';
-
 import { Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
-import { EventTypeIcon } from '@/features/event-types/components/dumb/EventTypeIcon';
 import { SubtypeRowsContent } from '@/features/event-types/components/dumb/SubtypeRowsContent';
+import { EventTypeIcon } from '@/shared/components/event-types/EventTypeIcon';
 import {
   ConfirmDialogData,
   ExpandableTable,

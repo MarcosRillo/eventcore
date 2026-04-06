@@ -9,9 +9,9 @@
  * - NO tokens stored in localStorage (XSS safe)
  */
 
-import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-import { ApiErrorResponse, ApiResponse } from '@/types/api-response.types';
+import type { ApiError, ApiResponse } from '@/types/api-response.types';
 
 /**
  * API Base URL
@@ -115,7 +115,7 @@ const isPublicApiRoute = (url: string | undefined): boolean => {
 // Response interceptor with auto-refresh on 401
 apiClient.interceptors.response.use(
   <T>(response: AxiosResponse<ApiResponse<T>>) => response,
-  async (error: AxiosError<ApiErrorResponse>) => {
+  async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     // Handle 401 Unauthorized - attempt token refresh

@@ -6,7 +6,6 @@
  */
 
 import { combinedEventAdminService } from '@/features/events/services/eventAdminService';
-import { combinedEventOrganizerService } from '@/features/events/services/eventOrganizerService';
 import { combinedEventPublicService } from '@/features/events/services/eventPublicService';
 import { EventServiceContext } from '@/features/events/services/types';
 
@@ -22,8 +21,6 @@ export const getEventServiceForContext = (context: EventServiceContext = 'admin'
       return combinedEventAdminService;
     case 'public':
       return combinedEventPublicService;
-    case 'organizer':
-      return combinedEventOrganizerService;
     case 'auto':
       // This will be handled by useEventManager with user role detection
       return combinedEventAdminService; // Default fallback
@@ -35,4 +32,3 @@ export const getEventServiceForContext = (context: EventServiceContext = 'admin'
 // Export specialized services for direct use
 export { combinedEventAdminService as eventAdminService };
 export { combinedEventPublicService as eventPublicService };
-export { combinedEventOrganizerService as eventOrganizerService };

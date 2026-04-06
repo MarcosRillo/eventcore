@@ -5,9 +5,9 @@ import { Suspense, useEffect, useMemo } from 'react'
 
 import { getAdminNavConfig } from '@/app/(admin)/adminNavConfig'
 import { useAuth } from '@/context/AuthContext'
-import { usePermissions } from '@/hooks/usePermissions'
 import { LoadingSpinner } from '@/shared/components/feedback'
 import { AppShell } from '@/shared/components/layout'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 const PageLoadingFallback = () => (
   <div className="flex items-center justify-center py-12">

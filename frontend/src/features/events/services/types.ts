@@ -4,23 +4,24 @@
  * Common interfaces and types for event services
  */
 
-import {
-  ApprovalStatistics,
+import type { PaginatedResponse } from '@/types/api-response.types';
+import type {
   Event,
-  EventFilters,
   EventFormData,
-  EventPagination,
+  EventMessage,
   EventStatistics,
-  EventStatus
+  EventStatus,
+  EventTemplate
 } from '@/types/event.types';
-import { EventMessage,EventTemplate } from '@/types/event.types';
-import {
+import type {
   AdminEventFilters,
+  EventFilters,
   EventMessageFilters,
   EventTemplateFilters,
   FeedFilters,
   OrganizerEventFilters,
-  PublicEventFilters} from '@/types/filter.types';
+  PublicEventFilters
+} from '@/types/filter.types';
 
 /**
  * Service Context Type for role-based delegation
@@ -33,7 +34,7 @@ export type EventServiceContext = 'admin' | 'public' | 'organizer' | 'auto';
  */
 export interface BaseEventService {
   // Core CRUD operations (required)
-  getEvents(filters?: EventFilters): Promise<EventPagination>;
+  getEvents(filters?: EventFilters): Promise<PaginatedResponse<Event>>;
   getEvent?(id: number): Promise<Event>;
   
   // Optional CRUD operations (may not be available in all services)
@@ -49,16 +50,16 @@ export interface BaseEventService {
 
 /**
  * Approval Service Interface
- * For services that support approval workflows
+ * For services that support approval workflows (PATCH-based, aligned with backend)
  */
 export interface EventApprovalService {
-  getEventsByStatus(status: EventStatus, filters?: EventFilters): Promise<EventPagination>;
-  getApprovalStatistics(): Promise<ApprovalStatistics>;
   approveInternal(eventId: number, comment?: string): Promise<Event>;
-  requestPublic(eventId: number, comment?: string): Promise<Event>;
-  approvePublic(eventId: number, comment?: string): Promise<Event>;
-  requestChanges(eventId: number, comment: string): Promise<Event>;
-  rejectEvent(eventId: number, comment: string): Promise<Event>;
+  requestPublicApproval(eventId: number, comment?: string): Promise<Event>;
+  publishEvent(eventId: number): Promise<Event>;
+  requestChanges(eventId: number, reason: string): Promise<Event>;
+  approveAndPublish(eventId: number, comment?: string): Promise<Event>;
+  rejectEvent(eventId: number, reason: string): Promise<Event>;
+  toggleFeatured(eventId: number): Promise<Event>;
 }
 
 /**
@@ -90,13 +91,13 @@ export interface AdminEventService extends BaseEventService {
  */
 export interface PublicEventService extends BaseEventService {
   // Override base method with public-specific filters
-  getEvents(filters?: PublicEventFilters): Promise<EventPagination>;
+  getEvents(filters?: PublicEventFilters): Promise<PaginatedResponse<Event>>;
   getEvent(id: number): Promise<Event>;
 
   // Public-specific methods
-  getPublicEvents?(filters?: PublicEventFilters): Promise<EventPagination>;
+  getPublicEvents?(filters?: PublicEventFilters): Promise<PaginatedResponse<Event>>;
   getPublicEvent?(identifier: number | string): Promise<Event>;
-  searchEvents?(query: string, filters?: PublicEventFilters): Promise<EventPagination>;
+  searchEvents?(query: string, filters?: PublicEventFilters): Promise<PaginatedResponse<Event>>;
   getFeaturedEvents?(limit?: number): Promise<Event[]>;
   getUpcomingEvents?(limit?: number): Promise<Event[]>;
   
@@ -123,10 +124,10 @@ export interface OrganizerEventService extends BaseEventService {
   duplicateEvent(id: number, overrides?: Partial<EventFormData>): Promise<Event>;
   
   // Override to use organizer-specific filters
-  getEvents(filters?: OrganizerEventFilters): Promise<EventPagination>;
+  getEvents(filters?: OrganizerEventFilters): Promise<PaginatedResponse<Event>>;
 
   // Organizer-specific methods
-  getMyEvents?(filters?: OrganizerEventFilters): Promise<EventPagination>;
+  getMyEvents?(filters?: OrganizerEventFilters): Promise<PaginatedResponse<Event>>;
   getMyEvent?(id: number): Promise<Event>;
   submitForApproval?(id: number, comment?: string): Promise<Event>;
   getMyTemplates?(filters?: EventTemplateFilters): Promise<EventTemplate[]>;

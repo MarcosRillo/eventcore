@@ -11,7 +11,7 @@ import {
   getContrastTextColor,
   getEventTypeColor,
   isValidHexColor,
-} from '@/features/internal-calendar/utils/eventTypeColorMapping'
+} from '@/shared/utils/colorUtils'
 
 describe('eventTypeColorMapping', () => {
   describe('getEventTypeColor', () => {

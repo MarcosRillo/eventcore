@@ -1,4 +1,4 @@
-import { OrganizerEventListItem } from '@/features/organizer/components/dumb/OrganizerEventListItem'
+import { OrganizerEventListItem } from '@/features/organizer/components/smart/OrganizerEventListItem'
 import { OrganizerEvent } from '@/features/organizer/types/event.types'
 import { EventPreviewCardSkeletons } from '@/shared/components/display'
 import EmptyState, { EmptyStateIcons } from '@/shared/components/feedback/EmptyState'

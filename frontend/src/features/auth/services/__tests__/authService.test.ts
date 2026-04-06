@@ -16,7 +16,7 @@ import {
   logoutUser,
   refreshTokens,
   validateToken,
-} from '@/services/authService';
+} from '@/features/auth/services/authService';
 
 // Mock apiClient
 jest.mock('@/services/apiClient', () => ({

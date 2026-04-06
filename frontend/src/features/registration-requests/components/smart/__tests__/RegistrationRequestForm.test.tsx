@@ -8,7 +8,7 @@
 import { fireEvent,render, screen } from '@testing-library/react'
 import useSWR from 'swr'
 
-import { RegistrationRequestForm } from '@/features/registration-requests/components/dumb/RegistrationRequestForm'
+import { RegistrationRequestForm } from '@/features/registration-requests/components/smart/RegistrationRequestForm'
 import {
   RegistrationRequestFormData,
   RegistrationRequestFormErrors
