@@ -8,8 +8,6 @@
  * Created: January 2026
  */
 
-'use client';
-
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 

@@ -5,8 +5,6 @@
  * Smart component that renders landing page with server-fetched data
  */
 
-'use client'
-
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 

@@ -6,8 +6,6 @@
  * Connects dashboard with data hooks and manages state.
  */
 
-'use client'
-
 import { useRouter } from 'next/navigation'
 
 import { useOrganizerEvents } from '@/features/organizer/hooks/useOrganizerEvents'

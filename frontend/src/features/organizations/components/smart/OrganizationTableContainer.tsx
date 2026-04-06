@@ -8,9 +8,9 @@
 import React, { useCallback,useState } from 'react'
 
 import { OrganizationDetailModal } from '@/features/organizations/components/dumb/OrganizationDetailModal'
+import { OrganizationFilters } from '@/features/organizations/components/dumb/OrganizationFilters'
 import { OrganizationTable } from '@/features/organizations/components/dumb/OrganizationTable'
 import { useOrganizations } from '@/features/organizations/hooks/useOrganizations'
-import { Button, Input } from '@/shared/components/form'
 
 export const OrganizationTableContainer: React.FC = () => {
   const {
@@ -110,54 +110,16 @@ export const OrganizationTableContainer: React.FC = () => {
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 flex gap-2">
-            <Input
-              type="text"
-              placeholder="Buscar por nombre o CUIT..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={handleSearchKeyPress}
-              fullWidth
-            />
-            <Button variant="primary" onClick={handleSearch}>
-              Buscar
-            </Button>
-            {filters.search && (
-              <Button variant="outline" onClick={handleClearSearch}>
-                Limpiar
-              </Button>
-            )}
-          </div>
-
-          {/* Status Filter */}
-          <div className="flex gap-2">
-            <Button
-              variant={filters.status === 'all' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => handleStatusFilter('all')}
-            >
-              Todos
-            </Button>
-            <Button
-              variant={filters.status === 'active' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => handleStatusFilter('active')}
-            >
-              Activos
-            </Button>
-            <Button
-              variant={filters.status === 'suspended' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => handleStatusFilter('suspended')}
-            >
-              Suspendidos
-            </Button>
-          </div>
-        </div>
-      </div>
+      <OrganizationFilters
+        searchInput={searchInput}
+        filterStatus={filters.status ?? 'all'}
+        hasActiveSearch={!!filters.search}
+        onSearchInputChange={setSearchInput}
+        onSearchSubmit={handleSearch}
+        onSearchKeyPress={handleSearchKeyPress}
+        onClearSearch={handleClearSearch}
+        onStatusFilter={handleStatusFilter}
+      />
 
       {/* Table */}
       <OrganizationTable

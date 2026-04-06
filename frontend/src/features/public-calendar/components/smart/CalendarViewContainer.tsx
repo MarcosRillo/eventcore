@@ -6,8 +6,6 @@
  * Supports server-side initial data to avoid waterfall fetching
  */
 
-'use client'
-
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 

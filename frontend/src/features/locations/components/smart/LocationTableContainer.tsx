@@ -6,8 +6,6 @@
  * Handles business logic, state management, and configuration
  */
 
-'use client';
-
 import { MapPin,Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useMemo,useState } from 'react';
 

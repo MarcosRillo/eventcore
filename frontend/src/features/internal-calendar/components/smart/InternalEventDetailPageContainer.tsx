@@ -7,14 +7,10 @@
  * Handles loading, error, and not found states.
  */
 
-'use client';
-
 import { useRouter } from 'next/navigation';
-import { useEffect,useState } from 'react';
 
 import { InternalEventDetailPage } from '@/features/internal-calendar/components/dumb/InternalEventDetailPage';
-import { internalCalendarService } from '@/features/internal-calendar/services/internalCalendar.service';
-import type { InternalCalendarEvent } from '@/features/internal-calendar/types/internal-calendar.types';
+import { useInternalEventDetail } from '@/features/internal-calendar/hooks/useInternalEventDetail';
 import { LoadingSpinner } from '@/shared/components/feedback';
 
 export interface InternalEventDetailPageContainerProps {
@@ -33,32 +29,7 @@ export function InternalEventDetailPageContainer({
   basePath,
 }: InternalEventDetailPageContainerProps) {
   const router = useRouter();
-  const [event, setEvent] = useState<InternalCalendarEvent | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchEvent = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const foundEvent = await internalCalendarService.getEventById(eventId);
-
-        if (foundEvent) {
-          setEvent(foundEvent);
-        } else {
-          setError('Evento no encontrado');
-        }
-      } catch {
-        setError('Error al cargar el evento');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvent();
-  }, [eventId]);
+  const { event, loading, error } = useInternalEventDetail(eventId);
 
   const handleBack = () => {
     router.push(basePath);

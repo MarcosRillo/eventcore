@@ -8,8 +8,6 @@
  * Navigates to event detail page on click.
  */
 
-'use client';
-
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import type { View } from 'react-big-calendar';

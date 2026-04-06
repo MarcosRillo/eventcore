@@ -120,23 +120,6 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
- * Debounce function
- * @param func
- * @param wait
- */
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-/**
  * Format file size to human readable format
  * @param bytes
  */

@@ -5,8 +5,6 @@
  * Social media sharing buttons for public event pages
  */
 
-'use client'
-
 import { useState } from 'react'
 
 import { Button } from '@/shared/components/form'

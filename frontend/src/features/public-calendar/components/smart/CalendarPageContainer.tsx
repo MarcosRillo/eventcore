@@ -6,13 +6,11 @@
  * Supports server-side initial data to avoid waterfall fetching
  */
 
-'use client'
-
 import { Calendar, LayoutGrid, Tag, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { Suspense,useEffect,useState } from 'react'
+import { Suspense, useState } from 'react'
 
-import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
+import { usePublicStats } from '@/features/public-calendar/hooks/usePublicStats'
 import {
   EventType,
   Location,
@@ -71,27 +69,7 @@ export const CalendarPageContainer = ({
   initialEventTypeId,
 }: CalendarPageContainerProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('calendar')
-  const [stats, setStats] = useState<PublicStats | null>(initialStats ?? null)
-  const [statsLoading, setStatsLoading] = useState(initialStats === undefined)
-
-  // Fetch stats only if not provided from server
-  useEffect(() => {
-    if (initialStats !== undefined) {
-      return
-    }
-
-    const fetchStats = async () => {
-      try {
-        const response = await publicEventsService.getStats()
-        setStats(response.data)
-      } catch {
-        setStats(null)
-      } finally {
-        setStatsLoading(false)
-      }
-    }
-    fetchStats()
-  }, [initialStats])
+  const { stats, statsLoading } = usePublicStats(initialStats)
 
   return (
     <div className="bg-neutral-50">

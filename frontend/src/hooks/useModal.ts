@@ -7,7 +7,9 @@ import { useCallback,useState } from 'react';
 
 import { ModalId, ModalState } from '@/types/modal.types';
 
-// Single modal hook
+/**
+ * @deprecated Use useGenericModals from '@/shared/hooks/useGenericModals' instead.
+ */
 export const useModal = (initialState = false) => {
   const [isOpen, setIsOpen] = useState(initialState);
 
@@ -23,7 +25,9 @@ export const useModal = (initialState = false) => {
   };
 };
 
-// Multi-modal management hook
+/**
+ * @deprecated Use useGenericModals from '@/shared/hooks/useGenericModals' instead.
+ */
 export const useMultiModal = () => {
   const [modals, setModals] = useState<ModalState>({});
 
@@ -59,7 +63,9 @@ export const useMultiModal = () => {
   };
 };
 
-// Modal with data hook - for modals that need to pass data
+/**
+ * @deprecated Use useGenericModals from '@/shared/hooks/useGenericModals' instead.
+ */
 export const useModalWithData = <T = unknown>(initialState = false) => {
   const [isOpen, setIsOpen] = useState(initialState);
   const [data, setData] = useState<T | null>(null);

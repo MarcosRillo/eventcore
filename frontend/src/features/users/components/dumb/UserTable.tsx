@@ -5,8 +5,6 @@
  * Uses GenericTable with custom column renderers for users
  */
 
-'use client';
-
 import {
   Ban,
   Pencil,

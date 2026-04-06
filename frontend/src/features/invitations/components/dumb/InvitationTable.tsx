@@ -5,8 +5,6 @@
  * Uses GenericTable with custom column renderers for invitations
  */
 
-'use client';
-
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { useCallback,useMemo } from 'react';
 

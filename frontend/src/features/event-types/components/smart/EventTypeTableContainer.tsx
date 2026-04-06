@@ -9,8 +9,6 @@
  * Updated: January 2026 - Migrated to ExpandableTable with subtypes
  */
 
-'use client';
-
 import { Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
