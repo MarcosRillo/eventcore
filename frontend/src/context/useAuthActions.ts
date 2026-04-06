@@ -12,7 +12,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback,useEffect, useRef, useState } from 'react';
 
 import apiClient from '@/services/apiClient';
-import { clearTokens } from '@/services/tokenUtils';
 import {
   AuthContextType,
   LoginCredentials,
@@ -37,8 +36,14 @@ export const useAuthActions = (): AuthContextType => {
    * Clear all authentication state
    */
   const handleLogout = useCallback(() => {
-    // Clear any legacy localStorage items
-    clearTokens();
+    // Clear any legacy localStorage items that may exist from pre-httpOnly-cookie era.
+    // tokenUtils.clearTokens() was removed — its only real work was these four keys.
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('tokenExpiresAt');
+      localStorage.removeItem('user');
+    }
     setUser(null);
     setError(null);
 

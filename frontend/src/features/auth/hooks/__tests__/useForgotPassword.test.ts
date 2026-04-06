@@ -4,10 +4,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useForgotPassword } from '@/features/auth/hooks/useForgotPassword';
-import * as authService from '@/services/authService';
+import * as authService from '@/features/auth/services/authService';
 import { useToast } from '@/shared/context';
 
-jest.mock('@/services/authService');
+jest.mock('@/features/auth/services/authService');
 jest.mock('@/shared/context', () => ({
   useToast: jest.fn(),
 }));

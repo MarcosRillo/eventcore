@@ -18,7 +18,7 @@ jest.mock('@/context/AuthContext', () => ({
   }),
 }));
 
-jest.mock('@/hooks/usePermissions', () => ({
+jest.mock('@/shared/hooks/usePermissions', () => ({
   usePermissions: () => ({
     isAdmin: () => true,
     isOrganizer: () => false,
@@ -79,11 +79,10 @@ const mockAdminService = {
   getStatistics: jest.fn(),
   approval: {
     approveInternal: jest.fn(),
-    requestPublic: jest.fn(),
-    approvePublic: jest.fn(),
+    requestPublicApproval: jest.fn(),
+    publishEvent: jest.fn(),
     requestChanges: jest.fn(),
     rejectEvent: jest.fn(),
-    getApprovalStatistics: jest.fn(),
   },
 };
 
@@ -223,7 +222,7 @@ describe('useEventManager Hook', () => {
 
     test('should request public approval', async () => {
       const updatedEvent = { ...mockEvent, status_id: 3 };
-      mockAdminService.approval.requestPublic.mockResolvedValue(updatedEvent);
+      mockAdminService.approval.requestPublicApproval.mockResolvedValue(updatedEvent);
 
       const { result } = renderHook(() => useEventManager(), { wrapper });
 
@@ -235,13 +234,13 @@ describe('useEventManager Hook', () => {
         await result.current.requestPublic(1, 'Ready for public');
       });
 
-      expect(mockAdminService.approval.requestPublic).toHaveBeenCalledWith(1, 'Ready for public');
+      expect(mockAdminService.approval.requestPublicApproval).toHaveBeenCalledWith(1, 'Ready for public');
       expect(result.current.isApprovalModalOpen).toBe(false);
     });
 
     test('should approve event for public', async () => {
       const approvedEvent = { ...mockEvent, status_id: 4 };
-      mockAdminService.approval.approvePublic.mockResolvedValue(approvedEvent);
+      mockAdminService.approval.publishEvent.mockResolvedValue(approvedEvent);
 
       const { result } = renderHook(() => useEventManager(), { wrapper });
 
@@ -253,7 +252,7 @@ describe('useEventManager Hook', () => {
         await result.current.approvePublic(1);
       });
 
-      expect(mockAdminService.approval.approvePublic).toHaveBeenCalledWith(1, undefined);
+      expect(mockAdminService.approval.publishEvent).toHaveBeenCalledWith(1);
       expect(result.current.isApprovalModalOpen).toBe(false);
     });
 
@@ -527,26 +526,20 @@ describe('useEventManager Hook', () => {
       expect(result.current.statistics).toEqual(mockStats);
     });
 
-    test('should load approval statistics successfully', async () => {
-      const mockApprovalStats = {
-        pending_approval: 5,
-        approved: 50,
-        rejected: 3,
-      };
-      mockAdminService.approval.getApprovalStatistics.mockResolvedValue(mockApprovalStats);
-
+    test('should be a no-op when loadApprovalStatistics is called', async () => {
       const { result } = renderHook(() => useEventManager(), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
+      // loadApprovalStatistics is intentionally a no-op: getApprovalStatistics
+      // is not available in the consolidated approvalService
       await act(async () => {
         await result.current.loadApprovalStatistics();
       });
 
-      expect(mockAdminService.approval.getApprovalStatistics).toHaveBeenCalled();
-      expect(result.current.approvalStatistics).toEqual(mockApprovalStats);
+      expect(result.current.approvalStatistics).toBeNull();
     });
 
     test('should handle statistics error silently', async () => {

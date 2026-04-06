@@ -13,7 +13,6 @@ import { ReactNode } from 'react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiClient';
-import { clearTokens } from '@/services/tokenUtils';
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -30,13 +29,6 @@ jest.mock('@/services/apiClient', () => ({
     post: jest.fn(),
     get: jest.fn(),
   },
-}));
-
-// Mock token utilities
-jest.mock('@/services/tokenUtils', () => ({
-  getAccessToken: jest.fn().mockReturnValue(null),
-  storeTokens: jest.fn(),
-  clearTokens: jest.fn(),
 }));
 
 // Type the mocked apiClient
@@ -267,7 +259,6 @@ describe('AuthContext', () => {
       expect(result.current.user).toBeNull();
       expect(result.current.token).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
-      expect(clearTokens).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith('/login');
     });
 
@@ -357,7 +348,6 @@ describe('AuthContext', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
-      expect(clearTokens).toHaveBeenCalled();
     });
   });
 

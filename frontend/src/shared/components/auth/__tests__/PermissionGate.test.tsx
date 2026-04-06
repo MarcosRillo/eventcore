@@ -4,11 +4,11 @@
  */
 import { render, screen } from '@testing-library/react';
 
-import { PermissionGate } from '@/components/auth/PermissionGate';
-import { usePermissions } from '@/hooks/usePermissions';
+import { PermissionGate } from '@/shared/components/auth/PermissionGate';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 
 // Mock usePermissions hook
-jest.mock('@/hooks/usePermissions');
+jest.mock('@/shared/hooks/usePermissions');
 
 const mockUsePermissions = usePermissions as jest.MockedFunction<typeof usePermissions>;
 

@@ -8,8 +8,8 @@ import useSWR from 'swr';
 
 import { useAuth } from '@/context/AuthContext';
 import { deleteLocation } from '@/features/locations/services/location.service';
-import { useDebounce } from '@/hooks/useDebounce';
 import { apiFetcher, locationKeys } from '@/lib/swr';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { PaginationMeta } from '@/types/api-response.types';
 import { Location } from '@/types/location.types';
 

@@ -16,9 +16,9 @@ import {
   User,
 } from 'lucide-react';
 
-import { DEFAULT_EVENT_COLOR, getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping';
 import { Badge, ImagePlaceholder, SafeImage } from '@/shared/components/display';
 import { useSanitizedHTML } from '@/shared/hooks/useSanitizedHTML';
+import { DEFAULT_EVENT_COLOR, getContrastTextColor } from '@/shared/utils/colorUtils';
 import type { Event } from '@/types/event.types';
 
 interface EventInfoPanelProps {

@@ -6,7 +6,7 @@ import { AxiosError } from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 
-import { resetPassword, validateResetToken } from '@/services/authService';
+import { resetPassword, validateResetToken } from '@/features/auth/services/authService';
 import { useToast } from '@/shared/context';
 
 interface PasswordErrors {

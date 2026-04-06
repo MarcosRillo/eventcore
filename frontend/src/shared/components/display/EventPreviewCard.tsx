@@ -17,11 +17,11 @@ import { Calendar, MapPin } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { memo } from 'react'
 
-import { getContrastTextColor } from '@/features/internal-calendar/utils/eventTypeColorMapping'
 import Badge from '@/shared/components/display/Badge'
 import Card from '@/shared/components/display/Card'
 import ImagePlaceholder from '@/shared/components/display/ImagePlaceholder'
 import SafeImage from '@/shared/components/display/SafeImage'
+import { getContrastTextColor } from '@/shared/utils/colorUtils'
 
 const DEFAULT_EVENT_TYPE_COLOR = '#3B82F6'
 

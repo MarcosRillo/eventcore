@@ -17,7 +17,7 @@ export {
   logoutUser,
   resetPassword,
   validateResetToken,
-} from '@/services/authService';
+} from '@/features/auth/services/authService';
 
 // Types (when created)
 // export * from '@/features/auth/types';

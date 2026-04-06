@@ -6,7 +6,6 @@
 
 import type { PaginatedResponse } from '@/types/api-response.types';
 import type {
-  ApprovalStatistics,
   Event,
   EventFormData,
   EventMessage,
@@ -51,16 +50,16 @@ export interface BaseEventService {
 
 /**
  * Approval Service Interface
- * For services that support approval workflows
+ * For services that support approval workflows (PATCH-based, aligned with backend)
  */
 export interface EventApprovalService {
-  getEventsByStatus(status: EventStatus, filters?: EventFilters): Promise<PaginatedResponse<Event>>;
-  getApprovalStatistics(): Promise<ApprovalStatistics>;
   approveInternal(eventId: number, comment?: string): Promise<Event>;
-  requestPublic(eventId: number, comment?: string): Promise<Event>;
-  approvePublic(eventId: number, comment?: string): Promise<Event>;
-  requestChanges(eventId: number, comment: string): Promise<Event>;
-  rejectEvent(eventId: number, comment: string): Promise<Event>;
+  requestPublicApproval(eventId: number, comment?: string): Promise<Event>;
+  publishEvent(eventId: number): Promise<Event>;
+  requestChanges(eventId: number, reason: string): Promise<Event>;
+  approveAndPublish(eventId: number, comment?: string): Promise<Event>;
+  rejectEvent(eventId: number, reason: string): Promise<Event>;
+  toggleFeatured(eventId: number): Promise<Event>;
 }
 
 /**

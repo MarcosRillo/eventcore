@@ -17,12 +17,12 @@ import type {
   OrganizationsResponse,
   PaginationMeta,
 } from '@/features/organizations/types/organization.types'
-import { useDebounce } from '@/hooks/useDebounce'
+import { useDebounce } from '@/shared/hooks/useDebounce'
 
 // Mock SWR and dependencies
 jest.mock('swr')
 jest.mock('@/context/AuthContext')
-jest.mock('@/hooks/useDebounce')
+jest.mock('@/shared/hooks/useDebounce')
 jest.mock('@/features/organizations/services/organization.service')
 
 const mockGetOrganization = getOrganization as jest.MockedFunction<typeof getOrganization>

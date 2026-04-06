@@ -14,10 +14,10 @@
 import { ClipboardCheck } from 'lucide-react'
 import { memo } from 'react'
 
-import { getStatusConfig } from '@/features/events/constants'
 import { formatDate } from '@/lib/utils'
 import { EventPreviewCard } from '@/shared/components/display'
 import { Button } from '@/shared/components/form'
+import { getStatusConfig } from '@/shared/constants/eventStatus'
 import type { Event, EventStatusCode } from '@/types/event.types'
 
 const NOOP = () => {}

@@ -5,15 +5,15 @@
  * Provides complete CRUD operations, approval workflow, and administrative features.
  */
 
+import { approvalService } from '@/features/events/services/approvalService';
 import type { AdminEventService } from '@/features/events/services/types';
 import apiClient from '@/services/apiClient';
 import type { PaginatedResponse } from '@/types/api-response.types';
 import type {
-  ApprovalStatistics,
   Event,
   EventFormData,
   EventStatistics,
-  EventStatus
+  EventStatus,
 } from '@/types/event.types';
 import type { EventFilters } from '@/types/filter.types';
 
@@ -160,185 +160,11 @@ export const eventAdminService: Omit<AdminEventService, 'approval'> = {
 };
 
 /**
- * Admin-level approval workflow operations
- */
-export const eventAdminApprovalService = {
-  /**
-   * Get events by approval status with admin filters
-   * @param status
-   * @param filters
-   */
-  async getEventsByStatus(status: EventStatus, filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
-      }
-    });
-
-    const response = await apiClient.get(`/events/approval-status/${status}?${params.toString()}`);
-    return response.data;
-  },
-
-  /**
-   * Get approval workflow statistics
-   */
-  async getApprovalStatistics(): Promise<ApprovalStatistics> {
-    const response = await apiClient.get('/events/approval/statistics');
-    return response.data;
-  },
-
-  /**
-   * Approve event for internal use
-   * @param eventId
-   * @param comment
-   */
-  async approveInternal(eventId: number, comment?: string): Promise<Event> {
-    const response = await apiClient.post(`/events/${eventId}/approve-internal`, comment ? { comment } : {});
-    return response.data.data;
-  },
-
-  /**
-   * Request public approval for an internally approved event
-   * @param eventId
-   * @param comment
-   */
-  async requestPublic(eventId: number, comment?: string): Promise<Event> {
-    const response = await apiClient.post(`/events/${eventId}/request-public`, comment ? { comment } : {});
-    return response.data.data;
-  },
-
-  /**
-   * Approve event for public publication
-   * @param eventId
-   * @param comment
-   */
-  async approvePublic(eventId: number, comment?: string): Promise<Event> {
-    const response = await apiClient.post(`/events/${eventId}/approve-public`, comment ? { comment } : {});
-    return response.data.data;
-  },
-
-  /**
-   * Request changes to an event
-   * @param eventId
-   * @param comment
-   */
-  async requestChanges(eventId: number, comment: string): Promise<Event> {
-    const response = await apiClient.post(`/events/${eventId}/request-changes`, { comment });
-    return response.data.data;
-  },
-
-  /**
-   * Reject an event
-   * @param eventId
-   * @param comment
-   */
-  async rejectEvent(eventId: number, comment: string): Promise<Event> {
-    const response = await apiClient.post(`/events/${eventId}/reject`, { comment });
-    return response.data.data;
-  },
-
-  /**
-   * Bulk approve events
-   * @param eventIds
-   * @param comment
-   */
-  async bulkApproveInternal(eventIds: number[], comment?: string): Promise<Event[]> {
-    const response = await apiClient.post('/events/bulk-approve-internal', {
-      event_ids: eventIds,
-      comment,
-    });
-    return response.data.data;
-  },
-
-  /**
-   * Bulk approve for public
-   * @param eventIds
-   * @param comment
-   */
-  async bulkApprovePublic(eventIds: number[], comment?: string): Promise<Event[]> {
-    const response = await apiClient.post('/events/bulk-approve-public', {
-      event_ids: eventIds,
-      comment,
-    });
-    return response.data.data;
-  },
-
-  /**
-   * Bulk reject events
-   * @param eventIds
-   * @param comment
-   */
-  async bulkReject(eventIds: number[], comment: string): Promise<Event[]> {
-    const response = await apiClient.post('/events/bulk-reject', {
-      event_ids: eventIds,
-      comment,
-    });
-    return response.data.data;
-  },
-
-  /**
-   * Get approval history for an event
-   * @param eventId
-   */
-  async getApprovalHistory(eventId: number): Promise<{
-    id: number;
-    event_id: number;
-    action: string;
-    status_from: EventStatus;
-    status_to: EventStatus;
-    comment?: string;
-    user: { id: number; name: string };
-    created_at: string;
-  }[]> {
-    const response = await apiClient.get(`/events/${eventId}/approval-history`);
-    return response.data.data;
-  },
-
-  /**
-   * Get events pending admin approval
-   * @param filters
-   */
-  async getPendingApprovals(filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
-    return this.getEventsByStatus('pending_internal_approval', filters);
-  },
-
-  /**
-   * Get events pending public approval
-   * @param filters
-   */
-  async getPendingPublicApprovals(filters: EventFilters = {}): Promise<PaginatedResponse<Event>> {
-    return this.getEventsByStatus('pending_public_approval', filters);
-  },
-
-  /**
-   * Auto-approve events based on criteria
-   * @param criteria
-   * @param criteria.event_type_ids
-   * @param criteria.event_subtype_ids
-   * @param criteria.organizer_ids
-   * @param criteria.location_ids
-   * @param criteria.max_days_old
-   */
-  async autoApprove(criteria: {
-    event_type_ids?: number[];
-    event_subtype_ids?: number[];
-    organizer_ids?: number[];
-    location_ids?: number[];
-    max_days_old?: number;
-  }): Promise<{ approved: number; skipped: number }> {
-    const response = await apiClient.post('/events/auto-approve', criteria);
-    return response.data;
-  },
-};
-
-/**
  * Combined admin event service
  */
 export const combinedEventAdminService: AdminEventService = {
   ...eventAdminService,
-  approval: eventAdminApprovalService,
+  approval: approvalService,
 };
 
 export default combinedEventAdminService;

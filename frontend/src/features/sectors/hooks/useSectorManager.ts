@@ -9,8 +9,8 @@ import useSWR from 'swr';
 import { useAuth } from '@/context/AuthContext';
 import { deleteSector } from '@/features/sectors/services/sector.service';
 import { Sector } from '@/features/sectors/types/sector.types';
-import { useDebounce } from '@/hooks/useDebounce';
 import { apiFetcher, sectorKeys } from '@/lib/swr';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { PaginationMeta } from '@/types/api-response.types';
 
 type SectorFilterStatus = 'all' | 'active' | 'inactive';
