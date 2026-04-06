@@ -7,6 +7,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
  * See entity-admin.setup.ts for implementation notes.
  */
 setup('authenticate as organizer', async ({ page }) => {
+  await page.context().clearCookies();
   await page.goto(`${BASE_URL}/login`);
 
   // Wait for the login form to be ready (backend cold start can delay /auth/me)
