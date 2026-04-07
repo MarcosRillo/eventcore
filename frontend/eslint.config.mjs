@@ -168,6 +168,12 @@ const eslintConfig = [
     }
   },
   {
+    files: ["e2e/**/*.ts"],
+    rules: {
+      "no-restricted-imports": "off" // E2E tests are outside src/ and cannot use @/ aliases
+    }
+  },
+  {
     files: ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
     rules: {
       // Block ALL console.* in tests - no debugging statements allowed
