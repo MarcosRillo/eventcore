@@ -10,6 +10,8 @@ import { Calendar, LayoutGrid, Tag, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Suspense, useState } from 'react'
 
+// PublicCalendarContainer: no browser APIs — static import for SSR (SEO)
+import { PublicCalendarContainer } from '@/features/public-calendar/components/smart/PublicCalendarContainer'
 import { usePublicStats } from '@/features/public-calendar/hooks/usePublicStats'
 import {
   EventType,
@@ -21,13 +23,9 @@ import { SkeletonCard } from '@/shared/components/feedback'
 import type { StatBarItem } from '@/shared/components/stats'
 import { StatsBar } from '@/shared/components/stats'
 
-// Lazy load view containers - only the active view is loaded
+// CalendarViewContainer: react-big-calendar requires browser APIs — keep ssr: false
 const CalendarViewContainer = dynamic(
   () => import('@/features/public-calendar/components/smart/CalendarViewContainer').then(mod => ({ default: mod.CalendarViewContainer })),
-  { ssr: false }
-)
-const PublicCalendarContainer = dynamic(
-  () => import('@/features/public-calendar/components/smart/PublicCalendarContainer').then(mod => ({ default: mod.PublicCalendarContainer })),
   { ssr: false }
 )
 
@@ -68,7 +66,7 @@ export const CalendarPageContainer = ({
   initialLocations,
   initialEventTypeId,
 }: CalendarPageContainerProps) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const { stats, statsLoading } = usePublicStats(initialStats)
 
   return (

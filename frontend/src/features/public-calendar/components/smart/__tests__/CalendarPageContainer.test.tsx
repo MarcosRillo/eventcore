@@ -40,10 +40,31 @@ describe('CalendarPageContainer', () => {
   })
 
   describe('initial rendering', () => {
-    test('should render with calendar view by default', async () => {
+    test('renders PublicCalendarContainer by default', async () => {
       mockGetStats.mockResolvedValue({ data: mockStats })
       await act(async () => {
         render(<CalendarPageContainer />)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
+      })
+      expect(screen.queryByTestId('calendar-view-container')).not.toBeInTheDocument()
+    })
+
+    test('CalendarViewContainer loads when user switches to calendar view', async () => {
+      mockGetStats.mockResolvedValue({ data: mockStats })
+      await act(async () => {
+        render(<CalendarPageContainer />)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
+      })
+
+      const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
+      await act(async () => {
+        fireEvent.click(calendarButton)
       })
 
       await waitFor(() => {
@@ -75,19 +96,7 @@ describe('CalendarPageContainer', () => {
       expect(screen.getByRole('button', { name: /vista cuadrícula/i })).toBeInTheDocument()
     })
 
-    test('should highlight calendar button by default', async () => {
-      mockGetStats.mockResolvedValue({ data: mockStats })
-      await act(async () => {
-        render(<CalendarPageContainer />)
-      })
-
-      await waitFor(() => {
-        const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
-        expect(calendarButton).toHaveClass('bg-white', 'text-primary-600', 'shadow-sm', 'font-semibold')
-      })
-    })
-
-    test('should not highlight grid button by default', async () => {
+    test('should highlight grid button by default', async () => {
       mockGetStats.mockResolvedValue({ data: mockStats })
       await act(async () => {
         render(<CalendarPageContainer />)
@@ -95,8 +104,20 @@ describe('CalendarPageContainer', () => {
 
       await waitFor(() => {
         const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
-        expect(gridButton).toHaveClass('text-neutral-600', 'hover:text-neutral-900')
-        expect(gridButton).not.toHaveClass('bg-white')
+        expect(gridButton).toHaveClass('bg-white', 'text-primary-600', 'shadow-sm', 'font-semibold')
+      })
+    })
+
+    test('should not highlight calendar button by default', async () => {
+      mockGetStats.mockResolvedValue({ data: mockStats })
+      await act(async () => {
+        render(<CalendarPageContainer />)
+      })
+
+      await waitFor(() => {
+        const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
+        expect(calendarButton).toHaveClass('text-neutral-600', 'hover:text-neutral-900')
+        expect(calendarButton).not.toHaveClass('bg-white')
       })
     })
   })
@@ -149,40 +170,13 @@ describe('CalendarPageContainer', () => {
   })
 
   describe('view mode toggling', () => {
-    test('should switch to grid view when grid button is clicked', async () => {
-      mockGetStats.mockResolvedValue({ data: mockStats })
-      await act(async () => {
-        render(<CalendarPageContainer />)
-      })
-
-      const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
-      await act(async () => {
-        fireEvent.click(gridButton)
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
-      })
-      expect(screen.queryByTestId('calendar-view-container')).not.toBeInTheDocument()
-    })
-
     test('should switch to calendar view when calendar button is clicked', async () => {
       mockGetStats.mockResolvedValue({ data: mockStats })
       await act(async () => {
         render(<CalendarPageContainer />)
       })
 
-      // First switch to grid
-      const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
-      await act(async () => {
-        fireEvent.click(gridButton)
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
-      })
-
-      // Then switch back to calendar
+      // Default is grid — switch to calendar
       const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
       await act(async () => {
         fireEvent.click(calendarButton)
@@ -194,6 +188,34 @@ describe('CalendarPageContainer', () => {
       expect(screen.queryByTestId('public-calendar-container')).not.toBeInTheDocument()
     })
 
+    test('should switch back to grid view when grid button is clicked after calendar', async () => {
+      mockGetStats.mockResolvedValue({ data: mockStats })
+      await act(async () => {
+        render(<CalendarPageContainer />)
+      })
+
+      // First switch to calendar
+      const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
+      await act(async () => {
+        fireEvent.click(calendarButton)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId('calendar-view-container')).toBeInTheDocument()
+      })
+
+      // Then switch back to grid
+      const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
+      await act(async () => {
+        fireEvent.click(gridButton)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
+      })
+      expect(screen.queryByTestId('calendar-view-container')).not.toBeInTheDocument()
+    })
+
     test('should update button styles when switching views', async () => {
       mockGetStats.mockResolvedValue({ data: mockStats })
       await act(async () => {
@@ -203,47 +225,47 @@ describe('CalendarPageContainer', () => {
       const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
       const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
 
-      // Initially calendar is active
-      expect(calendarButton).toHaveClass('bg-white', 'text-primary-600')
+      // Initially grid is active
+      expect(gridButton).toHaveClass('bg-white', 'text-primary-600')
 
-      // Click grid button
+      // Click calendar button
       await act(async () => {
-        fireEvent.click(gridButton)
+        fireEvent.click(calendarButton)
       })
 
       await waitFor(() => {
-        expect(gridButton).toHaveClass('bg-white', 'text-primary-600', 'shadow-sm', 'font-semibold')
+        expect(calendarButton).toHaveClass('bg-white', 'text-primary-600', 'shadow-sm', 'font-semibold')
       })
-      expect(calendarButton).not.toHaveClass('bg-white')
-      expect(calendarButton).toHaveClass('text-neutral-600')
+      expect(gridButton).not.toHaveClass('bg-white')
+      expect(gridButton).toHaveClass('text-neutral-600')
     })
   })
 
   describe('conditional content rendering', () => {
+    test('should render PublicCalendarContainer when viewMode is grid (default)', async () => {
+      mockGetStats.mockResolvedValue({ data: mockStats })
+      await act(async () => {
+        render(<CalendarPageContainer />)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
+      })
+    })
+
     test('should render CalendarViewContainer when viewMode is calendar', async () => {
       mockGetStats.mockResolvedValue({ data: mockStats })
       await act(async () => {
         render(<CalendarPageContainer />)
       })
 
-      await waitFor(() => {
-        expect(screen.getByTestId('calendar-view-container')).toBeInTheDocument()
-      })
-    })
-
-    test('should render PublicCalendarContainer when viewMode is grid', async () => {
-      mockGetStats.mockResolvedValue({ data: mockStats })
+      const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
       await act(async () => {
-        render(<CalendarPageContainer />)
-      })
-
-      const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
-      await act(async () => {
-        fireEvent.click(gridButton)
+        fireEvent.click(calendarButton)
       })
 
       await waitFor(() => {
-        expect(screen.getByTestId('public-calendar-container')).toBeInTheDocument()
+        expect(screen.getByTestId('calendar-view-container')).toBeInTheDocument()
       })
     })
 
@@ -253,15 +275,15 @@ describe('CalendarPageContainer', () => {
         render(<CalendarPageContainer />)
       })
 
-      // Check in calendar view
+      // Check in grid view (default)
       await waitFor(() => {
         expect(screen.getByTestId('stats-bar')).toBeInTheDocument()
       })
 
-      // Switch to grid view
-      const gridButton = screen.getByRole('button', { name: /vista cuadrícula/i })
+      // Switch to calendar view
+      const calendarButton = screen.getByRole('button', { name: /vista calendario/i })
       await act(async () => {
-        fireEvent.click(gridButton)
+        fireEvent.click(calendarButton)
       })
 
       // StatsBar should still be present
