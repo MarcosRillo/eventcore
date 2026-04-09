@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Event Model
@@ -244,7 +245,11 @@ class Event extends Model
      */
     public function scopePublished($query)
     {
-        $publishedId = \App\Models\EventStatus::where('status_code', 'published')->value('id');
+        $publishedId = Cache::remember(
+            'event_status.id.published',
+            86400,
+            fn () => EventStatus::where('status_code', 'published')->value('id'),
+        );
 
         return $query->where('status_id', $publishedId);
     }

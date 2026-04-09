@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Event;
+use App\Models\EventFormat;
+use App\Models\EventStatus;
 use App\Models\EventType;
 use App\Observers\EventCacheObserver;
+use App\Observers\EventFormatCacheObserver;
+use App\Observers\EventStatusCacheObserver;
 use App\Observers\EventTypeCacheObserver;
 use App\Policies\EventPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -37,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
         // Cache invalidation observers
         Event::observe(EventCacheObserver::class);
         EventType::observe(EventTypeCacheObserver::class);
+        EventStatus::observe(EventStatusCacheObserver::class);
+        EventFormat::observe(EventFormatCacheObserver::class);
 
         // Rate limiters
         $this->configureRateLimiting();

@@ -9,6 +9,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { buildAdminCsp, buildPublicCsp, generateNonce, isAdminRoute } from '@/lib/csp';
+
 /**
  * User role codes - MUST match backend user_roles.role_code
  */
@@ -268,24 +270,13 @@ function hasRefreshToken(request: NextRequest): boolean {
  * @param request
  */
 export function middleware(request: NextRequest) {
-  // CSP nonces are incompatible with ISR (cached HTML has stale nonces).
-  // Using a permissive CSP without nonces until we move to fully dynamic admin pages.
-  const cspHeader = [
-    "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https:",
-    "font-src 'self'",
-    `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || ''}`.trim(),
-    "frame-ancestors 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "report-uri /api/csp-report",
-  ].join('; ');
-  const nonce = '';
-
+  // CSP strategy: admin routes (fully dynamic) use nonce-based CSP for stronger XSS
+  // protection. Public/ISR routes keep unsafe-inline because nonces are incompatible
+  // with cached HTML (stale nonces in ISR responses).
   const { pathname } = request.nextUrl;
+  const useNonce = isAdminRoute(pathname);
+  const nonce = useNonce ? generateNonce() : '';
+  const cspHeader = useNonce ? buildAdminCsp(nonce) : buildPublicCsp();
 
   // Allow public routes (no authentication required)
   if (isPublicRoute(pathname)) {
