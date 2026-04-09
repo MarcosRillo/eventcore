@@ -47,7 +47,7 @@ return [
     |
     */
 
-    'expiration' => 60 * 24 * 7, // 7 días
+    'expiration' => 60, // 1 hora — refresh tokens handle session continuity
 
     /*
     |--------------------------------------------------------------------------
