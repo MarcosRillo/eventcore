@@ -64,8 +64,8 @@ class OrganizerSubmitTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        // Reset sequence to avoid id collision
-        \DB::statement('ALTER SEQUENCE organizations_id_seq RESTART WITH 100');
+        // Reset sequence to avoid id collision (setval is DML-safe inside transactions, unlike ALTER SEQUENCE DDL)
+        \DB::select("SELECT setval('organizations_id_seq', 100)");
 
         $this->organization = Organization::factory()->create();
         $this->producerOrg = Organization::factory()->create(['name' => 'Test Producer Org']);
