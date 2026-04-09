@@ -58,6 +58,7 @@ export function buildAdminCsp(nonce: string): string {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
+    "report-uri /api/csp-report",
   ].join('; ')
 }
 
@@ -76,5 +77,6 @@ export function buildPublicCsp(): string {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
+    "report-uri /api/csp-report",
   ].join('; ')
 }
