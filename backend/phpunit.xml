@@ -24,6 +24,13 @@
             <file>app/Http/Kernel.php</file>
         </exclude>
     </source>
+    <coverage>
+        <report>
+            <text outputFile="php://stdout" showUncoveredFiles="false"/>
+            <html outputDirectory="coverage-report" lowUpperBound="50" highLowerBound="80"/>
+            <clover outputFile="coverage-report/clover.xml"/>
+        </report>
+    </coverage>
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>

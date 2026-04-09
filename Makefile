@@ -59,6 +59,12 @@ tinker: ## Abre Laravel Tinker
 test: ## Ejecuta tests
 	$(DC) exec -u www backend php artisan test
 
+coverage: ## Ejecuta tests con reporte de cobertura en terminal (requiere pcov)
+	$(DC) exec -u www backend php artisan test --coverage
+
+coverage-html: ## Genera reporte de cobertura HTML en backend/coverage-report/
+	$(DC) exec -u www backend php artisan test --coverage --coverage-html coverage-report
+
 db-shell: ## Accede a PostgreSQL CLI
 	$(DC) exec db psql -U $${POSTGRES_USER:-plataforma_user} -d $${POSTGRES_DB:-plataforma_calendario}
 
