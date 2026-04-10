@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Dashboard;
 
+use App\Features\Dashboard\Services\DashboardService;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -167,5 +168,63 @@ class DashboardControllerTest extends EventTestCase
         $response = $this->getJson('/api/v1/events/999999/detail');
 
         $response->assertNotFound();
+    }
+
+    // ================================================================
+    // ERROR HANDLING — 500 catch block coverage
+    // ================================================================
+
+    #[Test]
+    public function test_events_summary_returns_500_on_service_exception(): void
+    {
+        $this->authenticateUser('entity_admin');
+
+        $mock = $this->mock(DashboardService::class);
+        $mock->shouldReceive('getEventsSummary')
+            ->once()
+            ->andThrow(new \RuntimeException('DB connection lost'));
+
+        $response = $this->getJson('/api/v1/dashboard/events/summary');
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('success', false);
+        $response->assertJsonPath('message', 'Failed to retrieve events summary');
+        $response->assertJsonPath('error', 'Internal server error');
+    }
+
+    #[Test]
+    public function test_events_list_returns_500_on_service_exception(): void
+    {
+        $this->authenticateUser('entity_admin');
+
+        $mock = $this->mock(DashboardService::class);
+        $mock->shouldReceive('getFilteredEvents')
+            ->once()
+            ->andThrow(new \RuntimeException('Query timeout'));
+
+        $response = $this->getJson('/api/v1/dashboard/events?tab=pending');
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('success', false);
+        $response->assertJsonPath('message', 'Failed to retrieve events');
+        $response->assertJsonPath('error', 'Internal server error');
+    }
+
+    #[Test]
+    public function test_event_detail_returns_500_on_service_exception(): void
+    {
+        $this->authenticateUser('entity_admin');
+
+        $mock = $this->mock(DashboardService::class);
+        $mock->shouldReceive('getEventDetail')
+            ->once()
+            ->andThrow(new \RuntimeException('Unexpected DB error'));
+
+        $response = $this->getJson('/api/v1/events/1/detail');
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('success', false);
+        $response->assertJsonPath('message', 'Failed to retrieve event detail');
+        $response->assertJsonPath('error', 'Internal server error');
     }
 }
