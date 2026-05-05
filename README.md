@@ -1,238 +1,209 @@
-# Plataforma de Eventos Turisticos - Tucuman
+<div align="center">
 
-> Multi-tenant event management platform for tourism in Argentina
+# eventcore
 
-[![Tests](https://img.shields.io/badge/tests-3409%20passing-brightgreen)]()
-[![Backend](https://img.shields.io/badge/Laravel-12-red)]()
-[![Frontend](https://img.shields.io/badge/Next.js-15.5.9-black)]()
-[![PHP](https://img.shields.io/badge/PHP-8.2-blue)]()
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)]()
+**Plataforma SaaS multi-tenant de gestión de eventos masivos y acreditación en tiempo real.**
 
----
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-portfolio_case_study-orange)](#about)
+[![Stack](https://img.shields.io/badge/stack-Laravel_%2B_Next.js-2D3748)](#architecture)
+[![Tests](https://img.shields.io/badge/coverage-85%25%2B-brightgreen)](#testing)
 
-## Overview
+[Demo en vivo](#demo) · [Arquitectura](#architecture) · [Quick start](#quick-start) · [Caso de estudio](#case-study)
 
-Professional platform for centralized management of tourism events with multi-tenant approval and publication workflow.
-
-**Client:** Ente de Turismo de Tucuman
-**Model:** Multi-tenant (government entities, hotels, restaurants, organizers)
-**Architecture:** Monorepo with Features-based architecture
+</div>
 
 ---
 
-## Stack
+## Table of contents
 
-### Backend
-- **Framework:** Laravel 12, PHP 8.2, Sanctum 4.2
-- **Database:** PostgreSQL 15
-- **Cache:** Redis (Upstash in production)
-- **Testing:** PHPUnit (527 tests, 2172 assertions)
-- **API:** RESTful, versioned (/api/v1/), 97 endpoints
+- [About](#about)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Demo](#demo)
+- [Quick start](#quick-start)
+- [Project structure](#project-structure)
+- [Testing](#testing)
+- [Security](#security)
+- [Roadmap](#roadmap)
+- [Case study](#case-study)
+- [License](#license)
+- [Author](#author)
 
-### Frontend
-- **Framework:** Next.js 15.5.9 (App Router)
-- **React:** 19.2.3, TypeScript 5.9.3 (strict mode)
-- **Styling:** Tailwind CSS 4
-- **Testing:** Jest 30.2.0 + React Testing Library (2882 tests)
+## About
 
-### Infrastructure
-- **Backend Deploy:** Render (Docker/FrankenPHP)
-- **Frontend Deploy:** Vercel
-- **Database:** Neon PostgreSQL (serverless)
-- **Cache:** Upstash Redis
-- **Dev:** Docker Compose (PostgreSQL 15 + Redis 7 + Nginx + MailHog)
+**eventcore** es una plataforma SaaS multi-tenant para gestionar eventos masivos de punta a punta: creación, aprobación, registro de asistentes, acreditación con sincronización en vivo entre terminales y emisión de credenciales con un editor visual drag-and-drop.
 
----
+Originalmente desarrollada como proyecto interno en una empresa de servicios, fue liberada como open source para servir como caso de estudio sobre cómo se construye, prueba y endurece una SaaS multi-tenant con un equipo de un solo desarrollador.
 
-## Metrics
+## Features
 
-### Backend (verified 2026-03-25)
-| Category | Count |
-|----------|-------|
-| Features | 12 (Approval, Auth, Dashboard, EventTypes, Events, InternalCalendar, Locations, Organizations, Organizer, PublicEvents, Shared, Users) |
-| Controllers | 18 |
-| Services | 24 |
-| Models | 21 |
-| Migrations | 46 |
-| API Routes | 97 (GET:48, POST:21, PUT:6, PATCH:14, DELETE:8) |
-| Form Requests | 29 |
-| Tests | 527 passing (40 test files) |
-
-### Frontend (verified 2026-03-25)
-| Category | Count |
-|----------|-------|
-| Features | 14 (auth, entity-admin, event-types, events, internal-calendar, invitations, landing, locations, organizations, organizer, organizer-dashboard, public-calendar, registration-requests, users) |
-| Components | 189 (109 feature + 80 shared) |
-| Hooks | 38 (7 shared + 31 feature) |
-| Services | 26 (5 shared + 21 feature) |
-| Pages/Routes | 27 |
-| Tests | 2882 passing (160 test files) |
-
-**Total Tests: 3409 passing (100%)**
-
----
-
-## Quick Start
-
-### Prerequisites
-- Docker Desktop
-- Node.js 22+
-- Git
-
-### Installation
-
-```bash
-git clone https://github.com/MarcosRillo/plataforma-calendario.git
-cd plataforma-calendario
-
-# Start backend services
-make install    # First time: builds, migrates, seeds
-# OR
-make up         # Subsequent runs
-
-# Start frontend
-cd frontend && pnpm install && pnpm dev
-```
-
-### Access
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:8000/api/v1/
-- **Database:** localhost:5432
-
-### Running Tests
-
-```bash
-# Backend (Docker required)
-docker compose exec backend php artisan test
-
-# Frontend
-cd frontend && pnpm test
-
-# Code style
-docker compose exec backend vendor/bin/pint --test
-cd frontend && pnpm run lint
-```
-
----
-
-## Project Structure
-
-```
-plataforma-calendario/
-├── frontend/                      # Next.js 15 + React 19
-│   └── src/
-│       ├── app/                   # App Router (27 pages)
-│       ├── features/              # 14 feature modules
-│       │   ├── auth/
-│       │   ├── entity-admin/
-│       │   ├── event-types/
-│       │   ├── events/
-│       │   ├── internal-calendar/
-│       │   ├── invitations/
-│       │   ├── landing/
-│       │   ├── locations/
-│       │   ├── organizations/
-│       │   ├── organizer/
-│       │   ├── organizer-dashboard/
-│       │   ├── public-calendar/
-│       │   ├── registration-requests/
-│       │   └── users/
-│       ├── shared/                # 80 shared components
-│       └── context/               # AuthContext
-│
-├── backend/                       # Laravel 12 + PHP 8.2
-│   └── app/
-│       ├── Features/              # 12 feature modules
-│       │   ├── Approval/
-│       │   ├── Auth/
-│       │   ├── Dashboard/
-│       │   ├── EventTypes/
-│       │   ├── Events/
-│       │   ├── InternalCalendar/
-│       │   ├── Locations/
-│       │   ├── Organizations/
-│       │   ├── Organizer/
-│       │   ├── PublicEvents/
-│       │   ├── Shared/
-│       │   └── Users/
-│       └── Models/                # 21 Eloquent models
-│
-├── docs/                          # Architecture & changelogs
-├── docker-compose.yml             # Dev environment
-├── render.yaml                    # Render deploy config
-└── Makefile                       # Dev automation
-```
-
----
+- **Multi-tenant con aislamiento por organización**: cada organización gestiona sus eventos sin ver datos del resto.
+- **4 roles + workflow de aprobación**: platform admin, entity admin, entity staff, organizer admin — con trazabilidad de cada cambio de estado del evento.
+- **Acreditación en tiempo real**: sincronización en vivo entre terminales vía Laravel Echo + Reverb (4 listeners por canal `event.{eventId}` con payload guards type-safe, reconexión automática, auth bidireccional).
+- **Editor visual de credenciales**: drag-and-drop con `react-konva` — Text/Image/Field/QR/Shape/Transformer, properties panel, store en Zustand y serialización propia. Los clientes diseñan sus badges sin tocar código.
+- **Design system propio**: 56 componentes consolidados, dark mode y accesibilidad WCAG 2.1 AA. Regla ESLint custom para bloquear imports cross-feature.
+- **Hardening de seguridad**: rate limiting anti-spoofing (CF-Connecting-IP), CSP con nonces dinámicos por ruta, HSTS, normalización de timing en password recovery.
+- **Tests serios**: 85%+ cobertura — 433 Vitest + 60 PHPUnit + 66 Playwright end-to-end. Gates per-file del 88% en módulos críticos.
+- **CI/CD listo**: GitHub Actions con tests, linting y CodeQL en cada PR.
 
 ## Architecture
 
-Both backend and frontend follow a **Features-based architecture**, organizing code by business domain rather than technical layers. Each feature encapsulates its own controllers, services, components, hooks, and tests.
+```
+┌──────────────────────┐         ┌──────────────────────┐
+│   Web (Next.js 14)   │ ◀────▶ │   API (Laravel 11)   │
+│   App Router · TS    │  REST   │   105 endpoints      │
+│   Tailwind · Zustand │  + WS   │   24 modelos Eloquent│
+│   SWR · react-konva  │         │   Sanctum · Spatie   │
+└──────────┬───────────┘         └──────────┬───────────┘
+           │                                │
+           │                                ▼
+           │                    ┌──────────────────────┐
+           │                    │     PostgreSQL       │
+           │                    │     Redis (cache)    │
+           │                    └──────────┬───────────┘
+           │                                │
+           ▼                                ▼
+        ┌─────────────────────────────────────┐
+        │   Laravel Reverb (WebSockets)       │
+        │   Canal event.{eventId}             │
+        │   RegistrantCreated / Updated /     │
+        │   Accredited / Payment              │
+        └─────────────────────────────────────┘
+```
 
-See detailed documentation:
-- [Backend Architecture](docs/backend/ARCHITECTURE.md)
-- [Frontend Architecture](docs/frontend/ARCHITECTURE.md)
+**Stack núcleo:** Next.js 14 (App Router) · TypeScript · Laravel 11 · PostgreSQL · Redis · Laravel Echo + Reverb · Sanctum · Spatie Permissions · Tailwind · Zustand · SWR · react-konva.
 
----
+**Toolchain:** pnpm · Vitest · PHPUnit · Playwright · GitHub Actions · CodeQL · Docker.
 
-## Key Features
+> Diagrama de arquitectura detallado: [`docs/architecture.md`](docs/architecture.md)
 
-### Entity Admin (Tourism Board)
-- Approve/reject/request changes on events
-- Manage organizations, users, invitations
-- Internal calendar with stats dashboard
-- Event type and location management
+## Demo
 
-### Organizers (Hotels, Restaurants, etc.)
-- Create and manage events with image upload
-- Track approval workflow status
-- Statistics dashboard
-- Calendar view of own events
+> [!NOTE]
+> **Demo en vivo:** https://plataforma-calendario-monorepo.vercel.app
 
-### Public (Tourists)
-- Browse public event calendar
-- Filter by type, location, date range
-- Search events
-- View event details with QR codes
+**Credenciales de prueba** (resetadas cada hora):
 
-### Platform Security
-- Role-based access control (4 roles)
-- API rate limiting (3 named limiters)
-- Redis caching with tag invalidation
-- CORS with credentials whitelist
-- HTML sanitization (XSS prevention)
-- Multi-tenant data isolation (TenantScope)
+| Rol             | Email                       | Password    |
+|-----------------|-----------------------------|-------------|
+| Platform admin  | `admin@eventcore.dev`       | `demo1234`  |
+| Entity admin    | `entity@eventcore.dev`      | `demo1234`  |
+| Organizer       | `organizer@eventcore.dev`   | `demo1234`  |
 
----
+> Walkthrough en video (90s): <!-- TODO: link a Loom -->
+
+## Quick start
+
+### Pre-requisitos
+
+- Docker + Docker Compose
+- Node 20+ y pnpm 10
+- PHP 8.3 y Composer (sólo si corrés la API fuera de Docker)
+
+### Levantar todo con Docker
+
+```bash
+git clone https://github.com/MarcosRillo/eventcore.git
+cd eventcore
+
+cp .env.example .env
+docker compose up -d
+
+# Migrations + seeders + storage link
+docker compose exec api php artisan migrate --seed
+docker compose exec api php artisan storage:link
+
+# Web
+cd frontend && pnpm install && pnpm dev
+```
+
+- API: `http://localhost:8000`
+- Web: `http://localhost:3000`
+- Reverb: `ws://localhost:8080`
+
+### Levantar sin Docker
+
+Ver [`docs/local-dev.md`](docs/local-dev.md).
+
+## Project structure
+
+```
+eventcore/
+├── backend/                    # Laravel 11 — API REST + Reverb
+│   ├── app/
+│   ├── database/
+│   ├── routes/
+│   └── tests/                  # PHPUnit
+├── frontend/                   # Next.js 14 — App Router
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/         # Design system
+│   │   ├── features/           # Vertical slices
+│   │   └── lib/
+│   └── e2e/                    # Vitest + Playwright
+├── docs/
+│   ├── architecture.md
+│   ├── local-dev.md
+│   └── assets/
+├── .github/
+│   └── workflows/              # CI: tests, lint, CodeQL
+├── docker-compose.yml
+├── LICENSE
+├── NOTICE
+└── README.md
+```
 
 ## Testing
 
-- **Backend:** PHPUnit with RefreshDatabase, SQLite in-memory for isolation
-- **Frontend:** Jest + React Testing Library, strict console policy
-- **CI:** GitHub Actions (test + lint + security audit)
+```bash
+# Frontend (Vitest + Playwright)
+cd frontend
+pnpm test           # unit
+pnpm test:e2e       # Playwright
+pnpm coverage       # gate per-file 88% en módulos críticos
 
-**Current: 3409/3409 tests passing (100%)**
+# Backend (PHPUnit)
+cd backend
+php artisan test
+```
 
-Note: Backend tests must run in Docker (PostgreSQL required for full migration compatibility).
+**Cobertura objetivo:** 85% global · 88% per-file en módulos críticos (auth, billing, accreditation).
 
----
+## Security
 
-## Documentation
+- Reportar vulnerabilidades: ver [`SECURITY.md`](SECURITY.md).
+- Pipeline corre CodeQL + Dependabot en cada PR.
+- Headers HTTP por defecto: HSTS, CSP con nonces dinámicos, X-Content-Type-Options, X-Frame-Options.
+- Rate limiting anti-spoofing usando `CF-Connecting-IP` (no `X-Forwarded-For`).
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Development guidelines
-- [Backend Architecture](docs/backend/ARCHITECTURE.md)
-- [Frontend Architecture](docs/frontend/ARCHITECTURE.md)
-- [Backend Changelog](docs/backend/CHANGELOG.md)
-- [Frontend Changelog](docs/frontend/CHANGELOG.md)
+## Roadmap
 
----
+- [ ] Demo deploy en Railway (API + Postgres) + Vercel (Web)
+- [ ] Walkthrough en Loom (90s)
+- [ ] `docs/architecture.md` con diagramas detallados
+- [ ] Playground público de tenants efímeros
+- [ ] Webhook signing para integraciones de terceros
+- [ ] OpenAPI spec autogenerada
+
+## Case study
+
+Lectura larga sobre las decisiones de diseño, los trade-offs y los aprendizajes:
+**[marcosrillo.dev/eventcore](https://marcosrillo.dev)** <!-- TODO -->
+
+Algunos posts relacionados:
+- Migración Jest → Vitest sin perder cobertura (37 archivos vía codemod)
+- Consolidar dos design systems en uno (de 273 archivos legacy a 56 componentes)
+- Hardening de un Laravel multi-tenant: lecciones del campo
 
 ## License
 
-Proprietary - Ente de Turismo de Tucuman
+Apache 2.0 — ver [LICENSE](LICENSE) y [NOTICE](NOTICE).
 
----
+## Author
 
-**Lead Developer:** Marcos Rillo Cabanne
-**Last Updated:** March 25, 2026
-**Version:** 2.1.0
+**Marcos Rillo Cabanne** — Full Stack Developer · Tucumán, Argentina
+
+[LinkedIn](https://linkedin.com/in/marcos-rillo-cabanne) · [Email](mailto:marcosrillocabanne@gmail.com)
+
+> Este repo es el caso de estudio principal de mi portfolio. Si te interesa cómo está construido o querés conversar sobre una posición full stack, escribime.
