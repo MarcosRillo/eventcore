@@ -1,7 +1,79 @@
-# ===========================================
-# GENERAL
-# ===========================================
+# ───────── Secrets / env ─────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.pfx
+auth.json
+
+# ───────── Local tooling ─────────
+.claude/
+
+# ───────── Node / Next.js (apps/web) ─────────
 node_modules/
+.pnpm-store/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# ───────── Laravel (apps/api) ─────────
+/apps/api/vendor/
+/apps/api/node_modules/
+/apps/api/public/build/
+/apps/api/public/hot/
+/apps/api/public/storage
+/apps/api/storage/*.key
+/apps/api/storage/app/public/*
+!/apps/api/storage/app/public/.gitkeep
+/apps/api/storage/framework/cache/data/*
+/apps/api/storage/framework/sessions/*
+/apps/api/storage/framework/testing/*
+/apps/api/storage/framework/views/*
+/apps/api/storage/logs/*
+!/apps/api/storage/**/.gitkeep
+/apps/api/bootstrap/cache/*.php
+.phpunit.result.cache
+.phpunit.cache/
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# ───────── Testing / coverage ─────────
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+playwright/.cache/
+
+# ───────── Build / cache ─────────
+dist/
+build/
+.cache/
+.turbo/
+.parcel-cache/
+
+# ───────── Logs ─────────
+*.log
+logs/
+pids/
+*.pid
+*.seed
+
+# ───────── IDE / editor ─────────
+.idea/
+.vscode/*
+!.vscode/settings.example.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# ───────── OS ─────────
 .DS_Store
 .DS_Store?
 ._*
@@ -9,148 +81,13 @@ node_modules/
 .Trashes
 ehthumbs.db
 Thumbs.db
-*.log
-*.pid
-*.seed
-*.pid.lock
-.tmp
-.temp
-.claude/
-.agents/
-CLAUDE.md
-frontend/CLAUDE.md
-backend/CLAUDE.md
 
-# Root level files that should never be committed
-.env
+# ───────── Docker ─────────
+docker-compose.override.yml
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ===========================================
-# FRONTEND (Next.js/React)
-# ===========================================
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/build/
-frontend/dist/
-
-# Environment variables
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
-
-# Vercel
-frontend/.vercel
-
-# TypeScript
-frontend/*.tsbuildinfo
-frontend/next-env.d.ts
-
-# Testing
-frontend/coverage/
-frontend/.nyc_output
-
-# Cache
-frontend/.cache/
-frontend/.parcel-cache/
-
-# ===========================================
-# BACKEND (Laravel/PHP)
-# ===========================================
-backend/vendor/
-backend/node_modules/
-
-# Environment variables
-backend/.env
-backend/.env.backup
-backend/.env.production
-
-# Laravel specific
-backend/storage/app/*
-!backend/storage/app/.gitkeep
-!backend/storage/app/public/
-backend/storage/framework/cache/*
-!backend/storage/framework/cache/.gitkeep
-backend/storage/framework/sessions/*
-!backend/storage/framework/sessions/.gitkeep
-backend/storage/framework/testing/*
-!backend/storage/framework/testing/.gitkeep
-backend/storage/framework/views/*
-!backend/storage/framework/views/.gitkeep
-backend/storage/logs/*
-!backend/storage/logs/.gitkeep
-backend/bootstrap/cache/*
-!backend/bootstrap/cache/.gitkeep
-
-# Composer
-backend/composer.phar
-
-# PHPUnit
-backend/coverage/
-backend/.phpunit.result.cache
-
-# PHP CS Fixer
-backend/.php_cs.cache
-backend/.php-cs-fixer.cache
-
-# ===========================================
-# DOCKER
-# ===========================================
-# Docker volumes (si tienes datos persistentes)
-# docker-volumes/
-
-# Docker environment (CRITICAL: Never commit!)
-.env.docker
-**/.env*
-!.env.example
-!.env.docker.example
-!frontend/.env.example
-!backend/.env.example
-
-# ===========================================
-# BACKUP & TEMPORARY FILES
-# ===========================================
-*.backup
-*.bak
-*.tmp
-*.temp
-backup/
-backups/
-
-# Database dumps
-*.sql
-*.dump
-
-# Archives
-*.zip
-*.tar.gz
-*.rar
-
-# ===========================================
-# OS GENERATED FILES
-# ===========================================
-# macOS
-.AppleDouble
-.LSOverride
-Icon?
-
-# Windows
-Desktop.ini
-$RECYCLE.BIN/
-
-# Linux
-*~
-.nfs*
-# Documentation temporary files
-docs/**/.DS_Store
-docs/**/Thumbs.db
-docs/**/*.tmp
-docs/**/*.bak
+# ───────── Misc ─────────
+.history/
+.vagrant/
+.bundle/
+.fleet/
+*.local
