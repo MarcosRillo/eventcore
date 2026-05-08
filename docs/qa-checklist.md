@@ -1,5 +1,5 @@
-# QA Manual Test Checklist — Plataforma Calendario Tucumán
-**Version:** Pre-presentación Ente de Turismo
+# QA Manual Test Checklist — eventcore Platform
+**Version:** Pre-presentación Demo Organization
 **Date:** 2026-03-31
 **Frontend:** https://plataforma-calendario-monorepo.vercel.app
 **Backend:** https://plataforma-calendario-monorepo.onrender.com
@@ -10,10 +10,10 @@
 
 | Role | Email | Password |
 |------|-------|----------|
-| Platform Admin | marcos@plataforma.com | password123 |
-| Entity Admin | ana.garcia@enteturismo.gov.ar | password123 |
-| Organizer (Sheraton) | maria.rodriguez@sheraton.com | password123 |
-| Organizer (La Rural) | juan.perez@larural.com.ar | password123 |
+| Platform Admin | marcos@plataforma.com | `$SEED_DEMO_PASSWORD` |
+| Entity Admin | admin@example.com | `$SEED_DEMO_PASSWORD` |
+| Organizer (Hotel Central Demo) | organizer@example.com | `$SEED_DEMO_PASSWORD` |
+| Organizer (Centro de Convenciones Norte) | organizer2@example.com | `$SEED_DEMO_PASSWORD` |
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### 1.1 Landing Page — `/`
 
-- [ ] La página carga en menos de 5 segundos (Render warm) — Hero section visible con título "Eventos Tucumán" `[BLOCKER]`
+- [ ] La página carga en menos de 5 segundos (Render warm) — Hero section visible con título "eventcore" `[BLOCKER]`
 - [ ] La sección "Eventos Destacados" muestra cards con imagen, título y fecha — Las imágenes cargan desde Cloudinary (dominio `res.cloudinary.com`) `[BLOCKER]`
 - [ ] La sección "Categorías" muestra los tipos de evento (chips/cards clickeables) — Visible con íconos/colores `[CRITICAL]`
 - [ ] La sección "Organizadores" (CTA section) renderiza al hacer scroll — Visible al fondo del landing `[NICE]`
@@ -83,13 +83,13 @@
 
 ### 2.1 Login — `/login`
 
-- [ ] La página carga con logo, título "Eventos Tucumán" y formulario `[BLOCKER]`
+- [ ] La página carga con logo, título "eventcore" y formulario `[BLOCKER]`
 - [ ] Login con email/password vacíos no realiza request — Validación frontend bloquea submit `[BLOCKER]`
 - [ ] Login con password incorrecta muestra error "Invalid credentials" en banner rojo `[BLOCKER]`
 - [ ] Login con email que no existe muestra error (mismo banner, no revela si existe) `[BLOCKER]`
-- [ ] Login exitoso como **Entity Admin** (ana.garcia@enteturismo.gov.ar) redirige al panel de admin `[BLOCKER]`
-- [ ] Login exitoso como **Organizer Sheraton** (maria.rodriguez@sheraton.com) redirige a `/organizer/dashboard` `[BLOCKER]`
-- [ ] Login exitoso como **Organizer La Rural** (juan.perez@larural.com.ar) redirige a `/organizer/dashboard` `[BLOCKER]`
+- [ ] Login exitoso como **Entity Admin** (admin@example.com) redirige al panel de admin `[BLOCKER]`
+- [ ] Login exitoso como **Organizer Hotel Central Demo** (organizer@example.com) redirige a `/organizer/dashboard` `[BLOCKER]`
+- [ ] Login exitoso como **Organizer Centro de Convenciones Norte** (organizer2@example.com) redirige a `/organizer/dashboard` `[BLOCKER]`
 - [ ] Usuario ya autenticado que visita `/login` ve spinner "Redirigiendo..." y es redirigido automáticamente `[CRITICAL]`
 - [ ] Link "¿Olvidaste tu contraseña?" navega a `/forgot-password` `[CRITICAL]`
 - [ ] El campo contraseña tiene toggle show/hide funcional `[NICE]`
@@ -250,7 +250,7 @@ Esta página tiene 3 tabs unificados.
 
 ### 4.1 Dashboard — `/organizer/dashboard`
 
-Loguearse como: **maria.rodriguez@sheraton.com**
+Loguearse como: **organizer@example.com**
 
 - [ ] El dashboard carga con estadísticas del organizador (total, por estado) `[BLOCKER]`
 - [ ] La lista de eventos del organizador carga — Solo ve sus propios eventos, no los de otros `[BLOCKER]`
@@ -331,9 +331,9 @@ Loguearse como: **maria.rodriguez@sheraton.com**
 
 ### 4.7 Aislamiento de datos (seguridad)
 
-Loguearse como: **juan.perez@larural.com.ar**
+Loguearse como: **organizer2@example.com**
 
-- [ ] Solo ve sus propios eventos — No ve eventos de Sheraton ni de otros organizadores `[BLOCKER]`
+- [ ] Solo ve sus propios eventos — No ve eventos de Hotel Central Demo ni de otros organizadores `[BLOCKER]`
 - [ ] Intentar navegar a `/events` (admin) redirige a su dashboard o muestra 403 — NO accede a datos del admin `[BLOCKER]`
 - [ ] Intentar navegar a `/event-types`, `/locations`, `/sectors` redirige o bloquea acceso `[BLOCKER]`
 - [ ] Intentar navegar a `/organizations` redirige o bloquea acceso `[BLOCKER]`
@@ -450,7 +450,7 @@ Estos tests combinan múltiples roles y deben ejecutarse en orden.
 
 ## Section 9: SEO y Metadatos (verificación rápida)
 
-- [ ] `/` — `<title>` contiene "Eventos Tucumán" `[NICE]`
+- [ ] `/` — `<title>` contiene "eventcore" `[NICE]`
 - [ ] `/calendar/{id}` — `<title>` contiene el nombre del evento `[NICE]`
 - [ ] `/robots.txt` — Responde con contenido (acceder a `/robots.txt`) `[NICE]`
 - [ ] `/sitemap.xml` — Responde con contenido XML `[NICE]`

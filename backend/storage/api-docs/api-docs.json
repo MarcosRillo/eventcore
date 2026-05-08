@@ -44,7 +44,7 @@
                                         "type": "string",
                                         "format": "password",
                                         "minLength": 6,
-                                        "example": "password123"
+                                        "example": "YourSecureP@ss!23"
                                     }
                                 },
                                 "type": "object"

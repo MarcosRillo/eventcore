@@ -133,7 +133,7 @@ return [
     |
     */
 
-    'primary_entity_name' => env('PRIMARY_ENTITY_NAME', 'Ente de Turismo'),
+    'primary_entity_name' => env('PRIMARY_ENTITY_NAME', 'Demo Organization'),
     'primary_entity_cuit' => env('PRIMARY_ENTITY_CUIT'),
     'initial_admin_email' => env('INITIAL_ADMIN_EMAIL'),
     'initial_admin_password' => env('INITIAL_ADMIN_PASSWORD'),

@@ -10,7 +10,7 @@
 
 ## 📋 Overview
 
-Implementar el dashboard completo para Entity Admin (Ente de Turismo) que permite aprobar, rechazar y solicitar cambios en eventos creados por organizadores. Este es el **componente crítico** que completa el workflow de aprobación del sistema.
+Implementar el dashboard completo para Entity Admin (Demo Organization) que permite aprobar, rechazar y solicitar cambios en eventos creados por organizadores. Este es el **componente crítico** que completa el workflow de aprobación del sistema.
 
 ### Context
 

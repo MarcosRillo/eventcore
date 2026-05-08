@@ -28,7 +28,7 @@ class FixOrphanOrganizations extends Command
      */
     public function handle(): int
     {
-        // Get default primary entity (Ente de Turismo)
+        // Get default primary entity (Demo Organization)
         $defaultEntity = Organization::whereNull('parent_id')
             ->whereHas('type', fn ($q) => $q->where('type_code', 'primary_entity'))
             ->first();
