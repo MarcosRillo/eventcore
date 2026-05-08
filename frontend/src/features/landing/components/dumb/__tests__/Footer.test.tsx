@@ -34,10 +34,10 @@ describe('Footer', () => {
     test('should render about section with title and description', () => {
       render(<Footer />)
 
-      expect(screen.getByText('Eventos Tucumán')).toBeInTheDocument()
+      expect(screen.getByText('eventcore')).toBeInTheDocument()
       expect(screen.getByText(/Plataforma de gestión y difusión/i)).toBeInTheDocument()
 
-      const aboutText = screen.getByText(/de la provincia de Tucumán/i)
+      const aboutText = screen.getByText(/de la provincia de Demo Region/i)
       expect(aboutText).toHaveClass('text-neutral-400', 'text-sm')
     })
 
@@ -53,8 +53,8 @@ describe('Footer', () => {
       render(<Footer />)
 
       expect(screen.getByText('Contacto')).toBeInTheDocument()
-      expect(screen.getByText(/info@eventostucuman.gob.ar/i)).toBeInTheDocument()
-      expect(screen.getByText(/San Miguel de Tucumán/i)).toBeInTheDocument()
+      expect(screen.getByText(/info@eventcore.dev/i)).toBeInTheDocument()
+      expect(screen.getByText(/Demo City/i)).toBeInTheDocument()
     })
 
     test('should apply correct grid layout classes', () => {
@@ -90,7 +90,7 @@ describe('Footer', () => {
     test('should render email contact with icon', () => {
       const { container } = render(<Footer />)
 
-      expect(screen.getByText(/info@eventostucuman.gob.ar/i)).toBeInTheDocument()
+      expect(screen.getByText(/info@eventcore.dev/i)).toBeInTheDocument()
 
       // Email icon SVG should be present
       const emailIcon = container.querySelector('svg[viewBox="0 0 24 24"]')
@@ -107,7 +107,7 @@ describe('Footer', () => {
     test('should render address contact with icon', () => {
       render(<Footer />)
 
-      const addressText = screen.getByText(/San Miguel de Tucumán/i)
+      const addressText = screen.getByText(/Demo City/i)
       expect(addressText).toBeInTheDocument()
 
       // Check parent li element has correct classes
@@ -131,7 +131,7 @@ describe('Footer', () => {
       render(<Footer />)
 
       const currentYear = new Date().getFullYear()
-      const copyrightText = screen.getByText(new RegExp(`© ${currentYear} Ente de Turismo de Tucumán`))
+      const copyrightText = screen.getByText(new RegExp(`© ${currentYear} Demo Organization`))
 
       expect(copyrightText).toBeInTheDocument()
       expect(copyrightText).toHaveClass('text-neutral-500', 'text-sm')

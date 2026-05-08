@@ -20,7 +20,7 @@ const mockUser = {
 }
 
 const mockConfig: AppShellConfig = {
-  brandTitle: 'Tucumán',
+  brandTitle: 'Demo Region',
   brandSubtitle: 'Turismo',
   navSections: [
     {
@@ -33,7 +33,7 @@ const mockConfig: AppShellConfig = {
   ],
   routeTitles: { '/': 'Dashboard' },
   defaultTitle: 'Panel',
-  headerSubtitle: 'Ente de Turismo',
+  headerSubtitle: 'Demo Organization',
   collapsible: true,
   showSearch: true,
   showNotifications: true,

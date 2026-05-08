@@ -4,7 +4,7 @@ import publicApiClient from '@/services/publicApiClient'
 import type { Event } from '@/types/event.types'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eventostucuman.gob.ar'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eventcore.dev'
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

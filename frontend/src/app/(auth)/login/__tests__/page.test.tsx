@@ -75,7 +75,7 @@ describe('LoginPage', () => {
     it('should render login form with all elements', () => {
       render(<LoginPage />);
 
-      expect(screen.getByText('Eventos Tucumán')).toBeInTheDocument();
+      expect(screen.getByText('eventcore')).toBeInTheDocument();
       expect(screen.getByText('Plataforma de eventos turísticos y culturales')).toBeInTheDocument();
       expect(screen.getByText('Correo electrónico')).toBeInTheDocument();
       expect(screen.getByText('Contraseña')).toBeInTheDocument();
@@ -200,7 +200,7 @@ describe('LoginPage', () => {
       render(<LoginPage />);
 
       expect(screen.getByText('Redirigiendo...')).toBeInTheDocument();
-      expect(screen.queryByText('Eventos Tucumán')).not.toBeInTheDocument();
+      expect(screen.queryByText('eventcore')).not.toBeInTheDocument();
     });
   });
 

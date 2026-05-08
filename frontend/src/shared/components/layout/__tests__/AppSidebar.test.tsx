@@ -10,7 +10,7 @@ jest.mock('next/navigation', () => ({
 }))
 
 const defaultConfig = {
-  brandTitle: 'Tucumán',
+  brandTitle: 'Demo Region',
   brandSubtitle: 'Turismo',
   collapsible: true,
   navSections: [
@@ -38,7 +38,7 @@ describe('AppSidebar', () => {
       />
     )
 
-    expect(screen.getByText('Tucumán')).toBeInTheDocument()
+    expect(screen.getByText('Demo Region')).toBeInTheDocument()
     expect(screen.getByText('Turismo')).toBeInTheDocument()
   })
 
@@ -106,7 +106,7 @@ describe('AppSidebar', () => {
     )
 
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
-    expect(screen.queryByText('Tucumán')).not.toBeInTheDocument()
+    expect(screen.queryByText('Demo Region')).not.toBeInTheDocument()
   })
 
   it('renders collapse toggle with aria-label', () => {

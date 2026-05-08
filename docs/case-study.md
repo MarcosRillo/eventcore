@@ -1,7 +1,6 @@
 # Case Study: Multi-Tenant Event Management Platform
 
-> Solo developer. Built from scratch. Currently in staging for a public-sector organization.
-> I cannot share the repository or URLs due to professional ethics with my current employer.
+> Solo developer. Built from scratch. This codebase is open source — see the repository at github.com/MarcosRillo/eventcore for the full implementation.
 
 ---
 

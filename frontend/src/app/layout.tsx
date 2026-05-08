@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://eventostucuman.gob.ar'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://eventcore.dev'),
   title: "Plataforma Calendario - Gestión de Eventos",
   description: "Sistema completo de gestión de calendario y eventos con multi-tenancy",
 };

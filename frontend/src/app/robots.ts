@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eventostucuman.gob.ar'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eventcore.dev'
 
   return {
     rules: [

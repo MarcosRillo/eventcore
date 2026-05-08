@@ -14,9 +14,9 @@ import type { FormHook } from '@/types/generic-infrastructure.types';
  * | Code            | Name                   | Description                    |
  * |-----------------|------------------------|--------------------------------|
  * | platform_admin  | Platform Administrator | SuperAdmin - full platform access |
- * | entity_admin    | Entity Administrator   | Ente de Turismo - approves events |
+ * | entity_admin    | Entity Administrator   | Demo Organization - approves events |
  * | entity_staff    | Entity Staff           | Staff with limited permissions |
- * | organizer_admin | Event Organizer        | External organizers (La Rural, etc.) |
+ * | organizer_admin | Event Organizer        | External organizers (e.g. venues, hotels) |
  */
 export type UserRoleCode =
   | 'platform_admin'

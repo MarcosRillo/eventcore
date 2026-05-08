@@ -14,10 +14,10 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 mb-6 md:mb-10">
           {/* About Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Eventos Tucumán</h3>
+            <h3 className="text-lg font-semibold mb-4">eventcore</h3>
             <p className="text-neutral-400 text-sm leading-relaxed">
               Plataforma de gestión y difusión de eventos turísticos y culturales
-              de la provincia de Tucumán.
+              de la provincia de Demo Region.
             </p>
           </div>
 
@@ -60,14 +60,14 @@ export const Footer = () => {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                 </svg>
-                info@eventostucuman.gob.ar
+                info@eventcore.dev
               </li>
               <li className="flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                 </svg>
-                San Miguel de Tucumán
+                Demo City
               </li>
             </ul>
           </div>
@@ -76,7 +76,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-neutral-800 pt-8 text-center">
           <p className="text-neutral-500 text-sm">
-            © {currentYear} Ente de Turismo de Tucumán. Todos los derechos reservados.
+            © {currentYear} Demo Organization. Todos los derechos reservados.
           </p>
         </div>
       </div>

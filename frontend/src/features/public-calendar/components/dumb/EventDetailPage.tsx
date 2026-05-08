@@ -74,7 +74,7 @@ export default function EventDetailPage({ event }: EventDetailPageProps) {
     },
     organizer: {
       "@type": "Organization",
-      name: event.organizer?.organization || "Ente de Turismo de Tucumán"
+      name: event.organizer?.organization || "Demo Organization"
     },
     image: event.featured_image,
     offers: event.registration_required ? {

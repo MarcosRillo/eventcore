@@ -70,7 +70,7 @@ export const PublicCalendar = ({
       <div className="bg-white border-b border-neutral-200">
         <div className="py-6">
           <PageHeader
-            title="Eventos en Tucumán"
+            title="Eventos en Demo Region"
             subtitle="Descubrí los mejores eventos turísticos y culturales"
           />
         </div>

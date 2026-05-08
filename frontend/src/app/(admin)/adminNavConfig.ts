@@ -17,9 +17,9 @@ interface AdminNavOptions {
 
 export function getAdminNavConfig(options: AdminNavOptions): AppShellConfig {
   return {
-    brandTitle: 'Tucumán',
+    brandTitle: 'Demo Region',
     brandSubtitle: 'Turismo',
-    headerSubtitle: 'Ente de Turismo de Tucumán - Gestión de eventos',
+    headerSubtitle: 'Demo Organization - Gestión de eventos',
     collapsible: true,
     showSearch: true,
     showNotifications: true,

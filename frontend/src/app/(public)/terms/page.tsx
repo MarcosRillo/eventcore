@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Términos y Condiciones',
-  description: 'Términos y condiciones de uso de la Plataforma de Eventos Tucumán',
+  description: 'Términos y condiciones de uso de la Plataforma de eventcore',
 }
 
 export default function TermsPage() {
@@ -11,10 +11,10 @@ export default function TermsPage() {
       <h1 className="text-3xl font-bold text-neutral-900 mb-6">Términos y Condiciones</h1>
       <div className="prose prose-neutral max-w-none">
         <p className="text-neutral-600 mb-4">
-          Próximamente se publicarán los términos y condiciones de uso de la Plataforma de Eventos Tucumán.
+          Próximamente se publicarán los términos y condiciones de uso de la Plataforma de eventcore.
         </p>
         <p className="text-neutral-600">
-          Para consultas, contactá al equipo del Ente de Turismo de Tucumán.
+          Para consultas, contactá al equipo del Demo Organization.
         </p>
       </div>
     </div>

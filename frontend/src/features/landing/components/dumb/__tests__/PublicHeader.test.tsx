@@ -39,7 +39,7 @@ describe('PublicHeader', () => {
     test('should render logo with link to homepage', () => {
       render(<PublicHeader />)
 
-      const logoLink = screen.getByRole('link', { name: /eventos tucumán/i })
+      const logoLink = screen.getByRole('link', { name: /eventos demo region/i })
       expect(logoLink).toBeInTheDocument()
       expect(logoLink).toHaveAttribute('href', '/')
       expect(logoLink).toHaveClass('text-lg', 'font-bold')

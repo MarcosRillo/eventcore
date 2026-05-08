@@ -29,7 +29,7 @@ describe('InternalEventCard', () => {
       {
         id: 1,
         name: 'Centro de Convenciones',
-        city: 'San Miguel de Tucumán',
+        city: 'Demo City',
       },
     ],
   };
@@ -59,7 +59,7 @@ describe('InternalEventCard', () => {
     render(<InternalEventCard event={mockEvent} basePath="/internal-calendar" />);
 
     expect(screen.getByText(/Centro de Convenciones/i)).toBeInTheDocument();
-    expect(screen.getByText(/San Miguel de Tucumán/i)).toBeInTheDocument();
+    expect(screen.getByText(/Demo City/i)).toBeInTheDocument();
   });
 
   test('should render link with correct basePath', () => {

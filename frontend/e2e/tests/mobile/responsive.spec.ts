@@ -49,13 +49,13 @@ test.describe('Mobile Responsive', () => {
 
     // H1 heading on landing page
     await expect(
-      page.getByRole('heading', { name: /Tucumán/i, level: 1 })
+      page.getByRole('heading', { name: /Demo Region/i, level: 1 })
     ).toBeVisible();
   });
 
   test('landing page title is correct on mobile', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/Eventos Tucumán/);
+    await expect(page).toHaveTitle(/eventcore/);
   });
 
   test('calendar page loads on mobile', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('Mobile Responsive', () => {
     await page.goto('/login');
 
     await expect(
-      page.getByRole('heading', { name: 'Eventos Tucumán', level: 2 })
+      page.getByRole('heading', { name: 'eventcore', level: 2 })
     ).toBeVisible();
     await expect(
       page.getByRole('textbox', { name: /Correo electrónico/i })
@@ -92,7 +92,7 @@ test.describe('Mobile Responsive', () => {
     // The Acceso Organizadores link is visible in the public header even on mobile
     // (it's inside the menu but the link element is in the DOM even when menu is closed in SSR)
     // Instead verify the logo link and the desktop nav structure
-    await expect(page.getByRole('link', { name: 'Eventos Tucumán' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'eventcore' })).toBeVisible();
 
     // The hamburger button exists — menu toggle is client-only behavior
     await expect(

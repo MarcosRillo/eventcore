@@ -14,13 +14,13 @@ setup('authenticate as organizer', async ({ page }) => {
   const emailInput = page.locator('input[name="email"]');
   await expect(emailInput).toBeEnabled({ timeout: 90_000 });
 
-  await emailInput.fill('maria.rodriguez@sheraton.com');
+  await emailInput.fill('organizer@example.com');
 
   // Password field uses a separate PasswordInput component — use name selector
   // to avoid timing issues with getByLabel after email fill triggers re-render
   const passwordInput = page.locator('input[name="password"]');
   await expect(passwordInput).toBeVisible({ timeout: 10_000 });
-  await passwordInput.fill('password123');
+  await passwordInput.fill(process.env.E2E_DEMO_PASSWORD || 'demo1234');
 
   const loginButton = page.getByRole('button', { name: /iniciar sesión/i });
   await expect(loginButton).toBeEnabled({ timeout: 10_000 });

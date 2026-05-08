@@ -23,7 +23,7 @@ const defaultConfig = {
     '/events': 'Gestión de Eventos',
   } as Record<string, string>,
   defaultTitle: 'Panel de Administración',
-  headerSubtitle: 'Ente de Turismo de Tucumán',
+  headerSubtitle: 'Demo Organization',
   showSearch: true,
   showNotifications: true,
 }
@@ -75,7 +75,7 @@ describe('AppHeader', () => {
       />
     )
 
-    expect(screen.getByText('Ente de Turismo de Tucumán')).toBeInTheDocument()
+    expect(screen.getByText('Demo Organization')).toBeInTheDocument()
   })
 
   it('shows hamburger with aria-label', () => {

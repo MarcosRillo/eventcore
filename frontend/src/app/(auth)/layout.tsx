@@ -11,8 +11,8 @@ import { Footer,PublicHeader } from '@/features/landing/components/dumb'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Eventos Tucumán',
-    default: 'Autenticación | Eventos Tucumán',
+    template: '%s | eventcore',
+    default: 'Autenticación | eventcore',
   },
   description: 'Accedé a tu cuenta para gestionar eventos turísticos',
   robots: {

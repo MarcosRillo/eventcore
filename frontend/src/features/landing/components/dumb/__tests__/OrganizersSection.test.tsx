@@ -45,7 +45,7 @@ describe('OrganizersSection', () => {
     test('should render title with correct text and styling', () => {
       render(<OrganizersSection />)
 
-      const title = screen.getByText(/¿Organizás eventos en Tucumán?/i)
+      const title = screen.getByText(/¿Organizás eventos en Demo Region?/i)
       expect(title).toBeInTheDocument()
       expect(title).toHaveClass('text-2xl', 'md:text-3xl', 'font-bold', 'text-white')
     })
@@ -80,7 +80,7 @@ describe('OrganizersSection', () => {
 
       expect(screen.getByText(/Tu evento visible en el calendario oficial/i)).toBeInTheDocument()
       expect(screen.getByText(/Panel de control para administrar/i)).toBeInTheDocument()
-      expect(screen.getByText(/Respaldo del Ente de Turismo/i)).toBeInTheDocument()
+      expect(screen.getByText(/Respaldo del Demo Organization/i)).toBeInTheDocument()
     })
 
     test('should apply correct grid layout to benefits section', () => {

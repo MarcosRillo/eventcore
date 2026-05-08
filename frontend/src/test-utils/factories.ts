@@ -28,13 +28,13 @@ export const createMockEvent = (overrides: Partial<Event> & { id: number; title:
 
 /**
  * Creates a valid Location mock with required fields
- * Simplified for Tucumán Tourism
+ * Simplified for Demo Region Tourism
  * @param overrides
  */
 export const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
   address: 'Av. Soldati 330',
-  city: 'San Miguel de Tucumán',
-  state: 'Tucumán',
+  city: 'Demo City',
+  state: 'Demo State',
   country: 'Argentina',
   is_active: true,
   entity_id: 1,

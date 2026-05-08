@@ -21,7 +21,7 @@ describe('PublicCalendar', () => {
       end_date: '2025-11-17',
       event_type: { id: 1, name: 'Música' },
       event_subtype: { id: 1, name: 'Festival', event_type_id: 1 },
-      locations: [{ id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' }],
+      locations: [{ id: 1, name: 'Teatro San Martín', city: 'Demo City' }],
       is_featured: true
     },
     {
@@ -32,7 +32,7 @@ describe('PublicCalendar', () => {
       start_date: '2025-11-20',
       end_date: '2025-11-20',
       event_type: { id: 2, name: 'Arte' },
-      locations: [{ id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }],
+      locations: [{ id: 2, name: 'Museo Provincial', city: 'Demo City' }],
       is_featured: false
     }
   ]
@@ -49,8 +49,8 @@ describe('PublicCalendar', () => {
   ]
 
   const mockLocations: Location[] = [
-    { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
-    { id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }
+    { id: 1, name: 'Teatro San Martín', city: 'Demo City' },
+    { id: 2, name: 'Museo Provincial', city: 'Demo City' }
   ]
 
   const mockHandlers = {
@@ -81,7 +81,7 @@ describe('PublicCalendar', () => {
     test('renders calendar with header and event grid', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByText(/eventos en tucumán/i)).toBeInTheDocument()
+      expect(screen.getByText(/eventos en demo region/i)).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()
     })
 
@@ -232,7 +232,7 @@ describe('PublicCalendar', () => {
 
       const h1 = screen.getByRole('heading', { level: 1 })
       expect(h1).toBeInTheDocument()
-      expect(h1.textContent).toMatch(/eventos en tucumán/i)
+      expect(h1.textContent).toMatch(/eventos en demo region/i)
     })
 
     test('uses semantic HTML', () => {

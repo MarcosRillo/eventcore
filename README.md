@@ -81,7 +81,7 @@ Originalmente desarrollada como proyecto interno en una empresa de servicios, fu
 ## Demo
 
 > [!NOTE]
-> **Demo en vivo:** https://plataforma-calendario-monorepo.vercel.app
+> **Demo en vivo:** https://eventcore.vercel.app
 
 **Credenciales de prueba** (resetadas cada hora):
 

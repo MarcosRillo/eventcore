@@ -62,7 +62,7 @@ test.describe('Public Calendar', () => {
     await page.getByRole('button', { name: 'Vista cuadrícula' }).click();
 
     // Wait for event cards to appear — they render as links
-    const eventLinks = page.getByRole('link').filter({ hasNotText: /Eventos Tucumán|Inicio|Eventos$/ });
+    const eventLinks = page.getByRole('link').filter({ hasNotText: /eventcore|Inicio|Eventos$/ });
     const count = await eventLinks.count();
 
     if (count > 0) {

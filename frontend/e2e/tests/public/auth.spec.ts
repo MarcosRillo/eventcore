@@ -4,7 +4,7 @@ test.describe('Authentication', () => {
   test('login page renders heading and form', async ({ page }) => {
     await page.goto('/login');
     // Heading is stable even while auth initializes
-    await expect(page.getByRole('heading', { name: 'Eventos Tucumán', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'eventcore', level: 2 })).toBeVisible();
     await expect(page.getByRole('textbox', { name: /Correo electrónico/i })).toBeAttached();
   });
 
@@ -59,7 +59,7 @@ test.describe('Authentication', () => {
     // This test runs in the public project (no storageState) — we verify the
     // login page is accessible to unauthenticated users (not redirected away)
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: 'Eventos Tucumán', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'eventcore', level: 2 })).toBeVisible();
     // URL stays on /login for unauthenticated user
     await expect(page).toHaveURL(/login/);
   });

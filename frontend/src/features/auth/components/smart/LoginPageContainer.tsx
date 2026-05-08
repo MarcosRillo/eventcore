@@ -80,7 +80,7 @@ export function LoginPageContainer() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-neutral-900">
-          Eventos Tucumán
+          eventcore
         </h2>
         <p className="mt-2 text-center text-sm text-neutral-600">
           Plataforma de eventos turísticos y culturales

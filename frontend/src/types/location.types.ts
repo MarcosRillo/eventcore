@@ -1,10 +1,10 @@
 /**
- * Location Types - Simplified for Tucumán Tourism
+ * Location Types - Simplified for Demo Region Tourism
  *
  * Aligned with backend validation (LocationController.php)
  * Required: name, address, city
  * Optional: state, country, description
- * Defaults: state="Tucumán", country="Argentina", is_active=true
+ * Defaults: state="Demo Region", country="Argentina", is_active=true
  */
 
 import { PaginatedResponse } from '@/types/api-response.types';

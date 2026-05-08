@@ -29,7 +29,7 @@ export const OrganizersSection = () => {
 
           {/* Title */}
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
-            ¿Organizás eventos en Tucumán?
+            ¿Organizás eventos en Demo Region?
           </h2>
 
           {/* Description */}
@@ -55,7 +55,7 @@ export const OrganizersSection = () => {
             <div className="bg-white/10 rounded-lg p-4">
               <div className="text-white font-semibold mb-2">Apoyo Institucional</div>
               <p className="text-sm text-primary-100">
-                Respaldo del Ente de Turismo de Tucumán
+                Respaldo del Demo Organization
               </p>
             </div>
           </div>

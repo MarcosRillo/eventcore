@@ -111,7 +111,7 @@ export function LocationTable({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-neutral-900">{location.city}</div>
-                    <div className="text-sm text-neutral-500">{location.state || 'Tucumán'}</div>
+                    <div className="text-sm text-neutral-500">{location.state || 'Demo Region'}</div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm text-neutral-600 line-clamp-2">

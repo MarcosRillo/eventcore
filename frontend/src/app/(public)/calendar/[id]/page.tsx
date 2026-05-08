@@ -35,9 +35,9 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     });
 
     return {
-      title: `${event.title} - Eventos Tucumán`,
+      title: `${event.title} - eventcore`,
       description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
-      keywords: `tucuman, turismo, evento, ${event.title}`,
+      keywords: `demo region, turismo, evento, ${event.title}`,
       openGraph: {
         title: event.title,
         description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     };
   } catch {
     return {
-      title: 'Evento no encontrado - Tucumán Turismo',
+      title: 'Evento no encontrado - Demo Region Turismo',
       description: 'El evento solicitado no fue encontrado o no está disponible.',
     };
   }

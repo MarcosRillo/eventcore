@@ -22,7 +22,7 @@ export const HeroSection = ({ onExploreClick }: HeroSectionProps) => {
 
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
           Descubrí los eventos de{' '}
-          <span className="text-primary-500">Tucumán</span>
+          <span className="text-primary-500">Demo Region</span>
         </h1>
 
         <p className="text-lg md:text-xl text-neutral-600 mb-6 md:mb-10 max-w-2xl mx-auto leading-relaxed">

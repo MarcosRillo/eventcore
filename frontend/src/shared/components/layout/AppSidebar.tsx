@@ -145,7 +145,7 @@ const AppSidebar = memo(function AppSidebar({
         ) : (
           <div className="text-center">
             <p className="text-xs text-neutral-600 font-medium">
-              Ente de Turismo de Tucumán
+              Demo Organization
             </p>
             <p className="text-xs text-neutral-400 mt-1">
               © 2025 • v1.0.0

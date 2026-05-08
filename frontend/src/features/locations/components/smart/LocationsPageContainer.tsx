@@ -3,7 +3,7 @@
 /**
  * Locations Page Container
  * Admin page for location management with full CRUD operations
- * Simplified for Tucumán Tourism - all locations are active by default
+ * Simplified for Demo Region Tourism - all locations are active by default
  */
 
 import { useState } from 'react';

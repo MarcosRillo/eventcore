@@ -9,10 +9,10 @@ import { Footer,PublicHeader } from '@/features/landing/components/dumb'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Eventos Tucumán',
-    default: 'Eventos Tucumán - Calendario Turístico',
+    template: '%s | eventcore',
+    default: 'eventcore - Calendario Turístico',
   },
-  description: 'Descubrí los mejores eventos turísticos y culturales de Tucumán',
+  description: 'Descubrí los mejores eventos turísticos y culturales de Demo Region',
 }
 
 interface PublicLayoutProps {
