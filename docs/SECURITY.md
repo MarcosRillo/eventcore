@@ -1,6 +1,6 @@
 # Security Architecture
 
-Technical reference for reviewers evaluating the security posture of Plataforma Calendario.
+Technical reference for reviewers evaluating the security posture of eventcore.
 
 ---
 

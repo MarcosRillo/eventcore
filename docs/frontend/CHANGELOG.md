@@ -1,4 +1,4 @@
-# Changelog - Frontend Plataforma Calendario
+# Changelog - eventcore Frontend
 
 Todos los cambios notables en el frontend del proyecto se documentarán en este archivo.
 

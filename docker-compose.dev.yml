@@ -43,7 +43,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
-    container_name: plataforma-calendario-mailhog
+    container_name: eventcore-mailhog
     restart: unless-stopped
     ports:
       - "127.0.0.1:1025:1025"

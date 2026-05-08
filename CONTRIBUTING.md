@@ -29,8 +29,8 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 1. **Clone and enter the repository:**
 ```bash
-git clone https://github.com/MarcosRillo/plataforma-calendario-monorepo.git
-cd plataforma-calendario
+git clone https://github.com/MarcosRillo/eventcore.git
+cd eventcore
 ```
 
 2. **Start Docker containers:**

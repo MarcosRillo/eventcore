@@ -4,9 +4,9 @@
 
 # Variables
 DC = docker-compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.docker
-BACKEND_CONTAINER = plataforma-calendario-backend
-DB_CONTAINER = plataforma-calendario-db
-REDIS_CONTAINER = plataforma-calendario-redis
+BACKEND_CONTAINER = eventcore-backend
+DB_CONTAINER = eventcore-db
+REDIS_CONTAINER = eventcore-redis
 
 help: ## Muestra esta ayuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
