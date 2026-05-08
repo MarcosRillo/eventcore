@@ -189,7 +189,7 @@ class OrganizationTest extends TestCase
 
         Organization::factory()->eventOrganizer()->create([
             'parent_id' => $setup['entity']->id,
-            'name' => 'Hotel Tucumán',
+            'name' => 'Hotel Demo Region',
         ]);
 
         Organization::factory()->eventOrganizer()->create([

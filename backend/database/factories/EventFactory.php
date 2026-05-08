@@ -97,7 +97,7 @@ class EventFactory extends Factory
         $descriptions = [
             "Evento imperdible que celebra {$topic} con actividades para toda la familia.",
             "Una experiencia única dedicada a {$topic}, con invitados especiales y talleres interactivos.",
-            "Descubrí el mundo de {$topic} en este encuentro que reúne a los mejores exponentes de Tucumán.",
+            "Descubrí el mundo de {$topic} en este encuentro que reúne a los mejores exponentes de Demo Region.",
             "Jornada especial sobre {$topic} con entrada libre y gratuita para toda la comunidad.",
             "Celebramos {$topic} con un evento que combina tradición e innovación.",
         ];

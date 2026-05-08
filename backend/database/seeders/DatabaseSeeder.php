@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->command->info('Starting database seeding...');
-        $this->command->info('Creating dataset for Ente de Turismo de Tucumán');
+        $this->command->info('Creating dataset for Demo Organization');
         $this->command->newLine();
 
         // Run seeders in correct order (respecting foreign key dependencies)
@@ -40,21 +40,21 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('LOGIN CREDENTIALS:');
         $this->command->info('-------------------------------------------------------');
-        $this->command->info('Platform Admin: marcos@plataforma.com / password123');
-        $this->command->info('Entity Admin: ana.garcia@enteturismo.gov.ar / password123');
-        $this->command->info('Organizer (Sheraton): maria.rodriguez@sheraton.com / password123');
-        $this->command->info('Organizer (La Rural): juan.perez@larural.com.ar / password123');
-        $this->command->info('All other users also have password: password123');
+        $this->command->info('Platform Admin: marcos@plataforma.com');
+        $this->command->info('Entity Admin: admin@example.com');
+        $this->command->info('Organizer (Hotel Central Demo): organizer@example.com');
+        $this->command->info('Organizer (Centro de Convenciones Norte): organizer2@example.com');
+        $this->command->info('All passwords from SEED_DEMO_PASSWORD env var (default: demo1234)');
         $this->command->newLine();
 
         $this->command->info('DATASET SUMMARY:');
         $this->command->info('-------------------------------------------------------');
-        $this->command->info('- 1 Primary Entity (Ente de Turismo de Tucumán)');
-        $this->command->info('- 2 Event Organizers (Sheraton + La Rural)');
+        $this->command->info('- 1 Primary Entity (Demo Organization)');
+        $this->command->info('- 2 Event Organizers (Hotel Central Demo + Centro de Convenciones Norte)');
         $this->command->info('- 8 Users: 1 platform_admin, 1 entity_admin, 2 organizer_admin, 4 entity_staff');
         $this->command->info('- 60 Locations');
         $this->command->info('- ~154 Events (all workflow statuses + EventApproval audit trail)');
-        $this->command->info('- 1 Suspended user (fernando.ruiz@enteturismo.gov.ar) for testing');
+        $this->command->info('- 1 Suspended user (staff-suspended@example.com) for testing');
         $this->command->newLine();
     }
 }

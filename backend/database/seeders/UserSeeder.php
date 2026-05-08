@@ -23,61 +23,63 @@ class UserSeeder extends Seeder
 
     private function seedUsers(): void
     {
+        $demoPassword = env('SEED_DEMO_PASSWORD', 'demo1234');
+
         // Get role IDs
         $platformAdminRole = UserRole::where('role_code', 'platform_admin')->first();
         $entityAdminRole = UserRole::where('role_code', 'entity_admin')->first();
         $organizerAdminRole = UserRole::where('role_code', 'organizer_admin')->first();
         $entityStaffRole = UserRole::where('role_code', 'entity_staff')->first();
 
-        // Create Platform Admin
+        // Create Platform Admin (project author — kept intentionally)
         User::create([
             'name' => 'Marcos Rillo Cabanne',
             'email' => 'marcos@plataforma.com',
             'role_id' => $platformAdminRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
         ]);
 
         // Get organizations for associating users
-        $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $sheraton = Organization::where('slug', 'sheraton-tucuman')->first();
-        $laRural = Organization::where('slug', 'la-rural-tucuman')->first();
+        $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
+        $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();
+        $centroNorte = Organization::where('slug', 'centro-convenciones-norte')->first();
 
-        // Create Entity Admin for Ente de Turismo
+        // Create Entity Admin for Demo Organization
         $entityAdminTurismo = User::create([
             'name' => 'Ana García',
-            'email' => 'ana.garcia@enteturismo.gov.ar',
+            'email' => 'admin@example.com',
             'role_id' => $entityAdminRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
         ]);
         $entityAdminTurismo->organizations()->attach($enteDeturismo->id);
 
         // Create Organizer Admins
-        $organizerSheraton = User::create([
+        $organizerHotelCentral = User::create([
             'name' => 'María Rodriguez',
-            'email' => 'maria.rodriguez@sheraton.com',
+            'email' => 'organizer@example.com',
             'role_id' => $organizerAdminRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
         ]);
-        $organizerSheraton->organizations()->attach($sheraton->id);
+        $organizerHotelCentral->organizations()->attach($hotelCentral->id);
 
-        $organizerLaRural = User::create([
+        $organizerCentroNorte = User::create([
             'name' => 'Juan Pérez',
-            'email' => 'juan.perez@larural.com.ar',
+            'email' => 'organizer2@example.com',
             'role_id' => $organizerAdminRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
         ]);
-        $organizerLaRural->organizations()->attach($laRural->id);
+        $organizerCentroNorte->organizations()->attach($centroNorte->id);
 
-        // Create Entity Staff members for Ente de Turismo
+        // Create Entity Staff members for Demo Organization
         $staffTurismo1 = User::create([
             'name' => 'Patricia López',
-            'email' => 'patricia.lopez@enteturismo.gov.ar',
+            'email' => 'staff1@example.com',
             'role_id' => $entityStaffRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
             'status' => 'active',
         ]);
@@ -85,9 +87,9 @@ class UserSeeder extends Seeder
 
         $staffTurismo2 = User::create([
             'name' => 'Miguel Sánchez',
-            'email' => 'miguel.sanchez@enteturismo.gov.ar',
+            'email' => 'staff2@example.com',
             'role_id' => $entityStaffRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
             'status' => 'active',
         ]);
@@ -95,9 +97,9 @@ class UserSeeder extends Seeder
 
         $staffTurismo3 = User::create([
             'name' => 'Lucía Romero',
-            'email' => 'lucia.romero@enteturismo.gov.ar',
+            'email' => 'staff3@example.com',
             'role_id' => $entityStaffRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
             'status' => 'active',
         ]);
@@ -106,9 +108,9 @@ class UserSeeder extends Seeder
         // One suspended staff for testing
         $staffTurismoSuspended = User::create([
             'name' => 'Fernando Ruiz (Suspendido)',
-            'email' => 'fernando.ruiz@enteturismo.gov.ar',
+            'email' => 'staff-suspended@example.com',
             'role_id' => $entityStaffRole->id,
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($demoPassword),
             'email_verified_at' => now(),
             'status' => 'suspended',
         ]);
@@ -116,9 +118,9 @@ class UserSeeder extends Seeder
 
         $this->command->info('Users created successfully!');
         $this->command->info('- 1 Platform Admin');
-        $this->command->info('- 1 Entity Admin (Ente de Turismo)');
-        $this->command->info('- 2 Organizer Admins (Sheraton + La Rural)');
+        $this->command->info('- 1 Entity Admin (Demo Organization)');
+        $this->command->info('- 2 Organizer Admins');
         $this->command->info('- 4 Entity Staff (3 active + 1 suspended)');
-        $this->command->info('- All passwords: password123');
+        $this->command->info('- All passwords from SEED_DEMO_PASSWORD (default: demo1234)');
     }
 }

@@ -27,39 +27,39 @@ class OrganizationSeeder extends Seeder
         $primaryEntityType = OrganizationType::where('type_code', 'primary_entity')->first();
         $eventOrganizerType = OrganizationType::where('type_code', 'event_organizer')->first();
 
-        // Create Primary Entity (Ente de Turismo de Tucumán)
+        // Create Primary Entity (Demo Organization)
         $enteDeturismo = Organization::create([
-            'name' => 'Ente de Turismo de Tucumán',
+            'name' => 'Demo Organization',
             'cuit' => '30-70000001-5',
-            'description' => 'Organismo público encargado de promover el turismo en la provincia de Tucumán',
+            'description' => 'Organismo público encargado de promover el turismo en la provincia de Demo Region',
             'status_id' => $activeStatus->id,
             'type_id' => $primaryEntityType->id,
-            'slug' => 'ente-turismo-tucuman',
+            'slug' => 'demo-organization',
         ]);
 
-        // Create Event Organizers for Ente de Turismo
+        // Create Event Organizers for Demo Organization
         Organization::create([
-            'name' => 'Sheraton Tucumán Hotel',
+            'name' => 'Hotel Central Demo',
             'cuit' => '30-70000003-1',
             'description' => 'Hotel cinco estrellas que organiza eventos corporativos y sociales',
             'status_id' => $activeStatus->id,
             'type_id' => $eventOrganizerType->id,
             'parent_id' => $enteDeturismo->id,
-            'slug' => 'sheraton-tucuman',
+            'slug' => 'hotel-central-demo',
         ]);
 
         Organization::create([
-            'name' => 'La Rural Tucumán',
+            'name' => 'Centro de Convenciones Norte',
             'cuit' => '30-70000004-9',
             'description' => 'Sociedad Rural organizadora de ferias agropecuarias y eventos del sector',
             'status_id' => $activeStatus->id,
             'type_id' => $eventOrganizerType->id,
             'parent_id' => $enteDeturismo->id,
-            'slug' => 'la-rural-tucuman',
+            'slug' => 'centro-convenciones-norte',
         ]);
 
         $this->command->info('Organizations created successfully!');
-        $this->command->info('- 1 Primary Entity (Ente de Turismo de Tucumán)');
-        $this->command->info('- 2 Event Organizers (Sheraton + La Rural)');
+        $this->command->info('- 1 Primary Entity (Demo Organization)');
+        $this->command->info('- 2 Event Organizers (Hotel Central Demo + Centro de Convenciones Norte)');
     }
 }

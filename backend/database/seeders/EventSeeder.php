@@ -118,9 +118,9 @@ class EventSeeder extends Seeder
 
 
         // Get organizations
-        $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $sheratonHotel = Organization::where('slug', 'sheraton-tucuman')->first();
-        $laRural = Organization::where('slug', 'la-rural-tucuman')->first();
+        $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
+        $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();
+        $centroNorte = Organization::where('slug', 'centro-convenciones-norte')->first();
 
         // Get Entity Admin
         $entityAdminTurismo = User::where('email', 'ana.garcia@enteturismo.gov.ar')->first();
@@ -144,12 +144,12 @@ class EventSeeder extends Seeder
 
 
         // =====================================================
-        // EVENTOS PROPIOS DEL ENTE DE TURISMO (3)
+        // EVENTOS PROPIOS DEL DEMO ORGANIZATION (3)
         // =====================================================
 
         $eventoTurismo1 = Event::create([
-            'title' => 'Festival Gastronómico de Tucumán 2025',
-            'description' => 'Gran festival que celebra la rica tradición culinaria tucumana con la participación de los mejores chefs locales, degustaciones de platos típicos, talleres de cocina y espectáculos musicales folclóricos.',
+            'title' => 'Festival Gastronómico de Demo Region 2025',
+            'description' => 'Gran festival que celebra la rica tradición culinaria demo con la participación de los mejores chefs locales, degustaciones de platos típicos, talleres de cocina y espectáculos musicales folclóricos.',
             'start_date' => Carbon::now()->addDays(30)->setHour(18)->setMinute(0),
             'end_date' => Carbon::now()->addDays(32)->setHour(23)->setMinute(0),
             'status_id' => $publishedStatus->id,
@@ -175,7 +175,7 @@ class EventSeeder extends Seeder
 
         $eventoTurismo2 = Event::create([
             'title' => 'Expedición Aventura - Cerro San Javier',
-            'description' => 'Actividad de turismo aventura que incluye trekking, rappel y tirolesa en el hermoso Cerro San Javier. Una experiencia única para conectar con la naturaleza tucumana.',
+            'description' => 'Actividad de turismo aventura que incluye trekking, rappel y tirolesa en el hermoso Cerro San Javier. Una experiencia única para conectar con la naturaleza demo.',
             'start_date' => Carbon::now()->addDays(15)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(15)->setHour(17)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -198,7 +198,7 @@ class EventSeeder extends Seeder
 
         $eventoTurismo3 = Event::create([
             'title' => 'Ruta del Dulce Regional',
-            'description' => 'Recorrido por las principales fincas productoras de dulces artesanales de Tucumán. Incluye degustación de dulce de cayote, mamón, batata y otros productos tradicionales.',
+            'description' => 'Recorrido por las principales fincas productoras de dulces artesanales de Demo Region. Incluye degustación de dulce de cayote, mamón, batata y otros productos tradicionales.',
             'start_date' => Carbon::now()->addDays(45)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(45)->setHour(18)->setMinute(0),
             'status_id' => $pendingInternalStatus->id,
@@ -223,18 +223,18 @@ class EventSeeder extends Seeder
         // EVENTOS DE ORGANIZADORES EXTERNOS (4)
         // =====================================================
 
-        // Event from Sheraton Hotel (pending internal approval)
-        if ($sheratonHotel) {
-            $eventoSheraton = Event::create([
+        // Event from Hotel Central Demo (pending internal approval)
+        if ($hotelCentral) {
+            $eventoHotelCentral = Event::create([
                 'title' => 'Cena de Gala San Valentín 2025',
-                'description' => 'Elegante cena de gala para celebrar San Valentín en el hotel más exclusivo de Tucumán. Incluye menú gourmet de cinco tiempos, música en vivo y vista panorámica de la ciudad.',
+                'description' => 'Elegante cena de gala para celebrar San Valentín en el hotel más exclusivo de Demo Region. Incluye menú gourmet de cinco tiempos, música en vivo y vista panorámica de la ciudad.',
                 'start_date' => Carbon::now()->addDays(25)->setHour(20)->setMinute(0),
                 'end_date' => Carbon::now()->addDays(25)->setHour(23)->setMinute(30),
                 'status_id' => $pendingInternalStatus->id,
                 'format_id' => $sedeUnicaFormat->id,
                 'featured_image' => $this->getRandomSeedImage(),
                 'is_featured' => false,
-                'organization_id' => $sheratonHotel->id,
+                'organization_id' => $hotelCentral->id,
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
                 'event_type_id' => $festivalesType->id,
@@ -243,7 +243,7 @@ class EventSeeder extends Seeder
             ]);
 
             if ($ubicacionesTurismo->count() > 0) {
-                $eventoSheraton->locations()->attach([
+                $eventoHotelCentral->locations()->attach([
                     $ubicacionesTurismo->first()->id => [
                         'location_specific_notes' => 'Evento en salón principal del hotel',
                         'max_attendees_for_location' => 150,
@@ -252,8 +252,8 @@ class EventSeeder extends Seeder
             }
         }
 
-        // Event from La Rural (approved internally)
-        if ($laRural) {
+        // Event from Centro de Convenciones Norte (approved internally)
+        if ($centroNorte) {
             $eventoRural = Event::create([
                 'title' => 'Feria Agropecuaria del Norte 2025',
                 'description' => 'Gran feria que reúne a productores agropecuarios del norte argentino. Exposición de ganado, maquinaria agrícola, productos regionales y conferencias técnicas del sector.',
@@ -263,7 +263,7 @@ class EventSeeder extends Seeder
                 'format_id' => $multiSedeFormat->id,
                 'featured_image' => $this->getRandomSeedImage(),
                 'is_featured' => true,
-                'organization_id' => $laRural->id,
+                'organization_id' => $centroNorte->id,
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
                 'event_type_id' => $turismoType->id,
@@ -282,7 +282,7 @@ class EventSeeder extends Seeder
         }
 
         // Draft events from organizers (for testing workflow)
-        if ($sheratonHotel && $draftStatus && $conferenciasType && $workshopSubtype) {
+        if ($hotelCentral && $draftStatus && $conferenciasType && $workshopSubtype) {
             $workshopMarketing = Event::create([
                 'title' => 'Workshop de Marketing Digital',
                 'description' => 'Taller práctico de estrategias de marketing digital para el sector turístico.',
@@ -293,14 +293,14 @@ class EventSeeder extends Seeder
                 'featured_image' => $this->getRandomSeedImage(),
                 'event_type_id' => $conferenciasType->id,
                 'event_subtype_id' => $workshopSubtype->id,
-                'organization_id' => $sheratonHotel->id,
+                'organization_id' => $hotelCentral->id,
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
                 'edition_number' => '1',
                 'local_attendance' => 50,
                 'national_attendance' => 10,
                 'event_website' => 'https://ejemplo.com/workshop-marketing',
-                'maps_url' => 'https://maps.google.com/?q=Sheraton+Tucuman',
+                'maps_url' => 'https://maps.google.com/?q=Hotel+Central+Demo',
             ]);
 
             if ($ubicacionesTurismo->count() > 0) {
@@ -313,9 +313,9 @@ class EventSeeder extends Seeder
             }
         }
 
-        if ($laRural && $draftStatus && $festivalesType && $gastronomicoSubtype) {
+        if ($centroNorte && $draftStatus && $festivalesType && $gastronomicoSubtype) {
             $degustacionVinos = Event::create([
-                'title' => 'Degustación de Vinos Tucumanos',
+                'title' => 'Degustación de Vinos Demo Regionos',
                 'description' => 'Cata de vinos de las bodegas más prestigiosas de los Valles Calchaquíes.',
                 'start_date' => Carbon::now()->addDays(25)->setHour(19)->setMinute(0),
                 'end_date' => Carbon::now()->addDays(25)->setHour(22)->setMinute(0),
@@ -324,7 +324,7 @@ class EventSeeder extends Seeder
                 'featured_image' => $this->getRandomSeedImage(),
                 'event_type_id' => $festivalesType->id,
                 'event_subtype_id' => $gastronomicoSubtype->id,
-                'organization_id' => $laRural->id,
+                'organization_id' => $centroNorte->id,
                 'entity_id' => $enteDeturismo->id,
                 'created_by' => null,
                 'edition_number' => '6',
@@ -356,8 +356,8 @@ class EventSeeder extends Seeder
             $sedeUnicaFormat,
             $multiSedeFormat,
             $enteDeturismo,
-            $sheratonHotel,
-            $laRural,
+            $hotelCentral,
+            $centroNorte,
             $entityAdminTurismo,
             $ubicacionesTurismo,
         );
@@ -377,8 +377,8 @@ class EventSeeder extends Seeder
         EventFormat $sedeUnicaFormat,
         EventFormat $multiSedeFormat,
         Organization $enteDeturismo,
-        ?Organization $sheratonHotel,
-        ?Organization $laRural,
+        ?Organization $hotelCentral,
+        ?Organization $centroNorte,
         ?User $entityAdminTurismo,
         $ubicacionesTurismo,
     ): void {
@@ -409,9 +409,9 @@ class EventSeeder extends Seeder
 
         $locationIndex = 0;
 
-        // 1. Festival de Rock Tucumano 2025 (Festival de Música) - Published
+        // 1. Festival de Rock Demo Regiono 2025 (Festival de Música) - Published
         $festivalRock = Event::create([
-            'title' => 'Festival de Rock Tucumano 2025',
+            'title' => 'Festival de Rock Demo Regiono 2025',
             'description' => 'El festival de rock más grande del norte argentino. Bandas locales, nacionales e internacionales en un evento de tres días con múltiples escenarios.',
             'start_date' => Carbon::now()->addDays(20)->setHour(18)->setMinute(0),
             'end_date' => Carbon::now()->addDays(22)->setHour(2)->setMinute(0),
@@ -434,7 +434,7 @@ class EventSeeder extends Seeder
         // 2. Fiesta de la Empanada 2025 (Festival Gastronómico) - Approved
         $fiestaEmpanada = Event::create([
             'title' => 'Fiesta de la Empanada 2025',
-            'description' => 'Celebración de la empanada tucumana con competencias de cocina, degustaciones y espectáculos folclóricos. El evento gastronómico más importante de la provincia.',
+            'description' => 'Celebración de la empanada demo con competencias de cocina, degustaciones y espectáculos folclóricos. El evento gastronómico más importante de la provincia.',
             'start_date' => Carbon::now()->addDays(35)->setHour(11)->setMinute(0),
             'end_date' => Carbon::now()->addDays(36)->setHour(23)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -443,7 +443,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesSubtypes->where('name', 'Festival Gastronómico')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '45',
@@ -528,7 +528,7 @@ class EventSeeder extends Seeder
         // 2. Maratón Cerro San Javier 2025 (Maratón) - Approved
         $maratonSanJavier = Event::create([
             'title' => 'Maratón Cerro San Javier 2025',
-            'description' => 'Carrera de montaña por las laderas del Cerro San Javier. Recorridos de 10K, 21K y 42K con vistas espectaculares de las Yungas tucumanas.',
+            'description' => 'Carrera de montaña por las laderas del Cerro San Javier. Recorridos de 10K, 21K y 42K con vistas espectaculares de las Yungas demos.',
             'start_date' => Carbon::now()->addDays(28)->setHour(6)->setMinute(30),
             'end_date' => Carbon::now()->addDays(28)->setHour(14)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -537,7 +537,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesSubtypes->where('name', 'Maratón')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '7',
@@ -549,7 +549,7 @@ class EventSeeder extends Seeder
 
         // 3. Torneo de Tenis Amateur (Torneo) - Pending Public Approval
         $torneoTenis = Event::create([
-            'title' => 'Torneo de Tenis Amateur Tucumán',
+            'title' => 'Torneo de Tenis Amateur Demo Region',
             'description' => 'Competencia de tenis para jugadores amateur de todas las edades. Categorías individuales y dobles.',
             'start_date' => Carbon::now()->addDays(42)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(44)->setHour(19)->setMinute(0),
@@ -581,7 +581,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesSubtypes->where('name', 'Exhibición Deportiva')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '1',
@@ -622,7 +622,7 @@ class EventSeeder extends Seeder
         // 2. Teatro al Aire Libre - Clásicos (Teatro) - Approved
         $teatroAireLibre = Event::create([
             'title' => 'Teatro al Aire Libre - Clásicos Argentinos',
-            'description' => 'Ciclo de obras de teatro clásico argentino presentadas al aire libre. Funciones gratuitas con los mejores elencos tucumanos.',
+            'description' => 'Ciclo de obras de teatro clásico argentino presentadas al aire libre. Funciones gratuitas con los mejores elencos demo.',
             'start_date' => Carbon::now()->addDays(25)->setHour(20)->setMinute(30),
             'end_date' => Carbon::now()->addDays(25)->setHour(23)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -641,9 +641,9 @@ class EventSeeder extends Seeder
             $teatroAireLibre->locations()->attach($loc->id, ['location_specific_notes' => 'Parque 9 de Julio']);
         }
 
-        // 3. Orquesta Sinfónica de Tucumán (Concierto) - Pending Public Approval
+        // 3. Orquesta Sinfónica de Demo Region (Concierto) - Pending Public Approval
         $orquestaSinfonica = Event::create([
-            'title' => 'Orquesta Sinfónica de Tucumán - Gala de Invierno',
+            'title' => 'Orquesta Sinfónica de Demo Region - Gala de Invierno',
             'description' => 'Concierto de gala con la Orquesta Sinfónica Provincial interpretando obras de Beethoven, Tchaikovsky y compositores argentinos.',
             'start_date' => Carbon::now()->addDays(48)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->addDays(48)->setHour(23)->setMinute(0),
@@ -653,7 +653,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaSubtypes->where('name', 'Concierto')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '25',
@@ -663,9 +663,9 @@ class EventSeeder extends Seeder
             $orquestaSinfonica->locations()->attach($loc->id, ['location_specific_notes' => 'Teatro San Martín']);
         }
 
-        // 4. Ballet Folclórico Tucumano (Danza) - Draft
+        // 4. Ballet Folclórico Demo Regiono (Danza) - Draft
         $balletFolclorico = Event::create([
-            'title' => 'Ballet Folclórico Tucumano - Raíces',
+            'title' => 'Ballet Folclórico Demo Regiono - Raíces',
             'description' => 'Espectáculo de danza folclórica que recorre las tradiciones del norte argentino. Música en vivo y vestuario tradicional.',
             'start_date' => Carbon::now()->addDays(72)->setHour(21)->setMinute(0),
             'end_date' => Carbon::now()->addDays(72)->setHour(23)->setMinute(30),
@@ -693,8 +693,8 @@ class EventSeeder extends Seeder
 
         // 1. City Tour Histórico San Miguel (Tour Guiado) - Published
         $cityTour = Event::create([
-            'title' => 'City Tour Histórico San Miguel de Tucumán',
-            'description' => 'Recorrido guiado por los sitios históricos más importantes de San Miguel de Tucumán. Casa Histórica, Plaza Independencia y edificios coloniales.',
+            'title' => 'City Tour Histórico Demo City',
+            'description' => 'Recorrido guiado por los sitios históricos más importantes de Demo City. Casa Histórica, Plaza Independencia y edificios coloniales.',
             'start_date' => Carbon::now()->addDays(10)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(10)->setHour(13)->setMinute(0),
             'status_id' => $publishedStatus->id,
@@ -713,9 +713,9 @@ class EventSeeder extends Seeder
             $cityTour->locations()->attach($loc->id, ['location_specific_notes' => 'Punto de encuentro: Plaza Independencia']);
         }
 
-        // 2. Excursión Yungas Tucumanas (Excursión) - Approved
+        // 2. Excursión Yungas Demo Regionas (Excursión) - Approved
         $excursionYungas = Event::create([
-            'title' => 'Excursión Yungas Tucumanas',
+            'title' => 'Excursión Yungas Demo Regionas',
             'description' => 'Expedición de un día por la selva de las Yungas. Avistamiento de aves, flora nativa y cascadas escondidas. Incluye almuerzo regional.',
             'start_date' => Carbon::now()->addDays(22)->setHour(7)->setMinute(0),
             'end_date' => Carbon::now()->addDays(22)->setHour(18)->setMinute(0),
@@ -725,7 +725,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoSubtypes->where('name', 'Excursión')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '4',
@@ -735,10 +735,10 @@ class EventSeeder extends Seeder
             $excursionYungas->locations()->attach($loc->id, ['location_specific_notes' => 'Salida desde plaza central']);
         }
 
-        // 3. Ruta del Vino Tucumano (Ruta Turística) - Pending
+        // 3. Ruta del Vino Demo Regiono (Ruta Turística) - Pending
         $rutaVino = Event::create([
-            'title' => 'Ruta del Vino Tucumano',
-            'description' => 'Recorrido por las bodegas de los Valles Calchaquíes tucumanos. Degustación de vinos de altura y almuerzo en viñedos.',
+            'title' => 'Ruta del Vino Demo Regiono',
+            'description' => 'Recorrido por las bodegas de los Valles Calchaquíes demo. Degustación de vinos de altura y almuerzo en viñedos.',
             'start_date' => Carbon::now()->addDays(38)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(38)->setHour(19)->setMinute(0),
             'status_id' => $pendingInternalStatus->id,
@@ -769,7 +769,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoSubtypes->where('name', 'Experiencia Gastronómica')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '1',
@@ -807,9 +807,9 @@ class EventSeeder extends Seeder
             $feriaArtesanos->locations()->attach($loc->id, ['location_specific_notes' => 'Paseo de artesanos']);
         }
 
-        // 2. Feria del Libro Tucumán 2025 (Feria del Libro) - Approved
+        // 2. Feria del Libro Demo Region 2025 (Feria del Libro) - Approved
         $feriaLibro = Event::create([
-            'title' => 'Feria del Libro Tucumán 2025',
+            'title' => 'Feria del Libro Demo Region 2025',
             'description' => 'El evento literario más importante de la provincia. Editoriales, autores, presentaciones de libros y actividades culturales.',
             'start_date' => Carbon::now()->addDays(32)->setHour(10)->setMinute(0),
             'end_date' => Carbon::now()->addDays(40)->setHour(22)->setMinute(0),
@@ -819,7 +819,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasSubtypes->where('name', 'Feria del Libro')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '32',
@@ -863,7 +863,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasSubtypes->where('name', 'Expo Comercial')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '4',
@@ -913,7 +913,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasSubtypes->where('name', 'Seminario')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '3',
@@ -957,7 +957,7 @@ class EventSeeder extends Seeder
             'featured_image' => $this->getRandomSeedImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasSubtypes->where('name', 'Charla')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => $entityAdminTurismo?->id,
             'edition_number' => '1',
@@ -994,9 +994,9 @@ class EventSeeder extends Seeder
         // Get frequencies
 
         // Get organizations
-        $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $sheratonHotel = Organization::where('slug', 'sheraton-tucuman')->first();
-        $laRural = Organization::where('slug', 'la-rural-tucuman')->first();
+        $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
+        $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();
+        $centroNorte = Organization::where('slug', 'centro-convenciones-norte')->first();
 
         // Get user
         $entityAdminTurismo = User::where('email', 'ana.garcia@enteturismo.gov.ar')->first();
@@ -1036,10 +1036,10 @@ class EventSeeder extends Seeder
         // PUBLISHED (5 new events)
         // =====================================================
 
-        // 1. Noche de Museos Tucumán - Cultura/Exposición de Arte - Ente
+        // 1. Noche de Museos Demo Region - Cultura/Exposición de Arte - Ente
         $evento = Event::create([
-            'title' => 'Noche de Museos Tucumán',
-            'description' => 'Recorrido nocturno por los principales museos de San Miguel de Tucumán. Entrada gratuita, intervenciones artísticas y música en vivo en cada espacio cultural.',
+            'title' => 'Noche de Museos Demo Region',
+            'description' => 'Recorrido nocturno por los principales museos de Demo City. Entrada gratuita, intervenciones artísticas y música en vivo en cada espacio cultural.',
             'start_date' => Carbon::now()->addDays(5)->setHour(19)->setMinute(0),
             'end_date' => Carbon::now()->addDays(6)->setHour(1)->setMinute(0),
             'status_id' => $publishedStatus->id,
@@ -1083,7 +1083,7 @@ class EventSeeder extends Seeder
         // 3. Maratón Nocturna San Miguel - Deportes/Maratón - Ente
         $evento = Event::create([
             'title' => 'Maratón Nocturna San Miguel',
-            'description' => 'Carrera nocturna por las calles iluminadas de San Miguel de Tucumán. Recorridos de 5K y 10K abiertos a todo público.',
+            'description' => 'Carrera nocturna por las calles iluminadas de Demo City. Recorridos de 5K y 10K abiertos a todo público.',
             'start_date' => Carbon::now()->addDays(7)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->addDays(7)->setHour(23)->setMinute(30),
             'status_id' => $publishedStatus->id,
@@ -1104,9 +1104,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Largada y llegada en Plaza Independencia']);
         }
 
-        // 4. Serenata a Tucumán - Festivales/Festival de Música - Ente (null image)
+        // 4. Serenata a Demo Region - Festivales/Festival de Música - Ente (null image)
         $evento = Event::create([
-            'title' => 'Serenata a Tucumán',
+            'title' => 'Serenata a Demo Region',
             'description' => 'Festival de música folclórica y popular bajo las estrellas. Artistas locales y nacionales rinden homenaje a la provincia en una noche inolvidable.',
             'start_date' => Carbon::now()->subDays(3)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->subDays(2)->setHour(3)->setMinute(0),
@@ -1126,9 +1126,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Escenario al aire libre']);
         }
 
-        // 5. Ruta de los Artesanos Tucumanos - Turismo/Ruta Turística - Sheraton
+        // 5. Ruta de los Artesanos Demo Regionos - Turismo/Ruta Turística - Hotel Central Demo
         $evento = Event::create([
-            'title' => 'Ruta de los Artesanos Tucumanos',
+            'title' => 'Ruta de los Artesanos Demo Regionos',
             'description' => 'Recorrido guiado por talleres de artesanos en los Valles Calchaquíes. Cerámica, tejidos y tallas en madera de artistas locales.',
             'start_date' => Carbon::now()->addDays(9)->setHour(8)->setMinute(30),
             'end_date' => Carbon::now()->addDays(9)->setHour(18)->setMinute(0),
@@ -1138,7 +1138,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Ruta Turística')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '12',
@@ -1152,7 +1152,7 @@ class EventSeeder extends Seeder
         // APPROVED INTERNAL (4 new events)
         // =====================================================
 
-        // 6. Congreso de Gastronomía Regional - Conferencias/Congreso - Sheraton
+        // 6. Congreso de Gastronomía Regional - Conferencias/Congreso - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Congreso de Gastronomía Regional',
             'description' => 'Encuentro de chefs, productores y expertos gastronómicos del NOA. Ponencias sobre identidad culinaria, productos autóctonos y tendencias.',
@@ -1164,7 +1164,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasType->subtypes->where('name', 'Congreso')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '2',
@@ -1177,9 +1177,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Salón de convenciones']);
         }
 
-        // 7. Torneo de Polo Tucumano - Deportes/Torneo - Ente
+        // 7. Torneo de Polo Demo Regiono - Deportes/Torneo - Ente
         $evento = Event::create([
-            'title' => 'Torneo de Polo Tucumano',
+            'title' => 'Torneo de Polo Demo Regiono',
             'description' => 'Campeonato de polo con equipos de todo el norte argentino. Jornadas de competencia con actividades sociales y gastronómicas.',
             'start_date' => Carbon::now()->addDays(35)->setHour(10)->setMinute(0),
             'end_date' => Carbon::now()->addDays(37)->setHour(18)->setMinute(0),
@@ -1221,7 +1221,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Glorieta del parque']);
         }
 
-        // 9. Feria del Libro Infantil y Juvenil - Ferias/Feria del Libro - La Rural
+        // 9. Feria del Libro Infantil y Juvenil - Ferias/Feria del Libro - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Feria del Libro Infantil y Juvenil',
             'description' => 'Espacio dedicado a la literatura infantil y juvenil. Talleres de escritura creativa, cuentacuentos, ilustración y encuentros con autores.',
@@ -1233,7 +1233,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria del Libro')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '10',
@@ -1269,10 +1269,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Sala de proyecciones']);
         }
 
-        // 11. Rally de las Yungas - Deportes/Competencia - Sheraton
+        // 11. Rally de las Yungas - Deportes/Competencia - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Rally de las Yungas',
-            'description' => 'Competencia de rally todo terreno por caminos de montaña en las Yungas tucumanas. Categorías 4x4, motos y cuatriciclos.',
+            'description' => 'Competencia de rally todo terreno por caminos de montaña en las Yungas demos. Categorías 4x4, motos y cuatriciclos.',
             'start_date' => Carbon::now()->addDays(50)->setHour(7)->setMinute(0),
             'end_date' => Carbon::now()->addDays(52)->setHour(18)->setMinute(0),
             'status_id' => $pendingPublicStatus?->id ?? $pendingInternalStatus->id,
@@ -1281,7 +1281,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Competencia')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '6',
@@ -1293,7 +1293,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Base de operaciones y largada']);
         }
 
-        // 12. Expo Turismo NOA - Ferias/Expo Comercial - La Rural (null image)
+        // 12. Expo Turismo NOA - Ferias/Expo Comercial - Centro de Convenciones Norte (null image)
         $evento = Event::create([
             'title' => 'Expo Turismo NOA',
             'description' => 'Exposición de destinos y servicios turísticos del noroeste argentino. Operadores, hoteleros y agencias presentan sus ofertas.',
@@ -1305,7 +1305,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Expo Comercial')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '3',
@@ -1315,9 +1315,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Pabellón de exposiciones']);
         }
 
-        // 13. Tour Nocturno Tucumán Colonial - Turismo/Tour Guiado - Ente
+        // 13. Tour Nocturno Demo Region Colonial - Turismo/Tour Guiado - Ente
         $evento = Event::create([
-            'title' => 'Tour Nocturno Tucumán Colonial',
+            'title' => 'Tour Nocturno Demo Region Colonial',
             'description' => 'Paseo nocturno por el casco histórico con relatos de la época colonial. Incluye visita a la Casa Histórica y edificios patrimoniales iluminados.',
             'start_date' => Carbon::now()->addDays(14)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->addDays(14)->setHour(23)->setMinute(0),
@@ -1363,7 +1363,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Escenario principal de jazz']);
         }
 
-        // 15. Seminario de Turismo Digital - Conferencias/Seminario - Sheraton
+        // 15. Seminario de Turismo Digital - Conferencias/Seminario - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Seminario de Turismo Digital',
             'description' => 'Jornada sobre transformación digital en el turismo. Marketing online, plataformas de reserva, inteligencia artificial y experiencias virtuales.',
@@ -1375,11 +1375,11 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasType->subtypes->where('name', 'Seminario')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
-            'event_website' => 'https://turismodigital.tucuman.gob.ar',
+            'event_website' => 'https://demo.example.org',
         ]);
         $loc = $getLocation($locationIndex++);
         if ($loc) {
@@ -1430,7 +1430,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Polideportivo']);
         }
 
-        // 18. Feria Artesanal Navideña - Ferias/Feria Artesanal - La Rural
+        // 18. Feria Artesanal Navideña - Ferias/Feria Artesanal - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Feria Artesanal Navideña',
             'description' => 'Feria especial de artesanías para las fiestas. Regalos artesanales, decoración navideña y gastronomía típica de fin de año.',
@@ -1442,7 +1442,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria Artesanal')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '15',
@@ -1456,9 +1456,9 @@ class EventSeeder extends Seeder
         // DRAFT (5 new events)
         // =====================================================
 
-        // 19. Hackathon Tucumán Digital - Conferencias/Workshop - Ente
+        // 19. Hackathon Demo Region Digital - Conferencias/Workshop - Ente
         $evento = Event::create([
-            'title' => 'Hackathon Tucumán Digital',
+            'title' => 'Hackathon Demo Region Digital',
             'description' => 'Maratón de programación de 48 horas. Equipos de desarrolladores crean soluciones tecnológicas para problemas turísticos reales de la provincia.',
             'start_date' => Carbon::now()->addDays(80)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(82)->setHour(18)->setMinute(0),
@@ -1478,9 +1478,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Laboratorio de innovación']);
         }
 
-        // 20. Festival del Locro Tucumano - Festivales/Festival Gastronómico - Ente (null image)
+        // 20. Festival del Locro Demo Regiono - Festivales/Festival Gastronómico - Ente (null image)
         $evento = Event::create([
-            'title' => 'Festival del Locro Tucumano',
+            'title' => 'Festival del Locro Demo Regiono',
             'description' => 'Gran concurso de locro con participantes de toda la provincia. Degustación libre, música folclórica y premios al mejor locro.',
             'start_date' => Carbon::now()->addDays(75)->setHour(11)->setMinute(0),
             'end_date' => Carbon::now()->addDays(75)->setHour(22)->setMinute(0),
@@ -1500,9 +1500,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Patio de comidas al aire libre']);
         }
 
-        // 21. Tour Gastronómico Tucumano - Turismo/Experiencia Gastronómica - Sheraton
+        // 21. Tour Gastronómico Demo Regiono - Turismo/Experiencia Gastronómica - Hotel Central Demo
         $evento = Event::create([
-            'title' => 'Tour Gastronómico Tucumano',
+            'title' => 'Tour Gastronómico Demo Regiono',
             'description' => 'Recorrido por restaurantes y puestos emblemáticos de San Miguel. Empanadas, humita, tamales y dulces regionales con guía especializado.',
             'start_date' => Carbon::now()->addDays(85)->setHour(11)->setMinute(0),
             'end_date' => Carbon::now()->addDays(85)->setHour(16)->setMinute(0),
@@ -1512,7 +1512,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Experiencia Gastronómica')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -1522,10 +1522,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Punto de partida: Mercado del Norte']);
         }
 
-        // 22. Muestra Fotográfica Tucumán Natural - Cultura/Exposición de Arte - La Rural
+        // 22. Muestra Fotográfica Demo Region Natural - Cultura/Exposición de Arte - Centro de Convenciones Norte
         $evento = Event::create([
-            'title' => 'Muestra Fotográfica Tucumán Natural',
-            'description' => 'Exposición de fotografías de la naturaleza tucumana. Flora, fauna y paisajes de las Yungas, los Valles y la llanura en imágenes de gran formato.',
+            'title' => 'Muestra Fotográfica Demo Region Natural',
+            'description' => 'Exposición de fotografías de la naturaleza demo. Flora, fauna y paisajes de las Yungas, los Valles y la llanura en imágenes de gran formato.',
             'start_date' => Carbon::now()->addDays(60)->setHour(10)->setMinute(0),
             'end_date' => Carbon::now()->addDays(90)->setHour(20)->setMinute(0),
             'status_id' => $draftStatus->id,
@@ -1534,7 +1534,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaType->subtypes->where('name', 'Exposición de Arte')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -1546,8 +1546,8 @@ class EventSeeder extends Seeder
 
         // 23. Campeonato de Mountain Bike - Deportes/Competencia - Ente
         $evento = Event::create([
-            'title' => 'Campeonato de Mountain Bike Tucumán',
-            'description' => 'Competencia de ciclismo de montaña en los cerros tucumanos. Categorías amateur y profesional con circuitos de diferentes dificultades.',
+            'title' => 'Campeonato de Mountain Bike Demo Region',
+            'description' => 'Competencia de ciclismo de montaña en los cerros demo. Categorías amateur y profesional con circuitos de diferentes dificultades.',
             'start_date' => Carbon::now()->addDays(90)->setHour(7)->setMinute(0),
             'end_date' => Carbon::now()->addDays(90)->setHour(17)->setMinute(0),
             'status_id' => $draftStatus->id,
@@ -1570,7 +1570,7 @@ class EventSeeder extends Seeder
         // REQUIRES CHANGES (4 new events)
         // =====================================================
 
-        // 24. Festival de Danza Contemporánea - Cultura/Danza - Sheraton (null image)
+        // 24. Festival de Danza Contemporánea - Cultura/Danza - Hotel Central Demo (null image)
         $evento = Event::create([
             'title' => 'Festival de Danza Contemporánea',
             'description' => 'Encuentro de compañías de danza contemporánea del norte argentino. Funciones, talleres y charlas con coreógrafos reconocidos.',
@@ -1582,7 +1582,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaType->subtypes->where('name', 'Danza')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '4',
@@ -1595,7 +1595,7 @@ class EventSeeder extends Seeder
         // 25. Charla: Innovación en Turismo - Conferencias/Charla - Ente
         $evento = Event::create([
             'title' => 'Charla: Innovación y Tendencias en Turismo',
-            'description' => 'Presentación sobre las últimas tendencias en turismo mundial y cómo aplicarlas en Tucumán. Casos de éxito y oportunidades de inversión.',
+            'description' => 'Presentación sobre las últimas tendencias en turismo mundial y cómo aplicarlas en Demo Region. Casos de éxito y oportunidades de inversión.',
             'start_date' => Carbon::now()->addDays(35)->setHour(18)->setMinute(30),
             'end_date' => Carbon::now()->addDays(35)->setHour(21)->setMinute(0),
             'status_id' => $requiresChangesStatus?->id ?? $pendingInternalStatus->id,
@@ -1636,7 +1636,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Predio de peñas']);
         }
 
-        // 27. Expo Inmobiliaria del Norte - Ferias/Expo Comercial - La Rural
+        // 27. Expo Inmobiliaria del Norte - Ferias/Expo Comercial - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Expo Inmobiliaria del Norte',
             'description' => 'Exposición de desarrollos inmobiliarios, terrenos y propiedades del NOA. Charlas sobre inversión, créditos hipotecarios y arquitectura sustentable.',
@@ -1648,7 +1648,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Expo Comercial')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '12',
@@ -1662,9 +1662,9 @@ class EventSeeder extends Seeder
         // REJECTED (3 new events)
         // =====================================================
 
-        // 28. Torneo de eSports Tucumán - Deportes/Torneo - Sheraton (null image)
+        // 28. Torneo de eSports Demo Region - Deportes/Torneo - Hotel Central Demo (null image)
         $evento = Event::create([
-            'title' => 'Torneo de eSports Tucumán',
+            'title' => 'Torneo de eSports Demo Region',
             'description' => 'Competencia de videojuegos con torneos de League of Legends, Valorant y FIFA. Premios en efectivo y streaming en vivo.',
             'start_date' => Carbon::now()->addDays(25)->setHour(14)->setMinute(0),
             'end_date' => Carbon::now()->addDays(26)->setHour(22)->setMinute(0),
@@ -1674,7 +1674,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Torneo')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -1684,7 +1684,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Sala gaming']);
         }
 
-        // 29. Festival de Reggaetón del Norte - Festivales/Festival de Música - La Rural
+        // 29. Festival de Reggaetón del Norte - Festivales/Festival de Música - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Festival de Reggaetón del Norte',
             'description' => 'Festival de música urbana con artistas nacionales. Shows en vivo, DJs, zona VIP y food trucks.',
@@ -1696,7 +1696,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesType->subtypes->where('name', 'Festival de Música')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -1759,7 +1759,7 @@ class EventSeeder extends Seeder
 
     /**
      * Seed ~62 extra events to expand the dataset for demo.
-     * Covers all workflow statuses with realistic Tucumán events.
+     * Covers all workflow statuses with realistic Demo Region events.
      */
     private function seedExtraEvents(): void
     {
@@ -1783,9 +1783,9 @@ class EventSeeder extends Seeder
         // Get frequencies
 
         // Get organizations
-        $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $sheratonHotel = Organization::where('slug', 'sheraton-tucuman')->first();
-        $laRural = Organization::where('slug', 'la-rural-tucuman')->first();
+        $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
+        $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();
+        $centroNorte = Organization::where('slug', 'centro-convenciones-norte')->first();
 
         // Get user
         $entityAdminTurismo = User::where('email', 'ana.garcia@enteturismo.gov.ar')->first();
@@ -1940,7 +1940,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Pantalla en el parque']);
         }
 
-        // 6. Tour Avistaje de Aves en Yungas - Turismo/Excursión - Sheraton
+        // 6. Tour Avistaje de Aves en Yungas - Turismo/Excursión - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Tour Avistaje de Aves en Yungas',
             'description' => 'Excursión guiada por ornitólogos expertos por la Reserva de las Yungas. Avistamiento de tucanes, cóndores y más de 100 especies registradas.',
@@ -1952,7 +1952,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Excursión')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '30',
@@ -1962,7 +1962,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Entrada a la reserva']);
         }
 
-        // 7. Expo Vitivinícola de los Valles - Ferias/Expo Comercial - Sheraton
+        // 7. Expo Vitivinícola de los Valles - Ferias/Expo Comercial - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Expo Vitivinícola de los Valles Calchaquíes',
             'description' => 'Exposición de bodegas y productores vitivinícolas de los Valles Calchaquíes. Catas profesionales, maridajes y rondas de negocios internacionales.',
@@ -1974,7 +1974,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Expo Comercial')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '8',
@@ -1984,10 +1984,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Salón de eventos principal']);
         }
 
-        // 8. Gala Benéfica por la Educación Rural - Cultura/Concierto - La Rural (null image)
+        // 8. Gala Benéfica por la Educación Rural - Cultura/Concierto - Centro de Convenciones Norte (null image)
         $evento = Event::create([
             'title' => 'Gala Benéfica por la Educación Rural',
-            'description' => 'Cena de gala con subasta de obras de arte y show musical para recaudar fondos destinados a escuelas rurales de Tucumán.',
+            'description' => 'Cena de gala con subasta de obras de arte y show musical para recaudar fondos destinados a escuelas rurales de Demo Region.',
             'start_date' => Carbon::now()->subDays(5)->setHour(20)->setMinute(0),
             'end_date' => Carbon::now()->subDays(4)->setHour(1)->setMinute(0),
             'status_id' => $publishedStatus->id,
@@ -1996,7 +1996,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaType->subtypes->where('name', 'Concierto')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '7',
@@ -2006,10 +2006,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Salón principal de gala']);
         }
 
-        // 9. Carrera de Regularidad Autos Clásicos - Deportes/Competencia - La Rural
+        // 9. Carrera de Regularidad Autos Clásicos - Deportes/Competencia - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Carrera de Regularidad Autos Clásicos',
-            'description' => 'Rally de regularidad para vehículos clásicos anteriores a 1980 por rutas históricas de Tucumán. Exhibición y premiación en plaza central.',
+            'description' => 'Rally de regularidad para vehículos clásicos anteriores a 1980 por rutas históricas de Demo Region. Exhibición y premiación en plaza central.',
             'start_date' => Carbon::now()->addDays(19)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(19)->setHour(18)->setMinute(0),
             'status_id' => $publishedStatus->id,
@@ -2018,7 +2018,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Competencia')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '15',
@@ -2028,7 +2028,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Largada en plaza principal']);
         }
 
-        // 10. Workshop de Fotografía de Naturaleza - Conferencias/Workshop - Sheraton
+        // 10. Workshop de Fotografía de Naturaleza - Conferencias/Workshop - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Workshop de Fotografía de Naturaleza',
             'description' => 'Taller intensivo de fotografía de naturaleza con salida de campo a las Yungas. Técnicas de macro, paisaje y fauna silvestre con fotógrafos profesionales.',
@@ -2040,7 +2040,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasType->subtypes->where('name', 'Workshop')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '4',
@@ -2079,7 +2079,7 @@ class EventSeeder extends Seeder
         // 12. Ruta del Azúcar Histórica - Turismo/Ruta Turística - Ente (null image)
         $evento = Event::create([
             'title' => 'Ruta del Azúcar Histórica',
-            'description' => 'Recorrido por los ingenios azucareros históricos de Tucumán. Visita a fábricas en funcionamiento, museos y degustación de productos derivados.',
+            'description' => 'Recorrido por los ingenios azucareros históricos de Demo Region. Visita a fábricas en funcionamiento, museos y degustación de productos derivados.',
             'start_date' => Carbon::now()->addDays(26)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(26)->setHour(18)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -2120,10 +2120,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Natatorio olímpico']);
         }
 
-        // 14. Feria del Dulce Tucumano - Ferias/Feria Productiva - La Rural
+        // 14. Feria del Dulce Demo Regiono - Ferias/Feria Productiva - Centro de Convenciones Norte
         $evento = Event::create([
-            'title' => 'Feria del Dulce Tucumano',
-            'description' => 'Exposición y venta de dulces artesanales: cayote, membrillo, batata, mamón y otros clásicos tucumanos. Talleres de producción artesanal.',
+            'title' => 'Feria del Dulce Demo Regiono',
+            'description' => 'Exposición y venta de dulces artesanales: cayote, membrillo, batata, mamón y otros clásicos demo. Talleres de producción artesanal.',
             'start_date' => Carbon::now()->addDays(32)->setHour(10)->setMinute(0),
             'end_date' => Carbon::now()->addDays(34)->setHour(21)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -2132,7 +2132,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria Productiva')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '10',
@@ -2142,7 +2142,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Pabellón de productores']);
         }
 
-        // 15. Seminario de Hotelería Sustentable - Conferencias/Seminario - Sheraton (null image)
+        // 15. Seminario de Hotelería Sustentable - Conferencias/Seminario - Hotel Central Demo (null image)
         $evento = Event::create([
             'title' => 'Seminario de Hotelería Sustentable',
             'description' => 'Jornada sobre prácticas sustentables en hotelería y turismo. Eficiencia energética, gestión de residuos y certificaciones verdes.',
@@ -2154,7 +2154,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasType->subtypes->where('name', 'Seminario')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '3',
@@ -2166,7 +2166,7 @@ class EventSeeder extends Seeder
 
         // 16. Festival de Murga y Comparsa - Festivales/Festival Cultural - Ente
         $evento = Event::create([
-            'title' => 'Festival de Murga y Comparsa Tucumana',
+            'title' => 'Festival de Murga y Comparsa Demo Regiona',
             'description' => 'Desfile y competencia de murgas y comparsas por las calles del centro. Color, música, baile y alegría popular con premios por categoría.',
             'start_date' => Carbon::now()->addDays(42)->setHour(18)->setMinute(0),
             'end_date' => Carbon::now()->addDays(42)->setHour(23)->setMinute(30),
@@ -2186,7 +2186,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Circuito de desfile']);
         }
 
-        // 17. Excursión Fotográfica Ruinas de Quilmes - Turismo/Excursión - Sheraton
+        // 17. Excursión Fotográfica Ruinas de Quilmes - Turismo/Excursión - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Excursión Fotográfica Ruinas de Quilmes',
             'description' => 'Viaje fotográfico guiado a las Ruinas de Quilmes al amanecer. Técnicas de fotografía de paisaje y patrimonio arqueológico con equipo profesional.',
@@ -2198,7 +2198,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Excursión')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '15',
@@ -2208,10 +2208,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Entrada a las ruinas']);
         }
 
-        // 18. Charla: Gastronomía e Identidad Tucumana - Conferencias/Charla - Ente
+        // 18. Charla: Gastronomía e Identidad Demo Regiona - Conferencias/Charla - Ente
         $evento = Event::create([
-            'title' => 'Charla: Gastronomía e Identidad Tucumana',
-            'description' => 'Conversatorio con chefs y antropólogos sobre el rol de la gastronomía en la identidad cultural tucumana. Degustación de platos tradicionales.',
+            'title' => 'Charla: Gastronomía e Identidad Demo Regiona',
+            'description' => 'Conversatorio con chefs y antropólogos sobre el rol de la gastronomía en la identidad cultural demo. Degustación de platos tradicionales.',
             'start_date' => Carbon::now()->addDays(21)->setHour(18)->setMinute(30),
             'end_date' => Carbon::now()->addDays(21)->setHour(21)->setMinute(0),
             'status_id' => $approvedInternalStatus->id,
@@ -2230,7 +2230,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Sala de charlas']);
         }
 
-        // 19. Encuentro de Escultores del Norte - Cultura/Exposición de Arte - La Rural (null image)
+        // 19. Encuentro de Escultores del Norte - Cultura/Exposición de Arte - Centro de Convenciones Norte (null image)
         $evento = Event::create([
             'title' => 'Encuentro de Escultores del Norte',
             'description' => 'Simposio de escultura con artistas trabajando en vivo. Piedra, madera y metal transformados en obras que quedarán como patrimonio de la ciudad.',
@@ -2242,7 +2242,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaType->subtypes->where('name', 'Exposición de Arte')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '9',
@@ -2259,7 +2259,7 @@ class EventSeeder extends Seeder
         // 20. Festival del Humita y el Tamal - Festivales/Festival Gastronómico - Ente
         $evento = Event::create([
             'title' => 'Festival del Humita y el Tamal',
-            'description' => 'Celebración de dos íconos de la gastronomía tucumana. Concurso de las mejores humitas y tamales, show de cocina en vivo y música folclórica.',
+            'description' => 'Celebración de dos íconos de la gastronomía demo. Concurso de las mejores humitas y tamales, show de cocina en vivo y música folclórica.',
             'start_date' => Carbon::now()->addDays(46)->setHour(11)->setMinute(0),
             'end_date' => Carbon::now()->addDays(47)->setHour(22)->setMinute(0),
             'status_id' => $pendingPublicStatus?->id ?? $pendingInternalStatus->id,
@@ -2300,10 +2300,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Mirador del cerro']);
         }
 
-        // 22. Ruta del Citrus Tucumano - Turismo/Ruta Turística - Ente
+        // 22. Ruta del Citrus Demo Regiono - Turismo/Ruta Turística - Ente
         $evento = Event::create([
-            'title' => 'Ruta del Citrus Tucumano',
-            'description' => 'Recorrido por fincas citrícolas de la llanura tucumana. Cosecha de limones, naranjas y pomelos, visita a plantas empacadoras y degustación.',
+            'title' => 'Ruta del Citrus Demo Regiono',
+            'description' => 'Recorrido por fincas citrícolas de la llanura demo. Cosecha de limones, naranjas y pomelos, visita a plantas empacadoras y degustación.',
             'start_date' => Carbon::now()->addDays(52)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(52)->setHour(17)->setMinute(0),
             'status_id' => $pendingPublicStatus?->id ?? $pendingInternalStatus->id,
@@ -2322,7 +2322,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Primera finca del recorrido']);
         }
 
-        // 23. Feria del Libro Universitario - Ferias/Feria del Libro - Sheraton (null image)
+        // 23. Feria del Libro Universitario - Ferias/Feria del Libro - Hotel Central Demo (null image)
         $evento = Event::create([
             'title' => 'Feria del Libro Universitario',
             'description' => 'Exposición de editoriales universitarias del NOA con presentaciones de publicaciones académicas, talleres de escritura científica y mesas de debate.',
@@ -2334,7 +2334,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria del Libro')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '14',
@@ -2366,7 +2366,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Patio cultural']);
         }
 
-        // 25. Congreso de Arquitectura Sustentable - Conferencias/Congreso - Sheraton
+        // 25. Congreso de Arquitectura Sustentable - Conferencias/Congreso - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Congreso de Arquitectura Sustentable del NOA',
             'description' => 'Encuentro de arquitectos y urbanistas para debatir sobre construcción sustentable adaptada al clima del noroeste. Casos de estudio y nuevas normativas.',
@@ -2378,7 +2378,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasType->subtypes->where('name', 'Congreso')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '7',
@@ -2388,9 +2388,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Salón de congresos']);
         }
 
-        // 26. Copa de Golf Tucumán - Deportes/Torneo - La Rural
+        // 26. Copa de Golf Demo Region - Deportes/Torneo - Centro de Convenciones Norte
         $evento = Event::create([
-            'title' => 'Copa de Golf Tucumán',
+            'title' => 'Copa de Golf Demo Region',
             'description' => 'Torneo de golf amateur y profesional en el campo del Jockey Club. Categorías por handicap con premios y cena de gala de premiación.',
             'start_date' => Carbon::now()->addDays(49)->setHour(7)->setMinute(0),
             'end_date' => Carbon::now()->addDays(50)->setHour(19)->setMinute(0),
@@ -2400,7 +2400,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Torneo')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '25',
@@ -2410,7 +2410,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Campo de golf']);
         }
 
-        // 27. Tour Estrellas del Hemisferio Sur - Turismo/Tour Guiado - La Rural (null image)
+        // 27. Tour Estrellas del Hemisferio Sur - Turismo/Tour Guiado - Centro de Convenciones Norte (null image)
         $evento = Event::create([
             'title' => 'Tour Estrellas del Hemisferio Sur',
             'description' => 'Experiencia de astroturismo en Amaicha del Valle. Observación del cielo nocturno con telescopios profesionales y charla de astronomía.',
@@ -2422,7 +2422,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Tour Guiado')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '6',
@@ -2480,7 +2480,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Sala de arqueología']);
         }
 
-        // 30. Experiencia Gastronómica de Altura - Turismo/Experiencia Gastronómica - Sheraton
+        // 30. Experiencia Gastronómica de Altura - Turismo/Experiencia Gastronómica - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Experiencia Gastronómica de Altura',
             'description' => 'Cena exclusiva en una terraza con vista a los valles. Menú de pasos con ingredientes autóctonos maridados con vinos de altura calchaquíes.',
@@ -2492,7 +2492,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Experiencia Gastronómica')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '6',
@@ -2502,9 +2502,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Terraza panorámica']);
         }
 
-        // 31. Expo Agro Tucumán - Ferias/Expo Comercial - La Rural (null image)
+        // 31. Expo Agro Demo Region - Ferias/Expo Comercial - Centro de Convenciones Norte (null image)
         $evento = Event::create([
-            'title' => 'Expo Agro Tucumán',
+            'title' => 'Expo Agro Demo Region',
             'description' => 'Exposición agroindustrial con maquinaria, semillas, agroquímicos y tecnología rural. Charlas técnicas y rondas de negocios para el sector productivo.',
             'start_date' => Carbon::now()->addDays(68)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(71)->setHour(19)->setMinute(0),
@@ -2514,7 +2514,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Expo Comercial')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '28',
@@ -2590,7 +2590,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Escenario infantil']);
         }
 
-        // 35. Maratón Solidaria por la Salud - Deportes/Maratón - Sheraton (null image)
+        // 35. Maratón Solidaria por la Salud - Deportes/Maratón - Hotel Central Demo (null image)
         $evento = Event::create([
             'title' => 'Maratón Solidaria por la Salud',
             'description' => 'Carrera benéfica de 5K y 10K para recaudar fondos para hospitales públicos. Caminata familiar, hidratación y medalla para todos los participantes.',
@@ -2602,7 +2602,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Maratón')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '5',
@@ -2612,7 +2612,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Circuito de carrera']);
         }
 
-        // 36. Feria de Diseño y Moda del NOA - Ferias/Feria Artesanal - Sheraton
+        // 36. Feria de Diseño y Moda del NOA - Ferias/Feria Artesanal - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Feria de Diseño y Moda del NOA',
             'description' => 'Exposición de diseñadores de moda y textiles del noroeste. Pasarela, workshops de diseño sustentable y venta directa de indumentaria de autor.',
@@ -2624,7 +2624,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria Artesanal')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '6',
@@ -2634,7 +2634,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Salón de moda y pasarela']);
         }
 
-        // 37. Experiencia Termal en Tafí Viejo - Turismo/Experiencia Gastronómica - La Rural
+        // 37. Experiencia Termal en Tafí Viejo - Turismo/Experiencia Gastronómica - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Experiencia Termal y Gastronómica',
             'description' => 'Jornada de relax en aguas termales con almuerzo gourmet de cocina regional. Masajes, sauna y caminata por senderos naturales.',
@@ -2646,7 +2646,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Experiencia Gastronómica')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '12',
@@ -2707,7 +2707,7 @@ class EventSeeder extends Seeder
         // 40. Tour en Bicicleta por la Ciudad - Turismo/Tour Guiado - Ente
         $evento = Event::create([
             'title' => 'Tour en Bicicleta por la Ciudad',
-            'description' => 'Recorrido guiado en bicicleta por los monumentos y parques de San Miguel de Tucumán. Incluye bicicleta, casco y guía bilingüe.',
+            'description' => 'Recorrido guiado en bicicleta por los monumentos y parques de Demo City. Incluye bicicleta, casco y guía bilingüe.',
             'start_date' => Carbon::now()->addDays(88)->setHour(8)->setMinute(0),
             'end_date' => Carbon::now()->addDays(88)->setHour(12)->setMinute(0),
             'status_id' => $draftStatus->id,
@@ -2726,7 +2726,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Punto de partida en plaza']);
         }
 
-        // 41. Expo Tecnológica del Norte - Ferias/Expo Comercial - Sheraton (null image)
+        // 41. Expo Tecnológica del Norte - Ferias/Expo Comercial - Hotel Central Demo (null image)
         $evento = Event::create([
             'title' => 'Expo Tecnológica del Norte',
             'description' => 'Exposición de startups, empresas tech y centros de investigación del NOA. Demos de productos, pitch competition y rondas de inversión.',
@@ -2738,7 +2738,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Expo Comercial')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '2',
@@ -2770,7 +2770,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Sala de torneos']);
         }
 
-        // 43. Seminario de Coctelería y Mixología - Conferencias/Seminario - Sheraton
+        // 43. Seminario de Coctelería y Mixología - Conferencias/Seminario - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Seminario de Coctelería y Mixología Regional',
             'description' => 'Jornada de capacitación en coctelería con ingredientes autóctonos del NOA. Bartenders internacionales enseñan técnicas con frutas y hierbas locales.',
@@ -2782,7 +2782,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $conferenciasType->id,
             'event_subtype_id' => $conferenciasType->subtypes->where('name', 'Seminario')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -2792,10 +2792,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Bar del hotel']);
         }
 
-        // 44. Feria de Plantas Nativas - Ferias/Feria Productiva - La Rural
+        // 44. Feria de Plantas Nativas - Ferias/Feria Productiva - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Feria de Plantas Nativas y Jardinería',
-            'description' => 'Exposición y venta de plantas nativas de las Yungas y valles tucumanos. Charlas de paisajismo sustentable y huerta urbana.',
+            'description' => 'Exposición y venta de plantas nativas de las Yungas y valles demo. Charlas de paisajismo sustentable y huerta urbana.',
             'start_date' => Carbon::now()->addDays(86)->setHour(9)->setMinute(0),
             'end_date' => Carbon::now()->addDays(87)->setHour(18)->setMinute(0),
             'status_id' => $draftStatus->id,
@@ -2804,7 +2804,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria Productiva')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '8',
@@ -2814,7 +2814,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Vivero y jardín botánico']);
         }
 
-        // 45. Cabalgata por los Valles Calchaquíes - Turismo/Excursión - La Rural (null image)
+        // 45. Cabalgata por los Valles Calchaquíes - Turismo/Excursión - Centro de Convenciones Norte (null image)
         $evento = Event::create([
             'title' => 'Cabalgata por los Valles Calchaquíes',
             'description' => 'Cabalgata de dos días por los senderos de los Valles Calchaquíes. Pernocte en estancia, asado criollo y avistaje de cóndores.',
@@ -2826,7 +2826,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Excursión')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '4',
@@ -2861,7 +2861,7 @@ class EventSeeder extends Seeder
         // 47. Charla: Emprendimientos Gastronómicos - Conferencias/Charla - Ente
         $evento = Event::create([
             'title' => 'Charla: Cómo Montar un Emprendimiento Gastronómico',
-            'description' => 'Encuentro con emprendedores gastronómicos exitosos de Tucumán. Claves de negocio, habilitaciones, marketing y diferenciación en el mercado local.',
+            'description' => 'Encuentro con emprendedores gastronómicos exitosos de Demo Region. Claves de negocio, habilitaciones, marketing y diferenciación en el mercado local.',
             'start_date' => Carbon::now()->addDays(91)->setHour(18)->setMinute(0),
             'end_date' => Carbon::now()->addDays(91)->setHour(20)->setMinute(30),
             'status_id' => $draftStatus->id,
@@ -2884,9 +2884,9 @@ class EventSeeder extends Seeder
         // REQUIRES CHANGES (8 new events)
         // =====================================================
 
-        // 48. Festival de la Vendimia Tucumana - Festivales/Festival Gastronómico - Ente
+        // 48. Festival de la Vendimia Demo Regiona - Festivales/Festival Gastronómico - Ente
         $evento = Event::create([
-            'title' => 'Festival de la Vendimia Tucumana',
+            'title' => 'Festival de la Vendimia Demo Regiona',
             'description' => 'Celebración de la cosecha de uvas en los Valles Calchaquíes. Pisada de uvas, degustación de mostos y vinos nuevos, y elección de la Reina de la Vendimia.',
             'start_date' => Carbon::now()->addDays(43)->setHour(10)->setMinute(0),
             'end_date' => Carbon::now()->addDays(44)->setHour(23)->setMinute(0),
@@ -2906,7 +2906,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Viñedos del valle']);
         }
 
-        // 49. Concierto de Rock Sinfónico - Cultura/Concierto - Sheraton
+        // 49. Concierto de Rock Sinfónico - Cultura/Concierto - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Concierto de Rock Sinfónico',
             'description' => 'La Orquesta Sinfónica Provincial interpreta clásicos del rock nacional con arreglos sinfónicos. Sui Generis, Spinetta y Charly García reimaginados.',
@@ -2918,7 +2918,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaType->subtypes->where('name', 'Concierto')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -2950,10 +2950,10 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Sendero de montaña']);
         }
 
-        // 51. Tour Nocturno de Leyendas - Turismo/Tour Guiado - La Rural (null image)
+        // 51. Tour Nocturno de Leyendas - Turismo/Tour Guiado - Centro de Convenciones Norte (null image)
         $evento = Event::create([
-            'title' => 'Tour Nocturno de Leyendas Tucumanas',
-            'description' => 'Paseo teatralizado por el casco histórico con actores que representan leyendas y personajes míticos tucumanos. La Telesita, el Familiar y más.',
+            'title' => 'Tour Nocturno de Leyendas Demo Regionas',
+            'description' => 'Paseo teatralizado por el casco histórico con actores que representan leyendas y personajes míticos demo. La Telesita, el Familiar y más.',
             'start_date' => Carbon::now()->addDays(39)->setHour(21)->setMinute(0),
             'end_date' => Carbon::now()->addDays(39)->setHour(23)->setMinute(30),
             'status_id' => $requiresChangesStatus?->id ?? $pendingInternalStatus->id,
@@ -2962,7 +2962,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $turismoType->id,
             'event_subtype_id' => $turismoType->subtypes->where('name', 'Tour Guiado')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '20',
@@ -2994,9 +2994,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Auditorio médico']);
         }
 
-        // 53. Feria de Comidas del Mundo - Ferias/Feria Productiva - Sheraton
+        // 53. Feria de Comidas del Mundo - Ferias/Feria Productiva - Hotel Central Demo
         $evento = Event::create([
-            'title' => 'Feria de Comidas del Mundo en Tucumán',
+            'title' => 'Feria de Comidas del Mundo en Demo Region',
             'description' => 'Festival gastronómico multicultural con puestos de comida árabe, japonesa, peruana, italiana y regional. Música del mundo y talleres de cocina.',
             'start_date' => Carbon::now()->addDays(48)->setHour(11)->setMinute(0),
             'end_date' => Carbon::now()->addDays(49)->setHour(23)->setMinute(0),
@@ -3006,7 +3006,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $feriasType->id,
             'event_subtype_id' => $feriasType->subtypes->where('name', 'Feria Productiva')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '12',
@@ -3038,7 +3038,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Espacio ceremonial']);
         }
 
-        // 55. Olimpíadas de Matemática - Deportes/Torneo - La Rural (null image)
+        // 55. Olimpíadas de Matemática - Deportes/Torneo - Centro de Convenciones Norte (null image)
         $evento = Event::create([
             'title' => 'Olimpíadas Provinciales de Matemática',
             'description' => 'Competencia de matemática para estudiantes de secundaria de toda la provincia. Pruebas individuales y por equipo con clasificación a nacionales.',
@@ -3050,7 +3050,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Torneo')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '32',
@@ -3064,7 +3064,7 @@ class EventSeeder extends Seeder
         // REJECTED (5 new events)
         // =====================================================
 
-        // 56. Fiesta de la Cerveza Sin Alcohol - Festivales/Festival Gastronómico - Sheraton
+        // 56. Fiesta de la Cerveza Sin Alcohol - Festivales/Festival Gastronómico - Hotel Central Demo
         $evento = Event::create([
             'title' => 'Fiesta de la Cerveza Sin Alcohol',
             'description' => 'Festival dedicado a cervezas sin alcohol y bebidas artesanales saludables. Food trucks veganos y música acústica en ambiente familiar.',
@@ -3076,7 +3076,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $festivalesType->id,
             'event_subtype_id' => $festivalesType->subtypes->where('name', 'Festival Gastronómico')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -3086,7 +3086,7 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Explanada del hotel']);
         }
 
-        // 57. Karaoke Masivo al Aire Libre - Cultura/Concierto - La Rural
+        // 57. Karaoke Masivo al Aire Libre - Cultura/Concierto - Centro de Convenciones Norte
         $evento = Event::create([
             'title' => 'Karaoke Masivo al Aire Libre',
             'description' => 'Evento de karaoke masivo con pantalla gigante y sonido profesional. Competencia por categorías y premios al mejor intérprete de la noche.',
@@ -3098,7 +3098,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $culturaType->id,
             'event_subtype_id' => $culturaType->subtypes->where('name', 'Concierto')->first()->id,
-            'organization_id' => $laRural?->id ?? $enteDeturismo->id,
+            'organization_id' => $centroNorte?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -3130,9 +3130,9 @@ class EventSeeder extends Seeder
             $evento->locations()->attach($loc->id, ['location_specific_notes' => 'Predio de exposición']);
         }
 
-        // 59. Competencia de Drones - Deportes/Competencia - Sheraton
+        // 59. Competencia de Drones - Deportes/Competencia - Hotel Central Demo
         $evento = Event::create([
-            'title' => 'Competencia de Drones FPV Tucumán',
+            'title' => 'Competencia de Drones FPV Demo Region',
             'description' => 'Carrera de drones FPV con circuito de obstáculos. Categorías amateur y profesional con transmisión en vivo y zona de exhibición tecnológica.',
             'start_date' => Carbon::now()->addDays(44)->setHour(15)->setMinute(0),
             'end_date' => Carbon::now()->addDays(44)->setHour(20)->setMinute(0),
@@ -3142,7 +3142,7 @@ class EventSeeder extends Seeder
             'featured_image' => $getImage(),
             'event_type_id' => $deportesType->id,
             'event_subtype_id' => $deportesType->subtypes->where('name', 'Competencia')->first()->id,
-            'organization_id' => $sheratonHotel?->id ?? $enteDeturismo->id,
+            'organization_id' => $hotelCentral?->id ?? $enteDeturismo->id,
             'entity_id' => $enteDeturismo->id,
             'created_by' => null,
             'edition_number' => '1',
@@ -3240,9 +3240,9 @@ class EventSeeder extends Seeder
 
 
 
-        $enteDeturismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
-        $sheratonHotel = Organization::where('slug', 'sheraton-tucuman')->first();
-        $laRural = Organization::where('slug', 'la-rural-tucuman')->first();
+        $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
+        $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();
+        $centroNorte = Organization::where('slug', 'centro-convenciones-norte')->first();
 
         $entityAdminTurismo = User::where('email', 'ana.garcia@enteturismo.gov.ar')->first();
 
@@ -3274,31 +3274,31 @@ class EventSeeder extends Seeder
             return ($imageCounter % 4 === 0) ? null : $this->getRandomSeedImage();
         };
 
-        $orgs = [$enteDeturismo, $sheratonHotel, $laRural];
+        $orgs = [$enteDeturismo, $hotelCentral, $centroNorte];
         $statuses = [$publishedStatus, $approvedInternalStatus];
 
         // 30 demo events: days 30-60, alternating published/approved_internal
         $demoEvents = [
             // === FESTIVALES (5) ===
-            ['Noche de las Peñas Tucumanas', 'Gran encuentro de peñas folclóricas con música en vivo, empanadas y vino patero en la Plaza Independencia.', 30, 18, 31, 2, $festivalesType, 'Festival Folclórico', $sedeUnicaFormat, 0, 'Escenario principal Plaza Independencia'],
-            ['Festival de la Empanada Artesanal', 'Concurso de la mejor empanada tucumana con degustación libre, shows en vivo y feria de productores locales.', 33, 11, 34, 22, $festivalesType, 'Festival Gastronómico', $multiSedeFormat, 1, 'Zona de degustación'],
+            ['Noche de las Peñas Demo Regionas', 'Gran encuentro de peñas folclóricas con música en vivo, empanadas y vino patero en la Plaza Independencia.', 30, 18, 31, 2, $festivalesType, 'Festival Folclórico', $sedeUnicaFormat, 0, 'Escenario principal Plaza Independencia'],
+            ['Festival de la Empanada Artesanal', 'Concurso de la mejor empanada demo con degustación libre, shows en vivo y feria de productores locales.', 33, 11, 34, 22, $festivalesType, 'Festival Gastronómico', $multiSedeFormat, 1, 'Zona de degustación'],
             ['Festival de Jazz del NOA', 'Tres días de jazz con bandas nacionales e internacionales en el Teatro San Martín y espacios al aire libre.', 35, 20, 37, 23, $festivalesType, 'Festival de Música', $multiSedeFormat, 2, 'Escenario Teatro San Martín'],
-            ['Fiesta del Limón Tucumano', 'Celebración de la cosecha citrícola con carrozas, elección de la reina y espectáculos folclóricos en Famaillá.', 45, 10, 47, 22, $festivalesType, 'Festival Cultural', $sedeUnicaFormat, 0, 'Ruta del Limón - Famaillá'],
+            ['Fiesta del Limón Demo Regiono', 'Celebración de la cosecha citrícola con carrozas, elección de la reina y espectáculos folclóricos en Famaillá.', 45, 10, 47, 22, $festivalesType, 'Festival Cultural', $sedeUnicaFormat, 0, 'Ruta del Limón - Famaillá'],
             ['Encuentro Nacional de Folklore', 'Festival folclórico con delegaciones de todo el país, peñas, artesanías y gastronomía regional.', 55, 18, 57, 23, $festivalesType, 'Festival Folclórico', $multiSedeFormat, 1, 'Anfiteatro Municipal'],
 
             // === DEPORTES (5) ===
             ['Maratón Cerro San Javier', 'Carrera de montaña de 21km por los senderos del Cerro San Javier con categorías amateur y profesional.', 31, 6, 31, 14, $deportesType, 'Maratón', $sedeUnicaFormat, 2, 'Punto de largada: base del cerro'],
             ['Torneo Interprovincial de Vóley Playa', 'Competencia de vóley playa con equipos del NOA en las canchas del Parque 9 de Julio.', 35, 9, 36, 19, $deportesType, 'Torneo', $sedeUnicaFormat, 0, 'Canchas Parque 9 de Julio'],
             ['Exhibición de Artes Marciales', 'Demostración de karate, judo, taekwondo y artes marciales mixtas con maestros invitados.', 42, 16, 42, 21, $deportesType, 'Exhibición Deportiva', $sedeUnicaFormat, 1, 'Gimnasio Municipal'],
-            ['Competencia de Mountain Bike Yungas', 'Circuito de mountain bike por las Yungas tucumanas, 45km de senderos naturales.', 50, 7, 50, 16, $deportesType, 'Competencia', $sedeUnicaFormat, 2, 'Sendero de las Yungas'],
-            ['Copa Tucumán de Natación', 'Torneo de natación en pileta olímpica con categorías infantil, juvenil y adultos.', 53, 8, 54, 18, $deportesType, 'Torneo', $sedeUnicaFormat, 0, 'Natatorio Provincial'],
+            ['Competencia de Mountain Bike Yungas', 'Circuito de mountain bike por las Yungas demos, 45km de senderos naturales.', 50, 7, 50, 16, $deportesType, 'Competencia', $sedeUnicaFormat, 2, 'Sendero de las Yungas'],
+            ['Copa Demo Region de Natación', 'Torneo de natación en pileta olímpica con categorías infantil, juvenil y adultos.', 53, 8, 54, 18, $deportesType, 'Torneo', $sedeUnicaFormat, 0, 'Natatorio Provincial'],
 
             // === CULTURA (5) ===
             ['Exposición Pintores del NOA', 'Muestra colectiva de artistas plásticos del Noroeste Argentino en el Museo Timoteo Navarro.', 35, 10, 50, 20, $culturaType, 'Exposición de Arte', $sedeUnicaFormat, 1, 'Sala principal del museo'],
-            ['Noche de Teatro Independiente', 'Ciclo de obras cortas de compañías independientes tucumanas en el Teatro Alberdi.', 37, 21, 37, 23, $culturaType, 'Teatro', $sedeUnicaFormat, 2, 'Teatro Alberdi - Sala A'],
-            ['Concierto Sinfónica de Tucumán', 'Programa especial con obras de Ginastera, Piazzolla y Guastavino interpretado por la Orquesta Sinfónica.', 35, 20, 35, 22, $culturaType, 'Concierto', $sedeUnicaFormat, 0, 'Teatro San Martín - Sala Principal'],
+            ['Noche de Teatro Independiente', 'Ciclo de obras cortas de compañías independientes demos en el Teatro Alberdi.', 37, 21, 37, 23, $culturaType, 'Teatro', $sedeUnicaFormat, 2, 'Teatro Alberdi - Sala A'],
+            ['Concierto Sinfónica de Demo Region', 'Programa especial con obras de Ginastera, Piazzolla y Guastavino interpretado por la Orquesta Sinfónica.', 35, 20, 35, 22, $culturaType, 'Concierto', $sedeUnicaFormat, 0, 'Teatro San Martín - Sala Principal'],
             ['Festival de Danza Contemporánea', 'Presentaciones de danza contemporánea y ballet con compañías locales y nacionales invitadas.', 50, 19, 51, 22, $culturaType, 'Danza', $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
-            ['Muestra Fotográfica Tucumán Antiguo', 'Fotografías históricas de Tucumán del siglo XIX y XX con piezas de archivo nunca antes exhibidas.', 56, 10, 60, 18, $culturaType, 'Exposición de Arte', $sedeUnicaFormat, 2, 'Casa de Gobierno - Salón Blanco'],
+            ['Muestra Fotográfica Demo Region Antiguo', 'Fotografías históricas de Demo Region del siglo XIX y XX con piezas de archivo nunca antes exhibidas.', 56, 10, 60, 18, $culturaType, 'Exposición de Arte', $sedeUnicaFormat, 2, 'Casa de Gobierno - Salón Blanco'],
 
             // === TURISMO (5) ===
             ['Ruta de los Artesanos de Tafí', 'Recorrido guiado por talleres artesanales de Tafí del Valle con demostraciones de tejido y cerámica.', 34, 9, 34, 17, $turismoType, 'Ruta Turística', $sedeUnicaFormat, 0, 'Punto de salida: Plaza de Tafí'],
@@ -3308,17 +3308,17 @@ class EventSeeder extends Seeder
             ['Trekking Cascada del Río Noque', 'Caminata guiada de dificultad media hasta la cascada del Río Noque con almuerzo campestre.', 58, 7, 58, 17, $turismoType, 'Excursión', $sedeUnicaFormat, 1, 'Base del sendero Río Noque'],
 
             // === FERIAS (5) ===
-            ['Feria de Artesanías del Norte', 'Artesanos de Tucumán, Salta y Jujuy exhiben y venden sus creaciones en madera, cuero y tejidos.', 35, 10, 36, 20, $feriasType, 'Feria Artesanal', $sedeUnicaFormat, 2, 'Paseo de artesanos'],
+            ['Feria de Artesanías del Norte', 'Artesanos de Demo Region, Salta y Jujuy exhiben y venden sus creaciones en madera, cuero y tejidos.', 35, 10, 36, 20, $feriasType, 'Feria Artesanal', $sedeUnicaFormat, 2, 'Paseo de artesanos'],
             ['Expo Vinos del NOA', 'Feria de bodegas del Noroeste con cata de vinos, maridajes y charlas con enólogos reconocidos.', 40, 11, 41, 21, $feriasType, 'Expo Comercial', $multiSedeFormat, 0, 'Centro de Convenciones'],
-            ['Feria del Libro Tucumán', 'Edición anual de la feria del libro con presentaciones de autores locales, talleres y actividades infantiles.', 50, 10, 52, 20, $feriasType, 'Feria del Libro', $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
+            ['Feria del Libro Demo Region', 'Edición anual de la feria del libro con presentaciones de autores locales, talleres y actividades infantiles.', 50, 10, 52, 20, $feriasType, 'Feria del Libro', $sedeUnicaFormat, 1, 'Centro Cultural Virla'],
             ['Mercado Productivo Regional', 'Feria de productores locales con frutas, verduras, dulces artesanales, quesos y miel de la región.', 51, 8, 51, 16, $feriasType, 'Feria Productiva', $sedeUnicaFormat, 2, 'Mercado del Norte'],
-            ['Expo Turismo Tucumán', 'Feria de turismo con stands de prestadores, sorteos de paquetes turísticos y shows en vivo.', 59, 10, 60, 20, $feriasType, 'Expo Comercial', $multiSedeFormat, 0, 'Centro de Convenciones Tucumán'],
+            ['Expo Turismo Demo Region', 'Feria de turismo con stands de prestadores, sorteos de paquetes turísticos y shows en vivo.', 59, 10, 60, 20, $feriasType, 'Expo Comercial', $multiSedeFormat, 0, 'Centro de Convenciones Demo Region'],
 
             // === CONFERENCIAS (5) ===
-            ['Congreso de Innovación Turística', 'Congreso con ponencias sobre tecnología aplicada al turismo, marketing digital y sostenibilidad.', 33, 9, 34, 18, $conferenciasType, 'Congreso', $sedeUnicaFormat, 1, 'Hotel Sheraton - Salón Imperial'],
-            ['Seminario de Gastronomía Sustentable', 'Seminario sobre cocina con productos locales, reducción de desperdicios y cadenas de valor cortas.', 50, 10, 50, 18, $conferenciasType, 'Seminario', $sedeUnicaFormat, 2, 'Universidad Nacional de Tucumán'],
+            ['Congreso de Innovación Turística', 'Congreso con ponencias sobre tecnología aplicada al turismo, marketing digital y sostenibilidad.', 33, 9, 34, 18, $conferenciasType, 'Congreso', $sedeUnicaFormat, 1, 'Hotel Central Demo - Salón Imperial'],
+            ['Seminario de Gastronomía Sustentable', 'Seminario sobre cocina con productos locales, reducción de desperdicios y cadenas de valor cortas.', 50, 10, 50, 18, $conferenciasType, 'Seminario', $sedeUnicaFormat, 2, 'Universidad Nacional de Demo Region'],
             ['Workshop Fotografía de Naturaleza', 'Taller práctico de fotografía de paisajes y fauna en las Yungas con fotógrafos profesionales.', 47, 9, 47, 17, $conferenciasType, 'Workshop', $sedeUnicaFormat, 0, 'Reserva Experimental Horco Molle'],
-            ['Charla: Historia Viva de Tucumán', 'Ciclo de charlas sobre la historia de Tucumán desde la independencia hasta la actualidad.', 50, 19, 50, 21, $conferenciasType, 'Charla', $sedeUnicaFormat, 1, 'Casa Histórica de la Independencia'],
+            ['Charla: Historia Viva de Demo Region', 'Ciclo de charlas sobre la historia de Demo Region desde la independencia hasta la actualidad.', 50, 19, 50, 21, $conferenciasType, 'Charla', $sedeUnicaFormat, 1, 'Casa Histórica de la Independencia'],
             ['Congreso Patrimonio Cultural del NOA', 'Encuentro de especialistas en preservación del patrimonio cultural e histórico del Noroeste Argentino.', 57, 9, 58, 18, $conferenciasType, 'Congreso', $multiSedeFormat, 2, 'Facultad de Filosofía y Letras'],
         ];
 

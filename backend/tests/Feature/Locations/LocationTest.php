@@ -77,7 +77,7 @@ class LocationTest extends EventTestCase
             'name' => 'Test Location',
             'address' => '123 Test Street',
             'city' => 'Test City',
-            'state' => 'Tucumán',
+            'state' => 'Demo State',
             'country' => 'Argentina',
             'is_active' => true,
         ];
@@ -193,7 +193,7 @@ class LocationTest extends EventTestCase
 
         Location::factory()->create([
             'entity_id' => $organization->id,
-            'name' => 'Centro de Convenciones Tucumán',
+            'name' => 'Centro de Convenciones Demo Region',
         ]);
 
         Location::factory()->create([
@@ -234,7 +234,7 @@ class LocationTest extends EventTestCase
         Location::factory()->create([
             'entity_id' => $organization->id,
             'name' => 'Venue A',
-            'city' => 'San Miguel de Tucuman',
+            'city' => 'Demo City',
         ]);
 
         Location::factory()->create([
@@ -434,7 +434,7 @@ class LocationTest extends EventTestCase
         $response = $this->postJson('/api/v1/locations', [
             'name' => 'Complete Location',
             'address' => 'Av. Soldati 330',
-            'city' => 'San Miguel de Tucumán',
+            'city' => 'Demo City',
         ]);
 
         // Assert: Created successfully
@@ -442,7 +442,7 @@ class LocationTest extends EventTestCase
         $this->assertDatabaseHas('locations', [
             'name' => 'Complete Location',
             'address' => 'Av. Soldati 330',
-            'city' => 'San Miguel de Tucumán',
+            'city' => 'Demo City',
         ]);
     }
 

@@ -52,8 +52,8 @@ class OrganizerSubmitTest extends TestCase
         // Required by TenantScope which filters locations to entity_id = 1 for organizers
         \DB::table('organizations')->insertOrIgnore([
             'id' => 1,
-            'name' => 'Ente de Turismo de Tucumán',
-            'slug' => 'ente-turismo-tucuman',
+            'name' => 'Demo Organization',
+            'slug' => 'demo-organization',
             'cuit' => '30-12345678-9',
             'description' => 'Ente principal de turismo',
             'type_id' => \DB::table('organization_types')->value('id'),
@@ -81,7 +81,7 @@ class OrganizerSubmitTest extends TestCase
 
         $this->location = Location::factory()->create([
             'entity_id' => $this->organization->id,
-            'city' => 'San Miguel de Tucumán',
+            'city' => 'Demo City',
         ]);
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
         $this->pendingInternalStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
@@ -274,7 +274,7 @@ class OrganizerSubmitTest extends TestCase
         // Note: entity_id = 1 because TenantScope filters locations to entity_id = 1 for organizers
         $location = Location::factory()->create([
             'entity_id' => 1,
-            'city' => 'San Miguel de Tucumán',
+            'city' => 'Demo City',
         ]);
 
         $event = Event::factory()->create([
@@ -306,7 +306,7 @@ class OrganizerSubmitTest extends TestCase
         // Note: entity_id = 1 because TenantScope filters locations to entity_id = 1 for organizers
         $location = Location::factory()->create([
             'entity_id' => 1,
-            'city' => 'San Miguel de Tucumán',
+            'city' => 'Demo City',
         ]);
 
         $data = [

@@ -22,10 +22,10 @@ class SectorSeeder extends Seeder
     private function seedSectors(): void
     {
         // Get the main tourism entity
-        $enteTurismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
+        $enteTurismo = Organization::where('slug', 'demo-organization')->first();
 
         if (! $enteTurismo) {
-            $this->command->warn('Ente de Turismo not found. Skipping Sector seeding.');
+            $this->command->warn('Demo Organization not found. Skipping Sector seeding.');
 
             return;
         }

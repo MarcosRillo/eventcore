@@ -46,7 +46,7 @@ class RegistrationRequestTest extends TestCase
             'last_name' => 'Pérez',
             'email' => 'organizer@example.com',
             'whatsapp' => '+5493814567890',
-            'organization_name' => 'La Rural Tucumán',
+            'organization_name' => 'Centro de Convenciones Norte',
             'organization_cuit' => '30-71234567-9',
             'organization_sector' => 'Eventos y Exposiciones',
             'motivation' => 'Queremos publicar nuestros eventos en la plataforma para llegar a más turistas y promocionar nuestras actividades culturales.',
@@ -66,7 +66,7 @@ class RegistrationRequestTest extends TestCase
 
         $this->assertDatabaseHas('registration_requests', [
             'email' => 'organizer@example.com',
-            'organization_name' => 'La Rural Tucumán',
+            'organization_name' => 'Centro de Convenciones Norte',
             'status' => 'pending',
         ]);
 
@@ -165,7 +165,7 @@ class RegistrationRequestTest extends TestCase
 
         // Verify organization was created
         $this->assertDatabaseHas('organizations', [
-            'name' => 'La Rural Tucumán',
+            'name' => 'Centro de Convenciones Norte',
         ]);
 
         // Verify request status updated

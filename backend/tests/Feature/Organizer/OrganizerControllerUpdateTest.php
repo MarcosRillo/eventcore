@@ -40,8 +40,8 @@ class OrganizerControllerUpdateTest extends TestCase
         // Location validation scopes to parent entity id, so locations with entity_id=1 must match.
         \DB::table('organizations')->insertOrIgnore([
             'id' => 1,
-            'name' => 'Ente de Turismo de Tucumán',
-            'slug' => 'ente-turismo-tucuman',
+            'name' => 'Demo Organization',
+            'slug' => 'demo-organization',
             'cuit' => '30-12345678-9',
             'description' => 'Ente principal de turismo',
             'type_id' => \DB::table('organization_types')->where('type_code', 'primary_entity')->value('id'),
@@ -196,7 +196,7 @@ class OrganizerControllerUpdateTest extends TestCase
             'international_attendance' => 150,
 
             // Additional info
-            'event_website' => 'https://turismo-actualizado.gob.ar',
+            'event_website' => 'https://demo-actualizado.example.org',
 
             // Images
             'logo_url' => 'https://example.com/new-logo.png',

@@ -31,7 +31,7 @@ class ProductionSeeder extends Seeder
 
         // Create primary entity from config
         $organization = Organization::create([
-            'name' => config('app.primary_entity_name', 'Ente de Turismo'),
+            'name' => config('app.primary_entity_name', 'Demo Organization'),
             'cuit' => config('app.primary_entity_cuit', '30-00000000-0'),
             'description' => 'Organismo público de turismo',
             'status_id' => $activeStatus->id,

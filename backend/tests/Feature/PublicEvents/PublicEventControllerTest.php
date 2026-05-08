@@ -499,7 +499,7 @@ class PublicEventControllerTest extends TestCase
         $location = Location::factory()->create([
             'entity_id' => $this->organization->id,
             'name' => 'Teatro San Martín',
-            'city' => 'San Miguel de Tucumán',
+            'city' => 'Demo City',
         ]);
 
         $event = Event::factory()->create([

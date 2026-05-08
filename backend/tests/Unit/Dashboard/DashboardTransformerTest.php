@@ -414,7 +414,7 @@ class DashboardTransformerTest extends TestCase
             'entity_id' => $this->organization->id,
             'name'      => 'Teatro San Martín',
             'address'   => 'Av. San Martín 123',
-            'city'      => 'Tucumán',
+            'city'      => 'Demo City',
         ]);
         $event->locations()->attach($location->id, [
             'location_specific_notes'    => 'Sala principal',
@@ -430,7 +430,7 @@ class DashboardTransformerTest extends TestCase
         $this->assertEquals($location->id, $loc['id']);
         $this->assertEquals('Teatro San Martín', $loc['name']);
         $this->assertEquals('Av. San Martín 123', $loc['address']);
-        $this->assertEquals('Tucumán', $loc['city']);
+        $this->assertEquals('Demo Region', $loc['city']);
         $this->assertEquals('Sala principal', $loc['location_specific_notes']);
         $this->assertEquals(500, $loc['max_attendees_for_location']);
     }

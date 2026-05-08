@@ -38,8 +38,8 @@ class OrganizerExtendedFieldsTest extends TestCase
         // Create tourism entity (id=1) for locations FK
         \DB::table('organizations')->insertOrIgnore([
             'id' => 1,
-            'name' => 'Ente de Turismo de Tucumán',
-            'slug' => 'ente-turismo-tucuman',
+            'name' => 'Demo Organization',
+            'slug' => 'demo-organization',
             'cuit' => '30-12345678-9',
             'description' => 'Ente principal de turismo',
             'type_id' => \DB::table('organization_types')->value('id'),

@@ -23,10 +23,10 @@ class EventTypeSeeder extends Seeder
     private function seedEventTypesAndSubtypes(): void
     {
         // Get the main tourism entity
-        $enteTurismo = Organization::where('slug', 'ente-turismo-tucuman')->first();
+        $enteTurismo = Organization::where('slug', 'demo-organization')->first();
 
         if (! $enteTurismo) {
-            $this->command->warn('Ente de Turismo not found. Skipping EventType seeding.');
+            $this->command->warn('Demo Organization not found. Skipping EventType seeding.');
 
             return;
         }

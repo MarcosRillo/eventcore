@@ -122,12 +122,12 @@ class LocationTest extends TestCase
     #[Test]
     public function test_scope_search_filters_by_city(): void
     {
-        $this->createLocation(['name' => 'Venue A', 'city' => 'Tucumán']);
+        $this->createLocation(['name' => 'Venue A', 'city' => 'Demo City']);
         $this->createLocation(['name' => 'Venue B', 'city' => 'Buenos Aires']);
 
         $results = Location::withoutGlobalScopes()
             ->where('entity_id', $this->organization->id)
-            ->search('Tucumán')
+            ->search('Demo City')
             ->get();
 
         $this->assertCount(1, $results);
@@ -143,8 +143,8 @@ class LocationTest extends TestCase
     {
         $location = $this->createLocation([
             'address' => 'Av. Soldati 330',
-            'city' => 'San Miguel de Tucumán',
-            'state' => 'Tucumán',
+            'city' => 'Demo City',
+            'state' => 'Demo State',
             'postal_code' => '4000',
             'country' => 'Argentina',
         ]);
@@ -152,7 +152,7 @@ class LocationTest extends TestCase
         $fullAddress = $location->full_address;
 
         $this->assertStringContainsString('Av. Soldati 330', $fullAddress);
-        $this->assertStringContainsString('San Miguel de Tucumán', $fullAddress);
+        $this->assertStringContainsString('Demo City', $fullAddress);
         $this->assertStringContainsString('Argentina', $fullAddress);
     }
 
@@ -161,7 +161,7 @@ class LocationTest extends TestCase
     {
         $location = $this->createLocation([
             'address' => 'Av. Soldati 330',
-            'city' => 'Tucumán',
+            'city' => 'Demo City',
             'state' => null,
             'postal_code' => null,
             'country' => null,
@@ -169,7 +169,7 @@ class LocationTest extends TestCase
 
         $fullAddress = $location->full_address;
 
-        $this->assertEquals('Av. Soldati 330, Tucumán', $fullAddress);
+        $this->assertEquals('Av. Soldati 330, Demo Region', $fullAddress);
     }
 
     #[Test]
