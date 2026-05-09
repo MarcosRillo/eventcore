@@ -22,7 +22,7 @@ class LocationFactory extends Factory
             'name' => $this->faker->city(),
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
-            'state' => 'Demo State',
+            'state' => 'Tucumán',
             'country' => 'Argentina',
             'postal_code' => $this->faker->postcode(),
             'latitude' => $this->faker->latitude(-26.8, -27.0),

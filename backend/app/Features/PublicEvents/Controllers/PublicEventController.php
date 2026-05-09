@@ -18,7 +18,7 @@ use Illuminate\Http\JsonResponse;
  * Public Event Controller
  *
  * Handles public API endpoints for events that don't require authentication.
- * Used by the public calendar for tourists visiting Demo Region.
+ * Used by the public calendar for tourists visiting Tucumán.
  */
 class PublicEventController extends Controller
 {

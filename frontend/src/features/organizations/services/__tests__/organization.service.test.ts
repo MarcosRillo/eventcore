@@ -102,7 +102,7 @@ describe('organization.service', () => {
 
     it('should apply search filter to URL', async () => {
       // Arrange
-      const mockOrganizations = [createMockOrganization({ name: 'Hotel Demo Region' })]
+      const mockOrganizations = [createMockOrganization({ name: 'Hotel Tucumán' })]
       const mockPagination = createMockPagination({ total: 1 })
 
       mockApiClient.get.mockResolvedValueOnce({
@@ -118,7 +118,7 @@ describe('organization.service', () => {
       // Assert
       expect(mockApiClient.get).toHaveBeenCalledWith('/organizations?search=hotel')
       expect(result.data).toHaveLength(1)
-      expect(result.data[0].name).toBe('Hotel Demo Region')
+      expect(result.data[0].name).toBe('Hotel Tucumán')
       expect(result.pagination.total).toBe(1)
     })
 

@@ -17,7 +17,7 @@ export const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">eventcore</h3>
             <p className="text-neutral-400 text-sm leading-relaxed">
               Plataforma de gestión y difusión de eventos turísticos y culturales
-              de la provincia de Demo Region.
+              de la provincia de Tucumán.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export const Footer = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                 </svg>
-                Demo City
+                San Miguel de Tucumán
               </li>
             </ul>
           </div>

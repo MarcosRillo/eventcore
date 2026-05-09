@@ -24,7 +24,7 @@ describe('EventCard', () => {
       {
         id: 1,
         name: 'Teatro San Martín',
-        city: 'Demo City',
+        city: 'San Miguel de Tucumán',
         address: 'San Martín 251'
       }
     ],
@@ -57,7 +57,7 @@ describe('EventCard', () => {
       render(<EventCard event={mockEvent} {...mockHandlers} />)
 
       expect(screen.getByText(/Teatro San Martín/i)).toBeInTheDocument()
-      expect(screen.getByText(/Demo City/i)).toBeInTheDocument()
+      expect(screen.getByText(/San Miguel de Tucumán/i)).toBeInTheDocument()
     })
 
     test('renders event date', () => {

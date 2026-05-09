@@ -9,7 +9,7 @@
 
 ## 🎯 FILOSOFÍA DE DISEÑO
 
-**Concepto:** Autoridad gubernamental + identidad natural Demo Region  
+**Concepto:** Autoridad gubernamental + identidad natural Tucumán  
 **Inspiración:** GOV.UK (confianza) + Jardín de la República (naturaleza)  
 **Contexto:** Plataforma multi-tenant para eventos turísticos
 
@@ -54,7 +54,7 @@ primary: {
 
 ---
 
-### Secondary Colors (Verde Demo Region)
+### Secondary Colors (Verde Tucumán)
 
 Uso: Identidad local, naturaleza, CTAs secundarios, estados success
 

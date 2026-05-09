@@ -123,7 +123,7 @@ export const CategoriesSection = ({
             ¿Qué estás buscando?
           </h2>
           <p className="text-neutral-600">
-            Elegí una categoría y encontrá eventos en Demo Region
+            Elegí una categoría y encontrá eventos en Tucumán
           </p>
         </div>
 

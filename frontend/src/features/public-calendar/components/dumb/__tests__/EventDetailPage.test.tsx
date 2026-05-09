@@ -47,7 +47,7 @@ jest.mock('@/features/events/services/eventPublicService', () => ({
 describe('EventDetailPage', () => {
   const mockEvent: Event = {
     id: 1,
-    title: 'Festival de Música Demo Region',
+    title: 'Festival de Música Tucumán',
     description: '<p>Gran festival con artistas nacionales e internacionales</p>',
     start_date: '2025-11-15T18:00:00.000Z',
     end_date: '2025-11-17T23:00:00.000Z',
@@ -57,9 +57,9 @@ describe('EventDetailPage', () => {
       {
         id: 1,
         name: 'Parque 9 de Julio',
-        city: 'Demo City',
+        city: 'San Miguel de Tucumán',
         address: 'Av. Aconquija s/n',
-        state: 'Demo State',
+        state: 'Tucumán',
         country: 'Argentina',
         is_active: true,
         entity_id: 1,
@@ -87,7 +87,7 @@ describe('EventDetailPage', () => {
     test('renders event title and description', () => {
       render(<EventDetailPage event={mockEvent} />)
 
-      expect(screen.getByText('Festival de Música Demo Region')).toBeInTheDocument()
+      expect(screen.getByText('Festival de Música Tucumán')).toBeInTheDocument()
       // Description contains HTML, so we check for text content
       expect(screen.getByText(/Gran festival con artistas/i)).toBeInTheDocument()
     })
@@ -267,7 +267,7 @@ describe('EventDetailPage', () => {
     test('renders featured image when provided', () => {
       render(<EventDetailPage event={mockEvent} />)
 
-      const image = screen.getByAltText('Festival de Música Demo Region')
+      const image = screen.getByAltText('Festival de Música Tucumán')
       expect(image).toBeInTheDocument()
       expect(image).toHaveAttribute('src', 'https://example.com/festival.jpg')
     })

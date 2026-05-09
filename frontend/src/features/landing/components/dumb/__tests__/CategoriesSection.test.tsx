@@ -34,7 +34,7 @@ describe('CategoriesSection', () => {
       render(<CategoriesSection {...defaultProps} />)
 
       expect(screen.getByText('¿Qué estás buscando?')).toBeInTheDocument()
-      expect(screen.getByText('Elegí una categoría y encontrá eventos en Demo Region')).toBeInTheDocument()
+      expect(screen.getByText('Elegí una categoría y encontrá eventos en Tucumán')).toBeInTheDocument()
 
       const heading = screen.getByRole('heading', { name: /qué estás buscando/i })
       expect(heading).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold')

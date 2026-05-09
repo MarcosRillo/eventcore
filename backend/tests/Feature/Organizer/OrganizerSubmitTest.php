@@ -87,7 +87,7 @@ class OrganizerSubmitTest extends TestCase
 
         $this->location = Location::factory()->create([
             'entity_id' => $this->organization->id,
-            'city' => 'Demo City',
+            'city' => 'San Miguel de Tucumán',
         ]);
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
         $this->pendingInternalStatus = EventStatus::where('status_code', 'pending_internal_approval')->first();
@@ -280,7 +280,7 @@ class OrganizerSubmitTest extends TestCase
         // Note: entity_id = 1 because TenantScope filters locations to entity_id = 1 for organizers
         $location = Location::factory()->create([
             'entity_id' => 1,
-            'city' => 'Demo City',
+            'city' => 'San Miguel de Tucumán',
         ]);
 
         $event = Event::factory()->create([
@@ -312,7 +312,7 @@ class OrganizerSubmitTest extends TestCase
         // Note: entity_id = 1 because TenantScope filters locations to entity_id = 1 for organizers
         $location = Location::factory()->create([
             'entity_id' => 1,
-            'city' => 'Demo City',
+            'city' => 'San Miguel de Tucumán',
         ]);
 
         $data = [

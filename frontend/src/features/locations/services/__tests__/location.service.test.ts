@@ -26,11 +26,11 @@ const createMockResponse = <T>(data: T, status = 200, statusText = 'OK'): AxiosR
   config: { headers: {} } as AxiosResponse['config'],
 })
 
-// Helper to create a valid Location mock (simplified for Demo Region Tourism)
+// Helper to create a valid Location mock (simplified for Tucumán Tourism)
 const createMockLocation = (overrides: Partial<Location> & { id: number; name: string }): Location => ({
   address: 'Default Address 123',
   city: 'Default City',
-  state: 'Demo State',
+  state: 'Tucumán',
   country: 'Argentina',
   is_active: true,
   entity_id: 1,
@@ -68,8 +68,8 @@ describe('location.service', () => {
     it('should fetch paginated locations with default params', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          createMockLocation({ id: 1, name: 'Centro de Convenciones Demo Region', address: 'Av. Soldati 330', city: 'Demo City', state: 'Demo State' }),
-          createMockLocation({ id: 2, name: 'Parque 9 de Julio', address: 'Av. Aconquija s/n', city: 'Demo City', state: 'Demo State' }),
+          createMockLocation({ id: 1, name: 'Centro de Convenciones Tucumán', address: 'Av. Soldati 330', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
+          createMockLocation({ id: 2, name: 'Parque 9 de Julio', address: 'Av. Aconquija s/n', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
         ],
         meta: createMockMeta({ current_page: 1, last_page: 1, total: 2, per_page: 15, from: 1, to: 2 }),
         links: {
@@ -123,7 +123,7 @@ describe('location.service', () => {
     it('should fetch locations with search filter', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          createMockLocation({ id: 1, name: 'Centro de Convenciones Demo Region', address: 'Av. Soldati 330', city: 'Demo City', state: 'Demo State' }),
+          createMockLocation({ id: 1, name: 'Centro de Convenciones Tucumán', address: 'Av. Soldati 330', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
         ],
         meta: createMockMeta({ current_page: 1, last_page: 1, total: 1, per_page: 15, from: 1, to: 1 }),
         links: {
@@ -151,7 +151,7 @@ describe('location.service', () => {
     it('should fetch only active locations when is_active filter is true', async () => {
       const mockResponse: LocationPagination = {
         data: [
-          createMockLocation({ id: 1, name: 'Active Location', address: 'Address 1', city: 'Demo City', state: 'Demo State' }),
+          createMockLocation({ id: 1, name: 'Active Location', address: 'Address 1', city: 'San Miguel de Tucumán', state: 'Tucumán' }),
         ],
         meta: createMockMeta({ current_page: 1, last_page: 1, total: 1, per_page: 15, from: 1, to: 1 }),
         links: {

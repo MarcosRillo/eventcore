@@ -37,7 +37,7 @@ describe('Footer', () => {
       expect(screen.getByText('eventcore')).toBeInTheDocument()
       expect(screen.getByText(/Plataforma de gestión y difusión/i)).toBeInTheDocument()
 
-      const aboutText = screen.getByText(/de la provincia de Demo Region/i)
+      const aboutText = screen.getByText(/de la provincia de Tucumán/i)
       expect(aboutText).toHaveClass('text-neutral-400', 'text-sm')
     })
 
@@ -54,7 +54,7 @@ describe('Footer', () => {
 
       expect(screen.getByText('Contacto')).toBeInTheDocument()
       expect(screen.getByText(/info@eventcore.dev/i)).toBeInTheDocument()
-      expect(screen.getByText(/Demo City/i)).toBeInTheDocument()
+      expect(screen.getByText(/San Miguel de Tucumán/i)).toBeInTheDocument()
     })
 
     test('should apply correct grid layout classes', () => {
@@ -107,7 +107,7 @@ describe('Footer', () => {
     test('should render address contact with icon', () => {
       render(<Footer />)
 
-      const addressText = screen.getByText(/Demo City/i)
+      const addressText = screen.getByText(/San Miguel de Tucumán/i)
       expect(addressText).toBeInTheDocument()
 
       // Check parent li element has correct classes

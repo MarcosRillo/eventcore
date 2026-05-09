@@ -20,7 +20,7 @@ const mockUser = {
 }
 
 const mockConfig: AppShellConfig = {
-  brandTitle: 'Demo Region',
+  brandTitle: 'Tucumán',
   brandSubtitle: 'Turismo',
   navSections: [
     {

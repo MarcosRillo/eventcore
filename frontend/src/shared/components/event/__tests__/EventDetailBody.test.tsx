@@ -32,14 +32,14 @@ jest.mock('next/image', () => ({
 describe('EventDetailBody', () => {
   const fullEvent: EventDetailData = {
     id: 1,
-    title: 'Festival de Música Demo Region',
+    title: 'Festival de Música Tucumán',
     description: '<p>Gran festival con artistas nacionales</p>',
     start_date: '2025-11-15T18:00:00.000Z',
     end_date: '2025-11-17T23:00:00.000Z',
     featured_image: 'https://example.com/festival.jpg',
     is_featured: true,
     locations: [
-      { id: 1, name: 'Parque 9 de Julio', address: 'Av. Aconquija s/n', city: 'Demo City' },
+      { id: 1, name: 'Parque 9 de Julio', address: 'Av. Aconquija s/n', city: 'San Miguel de Tucumán' },
     ],
     contact_email: 'info@festival.com',
     contact_phone: '+54 381 4300000',
@@ -48,14 +48,14 @@ describe('EventDetailBody', () => {
     cta_link: 'https://festival.com/tickets',
     event_type: { id: 1, name: 'Cultural', color: '#FF5733' },
     event_subtype: { id: 1, name: 'Música' },
-    organizer: { name: 'Juan Pérez', organization: 'Fundación Demo Region' },
+    organizer: { name: 'Juan Pérez', organization: 'Fundación Tucumán' },
   };
 
   describe('Image rendering', () => {
     test('renders featured image when provided', () => {
       render(<EventDetailBody event={fullEvent} />);
 
-      const image = screen.getByAltText('Festival de Música Demo Region');
+      const image = screen.getByAltText('Festival de Música Tucumán');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('src', 'https://example.com/festival.jpg');
     });
@@ -72,7 +72,7 @@ describe('EventDetailBody', () => {
     test('renders event title as h1', () => {
       render(<EventDetailBody event={fullEvent} />);
 
-      const heading = screen.getByRole('heading', { level: 1, name: /Festival de Música Demo Region/i });
+      const heading = screen.getByRole('heading', { level: 1, name: /Festival de Música Tucumán/i });
       expect(heading).toBeInTheDocument();
     });
   });

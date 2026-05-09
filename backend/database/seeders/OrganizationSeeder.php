@@ -31,7 +31,7 @@ class OrganizationSeeder extends Seeder
         $enteDeturismo = Organization::create([
             'name' => 'Demo Organization',
             'cuit' => '30-70000001-5',
-            'description' => 'Organismo público encargado de promover el turismo en la provincia de Demo Region',
+            'description' => 'Organismo público encargado de promover el turismo en la provincia de Tucumán',
             'status_id' => $activeStatus->id,
             'type_id' => $primaryEntityType->id,
             'slug' => 'demo-organization',

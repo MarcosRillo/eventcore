@@ -308,7 +308,7 @@ describe('CreateLocationModal', () => {
       // Fill all fields
       await user.type(screen.getByLabelText(/Nombre del lugar/), 'Centro Cultural')
       await user.type(screen.getByLabelText(/Dirección/), 'Av. Principal 123')
-      await user.type(screen.getByLabelText(/Ciudad/), 'Demo City')
+      await user.type(screen.getByLabelText(/Ciudad/), 'San Miguel de Tucumán')
       await user.type(screen.getByLabelText(/Descripción/), 'Un lugar increíble')
 
       // Submit form
@@ -318,9 +318,9 @@ describe('CreateLocationModal', () => {
         expect(mockCreateLocation).toHaveBeenCalledWith({
           name: 'Centro Cultural',
           address: 'Av. Principal 123',
-          city: 'Demo City',
+          city: 'San Miguel de Tucumán',
           description: 'Un lugar increíble',
-          state: 'Demo State',
+          state: 'Tucumán',
           country: 'Argentina',
           is_active: true,
         })

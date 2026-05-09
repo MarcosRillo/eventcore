@@ -49,7 +49,7 @@ test.describe('Mobile Responsive', () => {
 
     // H1 heading on landing page
     await expect(
-      page.getByRole('heading', { name: /Demo Region/i, level: 1 })
+      page.getByRole('heading', { name: /Tucumán/i, level: 1 })
     ).toBeVisible();
   });
 
