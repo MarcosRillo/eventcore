@@ -1,8 +1,8 @@
 # QA Manual Test Checklist — eventcore Platform
 **Version:** Pre-presentación Demo Organization
 **Date:** 2026-03-31
-**Frontend:** https://plataforma-calendario-monorepo.vercel.app
-**Backend:** https://plataforma-calendario-monorepo.onrender.com
+**Frontend:** https://eventcore-app.vercel.app
+**Backend:** https://eventcore-321o.onrender.com
 
 ---
 
@@ -472,6 +472,6 @@ Antes de presentar al Ente, confirmar:
 
 ---
 
-*Generado a partir del código fuente del repositorio — plataforma-calendario-monorepo.*
+*Generado a partir del código fuente del repositorio — eventcore.*
 *Rutas verificadas contra la estructura de `frontend/src/app/` y los smart containers de `frontend/src/features/`.*
 *Workflow de estados verificado contra `ApprovalStateMachine.php`.*
