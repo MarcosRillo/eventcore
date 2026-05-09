@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "967e7b45b4892fa9f9230408ac499c21",
+    "content-hash": "ede021eb84f45eb2049ef351df108d11",
     "packages": [
         {
             "name": "brick/math",
@@ -261,16 +261,16 @@
         },
         {
             "name": "dedoc/scramble",
-            "version": "v0.13.16",
+            "version": "v0.13.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dedoc/scramble.git",
-                "reference": "43a5dd62b6a5d7d6fd0125092985d78ae22f0ffe"
+                "reference": "b54b0c43bdebaa01f66cc3dfdd8f91e19b12da96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dedoc/scramble/zipball/43a5dd62b6a5d7d6fd0125092985d78ae22f0ffe",
-                "reference": "43a5dd62b6a5d7d6fd0125092985d78ae22f0ffe",
+                "url": "https://api.github.com/repos/dedoc/scramble/zipball/b54b0c43bdebaa01f66cc3dfdd8f91e19b12da96",
+                "reference": "b54b0c43bdebaa01f66cc3dfdd8f91e19b12da96",
                 "shasum": ""
             },
             "require": {
@@ -329,7 +329,7 @@
             ],
             "support": {
                 "issues": "https://github.com/dedoc/scramble/issues",
-                "source": "https://github.com/dedoc/scramble/tree/v0.13.16"
+                "source": "https://github.com/dedoc/scramble/tree/v0.13.22"
             },
             "funding": [
                 {
@@ -337,7 +337,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-17T21:42:41+00:00"
+            "time": "2026-04-27T20:30:51+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -10128,12 +10128,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
