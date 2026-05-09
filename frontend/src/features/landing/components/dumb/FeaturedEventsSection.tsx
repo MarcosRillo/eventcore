@@ -23,7 +23,7 @@ export const FeaturedEventsSection = ({
             Próximos Eventos Destacados
           </h2>
           <p className="text-lg text-neutral-500 max-w-xl mx-auto">
-            No te pierdas los eventos más esperados de Demo Region
+            No te pierdas los eventos más esperados de Tucumán
           </p>
         </div>
 

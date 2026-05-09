@@ -31,7 +31,7 @@ describe('InternalCalendar (Grid View)', () => {
       status: { id: 1, status_code: 'approved_internal', status_name: 'Aprobado Interno', description: 'Event approved for internal use' },
       organization: { id: 1, name: 'Org 1' },
       event_type: { id: 1, name: 'Concierto', color: '#FF5733' },
-      locations: [{ id: 1, name: 'Venue 1', city: 'Demo City' }],
+      locations: [{ id: 1, name: 'Venue 1', city: 'San Miguel de Tucumán' }],
     },
     {
       id: 2,
@@ -41,7 +41,7 @@ describe('InternalCalendar (Grid View)', () => {
       status: { id: 2, status_code: 'published', status_name: 'Publicado', description: 'Event published' },
       organization: { id: 2, name: 'Org 2' },
       event_type: { id: 2, name: 'Festival', color: '#33FF57' },
-      locations: [{ id: 2, name: 'Venue 2', city: 'Demo City' }],
+      locations: [{ id: 2, name: 'Venue 2', city: 'San Miguel de Tucumán' }],
     },
   ];
 

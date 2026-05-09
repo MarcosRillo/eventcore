@@ -8,13 +8,13 @@ import * as cachedEvents from '@/features/public-calendar/services/public-events
 export const metadata: Metadata = {
   title: 'eventcore - Turismo y Cultura',
   description:
-    'Descubrí los mejores eventos turísticos y culturales de Demo Region. Música, arte, gastronomía, festivales y mucho más. Plataforma oficial de eventos.',
+    'Descubrí los mejores eventos turísticos y culturales de Tucumán. Música, arte, gastronomía, festivales y mucho más. Plataforma oficial de eventos.',
   keywords:
     'demo region, turismo, eventos, calendario, festivales, cultura, actividades, argentina, noroeste argentino',
   openGraph: {
     title: 'eventcore - Turismo y Cultura',
     description:
-      'Descubrí los mejores eventos turísticos y culturales de Demo Region',
+      'Descubrí los mejores eventos turísticos y culturales de Tucumán',
     type: 'website',
     locale: 'es_AR',
     siteName: 'eventcore',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'eventcore - Turismo y Cultura',
     description:
-      'Descubrí los mejores eventos turísticos y culturales de Demo Region'
+      'Descubrí los mejores eventos turísticos y culturales de Tucumán'
   },
   alternates: {
     canonical: '/'

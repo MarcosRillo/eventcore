@@ -8,12 +8,12 @@ import * as cachedEvents from '@/features/public-calendar/services/public-events
 import { publicEventsService } from '@/features/public-calendar/services/public-events.service'
 
 export const metadata: Metadata = {
-  title: 'Eventos en Demo Region - Calendario Turístico',
+  title: 'Eventos en Tucumán - Calendario Turístico',
   description:
-    'Descubrí los mejores eventos turísticos y culturales de Demo Region. Música, arte, gastronomía y más.',
+    'Descubrí los mejores eventos turísticos y culturales de Tucumán. Música, arte, gastronomía y más.',
   keywords: 'demo region, turismo, eventos, calendario, festivales, cultura, actividades',
   openGraph: {
-    title: 'Eventos en Demo Region',
+    title: 'Eventos en Tucumán',
     description: 'Calendario de eventos turísticos y culturales',
     type: 'website',
     locale: 'es_AR',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Eventos en Demo Region',
+    title: 'Eventos en Tucumán',
     description: 'Calendario de eventos turísticos y culturales'
   },
   alternates: {

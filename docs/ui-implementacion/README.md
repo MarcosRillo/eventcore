@@ -88,7 +88,7 @@ Este paquete incluye TODO lo necesario para implementar el nuevo sistema de dise
 - ✅ Tourism color psychology research
 - ✅ Government design systems benchmarking
 - ✅ Eventbrite/Meetup UX patterns
-- ✅ Demo Region context analysis
+- ✅ Tucumán context analysis
 - ✅ 3 propuestas de paletas completas
 - ✅ Comparativa objetiva (scoring)
 - ✅ Justificación detallada Paleta C
@@ -195,7 +195,7 @@ Este paquete incluye TODO lo necesario para implementar el nuevo sistema de dise
 ✅ Modal blanco profesional
 ✅ Labels legibles (neutral-600)
 ✅ Inputs claros con bg y border visible
-✅ Azul gobierno + verde Demo Region
+✅ Azul gobierno + verde Tucumán
 ✅ WCAG AA compliant (algunos AAA)
 ✅ Score accesibilidad: 90+/100
 ```
@@ -254,7 +254,7 @@ Después de implementar, verificar:
 ## 🎨 PALETA ELEGIDA: "HÍBRIDA PROFESIONAL"
 
 **Primary:** Azul #2563eb (confianza gobierno)  
-**Secondary:** Verde #10b981 (identidad Demo Region)  
+**Secondary:** Verde #10b981 (identidad Tucumán)  
 **Accent:** Naranja #ea580c (energía, CTAs)
 
 **Por qué esta paleta:**

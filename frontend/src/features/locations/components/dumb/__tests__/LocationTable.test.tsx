@@ -57,14 +57,14 @@ jest.mock('@/shared/components/modals', () => ({
 }))
 
 describe('LocationTable', () => {
-  // Simplified mock locations for Demo Region Tourism
+  // Simplified mock locations for Tucumán Tourism
   const mockLocations: Location[] = [
     {
       id: 1,
-      name: 'Centro de Convenciones Demo Region',
+      name: 'Centro de Convenciones Tucumán',
       address: 'Av. Soldati 330',
-      city: 'Demo City',
-      state: 'Demo State',
+      city: 'San Miguel de Tucumán',
+      state: 'Tucumán',
       country: 'Argentina',
       description: 'Centro de eventos principal',
       is_active: true,
@@ -76,8 +76,8 @@ describe('LocationTable', () => {
       id: 2,
       name: 'Parque 9 de Julio',
       address: 'Av. Aconquija s/n',
-      city: 'Demo City',
-      state: 'Demo State',
+      city: 'San Miguel de Tucumán',
+      state: 'Tucumán',
       country: 'Argentina',
       is_active: true,
       entity_id: 1,
@@ -136,7 +136,7 @@ describe('LocationTable', () => {
     it('should render table with locations', () => {
       render(<LocationTable {...defaultProps} />)
 
-      expect(screen.getByText('Centro de Convenciones Demo Region')).toBeInTheDocument()
+      expect(screen.getByText('Centro de Convenciones Tucumán')).toBeInTheDocument()
       expect(screen.getByText('Parque 9 de Julio')).toBeInTheDocument()
     })
 
@@ -154,15 +154,15 @@ describe('LocationTable', () => {
     it('should display location name and address', () => {
       render(<LocationTable {...defaultProps} />)
 
-      expect(screen.getByText('Centro de Convenciones Demo Region')).toBeInTheDocument()
+      expect(screen.getByText('Centro de Convenciones Tucumán')).toBeInTheDocument()
       expect(screen.getByText('Av. Soldati 330')).toBeInTheDocument()
     })
 
     it('should display city and state', () => {
       render(<LocationTable {...defaultProps} />)
 
-      // Multiple Demo State occurrences expected (state for each location)
-      const demoRegionElements = screen.getAllByText('Demo State')
+      // Multiple Tucumán occurrences expected (state for each location)
+      const demoRegionElements = screen.getAllByText('Tucumán')
       expect(demoRegionElements.length).toBeGreaterThan(0)
     })
 
@@ -281,8 +281,8 @@ describe('LocationTable', () => {
     it('should have aria-labels on action buttons', () => {
       render(<LocationTable {...defaultProps} />)
 
-      expect(screen.getByLabelText('Editar Centro de Convenciones Demo Region')).toBeInTheDocument()
-      expect(screen.getByLabelText('Eliminar Centro de Convenciones Demo Region')).toBeInTheDocument()
+      expect(screen.getByLabelText('Editar Centro de Convenciones Tucumán')).toBeInTheDocument()
+      expect(screen.getByLabelText('Eliminar Centro de Convenciones Tucumán')).toBeInTheDocument()
     })
   })
 })

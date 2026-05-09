@@ -66,7 +66,7 @@ export function LocationTableContainer({
     setConfirmDialog(prev => ({ ...prev, isOpen: false }));
   }, []);
 
-  // Column configuration - simplified for Demo Region Tourism
+  // Column configuration - simplified for Tucumán Tourism
   const columns = useMemo((): TableColumnConfig<Location>[] => [
     // Name and description
     {
@@ -94,7 +94,7 @@ export function LocationTableContainer({
         <div className="flex flex-col">
           <span className="text-sm text-neutral-900">{location.address}</span>
           <span className="text-xs text-neutral-500">
-            {location.city}, {location.state || 'Demo Region'}
+            {location.city}, {location.state || 'Tucumán'}
           </span>
         </div>
       ),

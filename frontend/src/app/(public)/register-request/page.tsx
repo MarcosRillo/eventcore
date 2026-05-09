@@ -9,7 +9,7 @@ import { RegisterRequestPageContainer } from '@/features/registration-requests/c
 
 export const metadata: Metadata = {
   title: 'Solicitar Registro | Plataforma de Eventos',
-  description: 'Solicita el registro de tu organización en la plataforma de eventos turísticos de Demo Region',
+  description: 'Solicita el registro de tu organización en la plataforma de eventos turísticos de Tucumán',
 }
 
 export default function RegisterRequestPage() {

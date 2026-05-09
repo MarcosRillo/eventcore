@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     };
   } catch {
     return {
-      title: 'Evento no encontrado - Demo Region Turismo',
+      title: 'Evento no encontrado - Tucumán Turismo',
       description: 'El evento solicitado no fue encontrado o no está disponible.',
     };
   }

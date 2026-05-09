@@ -16,7 +16,7 @@ describe('HeroSection', () => {
     render(<HeroSection onExploreClick={jest.fn()} />)
 
     expect(screen.getByText(/Descubrí los eventos de/i)).toBeInTheDocument()
-    expect(screen.getByText(/Demo Region/i)).toBeInTheDocument()
+    expect(screen.getByText(/Tucumán/i)).toBeInTheDocument()
     expect(screen.getByText(/Explorá los mejores eventos turísticos y culturales/i)).toBeInTheDocument()
   })
 

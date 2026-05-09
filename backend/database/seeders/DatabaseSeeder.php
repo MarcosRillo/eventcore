@@ -2,15 +2,24 @@
 
 namespace Database\Seeders;
 
+use App\Models\Event;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
+     *
+     * Idempotent: skips if events already exist (safe to re-run on every deploy).
      */
     public function run(): void
     {
+        if (Event::query()->exists()) {
+            $this->command->info('Database already seeded (events present), skipping.');
+
+            return;
+        }
+
         $this->command->info('Starting database seeding...');
         $this->command->info('Creating dataset for Demo Organization');
         $this->command->newLine();

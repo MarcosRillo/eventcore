@@ -45,7 +45,7 @@ describe('OrganizersSection', () => {
     test('should render title with correct text and styling', () => {
       render(<OrganizersSection />)
 
-      const title = screen.getByText(/¿Organizás eventos en Demo Region?/i)
+      const title = screen.getByText(/¿Organizás eventos en Tucumán?/i)
       expect(title).toBeInTheDocument()
       expect(title).toHaveClass('text-2xl', 'md:text-3xl', 'font-bold', 'text-white')
     })

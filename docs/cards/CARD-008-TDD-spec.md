@@ -141,7 +141,7 @@ describe('PublicCalendar', () => {
       start_date: '2025-11-15',
       end_date: '2025-11-17',
       category: { id: 1, name: 'Música' },
-      location: { id: 1, name: 'Teatro San Martín', city: 'Demo City' },
+      location: { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
       is_featured: true
     },
     {
@@ -151,7 +151,7 @@ describe('PublicCalendar', () => {
       start_date: '2025-11-20',
       end_date: '2025-11-20',
       category: { id: 2, name: 'Arte' },
-      location: { id: 2, name: 'Museo Provincial', city: 'Demo City' },
+      location: { id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' },
       is_featured: false
     }
   ] as PublicEvent[]
@@ -163,8 +163,8 @@ describe('PublicCalendar', () => {
   ]
 
   const mockLocations = [
-    { id: 1, name: 'Teatro San Martín', city: 'Demo City' },
-    { id: 2, name: 'Museo Provincial', city: 'Demo City' }
+    { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
+    { id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }
   ]
 
   const mockHandlers = {
@@ -525,11 +525,11 @@ describe('EventCard', () => {
   const mockEvent: PublicEvent = {
     id: 1,
     title: 'Festival de Música',
-    description: 'Gran evento musical en Demo Region',
+    description: 'Gran evento musical en Tucumán',
     start_date: '2025-11-15',
     end_date: '2025-11-17',
     category: { id: 1, name: 'Música' },
-    location: { id: 1, name: 'Teatro San Martín', city: 'Demo City' },
+    location: { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
     is_featured: true
   }
 
@@ -1360,7 +1360,7 @@ export const PublicCalendar = ({
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Eventos en Demo Region
+            Eventos en Tucumán
           </h1>
           <p className="text-gray-600">
             Descubre los mejores eventos culturales y turísticos de la provincia
@@ -1505,8 +1505,8 @@ import { PublicCalendarContainer } from '@/features/public-calendar/components/s
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Eventos en Demo Region | Calendario de Eventos Turísticos',
-  description: 'Descubre los mejores eventos culturales y turísticos de Demo Region. Consulta nuestro calendario completo de actividades.',
+  title: 'Eventos en Tucumán | Calendario de Eventos Turísticos',
+  description: 'Descubre los mejores eventos culturales y turísticos de Tucumán. Consulta nuestro calendario completo de actividades.',
   keywords: 'eventos demo region, calendario turístico, eventos culturales, turismo demo region'
 }
 

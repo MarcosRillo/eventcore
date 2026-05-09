@@ -70,7 +70,7 @@ class EventValidationServiceTest extends TestCase
         ]);
         $this->locationWithCity = Location::factory()->create([
             'entity_id' => $this->organization->id,
-            'city' => 'Demo City',
+            'city' => 'San Miguel de Tucumán',
         ]);
         $this->draftStatus = EventStatus::where('status_code', 'draft')->first();
         $this->formatId = \DB::table('event_formats')->value('id') ?? 1;

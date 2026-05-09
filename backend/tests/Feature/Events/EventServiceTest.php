@@ -104,7 +104,7 @@ class EventServiceTest extends TestCase
         Event::factory()->create([
             'entity_id' => $this->organization->id,
             'status_id' => $this->draftStatus->id,
-            'title' => 'Festival de Jazz Demo Region',
+            'title' => 'Festival de Jazz Tucumán',
         ]);
 
         Event::factory()->create([
@@ -116,7 +116,7 @@ class EventServiceTest extends TestCase
         $result = $this->service->getAllEvents($this->user, ['search' => 'Jazz']);
 
         $this->assertEquals(1, $result->total());
-        $this->assertEquals('Festival de Jazz Demo Region', $result->items()[0]->title);
+        $this->assertEquals('Festival de Jazz Tucumán', $result->items()[0]->title);
     }
 
     #[Test]

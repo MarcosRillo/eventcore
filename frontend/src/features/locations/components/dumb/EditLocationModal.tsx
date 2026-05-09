@@ -1,6 +1,6 @@
 /**
  * EditLocationModal Component
- * Simplified modal for editing existing locations in Demo Region
+ * Simplified modal for editing existing locations in Tucumán
  */
 
 'use client';
@@ -83,7 +83,7 @@ export function EditLocationModal({
       address: formData.address.trim(),
       city: formData.city.trim(),
       description: formData.description?.trim() || undefined,
-      state: 'Demo State',
+      state: 'Tucumán',
       country: 'Argentina',
       is_active: true,
     };
@@ -125,7 +125,7 @@ export function EditLocationModal({
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            placeholder="Ej. Centro de Convenciones Demo Region"
+            placeholder="Ej. Centro de Convenciones Tucumán"
             disabled={isLoading}
             error={errors.name}
             fullWidth
@@ -151,7 +151,7 @@ export function EditLocationModal({
             name="city"
             value={formData.city}
             onChange={handleInputChange}
-            placeholder="Ej. Demo City"
+            placeholder="Ej. San Miguel de Tucumán"
             disabled={isLoading}
             error={errors.city}
             fullWidth

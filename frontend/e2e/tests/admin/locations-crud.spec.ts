@@ -26,7 +26,7 @@ test.describe('Entity Admin - Locations CRUD', () => {
     const name = uniqueName('Lugar E2E');
     await page.getByRole('dialog').locator('input[name="name"]').fill(name);
     await page.getByRole('dialog').locator('input[name="address"]').fill('Calle Test 123');
-    await page.getByRole('dialog').locator('input[name="city"]').fill('Demo City');
+    await page.getByRole('dialog').locator('input[name="city"]').fill('San Miguel de Tucumán');
 
     const [response] = await Promise.all([
       waitForResponse(page, '/api/v1/locations', 'POST'),
@@ -77,7 +77,7 @@ test.describe('Entity Admin - Locations CRUD', () => {
     const name = uniqueName('Lugar E2E');
     await page.getByRole('dialog').locator('input[name="name"]').fill(name);
     await page.getByRole('dialog').locator('input[name="address"]').fill('Calle Test 123');
-    await page.getByRole('dialog').locator('input[name="city"]').fill('Demo City');
+    await page.getByRole('dialog').locator('input[name="city"]').fill('San Miguel de Tucumán');
 
     const [createResponse] = await Promise.all([
       waitForResponse(page, '/api/v1/locations', 'POST'),

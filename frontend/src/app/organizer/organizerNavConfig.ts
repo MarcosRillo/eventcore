@@ -3,7 +3,7 @@ import { Calendar, Home, PlusCircle } from 'lucide-react'
 import type { AppShellConfig } from '@/shared/components/layout/types'
 
 export const organizerNavConfig: AppShellConfig = {
-  brandTitle: 'Demo Region',
+  brandTitle: 'Tucumán',
   brandSubtitle: 'Organizador',
   headerSubtitle: 'Panel de Organizador',
   collapsible: false,

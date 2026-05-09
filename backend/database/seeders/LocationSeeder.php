@@ -27,7 +27,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Centro de Convenciones Norte',
                 'address' => 'Av. Principal 1234',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1000',
                 'latitude' => -34.6037,
                 'longitude' => -58.3816,
@@ -45,7 +45,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Auditorio Principal',
                 'address' => 'Calle Demo 567',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1001',
                 'latitude' => -34.5895,
                 'longitude' => -58.3974,
@@ -61,7 +61,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Estadio Demo',
                 'address' => 'Av. Principal 2000',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1002',
                 'latitude' => -34.6150,
                 'longitude' => -58.4000,
@@ -79,7 +79,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Teatro Municipal',
                 'address' => 'Calle Demo 100',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1003',
                 'latitude' => -34.6080,
                 'longitude' => -58.3850,
@@ -95,7 +95,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Hotel Central Demo',
                 'address' => 'Av. Principal 500',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1004',
                 'latitude' => -34.6000,
                 'longitude' => -58.3900,
@@ -113,7 +113,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Salón de Conferencias Sur',
                 'address' => 'Calle Demo 890',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1005',
                 'latitude' => -34.6400,
                 'longitude' => -58.4200,
@@ -130,7 +130,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Centro Cultural Plaza',
                 'address' => 'Av. Principal 750',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1006',
                 'latitude' => -34.5950,
                 'longitude' => -58.3800,
@@ -147,7 +147,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Anfiteatro al Aire Libre',
                 'address' => 'Calle Demo 1200',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1007',
                 'latitude' => -34.5900,
                 'longitude' => -58.4100,
@@ -164,7 +164,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Sala Polifuncional A',
                 'address' => 'Av. Principal 1800',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1008',
                 'latitude' => -34.6250,
                 'longitude' => -58.3700,
@@ -180,7 +180,7 @@ class LocationSeeder extends Seeder
             [
                 'name' => 'Espacio Eventos Río',
                 'address' => 'Calle Demo 2500',
-                'city' => 'Demo City',
+                'city' => 'San Miguel de Tucumán',
                 'postal_code' => '1009',
                 'latitude' => -34.6500,
                 'longitude' => -58.4450,
@@ -198,7 +198,7 @@ class LocationSeeder extends Seeder
 
         foreach ($locations as $locationData) {
             Location::create(array_merge($locationData, [
-                'state' => 'Demo State',
+                'state' => 'Tucumán',
                 'country' => 'Argentina',
                 'is_active' => true,
                 'entity_id' => $organization->id,

@@ -173,8 +173,8 @@ const createMockLocation = (overrides: Partial<Location> = {}): Location => ({
   id: 1,
   name: 'Centro de Convenciones',
   address: 'Av. Soldati 330',
-  city: 'Demo City',
-  state: 'Demo State',
+  city: 'San Miguel de Tucumán',
+  state: 'Tucumán',
   country: 'Argentina',
   description: 'Un centro de eventos importante',
   is_active: true,
@@ -304,7 +304,7 @@ describe('EditLocationModal', () => {
           mockLocation.id,
           expect.objectContaining({
             name: 'Nuevo Nombre',
-            state: 'Demo State',
+            state: 'Tucumán',
             country: 'Argentina',
             is_active: true,
           })

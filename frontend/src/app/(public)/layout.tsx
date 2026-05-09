@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: '%s | eventcore',
     default: 'eventcore - Calendario Turístico',
   },
-  description: 'Descubrí los mejores eventos turísticos y culturales de Demo Region',
+  description: 'Descubrí los mejores eventos turísticos y culturales de Tucumán',
 }
 
 interface PublicLayoutProps {

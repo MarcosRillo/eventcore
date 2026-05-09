@@ -1,6 +1,6 @@
 /**
  * CreateLocationModal Component
- * Simplified modal for creating new locations in Demo Region
+ * Simplified modal for creating new locations in Tucumán
  */
 
 'use client';
@@ -65,7 +65,7 @@ export function CreateLocationModal({
       address: formData.address.trim(),
       city: formData.city.trim(),
       description: formData.description?.trim() || undefined,
-      state: 'Demo State',
+      state: 'Tucumán',
       country: 'Argentina',
       is_active: true,
     };
@@ -104,7 +104,7 @@ export function CreateLocationModal({
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            placeholder="Ej. Centro de Convenciones Demo Region"
+            placeholder="Ej. Centro de Convenciones Tucumán"
             disabled={isLoading}
             error={errors.name}
             fullWidth
@@ -130,7 +130,7 @@ export function CreateLocationModal({
             name="city"
             value={formData.city}
             onChange={handleInputChange}
-            placeholder="Ej. Demo City"
+            placeholder="Ej. San Miguel de Tucumán"
             disabled={isLoading}
             error={errors.city}
             fullWidth

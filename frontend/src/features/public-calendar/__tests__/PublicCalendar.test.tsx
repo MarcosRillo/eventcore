@@ -21,7 +21,7 @@ describe('PublicCalendar', () => {
       end_date: '2025-11-17',
       event_type: { id: 1, name: 'Música' },
       event_subtype: { id: 1, name: 'Festival', event_type_id: 1 },
-      locations: [{ id: 1, name: 'Teatro San Martín', city: 'Demo City' }],
+      locations: [{ id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' }],
       is_featured: true
     },
     {
@@ -32,7 +32,7 @@ describe('PublicCalendar', () => {
       start_date: '2025-11-20',
       end_date: '2025-11-20',
       event_type: { id: 2, name: 'Arte' },
-      locations: [{ id: 2, name: 'Museo Provincial', city: 'Demo City' }],
+      locations: [{ id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }],
       is_featured: false
     }
   ]
@@ -49,8 +49,8 @@ describe('PublicCalendar', () => {
   ]
 
   const mockLocations: Location[] = [
-    { id: 1, name: 'Teatro San Martín', city: 'Demo City' },
-    { id: 2, name: 'Museo Provincial', city: 'Demo City' }
+    { id: 1, name: 'Teatro San Martín', city: 'San Miguel de Tucumán' },
+    { id: 2, name: 'Museo Provincial', city: 'San Miguel de Tucumán' }
   ]
 
   const mockHandlers = {

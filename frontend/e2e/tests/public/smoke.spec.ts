@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('landing page loads', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/eventcore/);
-  await expect(page.getByRole('heading', { name: /Demo Region/i, level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Tucumán/i, level: 1 })).toBeVisible();
 });
 
 test('calendar page loads', async ({ page }) => {
