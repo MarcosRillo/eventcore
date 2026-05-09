@@ -169,7 +169,7 @@ class LocationTest extends TestCase
 
         $fullAddress = $location->full_address;
 
-        $this->assertEquals('Av. Soldati 330, Tucumán', $fullAddress);
+        $this->assertEquals('Av. Soldati 330, San Miguel de Tucumán', $fullAddress);
     }
 
     #[Test]
