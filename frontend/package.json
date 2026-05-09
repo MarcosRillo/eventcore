@@ -20,13 +20,13 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
-    "axios": "^1.13.2",
+    "axios": "^1.16.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "fuse.js": "^7.1.0",
     "isomorphic-dompurify": "^2.34.0",
     "lucide-react": "^0.562.0",
-    "next": "^15.5.9",
+    "next": "^15.5.18",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.3",
     "react-big-calendar": "^1.19.4",
@@ -40,7 +40,14 @@
       "msw",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "minimatch": "^10.0.0",
+      "flatted": "^3.4.2",
+      "picomatch": "^4.0.4",
+      "lodash": "^4.18.1",
+      "lodash-es": "^4.18.1"
+    }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
