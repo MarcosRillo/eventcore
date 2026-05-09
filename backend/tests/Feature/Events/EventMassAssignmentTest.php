@@ -2,11 +2,23 @@
 
 namespace Tests\Feature\Events;
 
+use App\Features\Events\Services\EventService;
 use App\Models\Event;
+use App\Models\EventFormat;
 use App\Models\EventStatus;
+use App\Models\EventSubtype;
+use App\Models\EventType;
+use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\EventLookupSeeder;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypeSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -19,13 +31,13 @@ class EventMassAssignmentTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypeSeeder::class);
-        $this->seed(\Database\Seeders\EventLookupSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(EventTypeSeeder::class);
+        $this->seed(EventLookupSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     // ===== $fillable protection =====
@@ -101,17 +113,17 @@ class EventMassAssignmentTest extends TestCase
         ]);
         $entityAdmin->organizations()->attach($organization->id);
 
-        $location = \App\Models\Location::factory()->create([
+        $location = Location::factory()->create([
             'entity_id' => $organization->id,
         ]);
 
         // Create event type and subtype directly (EventTypeSeeder needs specific org)
-        $eventType = \App\Models\EventType::create([
+        $eventType = EventType::create([
             'name' => 'Test Type',
             'color' => '#000000',
             'entity_id' => $organization->id,
         ]);
-        $eventSubtype = \App\Models\EventSubtype::create([
+        $eventSubtype = EventSubtype::create([
             'name' => 'Test Subtype',
             'event_type_id' => $eventType->id,
             'entity_id' => $organization->id,
@@ -120,14 +132,14 @@ class EventMassAssignmentTest extends TestCase
         $publishedStatusId = EventStatus::where('status_code', 'published')->first()->id;
         $draftStatusId = EventStatus::where('status_code', 'draft')->first()->id;
 
-        $service = app(\App\Features\Events\Services\EventService::class);
+        $service = app(EventService::class);
 
         $data = [
             'title' => 'Test Event - Status Bypass Attempt',
             'description' => 'Testing that status_id is forced to draft',
             'start_date' => now()->addDays(10)->toISOString(),
             'end_date' => now()->addDays(11)->toISOString(),
-            'format_id' => \App\Models\EventFormat::first()->id,
+            'format_id' => EventFormat::first()->id,
             'entity_id' => $organization->id,
             'organization_id' => $organization->id,
             'event_type_id' => $eventType->id,

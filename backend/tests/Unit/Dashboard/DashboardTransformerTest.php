@@ -4,10 +4,14 @@ namespace Tests\Unit\Dashboard;
 
 use App\Features\Dashboard\Services\DashboardTransformer;
 use App\Models\Event;
+use App\Models\EventApproval;
+use App\Models\EventSubtype;
 use App\Models\EventType;
+use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\EventStatusesSeeder;
 use Database\Seeders\EventTypesSeeder;
 use Database\Seeders\OrganizationStatusesSeeder;
@@ -28,6 +32,7 @@ class DashboardTransformerTest extends TestCase
     use RefreshDatabase;
 
     private DashboardTransformer $transformer;
+
     private Organization $organization;
 
     protected function setUp(): void
@@ -38,9 +43,9 @@ class DashboardTransformerTest extends TestCase
         $this->seed(OrganizationTypesSeeder::class);
         $this->seed(EventStatusesSeeder::class);
         $this->seed(EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventLookupSeeder::class);
+        $this->seed(EventLookupSeeder::class);
 
-        $this->transformer = new DashboardTransformer();
+        $this->transformer = new DashboardTransformer;
         $this->organization = Organization::factory()->primaryEntity()->create();
     }
 
@@ -50,7 +55,7 @@ class DashboardTransformerTest extends TestCase
         $statusId = \DB::table('event_statuses')->where('status_code', 'draft')->value('id')
             ?? \DB::table('event_statuses')->value('id');
         $eventType = EventType::factory()->create(['entity_id' => $this->organization->id]);
-        $subtype = \App\Models\EventSubtype::factory()->create([
+        $subtype = EventSubtype::factory()->create([
             'event_type_id' => $eventType->id,
             'entity_id' => $this->organization->id,
         ]);
@@ -313,7 +318,7 @@ class DashboardTransformerTest extends TestCase
     }
 
     #[Test]
-    public function test_calculate_duration_diffInDays_gt_zero_even_for_hours(): void
+    public function test_calculate_duration_diff_in_days_gt_zero_even_for_hours(): void
     {
         // DISCOVERY: diffInDays returns fractional days, so 5 hours = 0.208 days > 0
         // This means the transformer always takes the "days" branch for any non-zero diff.
@@ -331,7 +336,7 @@ class DashboardTransformerTest extends TestCase
     }
 
     #[Test]
-    public function test_calculate_duration_diffInDays_gt_zero_even_for_minutes(): void
+    public function test_calculate_duration_diff_in_days_gt_zero_even_for_minutes(): void
     {
         // DISCOVERY: 30 minutes = 0.0208 days > 0 — still falls into days branch
         $event = $this->createEvent();
@@ -410,14 +415,14 @@ class DashboardTransformerTest extends TestCase
     public function test_transform_for_detail_includes_locations_with_pivot_data(): void
     {
         $event = $this->createEvent();
-        $location = \App\Models\Location::factory()->create([
+        $location = Location::factory()->create([
             'entity_id' => $this->organization->id,
-            'name'      => 'Teatro San Martín',
-            'address'   => 'Av. San Martín 123',
-            'city'      => 'Demo City',
+            'name' => 'Teatro San Martín',
+            'address' => 'Av. San Martín 123',
+            'city' => 'Demo City',
         ]);
         $event->locations()->attach($location->id, [
-            'location_specific_notes'    => 'Sala principal',
+            'location_specific_notes' => 'Sala principal',
             'max_attendees_for_location' => 500,
         ]);
 
@@ -450,15 +455,15 @@ class DashboardTransformerTest extends TestCase
     #[Test]
     public function test_transform_for_detail_formats_approval_history_entries(): void
     {
-        $creator = \App\Models\User::factory()->create(['name' => 'Approver User']);
+        $creator = User::factory()->create(['name' => 'Approver User']);
         $event = $this->createEvent(['created_by' => $creator->id]);
 
         // Create an approval record
-        \App\Models\EventApproval::create([
-            'event_id'     => $event->id,
+        EventApproval::create([
+            'event_id' => $event->id,
             'performed_by' => $creator->id,
-            'action'       => 'approved',
-            'comments'     => 'Looks good',
+            'action' => 'approved',
+            'comments' => 'Looks good',
             'performed_at' => now(),
         ]);
 

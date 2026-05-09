@@ -3,7 +3,13 @@
 namespace Tests\Feature\Dashboard;
 
 use App\Models\Event;
+use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Feature\Events\EventTestCase;
@@ -19,11 +25,11 @@ class OrganizerStatsTest extends EventTestCase
         parent::setUp();
 
         // Seed only lookup tables (DatabaseTransactions rolls back after each test)
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     /**
@@ -32,7 +38,7 @@ class OrganizerStatsTest extends EventTestCase
     protected function authenticateUser(string $role = 'organizer_admin'): User
     {
         $user = parent::authenticateUser($role);
-        $this->organization = \App\Models\Organization::factory()->create();
+        $this->organization = Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
 
         return $user;
@@ -128,7 +134,7 @@ class OrganizerStatsTest extends EventTestCase
         // Arrange: Create two organizers with events
         $organizerA = $this->authenticateUser();
         $organizerB = User::factory()->create();
-        $organizationB = \App\Models\Organization::factory()->create();
+        $organizationB = Organization::factory()->create();
         $organizerB->organizations()->attach($organizationB->id);
 
         // Organizer A: 5 events

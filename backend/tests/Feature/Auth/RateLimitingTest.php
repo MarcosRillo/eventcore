@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use PHPUnit\Framework\Attributes\Test;
@@ -14,7 +15,7 @@ class RateLimitingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
 
         // Clear rate limiters before each test
         RateLimiter::clear('login');

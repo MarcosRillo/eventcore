@@ -10,15 +10,15 @@ Route::get('/', function () {
 Route::get('health', function () {
     $checks = [];
     try {
-        \DB::select('SELECT 1');
+        DB::select('SELECT 1');
         $checks['database'] = 'ok';
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         $checks['database'] = 'fail';
     }
     try {
-        \Cache::store('redis')->set('__health', 1, 5);
+        Cache::store('redis')->set('__health', 1, 5);
         $checks['cache'] = 'ok';
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         $checks['cache'] = 'fail';
     }
     $allOk = ! in_array('fail', $checks);

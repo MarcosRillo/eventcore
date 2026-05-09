@@ -6,6 +6,11 @@ use App\Features\Approval\Exceptions\InvalidStateTransitionException;
 use App\Features\Approval\Services\ApprovalStateMachine;
 use App\Models\Event;
 use App\Models\EventStatus;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -21,11 +26,11 @@ class ApprovalStateMachineTest extends TestCase
         parent::setUp();
         $this->stateMachine = new ApprovalStateMachine;
         $this->seed([
-            \Database\Seeders\UserRolesSeeder::class,
-            \Database\Seeders\EventStatusesSeeder::class,
-            \Database\Seeders\OrganizationStatusesSeeder::class,
-            \Database\Seeders\OrganizationTypesSeeder::class,
-            \Database\Seeders\EventTypesSeeder::class,
+            UserRolesSeeder::class,
+            EventStatusesSeeder::class,
+            OrganizationStatusesSeeder::class,
+            OrganizationTypesSeeder::class,
+            EventTypesSeeder::class,
         ]);
     }
 

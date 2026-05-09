@@ -3,6 +3,7 @@
 namespace App\Features\Users\Services;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -57,7 +58,7 @@ class UserService
             $targetOrgIds = $user->organizations->pluck('id')->toArray();
 
             if (empty(array_intersect($currentOrgIds, $targetOrgIds))) {
-                throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+                throw new ModelNotFoundException;
             }
         }
 

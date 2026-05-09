@@ -2,6 +2,12 @@
 
 namespace App\Models\Scopes;
 
+use App\Models\Event;
+use App\Models\EventStatus;
+use App\Models\EventSubtype;
+use App\Models\EventType;
+use App\Models\Location;
+use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -48,11 +54,11 @@ class TenantScope implements Scope
 
             // Models que pertenecen al ENTE (event types, subtypes, ubicaciones, etc)
             $entityOwnedModels = [
-                \App\Models\Location::class,
-                \App\Models\EventStatus::class,
-                \App\Models\EventType::class,
-                \App\Models\EventSubtype::class,
-                \App\Models\Sector::class,
+                Location::class,
+                EventStatus::class,
+                EventType::class,
+                EventSubtype::class,
+                Sector::class,
             ];
 
             if (in_array($modelClass, $entityOwnedModels)) {
@@ -67,7 +73,7 @@ class TenantScope implements Scope
             }
 
             // Modelos que pertenecen a ORGANIZACIONES (eventos)
-            if ($modelClass === \App\Models\Event::class && $organizationId) {
+            if ($modelClass === Event::class && $organizationId) {
                 $builder->where('organization_id', $organizationId);
 
                 return;

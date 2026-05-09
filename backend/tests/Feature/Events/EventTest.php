@@ -6,7 +6,14 @@ use App\Models\Event;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Location;
+use App\Models\Organization;
 use App\Models\User;
+use Carbon\Carbon;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -21,11 +28,11 @@ class EventTest extends EventTestCase
         parent::setUp();
 
         // Seed only lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);  // Seeds event_formats
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);  // Seeds event_formats
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     /**
@@ -34,7 +41,7 @@ class EventTest extends EventTestCase
     protected function authenticateUser(string $role = 'entity_admin'): User
     {
         $user = parent::authenticateUser($role);
-        $this->organization = \App\Models\Organization::factory()->create();
+        $this->organization = Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
 
         return $user;
@@ -490,9 +497,9 @@ class EventTest extends EventTestCase
         $this->assertEquals($upcoming3->id, $data[2]['id'], 'Third event should be furthest (15 days)');
 
         // Assert: Verify start dates are in ascending order
-        $startDate1 = \Carbon\Carbon::parse($data[0]['start_date']);
-        $startDate2 = \Carbon\Carbon::parse($data[1]['start_date']);
-        $startDate3 = \Carbon\Carbon::parse($data[2]['start_date']);
+        $startDate1 = Carbon::parse($data[0]['start_date']);
+        $startDate2 = Carbon::parse($data[1]['start_date']);
+        $startDate3 = Carbon::parse($data[2]['start_date']);
         $this->assertTrue($startDate1->lt($startDate2));
         $this->assertTrue($startDate2->lt($startDate3));
     }
@@ -553,9 +560,9 @@ class EventTest extends EventTestCase
         $this->assertEquals($past2->id, $data[2]['id'], 'Third should be oldest past event');
 
         // Assert: Verify end dates are in descending order
-        $endDate1 = \Carbon\Carbon::parse($data[0]['end_date']);
-        $endDate2 = \Carbon\Carbon::parse($data[1]['end_date']);
-        $endDate3 = \Carbon\Carbon::parse($data[2]['end_date']);
+        $endDate1 = Carbon::parse($data[0]['end_date']);
+        $endDate2 = Carbon::parse($data[1]['end_date']);
+        $endDate3 = Carbon::parse($data[2]['end_date']);
         $this->assertTrue($endDate1->gt($endDate2));
         $this->assertTrue($endDate2->gt($endDate3));
     }

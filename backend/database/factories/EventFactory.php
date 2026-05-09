@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Event;
 use App\Models\EventSubtype;
 use App\Models\EventType;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -57,7 +58,7 @@ class EventFactory extends Factory
 
             // Relationships
             'created_by' => User::factory(),
-            'entity_id' => \App\Models\Organization::factory(),
+            'entity_id' => Organization::factory(),
             'organization_id' => null,
             'format_id' => fn () => \DB::table('event_formats')->first()?->id ?? 1,
             'status_id' => fn () => \DB::table('event_statuses')->first()?->id ?? 1,
@@ -162,6 +163,4 @@ class EventFactory extends Factory
             'is_featured' => true,
         ]);
     }
-
-
 }

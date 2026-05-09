@@ -11,6 +11,8 @@ use App\Models\Sector;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -27,7 +29,7 @@ class SectorController extends Controller
     /**
      * Display a listing of sectors.
      */
-    public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $filters = [
             'search' => $request->input('search'),
@@ -118,7 +120,7 @@ class SectorController extends Controller
     /**
      * Remove the specified sector.
      */
-    public function destroy(Sector $sector): JsonResponse|\Illuminate\Http\Response
+    public function destroy(Sector $sector): JsonResponse|Response
     {
         try {
             $this->sectorService->deleteSector($sector);

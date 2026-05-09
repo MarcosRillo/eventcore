@@ -2,13 +2,13 @@
 
 namespace App\Features\Approval\Controllers;
 
-use App\Features\Approval\Services\ApprovalService;
-use App\Http\Controllers\Controller;
 use App\Features\Approval\Requests\ApproveAndPublishEventRequest;
 use App\Features\Approval\Requests\ApproveEventRequest;
 use App\Features\Approval\Requests\PublishEventRequest;
 use App\Features\Approval\Requests\RejectEventRequest;
 use App\Features\Approval\Requests\RequestChangesRequest;
+use App\Features\Approval\Services\ApprovalService;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;

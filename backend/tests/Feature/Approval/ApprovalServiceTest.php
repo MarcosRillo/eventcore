@@ -9,6 +9,12 @@ use App\Models\Event;
 use App\Models\EventApproval;
 use App\Models\EventStatus;
 use App\Models\User;
+use App\Models\UserRole;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
@@ -35,11 +41,11 @@ class ApprovalServiceTest extends TestCase
         parent::setUp();
 
         // Seed lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
 
         // Initialize service
         $this->stateMachine = app(ApprovalStateMachine::class);
@@ -50,7 +56,7 @@ class ApprovalServiceTest extends TestCase
         $this->approvedInternalStatus = EventStatus::where('status_code', 'approved_internal')->first();
 
         // Create approver
-        $entityAdminRole = \App\Models\UserRole::where('role_code', 'entity_admin')->first();
+        $entityAdminRole = UserRole::where('role_code', 'entity_admin')->first();
         $this->approver = User::factory()->create([
             'role_id' => $entityAdminRole->id,
         ]);

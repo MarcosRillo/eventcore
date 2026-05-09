@@ -45,9 +45,11 @@ class Organization extends Model
      *   2 = Confiable — verified organization, standard permissions
      *   3 = Premium   — trusted partner, full permissions
      */
-    public const TRUST_LEVEL_NUEVO     = 1;
+    public const TRUST_LEVEL_NUEVO = 1;
+
     public const TRUST_LEVEL_CONFIABLE = 2;
-    public const TRUST_LEVEL_PREMIUM   = 3;
+
+    public const TRUST_LEVEL_PREMIUM = 3;
 
     /**
      * Get the parent entity that owns this organization.

@@ -2,13 +2,21 @@
 
 namespace Tests\Feature\Dashboard;
 
+use App\Features\Dashboard\Services\DashboardService;
 use App\Models\Event;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\EventLookupSeeder;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Feature\Events\EventTestCase;
 
@@ -29,13 +37,13 @@ class DashboardServiceTest extends EventTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventLookupSeeder::class);
-        \Illuminate\Support\Facades\Cache::flush();
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
+        $this->seed(EventLookupSeeder::class);
+        Cache::flush();
     }
 
     /**
@@ -425,11 +433,11 @@ class DashboardServiceTest extends EventTestCase
         $this->createDashboardEvent('draft', [
             'created_by' => $user->id,
             'start_date' => now()->subDays(20),
-            'end_date'   => now()->subDays(10),
+            'end_date' => now()->subDays(10),
         ]);
 
-        /** @var \App\Features\Dashboard\Services\DashboardService $service */
-        $service = app(\App\Features\Dashboard\Services\DashboardService::class);
+        /** @var DashboardService $service */
+        $service = app(DashboardService::class);
         $result = $service->getFilteredEvents('historic', 1, '', 20);
 
         $this->assertArrayHasKey('data', $result);
@@ -446,7 +454,7 @@ class DashboardServiceTest extends EventTestCase
         $older = $this->createDashboardEvent('draft', [
             'created_by' => $user->id,
             'start_date' => now()->subDays(30),
-            'end_date'   => now()->subDays(20),
+            'end_date' => now()->subDays(20),
         ]);
         $older->updated_at = now()->subDays(15);
         $older->saveQuietly();
@@ -454,13 +462,13 @@ class DashboardServiceTest extends EventTestCase
         $newer = $this->createDashboardEvent('draft', [
             'created_by' => $user->id,
             'start_date' => now()->subDays(25),
-            'end_date'   => now()->subDays(15),
+            'end_date' => now()->subDays(15),
         ]);
         $newer->updated_at = now()->subDays(5);
         $newer->saveQuietly();
 
-        /** @var \App\Features\Dashboard\Services\DashboardService $service */
-        $service = app(\App\Features\Dashboard\Services\DashboardService::class);
+        /** @var DashboardService $service */
+        $service = app(DashboardService::class);
         $result = $service->getFilteredEvents('historic', 1, '', 20);
 
         $data = $result['data'];
@@ -478,11 +486,11 @@ class DashboardServiceTest extends EventTestCase
         $rejected = $this->createDashboardEvent('rejected', [
             'created_by' => $user->id,
             'start_date' => now()->addDays(5),
-            'end_date'   => now()->addDays(10),
+            'end_date' => now()->addDays(10),
         ]);
 
-        /** @var \App\Features\Dashboard\Services\DashboardService $service */
-        $service = app(\App\Features\Dashboard\Services\DashboardService::class);
+        /** @var DashboardService $service */
+        $service = app(DashboardService::class);
         $result = $service->getFilteredEvents('historic', 1, '', 20);
 
         $ids = array_column($result['data'], 'id');
@@ -498,7 +506,7 @@ class DashboardServiceTest extends EventTestCase
         $this->createDashboardEvent('pending_internal_approval', [
             'created_by' => $user->id,
             'start_date' => now()->addDays(5),
-            'end_date'   => now()->addDays(10),
+            'end_date' => now()->addDays(10),
         ]);
 
         $response = $this->getJson('/api/v1/dashboard/events?tab=requires-action');
@@ -516,7 +524,7 @@ class DashboardServiceTest extends EventTestCase
         $this->createDashboardEvent('approved_internal', [
             'created_by' => $user->id,
             'start_date' => now()->addDays(5),
-            'end_date'   => now()->addDays(10),
+            'end_date' => now()->addDays(10),
         ]);
 
         $response = $this->getJson('/api/v1/dashboard/events?tab=pending');
@@ -534,7 +542,7 @@ class DashboardServiceTest extends EventTestCase
         $this->createDashboardEvent('published', [
             'created_by' => $user->id,
             'start_date' => now()->addDays(5),
-            'end_date'   => now()->addDays(10),
+            'end_date' => now()->addDays(10),
         ]);
 
         $response = $this->getJson('/api/v1/dashboard/events?tab=published');
@@ -551,11 +559,11 @@ class DashboardServiceTest extends EventTestCase
 
         $matching = $this->createDashboardEvent('approved_internal', [
             'created_by' => $user->id,
-            'title'      => 'Festival de Tango Especial XUniqueX',
+            'title' => 'Festival de Tango Especial XUniqueX',
         ]);
         $this->createDashboardEvent('approved_internal', [
             'created_by' => $user->id,
-            'title'      => 'Exposición de Arte',
+            'title' => 'Exposición de Arte',
         ]);
 
         $response = $this->getJson('/api/v1/dashboard/events?tab=pending&search=XUniqueX');
@@ -579,7 +587,7 @@ class DashboardServiceTest extends EventTestCase
         $this->createDashboardEvent('draft', [
             'created_by' => $user->id,
             'start_date' => now()->subDays(20),
-            'end_date'   => now()->subDays(10),
+            'end_date' => now()->subDays(10),
         ]);
 
         $response = $this->getJson('/api/v1/dashboard/events/summary');

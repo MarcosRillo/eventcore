@@ -3,6 +3,7 @@
 namespace App\Features\Locations\Requests;
 
 use App\Services\HtmlSanitizer;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -33,18 +34,18 @@ class UpdateLocationRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name'        => 'sometimes|required|string|max:255',
-            'address'     => 'sometimes|required|string|max:500',
-            'city'        => 'sometimes|required|string|max:100',
-            'state'       => 'nullable|string|max:100',
-            'country'     => 'nullable|string|max:100',
+            'name' => 'sometimes|required|string|max:255',
+            'address' => 'sometimes|required|string|max:500',
+            'city' => 'sometimes|required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:1000',
-            'is_active'   => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
         ];
     }
 }

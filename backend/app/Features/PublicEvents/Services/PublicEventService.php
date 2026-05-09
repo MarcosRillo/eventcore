@@ -6,6 +6,7 @@ use App\Features\Shared\Traits\CachesWithTags;
 use App\Models\Event;
 use App\Models\EventType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -242,7 +243,7 @@ class PublicEventService
     /**
      * Apply filters to the event query.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  Builder  $query
      */
     private function applyFilters($query, array $filters): void
     {

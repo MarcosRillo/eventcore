@@ -8,8 +8,11 @@ use App\Features\Auth\Requests\SendInvitationRequest;
 use App\Features\Auth\Services\AuthService;
 use App\Features\Auth\Services\InvitationService;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class InvitationController extends Controller
 {
@@ -30,6 +33,7 @@ class InvitationController extends Controller
             );
 
             $invitation->notify(new InvitationNotification($invitation->plain_token));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Invitación enviada exitosamente.',
@@ -40,7 +44,7 @@ class InvitationController extends Controller
                     'expires_at' => $invitation->expires_at->toIso8601String(),
                 ],
             ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación.',
@@ -87,13 +91,13 @@ class InvitationController extends Controller
                 'success' => true,
                 'message' => 'Invitación cancelada.',
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cancelar.',
                 'errors' => $e->errors(),
             ], 422);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invitación no encontrada.',
@@ -108,6 +112,7 @@ class InvitationController extends Controller
     {
         try {
             $invitation = $this->invitationService->resendInvitation($id, $request->user());
+
             return response()->json([
                 'success' => true,
                 'message' => 'Invitación reenviada exitosamente.',
@@ -118,18 +123,18 @@ class InvitationController extends Controller
                     'expires_at' => $invitation->expires_at->toIso8601String(),
                 ],
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al reenviar invitación.',
                 'errors' => $e->errors(),
             ], 422);
-        } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
+        } catch (AccessDeniedHttpException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 403);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invitación no encontrada.',
@@ -174,6 +179,7 @@ class InvitationController extends Controller
             );
 
             $tokens = $this->authService->issueTokensForUser($user);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cuenta creada exitosamente.',
@@ -189,7 +195,7 @@ class InvitationController extends Controller
                     'expires_at' => $tokens['expires_at'],
                 ],
             ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al aceptar invitación.',

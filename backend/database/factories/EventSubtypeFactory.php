@@ -8,7 +8,7 @@ use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EventSubtype>
+ * @extends Factory<EventSubtype>
  */
 class EventSubtypeFactory extends Factory
 {

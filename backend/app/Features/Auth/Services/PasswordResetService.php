@@ -4,6 +4,7 @@ namespace App\Features\Auth\Services;
 
 use App\Features\Auth\Notifications\PasswordResetNotification;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -26,6 +27,7 @@ class PasswordResetService
 
         if (! $user) {
             Hash::make(Str::random(32)); // normalize timing — prevent email enumeration via response time
+
             return true;
         }
 
@@ -76,7 +78,7 @@ class PasswordResetService
         }
 
         // Check if token has expired
-        $createdAt = \Carbon\Carbon::parse($record->created_at);
+        $createdAt = Carbon::parse($record->created_at);
         if ($createdAt->addMinutes(self::TOKEN_EXPIRATION_MINUTES)->isPast()) {
             // Delete expired token
             DB::table('password_reset_tokens')->where('email', $email)->delete();
@@ -137,7 +139,7 @@ class PasswordResetService
         }
 
         // Check expiration
-        $createdAt = \Carbon\Carbon::parse($record->created_at);
+        $createdAt = Carbon::parse($record->created_at);
         if ($createdAt->addMinutes(self::TOKEN_EXPIRATION_MINUTES)->isPast()) {
             return false;
         }

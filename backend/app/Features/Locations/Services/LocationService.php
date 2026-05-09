@@ -6,6 +6,7 @@ use App\Models\Location;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -46,7 +47,7 @@ class LocationService
      * Get all active locations (useful for dropdowns and selects).
      * Returns a collection, not paginated results.
      */
-    public function getActiveLocations(): \Illuminate\Database\Eloquent\Collection
+    public function getActiveLocations(): Collection
     {
         $query = Location::query();
 

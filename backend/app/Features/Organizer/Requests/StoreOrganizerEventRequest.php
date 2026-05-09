@@ -2,6 +2,8 @@
 
 namespace App\Features\Organizer\Requests;
 
+use App\Models\Organization;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +25,7 @@ class StoreOrganizerEventRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -48,7 +50,7 @@ class StoreOrganizerEventRequest extends FormRequest
                         // Organizer's org has a parent_id pointing to the entity that owns the locations
                         $organizationId = $user->organization_id;
                         $parentEntityId = $organizationId
-                            ? \App\Models\Organization::where('id', $organizationId)->value('parent_id')
+                            ? Organization::where('id', $organizationId)->value('parent_id')
                             : null;
                         if ($parentEntityId) {
                             $query->where('entity_id', $parentEntityId);

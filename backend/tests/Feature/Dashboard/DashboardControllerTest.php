@@ -3,7 +3,15 @@
 namespace Tests\Feature\Dashboard;
 
 use App\Features\Dashboard\Services\DashboardService;
+use App\Models\Event;
+use App\Models\EventType;
+use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Feature\Events\EventTestCase;
@@ -23,17 +31,17 @@ class DashboardControllerTest extends EventTestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     protected function authenticateUser(string $role = 'entity_admin'): User
     {
         $user = parent::authenticateUser($role);
-        $this->organization = \App\Models\Organization::factory()->create();
+        $this->organization = Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
 
         return $user;
@@ -138,12 +146,12 @@ class DashboardControllerTest extends EventTestCase
         $user = $this->authenticateUser('entity_admin');
 
         // Create required event type
-        $eventType = \App\Models\EventType::factory()->create([
+        $eventType = EventType::factory()->create([
             'entity_id' => $this->organization->id,
             'is_active' => true,
         ]);
 
-        $event = \App\Models\Event::factory()->create([
+        $event = Event::factory()->create([
             'entity_id' => $this->organization->id,
             'created_by' => $user->id,
             'status_id' => $this->getStatusId('draft'),

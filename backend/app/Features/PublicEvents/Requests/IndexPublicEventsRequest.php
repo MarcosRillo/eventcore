@@ -3,6 +3,7 @@
 namespace App\Features\PublicEvents\Requests;
 
 use App\Features\Shared\Requests\PaginationRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Index Public Events Request
@@ -19,7 +20,7 @@ class IndexPublicEventsRequest extends PaginationRequest
     /**
      * Get validation rules
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

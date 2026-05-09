@@ -6,6 +6,9 @@ use App\Models\Organization;
 use App\Models\RegistrationRequest;
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,9 +29,9 @@ class RegistrationRequestServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
         Storage::fake('public');
 
         $this->admin = $this->createUserWithRole('platform_admin');
@@ -76,7 +79,7 @@ class RegistrationRequestServiceTest extends TestCase
                 'organization_id' => $organization->id,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
     }
 

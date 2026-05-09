@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationResource;
 use App\Models\Location;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 /**
  * Location Controller
@@ -26,7 +28,7 @@ class LocationController extends Controller
     /**
      * Display a listing of locations for the authenticated user's entity.
      */
-    public function index(IndexLocationsRequest $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index(IndexLocationsRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
         $locations = $this->locationService->getAllLocations($filters);
@@ -95,7 +97,7 @@ class LocationController extends Controller
     /**
      * Remove the specified location.
      */
-    public function destroy(Location $location): \Illuminate\Http\Response
+    public function destroy(Location $location): Response
     {
         $this->locationService->deleteLocation($location);
 

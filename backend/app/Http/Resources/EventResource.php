@@ -2,6 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Event;
+use App\Models\EventFormat;
+use App\Models\EventStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
@@ -12,7 +15,7 @@ use Illuminate\Support\Facades\Cache;
  * Transforms Event model data for API responses.
  * Updated for 3NF normalized schema (Nov 30, 2025).
  *
- * @property-read \App\Models\Event $resource
+ * @property-read Event $resource
  */
 class EventResource extends JsonResource
 {
@@ -34,18 +37,18 @@ class EventResource extends JsonResource
             'featured_image' => $this->featured_image
                 ? (str_starts_with($this->featured_image, 'http')
                     ? $this->featured_image
-                    : config('app.url') . $this->featured_image)
+                    : config('app.url').$this->featured_image)
                 : null,
             'is_featured' => $this->is_featured,
             'logo_url' => $this->logo_url
                 ? (str_starts_with($this->logo_url, 'http')
                     ? $this->logo_url
-                    : config('app.url') . $this->logo_url)
+                    : config('app.url').$this->logo_url)
                 : null,
             'responsive_image_url' => $this->responsive_image_url
                 ? (str_starts_with($this->responsive_image_url, 'http')
                     ? $this->responsive_image_url
-                    : config('app.url') . $this->responsive_image_url)
+                    : config('app.url').$this->responsive_image_url)
                 : null,
 
             // Event info
@@ -186,9 +189,9 @@ class EventResource extends JsonResource
 
         return [
             'meta' => [
-                'available_statuses' => Cache::rememberForever('event_statuses', fn () => \App\Models\EventStatus::all(['id', 'status_name', 'status_code']),
+                'available_statuses' => Cache::rememberForever('event_statuses', fn () => EventStatus::all(['id', 'status_name', 'status_code']),
                 ),
-                'available_formats' => Cache::rememberForever('event_formats', fn () => \App\Models\EventFormat::all(['id', 'format_name', 'format_code']),
+                'available_formats' => Cache::rememberForever('event_formats', fn () => EventFormat::all(['id', 'format_name', 'format_code']),
                 ),
             ],
         ];

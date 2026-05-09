@@ -9,6 +9,9 @@ use App\Models\Organization;
 use App\Models\RegistrationRequest;
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
@@ -34,9 +37,9 @@ class RegistrationRequestCoverageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
         Storage::fake('public');
         Notification::fake();
 
@@ -85,7 +88,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => $organization->id,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
     }
 
@@ -270,7 +273,7 @@ class RegistrationRequestCoverageTest extends TestCase
         $this->actingAs($platformAdmin, 'sanctum');
 
         $pendingRequest = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $response = $this->postJson("/api/v1/registration-requests/{$pendingRequest->id}/approve");
@@ -299,7 +302,7 @@ class RegistrationRequestCoverageTest extends TestCase
         $this->actingAs($entityAdmin, 'sanctum');
 
         $pendingRequest = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $this->postJson("/api/v1/registration-requests/{$pendingRequest->id}/approve");
@@ -314,7 +317,7 @@ class RegistrationRequestCoverageTest extends TestCase
         $this->actingAs($entityAdmin, 'sanctum');
 
         $pendingRequest = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $this->postJson("/api/v1/registration-requests/{$pendingRequest->id}/approve");
@@ -352,7 +355,7 @@ class RegistrationRequestCoverageTest extends TestCase
         $this->actingAs($entityAdmin, 'sanctum');
 
         $pendingRequest = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $this->postJson("/api/v1/registration-requests/{$pendingRequest->id}/reject", [
@@ -387,7 +390,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => $organization->id,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
 
         $response = $this->postJson("/api/v1/registration-requests/{$request->id}/suspend");
@@ -407,7 +410,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => null,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
 
         $response = $this->postJson("/api/v1/registration-requests/{$request->id}/suspend");
@@ -443,7 +446,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => $organization->id,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
 
         $response = $this->postJson("/api/v1/registration-requests/{$request->id}/unsuspend");
@@ -463,7 +466,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => null,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
 
         $response = $this->postJson("/api/v1/registration-requests/{$request->id}/unsuspend");
@@ -499,7 +502,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => $organization->id,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
 
         $response = $this->deleteJson("/api/v1/registration-requests/{$request->id}");
@@ -519,7 +522,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'organization_id' => null,
                 'reviewed_by' => $this->admin->id,
                 'reviewed_at' => now(),
-            ]
+            ],
         ));
 
         $response = $this->deleteJson("/api/v1/registration-requests/{$request->id}");
@@ -540,7 +543,7 @@ class RegistrationRequestCoverageTest extends TestCase
                 'status' => 'pending',
                 'first_name' => 'María',
                 'last_name' => 'González',
-            ])
+            ]),
         ));
 
         $response = $this->getJson("/api/v1/registration-requests/{$request->id}");
@@ -554,7 +557,7 @@ class RegistrationRequestCoverageTest extends TestCase
     public function test_show_returns_correct_id(): void
     {
         $request = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $response = $this->getJson("/api/v1/registration-requests/{$request->id}");
@@ -570,7 +573,7 @@ class RegistrationRequestCoverageTest extends TestCase
             $this->makeRequestData([
                 'status' => 'pending',
                 'organization_name' => 'Empresa de Eventos SA',
-            ])
+            ]),
         ));
 
         $response = $this->getJson("/api/v1/registration-requests/{$request->id}");
@@ -587,7 +590,7 @@ class RegistrationRequestCoverageTest extends TestCase
             $this->makeRequestData([
                 'status' => 'pending',
                 'email' => $email,
-            ])
+            ]),
         ));
 
         $response = $this->getJson("/api/v1/registration-requests/{$request->id}");
@@ -600,7 +603,7 @@ class RegistrationRequestCoverageTest extends TestCase
     public function test_show_response_contains_standard_resource_fields(): void
     {
         $request = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $response = $this->getJson("/api/v1/registration-requests/{$request->id}");
@@ -632,7 +635,7 @@ class RegistrationRequestCoverageTest extends TestCase
         $this->actingAs($entityAdmin, 'sanctum');
 
         $pendingRequest = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $response = $this->postJson("/api/v1/registration-requests/{$pendingRequest->id}/reject", [
@@ -652,7 +655,7 @@ class RegistrationRequestCoverageTest extends TestCase
         $this->actingAs($entityAdmin, 'sanctum');
 
         $pendingRequest = RegistrationRequest::create(array_merge(
-            $this->makeRequestData(['status' => 'pending'])
+            $this->makeRequestData(['status' => 'pending']),
         ));
 
         $reason = 'La información proporcionada es insuficiente para verificar la organización.';

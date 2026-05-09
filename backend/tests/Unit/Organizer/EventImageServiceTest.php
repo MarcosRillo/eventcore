@@ -26,7 +26,7 @@ class EventImageServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new EventImageService();
+        $this->service = new EventImageService;
     }
 
     // ================================================================
@@ -192,6 +192,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -214,19 +215,20 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
         $file = UploadedFile::fake()->image('logo.jpg', 800, 600);
 
         $url = $service->storeImage($file, 1, 'logo');
 
         $this->assertEquals(
             'https://res.cloudinary.com/testcloud/image/upload/events/1/logo_abc123.jpg',
-            $url
+            $url,
         );
     }
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -250,7 +252,7 @@ class EventImageServiceTest extends TestCase
                         && $options['resource_type'] === 'image'
                         && $options['overwrite'] === true
                         && str_starts_with($options['public_id'], 'logo_');
-                })
+                }),
             )
             ->andReturn(new ApiResponse([
                 'secure_url' => 'https://res.cloudinary.com/testcloud/image/upload/events/42/logo_xyz.jpg',
@@ -260,7 +262,7 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
         $file = UploadedFile::fake()->image('featured.jpg');
 
         $url = $service->storeImage($file, $organizationId, 'logo');
@@ -270,6 +272,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -293,7 +296,7 @@ class EventImageServiceTest extends TestCase
                     // public_id should start with 'logo_', not 'logo_file_'
                     return str_starts_with($options['public_id'], 'logo_')
                         && ! str_starts_with($options['public_id'], 'logo_file_');
-                })
+                }),
             )
             ->andReturn(new ApiResponse([
                 'secure_url' => 'https://res.cloudinary.com/testcloud/image/upload/events/1/logo_abc.jpg',
@@ -303,7 +306,7 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
         $file = UploadedFile::fake()->image('logo.jpg');
         $data = ['logo_file' => $file];
 
@@ -319,6 +322,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -339,10 +343,10 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         $result = $service->deleteImage(
-            'https://res.cloudinary.com/testcloud/image/upload/events/1/logo_abc123.jpg'
+            'https://res.cloudinary.com/testcloud/image/upload/events/1/logo_abc123.jpg',
         );
 
         $this->assertTrue($result);
@@ -350,6 +354,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -369,10 +374,10 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         $result = $service->deleteImage(
-            'https://res.cloudinary.com/testcloud/image/upload/events/1/logo_missing.jpg'
+            'https://res.cloudinary.com/testcloud/image/upload/events/1/logo_missing.jpg',
         );
 
         $this->assertFalse($result);
@@ -380,6 +385,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -400,11 +406,11 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         // Versioned URL: /image/upload/v1234567890/...
         $result = $service->deleteImage(
-            'https://res.cloudinary.com/testcloud/image/upload/v1234567890/events/1/logo_versioned.jpg'
+            'https://res.cloudinary.com/testcloud/image/upload/v1234567890/events/1/logo_versioned.jpg',
         );
 
         $this->assertTrue($result);
@@ -416,6 +422,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -448,7 +455,7 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         $data = [
             'logo_file' => UploadedFile::fake()->image('logo.jpg'),
@@ -468,6 +475,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -498,7 +506,7 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         $data = [
             'logo_file' => UploadedFile::fake()->image('new_logo.jpg'),
@@ -516,6 +524,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -543,7 +552,7 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         $data = [
             'logo_file' => UploadedFile::fake()->image('new_logo.jpg'),
@@ -560,6 +569,7 @@ class EventImageServiceTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     *
      * @preserveGlobalState disabled
      */
     #[Test]
@@ -584,7 +594,7 @@ class EventImageServiceTest extends TestCase
         $cloudinaryMock = \Mockery::mock('overload:Cloudinary\Cloudinary');
         $cloudinaryMock->shouldReceive('uploadApi')->andReturn($uploadApiMock);
 
-        $service = new EventImageService();
+        $service = new EventImageService;
 
         $data = [
             'featured_image_file' => UploadedFile::fake()->image('feature.jpg'),

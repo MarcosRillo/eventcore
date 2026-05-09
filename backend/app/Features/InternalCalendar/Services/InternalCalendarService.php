@@ -3,6 +3,8 @@
 namespace App\Features\InternalCalendar\Services;
 
 use App\Models\Event;
+use App\Models\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
@@ -57,7 +59,7 @@ class InternalCalendarService
         // This enables organizer_admin to view all organizations' events for date coordination
         $userRoleCode = $user?->getRoleCode();
         if ($userRoleCode && in_array($userRoleCode, self::PRIVILEGED_ROLES)) {
-            $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
+            $query->withoutGlobalScope(TenantScope::class);
         }
 
         // Apply filters
@@ -87,7 +89,7 @@ class InternalCalendarService
         // This enables organizer_admin to view any organization's event details
         $userRoleCode = $user?->getRoleCode();
         if ($userRoleCode && in_array($userRoleCode, self::PRIVILEGED_ROLES)) {
-            $query->withoutGlobalScope(\App\Models\Scopes\TenantScope::class);
+            $query->withoutGlobalScope(TenantScope::class);
         }
 
         return $query->first();
@@ -114,7 +116,7 @@ class InternalCalendarService
      * - start_date + end_date: Filter by date range (both required)
      * - event_type_id: Filter by event type
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query  The query builder to modify
+     * @param  Builder  $query  The query builder to modify
      * @param  array  $filters  Associative array of filter key-value pairs
      */
     private function applyFilters($query, array $filters): void

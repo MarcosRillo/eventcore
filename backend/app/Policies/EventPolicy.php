@@ -221,7 +221,7 @@ class EventPolicy
      */
     private function canAccessEvent(User $user, Event $event): bool
     {
-        if (!$user->organization_id) {
+        if (! $user->organization_id) {
             return false;
         }
 

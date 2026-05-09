@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Features\Auth\Notifications\PasswordResetNotification;
 use App\Models\User;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +20,7 @@ class PasswordResetTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
     }
 
     #[Test]
@@ -82,7 +83,7 @@ class PasswordResetTest extends TestCase
         ]);
 
         // Create a reset token
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
@@ -116,7 +117,7 @@ class PasswordResetTest extends TestCase
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         // Create a reset token
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
@@ -139,7 +140,7 @@ class PasswordResetTest extends TestCase
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         // Create an expired reset token (61 minutes ago)
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
@@ -189,7 +190,7 @@ class PasswordResetTest extends TestCase
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         // Create a valid reset token
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
@@ -212,7 +213,7 @@ class PasswordResetTest extends TestCase
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         // Create a valid reset token
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
@@ -234,7 +235,7 @@ class PasswordResetTest extends TestCase
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         // Create an expired reset token
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
@@ -266,7 +267,7 @@ class PasswordResetTest extends TestCase
         $this->assertEquals(2, $user->tokens()->count());
 
         // Create a reset token
-        $token = \Illuminate\Support\Str::random(64);
+        $token = Str::random(64);
         DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make($token),
