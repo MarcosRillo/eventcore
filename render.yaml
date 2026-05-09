@@ -43,13 +43,19 @@ services:
       - key: DB_SSLMODE
         value: require
 
-      # --- Redis (Upstash) ---
+      # --- Cache (Postgres-backed via Neon) ---
+      # NOTE: Originally Redis (Upstash). The Upstash database was deleted by
+      # the provider after long inactivity, causing 500s on every public endpoint
+      # (Cache::tags() calls failed DNS resolution). Switched to database cache as
+      # hotfix — performance is fine at current scale. To restore Redis later see
+      # OPS-046.
+      - key: CACHE_STORE
+        value: database
+      # Redis env vars retained for future restoration (set in dashboard, unused for now).
       - key: REDIS_URL
         sync: false # Upstash URL: rediss://default:xxx@xxx.upstash.io:6379
       - key: REDIS_CLIENT
         value: phpredis
-      - key: CACHE_STORE
-        value: redis
 
       # --- CORS / Sanctum ---
       - key: FRONTEND_URL
