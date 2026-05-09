@@ -6,6 +6,12 @@ use App\Models\Organization;
 use App\Models\OrganizationStatus;
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,11 +24,11 @@ class OrganizationTest extends TestCase
         parent::setUp();
 
         // Seed lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
     }
 
     /**
@@ -52,7 +58,7 @@ class OrganizationTest extends TestCase
     /**
      * Create linked organizations (organizers) for an entity.
      */
-    protected function createLinkedOrganizations(Organization $entity, int $count = 3): \Illuminate\Database\Eloquent\Collection
+    protected function createLinkedOrganizations(Organization $entity, int $count = 3): Collection
     {
         return Organization::factory()
             ->count($count)

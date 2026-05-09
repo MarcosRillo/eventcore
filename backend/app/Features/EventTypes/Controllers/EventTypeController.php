@@ -11,6 +11,8 @@ use App\Models\EventType;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -27,7 +29,7 @@ class EventTypeController extends Controller
     /**
      * Display a listing of event types.
      */
-    public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $filters = [
             'search' => $request->input('search'),
@@ -118,7 +120,7 @@ class EventTypeController extends Controller
     /**
      * Remove the specified event type.
      */
-    public function destroy(EventType $eventType): JsonResponse|\Illuminate\Http\Response
+    public function destroy(EventType $eventType): JsonResponse|Response
     {
         try {
             $this->eventTypeService->deleteEventType($eventType);

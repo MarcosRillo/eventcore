@@ -7,6 +7,11 @@ use App\Models\EventStatus;
 use App\Models\EventType;
 use App\Models\Location;
 use App\Models\Organization;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -40,11 +45,11 @@ class InternalCalendarServiceTest extends TestCase
         parent::setUp();
 
         // Seed required data
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
 
         // Create test organization
         $this->organization = Organization::factory()->create();

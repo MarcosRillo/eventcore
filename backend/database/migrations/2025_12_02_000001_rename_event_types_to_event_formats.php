@@ -19,7 +19,7 @@ return new class extends Migration
             if (Schema::hasColumn('events', 'subtype_id')) {
                 try {
                     $table->dropForeign(['subtype_id']);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // FK may not exist
                 }
             }

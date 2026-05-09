@@ -3,7 +3,11 @@
 namespace Tests\Feature\Locations;
 
 use App\Models\Location;
+use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Events\EventTestCase;
 
@@ -21,9 +25,9 @@ class LocationTest extends EventTestCase
         parent::setUp();
 
         // Seed only lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     /**
@@ -32,7 +36,7 @@ class LocationTest extends EventTestCase
     protected function authenticateUser(string $role = 'entity_admin'): User
     {
         $user = parent::authenticateUser($role);
-        $this->organization = \App\Models\Organization::factory()->create();
+        $this->organization = Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
 
         return $user;

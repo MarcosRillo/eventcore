@@ -2,15 +2,18 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Event;
 use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Organization;
+use App\Models\Scopes\TenantScope;
+use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
 use Database\Seeders\OrganizationStatusesSeeder;
 use Database\Seeders\OrganizationTypesSeeder;
 use Database\Seeders\UserRolesSeeder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -33,8 +36,8 @@ class EventTypeTest extends TestCase
         $this->seed(OrganizationStatusesSeeder::class);
         $this->seed(OrganizationTypesSeeder::class);
         $this->seed(EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventLookupSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(EventLookupSeeder::class);
 
         $this->organization = Organization::factory()->primaryEntity()->create();
     }
@@ -89,7 +92,7 @@ class EventTypeTest extends TestCase
         // Verify the relationship is a HasMany instance (zero events initially)
         $relation = $eventType->events();
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $relation);
+        $this->assertInstanceOf(HasMany::class, $relation);
         $this->assertInstanceOf(Collection::class, $eventType->events);
         $this->assertCount(0, $eventType->events);
     }
@@ -176,8 +179,8 @@ class EventTypeTest extends TestCase
     public function test_has_tenant_scope_via_booted(): void
     {
         // EventType uses TenantScope — verify global scopes are registered
-        $scopes = (new EventType())->getGlobalScopes();
+        $scopes = (new EventType)->getGlobalScopes();
 
-        $this->assertArrayHasKey(\App\Models\Scopes\TenantScope::class, $scopes);
+        $this->assertArrayHasKey(TenantScope::class, $scopes);
     }
 }

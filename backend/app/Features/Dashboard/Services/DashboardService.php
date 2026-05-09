@@ -54,9 +54,9 @@ class DashboardService
 
             return [
                 'requiere_accion' => (int) $row->requiere_accion,
-                'pendientes'      => (int) $row->pendientes,
-                'publicados'      => (int) $row->publicados,
-                'historico'       => (int) $row->historico,
+                'pendientes' => (int) $row->pendientes,
+                'publicados' => (int) $row->publicados,
+                'historico' => (int) $row->historico,
             ];
         });
     }

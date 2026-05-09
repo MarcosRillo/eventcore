@@ -17,15 +17,16 @@ use App\Features\Events\Controllers\EventController as FeatureEventController;
 use App\Features\EventTypes\Controllers\EventSubtypeController;
 use App\Features\EventTypes\Controllers\EventTypeController;
 // Feature Controllers - Sectors
-use App\Features\Sectors\Controllers\SectorController;
-// Feature Controllers - SIMPLE
 use App\Features\InternalCalendar\Controllers\InternalCalendarController;
+// Feature Controllers - SIMPLE
 use App\Features\InternalCalendar\Controllers\InternalCalendarStatsController;
 use App\Features\Locations\Controllers\LocationController;
 use App\Features\Organizations\Controllers\OrganizationController;
 use App\Features\Organizer\Controllers\OrganizerController;
 use App\Features\PublicEvents\Controllers\PublicEventController;
+use App\Features\Sectors\Controllers\SectorController;
 use App\Features\Users\Controllers\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -287,7 +288,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Legacy public routes (keep for backward compatibility)
-    Route::get('events/public', function (\Illuminate\Http\Request $request) {
+    Route::get('events/public', function (Request $request) {
         $response = app()->call([app(PublicEventController::class), 'index'], ['request' => $request]);
 
         return $response

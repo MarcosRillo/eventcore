@@ -172,7 +172,7 @@ return new class extends Migration
                                         'notes' => null,
                                     ],
                                 );
-                            } catch (\Exception $e) {
+                            } catch (Exception $e) {
                                 Log::warning('Failed to migrate async date', [
                                     'event_id' => $event->id,
                                     'date' => $date,

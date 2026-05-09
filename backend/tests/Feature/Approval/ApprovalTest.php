@@ -3,7 +3,14 @@
 namespace Tests\Feature\Approval;
 
 use App\Models\Event;
+use App\Models\EventApproval;
+use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Feature\Events\EventTestCase;
@@ -19,11 +26,11 @@ class ApprovalTest extends EventTestCase
         parent::setUp();
 
         // Seed only lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     /**
@@ -32,7 +39,7 @@ class ApprovalTest extends EventTestCase
     protected function authenticateUser(string $role = 'entity_admin'): User
     {
         $user = parent::authenticateUser($role);
-        $this->organization = \App\Models\Organization::factory()->create();
+        $this->organization = Organization::factory()->create();
         $user->organizations()->attach($this->organization->id);
 
         return $user;
@@ -237,7 +244,7 @@ class ApprovalTest extends EventTestCase
         $this->assertEquals($this->getStatusId('published'), $event->status_id);
 
         // Assert 3 approval records were created
-        $approvals = \App\Models\EventApproval::where('event_id', $event->id)->get();
+        $approvals = EventApproval::where('event_id', $event->id)->get();
         $this->assertCount(3, $approvals);
 
         $actions = $approvals->pluck('action')->sort()->values()->toArray();

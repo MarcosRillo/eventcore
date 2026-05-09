@@ -4,6 +4,9 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -18,9 +21,9 @@ class SuspendedUserTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
 
         $entityAdminRole = UserRole::where('role_code', 'entity_admin')->first();
 

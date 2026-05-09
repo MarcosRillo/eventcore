@@ -4,10 +4,12 @@ namespace Tests\Unit\Models;
 
 use App\Models\RefreshToken;
 use App\Models\User;
+use Carbon\Carbon;
 use Database\Seeders\OrganizationStatusesSeeder;
 use Database\Seeders\OrganizationTypesSeeder;
 use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -36,7 +38,7 @@ class RefreshTokenTest extends TestCase
             'user_id' => $user->id,
             'token' => 'plain_token_'.uniqid(),
             'token_hash' => hash('sha256', 'plain_token_'.uniqid()),
-            'family_id' => \Illuminate\Support\Str::uuid()->toString(),
+            'family_id' => Str::uuid()->toString(),
             'expires_at' => now()->addDays(30),
             'revoked_at' => null,
         ], $attributes));
@@ -54,7 +56,7 @@ class RefreshTokenTest extends TestCase
             'user_id' => $user->id,
             'token' => 'some_token',
             'token_hash' => hash('sha256', 'some_token'),
-            'family_id' => \Illuminate\Support\Str::uuid()->toString(),
+            'family_id' => Str::uuid()->toString(),
             'expires_at' => now()->addDays(30),
         ]);
 
@@ -190,7 +192,7 @@ class RefreshTokenTest extends TestCase
     public function test_scope_active_excludes_revoked_tokens(): void
     {
         $user = User::factory()->create();
-        $familyId = \Illuminate\Support\Str::uuid()->toString();
+        $familyId = Str::uuid()->toString();
 
         RefreshToken::create([
             'user_id' => $user->id,
@@ -220,8 +222,8 @@ class RefreshTokenTest extends TestCase
     public function test_scope_by_family_filters_by_family_id(): void
     {
         $user = User::factory()->create();
-        $familyA = \Illuminate\Support\Str::uuid()->toString();
-        $familyB = \Illuminate\Support\Str::uuid()->toString();
+        $familyA = Str::uuid()->toString();
+        $familyB = Str::uuid()->toString();
 
         RefreshToken::create([
             'user_id' => $user->id,
@@ -250,7 +252,7 @@ class RefreshTokenTest extends TestCase
     {
         $token = $this->createToken();
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $token->expires_at);
+        $this->assertInstanceOf(Carbon::class, $token->expires_at);
     }
 
     #[Test]
@@ -258,7 +260,7 @@ class RefreshTokenTest extends TestCase
     {
         $token = $this->createToken(['revoked_at' => now()->subHour()]);
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $token->revoked_at);
+        $this->assertInstanceOf(Carbon::class, $token->revoked_at);
     }
 
     #[Test]
@@ -276,7 +278,7 @@ class RefreshTokenTest extends TestCase
     #[Test]
     public function test_fillable_fields_are_defined(): void
     {
-        $model = new RefreshToken();
+        $model = new RefreshToken;
         $fillable = $model->getFillable();
 
         $this->assertContains('user_id', $fillable);

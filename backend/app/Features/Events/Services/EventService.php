@@ -5,12 +5,11 @@ namespace App\Features\Events\Services;
 use App\Features\Shared\Traits\StatusResolvable;
 use App\Models\Event;
 use App\Models\User;
+use App\Services\HtmlSanitizer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use App\Services\HtmlSanitizer;
 
 class EventService
 {
@@ -174,7 +173,7 @@ class EventService
      */
     public function getStatistics(User $user): array
     {
-        $cacheKey = 'events.statistics.' . ($user->organization_id ?? 'global');
+        $cacheKey = 'events.statistics.'.($user->organization_id ?? 'global');
 
         return Cache::remember($cacheKey, 60, function () use ($user) {
             $bindings = [];
@@ -193,10 +192,10 @@ class EventService
             ", $bindings);
 
             return [
-                'total'     => (int) $row->total,
+                'total' => (int) $row->total,
                 'published' => (int) $row->published,
-                'pending'   => (int) $row->pending,
-                'draft'     => (int) $row->draft,
+                'pending' => (int) $row->pending,
+                'draft' => (int) $row->draft,
             ];
         });
     }

@@ -12,6 +12,7 @@ use App\Models\EventType;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -28,7 +29,7 @@ class EventSubtypeController extends Controller
     /**
      * Display a listing of subtypes for an event type.
      */
-    public function index(Request $request, EventType $eventType): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index(Request $request, EventType $eventType): AnonymousResourceCollection
     {
         $filters = [
             'search' => $request->input('search'),

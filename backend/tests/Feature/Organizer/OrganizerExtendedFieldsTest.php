@@ -4,7 +4,14 @@ namespace Tests\Feature\Organizer;
 
 use App\Models\Event;
 use App\Models\EventRoom;
+use App\Models\Location;
 use App\Models\Organization;
+use Database\Seeders\EventLookupSeeder;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,12 +35,12 @@ class OrganizerExtendedFieldsTest extends TestCase
         parent::setUp();
 
         // Seed lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
-        $this->seed(\Database\Seeders\EventLookupSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
+        $this->seed(EventLookupSeeder::class);
 
         // Create tourism entity (id=1) for locations FK
         \DB::table('organizations')->insertOrIgnore([
@@ -137,7 +144,7 @@ class OrganizerExtendedFieldsTest extends TestCase
     public function test_event_can_have_many_rooms(): void
     {
         // Create a location first (required by event_rooms FK)
-        $location = \App\Models\Location::factory()->create(['entity_id' => 1]);
+        $location = Location::factory()->create(['entity_id' => 1]);
 
         $room1 = EventRoom::create([
             'location_id' => $location->id,

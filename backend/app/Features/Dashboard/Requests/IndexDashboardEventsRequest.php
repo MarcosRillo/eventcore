@@ -3,6 +3,8 @@
 namespace App\Features\Dashboard\Requests;
 
 use App\Features\Shared\Requests\PaginationRequest;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Index Dashboard Events Request
@@ -39,7 +41,7 @@ class IndexDashboardEventsRequest extends PaginationRequest
     /**
      * Get validation rules
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -53,7 +55,7 @@ class IndexDashboardEventsRequest extends PaginationRequest
      */
     protected function failedAuthorization(): void
     {
-        throw new \Illuminate\Auth\Access\AuthorizationException(
+        throw new AuthorizationException(
             'Access denied. Dashboard is only available for entity admin and entity staff users.',
         );
     }

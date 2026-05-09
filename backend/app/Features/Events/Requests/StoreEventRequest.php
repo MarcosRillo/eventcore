@@ -3,9 +3,10 @@
 namespace App\Features\Events\Requests;
 
 use App\Models\Event;
+use App\Services\HtmlSanitizer;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Services\HtmlSanitizer;
 
 /**
  * Store Event Request
@@ -41,7 +42,7 @@ class StoreEventRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -221,5 +222,4 @@ class StoreEventRequest extends FormRequest
             }
         }
     }
-
 }

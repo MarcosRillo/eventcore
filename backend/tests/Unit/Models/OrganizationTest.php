@@ -297,7 +297,7 @@ class OrganizationTest extends TestCase
     #[Test]
     public function test_fillable_fields_are_defined(): void
     {
-        $org = new Organization();
+        $org = new Organization;
         $fillable = $org->getFillable();
 
         $this->assertContains('name', $fillable);

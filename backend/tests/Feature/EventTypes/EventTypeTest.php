@@ -6,6 +6,9 @@ use App\Models\EventSubtype;
 use App\Models\EventType;
 use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Events\EventTestCase;
 
@@ -38,9 +41,9 @@ class EventTypeTest extends EventTestCase
         parent::setUp();
 
         // Seed lookup tables
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
     }
 
     /**

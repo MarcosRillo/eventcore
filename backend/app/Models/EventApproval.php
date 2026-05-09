@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * EventApproval Model
@@ -16,11 +17,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $performed_by
  * @property string $action
  * @property string|null $comments
- * @property \Illuminate\Support\Carbon $performed_at
- * @property \Illuminate\Support\Carbon|null $scheduled_publish_at
+ * @property Carbon $performed_at
+ * @property Carbon|null $scheduled_publish_at
  * @property array|null $metadata
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class EventApproval extends Model
 {

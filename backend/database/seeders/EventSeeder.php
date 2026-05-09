@@ -115,8 +115,6 @@ class EventSeeder extends Seeder
 
         // Get 3NF lookup values
 
-
-
         // Get organizations
         $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
         $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();
@@ -141,7 +139,6 @@ class EventSeeder extends Seeder
 
         // Get locations
         $ubicacionesTurismo = Location::where('entity_id', $enteDeturismo->id)->get();
-
 
         // =====================================================
         // EVENTOS PROPIOS DEL DEMO ORGANIZATION (3)
@@ -990,7 +987,6 @@ class EventSeeder extends Seeder
 
         // Get origins
 
-
         // Get frequencies
 
         // Get organizations
@@ -1778,7 +1774,6 @@ class EventSeeder extends Seeder
         $multiSedeFormat = EventFormat::where('format_code', 'multi_sede')->first();
 
         // Get origins
-
 
         // Get frequencies
 
@@ -3236,9 +3231,6 @@ class EventSeeder extends Seeder
 
         $sedeUnicaFormat = EventFormat::where('format_code', 'sede_unica')->first();
         $multiSedeFormat = EventFormat::where('format_code', 'multi_sede')->first();
-
-
-
 
         $enteDeturismo = Organization::where('slug', 'demo-organization')->first();
         $hotelCentral = Organization::where('slug', 'hotel-central-demo')->first();

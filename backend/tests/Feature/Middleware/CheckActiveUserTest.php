@@ -4,6 +4,7 @@ namespace Tests\Feature\Middleware;
 
 use App\Http\Middleware\CheckActiveUser;
 use App\Models\User;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,7 +33,7 @@ class CheckActiveUserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
     }
 
     #[Test]

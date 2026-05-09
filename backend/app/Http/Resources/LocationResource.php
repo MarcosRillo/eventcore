@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -10,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * Transforms Location model data for API responses.
  *
- * @property-read \App\Models\Location $resource
+ * @property-read Location $resource
  */
 class LocationResource extends JsonResource
 {

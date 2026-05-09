@@ -2,6 +2,8 @@
 
 namespace App\Features\Dashboard\Requests;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -24,7 +26,7 @@ class EventsSummaryRequest extends FormRequest
     /**
      * Get validation rules
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -36,7 +38,7 @@ class EventsSummaryRequest extends FormRequest
      */
     protected function failedAuthorization(): void
     {
-        throw new \Illuminate\Auth\Access\AuthorizationException(
+        throw new AuthorizationException(
             'Access denied. Dashboard is only available for entity admin and entity staff users.',
         );
     }

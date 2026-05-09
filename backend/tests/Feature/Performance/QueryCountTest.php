@@ -8,7 +8,14 @@ use App\Models\EventType;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserRole;
+use Database\Seeders\EventStatusesSeeder;
+use Database\Seeders\EventTypesSeeder;
+use Database\Seeders\OrganizationStatusesSeeder;
+use Database\Seeders\OrganizationTypesSeeder;
+use Database\Seeders\UserRolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Concerns\AssertsQueryCount;
 use Tests\TestCase;
@@ -36,11 +43,11 @@ class QueryCountTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\UserRolesSeeder::class);
-        $this->seed(\Database\Seeders\EventStatusesSeeder::class);
-        $this->seed(\Database\Seeders\EventTypesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationStatusesSeeder::class);
-        $this->seed(\Database\Seeders\OrganizationTypesSeeder::class);
+        $this->seed(UserRolesSeeder::class);
+        $this->seed(EventStatusesSeeder::class);
+        $this->seed(EventTypesSeeder::class);
+        $this->seed(OrganizationStatusesSeeder::class);
+        $this->seed(OrganizationTypesSeeder::class);
 
         $this->organization = Organization::factory()->create();
         $this->publishedStatus = EventStatus::where('status_code', 'published')->first();
@@ -136,7 +143,7 @@ class QueryCountTest extends TestCase
         $this->assertMaxQueries(100, function () use (&$queriesWithFew) {
             // Count queries for 5 records (excluding cache infrastructure queries)
             $queries = collect();
-            \Illuminate\Support\Facades\DB::listen(function ($q) use ($queries) {
+            DB::listen(function ($q) use ($queries) {
                 if (! str_contains($q->sql, '"cache"')) {
                     $queries->push($q->sql);
                 }
@@ -153,10 +160,10 @@ class QueryCountTest extends TestCase
         $queriesWithMany = 0;
         $this->assertMaxQueries(100, function () use (&$queriesWithMany) {
             // Flush cache so the second request hits the DB (not the cache from the first run)
-            \Illuminate\Support\Facades\Cache::flush();
+            Cache::flush();
 
             $queries = collect();
-            \Illuminate\Support\Facades\DB::listen(function ($q) use ($queries) {
+            DB::listen(function ($q) use ($queries) {
                 if (! str_contains($q->sql, '"cache"')) {
                     $queries->push($q->sql);
                 }

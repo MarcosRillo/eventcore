@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Location;
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Location>
+ * @extends Factory<Location>
  */
 class LocationFactory extends Factory
 {
@@ -30,7 +31,7 @@ class LocationFactory extends Factory
             'phone' => $this->faker->optional()->phoneNumber(),
             'email' => $this->faker->optional()->safeEmail(),
             'is_active' => true,
-            'entity_id' => \App\Models\Organization::factory(),
+            'entity_id' => Organization::factory(),
         ];
     }
 

@@ -23,10 +23,10 @@ class Invitation extends Model
     ];
 
     protected $casts = [
-        'expires_at'  => 'datetime',
+        'expires_at' => 'datetime',
         'accepted_at' => 'datetime',
-        'role_id'     => 'integer',
-        'invited_by'  => 'integer',
+        'role_id' => 'integer',
+        'invited_by' => 'integer',
     ];
 
     /**

@@ -286,14 +286,14 @@ class OrganizerService
         $row = DB::selectOne($sql, ['organization_id' => $organizationId]);
 
         return [
-            'total_events'     => (int) $row->total_events,
-            'draft'            => (int) $row->draft,
+            'total_events' => (int) $row->total_events,
+            'draft' => (int) $row->draft,
             'pending_approval' => (int) $row->pending_approval,
-            'approved_internal'=> (int) $row->approved_internal,
-            'published'        => (int) $row->published,
+            'approved_internal' => (int) $row->approved_internal,
+            'published' => (int) $row->published,
             'requires_changes' => (int) $row->requires_changes,
-            'rejected'         => (int) $row->rejected,
-            'archived'         => (int) $row->archived,
+            'rejected' => (int) $row->rejected,
+            'archived' => (int) $row->archived,
         ];
     }
 }

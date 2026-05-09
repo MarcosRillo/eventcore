@@ -5,6 +5,7 @@ namespace Tests\Unit\Models;
 use App\Models\Organization;
 use App\Models\RegistrationRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Database\Seeders\OrganizationStatusesSeeder;
 use Database\Seeders\OrganizationTypesSeeder;
 use Database\Seeders\UserRolesSeeder;
@@ -221,7 +222,7 @@ class RegistrationRequestTest extends TestCase
             'reviewed_at' => now(),
         ]);
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $request->reviewed_at);
+        $this->assertInstanceOf(Carbon::class, $request->reviewed_at);
     }
 
     #[Test]
@@ -266,7 +267,7 @@ class RegistrationRequestTest extends TestCase
     #[Test]
     public function test_fillable_fields_are_defined(): void
     {
-        $model = new RegistrationRequest();
+        $model = new RegistrationRequest;
         $fillable = $model->getFillable();
 
         $this->assertContains('dni', $fillable);

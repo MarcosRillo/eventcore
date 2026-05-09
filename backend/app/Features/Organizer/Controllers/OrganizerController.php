@@ -12,6 +12,7 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class OrganizerController extends Controller
@@ -86,7 +87,7 @@ class OrganizerController extends Controller
     /**
      * Delete event (draft status only).
      */
-    public function destroy(Request $request, int $id): JsonResponse|\Illuminate\Http\Response
+    public function destroy(Request $request, int $id): JsonResponse|Response
     {
         $event = Event::findOrFail($id);
         Gate::authorize('delete', $event);

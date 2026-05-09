@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
@@ -21,7 +22,8 @@ class User extends Authenticatable
      *   'active'    — account is active and can log in
      *   'suspended' — account is suspended and cannot log in
      */
-    public const STATUS_ACTIVE    = 'active';
+    public const STATUS_ACTIVE = 'active';
+
     public const STATUS_SUSPENDED = 'suspended';
 
     /**

@@ -6,6 +6,7 @@ use App\Features\Auth\Notifications\InvitationNotification;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Models\UserRole;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -229,7 +230,7 @@ class InvitationService
     /**
      * Get pending invitations for a user.
      */
-    public function getPendingInvitations(User $user): \Illuminate\Pagination\LengthAwarePaginator
+    public function getPendingInvitations(User $user): LengthAwarePaginator
     {
         $query = Invitation::valid()->with(['role', 'inviter']);
 
