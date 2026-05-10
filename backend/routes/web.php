@@ -7,40 +7,37 @@ Route::get('/', function () {
 });
 
 // TEMPORARY DEBUG ENDPOINT — REMOVE AFTER OPS-042 IS RESOLVED
+Route::get('debug-cfg', function () {
+    return response()->json([
+        'cache_default' => config('cache.default'),
+        'session_driver' => config('session.driver'),
+        'queue_default' => config('queue.default'),
+        'app_debug' => config('app.debug'),
+        'app_env' => config('app.env'),
+        'env_CACHE_STORE' => env('CACHE_STORE'),
+        'env_CACHE_DRIVER' => env('CACHE_DRIVER'),
+    ]);
+});
+
 Route::get('debug-events', function () {
-    $info = [
-        'config' => [
-            'cache_default' => config('cache.default'),
-            'session_driver' => config('session.driver'),
-            'queue_default' => config('queue.default'),
-            'app_debug' => config('app.debug'),
-            'app_env' => config('app.env'),
-        ],
-        'env' => [
-            'CACHE_STORE' => env('CACHE_STORE'),
-            'CACHE_DRIVER' => env('CACHE_DRIVER'),
-            'APP_DEBUG' => env('APP_DEBUG'),
-            'REDIS_URL_set' => env('REDIS_URL') ? 'yes' : 'no',
-        ],
-    ];
     try {
         $events = \App\Models\Event::published()
             ->with(['eventType', 'eventSubtype', 'locations', 'status'])
             ->paginate(15);
-        $info['events_count'] = $events->total();
-        $info['result'] = 'ok';
+
+        return response()->json([
+            'result' => 'ok',
+            'count' => $events->total(),
+        ]);
     } catch (\Throwable $e) {
-        $info['result'] = 'exception';
-        $info['exception'] = [
+        return response()->json([
+            'result' => 'exception',
             'class' => get_class($e),
             'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace_first_5' => array_slice(explode("\n", $e->getTraceAsString()), 0, 10),
-        ];
+            'file' => $e->getFile().':'.$e->getLine(),
+            'trace' => array_slice(explode("\n", $e->getTraceAsString()), 0, 8),
+        ], 500);
     }
-
-    return response()->json($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 });
 
 // ===== HEALTH CHECK (public, no auth, resolves at /health) =====
