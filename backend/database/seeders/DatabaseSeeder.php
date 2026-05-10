@@ -3,19 +3,46 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
      *
-     * Idempotent: skips if events already exist (safe to re-run on every deploy).
+     * Three-tier idempotency:
+     * 1. Empty DB → run all seeders (first deploy).
+     * 2. Users exist but no future events → wipe events + re-run EventSeeder
+     *    (refreshes stale demo dates without duplicating users/orgs/locations).
+     * 3. Users + future events exist → skip (data is fresh).
      */
     public function run(): void
     {
-        if (Event::query()->exists()) {
-            $this->command->info('Database already seeded (events present), skipping.');
+        $hasUsers = User::query()->exists();
+        $hasFutureEvents = Event::query()->where('start_date', '>=', now())->exists();
+
+        if ($hasUsers && $hasFutureEvents) {
+            $this->command->info('Database has fresh demo data (future events present), skipping.');
+
+            return;
+        }
+
+        if ($hasUsers && ! $hasFutureEvents) {
+            $this->command->info('Demo events are stale (all in the past). Refreshing event data only.');
+            // Wipe events + dependent pivot/audit tables to avoid FK violations.
+            foreach (['event_approvals', 'event_location', 'event_service', 'event_room', 'event_async_dates'] as $table) {
+                try {
+                    DB::table($table)->delete();
+                } catch (\Throwable $e) {
+                    // Table may not exist in older deploys — safe to skip.
+                }
+            }
+            Event::query()->delete();
+
+            $this->call([EventSeeder::class]);
+            $this->command->info('Event data refreshed with future dates.');
 
             return;
         }
