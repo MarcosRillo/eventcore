@@ -13,7 +13,7 @@ services:
     healthCheckPath: /up
     # Run migrations + seed demo data BEFORE the container starts serving traffic.
     # Seeder is idempotent (skips if events already exist), so safe per deploy.
-    preDeployCommand: "php artisan optimize:clear && php artisan migrate --force --isolated && php artisan db:seed --class=DatabaseSeeder --force"
+    preDeployCommand: "php artisan optimize:clear && php artisan cache:clear && php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force"
     envVars:
       # --- App ---
       - key: APP_NAME
