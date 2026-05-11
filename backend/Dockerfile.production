@@ -76,10 +76,11 @@ RUN touch .env && \
 
 # --- Startup script ---
 # 1. storage:link (idempotent symlink)
-# 2. optimize (cache config/routes/views with runtime env vars)
-# 3. exec into FrankenPHP
-# Note: migrations run via preDeployCommand in render.yaml before container starts
-RUN printf '#!/bin/sh\nset -e\nexport SERVER_NAME=":${PORT:-80}"\nphp artisan storage:link 2>/dev/null || true\nphp artisan optimize --force 2>/dev/null || true\nexec "$@"\n' \
+# 2. migrate --force (idempotent: only runs pending migrations; required on free
+#    tier where preDeployCommand from render.yaml is ignored)
+# 3. optimize (cache config/routes/views with runtime env vars)
+# 4. exec into FrankenPHP
+RUN printf '#!/bin/sh\nset -e\nexport SERVER_NAME=":${PORT:-80}"\nphp artisan storage:link 2>/dev/null || true\nphp artisan migrate --force 2>&1 || true\nphp artisan optimize 2>/dev/null || true\nexec "$@"\n' \
     > /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER ${USER}
