@@ -19,6 +19,9 @@ test.describe('Public Calendar', () => {
   test('calendar toolbar renders with react-big-calendar', async ({ page }) => {
     await page.goto('/calendar');
 
+    // Default view is grid — switch to calendar so react-big-calendar mounts
+    await page.getByRole('button', { name: 'Vista calendario' }).click();
+
     // Wait for react-big-calendar to mount
     await expect(page.getByRole('button', { name: 'Hoy' })).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('button', { name: 'Mes' })).toBeVisible();
