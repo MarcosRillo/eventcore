@@ -17,7 +17,7 @@ Route::get('health', function () {
         $checks['database'] = 'fail';
     }
     try {
-        Cache::store('redis')->set('__health', 1, 5);
+        Cache::set('__health', 1, 5);
         $checks['cache'] = 'ok';
     } catch (Throwable $e) {
         $checks['cache'] = 'fail';
