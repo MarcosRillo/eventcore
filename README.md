@@ -51,7 +51,7 @@ Originalmente desarrollada como proyecto interno en una empresa de servicios, fu
 
 ```
 ┌──────────────────────┐         ┌──────────────────────┐
-│   Web (Next.js 14)   │ ◀────▶ │   API (Laravel 11)   │
+│   Web (Next.js 15)   │ ◀────▶ │   API (Laravel 13)   │
 │   App Router · TS    │  REST   │   105 endpoints      │
 │   Tailwind · Zustand │  + WS   │   24 modelos Eloquent│
 │   SWR · react-konva  │         │   Sanctum · Spatie   │
@@ -72,7 +72,7 @@ Originalmente desarrollada como proyecto interno en una empresa de servicios, fu
         └─────────────────────────────────────┘
 ```
 
-**Stack núcleo:** Next.js 14 (App Router) · TypeScript · Laravel 11 · PostgreSQL · Redis · Laravel Echo + Reverb · Sanctum · Spatie Permissions · Tailwind · Zustand · SWR · react-konva.
+**Stack núcleo:** Next.js 15 (App Router) · TypeScript · Laravel 13 · PostgreSQL · Redis · Laravel Echo + Reverb · Sanctum · Spatie Permissions · Tailwind · Zustand · SWR · react-konva.
 
 **Toolchain:** pnpm · Vitest · PHPUnit · Playwright · GitHub Actions · CodeQL · Docker.
 
@@ -81,7 +81,7 @@ Originalmente desarrollada como proyecto interno en una empresa de servicios, fu
 ## Demo
 
 > [!NOTE]
-> **Demo en vivo:** https://eventcore.vercel.app
+> **Demo en vivo:** https://eventcore-app.vercel.app
 
 **Credenciales de prueba** (resetadas cada hora):
 
@@ -130,12 +130,12 @@ Ver [`docs/local-dev.md`](docs/local-dev.md).
 
 ```
 eventcore/
-├── backend/                    # Laravel 11 — API REST + Reverb
+├── backend/                    # Laravel 13 — API REST + Reverb
 │   ├── app/
 │   ├── database/
 │   ├── routes/
 │   └── tests/                  # PHPUnit
-├── frontend/                   # Next.js 14 — App Router
+├── frontend/                   # Next.js 15 — App Router
 │   ├── src/
 │   │   ├── app/
 │   │   ├── components/         # Design system
