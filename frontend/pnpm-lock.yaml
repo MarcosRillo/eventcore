@@ -67,6 +67,9 @@ importers:
       '@next/bundle-analyzer':
         specifier: ^16.2.3
         version: 16.2.3
+      '@next/eslint-plugin-next':
+        specifier: ^15.5.9
+        version: 15.5.9
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
@@ -97,6 +100,12 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.7)
+      '@typescript-eslint/eslint-plugin':
+        specifier: 8.50.0
+        version: 8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: 8.50.0
+        version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint:
         specifier: ^9
         version: 9.39.2(jiti@2.6.1)
@@ -109,6 +118,12 @@ importers:
       eslint-plugin-jsdoc:
         specifier: ^61.5.0
         version: 61.5.0(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-jsx-a11y:
+        specifier: 6.10.2
+        version: 6.10.2(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-react-hooks:
+        specifier: 5.2.0
+        version: 5.2.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-simple-import-sort:
         specifier: ^12.1.1
         version: 12.1.1(eslint@9.39.2(jiti@2.6.1))
