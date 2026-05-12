@@ -1,3 +1,7 @@
+// IMPORTANT: pnpm strict isolation requires every plugin imported here
+// to be declared as an explicit devDependency in package.json.
+// If you add a new plugin, also add it to package.json devDependencies
+// (otherwise CI lint will fail with ERR_MODULE_NOT_FOUND).
 import nextPlugin from "@next/eslint-plugin-next";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
