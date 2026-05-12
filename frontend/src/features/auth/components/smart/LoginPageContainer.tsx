@@ -90,6 +90,48 @@ export function LoginPageContainer() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleFormSubmit}>
+            {/* Demo credentials banner */}
+            <div className="bg-neutral-50 border border-neutral-200 rounded-md p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-neutral-900">
+                  Probá la plataforma sin registrarte
+                </h3>
+                <span className="text-xs uppercase tracking-wide text-neutral-500">
+                  demo
+                </span>
+              </div>
+              <ul className="space-y-1.5">
+                {[
+                  { role: 'Platform admin', email: 'admin@eventcore.dev' },
+                  { role: 'Entity admin', email: 'entity@eventcore.dev' },
+                  { role: 'Organizer', email: 'organizer@eventcore.dev' },
+                ].map(({ role, email }) => (
+                  <li
+                    key={email}
+                    className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-0.5 sm:gap-3"
+                  >
+                    <span className="text-xs text-neutral-600 sm:w-28 shrink-0">
+                      {role}
+                    </span>
+                    <code className="text-xs font-mono text-neutral-900 select-all break-all">
+                      {email}
+                    </code>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 pt-3 border-t border-neutral-200 space-y-1">
+                <p className="text-xs text-neutral-600">
+                  Contraseña para los tres:{' '}
+                  <code className="font-mono text-neutral-900 select-all">
+                    demo1234
+                  </code>
+                </p>
+                <p className="text-xs text-neutral-500">
+                  Datos de demo, pueden cambiar.
+                </p>
+              </div>
+            </div>
+
             {/* Error message */}
             {error && (
               <div className="bg-error-50 border border-error-200 rounded-md p-4" role="alert">
