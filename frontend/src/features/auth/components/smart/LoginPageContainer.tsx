@@ -102,9 +102,9 @@ export function LoginPageContainer() {
               </div>
               <ul className="space-y-1.5">
                 {[
-                  { role: 'Platform admin', email: 'admin@eventcore.dev' },
-                  { role: 'Entity admin', email: 'entity@eventcore.dev' },
-                  { role: 'Organizer', email: 'organizer@eventcore.dev' },
+                  { role: 'Platform admin', email: 'marcos@plataforma.com' },
+                  { role: 'Entity admin', email: 'ana.garcia@enteturismo.gov.ar' },
+                  { role: 'Organizer', email: 'juan.perez@larural.com.ar' },
                 ].map(({ role, email }) => (
                   <li
                     key={email}
@@ -123,7 +123,7 @@ export function LoginPageContainer() {
                 <p className="text-xs text-neutral-600">
                   Contraseña para los tres:{' '}
                   <code className="font-mono text-neutral-900 select-all">
-                    demo1234
+                    password123
                   </code>
                 </p>
                 <p className="text-xs text-neutral-500">
