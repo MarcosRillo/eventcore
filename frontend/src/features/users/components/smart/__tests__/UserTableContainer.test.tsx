@@ -2,7 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import UserTableContainer from '@/features/users/components/smart/UserTableContainer';
 import { useUserManager } from '@/features/users/hooks/useUserManager';
-import type { PaginationMeta,User } from '@/features/users/types/user.types';
+import type { User } from '@/features/users/types/user.types';
+import { createMockPaginationMeta } from '@/test-utils/factories';
 
 jest.mock('../../../hooks/useUserManager');
 
@@ -94,12 +95,12 @@ describe('UserTableContainer', () => {
     updated_at: '2025-11-28T00:00:00Z',
   };
 
-  const mockPagination: PaginationMeta = {
+  const mockPagination = createMockPaginationMeta({
     current_page: 1,
     last_page: 1,
     per_page: 15,
     total: 1,
-  };
+  });
 
   const defaultHookReturn = {
     users: [mockUser],

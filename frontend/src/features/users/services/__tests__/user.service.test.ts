@@ -1,8 +1,9 @@
 import { AxiosResponse } from 'axios'
 
 import userService from '@/features/users/services/user.service'
-import type { PaginationMeta,User, UserResponse, UsersResponse } from '@/features/users/types/user.types'
+import type { User, UserResponse, UsersResponse } from '@/features/users/types/user.types'
 import apiClient from '@/services/apiClient'
+import { createMockPaginationMeta } from '@/test-utils/factories'
 
 
 jest.mock('@/services/apiClient')
@@ -50,12 +51,12 @@ describe('userService', () => {
     updated_at: '2025-11-28T00:00:00Z',
   }
 
-  const mockPaginationMeta: PaginationMeta = {
+  const mockPaginationMeta = createMockPaginationMeta({
     current_page: 1,
     last_page: 1,
     per_page: 10,
     total: 2,
-  }
+  })
 
   beforeEach(() => {
     jest.clearAllMocks()
