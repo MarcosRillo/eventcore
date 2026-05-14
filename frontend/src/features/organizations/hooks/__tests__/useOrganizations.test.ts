@@ -15,9 +15,9 @@ import {
 import type {
   Organization,
   OrganizationsResponse,
-  PaginationMeta,
 } from '@/features/organizations/types/organization.types'
 import { useDebounce } from '@/shared/hooks/useDebounce'
+import { createMockPaginationMeta } from '@/test-utils/factories'
 
 // Mock SWR and dependencies
 jest.mock('swr')
@@ -90,18 +90,12 @@ const createMockOrganization = (overrides: Partial<Organization> = {}): Organiza
 })
 
 // Helper to create mock pagination
-const createMockPagination = (overrides: Partial<PaginationMeta> = {}): PaginationMeta => ({
-  current_page: 1,
-  last_page: 1,
-  per_page: 15,
-  total: 2,
-  ...overrides,
-})
+const createMockPagination = createMockPaginationMeta
 
 // Helper to create mock SWR response data
 const createMockSWRData = (
   organizations: Organization[] = [],
-  pagination?: Partial<PaginationMeta>,
+  pagination?: Parameters<typeof createMockPaginationMeta>[0],
 ): OrganizationsResponse => ({
   success: true,
   message: 'OK',

@@ -8,8 +8,9 @@ import {
   getOrganizations,
   toggleOrganizationStatus,
 } from '@/features/organizations/services/organization.service'
-import type { Organization, PaginationMeta } from '@/features/organizations/types/organization.types'
+import type { Organization } from '@/features/organizations/types/organization.types'
 import apiClient from '@/services/apiClient'
+import { createMockPaginationMeta } from '@/test-utils/factories'
 
 // Mock apiClient
 jest.mock('@/services/apiClient')
@@ -59,13 +60,7 @@ const createMockOrganization = (overrides: Partial<Organization> = {}): Organiza
 })
 
 // Helper to create mock pagination
-const createMockPagination = (overrides: Partial<PaginationMeta> = {}): PaginationMeta => ({
-  current_page: 1,
-  last_page: 1,
-  per_page: 15,
-  total: 2,
-  ...overrides,
-})
+const createMockPagination = createMockPaginationMeta
 
 describe('organization.service', () => {
   beforeEach(() => {

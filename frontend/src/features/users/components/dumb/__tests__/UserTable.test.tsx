@@ -1,7 +1,8 @@
 import { fireEvent,render, screen } from '@testing-library/react';
 
 import UserTable from '@/features/users/components/dumb/UserTable';
-import type { PaginationMeta,User } from '@/features/users/types/user.types';
+import type { User } from '@/features/users/types/user.types';
+import { createMockPaginationMeta } from '@/test-utils/factories';
 
 // Mock GenericTable to test UserTable behavior
 jest.mock('@/shared/components/tables', () => ({
@@ -104,12 +105,12 @@ describe('UserTable', () => {
     updated_at: '2025-11-28T00:00:00Z',
   };
 
-  const mockPagination: PaginationMeta = {
+  const mockPagination = createMockPaginationMeta({
     current_page: 1,
     last_page: 2,
     per_page: 10,
     total: 15,
-  };
+  });
 
   const defaultProps = {
     users: [mockUser],

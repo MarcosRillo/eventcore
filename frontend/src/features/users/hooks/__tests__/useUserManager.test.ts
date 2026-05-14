@@ -5,7 +5,8 @@ import { SWRConfig } from 'swr'
 
 import { useUserManager } from '@/features/users/hooks/useUserManager'
 import userService from '@/features/users/services/user.service'
-import type { PaginationMeta, User } from '@/features/users/types/user.types'
+import type { User } from '@/features/users/types/user.types'
+import { createMockPaginationMeta } from '@/test-utils/factories'
 
 jest.mock('@/lib/swr/fetcher', () => ({
   apiFetcher: jest.fn(),
@@ -66,12 +67,12 @@ describe('useUserManager', () => {
     updated_at: '2025-11-28T00:00:00Z',
   }
 
-  const mockPaginationMeta: PaginationMeta = {
+  const mockPaginationMeta = createMockPaginationMeta({
     current_page: 1,
     last_page: 1,
     per_page: 15,
     total: 2,
-  }
+  })
 
   beforeEach(() => {
     jest.clearAllMocks()
