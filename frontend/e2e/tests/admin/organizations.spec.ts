@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 // This project uses entity-admin storageState (injected by playwright.config.ts)
 
@@ -7,7 +7,7 @@ test.describe('Organizations Management', () => {
   // AppHeader (banner) also renders an h1 with the page title.
   // Scope heading locators to #main-content to avoid strict-mode violations
   // from duplicate h1 elements.
-  const mainHeading = (page: Parameters<Parameters<typeof test>[1]>[0]['page']) =>
+  const mainHeading = (page: Page) =>
     page.locator('#main-content').getByRole('heading', { name: 'Organizaciones', level: 1 });
 
   test('organizations page renders heading', async ({ page }) => {
