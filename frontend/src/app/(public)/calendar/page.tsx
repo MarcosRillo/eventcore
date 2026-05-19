@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Eventos en Tucumán - Calendario Turístico',
   description:
     'Descubrí los mejores eventos turísticos y culturales de Tucumán. Música, arte, gastronomía y más.',
-  keywords: 'demo region, turismo, eventos, calendario, festivales, cultura, actividades',
+  keywords: 'Tucumán, turismo, eventos, calendario, festivales, cultura, actividades',
   openGraph: {
     title: 'Eventos en Tucumán',
     description: 'Calendario de eventos turísticos y culturales',

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     'Descubrí los mejores eventos turísticos y culturales de Tucumán. Música, arte, gastronomía, festivales y mucho más. Plataforma oficial de eventos.',
   keywords:
-    'demo region, turismo, eventos, calendario, festivales, cultura, actividades, argentina, noroeste argentino',
+    'Tucumán, turismo, eventos, calendario, festivales, cultura, actividades, argentina, noroeste argentino',
   openGraph: {
     title: 'eventcore - Turismo y Cultura',
     description:

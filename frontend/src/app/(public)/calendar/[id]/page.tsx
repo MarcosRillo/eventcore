@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     return {
       title: `${event.title} - eventcore`,
       description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,
-      keywords: `demo region, turismo, evento, ${event.title}`,
+      keywords: `Tucumán, turismo, evento, ${event.title}`,
       openGraph: {
         title: event.title,
         description: event.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `${event.title} - ${eventDate}`,

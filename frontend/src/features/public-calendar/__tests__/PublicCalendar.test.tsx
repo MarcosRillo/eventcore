@@ -81,7 +81,7 @@ describe('PublicCalendar', () => {
     test('renders calendar with header and event grid', () => {
       render(<PublicCalendar {...defaultProps} />)
 
-      expect(screen.getByText(/eventos en demo region/i)).toBeInTheDocument()
+      expect(screen.getByText(/eventos en tucumán/i)).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /event grid/i })).toBeInTheDocument()
     })
 
@@ -232,7 +232,7 @@ describe('PublicCalendar', () => {
 
       const h1 = screen.getByRole('heading', { level: 1 })
       expect(h1).toBeInTheDocument()
-      expect(h1.textContent).toMatch(/eventos en demo region/i)
+      expect(h1.textContent).toMatch(/eventos en tucumán/i)
     })
 
     test('uses semantic HTML', () => {
