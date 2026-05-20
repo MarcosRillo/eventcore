@@ -9,17 +9,11 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import { ReactNode } from 'react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiClient';
-
-// Mock axios for isCancel control
-jest.mock('axios', () => ({
-  ...jest.requireActual('axios'),
-  isCancel: jest.fn(),
-}));
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -72,6 +66,8 @@ const createWrapper = () => {
 };
 
 describe('AuthContext', () => {
+  let cancelSpy: jest.SpyInstance<boolean, [value: unknown]>
+
   // Reset all mocks before each test
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,8 +78,12 @@ describe('AuthContext', () => {
     mockedApiClient.get.mockReset();
     mockedApiClient.post.mockReset();
 
-    // Reset axios.isCancel to return false by default
-    (axios.isCancel as jest.Mock).mockReturnValue(false);
+    // Install spy on axios.isCancel; default to returning false
+    cancelSpy = jest.spyOn(axios, 'isCancel').mockReturnValue(false)
+  });
+
+  afterEach(() => {
+    cancelSpy?.mockRestore()
   });
 
   // Helper to create standard mock responses
@@ -367,10 +367,10 @@ describe('AuthContext', () => {
       mockCookies.push('user=' + encodeURIComponent(JSON.stringify(createMockUser())));
 
       // Return a promise that rejects when the AbortController signal fires
-      mockedApiClient.get.mockImplementationOnce((_url: string, config?: { signal?: AbortSignal }) => {
+      mockedApiClient.get.mockImplementationOnce((_url: string, config?: AxiosRequestConfig) => {
         return new Promise<never>((_resolve, reject) => {
           if (config?.signal) {
-            config.signal.addEventListener('abort', () => {
+            (config.signal as AbortSignal).addEventListener('abort', () => {
               const canceledError = new Error('canceled');
               canceledError.name = 'CanceledError';
               reject(canceledError);
@@ -380,7 +380,7 @@ describe('AuthContext', () => {
       });
 
       // Make axios.isCancel return true for CanceledError
-      (axios.isCancel as jest.Mock).mockImplementation((error: unknown) => {
+      cancelSpy.mockImplementation((error: unknown) => {
         return error instanceof Error && error.name === 'CanceledError';
       });
 
@@ -411,7 +411,7 @@ describe('AuthContext', () => {
       });
 
       // axios.isCancel returns false for non-cancel errors
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      cancelSpy.mockReturnValue(false);
 
       const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
 
@@ -433,7 +433,7 @@ describe('AuthContext', () => {
       });
 
       // axios.isCancel returns false for non-cancel errors
-      (axios.isCancel as jest.Mock).mockReturnValue(false);
+      cancelSpy.mockReturnValue(false);
 
       const cookiesBefore = [...mockCookies];
 
