@@ -335,7 +335,7 @@ describe('EventTypeTableContainer', () => {
 
       // Dates should be formatted - look for parts of the date
       // The exact format depends on locale, but should have month/day/year
-      expect(screen.getByText(/2025/)).toBeTruthy();
+      expect(screen.getAllByText(/2025/)).toHaveLength(2);
     });
   });
 });
