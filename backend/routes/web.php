@@ -6,7 +6,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
 // ===== HEALTH CHECK (public, no auth, resolves at /health) =====
 Route::get('health', function () {
     $checks = [];
