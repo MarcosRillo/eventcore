@@ -15,9 +15,9 @@ A full-stack platform for managing and publishing public events across multiple 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 15, React 19, TypeScript (strict), Tailwind 4 |
-| Backend | Laravel 12, PHP 8.3, Sanctum (cookie-based auth) |
+| Backend | Laravel 13, PHP constraint `^8.3`, Sanctum (cookie-based auth) |
 | Database | PostgreSQL 15 |
-| Testing | Jest + Testing Library, Playwright E2E, Pest + PHPUnit |
+| Testing | Jest + Testing Library units; separate Playwright E2E; `php artisan test` with Pest/PHPUnit dependencies |
 | Infrastructure | Docker Compose, GitHub Actions CI |
 
 ## Architecture Decisions
@@ -32,18 +32,20 @@ A full-stack platform for managing and publishing public events across multiple 
 
 **Content Security Policy with route-aware nonces** — admin routes (fully dynamic) use per-request nonces in script-src. Public routes keep unsafe-inline for ISR cache compatibility. Violation reporting endpoint for security observability.
 
-## By the Numbers
+## Testing Evidence
 
-| Metric | Value |
-|--------|-------|
-| Frontend source files | 557 |
-| Backend source files | 143 |
-| Frontend tests | 2,778 (156 suites) |
-| Backend tests | 566 (2,191 assertions) |
-| E2E test specs | 15 (Playwright, multi-role) |
-| Database migrations | 59 |
-| Commits | 480+ |
-| Feature modules | 15 frontend, 13 backend |
+Testing is reproducible from the repository configuration rather than timeless test totals:
+
+| Scope | Working directory | Command | Source |
+|-------|-------------------|---------|--------|
+| Frontend units | `frontend/` | `pnpm test` | [Scripts](../frontend/package.json), [Jest config](../frontend/jest.config.js) |
+| Frontend coverage | `frontend/` | `pnpm run test:coverage` | [Scripts](../frontend/package.json) |
+| Browser workflows | `frontend/` | `pnpm run test:e2e` | [Playwright config](../frontend/playwright.config.ts) |
+| Backend | `backend/` | `php artisan test` | [Composer dependencies](../backend/composer.json), [test config](../backend/phpunit.xml) |
+
+The [Tests workflow](../.github/workflows/test.yml) runs `pnpm run test:ci` in `frontend/` and `php artisan test --coverage-clover=coverage.xml` in `backend/`. It does not run Playwright; browser tests require a suitable application/backend environment. Coverage collection is configured, but neither an achieved percentage nor an enforced numeric coverage gate is established by this configuration.
+
+**Audited baseline:** [run 26138337269](https://github.com/MarcosRillo/eventcore/actions/runs/26138337269), at commit `81870e1cefcc8a04db6fffe32232f8c86e3a01c8`, had a successful frontend job and a failure in the backend **Run tests** step. This is not an all-green result or a build-failure diagnosis. Authenticated log retrieval returned HTTP 410, so executed totals, achieved coverage and the failure cause remain unknown. The commands above are reproduction instructions, not results from a new execution.
 
 ## Security Posture
 
