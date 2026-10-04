@@ -1,0 +1,26 @@
+name: Documentation correction
+description: Report source-backed documentation inaccuracies.
+title: 'docs: '
+labels: [documentation]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Documentation problem
+      description: Describe the observable inaccuracy and cite supporting sources.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change
+      description: Describe the correction and the source evidence supporting it.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable, reproducible checks that confirm the correction.
+    validations:
+      required: true
